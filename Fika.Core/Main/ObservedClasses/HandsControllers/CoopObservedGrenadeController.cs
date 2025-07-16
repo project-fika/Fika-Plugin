@@ -4,7 +4,7 @@ using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Main.Players;
-using Fika.Core.Networking;
+using Fika.Core.Networking.Packets;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,9 +13,9 @@ namespace Fika.Core.Main.ObservedClasses
 {
     internal class CoopObservedGrenadeController : Player.GrenadeHandsController
     {
-        private CoopPlayer _coopPlayer;
+        private FikaPlayer _coopPlayer;
 
-        public static CoopObservedGrenadeController Create(CoopPlayer player, ThrowWeapItemClass item)
+        public static CoopObservedGrenadeController Create(FikaPlayer player, ThrowWeapItemClass item)
         {
             CoopObservedGrenadeController controller = smethod_9<CoopObservedGrenadeController>(player, item);
             controller._coopPlayer = player;
@@ -81,9 +81,9 @@ namespace Fika.Core.Main.ObservedClasses
         }
     }
 
-    public class ObservedTripwireState(Player.GrenadeHandsController controller, CoopPlayer player) : Player.GrenadeHandsController.TripwireStateManagerClass(controller)
+    public class ObservedTripwireState(Player.GrenadeHandsController controller, FikaPlayer player) : Player.GrenadeHandsController.TripwireStateManagerClass(controller)
     {
-        private readonly CoopPlayer _coopPlayer = player;
+        private readonly FikaPlayer _coopPlayer = player;
 
         public new void Start()
         {

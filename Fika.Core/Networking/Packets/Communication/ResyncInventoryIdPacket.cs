@@ -1,7 +1,7 @@
 ﻿using EFT;
 using LiteNetLib.Utils;
 
-namespace Fika.Core.Networking
+namespace Fika.Core.Networking.Packets.Communication
 {
     public struct ResyncInventoryIdPacket(int netId) : INetSerializable
     {

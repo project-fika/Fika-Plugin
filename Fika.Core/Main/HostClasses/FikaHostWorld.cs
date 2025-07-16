@@ -2,9 +2,11 @@
 using EFT;
 using EFT.Interactive;
 using Fika.Core.Networking;
+using Fika.Core.Networking.Packets;
+using Fika.Core.Networking.Packets.World;
 using LiteNetLib;
 using System.Collections.Generic;
-using static Fika.Core.Networking.GenericSubPackets;
+using static Fika.Core.Networking.Packets.World.GenericSubPackets;
 
 namespace Fika.Core.Main.HostClasses
 {
@@ -19,7 +21,7 @@ namespace Fika.Core.Main.HostClasses
         private FikaServer _server;
         private GameWorld _gameWorld;
 
-        public static FikaHostWorld Create(CoopHostGameWorld gameWorld)
+        public static FikaHostWorld Create(FikaHostGameWorld gameWorld)
         {
             FikaHostWorld hostWorld = gameWorld.gameObject.AddComponent<FikaHostWorld>();
             hostWorld._server = Singleton<FikaServer>.Instance;

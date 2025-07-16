@@ -16,14 +16,14 @@ namespace Fika.Core.Main.Utils
         /// </summary>
         /// <param name="coopHandler"><see cref="CoopHandler"/> used to fetch players</param>
         /// <returns></returns>
-        public static List<CoopPlayer> GetPlayers(CoopHandler coopHandler)
+        public static List<FikaPlayer> GetPlayers(CoopHandler coopHandler)
         {
-            List<CoopPlayer> humanPlayers = [];
+            List<FikaPlayer> humanPlayers = [];
 
             // Grab all players
-            foreach (CoopPlayer player in coopHandler.Players.Values)
+            foreach (FikaPlayer player in coopHandler.Players.Values)
             {
-                if ((player.IsYourPlayer || player is ObservedCoopPlayer) && player.HealthController.IsAlive)
+                if ((player.IsYourPlayer || player is ObservedPlayer) && player.HealthController.IsAlive)
                 {
                     humanPlayers.Add(player);
                 }
@@ -35,9 +35,9 @@ namespace Fika.Core.Main.Utils
         /// Calculates the distance from all players
         /// </summary>
         /// <param name="position">The <see cref="Vector3"/> position</param>
-        /// <param name="humanPlayers"><see cref="List{T}"/> of all human <see cref="CoopPlayer"/>s</param>
+        /// <param name="humanPlayers"><see cref="List{T}"/> of all human <see cref="FikaPlayer"/>s</param>
         /// <returns></returns>
-        public static float GetDistanceFromPlayers(Vector3 position, List<CoopPlayer> humanPlayers)
+        public static float GetDistanceFromPlayers(Vector3 position, List<FikaPlayer> humanPlayers)
         {
             float distance = float.PositiveInfinity;
 
@@ -56,10 +56,10 @@ namespace Fika.Core.Main.Utils
         /// <summary>
         /// Grabs the bot furthest away from all players and returns its distance
         /// </summary>
-        /// <param name="humanPlayers">List of all human <see cref="CoopPlayer"/>s</param>
+        /// <param name="humanPlayers">List of all human <see cref="FikaPlayer"/>s</param>
         /// <param name="furthestDistance">The furthest <see cref="float"/> distance</param>
         /// <returns></returns>
-        public static string GetFurthestBot(List<CoopPlayer> humanPlayers, Dictionary<string, Player> bots, out float furthestDistance, bool onlyScavs = false)
+        public static string GetFurthestBot(List<FikaPlayer> humanPlayers, Dictionary<string, Player> bots, out float furthestDistance, bool onlyScavs = false)
         {
             string furthestBot = string.Empty;
             furthestDistance = 0f;
@@ -104,7 +104,7 @@ namespace Fika.Core.Main.Utils
                 return true;
             }
 
-            CoopBot coopBot = (CoopBot)kvp.Value;
+            FikaBot coopBot = (FikaBot)kvp.Value;
 
             if (coopBot != null)
             {

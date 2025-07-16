@@ -2,7 +2,7 @@
 using LiteNetLib;
 using LiteNetLib.Utils;
 
-namespace Fika.Core.Networking
+namespace Fika.Core.Networking.Packets
 {
     public class SubPacket
     {
@@ -12,12 +12,12 @@ namespace Fika.Core.Networking
         public interface ISubPacket
         {
             /// <summary>
-            /// Executes the sub-packet logic, optionally with a <see cref="CoopPlayer"/> context.
+            /// Executes the sub-packet logic, optionally with a <see cref="FikaPlayer"/> context.
             /// </summary>
             /// <param name="player">
             /// The player involved in the execution. This parameter is optional and can be null.
             /// </param>
-            public void Execute(CoopPlayer player = null);
+            public void Execute(FikaPlayer player = null);
 
             /// <summary>
             /// Serializes the sub-packet data into the provided <see cref="NetDataWriter"/>.

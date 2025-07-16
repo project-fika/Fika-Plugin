@@ -101,7 +101,7 @@ public static class PingFactory
         private bool _displayRange;
         private float _screenScale = 1f;
         private Color _pingColor = Color.white;
-        private CoopPlayer _mainPlayer;
+        private FikaPlayer _mainPlayer;
 
         static AbstractPing()
         {
@@ -112,7 +112,7 @@ public static class PingFactory
         {
             _image = GetComponentInChildren<Image>();
             _image.color = Color.clear;
-            _mainPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+            _mainPlayer = (FikaPlayer)Singleton<GameWorld>.Instance.MainPlayer;
             _canvasRect = GetComponentInChildren<Canvas>().GetComponent<RectTransform>();
             _rangeText = GetComponentInChildren<TextMeshProUGUI>(true);
             _rangeText.color = Color.clear;

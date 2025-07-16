@@ -2,7 +2,7 @@
 using LiteNetLib.Utils;
 using UnityEngine;
 
-namespace Fika.Core.Networking
+namespace Fika.Core.Networking.Packets.Communication
 {
     public struct PingPacket : INetSerializable
     {

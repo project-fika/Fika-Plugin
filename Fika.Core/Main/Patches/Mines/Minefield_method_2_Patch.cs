@@ -4,6 +4,7 @@ using EFT.Interactive;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
+using Fika.Core.Networking.Packets.Player;
 using Fika.Core.Patching;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,7 @@ using UnityEngine;
 namespace Fika.Core.Main.Patches
 {
     /// <summary>
-    /// This patch prevents a null exception when an <see cref="ObservedCoopPlayer"/> is hit by a mine explosion
+    /// This patch prevents a null exception when an <see cref="ObservedPlayer"/> is hit by a mine explosion
     /// </summary>
     internal class Minefield_method_2_Patch : FikaPatch
     {
@@ -27,7 +28,7 @@ namespace Fika.Core.Main.Patches
             List<IPlayer> ___NotTargetedPlayers, float ____collateralContusionRange, float ____collateralDamageRange,
             float ____firstExplosionDamage, float ____secondExplosionDamage, Minefield __instance)
         {
-            if (player is ObservedCoopPlayer)
+            if (player is ObservedPlayer)
             {
                 if (FikaBackendUtils.IsServer)
                 {
@@ -53,7 +54,7 @@ namespace Fika.Core.Main.Patches
                 return;
             }
 
-            CoopPlayer coopPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.GetAlivePlayerByProfileID(player.ProfileId);
+            FikaPlayer coopPlayer = (FikaPlayer)Singleton<GameWorld>.Instance.GetAlivePlayerByProfileID(player.ProfileId);
             if (isCollateral && distance > collateralDamageRange)
             {
                 return;

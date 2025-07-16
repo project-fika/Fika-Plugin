@@ -34,7 +34,7 @@ namespace Fika.Core.Main.Patches
                     Rotation = __instance.transform.rotation.eulerAngles,
                     IsActive = true
                 };
-                Singleton<CoopHostGameWorld>.Instance.FikaHostWorld.WorldPacket.SyncObjectPackets.Add(packet);
+                Singleton<FikaHostGameWorld>.Instance.FikaHostWorld.WorldPacket.SyncObjectPackets.Add(packet);
             }
         }
     }

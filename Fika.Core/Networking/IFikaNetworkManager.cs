@@ -2,6 +2,7 @@
 using Fika.Core.Main.Components;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Packets;
+using Fika.Core.Networking.Packets.Communication;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using System;
@@ -17,9 +18,9 @@ namespace Fika.Core.Networking
         public ESideType RaidSide { get; set; }
         public int SendRate { get; }
         public bool AllowVOIP { get; set; }
-        public List<ObservedCoopPlayer> ObservedCoopPlayers { get; set; }
+        public List<ObservedPlayer> ObservedCoopPlayers { get; set; }
         public void CreateFikaChat();
-        public void SetupGameVariables(CoopPlayer coopPlayer);
+        public void SetupGameVariables(FikaPlayer coopPlayer);
         public void SendVOIPPacket(ref VOIPPacket packet, NetPeer peer = null);
         public void SendVOIPData(ArraySegment<byte> data, NetPeer peer = null);
         /// <summary>

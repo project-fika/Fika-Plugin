@@ -26,11 +26,11 @@ namespace Fika.Core.Main.FreeCamera
 
     public class FreeCameraController : MonoBehaviour
     {
-        private CoopPlayer Player
+        private FikaPlayer Player
         {
             get
             {
-                return (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+                return (FikaPlayer)Singleton<GameWorld>.Instance.MainPlayer;
             }
         }
         public bool IsScriptActive
@@ -404,12 +404,12 @@ namespace Fika.Core.Main.FreeCamera
             {
                 if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
                 {
-                    List<CoopPlayer> alivePlayers = [];
+                    List<FikaPlayer> alivePlayers = [];
 
-                    List<CoopPlayer> humanPlayers = coopHandler.HumanPlayers;
+                    List<FikaPlayer> humanPlayers = coopHandler.HumanPlayers;
                     for (int i = 0; i < humanPlayers.Count; i++)
                     {
-                        CoopPlayer player = humanPlayers[i];
+                        FikaPlayer player = humanPlayers[i];
                         if (!player.IsYourPlayer && player.HealthController.IsAlive)
                         {
                             alivePlayers.Add(player);
@@ -422,7 +422,7 @@ namespace Fika.Core.Main.FreeCamera
                         ToggleCamera();
                         return;
                     }
-                    CoopPlayer coopPlayer = alivePlayers[0];
+                    FikaPlayer coopPlayer = alivePlayers[0];
                     _freeCamScript.SetCurrentPlayer(coopPlayer);
                     FikaPlugin.Instance.FikaLogger.LogDebug("FreecamController: Spectating new player: " + coopPlayer.Profile.Info.MainProfileNickname);
 

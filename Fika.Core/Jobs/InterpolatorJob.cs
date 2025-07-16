@@ -1,6 +1,7 @@
 ﻿using Comfort.Common;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking;
+using Fika.Core.Networking.Packets.Player;
 using Unity.Collections;
 using Unity.Jobs;
 
@@ -23,7 +24,7 @@ namespace Fika.Core.Jobs
             for (int i = 0; i < _amount; i++)
             {                
                 PlayerStatePacket packet = _snapshots[i];
-                if (netManager.CoopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer player))
+                if (netManager.CoopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer player))
                 {
                     player.Snapshotter.Insert(ref packet, _networkTime);
                 }

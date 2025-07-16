@@ -3,16 +3,13 @@ using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
+using Fika.Core.Networking.Packets.Communication;
 
 namespace Fika.Core.Main.HostClasses
 {
-    public class HostRunddansController : LocalGameRunddansControllerClass
+    public class HostRunddansController(BackendConfigSettingsClass.GClass1583 settings, LocationSettingsClass.Location location)
+        : LocalGameRunddansControllerClass(settings, location)
     {
-        public HostRunddansController(BackendConfigSettingsClass.GClass1583 settings, LocationSettingsClass.Location location) : base(settings, location)
-        {
-
-        }
-
         public override void InteractWithEventObject(Player player, InteractPacketStruct packet)
         {
             if (!IsValid(player, out LocalGameTransitControllerClass gclass, out TransitDataClass transitDataClass)

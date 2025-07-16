@@ -1,7 +1,7 @@
 ﻿// © 2025 Lacyway All Rights Reserved
 
 using Fika.Core.Main.Players;
-using Fika.Core.Networking;
+using Fika.Core.Networking.Packets;
 using UnityEngine;
 
 namespace Fika.Core.Main.ObservedClasses
@@ -11,7 +11,7 @@ namespace Fika.Core.Main.ObservedClasses
     /// </summary>
     internal class CoopObservedQuickGrenadeController : EFT.Player.QuickGrenadeThrowHandsController
     {
-        public static CoopObservedQuickGrenadeController Create(CoopPlayer player, ThrowWeapItemClass item)
+        public static CoopObservedQuickGrenadeController Create(FikaPlayer player, ThrowWeapItemClass item)
         {
             return smethod_9<CoopObservedQuickGrenadeController>(player, item);
         }

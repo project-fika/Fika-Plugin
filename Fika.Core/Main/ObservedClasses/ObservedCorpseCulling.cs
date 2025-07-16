@@ -10,14 +10,14 @@ namespace Fika.Core.Main.ObservedClasses
     {
         public bool IsVisible;
 
-        private readonly ObservedCoopPlayer _observedCoopPlayer;
+        private readonly ObservedPlayer _observedCoopPlayer;
         private readonly Corpse _observedCorpse;
         private readonly List<Renderer> _renderers = new(256);
         private GClass997 _gClass997;
         private bool _ragdollDone;
         private bool _localVisible = true;
 
-        public ObservedCorpseCulling(ObservedCoopPlayer observedCoopPlayer, Corpse observedCorpse)
+        public ObservedCorpseCulling(ObservedPlayer observedCoopPlayer, Corpse observedCorpse)
         {
             _observedCoopPlayer = observedCoopPlayer;
             _observedCorpse = observedCorpse;

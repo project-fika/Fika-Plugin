@@ -9,14 +9,14 @@ namespace Fika.Core.Main.Components
 {
     public class BotStateManager : MonoBehaviour
     {
-        private List<CoopBot> _bots;
+        private List<FikaBot> _bots;
         private HostGameController _controller;
         private BotsController _botsController;
 
         private float _updateCount;
         private float _updatesPerTick;
 
-        public bool AddBot(CoopBot bot)
+        public bool AddBot(FikaBot bot)
         {
             if (_bots.Contains(bot))
             {
@@ -27,7 +27,7 @@ namespace Fika.Core.Main.Components
             return true;
         }
 
-        public bool RemoveBot(CoopBot bot)
+        public bool RemoveBot(FikaBot bot)
         {
             return _bots.Remove(bot);
         }
@@ -52,7 +52,7 @@ namespace Fika.Core.Main.Components
             {
                 for (int i = _bots.Count - 1; i >= 0; i--)
                 {
-                    CoopBot bot = _bots[i];
+                    FikaBot bot = _bots[i];
                     if (!bot.HealthController.IsAlive)
                     {
                         _bots.Remove(bot);

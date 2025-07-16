@@ -12,7 +12,7 @@ namespace Fika.Core.Main.ObservedClasses
 {
     internal class CoopObservedMedsController : Player.MedsController
     {
-        private CoopPlayer _coopPlayer;
+        private FikaPlayer _coopPlayer;
         private GStruct375<EBodyPart> _healParts;
 
         private ObservedMedsOperation ObservedOperation
@@ -23,7 +23,7 @@ namespace Fika.Core.Main.ObservedClasses
             }
         }
 
-        public static CoopObservedMedsController Create(CoopPlayer player, Item item, GStruct375<EBodyPart> bodyParts, float amount, int animationVariant)
+        public static CoopObservedMedsController Create(FikaPlayer player, Item item, GStruct375<EBodyPart> bodyParts, float amount, int animationVariant)
         {
             CoopObservedMedsController controller = smethod_6<CoopObservedMedsController>(player, item, bodyParts, amount, animationVariant);
             controller._coopPlayer = player;

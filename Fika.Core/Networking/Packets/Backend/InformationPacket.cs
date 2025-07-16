@@ -3,7 +3,7 @@
 using LiteNetLib.Utils;
 using System;
 
-namespace Fika.Core.Networking
+namespace Fika.Core.Networking.Packets.Backend
 {
     public struct InformationPacket : INetSerializable
     {

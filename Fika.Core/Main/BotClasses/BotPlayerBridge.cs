@@ -4,11 +4,11 @@ using EFT.Ballistics;
 using Fika.Core.Main.Players;
 using UnityEngine;
 
-namespace Fika.Core.Main.ObservedClasses
+namespace Fika.Core.Main.BotClasses
 {
-    public class BotPlayerBridge(CoopBot bot) : BodyPartCollider.IPlayerBridge
+    public class BotPlayerBridge(FikaBot bot) : BodyPartCollider.IPlayerBridge
     {
-        private readonly CoopBot _bot = bot;
+        private readonly FikaBot _bot = bot;
 
         public IPlayer iPlayer
         {

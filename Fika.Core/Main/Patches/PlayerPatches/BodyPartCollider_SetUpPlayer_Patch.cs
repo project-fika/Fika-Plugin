@@ -1,11 +1,13 @@
 ﻿using EFT;
+using Fika.Core.Main.BotClasses;
 using Fika.Core.Main.ObservedClasses;
+using Fika.Core.Main.ObservedClasses.PlayerBridge;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Patching;
 using System.Reflection;
 
-namespace Fika.Core.Main.Patches
+namespace Fika.Core.Main.Patches.PlayerPatches
 {
     public class BodyPartCollider_SetUpPlayer_Patch : FikaPatch
     {
@@ -19,14 +21,14 @@ namespace Fika.Core.Main.Patches
         {
             if (iPlayer != null)
             {
-                if (iPlayer is CoopBot coopBot)
+                if (iPlayer is FikaBot coopBot)
                 {
                     __instance.InitColliderSettings();
                     __instance.playerBridge = new BotPlayerBridge(coopBot);
                     return false;
                 }
 
-                if (iPlayer is ObservedCoopPlayer observedCoopPlayer)
+                if (iPlayer is ObservedPlayer observedCoopPlayer)
                 {
                     __instance.InitColliderSettings();
                     if (FikaBackendUtils.IsServer)

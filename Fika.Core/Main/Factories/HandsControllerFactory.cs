@@ -10,11 +10,11 @@ namespace Fika.Core.Main.Factories
     /// <summary>
     /// Used to create custom <see cref="Player.ItemHandsController"/>s for the client that are used for networking
     /// </summary>
-    /// <param name="player">The <see cref="CoopPlayer"/> to initiate the controller on.</param>
+    /// <param name="player">The <see cref="FikaPlayer"/> to initiate the controller on.</param>
     /// <param name="item">The <see cref="EFT.InventoryLogic.Item"/> to add to the controller.</param>
-    internal class HandsControllerFactory(ObservedCoopPlayer player, Item item = null, KnifeComponent knifeComponent = null)
+    internal class HandsControllerFactory(ObservedPlayer player, Item item = null, KnifeComponent knifeComponent = null)
     {
-        public ObservedCoopPlayer Player = player;
+        public ObservedPlayer Player = player;
         public Item Item = item;
         public KnifeComponent KnifeComponent = knifeComponent;
         public MedsItemClass MedsItem;

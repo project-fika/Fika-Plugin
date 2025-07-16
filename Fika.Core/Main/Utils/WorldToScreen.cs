@@ -11,7 +11,7 @@ namespace Fika.Core.Main.Utils
     /// </summary>
     public static class WorldToScreen
     {
-        public static bool GetScreenPoint(Vector3 worldPosition, CoopPlayer mainPlayer, out Vector3 screenPoint, bool useOpticCamera = true, bool skip = false)
+        public static bool GetScreenPoint(Vector3 worldPosition, FikaPlayer mainPlayer, out Vector3 screenPoint, bool useOpticCamera = true, bool skip = false)
         {
             CameraClass worldCameraInstance = CameraClass.Instance;
             Camera worldCamera = worldCameraInstance.Camera;

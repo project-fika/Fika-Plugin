@@ -8,6 +8,7 @@ using Fika.Core.Main.GameMode;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
+using Fika.Core.Networking.Packets.Communication;
 using LiteNetLib;
 using System.Collections.Generic;
 
@@ -74,7 +75,7 @@ namespace Fika.Core.Main.HostClasses
 
             if (!transitPlayers.ContainsKey(player.ProfileId))
             {
-                if (player is CoopPlayer coopPlayer)
+                if (player is FikaPlayer coopPlayer)
                 {
                     coopPlayer.UpdateBtrTraderServiceData().HandleExceptions();
                 }
@@ -256,7 +257,7 @@ namespace Fika.Core.Main.HostClasses
         private bool CheckForPlayers(Player player, int pointId)
         {
             int humanPlayers = 0;
-            foreach (CoopPlayer coopPlayer in Singleton<IFikaNetworkManager>.Instance.CoopHandler.HumanPlayers)
+            foreach (FikaPlayer coopPlayer in Singleton<IFikaNetworkManager>.Instance.CoopHandler.HumanPlayers)
             {
                 if (coopPlayer.HealthController.IsAlive)
                 {
@@ -343,7 +344,7 @@ namespace Fika.Core.Main.HostClasses
 
                 if (coopGame != null)
                 {
-                    coopGame.Extract((CoopPlayer)player, null, point);
+                    coopGame.Extract((FikaPlayer)player, null, point);
                 }
 
                 _transittedPlayers.Add(player.Id);

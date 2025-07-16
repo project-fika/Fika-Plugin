@@ -4,6 +4,7 @@ using Comfort.Common;
 using EFT;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking;
+using Fika.Core.Networking.Packets.Player;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using UnityEngine;
@@ -17,7 +18,7 @@ namespace Fika.Core.Main.PacketHandlers
         public FikaServer Server { get; set; }
         public FikaClient Client { get; set; }
 
-        private CoopPlayer _player;
+        private FikaPlayer _player;
         private bool _sendPackets;
         private PlayerStatePacket _state;
         private int _animHash;
@@ -29,7 +30,7 @@ namespace Fika.Core.Main.PacketHandlers
             }
         }
 
-        public static BotPacketSender Create(CoopBot bot)
+        public static BotPacketSender Create(FikaBot bot)
         {
             BotPacketSender sender = bot.gameObject.AddComponent<BotPacketSender>();
             sender._player = bot;

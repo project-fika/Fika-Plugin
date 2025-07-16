@@ -22,6 +22,8 @@ using Fika.Core.Main.Utils;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking;
+using Fika.Core.Networking.Packets.Backend;
+using Fika.Core.Networking.Packets.World;
 using Fika.Core.Utils;
 using HarmonyLib;
 using LiteNetLib;
@@ -33,8 +35,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
-using static Fika.Core.Networking.GenericSubPackets;
-using static Fika.Core.Networking.SubPacket;
+using static Fika.Core.Networking.Packets.World.GenericSubPackets;
+using static Fika.Core.Networking.Packets.SubPacket;
 using static LocationSettingsClass;
 
 namespace Fika.Core.Main.GameMode
@@ -134,13 +136,13 @@ namespace Fika.Core.Main.GameMode
         private ESeason _season;
 
         protected CoopHandler _coopHandler;
-        protected CoopPlayer _localPlayer;
+        protected FikaPlayer _localPlayer;
         protected EUpdateQueue _updateQueue;
         protected GameWorld _gameWorld;
         protected ISession _backendSession;
         protected Coroutine _extractRoutine;
 
-        public void SetLocalPlayer(CoopPlayer player)
+        public void SetLocalPlayer(FikaPlayer player)
         {
             _localPlayer = player;
             _coopHandler.MyPlayer = player;
@@ -271,7 +273,7 @@ namespace Fika.Core.Main.GameMode
             {
                 for (int i = 0; i < _coopHandler.HumanPlayers.Count; i++)
                 {
-                    CoopPlayer player = _coopHandler.HumanPlayers[i];
+                    FikaPlayer player = _coopHandler.HumanPlayers[i];
                     try
                     {
                         if (_gameWorld.TransitController != null)
@@ -394,7 +396,7 @@ namespace Fika.Core.Main.GameMode
 
             for (int i = 0; i < _coopHandler.HumanPlayers.Count; i++)
             {
-                CoopPlayer player = _coopHandler.HumanPlayers[i];
+                FikaPlayer player = _coopHandler.HumanPlayers[i];
                 if (player.IsYourPlayer)
                 {
                     continue;
@@ -411,7 +413,7 @@ namespace Fika.Core.Main.GameMode
 
             for (int i = 0; i < _coopHandler.HumanPlayers.Count; i++)
             {
-                CoopPlayer player = _coopHandler.HumanPlayers[i];
+                FikaPlayer player = _coopHandler.HumanPlayers[i];
                 if (player.IsYourPlayer)
                 {
                     continue;
@@ -558,7 +560,7 @@ namespace Fika.Core.Main.GameMode
             if (transitActive)
             {
                 gameWorld.TransitController = IsServer ? new FikaHostTransitController(instance.transitSettings, location.transitParameters,
-                    profile, localRaidSettings) : new FikaClientTransitController(instance.transitSettings, location.transitParameters,
+                    profile, localRaidSettings) : new ClientTransitController(instance.transitSettings, location.transitParameters,
                     profile, localRaidSettings);
 
                 if (gameWorld.TransitController is FikaHostTransitController fikaHostTransitController)
@@ -618,14 +620,14 @@ namespace Fika.Core.Main.GameMode
 
         public abstract void SetupEventsAndExfils(Player player);
 
-        public abstract void Extract(CoopPlayer player, ExfiltrationPoint exfiltrationPoint, TransitPoint transitPoint = null);
+        public abstract void Extract(FikaPlayer player, ExfiltrationPoint exfiltrationPoint, TransitPoint transitPoint = null);
 
         /// <summary>
         /// Used to make sure no stims or mods reset the DamageCoeff
         /// </summary>
-        /// <param name="player">The <see cref="CoopPlayer"/> to run the coroutine on</param>
+        /// <param name="player">The <see cref="FikaPlayer"/> to run the coroutine on</param>
         /// <returns></returns>
-        protected IEnumerator ExtractRoutine(CoopPlayer player, CoopGame coopGame)
+        protected IEnumerator ExtractRoutine(FikaPlayer player, CoopGame coopGame)
         {
             WaitForEndOfFrame waitForEndOfFrame = new();
             while (coopGame.Status != GameStatus.Stopping)

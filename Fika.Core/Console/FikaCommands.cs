@@ -14,7 +14,7 @@ using LiteNetLib;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using static Fika.Core.Networking.CommandPacket;
+using static Fika.Core.Networking.Packets.Debug.CommandPacket;
 
 namespace Fika.Core.Console
 {

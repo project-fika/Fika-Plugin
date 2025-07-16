@@ -3,7 +3,7 @@ using Fika.Core.Main.Players;
 using LiteNetLib.Utils;
 using UnityEngine;
 
-namespace Fika.Core.Networking
+namespace Fika.Core.Networking.Packets.Player
 {
     public struct PlayerStatePacket : INetSerializable
     {
@@ -79,10 +79,10 @@ namespace Fika.Core.Networking
         public void Deserialize(NetDataReader reader)
         {
             byte boolFlags = reader.GetByte();
-            IsProne = (boolFlags & (1 << 0)) != 0;
-            IsSprinting = (boolFlags & (1 << 1)) != 0;
-            LeftStanceDisabled = (boolFlags & (1 << 2)) != 0;
-            IsGrounded = (boolFlags & (1 << 3)) != 0;
+            IsProne = (boolFlags & 1 << 0) != 0;
+            IsSprinting = (boolFlags & 1 << 1) != 0;
+            LeftStanceDisabled = (boolFlags & 1 << 2) != 0;
+            IsGrounded = (boolFlags & 1 << 3) != 0;
 
             RemoteTime = reader.GetDouble();
             LocalTime = reader.GetDouble();
@@ -106,7 +106,7 @@ namespace Fika.Core.Networking
             Physical = reader.GetPhysical();
         }
 
-        public void UpdateData(CoopPlayer player, bool isMoving)
+        public void UpdateData(FikaPlayer player, bool isMoving)
         {
             Position = player.Position;
             Rotation = player.Rotation;

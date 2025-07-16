@@ -1,4 +1,4 @@
-﻿using Fika.Core.Networking;
+﻿using Fika.Core.Networking.Packets.Player;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 

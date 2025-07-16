@@ -14,13 +14,15 @@ using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
+using Fika.Core.Networking.Packets.Backend;
+using Fika.Core.Networking.Packets.World;
 using Fika.Core.Utils;
 using LiteNetLib;
 using System;
 using System.Collections;
 using System.Threading.Tasks;
 using UnityEngine;
-using static Fika.Core.Networking.SubPacket;
+using static Fika.Core.Networking.Packets.SubPacket;
 using static LocationSettingsClass;
 
 namespace Fika.Core.Main.GameMode
@@ -341,7 +343,7 @@ namespace Fika.Core.Main.GameMode
                 coopGame.Profile_0.Info.Side, coopGame.GameTimer.EscapeTimeSeconds(),
                 exfilPoints, secretExfilPoints);
 
-            if (TransitControllerAbstractClass.Exist(out FikaClientTransitController transitController))
+            if (TransitControllerAbstractClass.Exist(out ClientTransitController transitController))
             {
                 transitController.Init();
             }
@@ -358,7 +360,7 @@ namespace Fika.Core.Main.GameMode
             ConsoleScreen.ApplyStartCommands();
         }
 
-        public override void Extract(CoopPlayer player, ExfiltrationPoint exfiltrationPoint, TransitPoint transitPoint = null)
+        public override void Extract(FikaPlayer player, ExfiltrationPoint exfiltrationPoint, TransitPoint transitPoint = null)
         {
             if (_fikaGame is not CoopGame coopGame)
             {
@@ -378,7 +380,7 @@ namespace Fika.Core.Main.GameMode
                 NotificationManagerClass.DisplayMessageNotification(LocaleUtils.PLAYER_MIA.Localized(), iconType: EFT.Communications.ENotificationIconType.Alert, textColor: Color.red);
             }
 
-            if (player.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)
+            if (player.AbstractQuestControllerClass is ClientSharedQuestController sharedQuestController)
             {
                 sharedQuestController.ToggleQuestSharing(false);
             }
@@ -437,7 +439,7 @@ namespace Fika.Core.Main.GameMode
 
             if (_coopHandler != null)
             {
-                CoopPlayer coopPlayer = player;
+                FikaPlayer coopPlayer = player;
                 coopGame.ExtractedPlayers.Add(coopPlayer.NetId);
                 _coopHandler.ExtractedPlayers.Add(coopPlayer.NetId);
                 _coopHandler.Players.Remove(coopPlayer.NetId);

@@ -50,7 +50,7 @@ namespace Fika.Core.Main.ClientClasses
             }
         }
 
-        public void DestroyItem(CoopPlayer player)
+        public void DestroyItem(FikaPlayer player)
         {
             if (!method_5(player, out Item item))
             {

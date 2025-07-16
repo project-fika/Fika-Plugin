@@ -8,6 +8,7 @@ using Fika.Core.Main.ObservedClasses;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
+using Fika.Core.Networking.Packets.Communication;
 using Fika.Core.Utils;
 using LiteNetLib;
 using System;
@@ -33,22 +34,22 @@ namespace Fika.Core.Main.Components
         /// </summary>
         public string ServerId { get; internal set; }
         /// <summary>
-        /// Reference to the local <see cref="CoopPlayer"/> player
+        /// Reference to the local <see cref="FikaPlayer"/> player
         /// </summary>
-        public CoopPlayer MyPlayer { get; internal set; }
+        public FikaPlayer MyPlayer { get; internal set; }
         /// <summary>
         /// If the <see cref="CoopHandler"/> should sync and spawn profiles during <see cref="Update"/>
         /// </summary>
         public bool ShouldSync { get; set; }
 
         /// <summary>
-        /// Dictionary of key = <see cref="CoopPlayer.NetId"/>, value = <see cref="CoopPlayer"/>
+        /// Dictionary of key = <see cref="FikaPlayer.NetId"/>, value = <see cref="FikaPlayer"/>
         /// </summary>
-        public Dictionary<int, CoopPlayer> Players { get; internal set; }
+        public Dictionary<int, FikaPlayer> Players { get; internal set; }
         /// <summary>
-        /// All human players in the form of <see cref="CoopPlayer"/> (excluding headless if not playing as a headless client)
+        /// All human players in the form of <see cref="FikaPlayer"/> (excluding headless if not playing as a headless client)
         /// </summary>
-        public List<CoopPlayer> HumanPlayers { get; internal set; }
+        public List<FikaPlayer> HumanPlayers { get; internal set; }
         /// <summary>
         /// The amount of human players
         /// </summary>
@@ -60,13 +61,13 @@ namespace Fika.Core.Main.Components
             }
         }
         /// <summary>
-        /// List of <see cref="CoopPlayer.NetId"/>s that have extracted
+        /// List of <see cref="FikaPlayer.NetId"/>s that have extracted
         /// </summary>
         public List<int> ExtractedPlayers { get; internal set; }
 
         private ManualLogSource _logger;
         /// <summary>
-        /// List of all queued players by <see cref="CoopPlayer.NetId"/>
+        /// List of all queued players by <see cref="FikaPlayer.NetId"/>
         /// </summary>
         private List<int> _queuedPlayers;
         /// <summary>
@@ -314,7 +315,7 @@ namespace Fika.Core.Main.Components
                     }
                 });
 
-            ObservedCoopPlayer otherPlayer = SpawnObservedPlayer(spawnObject);
+            ObservedPlayer otherPlayer = SpawnObservedPlayer(spawnObject);
 
             if (!spawnObject.IsAlive)
             {
@@ -391,7 +392,7 @@ namespace Fika.Core.Main.Components
             _spawnQueue.Enqueue(spawnObject);
         }
 
-        private ObservedCoopPlayer SpawnObservedPlayer(SpawnObject spawnObject)
+        private ObservedPlayer SpawnObservedPlayer(SpawnObject spawnObject)
         {
             bool isAi = spawnObject.IsAI;
             Profile profile = spawnObject.Profile;
@@ -411,7 +412,7 @@ namespace Fika.Core.Main.Components
             GameWorld gameWorld = Singleton<GameWorld>.Instance;
 
             // Check for GClass increments on filter
-            ObservedCoopPlayer otherPlayer = ObservedCoopPlayer.CreateObservedPlayer(gameWorld, netId, position, Quaternion.identity, "Player",
+            ObservedPlayer otherPlayer = ObservedPlayer.CreateObservedPlayer(gameWorld, netId, position, Quaternion.identity, "Player",
                 isAi ? "Bot_" : $"Player_{profile.Nickname}_", EPointOfView.ThirdPerson, profile, healthBytes, isAi,
                 EUpdateQueue.Update, Player.EUpdateMode.Manual, Player.EUpdateMode.Auto,
                 BackendConfigAbstractClass.Config.CharacterController.ObservedPlayerMode,
@@ -446,9 +447,9 @@ namespace Fika.Core.Main.Components
                 HumanPlayers.Add(otherPlayer);
             }
 
-            foreach (CoopPlayer player in Players.Values)
+            foreach (FikaPlayer player in Players.Values)
             {
-                if (player is not ObservedCoopPlayer)
+                if (player is not ObservedPlayer)
                 {
                     continue;
                 }

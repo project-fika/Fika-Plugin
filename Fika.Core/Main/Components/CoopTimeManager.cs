@@ -24,7 +24,7 @@ namespace Fika.Core.Main.Components
             if (CoopGame.Status == GameStatus.Started && GameTimer != null && GameTimer.SessionTime != null && GameTimer.PastTime >= GameTimer.SessionTime)
             {
                 CoopGame.ExitStatus = ExitStatus.MissingInAction;
-                CoopPlayer coopPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+                FikaPlayer coopPlayer = (FikaPlayer)Singleton<GameWorld>.Instance.MainPlayer;
                 CoopGame.Extract(coopPlayer, null);
                 enabled = false;
             }

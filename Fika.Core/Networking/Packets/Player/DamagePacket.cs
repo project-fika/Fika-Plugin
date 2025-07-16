@@ -3,7 +3,7 @@ using EFT.Ballistics;
 using LiteNetLib.Utils;
 using UnityEngine;
 
-namespace Fika.Core.Networking
+namespace Fika.Core.Networking.Packets.Player
 {
     public struct DamagePacket : INetSerializable
     {

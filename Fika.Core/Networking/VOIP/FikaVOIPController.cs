@@ -13,7 +13,7 @@ namespace Fika.Core.Networking.VOIP
     {
         private static readonly TimeSpan _hearingDetectionTime = TimeSpan.FromSeconds(2.0);
 
-        public FikaVOIPController(CoopPlayer localPlayer, SoundSettingsControllerClass soundSettings)
+        public FikaVOIPController(FikaPlayer localPlayer, SoundSettingsControllerClass soundSettings)
         {
             EVoipState voipState = localPlayer.VoipState;
             LocalPlayer = localPlayer;
@@ -514,7 +514,7 @@ namespace Fika.Core.Networking.VOIP
         private DateTime? nullable_0;
 
 
-        public CoopPlayer LocalPlayer { get; set; }
+        public FikaPlayer LocalPlayer { get; set; }
         public SoundSettingsControllerClass SoundSettings { get; set; }
 
         public DissonanceComms DissonanceComms

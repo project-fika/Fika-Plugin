@@ -22,6 +22,8 @@ using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
+using Fika.Core.Networking.Packets.Communication;
+using Fika.Core.Networking.Packets.World;
 using Fika.Core.UI.Models;
 using Fika.Core.Utils;
 using HarmonyLib;
@@ -74,7 +76,7 @@ namespace Fika.Core.Main.GameMode
         private static ManualLogSource _logger;
 
         private Func<LocalPlayer, EftGamePlayerOwner> _func_1;
-        private CoopPlayer _localPlayer;
+        private FikaPlayer _localPlayer;
         private bool _hasSaved;
         private float _voipDistance;
 
@@ -260,7 +262,7 @@ namespace Fika.Core.Main.GameMode
                 profile.SetSpawnedInSession(false);
             }
 
-            CoopPlayer coopPlayer = await CoopPlayer.Create(gameWorld, playerId, position, rotation, "Player", "Main_", EPointOfView.FirstPerson,
+            FikaPlayer coopPlayer = await FikaPlayer.Create(gameWorld, playerId, position, rotation, "Player", "Main_", EPointOfView.FirstPerson,
                 profile, false, UpdateQueue, armsUpdateMode, Player.EUpdateMode.Auto,
                 BackendConfigAbstractClass.Config.CharacterController.ClientPlayerMode, getSensitivity, getAimingSensitivity,
                 statisticsManager, new ClientViewFilter(), session, playerId);
@@ -599,7 +601,7 @@ namespace Fika.Core.Main.GameMode
                 }
             }
 
-            IStatisticsManager statisticsManager = new CoopClientStatisticsManager();
+            IStatisticsManager statisticsManager = new ClientStatisticsManager();
 
             Vector3 spawnPos = GameController.GetSpawnPosition();
             Quaternion spawnRot = GameController.GetSpawnRotation();
@@ -630,7 +632,7 @@ namespace Fika.Core.Main.GameMode
 
             myPlayer.OnEpInteraction += OnEpInteraction;
 
-            _localPlayer = myPlayer as CoopPlayer;
+            _localPlayer = myPlayer as FikaPlayer;
             GameController.SetLocalPlayer(_localPlayer);
 
             _logger.LogInfo("Local player created");
@@ -688,7 +690,7 @@ namespace Fika.Core.Main.GameMode
 
         public override void Spawn()
         {
-            if (LocalPlayer_0.ActiveHealthController is CoopClientHealthController coopClientHealthController)
+            if (LocalPlayer_0.ActiveHealthController is ClientHealthController coopClientHealthController)
             {
                 coopClientHealthController.Start();
             }
@@ -755,7 +757,7 @@ namespace Fika.Core.Main.GameMode
         /// <param name="exfiltrationPoint">The exfiltration point that was used to extract</param>
         /// <param name="transitPoint">The transit point that was used to transit</param>
         /// <returns></returns>
-        public void Extract(CoopPlayer player, ExfiltrationPoint exfiltrationPoint, TransitPoint transitPoint = null)
+        public void Extract(FikaPlayer player, ExfiltrationPoint exfiltrationPoint, TransitPoint transitPoint = null)
         {
             GameController.Extract(player, exfiltrationPoint, transitPoint);
         }
@@ -767,7 +769,7 @@ namespace Fika.Core.Main.GameMode
         private async void HealthController_DiedEvent(EDamageType damageType)
         {
             Player player = gparam_0.Player;
-            if (player.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)
+            if (player.AbstractQuestControllerClass is ClientSharedQuestController sharedQuestController)
             {
                 sharedQuestController.ToggleQuestSharing(false);
             }
@@ -789,7 +791,7 @@ namespace Fika.Core.Main.GameMode
 
             if (FikaPlugin.Instance.ForceSaveOnDeath)
             {
-                await SavePlayer((CoopPlayer)player, ExitStatus, string.Empty, true);
+                await SavePlayer((FikaPlayer)player, ExitStatus, string.Empty, true);
             }
         }
 
@@ -828,7 +830,7 @@ namespace Fika.Core.Main.GameMode
 
             GameController.DestroyDebugComponent();
 
-            CoopPlayer myPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+            FikaPlayer myPlayer = (FikaPlayer)Singleton<GameWorld>.Instance.MainPlayer;
             myPlayer.PacketSender.DestroyThis();
 
             if (myPlayer.Side != EPlayerSide.Savage)
@@ -865,8 +867,8 @@ namespace Fika.Core.Main.GameMode
             if (GameController.CoopHandler != null)
             {
                 // Create a copy to prevent errors when the dictionary is being modified (which happens when using spawn mods)
-                CoopPlayer[] players = [.. GameController.CoopHandler.Players.Values];
-                foreach (CoopPlayer player in players)
+                FikaPlayer[] players = [.. GameController.CoopHandler.Players.Values];
+                foreach (FikaPlayer player in players)
                 {
                     if (player == null || player.IsYourPlayer)
                     {
@@ -915,14 +917,14 @@ namespace Fika.Core.Main.GameMode
         }
 
         /// <summary>
-        /// Saves your own <see cref="CoopPlayer"/> to the server
+        /// Saves your own <see cref="FikaPlayer"/> to the server
         /// </summary>
         /// <param name="player"></param>
         /// <param name="exitStatus"></param>
         /// <param name="exitName"></param>
         /// <param name="fromDeath"></param>
         /// <returns></returns>
-        private async Task SavePlayer(CoopPlayer player, ExitStatus exitStatus, string exitName, bool fromDeath)
+        private async Task SavePlayer(FikaPlayer player, ExitStatus exitStatus, string exitName, bool fromDeath)
         {
             if (_hasSaved)
             {
@@ -1028,7 +1030,7 @@ namespace Fika.Core.Main.GameMode
 
             _logger.LogWarning("Game init was cancelled!");
 
-            CoopPlayer myPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+            FikaPlayer myPlayer = (FikaPlayer)Singleton<GameWorld>.Instance.MainPlayer;
             myPlayer.PacketSender.DestroyThis();
 
             if (myPlayer.Side != EPlayerSide.Savage)
@@ -1052,7 +1054,7 @@ namespace Fika.Core.Main.GameMode
 
             if (GameController.CoopHandler != null)
             {
-                foreach (CoopPlayer player in GameController.CoopHandler.Players.Values)
+                foreach (FikaPlayer player in GameController.CoopHandler.Players.Values)
                 {
                     if (player == null)
                     {
@@ -1257,7 +1259,7 @@ namespace Fika.Core.Main.GameMode
                 flag2 = false;
                 flag3 = false;
                 Vector3 position = _localPlayer.Position;
-                foreach (CoopPlayer humanPlayer in GameController.CoopHandler.HumanPlayers)
+                foreach (FikaPlayer humanPlayer in GameController.CoopHandler.HumanPlayers)
                 {
                     if (humanPlayer.IsYourPlayer)
                     {

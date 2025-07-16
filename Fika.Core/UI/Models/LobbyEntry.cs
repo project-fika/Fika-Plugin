@@ -6,51 +6,39 @@ using System.Runtime.Serialization;
 namespace Fika.Core.UI.Models
 {
     [DataContract]
-    public struct LobbyEntry
+    public struct LobbyEntry(string serverId, string hostUsername, int playerCount,
+        LobbyEntry.ELobbyStatus status, string location, ESideType side, EDateTime time,
+        Dictionary<string, bool> players, bool isHeadless, string headlessRequesterNickname)
     {
         [DataMember]
-        public string ServerId;
+        public string ServerId = serverId;
 
         [DataMember]
-        public string HostUsername;
+        public string HostUsername = hostUsername;
 
         [DataMember]
-        public int PlayerCount;
+        public int PlayerCount = playerCount;
 
         [DataMember]
-        public ELobbyStatus Status;
+        public ELobbyStatus Status = status;
 
         [DataMember]
-        public string Location;
+        public string Location = location;
 
         [DataMember]
-        public ESideType Side;
+        public ESideType Side = side;
 
         [DataMember]
-        public EDateTime Time;
+        public EDateTime Time = time;
 
         [DataMember]
-        public Dictionary<string, bool> Players;
+        public Dictionary<string, bool> Players = players;
 
         [DataMember]
-        public bool IsHeadless;
+        public bool IsHeadless = isHeadless;
 
         [DataMember]
-        public string HeadlessRequesterNickname;
-
-        public LobbyEntry(string serverId, string hostUsername, int playerCount, ELobbyStatus status, string location, ESideType side, EDateTime time, Dictionary<string, bool> players, bool isHeadless, string headlessRequesterNickname)
-        {
-            ServerId = serverId;
-            HostUsername = hostUsername;
-            PlayerCount = playerCount;
-            Status = status;
-            Location = location;
-            Side = side;
-            Time = time;
-            Players = players;
-            IsHeadless = isHeadless;
-            HeadlessRequesterNickname = headlessRequesterNickname;
-        }
+        public string HeadlessRequesterNickname = headlessRequesterNickname;
 
         public enum ELobbyStatus
         {

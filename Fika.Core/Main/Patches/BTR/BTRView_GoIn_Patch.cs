@@ -5,6 +5,7 @@ using EFT.Vehicle;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
+using Fika.Core.Networking.Packets.World;
 using Fika.Core.Patching;
 using HarmonyLib;
 using LiteNetLib;
@@ -27,7 +28,7 @@ namespace Fika.Core.Main.Patches
         public static bool Prefix(BTRView __instance, Player player, BTRSide side, byte placeId, bool fast, ref Task __result)
         {
             bool isServer = FikaBackendUtils.IsServer;
-            if (player is ObservedCoopPlayer observedPlayer)
+            if (player is ObservedPlayer observedPlayer)
             {
                 __result = ObservedGoIn(__instance, observedPlayer, side, placeId, fast);
                 Singleton<IFikaNetworkManager>.Instance.ObservedCoopPlayers.Remove(observedPlayer);
@@ -36,7 +37,7 @@ namespace Fika.Core.Main.Patches
 
             if (player.IsYourPlayer)
             {
-                CoopPlayer myPlayer = (CoopPlayer)player;
+                FikaPlayer myPlayer = (FikaPlayer)player;
                 myPlayer.PacketSender.SendState = false;
                 player.InputDirection = new(0, 0);
                 if (isServer)
@@ -60,7 +61,7 @@ namespace Fika.Core.Main.Patches
             return true;
         }
 
-        private static async Task ObservedGoIn(BTRView view, ObservedCoopPlayer observedPlayer, BTRSide side, byte placeId, bool fast)
+        private static async Task ObservedGoIn(BTRView view, ObservedPlayer observedPlayer, BTRSide side, byte placeId, bool fast)
         {
             try
             {

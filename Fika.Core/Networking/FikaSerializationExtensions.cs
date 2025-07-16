@@ -15,12 +15,12 @@ using System.Runtime.InteropServices;
 using UnityEngine;
 using UnityEngine.Rendering.PostProcessing;
 using static BasePhysicalClass;
-using static Fika.Core.Networking.CommonSubPackets;
-using static Fika.Core.Networking.FirearmSubPackets;
-using static Fika.Core.Networking.GenericSubPackets;
-using static Fika.Core.Networking.RequestSubPackets;
-using static Fika.Core.Networking.SubPacket;
-using static Fika.Core.Networking.SubPackets;
+using static Fika.Core.Networking.Packets.FirearmController.FirearmSubPackets;
+using static Fika.Core.Networking.Packets.World.GenericSubPackets;
+using static Fika.Core.Networking.Packets.World.RequestSubPackets;
+using static Fika.Core.Networking.Packets.Player.CommonSubPackets;
+using static Fika.Core.Networking.Packets.SubPacket;
+using static Fika.Core.Networking.Packets.SubPackets;
 
 namespace Fika.Core.Networking
 {

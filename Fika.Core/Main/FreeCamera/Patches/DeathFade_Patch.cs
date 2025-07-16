@@ -9,7 +9,8 @@ namespace Fika.Core.Main.FreeCamera.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(DeathFade).GetMethod(nameof(DeathFade.DisableEffect));
+            return typeof(DeathFade)
+                .GetMethod(nameof(DeathFade.DisableEffect));
         }
 
         [PatchPrefix]

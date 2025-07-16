@@ -3,7 +3,7 @@
 using EFT;
 using UnityEngine;
 
-namespace Fika.Core.Main.ObservedClasses
+namespace Fika.Core.Main.ObservedClasses.MovementStates
 {
     public class ObservedRunState : RunStateClass
     {

@@ -2,7 +2,7 @@
 using LiteNetLib.Utils;
 using System.Collections.Generic;
 
-namespace Fika.Core.Networking
+namespace Fika.Core.Networking.Packets.Communication
 {
     public class TransitEventPacket : INetSerializable
     {

@@ -28,11 +28,11 @@ namespace Fika.Core.Main.Patches
 
             if (FikaBackendUtils.IsServer)
             {
-                __result = CoopHostGameWorld.Create(gameObject, objectsFactory, updateQueue, currentProfileId);
+                __result = FikaHostGameWorld.Create(gameObject, objectsFactory, updateQueue, currentProfileId);
             }
             else
             {
-                __result = CoopClientGameWorld.Create(gameObject, objectsFactory, updateQueue, currentProfileId);
+                __result = FikaClientGameWorld.Create(gameObject, objectsFactory, updateQueue, currentProfileId);
             }
             FikaBackendUtils.RequestFikaWorld = false;
             return false;

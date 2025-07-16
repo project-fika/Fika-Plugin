@@ -1,8 +1,8 @@
 ﻿using LiteNetLib.Utils;
 using UnityEngine;
-using static Fika.Core.Networking.SubPackets;
+using static Fika.Core.Networking.Packets.SubPackets;
 
-namespace Fika.Core.Networking
+namespace Fika.Core.Networking.Packets.Communication
 {
     public struct SendCharacterPacket(PlayerInfoPacket playerInfoPacket, bool isAlive, bool isAi, Vector3 position, int netId) : INetSerializable
     {

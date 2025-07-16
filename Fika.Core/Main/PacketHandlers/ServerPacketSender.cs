@@ -6,12 +6,15 @@ using EFT.Interactive;
 using EFT.UI;
 using Fika.Core.Bundles;
 using Fika.Core.Main.ClientClasses;
+using Fika.Core.Main.ClientClasses.HandsControllers;
 using Fika.Core.Main.Factories;
 using Fika.Core.Main.FreeCamera;
 using Fika.Core.Main.GameMode;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
+using Fika.Core.Networking.Packets.Communication;
+using Fika.Core.Networking.Packets.Player;
 using Fika.Core.UI.Custom;
 using LiteNetLib;
 using LiteNetLib.Utils;
@@ -28,7 +31,7 @@ namespace Fika.Core.Main.PacketHandlers
         public FikaServer Server { get; set; }
         public FikaClient Client { get; set; }
 
-        private CoopPlayer _player;
+        private FikaPlayer _player;
         private PlayerStatePacket _state;
         private int _animHash;
         private bool IsMoving
@@ -55,7 +58,7 @@ namespace Fika.Core.Main.PacketHandlers
         private float _updateCount;
         private float _updatesPerTick;
 
-        public static ServerPacketSender Create(CoopPlayer player)
+        public static ServerPacketSender Create(FikaPlayer player)
         {
             ServerPacketSender sender = player.gameObject.AddComponent<ServerPacketSender>();
             sender._player = player;
@@ -75,7 +78,7 @@ namespace Fika.Core.Main.PacketHandlers
             enabled = true;
             Enabled = true;
             SendState = true;
-            if (_player.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)
+            if (_player.AbstractQuestControllerClass is ClientSharedQuestController sharedQuestController)
             {
                 sharedQuestController.LateInit();
             }
@@ -132,7 +135,7 @@ namespace Fika.Core.Main.PacketHandlers
             }
             else if (_player.HealthController.IsAlive)
             {
-                if (_player.HandsController is CoopClientFirearmController controller && controller.IsAiming)
+                if (_player.HandsController is FikaClientFirearmController controller && controller.IsAiming)
                 {
                     sourceRaycast = new(controller.FireportPosition, controller.WeaponDirection);
                 }

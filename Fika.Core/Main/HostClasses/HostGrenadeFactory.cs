@@ -7,17 +7,17 @@ namespace Fika.Core.Main.HostClasses
     {
         public override Grenade AddGrenade(GameObject gameObject)
         {
-            return gameObject.AddComponent<CoopHostGrenade>();
+            return gameObject.AddComponent<FikaHostGrenade>();
         }
 
         public override SmokeGrenade AddSmokeGrenade(GameObject gameObject)
         {
-            return gameObject.AddComponent<CoopHostSmokeGrenade>();
+            return gameObject.AddComponent<FikaHostSmokeGrenade>();
         }
 
         public override StunGrenade AddStunGrenade(GameObject gameObject)
         {
-            return gameObject.AddComponent<CoopHostStunGrenade>();
+            return gameObject.AddComponent<FikaHostStunGrenade>();
         }
     }
 }

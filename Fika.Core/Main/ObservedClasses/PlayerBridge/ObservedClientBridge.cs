@@ -4,11 +4,11 @@ using EFT.Ballistics;
 using Fika.Core.Main.Players;
 using UnityEngine;
 
-namespace Fika.Core.Main.ObservedClasses
+namespace Fika.Core.Main.ObservedClasses.PlayerBridge
 {
-    public class ObservedClientBridge(ObservedCoopPlayer observedPlayer) : BodyPartCollider.IPlayerBridge
+    public class ObservedClientBridge(ObservedPlayer observedPlayer) : BodyPartCollider.IPlayerBridge
     {
-        private readonly ObservedCoopPlayer _observedPlayer = observedPlayer;
+        private readonly ObservedPlayer _observedPlayer = observedPlayer;
 
         public IPlayer iPlayer
         {

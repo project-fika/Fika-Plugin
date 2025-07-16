@@ -1,8 +1,8 @@
 ﻿using Fika.Core.Main.Players;
 using LiteNetLib.Utils;
-using static Fika.Core.Networking.SubPacket;
+using static Fika.Core.Networking.Packets.SubPacket;
 
-namespace Fika.Core.Networking
+namespace Fika.Core.Networking.Packets.FirearmController
 {
     public struct WeaponPacket : INetSerializable
     {
@@ -10,7 +10,7 @@ namespace Fika.Core.Networking
         public EFirearmSubPacketType Type;
         public ISubPacket SubPacket;
 
-        public readonly void Execute(CoopPlayer player)
+        public readonly void Execute(FikaPlayer player)
         {
             SubPacket.Execute(player);
         }

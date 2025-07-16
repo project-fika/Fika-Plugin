@@ -4,6 +4,7 @@ using EFT.Vehicle;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
+using Fika.Core.Networking.Packets.World;
 using Fika.Core.Patching;
 using LiteNetLib;
 using System.Reflection;
@@ -24,7 +25,7 @@ namespace Fika.Core.Main.Patches
             {
                 if (__result is EBtrInteractionStatus.Confirmed or EBtrInteractionStatus.EmptySlot)
                 {
-                    if (passenger.Player is ObservedCoopPlayer observedPlayer)
+                    if (passenger.Player is ObservedPlayer observedPlayer)
                     {
                         BTRInteractionPacket packet = new(observedPlayer.NetId)
                         {

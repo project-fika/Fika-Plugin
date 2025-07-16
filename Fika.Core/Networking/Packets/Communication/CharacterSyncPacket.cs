@@ -2,7 +2,7 @@
 using LiteNetLib.Utils;
 using System.Collections.Generic;
 
-namespace Fika.Core.Networking
+namespace Fika.Core.Networking.Packets.Communication
 {
     public class CharacterSyncPacket : INetSerializable
     {
@@ -11,10 +11,10 @@ namespace Fika.Core.Networking
 
         }
 
-        public CharacterSyncPacket(Dictionary<int, CoopPlayer> players)
+        public CharacterSyncPacket(Dictionary<int, FikaPlayer> players)
         {
             PlayerIds = new(players.Count);
-            foreach (KeyValuePair<int, CoopPlayer> kvp in players)
+            foreach (KeyValuePair<int, FikaPlayer> kvp in players)
             {
                 PlayerIds.Add(kvp.Value.NetId);
             }

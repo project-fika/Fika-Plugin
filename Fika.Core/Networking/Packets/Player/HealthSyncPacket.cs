@@ -1,10 +1,10 @@
 ﻿using EFT;
 using LiteNetLib.Utils;
-using static Fika.Core.Networking.SubPackets;
+using static Fika.Core.Networking.Packets.SubPackets;
 using static NetworkHealthSyncPacketStruct;
 using static NetworkHealthSyncPacketStruct.NetworkHealthExtraDataTypeStruct;
 
-namespace Fika.Core.Networking
+namespace Fika.Core.Networking.Packets.Player
 {
     public struct HealthSyncPacket : INetSerializable
     {

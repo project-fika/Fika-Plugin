@@ -10,12 +10,12 @@ namespace Fika.Core.Main.ClientClasses
     /// </summary>
     public class NoInertiaPhysical : PlayerPhysicalClass
     {
-        private CoopPlayer _coopPlayer;
+        private FikaPlayer _coopPlayer;
 
         public override void Init(IPlayer player)
         {
             base.Init(player);
-            _coopPlayer = (CoopPlayer)player;
+            _coopPlayer = (FikaPlayer)player;
         }
 
         public override void OnWeightUpdated()

@@ -15,7 +15,7 @@ namespace Fika.Core.Main.Patches
         [PatchPostfix]
         public static void Postfix(AirplaneDataPacketStruct ___AirplaneDataPacketStruct)
         {
-            Singleton<CoopHostGameWorld>.Instance.FikaHostWorld.WorldPacket.SyncObjectPackets.Add(___AirplaneDataPacketStruct);
+            Singleton<FikaHostGameWorld>.Instance.FikaHostWorld.WorldPacket.SyncObjectPackets.Add(___AirplaneDataPacketStruct);
         }
     }
 }

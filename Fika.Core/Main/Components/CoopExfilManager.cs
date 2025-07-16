@@ -5,12 +5,12 @@ using EFT.Interactive.SecretExfiltrations;
 using Fika.Core.Main.GameMode;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
-using Fika.Core.Networking;
+using Fika.Core.Networking.Packets.World;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using static Fika.Core.Networking.GenericSubPackets;
-using static Fika.Core.Networking.SubPacket;
+using static Fika.Core.Networking.Packets.World.GenericSubPackets;
+using static Fika.Core.Networking.Packets.SubPacket;
 
 namespace Fika.Core.Main.Components
 {
@@ -74,7 +74,7 @@ namespace Fika.Core.Main.Components
                         if (!exfiltrationPoint.UnmetRequirements(player).Any())
                         {
                             _game.ExitLocation = exfiltrationPoint.Settings.Name;
-                            _game.Extract((CoopPlayer)player, exfiltrationPoint);
+                            _game.Extract((FikaPlayer)player, exfiltrationPoint);
                         }
                     }
 
@@ -116,7 +116,7 @@ namespace Fika.Core.Main.Components
 
         private void SecretExfiltrationPoint_OnPointFoundEvent(string exitName, bool sharedExit)
         {
-            CoopPlayer mainPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+            FikaPlayer mainPlayer = (FikaPlayer)Singleton<GameWorld>.Instance.MainPlayer;
             GenericPacket packet = new()
             {
                 NetId = mainPlayer.NetId,
@@ -217,7 +217,7 @@ namespace Fika.Core.Main.Components
                 {
                     point.ExfiltrationStartTime = _game.PastTime;
 
-                    CoopPlayer mainPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+                    FikaPlayer mainPlayer = (FikaPlayer)Singleton<GameWorld>.Instance.MainPlayer;
                     GenericPacket packet = new()
                     {
                         NetId = mainPlayer.NetId,
@@ -233,7 +233,7 @@ namespace Fika.Core.Main.Components
 
         private class ExtractionPlayerHandler(Player player, ExfiltrationPoint point, float startTime)
         {
-            public CoopPlayer player = (CoopPlayer)player;
+            public FikaPlayer player = (FikaPlayer)player;
             public ExfiltrationPoint point = point;
             public float startTime = startTime;
         }

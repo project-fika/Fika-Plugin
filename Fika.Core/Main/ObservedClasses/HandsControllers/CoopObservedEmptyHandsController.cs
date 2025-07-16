@@ -6,7 +6,7 @@ namespace Fika.Core.Main.ObservedClasses
 {
     internal class CoopObservedEmptyHandsController : EFT.Player.EmptyHandsController
     {
-        public static CoopObservedEmptyHandsController Create(CoopPlayer player)
+        public static CoopObservedEmptyHandsController Create(FikaPlayer player)
         {
             return smethod_6<CoopObservedEmptyHandsController>(player);
         }

@@ -32,7 +32,7 @@ namespace Fika.Core.Main.FreeCamera
         private const float _minFov = 10f;
 
         private bool _isSpectator;
-        private CoopPlayer _currentPlayer;
+        private FikaPlayer _currentPlayer;
         private Vector3 _lastKnownPlayerPosition;
         private bool _isFollowing;
         private bool _isSpectatingBots;
@@ -117,7 +117,7 @@ namespace Fika.Core.Main.FreeCamera
             }
         }
 
-        public void SetCurrentPlayer(CoopPlayer player)
+        public void SetCurrentPlayer(FikaPlayer player)
         {
             _currentPlayer = player;
 #if DEBUG
@@ -174,11 +174,11 @@ namespace Fika.Core.Main.FreeCamera
                 return;
             }
 
-            List<CoopPlayer> players = [];
-            List<CoopPlayer> humanPlayers = coopHandler.HumanPlayers;
+            List<FikaPlayer> players = [];
+            List<FikaPlayer> humanPlayers = coopHandler.HumanPlayers;
             for (int i = 0; i < humanPlayers.Count; i++)
             {
-                CoopPlayer player = humanPlayers[i];
+                FikaPlayer player = humanPlayers[i];
                 if (!player.IsYourPlayer && player.HealthController.IsAlive)
                 {
                     players.Add(player);
@@ -195,7 +195,7 @@ namespace Fika.Core.Main.FreeCamera
                 _isSpectatingBots = true;
                 if (FikaBackendUtils.IsServer)
                 {
-                    foreach (CoopPlayer player in coopHandler.Players.Values)
+                    foreach (FikaPlayer player in coopHandler.Players.Values)
                     {
                         if (player.IsAI && player.HealthController.IsAlive)
                         {
@@ -205,7 +205,7 @@ namespace Fika.Core.Main.FreeCamera
                 }
                 else
                 {
-                    foreach (CoopPlayer player in coopHandler.Players.Values)
+                    foreach (FikaPlayer player in coopHandler.Players.Values)
                     {
                         if (player.IsObservedAI && player.HealthController.IsAlive)
                         {
@@ -450,7 +450,7 @@ namespace Fika.Core.Main.FreeCamera
                     return;
                 }
 
-                CoopPlayer player = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+                FikaPlayer player = (FikaPlayer)Singleton<GameWorld>.Instance.MainPlayer;
 
                 if (player != null && !coopHandler.ExtractedPlayers.Contains(player.NetId) && player.HealthController.IsAlive)
                 {

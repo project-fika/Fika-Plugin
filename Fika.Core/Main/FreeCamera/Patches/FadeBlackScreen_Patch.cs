@@ -12,7 +12,8 @@ namespace Fika.Core.Main.FreeCamera.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(PreloaderUI).GetMethod(nameof(PreloaderUI.FadeBlackScreen));
+            return typeof(PreloaderUI)
+                .GetMethod(nameof(PreloaderUI.FadeBlackScreen));
         }
 
         [PatchPrefix]

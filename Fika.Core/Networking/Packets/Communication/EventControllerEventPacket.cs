@@ -2,7 +2,7 @@
 using EFT.GlobalEvents;
 using LiteNetLib.Utils;
 
-namespace Fika.Core.Networking
+namespace Fika.Core.Networking.Packets.Communication
 {
     public class EventControllerEventPacket : INetSerializable
     {

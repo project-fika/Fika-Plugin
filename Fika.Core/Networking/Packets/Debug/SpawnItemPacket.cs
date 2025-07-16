@@ -1,7 +1,7 @@
 ﻿using EFT.InventoryLogic;
 using LiteNetLib.Utils;
 
-namespace Fika.Core.Networking
+namespace Fika.Core.Networking.Packets.Debug
 {
     public struct SpawnItemPacket : INetSerializable
     {

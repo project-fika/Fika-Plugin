@@ -9,7 +9,7 @@ using System.Collections.Generic;
 
 namespace Fika.Core.Main.ObservedClasses
 {
-    public sealed class ObservedHealthController(byte[] serializedState, ObservedCoopPlayer player, InventoryController inventory, SkillManager skills)
+    public sealed class ObservedHealthController(byte[] serializedState, ObservedPlayer player, InventoryController inventory, SkillManager skills)
         : NetworkHealthControllerAbstractClass(serializedState, inventory, skills)
     {
         public override Player Player

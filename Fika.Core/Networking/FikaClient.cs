@@ -45,6 +45,11 @@ using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using UnityEngine;
 using static Fika.Core.Networking.NetworkUtils;
+using Fika.Core.Networking.Packets.Player;
+using Fika.Core.Networking.Packets.World;
+using Fika.Core.Networking.Packets.FirearmController;
+using Fika.Core.Networking.Packets.Debug;
+using Fika.Core.Networking.Packets.Communication;
 
 namespace Fika.Core.Networking
 {
@@ -53,7 +58,7 @@ namespace Fika.Core.Networking
     /// </summary>
     public class FikaClient : MonoBehaviour, INetEventListener, IFikaNetworkManager
     {
-        public CoopPlayer MyPlayer;
+        public FikaPlayer MyPlayer;
         public int Ping;
         public int ServerFPS;
         public int ReadyClients;
@@ -111,7 +116,7 @@ namespace Fika.Core.Networking
         public FikaClientWorld FikaClientWorld { get; set; }
         public ESideType RaidSide { get; set; }
         public bool AllowVOIP { get; set; }
-        public List<ObservedCoopPlayer> ObservedCoopPlayers { get; set; }
+        public List<ObservedPlayer> ObservedCoopPlayers { get; set; }
 
         private NetPacketProcessor _packetProcessor;
         private int _sendRate;
@@ -308,7 +313,7 @@ namespace Fika.Core.Networking
             GameWorld gameWorld = Singleton<GameWorld>.Instance;
             if (gameWorld != null && gameWorld.RunddansController is ClientRunddansController clientController)
             {
-                if (_coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer player))
+                if (_coopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer player))
                 {
                     clientController.DestroyItem(player);
                 }
@@ -327,7 +332,7 @@ namespace Fika.Core.Networking
 
         private void OnInraidQuestPacketReceived(InraidQuestPacket packet)
         {
-            if (_coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer player))
+            if (_coopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer player))
             {
                 if (player.AbstractQuestControllerClass is ObservedQuestController controller)
                 {
@@ -478,7 +483,7 @@ namespace Fika.Core.Networking
                 return;
             }
 
-            if (_coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer bot))
+            if (_coopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer bot))
             {
                 switch (packet.Type)
                 {
@@ -547,7 +552,7 @@ namespace Fika.Core.Networking
 
             if (packet.EventType is TransitEventPacket.ETransitEventType.Init)
             {
-                if (Singleton<GameWorld>.Instance.TransitController is FikaClientTransitController transitController)
+                if (Singleton<GameWorld>.Instance.TransitController is ClientTransitController transitController)
                 {
                     transitController.Init();
                     return;
@@ -556,7 +561,7 @@ namespace Fika.Core.Networking
 
             if (packet.EventType is TransitEventPacket.ETransitEventType.Extract)
             {
-                if (Singleton<GameWorld>.Instance.TransitController is FikaClientTransitController transitController)
+                if (Singleton<GameWorld>.Instance.TransitController is ClientTransitController transitController)
                 {
                     transitController.HandleClientExtract(packet.TransitId, packet.PlayerId);
                     return;
@@ -587,7 +592,7 @@ namespace Fika.Core.Networking
 
         private void OnSpawnItemPacketReceived(SpawnItemPacket packet)
         {
-            if (_coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+            if (_coopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer playerToApply))
             {
                 FikaGlobals.SpawnItemInWorld(packet.Item, playerToApply);
             }
@@ -603,7 +608,7 @@ namespace Fika.Core.Networking
 
         private void OnUsableItemPacketReceived(UsableItemPacket packet)
         {
-            if (_coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+            if (_coopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer playerToApply))
             {
                 playerToApply.HandleUsableItemPacket(packet);
             }
@@ -611,9 +616,9 @@ namespace Fika.Core.Networking
 
         private void OnResyncInventoryIdPacketReceived(ResyncInventoryIdPacket packet)
         {
-            if (_coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+            if (_coopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer playerToApply))
             {
-                if (playerToApply is ObservedCoopPlayer observedPlayer)
+                if (playerToApply is ObservedPlayer observedPlayer)
                 {
                     if (observedPlayer.InventoryController is ObservedInventoryController observedController)
                     {
@@ -673,7 +678,7 @@ namespace Fika.Core.Networking
 
         private void OnBTRInteractionPacketReceived(BTRInteractionPacket packet)
         {
-            if (_coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+            if (_coopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer playerToApply))
             {
                 GameWorld gameWorld = Singleton<GameWorld>.Instance;
                 if (gameWorld.BtrController != null && gameWorld.BtrController.BtrView != null)
@@ -887,7 +892,7 @@ namespace Fika.Core.Networking
 
             if (MyPlayer.HealthController.IsAlive)
             {
-                if (MyPlayer.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)
+                if (MyPlayer.AbstractQuestControllerClass is ClientSharedQuestController sharedQuestController)
                 {
                     sharedQuestController.ReceiveQuestDropItemPacket(ref packet);
                 }
@@ -903,7 +908,7 @@ namespace Fika.Core.Networking
 
             if (MyPlayer.HealthController.IsAlive)
             {
-                if (MyPlayer.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)
+                if (MyPlayer.AbstractQuestControllerClass is ClientSharedQuestController sharedQuestController)
                 {
                     sharedQuestController.ReceiveQuestItemPacket(ref packet);
                 }
@@ -919,7 +924,7 @@ namespace Fika.Core.Networking
 
             if (MyPlayer.HealthController.IsAlive)
             {
-                if (MyPlayer.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)
+                if (MyPlayer.AbstractQuestControllerClass is ClientSharedQuestController sharedQuestController)
                 {
                     sharedQuestController.ReceiveQuestPacket(ref packet);
                 }
@@ -937,7 +942,7 @@ namespace Fika.Core.Networking
             }
         }
 
-        public void SetupGameVariables(CoopPlayer coopPlayer)
+        public void SetupGameVariables(FikaPlayer coopPlayer)
         {
             MyPlayer = coopPlayer;            
         }
@@ -952,7 +957,7 @@ namespace Fika.Core.Networking
 
         private void OnOperationCallbackPacketReceived(OperationCallbackPacket packet)
         {
-            if (_coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer player) && player.IsYourPlayer)
+            if (_coopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer player) && player.IsYourPlayer)
             {
                 player.HandleCallbackFromServer(packet);
             }
@@ -980,9 +985,9 @@ namespace Fika.Core.Networking
 
         private void OnHealthSyncPacketReceived(HealthSyncPacket packet)
         {
-            if (_coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+            if (_coopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer playerToApply))
             {
-                if (playerToApply is ObservedCoopPlayer observedPlayer)
+                if (playerToApply is ObservedPlayer observedPlayer)
                 {
                     if (packet.Packet.SyncType == NetworkHealthSyncPacketStruct.ESyncType.IsAlive && !packet.Packet.Data.IsAlive.IsAlive)
                     {
@@ -1029,7 +1034,7 @@ namespace Fika.Core.Networking
 
         private void OnCommonPlayerPacketReceived(CommonPlayerPacket packet)
         {
-            if (_coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+            if (_coopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer playerToApply))
             {
                 packet.SubPacket.Execute(playerToApply);
             }
@@ -1037,7 +1042,7 @@ namespace Fika.Core.Networking
 
         private void OnInventoryPacketReceived(InventoryPacket packet)
         {
-            if (_coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+            if (_coopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer playerToApply))
             {
                 HandleInventoryPacket(ref packet, playerToApply);
             }
@@ -1045,7 +1050,7 @@ namespace Fika.Core.Networking
 
         private void OnDamagePacketReceived(DamagePacket packet)
         {
-            if (_coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply) && playerToApply.IsYourPlayer)
+            if (_coopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer playerToApply) && playerToApply.IsYourPlayer)
             {
                 playerToApply.HandleDamagePacket(in packet);
             }
@@ -1053,7 +1058,7 @@ namespace Fika.Core.Networking
 
         private void OnArmorDamagePacketReceived(ArmorDamagePacket packet)
         {
-            if (_coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+            if (_coopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer playerToApply))
             {
                 playerToApply.HandleArmorDamagePacket(packet);
             }
@@ -1061,7 +1066,7 @@ namespace Fika.Core.Networking
 
         private void OnWeaponPacketReceived(WeaponPacket packet)
         {
-            if (_coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+            if (_coopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer playerToApply))
             {
                 packet.SubPacket.Execute(playerToApply);
             }
@@ -1134,7 +1139,7 @@ namespace Fika.Core.Networking
             _stateHandle.Complete();
             for (int i = 0; i < ObservedCoopPlayers.Count; i++)
             {
-                ObservedCoopPlayer player = ObservedCoopPlayers[i];
+                ObservedPlayer player = ObservedCoopPlayers[i];
                 if (player.CurrentPlayerState.ShouldUpdate)
                 {
                     player.ManualStateUpdate(); 
@@ -1331,7 +1336,7 @@ namespace Fika.Core.Networking
             _logger.LogInfo($"Packet loss: {_netClient.Statistics.PacketLossPercent}%");
         }
 
-        private void HandleInventoryPacket(ref InventoryPacket packet, CoopPlayer player)
+        private void HandleInventoryPacket(ref InventoryPacket packet, FikaPlayer player)
         {
             if (packet.OperationBytes.Length == 0)
             {

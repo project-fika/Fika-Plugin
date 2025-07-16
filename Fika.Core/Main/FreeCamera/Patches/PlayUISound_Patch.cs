@@ -9,7 +9,8 @@ namespace Fika.Core.Main.FreeCamera.Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(GUISounds).GetMethod(nameof(GUISounds.PlayUISound), [typeof(EUISoundType)]);
+            return typeof(GUISounds)
+                .GetMethod(nameof(GUISounds.PlayUISound), [typeof(EUISoundType)]);
         }
 
         [PatchPrefix]

@@ -15,7 +15,7 @@ namespace Fika.Core.Main.ObservedClasses
     public class ObservedInventoryController : Player.PlayerInventoryController, Interface16
     {
         private readonly IPlayerSearchController _searchController;
-        private readonly CoopPlayer _coopPlayer;
+        private readonly FikaPlayer _coopPlayer;
         public override bool HasDiscardLimits
         {
             get
@@ -37,7 +37,7 @@ namespace Fika.Core.Main.ObservedClasses
             MongoID_0 = firstId;
             Ushort_0 = firstOperationId;
             _searchController = new AISearchControllerClass();
-            _coopPlayer = (CoopPlayer)player;
+            _coopPlayer = (FikaPlayer)player;
         }
 
         public override void AddDiscardLimits(Item rootItem, IEnumerable<DestroyedItemsStruct> destroyedItems)

@@ -5,7 +5,7 @@ using EFT.InventoryLogic;
 using System;
 using UnityEngine;
 
-namespace Fika.Core.Networking
+namespace Fika.Core.Networking.Packets
 {
     /// <summary>
     /// Class containing several static methods to serialize/deserialize sub-packages

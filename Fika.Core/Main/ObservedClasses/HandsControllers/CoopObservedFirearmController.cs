@@ -10,7 +10,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using static EFT.Player;
-using static Fika.Core.Networking.FirearmSubPackets;
+using static Fika.Core.Networking.Packets.FirearmController.FirearmSubPackets;
 
 namespace Fika.Core.Main.ObservedClasses
 {
@@ -33,7 +33,7 @@ namespace Fika.Core.Main.ObservedClasses
 
         public bool IsRevolver { get; internal set; }
 
-        private ObservedCoopPlayer _coopPlayer;
+        private ObservedPlayer _coopPlayer;
         private bool _triggerPressed;
         private bool _needsReset;
         private float _lastFireTime = 0f;
@@ -129,7 +129,7 @@ namespace Fika.Core.Main.ObservedClasses
             _stationaryWeapon = Weapon.IsStationaryWeapon;
         }
 
-        public static CoopObservedFirearmController Create(ObservedCoopPlayer player, Weapon weapon)
+        public static CoopObservedFirearmController Create(ObservedPlayer player, Weapon weapon)
         {
             CoopObservedFirearmController controller = smethod_6<CoopObservedFirearmController>(player, weapon);
             controller._coopPlayer = player;

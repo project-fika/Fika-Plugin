@@ -153,12 +153,12 @@ namespace Fika.Core.Main.Utils
             return $"{bytes / Math.Pow(unit, exp):F2} {("KMGTPE")[exp - 1]}B";
         }
 
-        internal static void SpawnItemInWorld(Item item, CoopPlayer player)
+        internal static void SpawnItemInWorld(Item item, FikaPlayer player)
         {
             StaticManager.BeginCoroutine(SpawnItemRoutine(item, player));
         }
 
-        private static IEnumerator SpawnItemRoutine(Item item, CoopPlayer player)
+        private static IEnumerator SpawnItemRoutine(Item item, FikaPlayer player)
         {
             List<ResourceKey> collection = [];
             IEnumerable<Item> items = item.GetAllItems();

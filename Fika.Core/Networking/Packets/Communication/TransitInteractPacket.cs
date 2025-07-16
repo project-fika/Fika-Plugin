@@ -1,7 +1,7 @@
 ﻿using JsonType;
 using LiteNetLib.Utils;
 
-namespace Fika.Core.Networking
+namespace Fika.Core.Networking.Packets.Communication
 {
     public struct TransitInteractPacket : INetSerializable
     {

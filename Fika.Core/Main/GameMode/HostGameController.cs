@@ -21,6 +21,9 @@ using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
+using Fika.Core.Networking.Packets.Backend;
+using Fika.Core.Networking.Packets.Communication;
+using Fika.Core.Networking.Packets.World;
 using Fika.Core.UI.Models;
 using Fika.Core.Utils;
 using LiteNetLib;
@@ -30,7 +33,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
-using static Fika.Core.Networking.SubPacket;
+using static Fika.Core.Networking.Packets.SubPacket;
 using static LocationSettingsClass;
 
 namespace Fika.Core.Main.GameMode
@@ -212,7 +215,7 @@ namespace Fika.Core.Main.GameMode
             }
 
             int netId = 1000;
-            CoopBot coopBot;
+            FikaBot coopBot;
             if (Bots.ContainsKey(profile.Id))
             {
                 return null;
@@ -241,7 +244,7 @@ namespace Fika.Core.Main.GameMode
             }
 
             // Check for GClass increments on filter
-            coopBot = await CoopBot.CreateBot(_gameWorld, netId, position, Quaternion.identity, "Player",
+            coopBot = await FikaBot.CreateBot(_gameWorld, netId, position, Quaternion.identity, "Player",
                "Bot_", EPointOfView.ThirdPerson, profile, true, _updateQueue, Player.EUpdateMode.Auto,
                Player.EUpdateMode.Auto, BackendConfigAbstractClass.Config.CharacterController.BotPlayerMode, FikaGlobals.GetOtherPlayerSensitivity,
                 FikaGlobals.GetOtherPlayerSensitivity, ObservedViewFilter.Default, mongoId, nextOperationId);
@@ -335,7 +338,7 @@ namespace Fika.Core.Main.GameMode
         /// <returns></returns>
         private bool TryDespawnFurthestBot(Profile profile, Vector3 position, CoopHandler coopHandler)
         {
-            List<CoopPlayer> humanPlayers = BotExtensions.GetPlayers(coopHandler);
+            List<FikaPlayer> humanPlayers = BotExtensions.GetPlayers(coopHandler);
 
             bool onlyScavs = FikaPlugin.DespawnOnlyScavs.Value;
 
@@ -393,7 +396,7 @@ namespace Fika.Core.Main.GameMode
                 botOwner.Dispose();
             }
 
-            CoopPlayer coopPlayer = (CoopPlayer)bot;
+            FikaPlayer coopPlayer = (FikaPlayer)bot;
             coopHandler.Players.Remove(coopPlayer.NetId);
             Bots.Remove(bot.ProfileId);
         }
@@ -815,7 +818,7 @@ namespace Fika.Core.Main.GameMode
         /// <param name="exfiltrationPoint">The exfiltration point that was used to extract</param>
         /// <param name="transitPoint">The transit point that was used to transit</param>
         /// <returns></returns>
-        public override void Extract(CoopPlayer player, ExfiltrationPoint exfiltrationPoint, TransitPoint transitPoint = null)
+        public override void Extract(FikaPlayer player, ExfiltrationPoint exfiltrationPoint, TransitPoint transitPoint = null)
         {
             if (_fikaGame is not CoopGame coopGame)
             {
@@ -835,7 +838,7 @@ namespace Fika.Core.Main.GameMode
                 NotificationManagerClass.DisplayMessageNotification(LocaleUtils.PLAYER_MIA.Localized(), iconType: EFT.Communications.ENotificationIconType.Alert, textColor: Color.red);
             }
 
-            if (player.AbstractQuestControllerClass is CoopClientSharedQuestController sharedQuestController)
+            if (player.AbstractQuestControllerClass is ClientSharedQuestController sharedQuestController)
             {
                 sharedQuestController.ToggleQuestSharing(false);
             }
@@ -905,7 +908,7 @@ namespace Fika.Core.Main.GameMode
 
             if (_coopHandler != null)
             {
-                CoopPlayer coopPlayer = player;
+                FikaPlayer coopPlayer = player;
                 coopGame.ExtractedPlayers.Add(coopPlayer.NetId);
                 _coopHandler.ExtractedPlayers.Add(coopPlayer.NetId);
                 _coopHandler.Players.Remove(coopPlayer.NetId);
@@ -955,7 +958,7 @@ namespace Fika.Core.Main.GameMode
 
             if (!FikaBackendUtils.IsHeadless)
             {
-                CoopPlayer coopPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+                FikaPlayer coopPlayer = (FikaPlayer)Singleton<GameWorld>.Instance.MainPlayer;
                 if (coopPlayer.PacketSender != null)
                 {
                     coopPlayer.PacketSender.DestroyThis();
