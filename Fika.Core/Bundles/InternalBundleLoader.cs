@@ -61,15 +61,15 @@ namespace Fika.Core.Bundles
 
             return asset switch
             {
-                EFikaAsset.Ping => _masterBundle.LoadAsset<GameObject>("BasePingPrefab"),
-                EFikaAsset.SendItemMenu => _masterBundle.LoadAsset<GameObject>("SendItemMenu"),
-                EFikaAsset.MainMenuUI => _masterBundle.LoadAsset<GameObject>("MainMenuUI"),
-                EFikaAsset.MatchmakerUI => _masterBundle.LoadAsset<GameObject>("NewMatchMakerUI"),
-                EFikaAsset.PlayerUI => _masterBundle.LoadAsset<GameObject>("PlayerFriendlyUI"),
-                EFikaAsset.FreecamUI => _masterBundle.LoadAsset<GameObject>("FreecamUI"),
-                EFikaAsset.AdminUI => _masterBundle.LoadAsset<GameObject>("AdminSettingsUI"),
-                EFikaAsset.FikaChatUI => _masterBundle.LoadAsset<GameObject>("FikaChatUI"),
-                EFikaAsset.RaidAdminUI => _masterBundle.LoadAsset<GameObject>("RaidAdminUI"),
+                EFikaAsset.Ping => _masterBundle.LoadAsset<GameObject>("BasePingPrefab.prefab"),
+                EFikaAsset.SendItemMenu => _masterBundle.LoadAsset<GameObject>("SendItemMenu.prefab"),
+                EFikaAsset.MainMenuUI => _masterBundle.LoadAsset<GameObject>("MainMenuUI.prefab"),
+                EFikaAsset.MatchmakerUI => _masterBundle.LoadAsset<GameObject>("NewMatchMakerUI.prefab"),
+                EFikaAsset.PlayerUI => _masterBundle.LoadAsset<GameObject>("PlayerFriendlyUI.prefab"),
+                EFikaAsset.FreecamUI => _masterBundle.LoadAsset<GameObject>("FreecamUI.prefab"),
+                EFikaAsset.AdminUI => _masterBundle.LoadAsset<GameObject>("AdminSettingsUI.prefab"),
+                EFikaAsset.FikaChatUI => _masterBundle.LoadAsset<GameObject>("FikaChatUI.prefab"),
+                EFikaAsset.RaidAdminUI => _masterBundle.LoadAsset<GameObject>("RaidAdminUI.prefab"),
                 _ => throw new ArgumentOutOfRangeException(nameof(asset), "Invalid type was given")
             };
         }
@@ -82,12 +82,12 @@ namespace Fika.Core.Bundles
         {
             Dictionary<EFikaSprite, Sprite> sprites = [];
 
-            sprites.Add(EFikaSprite.PingPoint, _masterBundle.LoadAsset<Sprite>("PingPoint"));
-            sprites.Add(EFikaSprite.PingPlayer, _masterBundle.LoadAsset<Sprite>("PingPlayer"));
-            sprites.Add(EFikaSprite.PingLootableContainer, _masterBundle.LoadAsset<Sprite>("PingLootableContainer"));
-            sprites.Add(EFikaSprite.PingDoor, _masterBundle.LoadAsset<Sprite>("PingDoor"));
-            sprites.Add(EFikaSprite.PingDeadBody, _masterBundle.LoadAsset<Sprite>("PingDeadBody"));
-            sprites.Add(EFikaSprite.PingLootItem, _masterBundle.LoadAsset<Sprite>("PingLootItem"));
+            sprites.Add(EFikaSprite.PingPoint, _masterBundle.LoadAsset<Sprite>("PingPoint.png"));
+            sprites.Add(EFikaSprite.PingPlayer, _masterBundle.LoadAsset<Sprite>("PingPlayer.png"));
+            sprites.Add(EFikaSprite.PingLootableContainer, _masterBundle.LoadAsset<Sprite>("PingLootableContainer.png"));
+            sprites.Add(EFikaSprite.PingDoor, _masterBundle.LoadAsset<Sprite>("PingDoor.png"));
+            sprites.Add(EFikaSprite.PingDeadBody, _masterBundle.LoadAsset<Sprite>("PingDeadBody.png"));
+            sprites.Add(EFikaSprite.PingLootItem, _masterBundle.LoadAsset<Sprite>("PingLootItem.png"));
 
             return sprites;
         }
