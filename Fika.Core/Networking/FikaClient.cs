@@ -850,10 +850,12 @@ namespace Fika.Core.Networking
                 using GClass1278 eftReader = PacketToEFTReaderAbstractClass.Get(packet.Data);
                 GClass1782 lootData = eftReader.ReadEFTLootDataDescriptor();
                 GClass1399 lootItems = EFTItemSerializerClass.DeserializeLootData(lootData);
+#if RELEASE
                 if (lootItems.Count < 1)
                 {
                     throw new NullReferenceException("LootItems length was less than 1! Something probably went very wrong");
-                }
+                } 
+#endif
                 fikaGame.GameController.LootItems = lootItems;
                 (fikaGame.GameController as ClientGameController).HasReceivedLoot = true;
             }
