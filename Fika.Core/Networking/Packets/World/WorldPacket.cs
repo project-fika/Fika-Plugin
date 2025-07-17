@@ -1,5 +1,4 @@
-﻿using Fika.Core.Networking.Packets;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Fika.Core.Networking.Packets.World
 {

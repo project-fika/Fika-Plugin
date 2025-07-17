@@ -3,7 +3,6 @@
 using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Main.Players;
-using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Player;
 
 namespace Fika.Core.Main.ClientClasses

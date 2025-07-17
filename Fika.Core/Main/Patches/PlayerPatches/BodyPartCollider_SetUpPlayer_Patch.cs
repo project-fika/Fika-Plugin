@@ -1,6 +1,5 @@
 ﻿using EFT;
 using Fika.Core.Main.BotClasses;
-using Fika.Core.Main.ObservedClasses;
 using Fika.Core.Main.ObservedClasses.PlayerBridge;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;

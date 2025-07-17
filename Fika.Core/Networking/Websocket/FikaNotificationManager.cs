@@ -146,7 +146,7 @@ namespace Fika.Core.Networking.Websocket
         {
             if (FikaBackendUtils.IsHeadless)
             {
-                AsyncWorker.RunInMainTread(Application.Quit); 
+                AsyncWorker.RunInMainTread(Application.Quit);
             }
         }
 
@@ -154,7 +154,7 @@ namespace Fika.Core.Networking.Websocket
         {
             if (notification is OpenAdminMenuNotification openAdminNotif && openAdminNotif.Success)
             {
-                AsyncWorker.RunInMainTread(AdminSettingsUIScript.Create); 
+                AsyncWorker.RunInMainTread(AdminSettingsUIScript.Create);
             }
         }
 

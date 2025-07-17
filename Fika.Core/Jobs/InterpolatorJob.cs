@@ -22,7 +22,7 @@ namespace Fika.Core.Jobs
         {
             IFikaNetworkManager netManager = Singleton<IFikaNetworkManager>.Instance;
             for (int i = 0; i < _amount; i++)
-            {                
+            {
                 PlayerStatePacket packet = _snapshots[i];
                 if (netManager.CoopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer player))
                 {

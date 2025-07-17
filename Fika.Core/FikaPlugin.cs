@@ -16,7 +16,6 @@ using Fika.Core.Patching;
 #if GOLDMASTER
 using Fika.Core.UI; 
 #endif
-using Fika.Core.UI.Models;
 using Fika.Core.UI.Patches;
 using Fika.Core.Utils;
 using SPT.Common.Http;

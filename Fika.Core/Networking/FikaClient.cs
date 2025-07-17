@@ -12,9 +12,9 @@ using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.UI;
 using EFT.Vehicle;
+using Fika.Core.Jobs;
 using Fika.Core.Main.ClientClasses;
 using Fika.Core.Main.Components;
-using Fika.Core.Main.Custom;
 using Fika.Core.Main.Factories;
 using Fika.Core.Main.GameMode;
 using Fika.Core.Main.ObservedClasses;
@@ -22,11 +22,15 @@ using Fika.Core.Main.ObservedClasses.Snapshotting;
 using Fika.Core.Main.Patches.VOIP;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
-using Fika.Core.Jobs;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.Backend;
+using Fika.Core.Networking.Packets.Communication;
+using Fika.Core.Networking.Packets.Debug;
+using Fika.Core.Networking.Packets.FirearmController;
+using Fika.Core.Networking.Packets.Player;
+using Fika.Core.Networking.Packets.World;
 using Fika.Core.Networking.VOIP;
 using Fika.Core.UI.Custom;
 using Fika.Core.Utils;
@@ -34,7 +38,6 @@ using HarmonyLib;
 using LiteNetLib;
 using LiteNetLib.Utils;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -45,11 +48,6 @@ using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using UnityEngine;
 using static Fika.Core.Networking.NetworkUtils;
-using Fika.Core.Networking.Packets.Player;
-using Fika.Core.Networking.Packets.World;
-using Fika.Core.Networking.Packets.FirearmController;
-using Fika.Core.Networking.Packets.Debug;
-using Fika.Core.Networking.Packets.Communication;
 
 namespace Fika.Core.Networking
 {
@@ -944,7 +942,7 @@ namespace Fika.Core.Networking
 
         public void SetupGameVariables(FikaPlayer fikaPlayer)
         {
-            MyPlayer = fikaPlayer;            
+            MyPlayer = fikaPlayer;
         }
 
         public void CreateFikaChat()
@@ -993,7 +991,7 @@ namespace Fika.Core.Networking
                     {
                         if (packet.KillerId.HasValue)
                         {
-                            observedPlayer.SetAggressorData(packet.KillerId, packet.BodyPart, packet.WeaponId); 
+                            observedPlayer.SetAggressorData(packet.KillerId, packet.BodyPart, packet.WeaponId);
                         }
                         observedPlayer.CorpseSyncPacket = packet.CorpseSyncPacket;
                         if (packet.TriggerZones.Length > 0)
@@ -1142,7 +1140,7 @@ namespace Fika.Core.Networking
                 ObservedPlayer player = ObservedCoopPlayers[i];
                 if (player.CurrentPlayerState.ShouldUpdate)
                 {
-                    player.ManualStateUpdate(); 
+                    player.ManualStateUpdate();
                 }
             }
 

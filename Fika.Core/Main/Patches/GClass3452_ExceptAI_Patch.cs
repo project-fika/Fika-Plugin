@@ -1,6 +1,5 @@
 ﻿using Comfort.Common;
 using EFT;
-using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Patching;
 using System.Collections.Generic;

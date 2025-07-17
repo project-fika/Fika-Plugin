@@ -17,7 +17,6 @@ using Fika.Core.Console;
 #endif
 using Fika.Core.Main.ClientClasses;
 using Fika.Core.Main.Components;
-using Fika.Core.Main.Custom;
 using Fika.Core.Main.Factories;
 using Fika.Core.Main.GameMode;
 using Fika.Core.Main.HostClasses;
@@ -53,6 +52,7 @@ using Unity.Jobs;
 using UnityEngine;
 #if DEBUG
 using static Fika.Core.Networking.Packets.Debug.CommandPacket;
+using Fika.Core.Networking.Packets.Debug;
 # endif
 using static Fika.Core.Networking.Packets.World.GenericSubPackets;
 using static Fika.Core.Networking.NetworkUtils;
@@ -62,7 +62,6 @@ using Fika.Core.Networking.Packets.Player;
 using Fika.Core.Networking.Packets.World;
 using Fika.Core.Networking.Packets.FirearmController;
 using Fika.Core.Networking.Packets.Communication;
-using Fika.Core.Networking.Packets.Debug;
 
 namespace Fika.Core.Networking
 {
@@ -1125,7 +1124,7 @@ namespace Fika.Core.Networking
                     {
                         if (packet.KillerId.HasValue)
                         {
-                            observedPlayer.SetAggressorData(packet.KillerId, packet.BodyPart, packet.WeaponId); 
+                            observedPlayer.SetAggressorData(packet.KillerId, packet.BodyPart, packet.WeaponId);
                         }
                         observedPlayer.CorpseSyncPacket = packet.CorpseSyncPacket;
                         if (packet.TriggerZones.Length > 0)
@@ -1424,7 +1423,7 @@ namespace Fika.Core.Networking
             }
 
             SendDataToPeer(peer, ref packet, DeliveryMethod.ReliableOrdered);
-        }        
+        }
 
         public void OnPeerConnected(NetPeer peer)
         {

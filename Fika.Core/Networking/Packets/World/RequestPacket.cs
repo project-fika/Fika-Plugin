@@ -1,7 +1,7 @@
 ﻿using Fika.Core.Main.Utils;
 using LiteNetLib.Utils;
-using static Fika.Core.Networking.Packets.World.RequestSubPackets;
 using static Fika.Core.Networking.Packets.SubPacket;
+using static Fika.Core.Networking.Packets.World.RequestSubPackets;
 
 namespace Fika.Core.Networking
 {

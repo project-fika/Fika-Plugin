@@ -654,7 +654,7 @@ namespace Fika.Core.Main.GameMode
                 EBotAmount.High => 25,
                 EBotAmount.Horde => 35,
                 _ => 15,
-            };            
+            };
 
             _botsController.SetSettings(numberOfBots, _backendSession.BackEndConfig.BotPresets, _backendSession.BackEndConfig.BotWeaponScatterings);
             if (!FikaBackendUtils.IsHeadless)

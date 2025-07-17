@@ -6,11 +6,9 @@ using Fika.Core.Bundles;
 using Fika.Core.Main.Components;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
-using Fika.Core.UI.Custom;
 using Fika.Core.Utils;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace Fika.Core.Main.FreeCamera
@@ -638,7 +636,7 @@ namespace Fika.Core.Main.FreeCamera
                 if (_showOverlay)
                 {
                     _freecamUI.gameObject.SetActive(true);
-                    _freecamUI.VisionText.SetText("N: Enable nightvision"); 
+                    _freecamUI.VisionText.SetText("N: Enable nightvision");
                 }
                 _nightVisionActive = false;
                 _thermalVisionActive = false;

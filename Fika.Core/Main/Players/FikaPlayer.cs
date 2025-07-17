@@ -20,8 +20,8 @@ using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Packets.Communication;
 using Fika.Core.Networking.Packets.FirearmController;
-using Fika.Core.Networking.Packets.World;
 using Fika.Core.Networking.Packets.Player;
+using Fika.Core.Networking.Packets.World;
 using Fika.Core.Networking.VOIP;
 using HarmonyLib;
 using JsonType;
@@ -741,7 +741,7 @@ namespace Fika.Core.Main.Players
 
                 PacketSender.SendPacket(ref packet);
             }
-        }        
+        }
 
         public override void OnPhraseTold(EPhraseTrigger @event, TaggedClip clip, TagBank bank, PhraseSpeakerClass speaker)
         {

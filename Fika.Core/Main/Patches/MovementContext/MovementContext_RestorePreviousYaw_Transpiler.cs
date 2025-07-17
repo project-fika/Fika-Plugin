@@ -20,7 +20,7 @@ namespace Fika.Core.Main.Patches
         [PatchTranspiler]
         public static IEnumerable<CodeInstruction> Transpile(IEnumerable<CodeInstruction> instructions)
         {
-            CodeInstruction[] inst = [.. instructions];            
+            CodeInstruction[] inst = [.. instructions];
             yield return inst[19];
             yield return inst[20];
             yield return inst[21];
