@@ -641,31 +641,34 @@ namespace Fika.Core.Main.FreeCamera
                 _nightVisionActive = false;
                 _thermalVisionActive = false;
                 Player player = Singleton<GameWorld>.Instance.MainPlayer;
-                if (player != null && player.HealthController.IsAlive)
+                if (player != null)
                 {
-                    if (player.NightVisionObserver.Component != null && player.NightVisionObserver.Component.Togglable.On)
+                    if (player.HealthController.IsAlive)
                     {
-                        player.NightVisionObserver.Component.Togglable.ForceToggle(false);
-                        _nightVisionActive = true;
-                    }
+                        if (player.NightVisionObserver.Component != null && player.NightVisionObserver.Component.Togglable.On)
+                        {
+                            player.NightVisionObserver.Component.Togglable.ForceToggle(false);
+                            _nightVisionActive = true;
+                        }
 
-                    if (player.ThermalVisionObserver.Component != null && player.ThermalVisionObserver.Component.Togglable.On)
-                    {
-                        player.ThermalVisionObserver.Component.Togglable.ForceToggle(false);
-                        _thermalVisionActive = true;
+                        if (player.ThermalVisionObserver.Component != null && player.ThermalVisionObserver.Component.Togglable.On)
+                        {
+                            player.ThermalVisionObserver.Component.Togglable.ForceToggle(false);
+                            _thermalVisionActive = true;
+                        }
                     }
-                }
-                else if (player != null && !player.HealthController.IsAlive)
-                {
-                    if (_nightVision != null && _nightVision.On)
+                    else
                     {
-                        _nightVision.method_1(false);
-                    }
+                        if (_nightVision != null && _nightVision.On)
+                        {
+                            _nightVision.method_1(false);
+                        }
 
-                    if (_thermalVision != null && _thermalVision.On)
-                    {
-                        _thermalVision.method_1(false);
-                    }
+                        if (_thermalVision != null && _thermalVision.On)
+                        {
+                            _thermalVision.method_1(false);
+                        }
+                    } 
                 }
             }
 
