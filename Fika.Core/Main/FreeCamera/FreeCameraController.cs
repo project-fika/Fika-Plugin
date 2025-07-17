@@ -481,7 +481,7 @@ namespace Fika.Core.Main.FreeCamera
             }
 
             _gamePlayerOwner.enabled = false;
-            _freeCamScript.SetActive(true);
+            _freeCamScript.SetActive(true, _extracted);
         }
 
         /// <summary>
@@ -492,7 +492,7 @@ namespace Fika.Core.Main.FreeCamera
         {
             // re-enable _gamePlayerOwner
             _gamePlayerOwner.enabled = true;
-            _freeCamScript.SetActive(false);
+            _freeCamScript.SetActive(false, _extracted);
 
             localPlayer.PointOfView = EPointOfView.FirstPerson;
             CameraClass.Instance.SetOcclusionCullingEnabled(true);
