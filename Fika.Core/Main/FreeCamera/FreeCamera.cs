@@ -600,7 +600,7 @@ namespace Fika.Core.Main.FreeCamera
             _isFollowing = true;
         }
 
-        public void SetActive(bool active)
+        public void SetActive(bool active, bool extracted = false)
         {
             if (!active)
             {
@@ -647,7 +647,10 @@ namespace Fika.Core.Main.FreeCamera
                 {                    
                     if (player.HealthController.IsAlive)
                     {
-                        SetCameraPosition(player.CameraPosition);
+                        if (!extracted)
+                        {
+                            SetCameraPosition(player.CameraPosition); 
+                        }
 
                         if (player.NightVisionObserver.Component != null && player.NightVisionObserver.Component.Togglable.On)
                         {

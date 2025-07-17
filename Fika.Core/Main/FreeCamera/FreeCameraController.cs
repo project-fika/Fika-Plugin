@@ -436,7 +436,7 @@ namespace Fika.Core.Main.FreeCamera
                         Player.GetComponent<PlayerCameraController>().UpdatePointOfView();
                     }
                     _gamePlayerOwner.enabled = false;
-                    _freeCamScript.SetActive(true);
+                    _freeCamScript.SetActive(true, _extracted);
 
                     _freeCamScript.Attach3rdPerson();
                     return;
