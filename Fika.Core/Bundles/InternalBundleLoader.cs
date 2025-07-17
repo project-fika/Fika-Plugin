@@ -1,10 +1,13 @@
 ﻿// © 2025 Lacyway All Rights Reserved
 
+using Diz.Utils;
+using Fika.Core.Main.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Fika.Core.Bundles
@@ -21,28 +24,38 @@ namespace Fika.Core.Bundles
 
         public InternalBundleLoader()
         {
+            Task.Run(LoadBundles);
+            Instance = this;
+        }
+
+        public async Task LoadBundles()
+        {
             Assembly assembly = Assembly.GetExecutingAssembly();
-            assembly.GetManifestResourceNames().ToList().ForEach(name =>
+            foreach (string name in assembly.GetManifestResourceNames())
             {
                 using Stream stream = assembly.GetManifestResourceStream(name);
                 using MemoryStream memoryStream = new();
-                {
-                    string bundlename = name.Replace("Fika.Core.Bundles.Files.", "").Replace(".bundle", "");
-                    if (bundlename == "masterbundle")
-                    {
-                        stream.CopyTo(memoryStream);
-                        AssetBundleCreateRequest assetBundle = AssetBundle.LoadFromMemoryAsync(memoryStream.ToArray());
-                        _masterBundle = assetBundle.assetBundle;
-                    }
-                    else
-                    {
-                        FikaPlugin.Instance.FikaLogger.LogFatal("Unknown bundle loaded! Terminating...");
-                        Application.Quit();
-                    }
-                }
-            });
 
-            Instance = this;
+                string bundleName = name.Replace("Fika.Core.Bundles.Files.", "")
+                    .Replace(".bundle", "");
+
+                if (bundleName == "masterbundle")
+                {
+                    await stream.CopyToAsync(memoryStream);
+                    AssetBundleCreateRequest assetBundle = AssetBundle.LoadFromMemoryAsync(memoryStream.ToArray());
+                    while (!assetBundle.isDone)
+                    {
+                        await Task.Yield();
+                    }
+
+                    _masterBundle = assetBundle.assetBundle;
+                }
+                else
+                {
+                    FikaGlobals.LogFatal("Unknown bundle loaded! Terminating...");
+                    AsyncWorker.RunInMainTread(Application.Quit);
+                }
+            }
         }
 
         /// <summary>
