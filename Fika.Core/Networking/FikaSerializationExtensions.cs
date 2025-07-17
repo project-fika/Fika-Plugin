@@ -387,7 +387,7 @@ namespace Fika.Core.Networking
                 .Concat(array.Where(AirdropSynchronizableObject.Class2037.class2037_0.method_1))
                 .SelectMany(AirdropSynchronizableObject.Class2037.class2037_0.method_2)];
             Singleton<PoolManagerClass>.Instance.LoadBundlesAndCreatePools(PoolManagerClass.PoolsCategory.Raid, PoolManagerClass.AssemblyType.Online,
-                resourceKeys, JobPriorityClass.Immediate, null, default).HandleExceptions();
+                resourceKeys, JobPriorityClass.Immediate).HandleExceptions();
 
             return item;
         }
