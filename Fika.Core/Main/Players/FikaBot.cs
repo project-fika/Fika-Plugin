@@ -362,7 +362,7 @@ namespace Fika.Core.Main.Players
         public override void OnDestroy()
         {
 #if DEBUG
-            FikaPlugin.Instance.FikaLogger.LogInfo("Destroying " + ProfileId);
+            FikaPlugin.Instance.FikaLogger.LogInfo("Destroying " + Profile.Info.Nickname);
 #endif
             if (Singleton<FikaServer>.Instantiated)
             {
