@@ -24,14 +24,14 @@ namespace Fika.Core.Main.Factories
         public int AnimationVariant;
 
         /// <summary>
-        /// Creates a <see cref="CoopObservedFirearmController"/>
+        /// Creates a <see cref="ObservedFirearmController"/>
         /// </summary>
-        /// <returns>A new <see cref="CoopObservedFirearmController"/> or null if the action failed.</returns>
+        /// <returns>A new <see cref="ObservedFirearmController"/> or null if the action failed.</returns>
         public Player.FirearmController CreateObservedFirearmController()
         {
             if (Item is Weapon weapon)
             {
-                return CoopObservedFirearmController.Create(Player, weapon);
+                return ObservedFirearmController.Create(Player, weapon);
             }
 
             FikaPlugin.Instance.FikaLogger.LogError($"HandsControllerFactory::CreateObservedFirearmController: item was not of type Weapon, was: {Item.GetType()}");
@@ -39,14 +39,14 @@ namespace Fika.Core.Main.Factories
         }
 
         /// <summary>
-        /// Creates a <see cref="CoopObservedGrenadeController"/>
+        /// Creates a <see cref="ObservedGrenadeController"/>
         /// </summary>
-        /// <returns>A new <see cref="CoopObservedGrenadeController"/> or null if the action failed.</returns>
+        /// <returns>A new <see cref="ObservedGrenadeController"/> or null if the action failed.</returns>
         public Player.GrenadeHandsController CreateObservedGrenadeController()
         {
             if (Item is ThrowWeapItemClass grenade)
             {
-                return CoopObservedGrenadeController.Create(Player, grenade);
+                return ObservedGrenadeController.Create(Player, grenade);
             }
 
             FikaPlugin.Instance.FikaLogger.LogError($"HandsControllerFactory::CoopObservedGrenadeController: item was not of type GrenadeClass, was: {Item.GetType()}");
@@ -54,14 +54,14 @@ namespace Fika.Core.Main.Factories
         }
 
         /// <summary>
-        /// Creates a <see cref="CoopObservedQuickGrenadeController"/>
+        /// Creates a <see cref="ObservedQuickGrenadeController"/>
         /// </summary>
-        /// <returns>A new <see cref="CoopObservedQuickGrenadeController"/> or null if the action failed.</returns>
+        /// <returns>A new <see cref="ObservedQuickGrenadeController"/> or null if the action failed.</returns>
         public Player.QuickGrenadeThrowHandsController CreateObservedQuickGrenadeController()
         {
             if (Item is ThrowWeapItemClass grenade)
             {
-                return CoopObservedQuickGrenadeController.Create(Player, grenade);
+                return ObservedQuickGrenadeController.Create(Player, grenade);
             }
 
             FikaPlugin.Instance.FikaLogger.LogError($"HandsControllerFactory::CreateObservedQuickGrenadeController: item was not of type GrenadeClass, was: {Item.GetType()}");
@@ -69,14 +69,14 @@ namespace Fika.Core.Main.Factories
         }
 
         /// <summary>
-        /// Creates a <see cref="CoopObservedKnifeController"/>
+        /// Creates a <see cref="ObservedKnifeController"/>
         /// </summary>
-        /// <returns>A new <see cref="CoopObservedKnifeController"/> or null if the action failed.</returns>
+        /// <returns>A new <see cref="ObservedKnifeController"/> or null if the action failed.</returns>
         public Player.KnifeController CreateObservedKnifeController()
         {
             if (KnifeComponent != null)
             {
-                return CoopObservedKnifeController.Create(Player, KnifeComponent);
+                return ObservedKnifeController.Create(Player, KnifeComponent);
             }
 
             FikaPlugin.Instance.FikaLogger.LogError($"HandsControllerFactory::CoopObservedKnifeController: knifeComponent was null!");
@@ -84,18 +84,18 @@ namespace Fika.Core.Main.Factories
         }
 
         /// <summary>
-        /// Creates a <see cref="CoopObservedMedsController"/>
+        /// Creates a <see cref="ObservedMedsController"/>
         /// </summary>
-        /// <returns>A new <see cref="CoopObservedMedsController"/> or null if the action failed.</returns>
+        /// <returns>A new <see cref="ObservedMedsController"/> or null if the action failed.</returns>
         public Player.MedsController CreateObservedMedsController()
         {
             if (FoodItem != null)
             {
-                return CoopObservedMedsController.Create(Player, FoodItem, new(EBodyPart.Head), Amount, AnimationVariant);
+                return ObservedMedsController.Create(Player, FoodItem, new(EBodyPart.Head), Amount, AnimationVariant);
             }
             if (MedsItem != null)
             {
-                return CoopObservedMedsController.Create(Player, MedsItem, BodyParts, 1f, AnimationVariant);
+                return ObservedMedsController.Create(Player, MedsItem, BodyParts, 1f, AnimationVariant);
             }
 
             FikaPlugin.Instance.FikaLogger.LogError($"HandsControllerFactory::CreateObservedMedsController: meds or food was null!");

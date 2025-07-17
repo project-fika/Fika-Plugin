@@ -1186,7 +1186,7 @@ namespace Fika.Core.Main.Players
                 _observedSlotViewHandlers.Add(handler);
             }
 
-            if (HandsController != null && HandsController is CoopObservedFirearmController controller)
+            if (HandsController != null && HandsController is ObservedFirearmController controller)
             {
                 if (Inventory.Equipment.TryFindItem(controller.Weapon.Id, out Item item))
                 {
@@ -1743,7 +1743,7 @@ namespace Fika.Core.Main.Players
 
         private AbstractHandsController ReturnEmptyHandsController()
         {
-            return CoopObservedEmptyHandsController.Create(this);
+            return ObservedEmptyHandsController.Create(this);
         }
 
         private void CreateFirearmController(string itemId, bool isStationary = false, bool initial = false)
@@ -2043,7 +2043,7 @@ namespace Fika.Core.Main.Players
 
             internal AbstractHandsController ReturnController()
             {
-                return CoopObservedFirearmController.Create(_fikaPlayer, (Weapon)item);
+                return ObservedFirearmController.Create(_fikaPlayer, (Weapon)item);
             }
         }
 
@@ -2054,7 +2054,7 @@ namespace Fika.Core.Main.Players
 
             internal AbstractHandsController ReturnController()
             {
-                return CoopObservedGrenadeController.Create(fikaPlayer, (ThrowWeapItemClass)Item);
+                return ObservedGrenadeController.Create(fikaPlayer, (ThrowWeapItemClass)Item);
             }
         }
 
@@ -2068,7 +2068,7 @@ namespace Fika.Core.Main.Players
 
             internal AbstractHandsController ReturnController()
             {
-                return CoopObservedMedsController.Create(_fikaPlayer, Item, _bodyParts, _amount, _animationVariant);
+                return ObservedMedsController.Create(_fikaPlayer, Item, _bodyParts, _amount, _animationVariant);
             }
         }
 
@@ -2079,7 +2079,7 @@ namespace Fika.Core.Main.Players
 
             internal AbstractHandsController ReturnController()
             {
-                return CoopObservedKnifeController.Create(_fikaPlayer, Knife);
+                return ObservedKnifeController.Create(_fikaPlayer, Knife);
             }
         }
 
@@ -2090,7 +2090,7 @@ namespace Fika.Core.Main.Players
 
             internal AbstractHandsController ReturnController()
             {
-                return CoopObservedQuickGrenadeController.Create(_fikaPlayer, (ThrowWeapItemClass)tem);
+                return ObservedQuickGrenadeController.Create(_fikaPlayer, (ThrowWeapItemClass)tem);
             }
         }
 

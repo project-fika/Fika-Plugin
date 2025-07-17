@@ -20,7 +20,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public readonly void Execute(FikaPlayer player)
             {
-                if (player.HandsController is CoopObservedFirearmController controller)
+                if (player.HandsController is ObservedFirearmController controller)
                 {
                     controller.SetAim(AimingIndex);
                 }
@@ -38,7 +38,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public readonly void Execute(FikaPlayer player)
             {
-                if (player.HandsController is CoopObservedFirearmController controller)
+                if (player.HandsController is ObservedFirearmController controller)
                 {
                     controller.ChangeFireMode(FireMode);
                 }
@@ -54,7 +54,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
         {
             public readonly void Execute(FikaPlayer player)
             {
-                if (player.HandsController is CoopObservedFirearmController controller)
+                if (player.HandsController is ObservedFirearmController controller)
                 {
                     controller.ExamineWeapon();
                 }
@@ -70,7 +70,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
         {
             public readonly void Execute(FikaPlayer player)
             {
-                if (player.HandsController is CoopObservedFirearmController controller)
+                if (player.HandsController is ObservedFirearmController controller)
                 {
                     controller.CheckAmmo();
                 }
@@ -86,7 +86,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
         {
             public readonly void Execute(FikaPlayer player)
             {
-                if (player.HandsController is CoopObservedFirearmController controller)
+                if (player.HandsController is ObservedFirearmController controller)
                 {
                     controller.ToggleLauncher();
                 }
@@ -104,7 +104,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public readonly void Execute(FikaPlayer player)
             {
-                if (player.HandsController is CoopObservedFirearmController controller)
+                if (player.HandsController is ObservedFirearmController controller)
                 {
                     controller.SetInventoryOpened(Open);
                 }
@@ -133,7 +133,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
         {
             public readonly void Execute(FikaPlayer player)
             {
-                if (player.HandsController is CoopObservedGrenadeController grenadeController)
+                if (player.HandsController is ObservedGrenadeController grenadeController)
                 {
                     grenadeController.vmethod_3();
                 }
@@ -169,7 +169,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public readonly void Execute(FikaPlayer player)
             {
-                if (player.HandsController is CoopObservedFirearmController controller)
+                if (player.HandsController is ObservedFirearmController controller)
                 {
                     if (player.MovementContext.LeftStanceEnabled != LeftStance)
                     {
@@ -190,7 +190,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public readonly void Execute(FikaPlayer player)
             {
-                if (player.HandsController is CoopObservedFirearmController controller && controller.Weapon is RevolverItemClass)
+                if (player.HandsController is ObservedFirearmController controller && controller.Weapon is RevolverItemClass)
                 {
                     controller.RollCylinder(RollToZeroCamora);
                 }
@@ -206,7 +206,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
         {
             public readonly void Execute(FikaPlayer player)
             {
-                if (player.HandsController is CoopObservedFirearmController controller)
+                if (player.HandsController is ObservedFirearmController controller)
                 {
                     controller.HandleObservedBoltAction();
                 }
@@ -222,7 +222,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
         {
             public readonly void Execute(FikaPlayer player)
             {
-                if (player.HandsController is CoopObservedFirearmController controller)
+                if (player.HandsController is ObservedFirearmController controller)
                 {
                     controller.CheckChamber();
                 }
@@ -238,7 +238,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
         {
             public readonly void Execute(FikaPlayer player)
             {
-                if (player.HandsController is CoopObservedFirearmController controller)
+                if (player.HandsController is ObservedFirearmController controller)
                 {
                     controller.CheckFireMode();
                 }
@@ -254,7 +254,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
         {
             public readonly void Execute(FikaPlayer player)
             {
-                if (player.HandsController is CoopObservedFirearmController controller)
+                if (player.HandsController is ObservedFirearmController controller)
                 {
                     controller.UnderbarrelSightingRangeUp();
                 }
@@ -270,7 +270,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
         {
             public readonly void Execute(FikaPlayer player)
             {
-                if (player.HandsController is CoopObservedFirearmController controller)
+                if (player.HandsController is ObservedFirearmController controller)
                 {
                     controller.UnderbarrelSightingRangeDown();
                 }
@@ -286,7 +286,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
         {
             public readonly void Execute(FikaPlayer player)
             {
-                if (player.HandsController is CoopObservedFirearmController controller)
+                if (player.HandsController is ObservedFirearmController controller)
                 {
                     controller.ToggleBipod();
                 }
@@ -373,7 +373,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
                     return;
                 }
 
-                if (player.HandsController is CoopObservedFirearmController controller)
+                if (player.HandsController is ObservedFirearmController controller)
                 {
                     controller.HandleShotInfoPacket(in this, player.InventoryController);
                 }
@@ -411,7 +411,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public readonly void Execute(FikaPlayer player)
             {
-                if (player.HandsController is CoopObservedKnifeController knifeController)
+                if (player.HandsController is ObservedKnifeController knifeController)
                 {
                     if (Examine)
                     {
@@ -478,7 +478,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public readonly void Execute(FikaPlayer player)
             {
-                if (player.HandsController is CoopObservedGrenadeController controller)
+                if (player.HandsController is ObservedGrenadeController controller)
                 {
                     switch (Type)
                     {
@@ -528,7 +528,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
                         controller.ChangeFireMode(Weapon.EFireMode.greanadePlanting);
                     }
                 }
-                else if (player.HandsController is CoopObservedQuickGrenadeController quickGrenadeController)
+                else if (player.HandsController is ObservedQuickGrenadeController quickGrenadeController)
                 {
                     if (HasGrenade)
                     {
@@ -583,7 +583,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public readonly void Execute(FikaPlayer player)
             {
-                if (player.HandsController is CoopObservedFirearmController controller)
+                if (player.HandsController is ObservedFirearmController controller)
                 {
                     controller.SetLightsState(States, true);
                 }
@@ -630,7 +630,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public readonly void Execute(FikaPlayer player)
             {
-                if (player.HandsController is CoopObservedFirearmController controller)
+                if (player.HandsController is ObservedFirearmController controller)
                 {
                     controller.SetScopeMode(States);
                 }
@@ -670,7 +670,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public readonly void Execute(FikaPlayer player)
             {
-                if (player.HandsController is CoopObservedFirearmController controller)
+                if (player.HandsController is ObservedFirearmController controller)
                 {
                     MagazineItemClass magazine = null;
                     try
@@ -752,7 +752,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public readonly void Execute(FikaPlayer player)
             {
-                if (player.HandsController is CoopObservedFirearmController controller)
+                if (player.HandsController is ObservedFirearmController controller)
                 {
                     try
                     {
@@ -817,7 +817,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public readonly void Execute(FikaPlayer player)
             {
-                if (player.HandsController is CoopObservedFirearmController controller)
+                if (player.HandsController is ObservedFirearmController controller)
                 {
                     if (Status == EReloadWithAmmoStatus.AbortReload)
                     {
@@ -884,7 +884,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public readonly void Execute(FikaPlayer player)
             {
-                if (player.HandsController is CoopObservedFirearmController controller)
+                if (player.HandsController is ObservedFirearmController controller)
                 {
                     if (Status == EReloadWithAmmoStatus.AbortReload)
                     {
@@ -944,7 +944,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public readonly void Execute(FikaPlayer player)
             {
-                if (player.HandsController is CoopObservedFirearmController controller)
+                if (player.HandsController is ObservedFirearmController controller)
                 {
                     List<AmmoItemClass> ammo = controller.FindAmmoByIds(AmmoIds);
                     AmmoPackReloadingClass ammoPack = new(ammo);
@@ -981,7 +981,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public readonly void Execute(FikaPlayer player)
             {
-                if (player.HandsController is CoopObservedFirearmController controller)
+                if (player.HandsController is ObservedFirearmController controller)
                 {
                     List<AmmoItemClass> ammo = controller.FindAmmoByIds(AmmoIds);
                     AmmoPackReloadingClass ammoPack = new(ammo);
@@ -1044,7 +1044,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public readonly void Execute(FikaPlayer player)
             {
-                if (player.HandsController is CoopObservedFirearmController controller)
+                if (player.HandsController is ObservedFirearmController controller)
                 {
                     if (StartOneShotFire)
                     {
@@ -1091,7 +1091,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public readonly void Execute(FikaPlayer player)
             {
-                if (player.HandsController is CoopObservedFirearmController controller)
+                if (player.HandsController is ObservedFirearmController controller)
                 {
                     AmmoItemClass rocketClass = (AmmoItemClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), AmmoTemplateId, null);
                     controller.HandleRocketShot(rocketClass, in ShotPosition, in ShotForward);

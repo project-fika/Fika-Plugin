@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace Fika.Core.Main.ObservedClasses
 {
-    internal class CoopObservedMedsController : Player.MedsController
+    internal class ObservedMedsController : Player.MedsController
     {
         private FikaPlayer _fikaPlayer;
         private GStruct375<EBodyPart> _healParts;
@@ -23,9 +23,9 @@ namespace Fika.Core.Main.ObservedClasses
             }
         }
 
-        public static CoopObservedMedsController Create(FikaPlayer player, Item item, GStruct375<EBodyPart> bodyParts, float amount, int animationVariant)
+        public static ObservedMedsController Create(FikaPlayer player, Item item, GStruct375<EBodyPart> bodyParts, float amount, int animationVariant)
         {
-            CoopObservedMedsController controller = smethod_6<CoopObservedMedsController>(player, item, bodyParts, amount, animationVariant);
+            ObservedMedsController controller = smethod_6<ObservedMedsController>(player, item, bodyParts, amount, animationVariant);
             controller._fikaPlayer = player;
             controller._healParts = bodyParts;
             return controller;
@@ -120,7 +120,7 @@ namespace Fika.Core.Main.ObservedClasses
 
         private class ObservedMedsOperation(Player.MedsController controller) : ObservedMedsControllerClass(controller)
         {
-            private readonly CoopObservedMedsController _observedMedsController = (CoopObservedMedsController)controller;
+            private readonly ObservedMedsController _observedMedsController = (ObservedMedsController)controller;
             private int _animation;
             private bool _destroyRequested;
 

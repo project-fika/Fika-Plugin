@@ -11,13 +11,13 @@ using UnityEngine;
 
 namespace Fika.Core.Main.ObservedClasses
 {
-    internal class CoopObservedGrenadeController : Player.GrenadeHandsController
+    internal class ObservedGrenadeController : Player.GrenadeHandsController
     {
         private FikaPlayer _fikaPlayer;
 
-        public static CoopObservedGrenadeController Create(FikaPlayer player, ThrowWeapItemClass item)
+        public static ObservedGrenadeController Create(FikaPlayer player, ThrowWeapItemClass item)
         {
-            CoopObservedGrenadeController controller = smethod_9<CoopObservedGrenadeController>(player, item);
+            ObservedGrenadeController controller = smethod_9<ObservedGrenadeController>(player, item);
             controller._fikaPlayer = player;
             return controller;
         }

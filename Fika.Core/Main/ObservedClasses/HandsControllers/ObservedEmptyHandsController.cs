@@ -1,14 +1,15 @@
 ﻿// © 2025 Lacyway All Rights Reserved
 
+using EFT;
 using Fika.Core.Main.Players;
 
 namespace Fika.Core.Main.ObservedClasses
 {
-    internal class CoopObservedEmptyHandsController : EFT.Player.EmptyHandsController
+    internal class ObservedEmptyHandsController : Player.EmptyHandsController
     {
-        public static CoopObservedEmptyHandsController Create(FikaPlayer player)
+        public static ObservedEmptyHandsController Create(FikaPlayer player)
         {
-            return smethod_6<CoopObservedEmptyHandsController>(player);
+            return smethod_6<ObservedEmptyHandsController>(player);
         }
 
         public override bool CanChangeCompassState(bool newState)

@@ -14,7 +14,7 @@ using static Fika.Core.Networking.Packets.FirearmController.FirearmSubPackets;
 
 namespace Fika.Core.Main.ObservedClasses
 {
-    public class CoopObservedFirearmController : FirearmController
+    public class ObservedFirearmController : FirearmController
     {
         public WeaponManagerClass WeaponManager
         {
@@ -129,9 +129,9 @@ namespace Fika.Core.Main.ObservedClasses
             _stationaryWeapon = Weapon.IsStationaryWeapon;
         }
 
-        public static CoopObservedFirearmController Create(ObservedPlayer player, Weapon weapon)
+        public static ObservedFirearmController Create(ObservedPlayer player, Weapon weapon)
         {
-            CoopObservedFirearmController controller = smethod_6<CoopObservedFirearmController>(player, weapon);
+            ObservedFirearmController controller = smethod_6<ObservedFirearmController>(player, weapon);
             controller._fikaPlayer = player;
             return controller;
         }
@@ -771,7 +771,7 @@ namespace Fika.Core.Main.ObservedClasses
 
         private class ObservedThrowPatronOperation1(FirearmController controller) : MutliBarrelReloadOperationClass(controller)
         {
-            private readonly CoopObservedFirearmController _observedController = (CoopObservedFirearmController)controller;
+            private readonly ObservedFirearmController _observedController = (ObservedFirearmController)controller;
 
             public override void Start(ReloadMultiBarrelResultClass reloadMultiBarrelResult, Callback callback)
             {
@@ -782,7 +782,7 @@ namespace Fika.Core.Main.ObservedClasses
 
         private class ObservedThrowPatronOperation2(FirearmController controller) : SingleBarrelReloadOperationClass(controller)
         {
-            private readonly CoopObservedFirearmController _observedController = (CoopObservedFirearmController)controller;
+            private readonly ObservedFirearmController _observedController = (ObservedFirearmController)controller;
 
             public override void Start(ReloadSingleBarrelResultClass reloadSingleBarrelResult, Callback callback)
             {
@@ -793,7 +793,7 @@ namespace Fika.Core.Main.ObservedClasses
 
         private class ObservedThrowPatronOperation3(FirearmController controller) : FixMalfunctionOperationClass(controller)
         {
-            private readonly CoopObservedFirearmController _observedController = (CoopObservedFirearmController)controller;
+            private readonly ObservedFirearmController _observedController = (ObservedFirearmController)controller;
 
             public override void Start()
             {
@@ -804,7 +804,7 @@ namespace Fika.Core.Main.ObservedClasses
 
         private class ObservedThrowPatronOperation4(FirearmController controller) : RechamberOperationClass(controller)
         {
-            private readonly CoopObservedFirearmController _observedController = (CoopObservedFirearmController)controller;
+            private readonly ObservedFirearmController _observedController = (ObservedFirearmController)controller;
 
             public override void Start(AmmoItemClass ammo, Callback callback)
             {

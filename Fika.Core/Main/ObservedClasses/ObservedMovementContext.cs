@@ -314,12 +314,12 @@ namespace Fika.Core.Main.ObservedClasses
 
             public void HandleSwap(Player.AbstractHandsController oldController, Player.AbstractHandsController newController)
             {
-                if (newController is not CoopObservedFirearmController)
+                if (newController is not ObservedFirearmController)
                 {
                     return;
                 }
 
-                if (newController != null && newController is CoopObservedFirearmController observedController && observedController.Item == _context.StationaryWeapon.Item)
+                if (newController != null && newController is ObservedFirearmController observedController && observedController.Item == _context.StationaryWeapon.Item)
                 {
                     _context.OnHandsControllerChanged -= HandleSwap;
                     callback(null, newController);

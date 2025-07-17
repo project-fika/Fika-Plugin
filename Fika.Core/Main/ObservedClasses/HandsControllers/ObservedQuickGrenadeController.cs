@@ -1,5 +1,6 @@
 ﻿// © 2025 Lacyway All Rights Reserved
 
+using EFT;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Packets;
 using UnityEngine;
@@ -9,11 +10,11 @@ namespace Fika.Core.Main.ObservedClasses
     /// <summary>
     /// This is only used by AI
     /// </summary>
-    internal class CoopObservedQuickGrenadeController : EFT.Player.QuickGrenadeThrowHandsController
+    internal class ObservedQuickGrenadeController : Player.QuickGrenadeThrowHandsController
     {
-        public static CoopObservedQuickGrenadeController Create(FikaPlayer player, ThrowWeapItemClass item)
+        public static ObservedQuickGrenadeController Create(FikaPlayer player, ThrowWeapItemClass item)
         {
-            return smethod_9<CoopObservedQuickGrenadeController>(player, item);
+            return smethod_9<ObservedQuickGrenadeController>(player, item);
         }
 
         public override bool CanChangeCompassState(bool newState)
