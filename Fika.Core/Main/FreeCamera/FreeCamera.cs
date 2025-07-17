@@ -9,6 +9,7 @@ using Fika.Core.Main.Utils;
 using Fika.Core.Utils;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 
 namespace Fika.Core.Main.FreeCamera
@@ -229,7 +230,7 @@ namespace Fika.Core.Main.FreeCamera
             {
                 _currentPlayer = players[0];
 #if DEBUG
-                FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: currentPlayer was null, setting to first player {players[0].Profile.Nickname}");
+                FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: currentPlayer was null, setting to first player {players[0].Profile.GetCorrectedNickname()}");
 #endif
                 SwitchSpectateMode();
                 return;
@@ -468,13 +469,18 @@ namespace Fika.Core.Main.FreeCamera
                 }
             }
 
-            float x = Input.GetAxis("Mouse X");
-            float y = Input.GetAxis("Mouse Y");
+            float mouseX = Input.GetAxis("Mouse X");
+            float mouseY = Input.GetAxis("Mouse Y");
 
-            _pitch += y * _lookSensitivity;
-            _pitch = Mathf.Clamp(_pitch, -89, 89);
-            transform.eulerAngles = new(-_pitch, _yaw, 0);
-            _yaw = (_yaw + x * _lookSensitivity) % 360f;
+            // update yaw first
+            _yaw += mouseX * _lookSensitivity;
+
+            // update and clamp pitch
+            _pitch -= mouseY * _lookSensitivity;
+            _pitch = Mathf.Clamp(_pitch, -89f, 89f);
+
+            // apply rotation
+            transform.rotation = Quaternion.Euler(_pitch, _yaw, 0f);
         }
 
         private Vector3 GetNormalizedVector3(Transform transform)
@@ -539,12 +545,7 @@ namespace Fika.Core.Main.FreeCamera
 
         public void JumpToPlayer()
         {
-            Vector3 position = _currentPlayer.PlayerBones.Neck.position;
-            transform.position = position + Vector3.back + (Vector3.up / 2);
-            transform.LookAt(position);
-
-            _pitch = -transform.eulerAngles.x;
-            _yaw = transform.eulerAngles.y;
+            SetCameraPosition(_currentPlayer.CameraPosition);
 
             if (_isFollowing)
             {
@@ -558,7 +559,7 @@ namespace Fika.Core.Main.FreeCamera
         {
             CheckAndResetFov();
 #if DEBUG
-            FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: Attaching to helmet cam current player {_currentPlayer.Profile.Nickname}");
+            FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: Attaching to helmet cam current player {_currentPlayer.Profile.GetCorrectedNickname()}");
 #endif
             transform.SetParent(_currentPlayer.PlayerBones.Head.Original);
             transform.localPosition = new Vector3(-0.1f, -0.07f, -0.17f);
@@ -582,7 +583,7 @@ namespace Fika.Core.Main.FreeCamera
         {
             CheckAndResetFov();
 #if DEBUG
-            FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: Attaching to 3rd person current player {_currentPlayer.Profile.Nickname}");
+            FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: Attaching to 3rd person current player {_currentPlayer.Profile.GetCorrectedNickname()}");
 #endif
             if (!_currentPlayer.IsAI)
             {
@@ -640,11 +641,14 @@ namespace Fika.Core.Main.FreeCamera
                 }
                 _nightVisionActive = false;
                 _thermalVisionActive = false;
+
                 Player player = Singleton<GameWorld>.Instance.MainPlayer;
                 if (player != null)
-                {
+                {                    
                     if (player.HealthController.IsAlive)
                     {
+                        SetCameraPosition(player.CameraPosition);
+
                         if (player.NightVisionObserver.Component != null && player.NightVisionObserver.Component.Togglable.On)
                         {
                             player.NightVisionObserver.Component.Togglable.ForceToggle(false);
@@ -668,7 +672,7 @@ namespace Fika.Core.Main.FreeCamera
                         {
                             _thermalVision.method_1(false);
                         }
-                    } 
+                    }
                 }
             }
 
@@ -676,6 +680,35 @@ namespace Fika.Core.Main.FreeCamera
             _isFollowing = false;
             _leftMode = false;
             transform.parent = null;
+        }
+
+        private void SetCameraPosition(Transform target)
+        {
+            // set camera position and rotation based on target
+            transform.rotation = target.rotation;
+            transform.position = target.position - target.forward * 1f + target.up * 0.5f;
+
+            // extract pitch and yaw from current camera rotation
+            Vector3 euler = transform.eulerAngles;
+            _pitch = -NormalizeAngle(euler.x);
+            _yaw = NormalizeAngle(euler.y);
+
+            // apply downward tilt
+            _pitch += 20f;
+            _pitch = Mathf.Clamp(_pitch, -89f, 89f);
+
+            // reapply adjusted rotation
+            transform.rotation = Quaternion.Euler(-_pitch, _yaw, 0f);
+        }
+
+        private float NormalizeAngle(float angle)
+        {
+            angle %= 360f;
+            if (angle > 180f)
+            {
+                angle -= 360f;
+            }
+            return angle;
         }
 
         private void CheckAndResetFov()

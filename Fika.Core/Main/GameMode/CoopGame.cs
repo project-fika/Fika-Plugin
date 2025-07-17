@@ -440,7 +440,8 @@ namespace Fika.Core.Main.GameMode
 
             try
             {
-                LocalPlayer player = await CreateLocalPlayer() ?? throw new NullReferenceException("InitPlayer: Player was null!");
+                LocalPlayer player = await CreateLocalPlayer()
+                    ?? throw new NullReferenceException("InitPlayer: Player was null!");
                 dictionary_0.Add(player.ProfileId, player);
                 gparam_0 = _func_1(player);
                 PlayerCameraController.Create(gparam_0.Player);

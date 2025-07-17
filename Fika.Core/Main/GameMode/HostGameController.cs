@@ -985,6 +985,11 @@ namespace Fika.Core.Main.GameMode
 
         public override Task InitializeLoot(LocationSettingsClass.Location location)
         {
+            if (FikaPlugin.NoLoot.Value)
+            {
+                location.Loot = [];
+            }
+
             GClass1782 lootDescriptor = EFTItemSerializerClass.SerializeLootData(location.Loot, FikaGlobals.SearchControllerSerializer);
             EFTWriterClass eftWriter = new();
             eftWriter.WriteEFTLootDataDescriptor(lootDescriptor);

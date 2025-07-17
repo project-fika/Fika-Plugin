@@ -33,6 +33,7 @@ namespace Fika.Core.Main.FreeCamera
                 return (FikaPlayer)Singleton<GameWorld>.Instance.MainPlayer;
             }
         }
+
         public bool IsScriptActive
         {
             get
@@ -44,7 +45,9 @@ namespace Fika.Core.Main.FreeCamera
                 return false;
             }
         }
+
         public Camera CameraMain { get; private set; }
+
         private EftBattleUIScreen BattleUI
         {
             get

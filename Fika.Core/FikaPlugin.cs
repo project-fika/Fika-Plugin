@@ -113,6 +113,7 @@ namespace Fika.Core
         public static ConfigEntry<bool> OfficialVersion { get; set; }
         public static ConfigEntry<bool> DevMode { get; set; }
         public static ConfigEntry<bool> NoAI { get; set; }
+        public static ConfigEntry<bool> NoLoot { get; set; }
 
         // Coop
         public static ConfigEntry<bool> UseHeadlessIfAvailable { get; set; }
@@ -492,6 +493,14 @@ namespace Fika.Core
                     Category = advancedHeader,
                     DispName = "No AI"
                 }), "No AI", ref failed, headers);
+
+            NoLoot = SetupSetting(advancedDefaultHeader, "No Loot", false,
+                new ConfigDescription("Stops loot from spawning\nSpeeds up loading for debugging", tags: new ConfigurationManagerAttributes()
+                {
+                    IsAdvanced = true,
+                    Category = advancedHeader,
+                    DispName = "No Loot"
+                }), "No Loot", ref failed, headers);
 
             // Coop
 
