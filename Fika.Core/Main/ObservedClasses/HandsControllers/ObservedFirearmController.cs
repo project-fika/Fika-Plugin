@@ -389,7 +389,7 @@ namespace Fika.Core.Main.ObservedClasses
             rocketClass.IsUsed = true;
             Transform smokePort = TransformHelperClass.FindTransformRecursiveContains(WeaponRoot.transform, "smokeport", false);
             InitiateRocket(rocketClass, shotPosition, shotForward, smokePort);
-            Weapon.FirstLoadedChamberSlot.RemoveItem(false);
+            Weapon.FirstLoadedChamberSlot.RemoveItem();
             WeaponManager.MoveAmmoFromChamberToShellPort(true, 0);
 
             FirearmsAnimator.SetFire(false);
@@ -620,29 +620,23 @@ namespace Fika.Core.Main.ObservedClasses
             {
                 if (weapon.ReloadMode is Weapon.EReloadMode.OnlyBarrel)
                 {
-                    for (int i = 0; i < weapon.Chambers.Length; i++)
+                    if (weapon.FireMode.FireMode == Weapon.EFireMode.single)
                     {
-                        if (weapon.Chambers[i].ContainedItem is AmmoItemClass bClass && !bClass.IsUsed)
+                        Slot firstLoadedSlot = weapon.FirstLoadedChamberSlot;
+                        int index = Array.IndexOf(weapon.Chambers, firstLoadedSlot);
+                        HandleBarrelOnlyShot(weapon, index);
+                    }
+                    else
+                    {
+                        for (int i = 0; i < weapon.Chambers.Length; i++)
                         {
-                            bClass.IsUsed = true;
-                            if (!bClass.AmmoTemplate.RemoveShellAfterFire)
-                            {
-                                _weaponManager.MoveAmmoFromChamberToShellPort(bClass.IsUsed, i);
-                            }
-                            else
-                            {
-                                _weaponManager.DestroyPatronInWeapon();
-                            }
-                            if (!bClass.AmmoTemplate.RemoveShellAfterFire)
-                            {
-                                weapon.ShellsInChambers[i] = bClass.AmmoTemplate;
-                            }
+                            HandleBarrelOnlyShot(weapon, i);
                         }
                     }
                 }
                 else
                 {
-                    weapon.Chambers[0].RemoveItem(false);
+                    weapon.Chambers[0].RemoveItem();
                     HandleShellEvent(_weaponManager, packet.ChamberIndex, ammo, magazine);
                 }
                 FirearmsAnimator.SetAmmoInChamber(weapon.ChamberAmmoCount);
@@ -708,6 +702,33 @@ namespace Fika.Core.Main.ObservedClasses
             {
                 method_62(packet.ShotPosition, packet.ShotDirection);
                 LightAndSoundShot(packet.ShotPosition, packet.ShotDirection, ammo.AmmoTemplate);
+            }
+        }
+
+        /// <summary>
+        /// Handles a shot when the reload mode is <see cref="Weapon.EReloadMode.OnlyBarrel"/>
+        /// </summary>
+        /// <param name="weapon">The weapon to handle</param>
+        /// <param name="index">Index of the chamber</param>
+        private void HandleBarrelOnlyShot(Weapon weapon, int index)
+        {
+            Slot ammoSlot = weapon.Chambers[index];
+            if (ammoSlot.ContainedItem is AmmoItemClass bullet && !bullet.IsUsed)
+            {
+                bullet.IsUsed = true;
+                if (!bullet.AmmoTemplate.RemoveShellAfterFire)
+                {
+                    _weaponManager.MoveAmmoFromChamberToShellPort(bullet.IsUsed, index);
+                }
+                else
+                {
+                    _weaponManager.DestroyPatronInWeapon();
+                }
+                if (!bullet.AmmoTemplate.RemoveShellAfterFire)
+                {
+                    weapon.ShellsInChambers[index] = bullet.AmmoTemplate;
+                }
+                ammoSlot.RemoveItem();
             }
         }
 
