@@ -689,16 +689,12 @@ namespace Fika.Core.Main.FreeCamera
         {
             // set camera position and rotation based on target
             transform.rotation = target.rotation;
-            transform.position = target.position - target.forward * 1f + target.up * 0.5f;
+            transform.position = target.position - target.forward * 1f + target.up * 0.1f;
 
             // extract pitch and yaw from current camera rotation
             Vector3 euler = transform.eulerAngles;
             _pitch = -NormalizeAngle(euler.x);
             _yaw = NormalizeAngle(euler.y);
-
-            // apply downward tilt
-            _pitch += 20f;
-            _pitch = Mathf.Clamp(_pitch, -89f, 89f);
 
             // reapply adjusted rotation
             transform.rotation = Quaternion.Euler(-_pitch, _yaw, 0f);
