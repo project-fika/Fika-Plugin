@@ -485,7 +485,7 @@ namespace Fika.Core.UI.Custom
             if (FikaBackendUtils.JoinMatch(profileId, serverId, out CreateMatch result, out string errorMessage))
             {
                 FikaBackendUtils.GroupId = result.ServerId;
-                FikaBackendUtils.MatchingType = EMatchmakerType.GroupPlayer;
+                FikaBackendUtils.ClientType = EClientType.Client;
 
                 AddPlayerRequest data = new(FikaBackendUtils.GroupId, profileId, FikaBackendUtils.IsSpectator);
                 FikaRequestHandler.UpdateAddPlayer(data);

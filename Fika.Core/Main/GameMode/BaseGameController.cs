@@ -612,7 +612,7 @@ namespace Fika.Core.Main.GameMode
                 // Update version label
                 preloaderUiTraverse.Method("method_6").GetValue();
 
-                Logger.LogInfo($"MatchingType: {FikaBackendUtils.MatchingType}, Raid Code: {raidCode}");
+                Logger.LogInfo($"MatchingType: {FikaBackendUtils.ClientType}, Raid Code: {raidCode}");
             }
 
             return Task.CompletedTask;

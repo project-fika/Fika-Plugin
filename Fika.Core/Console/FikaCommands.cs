@@ -316,17 +316,17 @@ namespace Fika.Core.Console
         {
             if (string.IsNullOrEmpty(wildSpawnType) || wildSpawnType.ToLower() == "help")
             {
-                foreach (object availableSpawnType in Enum.GetValues(typeof(WildSpawnType)))
+                foreach (WildSpawnType availableSpawnType in Enum.GetValues(typeof(WildSpawnType)))
                 {
                     LogInfo(availableSpawnType.ToString());
                 }
-                LogInfo("Available WildSpawnType options below");
+                LogInfo("- Available WildSpawnType options below -");
                 return;
             }
 
             if (amount <= 0)
             {
-                LogInfo($"Invalid number: {amount}. Please enter a valid positive integer.");
+                LogInfo($"Invalid number: {amount}. Please enter a valid, positive integer.");
                 return;
             }
 

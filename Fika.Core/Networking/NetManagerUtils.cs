@@ -88,7 +88,7 @@ namespace Fika.Core.Networking
                 return;
             }
 
-            FikaBackendUtils.MatchingType = EMatchmakerType.Single;
+            FikaBackendUtils.ClientType = EClientType.None;
 
             if (FikaGameObject != null)
             {

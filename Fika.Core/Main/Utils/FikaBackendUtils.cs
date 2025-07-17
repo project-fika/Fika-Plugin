@@ -15,11 +15,11 @@ using UnityEngine;
 
 namespace Fika.Core.Main.Utils
 {
-    public enum EMatchmakerType
+    public enum EClientType
     {
-        Single = 0,
-        GroupPlayer = 1,
-        GroupLeader = 2
+        None = 0,
+        Client = 1,
+        Host = 2
     }
 
     public static class FikaBackendUtils
@@ -46,7 +46,7 @@ namespace Fika.Core.Main.Utils
         /// </summary>
         public static string PMCName { get; internal set; }
         public static bool IsScav { get; internal set; }
-        public static EMatchmakerType MatchingType { get; internal set; } = EMatchmakerType.Single;
+        public static EClientType ClientType { get; internal set; } = EClientType.None;
         public static bool IsHeadless { get; set; }
         public static bool IsReconnect { get; internal set; }
         public static bool IsHeadlessGame { get; set; }
@@ -90,14 +90,14 @@ namespace Fika.Core.Main.Utils
         {
             get
             {
-                return MatchingType == EMatchmakerType.GroupLeader;
+                return ClientType == EClientType.Host;
             }
         }
         public static bool IsClient
         {
             get
             {
-                return MatchingType == EMatchmakerType.GroupPlayer;
+                return ClientType == EClientType.Client;
             }
         }
         public static bool IsSinglePlayer
@@ -181,7 +181,7 @@ namespace Fika.Core.Main.Utils
             await FikaRequestHandler.RaidCreate(body);
 
             GroupId = profileId;
-            MatchingType = EMatchmakerType.GroupLeader;
+            ClientType = EClientType.Host;
 
             RaidCode = raidCode;
         }
@@ -214,15 +214,14 @@ namespace Fika.Core.Main.Utils
             }
 
             GroupPlayers.Clear();
-            foreach (KeyValuePair<Profile, bool> kvp in profiles)
+            foreach ((Profile profile, bool isLeader) in profiles)
             {
-                Profile profile = kvp.Key;
                 InfoClass info = profile.Info;
                 GroupPlayerDataClass infoSet = new()
                 {
                     AccountId = profile.AccountId,
                     Id = profile.Id,
-                    IsLeader = kvp.Value,
+                    IsLeader = isLeader,
                     Info = new()
                     {
                         Level = info.Level,
