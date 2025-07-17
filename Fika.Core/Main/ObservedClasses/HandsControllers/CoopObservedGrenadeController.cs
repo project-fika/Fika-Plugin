@@ -13,12 +13,12 @@ namespace Fika.Core.Main.ObservedClasses
 {
     internal class CoopObservedGrenadeController : Player.GrenadeHandsController
     {
-        private FikaPlayer _coopPlayer;
+        private FikaPlayer _fikaPlayer;
 
         public static CoopObservedGrenadeController Create(FikaPlayer player, ThrowWeapItemClass item)
         {
             CoopObservedGrenadeController controller = smethod_9<CoopObservedGrenadeController>(player, item);
-            controller._coopPlayer = player;
+            controller._fikaPlayer = player;
             return controller;
         }
 
@@ -31,7 +31,7 @@ namespace Fika.Core.Main.ObservedClasses
 
         private Player.BaseAnimationOperationClass Grenade1()
         {
-            return new ObservedTripwireState(this, _coopPlayer);
+            return new ObservedTripwireState(this, _fikaPlayer);
         }
 
         public override bool CanChangeCompassState(bool newState)
@@ -83,7 +83,7 @@ namespace Fika.Core.Main.ObservedClasses
 
     public class ObservedTripwireState(Player.GrenadeHandsController controller, FikaPlayer player) : Player.GrenadeHandsController.TripwireStateManagerClass(controller)
     {
-        private readonly FikaPlayer _coopPlayer = player;
+        private readonly FikaPlayer _fikaPlayer = player;
 
         public new void Start()
         {

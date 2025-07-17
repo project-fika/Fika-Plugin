@@ -395,32 +395,32 @@ namespace Fika.Core.Networking.Packets.World
 #if DEBUG
                         FikaGlobals.LogWarning($"Looking for missing netId {netId}");
 #endif
-                        if (server.CoopHandler.Players.TryGetValue(netId, out FikaPlayer coopPlayer))
+                        if (server.CoopHandler.Players.TryGetValue(netId, out FikaPlayer fikaPlayer))
                         {
 #if DEBUG
-                            FikaGlobals.LogWarning($"Found {coopPlayer.Profile.Nickname} that was missing from client, sending...");
+                            FikaGlobals.LogWarning($"Found {fikaPlayer.Profile.Nickname} that was missing from client, sending...");
 #endif
                             SendCharacterPacket packet = new(new()
                             {
-                                Profile = coopPlayer.Profile,
-                                ControllerId = coopPlayer.InventoryController.CurrentId,
-                                FirstOperationId = coopPlayer.InventoryController.NextOperationId
-                            }, coopPlayer.HealthController.IsAlive, coopPlayer.IsAI, coopPlayer.Transform.position, coopPlayer.NetId);
+                                Profile = fikaPlayer.Profile,
+                                ControllerId = fikaPlayer.InventoryController.CurrentId,
+                                FirstOperationId = fikaPlayer.InventoryController.NextOperationId
+                            }, fikaPlayer.HealthController.IsAlive, fikaPlayer.IsAI, fikaPlayer.Transform.position, fikaPlayer.NetId);
 
-                            if (coopPlayer.ActiveHealthController != null)
+                            if (fikaPlayer.ActiveHealthController != null)
                             {
-                                packet.PlayerInfoPacket.HealthByteArray = coopPlayer.ActiveHealthController.SerializeState();
+                                packet.PlayerInfoPacket.HealthByteArray = fikaPlayer.ActiveHealthController.SerializeState();
                             }
                             else
                             {
-                                packet.PlayerInfoPacket.HealthByteArray = coopPlayer.Profile.Health.SerializeHealthInfo();
+                                packet.PlayerInfoPacket.HealthByteArray = fikaPlayer.Profile.Health.SerializeHealthInfo();
                             }
 
-                            if (coopPlayer.HandsController != null)
+                            if (fikaPlayer.HandsController != null)
                             {
-                                packet.PlayerInfoPacket.ControllerType = HandsControllerToEnumClass.FromController(coopPlayer.HandsController);
-                                packet.PlayerInfoPacket.ItemId = coopPlayer.HandsController.Item.Id;
-                                packet.PlayerInfoPacket.IsStationary = coopPlayer.MovementContext.IsStationaryWeaponInHands;
+                                packet.PlayerInfoPacket.ControllerType = HandsControllerToEnumClass.FromController(fikaPlayer.HandsController);
+                                packet.PlayerInfoPacket.ItemId = fikaPlayer.HandsController.Item.Id;
+                                packet.PlayerInfoPacket.IsStationary = fikaPlayer.MovementContext.IsStationaryWeaponInHands;
                             }
 
                             server.SendDataToPeer(peer, ref packet, DeliveryMethod.ReliableOrdered);

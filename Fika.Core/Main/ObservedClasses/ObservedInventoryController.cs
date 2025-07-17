@@ -15,7 +15,7 @@ namespace Fika.Core.Main.ObservedClasses
     public class ObservedInventoryController : Player.PlayerInventoryController, Interface16
     {
         private readonly IPlayerSearchController _searchController;
-        private readonly FikaPlayer _coopPlayer;
+        private readonly FikaPlayer _fikaPlayer;
         public override bool HasDiscardLimits
         {
             get
@@ -37,7 +37,7 @@ namespace Fika.Core.Main.ObservedClasses
             MongoID_0 = firstId;
             Ushort_0 = firstOperationId;
             _searchController = new AISearchControllerClass();
-            _coopPlayer = (FikaPlayer)player;
+            _fikaPlayer = (FikaPlayer)player;
         }
 
         public override void AddDiscardLimits(Item rootItem, IEnumerable<DestroyedItemsStruct> destroyedItems)
@@ -126,18 +126,18 @@ namespace Fika.Core.Main.ObservedClasses
                 return;
             }
             HandleInProcess(item, to, operation, callback);
-            _coopPlayer.StatisticsManager.OnGrabLoot(item);
+            _fikaPlayer.StatisticsManager.OnGrabLoot(item);
         }
 
         private void HandleInProcess(Item item, ItemAddress to, GInterface421 operation, Callback callback)
         {
             Player.Class1256 handler = new()
             {
-                player_0 = _coopPlayer,
+                player_0 = _fikaPlayer,
                 callback = callback
             };
 
-            if (!_coopPlayer.HealthController.IsAlive)
+            if (!_fikaPlayer.HealthController.IsAlive)
             {
                 handler.callback.Succeed();
                 return;
@@ -173,7 +173,7 @@ namespace Fika.Core.Main.ObservedClasses
         OperationDataStruct Interface16.CreateOperationFromDescriptor(BaseDescriptorClass descriptor)
         {
             method_13(descriptor);
-            return descriptor.ToInventoryOperation(_coopPlayer);
+            return descriptor.ToInventoryOperation(_fikaPlayer);
         }
     }
 }

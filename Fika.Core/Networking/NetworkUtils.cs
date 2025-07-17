@@ -1,5 +1,5 @@
 ﻿#if DEBUG
-using Fika.Core.Coop.Utils;
+using Fika.Core.Main.Utils;
 # endif
 using K4os.Compression.LZ4;
 using LiteNetLib.Utils;

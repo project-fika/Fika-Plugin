@@ -460,21 +460,21 @@ namespace Fika.Core.Main.Players
             base.OnBeenKilledByAggressor(aggressor, damageInfo, bodyPart, lethalDamageType);
 
             // Handle 'Help Scav' rep gains
-            if (aggressor is FikaPlayer coopPlayer)
+            if (aggressor is FikaPlayer fikaPlayer)
             {
-                if (coopPlayer.Side == EPlayerSide.Savage)
+                if (fikaPlayer.Side == EPlayerSide.Savage)
                 {
-                    coopPlayer.Loyalty.method_1(this);
+                    fikaPlayer.Loyalty.method_1(this);
                 }
 
-                if (Side == EPlayerSide.Savage && coopPlayer.Side != EPlayerSide.Savage && !coopPlayer._hasSkilledScav)
+                if (Side == EPlayerSide.Savage && fikaPlayer.Side != EPlayerSide.Savage && !fikaPlayer._hasSkilledScav)
                 {
-                    coopPlayer._hasSkilledScav = true;
+                    fikaPlayer._hasSkilledScav = true;
                     return;
                 }
                 else if (Side != EPlayerSide.Savage && _hasSkilledScav && aggressor.Side == EPlayerSide.Savage)
                 {
-                    coopPlayer.Profile?.FenceInfo?.AddStanding(Profile.Info.Settings.StandingForKill, EFT.Counters.EFenceStandingSource.ScavHelp);
+                    fikaPlayer.Profile?.FenceInfo?.AddStanding(Profile.Info.Settings.StandingForKill, EFT.Counters.EFenceStandingSource.ScavHelp);
                 }
             }
         }
@@ -1587,23 +1587,23 @@ namespace Fika.Core.Main.Players
             }
         }
 
-        private class FirearmControllerHandler(FikaPlayer coopPlayer, Weapon weapon)
+        private class FirearmControllerHandler(FikaPlayer fikaPlayer, Weapon weapon)
         {
-            private readonly FikaPlayer coopPlayer = coopPlayer;
+            private readonly FikaPlayer fikaPlayer = fikaPlayer;
             public readonly Weapon weapon = weapon;
             public Process<FirearmController, IFirearmHandsController> process;
             public Action confirmCallback;
 
             internal FikaClientFirearmController ReturnController()
             {
-                return FikaClientFirearmController.Create(coopPlayer, weapon);
+                return FikaClientFirearmController.Create(fikaPlayer, weapon);
             }
 
             internal void SendPacket()
             {
                 CommonPlayerPacket packet = new()
                 {
-                    NetId = coopPlayer.NetId,
+                    NetId = fikaPlayer.NetId,
                     Type = ECommonSubPacketType.Proceed,
                     SubPacket = new ProceedPacket()
                     {
@@ -1611,7 +1611,7 @@ namespace Fika.Core.Main.Players
                         ItemId = weapon.Id
                     }
                 };
-                coopPlayer.PacketSender.SendPacket(ref packet);
+                fikaPlayer.PacketSender.SendPacket(ref packet);
             }
 
             internal void HandleResult(IResult result)
@@ -1623,23 +1623,23 @@ namespace Fika.Core.Main.Players
             }
         }
 
-        private class UsableItemControllerHandler(FikaPlayer coopPlayer, Item item)
+        private class UsableItemControllerHandler(FikaPlayer fikaPlayer, Item item)
         {
-            private readonly FikaPlayer _coopPlayer = coopPlayer;
+            private readonly FikaPlayer _fikaPlayer = fikaPlayer;
             private readonly Item _item = item;
             public Process<UsableItemController, GInterface184> process;
             public Action confirmCallback;
 
             internal FikaClientUsableItemController ReturnController()
             {
-                return FikaClientUsableItemController.Create(_coopPlayer, _item);
+                return FikaClientUsableItemController.Create(_fikaPlayer, _item);
             }
 
             internal void SendPacket()
             {
                 CommonPlayerPacket packet = new()
                 {
-                    NetId = _coopPlayer.NetId,
+                    NetId = _fikaPlayer.NetId,
                     Type = ECommonSubPacketType.Proceed,
                     SubPacket = new ProceedPacket()
                     {
@@ -1647,7 +1647,7 @@ namespace Fika.Core.Main.Players
                         ItemId = _item.Id
                     }
                 };
-                _coopPlayer.PacketSender.SendPacket(ref packet);
+                _fikaPlayer.PacketSender.SendPacket(ref packet);
             }
 
             internal void HandleResult(IResult result)
@@ -1659,23 +1659,23 @@ namespace Fika.Core.Main.Players
             }
         }
 
-        private class PortableRangeFinderControllerHandler(FikaPlayer coopPlayer, Item item)
+        private class PortableRangeFinderControllerHandler(FikaPlayer fikaPlayer, Item item)
         {
-            private readonly FikaPlayer coopPlayer = coopPlayer;
+            private readonly FikaPlayer fikaPlayer = fikaPlayer;
             private readonly Item item = item;
             public Process<PortableRangeFinderController, GInterface184> process;
             public Action confirmCallback;
 
             internal FikaClientPortableRangeFinderController ReturnController()
             {
-                return FikaClientPortableRangeFinderController.Create(coopPlayer, item);
+                return FikaClientPortableRangeFinderController.Create(fikaPlayer, item);
             }
 
             internal void SendPacket()
             {
                 CommonPlayerPacket packet = new()
                 {
-                    NetId = coopPlayer.NetId,
+                    NetId = fikaPlayer.NetId,
                     Type = ECommonSubPacketType.Proceed,
                     SubPacket = new ProceedPacket()
                     {
@@ -1683,7 +1683,7 @@ namespace Fika.Core.Main.Players
                         ItemId = item.Id
                     }
                 };
-                coopPlayer.PacketSender.SendPacket(ref packet);
+                fikaPlayer.PacketSender.SendPacket(ref packet);
             }
 
             internal void HandleResult(IResult result)
@@ -1695,23 +1695,23 @@ namespace Fika.Core.Main.Players
             }
         }
 
-        private class QuickUseItemControllerHandler(FikaPlayer coopPlayer, Item item)
+        private class QuickUseItemControllerHandler(FikaPlayer fikaPlayer, Item item)
         {
-            private readonly FikaPlayer coopPlayer = coopPlayer;
+            private readonly FikaPlayer fikaPlayer = fikaPlayer;
             private readonly Item item = item;
             public Process<QuickUseItemController, IOnHandsUseCallback> process;
             public Action confirmCallback;
 
             internal QuickUseItemController ReturnController()
             {
-                return QuickUseItemController.smethod_6<QuickUseItemController>(coopPlayer, item);
+                return QuickUseItemController.smethod_6<QuickUseItemController>(fikaPlayer, item);
             }
 
             internal void SendPacket()
             {
                 CommonPlayerPacket packet = new()
                 {
-                    NetId = coopPlayer.NetId,
+                    NetId = fikaPlayer.NetId,
                     Type = ECommonSubPacketType.Proceed,
                     SubPacket = new ProceedPacket()
                     {
@@ -1719,7 +1719,7 @@ namespace Fika.Core.Main.Players
                         ItemId = item.Id
                     }
                 };
-                coopPlayer.PacketSender.SendPacket(ref packet);
+                fikaPlayer.PacketSender.SendPacket(ref packet);
             }
 
             internal void HandleResult(IResult result)
@@ -1731,9 +1731,9 @@ namespace Fika.Core.Main.Players
             }
         }
 
-        private class MedsControllerHandler(FikaPlayer coopPlayer, MedsItemClass meds, GStruct375<EBodyPart> bodyParts, int animationVariant)
+        private class MedsControllerHandler(FikaPlayer fikaPlayer, MedsItemClass meds, GStruct375<EBodyPart> bodyParts, int animationVariant)
         {
-            private readonly FikaPlayer coopPlayer = coopPlayer;
+            private readonly FikaPlayer fikaPlayer = fikaPlayer;
             private readonly MedsItemClass meds = meds;
             private readonly GStruct375<EBodyPart> bodyParts = bodyParts;
             private readonly int animationVariant = animationVariant;
@@ -1742,14 +1742,14 @@ namespace Fika.Core.Main.Players
 
             internal MedsController ReturnController()
             {
-                return MedsController.smethod_6<MedsController>(coopPlayer, meds, bodyParts, 1f, animationVariant);
+                return MedsController.smethod_6<MedsController>(fikaPlayer, meds, bodyParts, 1f, animationVariant);
             }
 
             internal void SendPacket()
             {
                 CommonPlayerPacket packet = new()
                 {
-                    NetId = coopPlayer.NetId,
+                    NetId = fikaPlayer.NetId,
                     Type = ECommonSubPacketType.Proceed,
                     SubPacket = new ProceedPacket()
                     {
@@ -1759,7 +1759,7 @@ namespace Fika.Core.Main.Players
                         BodyParts = bodyParts
                     }
                 };
-                coopPlayer.PacketSender.SendPacket(ref packet);
+                fikaPlayer.PacketSender.SendPacket(ref packet);
             }
 
             internal void HandleResult(IResult result)
@@ -1771,9 +1771,9 @@ namespace Fika.Core.Main.Players
             }
         }
 
-        private class FoodControllerHandler(FikaPlayer coopPlayer, FoodDrinkItemClass foodDrink, float amount, GStruct375<EBodyPart> bodyParts, int animationVariant)
+        private class FoodControllerHandler(FikaPlayer fikaPlayer, FoodDrinkItemClass foodDrink, float amount, GStruct375<EBodyPart> bodyParts, int animationVariant)
         {
-            private readonly FikaPlayer coopPlayer = coopPlayer;
+            private readonly FikaPlayer fikaPlayer = fikaPlayer;
             private readonly FoodDrinkItemClass foodDrink = foodDrink;
             private readonly float amount = amount;
             private readonly GStruct375<EBodyPart> bodyParts = bodyParts;
@@ -1783,14 +1783,14 @@ namespace Fika.Core.Main.Players
 
             internal MedsController ReturnController()
             {
-                return MedsController.smethod_6<MedsController>(coopPlayer, foodDrink, bodyParts, amount, animationVariant);
+                return MedsController.smethod_6<MedsController>(fikaPlayer, foodDrink, bodyParts, amount, animationVariant);
             }
 
             internal void SendPacket()
             {
                 CommonPlayerPacket packet = new()
                 {
-                    NetId = coopPlayer.NetId,
+                    NetId = fikaPlayer.NetId,
                     Type = ECommonSubPacketType.Proceed,
                     SubPacket = new ProceedPacket()
                     {
@@ -1801,7 +1801,7 @@ namespace Fika.Core.Main.Players
                         BodyParts = bodyParts
                     }
                 };
-                coopPlayer.PacketSender.SendPacket(ref packet);
+                fikaPlayer.PacketSender.SendPacket(ref packet);
             }
 
             internal void HandleResult(IResult result)
@@ -1813,23 +1813,23 @@ namespace Fika.Core.Main.Players
             }
         }
 
-        private class KnifeControllerHandler(FikaPlayer coopPlayer, KnifeComponent knife)
+        private class KnifeControllerHandler(FikaPlayer fikaPlayer, KnifeComponent knife)
         {
-            private readonly FikaPlayer coopPlayer = coopPlayer;
+            private readonly FikaPlayer fikaPlayer = fikaPlayer;
             public readonly KnifeComponent knife = knife;
             public Process<KnifeController, IKnifeController> process;
             public Action confirmCallback;
 
             internal FikaClientKnifeController ReturnController()
             {
-                return FikaClientKnifeController.Create(coopPlayer, knife);
+                return FikaClientKnifeController.Create(fikaPlayer, knife);
             }
 
             internal void SendPacket()
             {
                 CommonPlayerPacket packet = new()
                 {
-                    NetId = coopPlayer.NetId,
+                    NetId = fikaPlayer.NetId,
                     Type = ECommonSubPacketType.Proceed,
                     SubPacket = new ProceedPacket()
                     {
@@ -1837,7 +1837,7 @@ namespace Fika.Core.Main.Players
                         ItemId = knife.Item.Id
                     }
                 };
-                coopPlayer.PacketSender.SendPacket(ref packet);
+                fikaPlayer.PacketSender.SendPacket(ref packet);
             }
 
             internal void HandleResult(IResult result)
@@ -1849,23 +1849,23 @@ namespace Fika.Core.Main.Players
             }
         }
 
-        private class QuickKnifeControllerHandler(FikaPlayer coopPlayer, KnifeComponent knife)
+        private class QuickKnifeControllerHandler(FikaPlayer fikaPlayer, KnifeComponent knife)
         {
-            private readonly FikaPlayer coopPlayer = coopPlayer;
+            private readonly FikaPlayer fikaPlayer = fikaPlayer;
             public readonly KnifeComponent knife = knife;
             public Process<QuickKnifeKickController, GInterface189> process;
             public Action confirmCallback;
 
             internal QuickKnifeKickController ReturnController()
             {
-                return QuickKnifeKickController.smethod_9<QuickKnifeKickController>(coopPlayer, knife);
+                return QuickKnifeKickController.smethod_9<QuickKnifeKickController>(fikaPlayer, knife);
             }
 
             internal void SendPacket()
             {
                 CommonPlayerPacket packet = new()
                 {
-                    NetId = coopPlayer.NetId,
+                    NetId = fikaPlayer.NetId,
                     Type = ECommonSubPacketType.Proceed,
                     SubPacket = new ProceedPacket()
                     {
@@ -1873,7 +1873,7 @@ namespace Fika.Core.Main.Players
                         ItemId = knife.Item.Id
                     }
                 };
-                coopPlayer.PacketSender.SendPacket(ref packet);
+                fikaPlayer.PacketSender.SendPacket(ref packet);
             }
 
             internal void HandleResult(IResult result)
@@ -1885,23 +1885,23 @@ namespace Fika.Core.Main.Players
             }
         }
 
-        private class GrenadeControllerHandler(FikaPlayer coopPlayer, ThrowWeapItemClass throwWeap)
+        private class GrenadeControllerHandler(FikaPlayer fikaPlayer, ThrowWeapItemClass throwWeap)
         {
-            private readonly FikaPlayer coopPlayer = coopPlayer;
+            private readonly FikaPlayer fikaPlayer = fikaPlayer;
             private readonly ThrowWeapItemClass throwWeap = throwWeap;
             public Process<GrenadeHandsController, IHandsThrowController> process;
             public Action confirmCallback;
 
             internal FikaClientGrenadeController ReturnController()
             {
-                return FikaClientGrenadeController.Create(coopPlayer, throwWeap);
+                return FikaClientGrenadeController.Create(fikaPlayer, throwWeap);
             }
 
             internal void SendPacket()
             {
                 CommonPlayerPacket packet = new()
                 {
-                    NetId = coopPlayer.NetId,
+                    NetId = fikaPlayer.NetId,
                     Type = ECommonSubPacketType.Proceed,
                     SubPacket = new ProceedPacket()
                     {
@@ -1909,7 +1909,7 @@ namespace Fika.Core.Main.Players
                         ItemId = throwWeap.Id
                     }
                 };
-                coopPlayer.PacketSender.SendPacket(ref packet);
+                fikaPlayer.PacketSender.SendPacket(ref packet);
             }
 
             internal void HandleResult(IResult result)
@@ -1921,23 +1921,23 @@ namespace Fika.Core.Main.Players
             }
         }
 
-        private class QuickGrenadeControllerHandler(FikaPlayer coopPlayer, ThrowWeapItemClass throwWeap)
+        private class QuickGrenadeControllerHandler(FikaPlayer fikaPlayer, ThrowWeapItemClass throwWeap)
         {
-            private readonly FikaPlayer coopPlayer = coopPlayer;
+            private readonly FikaPlayer fikaPlayer = fikaPlayer;
             private readonly ThrowWeapItemClass throwWeap = throwWeap;
             public Process<QuickGrenadeThrowHandsController, GInterface188> process;
             public Action confirmCallback;
 
             internal FikaClientQuickGrenadeController ReturnController()
             {
-                return FikaClientQuickGrenadeController.Create(coopPlayer, throwWeap);
+                return FikaClientQuickGrenadeController.Create(fikaPlayer, throwWeap);
             }
 
             internal void SendPacket()
             {
                 CommonPlayerPacket packet = new()
                 {
-                    NetId = coopPlayer.NetId,
+                    NetId = fikaPlayer.NetId,
                     Type = ECommonSubPacketType.Proceed,
                     SubPacket = new ProceedPacket()
                     {
@@ -1945,7 +1945,7 @@ namespace Fika.Core.Main.Players
                         ItemId = throwWeap.Id
                     }
                 };
-                coopPlayer.PacketSender.SendPacket(ref packet);
+                fikaPlayer.PacketSender.SendPacket(ref packet);
             }
 
             internal void HandleResult(IResult result)
@@ -1957,9 +1957,9 @@ namespace Fika.Core.Main.Players
             }
         }
 
-        private class DropHandler(FikaPlayer coopPlayer)
+        private class DropHandler(FikaPlayer fikaPlayer)
         {
-            private readonly FikaPlayer coopPlayer = coopPlayer;
+            private readonly FikaPlayer fikaPlayer = fikaPlayer;
 
             internal void HandleResult()
             {

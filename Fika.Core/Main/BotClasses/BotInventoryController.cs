@@ -21,12 +21,12 @@ namespace Fika.Core.Main.BotClasses
                 return false;
             }
         }
-        private readonly FikaBot _coopBot;
+        private readonly FikaBot _fikaBot;
         private readonly IPlayerSearchController _searchController;
 
         public BotInventoryController(Player player, Profile profile, bool examined, MongoID currentId, ushort nextOperationId) : base(player, profile, examined)
         {
-            _coopBot = (FikaBot)player;
+            _fikaBot = (FikaBot)player;
             MongoID_0 = currentId;
             Ushort_0 = nextOperationId;
             _searchController = new BotSearchControllerClass(profile);
@@ -52,25 +52,25 @@ namespace Fika.Core.Main.BotClasses
             if (operation is not GClass3359)
             {
 #if DEBUG
-                FikaPlugin.Instance.FikaLogger.LogInfo($"Sending bot operation {operation.GetType()} from {_coopBot.Profile.Nickname}");
+                FikaPlugin.Instance.FikaLogger.LogInfo($"Sending bot operation {operation.GetType()} from {_fikaBot.Profile.Nickname}");
 #endif
                 EFTWriterClass eftWriter = new();
                 eftWriter.WritePolymorph(operation.ToDescriptor());
                 InventoryPacket packet = new()
                 {
-                    NetId = _coopBot.NetId,
+                    NetId = _fikaBot.NetId,
                     CallbackId = operation.Id,
                     OperationBytes = eftWriter.ToArray()
                 };
 
-                _coopBot.PacketSender.SendPacket(ref packet);
+                _fikaBot.PacketSender.SendPacket(ref packet);
             }
             HandleOperation(operation, callback).HandleExceptions();
         }
 
         private async Task HandleOperation(BaseInventoryOperationClass operation, Callback callback)
         {
-            if (_coopBot.HealthController.IsAlive)
+            if (_fikaBot.HealthController.IsAlive)
             {
                 await Task.Yield();
             }

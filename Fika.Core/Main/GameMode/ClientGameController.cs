@@ -439,10 +439,10 @@ namespace Fika.Core.Main.GameMode
 
             if (_coopHandler != null)
             {
-                FikaPlayer coopPlayer = player;
-                coopGame.ExtractedPlayers.Add(coopPlayer.NetId);
-                _coopHandler.ExtractedPlayers.Add(coopPlayer.NetId);
-                _coopHandler.Players.Remove(coopPlayer.NetId);
+                FikaPlayer fikaPlayer = player;
+                coopGame.ExtractedPlayers.Add(fikaPlayer.NetId);
+                _coopHandler.ExtractedPlayers.Add(fikaPlayer.NetId);
+                _coopHandler.Players.Remove(fikaPlayer.NetId);
 
                 preloaderUI.StartBlackScreenShow(2f, 2f, () =>
                 {

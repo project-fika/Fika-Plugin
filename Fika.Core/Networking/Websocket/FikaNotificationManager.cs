@@ -195,14 +195,14 @@ namespace Fika.Core.Networking.Websocket
         }
 
 #if DEBUG
-        public static void TestNotification(EFikaNotifications type)
+        public static void TestNotification(EFikaNotification type)
         {
             // Ugly ass one-liner, who cares. It's for debug purposes
-            string Username = FikaPlugin.DevelopersList.ToList()[new Random().Next(FikaPlugin.DevelopersList.Count)].Key;
+            string Username = FikaPlugin.DevelopersList.ToList()[new System.Random().Next(FikaPlugin.DevelopersList.Count)].Key;
 
             switch (type)
             {
-                case EFikaNotifications.StartedRaid:
+                case EFikaNotification.StartedRaid:
                     StartRaidNotification startRaidNotification = new()
                     {
                         Nickname = Username,
@@ -211,7 +211,7 @@ namespace Fika.Core.Networking.Websocket
 
                     Singleton<PreloaderUI>.Instance.NotifierView.method_5(startRaidNotification);
                     break;
-                case EFikaNotifications.SentItem:
+                case EFikaNotification.SentItem:
                     ReceivedSentItemNotification SentItemNotification = new()
                     {
                         Nickname = Username,
@@ -220,7 +220,7 @@ namespace Fika.Core.Networking.Websocket
 
                     Singleton<PreloaderUI>.Instance.NotifierView.method_5(SentItemNotification);
                     break;
-                case EFikaNotifications.PushNotification:
+                case EFikaNotification.PushNotification:
                     PushNotification PushNotification = new()
                     {
                         Notification = "Test notification",

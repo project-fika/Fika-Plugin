@@ -422,9 +422,9 @@ namespace Fika.Core.Main.FreeCamera
                         ToggleCamera();
                         return;
                     }
-                    FikaPlayer coopPlayer = alivePlayers[0];
-                    _freeCamScript.SetCurrentPlayer(coopPlayer);
-                    FikaPlugin.Instance.FikaLogger.LogDebug("FreecamController: Spectating new player: " + coopPlayer.Profile.Info.MainProfileNickname);
+                    FikaPlayer fikaPlayer = alivePlayers[0];
+                    _freeCamScript.SetCurrentPlayer(fikaPlayer);
+                    FikaPlugin.Instance.FikaLogger.LogDebug("FreecamController: Spectating new player: " + fikaPlayer.Profile.Info.MainProfileNickname);
 
                     Player.PointOfView = EPointOfView.ThirdPerson;
                     if (Player.PlayerBody != null)

@@ -32,13 +32,13 @@ namespace Fika.Core.Main.HostClasses
         }
         private readonly ManualLogSource _logger;
         private readonly Player _player;
-        private readonly FikaPlayer _coopPlayer;
+        private readonly FikaPlayer _fikaPlayer;
         private readonly IPlayerSearchController _searchController;
 
         public FikaHostInventoryController(Player player, Profile profile, bool examined) : base(player, profile, examined)
         {
             _player = player;
-            _coopPlayer = (FikaPlayer)player;
+            _fikaPlayer = (FikaPlayer)player;
             _searchController = new PlayerSearchControllerClass(profile, this);
             _logger = BepInEx.Logging.Logger.CreateLogSource(nameof(FikaHostInventoryController));
         }
@@ -60,7 +60,7 @@ namespace Fika.Core.Main.HostClasses
                     Type = SubPacket.ERequestSubPacketType.TraderServices,
                     RequestSubPacket = new RequestSubPackets.TraderServicesRequest()
                     {
-                        NetId = _coopPlayer.NetId,
+                        NetId = _fikaPlayer.NetId,
                         TraderId = traderId
                     }
                 };
@@ -68,7 +68,7 @@ namespace Fika.Core.Main.HostClasses
                 return;
             }
 
-            _coopPlayer.UpdateTradersServiceData(traderId).HandleExceptions();
+            _fikaPlayer.UpdateTradersServiceData(traderId).HandleExceptions();
         }
 
         public override void CallMalfunctionRepaired(Weapon weapon)
@@ -101,7 +101,7 @@ namespace Fika.Core.Main.HostClasses
                 Item lootedItem = moveOperation.Item;
                 if (lootedItem.QuestItem)
                 {
-                    if (_coopPlayer.AbstractQuestControllerClass is ClientSharedQuestController sharedQuestController && sharedQuestController.ContainsAcceptedType("PlaceBeacon"))
+                    if (_fikaPlayer.AbstractQuestControllerClass is ClientSharedQuestController sharedQuestController && sharedQuestController.ContainsAcceptedType("PlaceBeacon"))
                     {
                         if (!sharedQuestController.CheckForTemplateId(lootedItem.TemplateId))
                         {
@@ -110,10 +110,10 @@ namespace Fika.Core.Main.HostClasses
                             // We use templateId because each client gets a unique itemId
                             QuestItemPacket packet = new()
                             {
-                                Nickname = _coopPlayer.Profile.Info.MainProfileNickname,
+                                Nickname = _fikaPlayer.Profile.Info.MainProfileNickname,
                                 ItemId = lootedItem.TemplateId,
                             };
-                            _coopPlayer.PacketSender.SendPacket(ref packet);
+                            _fikaPlayer.PacketSender.SendPacket(ref packet);
                         }
                     }
                     base.vmethod_1(operation, callback);
@@ -157,12 +157,12 @@ namespace Fika.Core.Main.HostClasses
                 eftWriter.WritePolymorph(operation.ToDescriptor());
                 InventoryPacket packet = new()
                 {
-                    NetId = _coopPlayer.NetId,
+                    NetId = _fikaPlayer.NetId,
                     CallbackId = operation.Id,
                     OperationBytes = eftWriter.ToArray()
                 };
 
-                _coopPlayer.PacketSender.SendPacket(ref packet);
+                _fikaPlayer.PacketSender.SendPacket(ref packet);
                 return;
             }
             handler.operation.Dispose();
@@ -187,7 +187,7 @@ namespace Fika.Core.Main.HostClasses
         private uint AddOperationCallback(BaseInventoryOperationClass operation, Action<ServerOperationStatus> callback)
         {
             ushort id = operation.Id;
-            _coopPlayer.OperationCallbacks.Add(id, callback);
+            _fikaPlayer.OperationCallbacks.Add(id, callback);
             return id;
         }
 

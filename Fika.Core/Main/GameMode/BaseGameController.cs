@@ -164,7 +164,7 @@ namespace Fika.Core.Main.GameMode
         /// This creates a "custom" Back button so that we can back out if we get stuck
         /// </summary>
         /// <param name="myPlayer"></param>
-        /// <param name="coopPlayer"></param>
+        /// <param name="fikaPlayer"></param>
         /// <param name="customButton"></param>
         /// <returns></returns>
         protected GameObject CreateStartButton()

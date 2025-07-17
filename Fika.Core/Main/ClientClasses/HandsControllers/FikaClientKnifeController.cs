@@ -10,12 +10,12 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
 {
     public class FikaClientKnifeController : EFT.Player.KnifeController
     {
-        protected FikaPlayer _coopPlayer;
+        protected FikaPlayer _fikaPlayer;
 
         public static FikaClientKnifeController Create(FikaPlayer player, KnifeComponent item)
         {
             FikaClientKnifeController controller = smethod_9<FikaClientKnifeController>(player, item);
-            controller._coopPlayer = player;
+            controller._fikaPlayer = player;
             return controller;
         }
 
@@ -25,14 +25,14 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
 
             WeaponPacket packet = new()
             {
-                NetId = _coopPlayer.NetId,
+                NetId = _fikaPlayer.NetId,
                 Type = EFirearmSubPacketType.Knife,
                 SubPacket = new KnifePacket()
                 {
                     Examine = true
                 }
             };
-            _coopPlayer.PacketSender.SendPacket(ref packet);
+            _fikaPlayer.PacketSender.SendPacket(ref packet);
         }
 
         public override bool MakeKnifeKick()
@@ -43,14 +43,14 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
             {
                 WeaponPacket packet = new()
                 {
-                    NetId = _coopPlayer.NetId,
+                    NetId = _fikaPlayer.NetId,
                     Type = EFirearmSubPacketType.Knife,
                     SubPacket = new KnifePacket()
                     {
                         Kick = true
                     }
                 };
-                _coopPlayer.PacketSender.SendPacket(ref packet);
+                _fikaPlayer.PacketSender.SendPacket(ref packet);
             }
 
             return knifeKick;
@@ -64,14 +64,14 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
             {
                 WeaponPacket packet = new()
                 {
-                    NetId = _coopPlayer.NetId,
+                    NetId = _fikaPlayer.NetId,
                     Type = EFirearmSubPacketType.Knife,
                     SubPacket = new KnifePacket()
                     {
                         AltKick = true
                     }
                 };
-                _coopPlayer.PacketSender.SendPacket(ref packet);
+                _fikaPlayer.PacketSender.SendPacket(ref packet);
             }
 
             return alternateKnifeKick;
@@ -83,14 +83,14 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
 
             WeaponPacket packet = new()
             {
-                NetId = _coopPlayer.NetId,
+                NetId = _fikaPlayer.NetId,
                 Type = EFirearmSubPacketType.Knife,
                 SubPacket = new KnifePacket()
                 {
                     BreakCombo = true
                 }
             };
-            _coopPlayer.PacketSender.SendPacket(ref packet);
+            _fikaPlayer.PacketSender.SendPacket(ref packet);
         }
     }
 }

@@ -10,18 +10,18 @@ namespace Fika.Core.Main.ClientClasses
     /// </summary>
     public class NoInertiaPhysical : PlayerPhysicalClass
     {
-        private FikaPlayer _coopPlayer;
+        private FikaPlayer _fikaPlayer;
 
         public override void Init(IPlayer player)
         {
             base.Init(player);
-            _coopPlayer = (FikaPlayer)player;
+            _fikaPlayer = (FikaPlayer)player;
         }
 
         public override void OnWeightUpdated()
         {
             BackendConfigSettingsClass.InertiaSettings inertia = Singleton<BackendConfigSettingsClass>.Instance.Inertia;
-            float num = IobserverToPlayerBridge_0.Skills.StrengthBuffElite ? _coopPlayer.InventoryController.Inventory.TotalWeightEliteSkill : _coopPlayer.InventoryController.Inventory.TotalWeight;
+            float num = IobserverToPlayerBridge_0.Skills.StrengthBuffElite ? _fikaPlayer.InventoryController.Inventory.TotalWeightEliteSkill : _fikaPlayer.InventoryController.Inventory.TotalWeight;
             Inertia = 0.0113f;
             SprintAcceleration = 0.9887f;
             PreSprintAcceleration = 2.9853f;
@@ -34,7 +34,7 @@ namespace Fika.Core.Main.ClientClasses
             Float_3 = SprintOverweightLimits.InverseLerp(num);
             MoveSideInertia = 1.9887f;
             MoveDiagonalInertia = 1.3955f;
-            if (_coopPlayer.IsAI)
+            if (_fikaPlayer.IsAI)
             {
                 Float_3 = 0f;
             }

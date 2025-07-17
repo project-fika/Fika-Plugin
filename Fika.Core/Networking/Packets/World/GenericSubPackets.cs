@@ -452,7 +452,7 @@ namespace Fika.Core.Networking.Packets.World
             {
                 if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
                 {
-                    if (coopHandler.Players.TryGetValue(NetId, out FikaPlayer coopPlayer) && coopPlayer is ObservedPlayer observed)
+                    if (coopHandler.Players.TryGetValue(NetId, out FikaPlayer fikaPlayer) && fikaPlayer is ObservedPlayer observed)
                     {
                         observed.SetMuffledState(Muffled);
                         return;

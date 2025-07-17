@@ -29,13 +29,13 @@ namespace Fika.Core.Main.ClientClasses
         }
         private readonly ManualLogSource _logger;
         private readonly Player _player;
-        private readonly FikaPlayer _coopPlayer;
+        private readonly FikaPlayer _fikaPlayer;
         private readonly IPlayerSearchController _searchController;
 
         public ClientInventoryController(Player player, Profile profile, bool examined) : base(player, profile, examined)
         {
             this._player = player;
-            _coopPlayer = (FikaPlayer)player;
+            _fikaPlayer = (FikaPlayer)player;
             MongoID_0 = MongoID.Generate(true);
             _searchController = new PlayerSearchControllerClass(profile, this);
             _logger = BepInEx.Logging.Logger.CreateLogSource(nameof(ClientInventoryController));
@@ -58,7 +58,7 @@ namespace Fika.Core.Main.ClientClasses
                     Type = SubPacket.ERequestSubPacketType.TraderServices,
                     RequestSubPacket = new RequestSubPackets.TraderServicesRequest()
                     {
-                        NetId = _coopPlayer.NetId,
+                        NetId = _fikaPlayer.NetId,
                         TraderId = traderId
                     }
                 };
@@ -67,7 +67,7 @@ namespace Fika.Core.Main.ClientClasses
                 return;
             }
 
-            _coopPlayer.UpdateTradersServiceData(traderId).HandleExceptions();
+            _fikaPlayer.UpdateTradersServiceData(traderId).HandleExceptions();
         }
 
         public override void CallMalfunctionRepaired(Weapon weapon)
@@ -107,7 +107,7 @@ namespace Fika.Core.Main.ClientClasses
                 Item lootedItem = moveOperation.Item;
                 if (lootedItem.QuestItem)
                 {
-                    if (_coopPlayer.AbstractQuestControllerClass is ClientSharedQuestController sharedQuestController && sharedQuestController.ContainsAcceptedType("PlaceBeacon"))
+                    if (_fikaPlayer.AbstractQuestControllerClass is ClientSharedQuestController sharedQuestController && sharedQuestController.ContainsAcceptedType("PlaceBeacon"))
                     {
                         if (!sharedQuestController.CheckForTemplateId(lootedItem.TemplateId))
                         {
@@ -116,10 +116,10 @@ namespace Fika.Core.Main.ClientClasses
                             // We use templateId because each client gets a unique itemId
                             QuestItemPacket questPacket = new()
                             {
-                                Nickname = _coopPlayer.Profile.Info.MainProfileNickname,
+                                Nickname = _fikaPlayer.Profile.Info.MainProfileNickname,
                                 ItemId = lootedItem.TemplateId
                             };
-                            _coopPlayer.PacketSender.SendPacket(ref questPacket);
+                            _fikaPlayer.PacketSender.SendPacket(ref questPacket);
                         }
                     }
                     base.vmethod_1(operation, callback);
@@ -156,7 +156,7 @@ namespace Fika.Core.Main.ClientClasses
             eftWriter.WritePolymorph(operation.ToDescriptor());
             InventoryPacket packet = new()
             {
-                NetId = _coopPlayer.NetId,
+                NetId = _fikaPlayer.NetId,
                 CallbackId = operationNum,
                 OperationBytes = eftWriter.ToArray()
             };
@@ -165,7 +165,7 @@ namespace Fika.Core.Main.ClientClasses
             ConsoleScreen.Log($"InvOperation: {operation.GetType().Name}, Id: {operation.Id}");
 #endif
 
-            _coopPlayer.PacketSender.SendPacket(ref packet);
+            _fikaPlayer.PacketSender.SendPacket(ref packet);
         }
 
         public override bool HasCultistAmulet(out CultistAmuletItemClass amulet)
@@ -186,7 +186,7 @@ namespace Fika.Core.Main.ClientClasses
         private uint AddOperationCallback(BaseInventoryOperationClass operation, Action<ServerOperationStatus> callback)
         {
             ushort id = operation.Id;
-            _coopPlayer.OperationCallbacks.Add(id, callback);
+            _fikaPlayer.OperationCallbacks.Add(id, callback);
             return id;
         }
 

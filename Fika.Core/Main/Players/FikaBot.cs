@@ -395,23 +395,23 @@ namespace Fika.Core.Main.Players
             }
         }
 
-        private class BotFirearmControllerHandler(FikaBot coopBot, Weapon weapon)
+        private class BotFirearmControllerHandler(FikaBot fikaBot, Weapon weapon)
         {
-            private readonly FikaBot _coopBot = coopBot;
+            private readonly FikaBot _fikaBot = fikaBot;
             public readonly Weapon weapon = weapon;
             public Process<FirearmController, IFirearmHandsController> Process;
             public Action ConfirmCallback;
 
             internal BotFirearmController ReturnController()
             {
-                return BotFirearmController.Create(_coopBot, weapon);
+                return BotFirearmController.Create(_fikaBot, weapon);
             }
 
             internal void SendPacket()
             {
                 CommonPlayerPacket packet = new()
                 {
-                    NetId = _coopBot.NetId,
+                    NetId = _fikaBot.NetId,
                     Type = ECommonSubPacketType.Proceed,
                     SubPacket = new ProceedPacket()
                     {
@@ -419,7 +419,7 @@ namespace Fika.Core.Main.Players
                         ItemId = weapon.Id
                     }
                 };
-                _coopBot.PacketSender.SendPacket(ref packet);
+                _fikaBot.PacketSender.SendPacket(ref packet);
             }
 
             internal void HandleResult(IResult result)

@@ -262,12 +262,12 @@ namespace Fika.Core.Main.GameMode
                 profile.SetSpawnedInSession(false);
             }
 
-            FikaPlayer coopPlayer = await FikaPlayer.Create(gameWorld, playerId, position, rotation, "Player", "Main_", EPointOfView.FirstPerson,
+            FikaPlayer fikaPlayer = await FikaPlayer.Create(gameWorld, playerId, position, rotation, "Player", "Main_", EPointOfView.FirstPerson,
                 profile, false, UpdateQueue, armsUpdateMode, Player.EUpdateMode.Auto,
                 BackendConfigAbstractClass.Config.CharacterController.ClientPlayerMode, getSensitivity, getAimingSensitivity,
                 statisticsManager, new ClientViewFilter(), session, playerId);
 
-            coopPlayer.Location = Location_0.Id;
+            fikaPlayer.Location = Location_0.Id;
             CoopHandler coopHandler = GameController.CoopHandler;
 
             if (coopHandler == null)
@@ -278,44 +278,44 @@ namespace Fika.Core.Main.GameMode
 
             if (GameController.RaidSettings.MetabolismDisabled)
             {
-                coopPlayer.HealthController.DisableMetabolism();
+                fikaPlayer.HealthController.DisableMetabolism();
                 NotificationManagerClass.DisplayMessageNotification(LocaleUtils.METABOLISM_DISABLED.Localized(), iconType: EFT.Communications.ENotificationIconType.Alert);
             }
 
-            coopHandler.Players.Add(coopPlayer.NetId, coopPlayer);
-            coopHandler.HumanPlayers.Add(coopPlayer);
-            coopPlayer.SetupMainPlayer();
+            coopHandler.Players.Add(fikaPlayer.NetId, fikaPlayer);
+            coopHandler.HumanPlayers.Add(fikaPlayer);
+            fikaPlayer.SetupMainPlayer();
 
-            PlayerSpawnRequest body = new(coopPlayer.ProfileId, FikaBackendUtils.GroupId);
+            PlayerSpawnRequest body = new(fikaPlayer.ProfileId, FikaBackendUtils.GroupId);
             await FikaRequestHandler.UpdatePlayerSpawn(body);
 
-            coopPlayer.SpawnPoint = GameController.SpawnPoint;
+            fikaPlayer.SpawnPoint = GameController.SpawnPoint;
 
             //GameObject customButton = null;
 
-            await NetManagerUtils.SetupGameVariables(coopPlayer);
-            //customButton = CreateCancelButton(coopPlayer, customButton);
+            await NetManagerUtils.SetupGameVariables(fikaPlayer);
+            //customButton = CreateCancelButton(fikaPlayer, customButton);
 
             if (!GameController.IsServer && !FikaBackendUtils.IsReconnect)
             {
                 SendCharacterPacket packet = new(new()
                 {
-                    Profile = coopPlayer.Profile,
-                    ControllerId = coopPlayer.InventoryController.CurrentId,
-                    FirstOperationId = coopPlayer.InventoryController.NextOperationId
-                }, coopPlayer.HealthController.IsAlive, false, coopPlayer.Transform.position, coopPlayer.NetId);
+                    Profile = fikaPlayer.Profile,
+                    ControllerId = fikaPlayer.InventoryController.CurrentId,
+                    FirstOperationId = fikaPlayer.InventoryController.NextOperationId
+                }, fikaPlayer.HealthController.IsAlive, false, fikaPlayer.Transform.position, fikaPlayer.NetId);
                 FikaClient client = Singleton<FikaClient>.Instance;
 
-                if (coopPlayer.ActiveHealthController != null)
+                if (fikaPlayer.ActiveHealthController != null)
                 {
-                    packet.PlayerInfoPacket.HealthByteArray = coopPlayer.ActiveHealthController.SerializeState();
+                    packet.PlayerInfoPacket.HealthByteArray = fikaPlayer.ActiveHealthController.SerializeState();
                 }
 
-                if (coopPlayer.HandsController != null)
+                if (fikaPlayer.HandsController != null)
                 {
-                    packet.PlayerInfoPacket.ControllerType = HandsControllerToEnumClass.FromController(coopPlayer.HandsController);
-                    packet.PlayerInfoPacket.ItemId = coopPlayer.HandsController.Item.Id;
-                    packet.PlayerInfoPacket.IsStationary = coopPlayer.MovementContext.IsStationaryWeaponInHands;
+                    packet.PlayerInfoPacket.ControllerType = HandsControllerToEnumClass.FromController(fikaPlayer.HandsController);
+                    packet.PlayerInfoPacket.ItemId = fikaPlayer.HandsController.Item.Id;
+                    packet.PlayerInfoPacket.IsStationary = fikaPlayer.MovementContext.IsStationaryWeaponInHands;
                 }
 
                 client.SendData(ref packet, DeliveryMethod.ReliableOrdered);
@@ -328,17 +328,17 @@ namespace Fika.Core.Main.GameMode
 
             if (FikaBackendUtils.IsReconnect && !FikaBackendUtils.ReconnectPosition.Equals(Vector3.zero))
             {
-                coopPlayer.Teleport(FikaBackendUtils.ReconnectPosition);
+                fikaPlayer.Teleport(FikaBackendUtils.ReconnectPosition);
             }
 
-            return coopPlayer;
+            return fikaPlayer;
         }
 
         /// <summary>
         /// This creates a "custom" Back button so that we can back out if we get stuck
         /// </summary>
         /// <param name="myPlayer"></param>
-        /// <param name="coopPlayer"></param>
+        /// <param name="fikaPlayer"></param>
         /// <param name="customButton"></param>
         /// <returns></returns>
         private GameObject CreateCancelButton(LocalPlayer myPlayer, GameObject customButton)

@@ -2006,16 +2006,16 @@ namespace Fika.Core.Main.Players
             }
         }
 
-        private class RemoveHandsControllerHandler(ObservedPlayer coopPlayer, Callback callback)
+        private class RemoveHandsControllerHandler(ObservedPlayer fikaPlayer, Callback callback)
         {
-            private readonly ObservedPlayer _coopPlayer = coopPlayer;
+            private readonly ObservedPlayer _fikaPlayer = fikaPlayer;
             private readonly Callback _callback = callback;
 
             public void Handle(Result<GInterface160> result)
             {
-                if (_coopPlayer._removeFromHandsCallback == _callback)
+                if (_fikaPlayer._removeFromHandsCallback == _callback)
                 {
-                    _coopPlayer._removeFromHandsCallback = null;
+                    _fikaPlayer._removeFromHandsCallback = null;
                 }
                 _callback.Invoke(result);
             }
@@ -2036,31 +2036,31 @@ namespace Fika.Core.Main.Players
             }
         }
 
-        private class CreateFirearmControllerHandler(ObservedPlayer coopPlayer)
+        private class CreateFirearmControllerHandler(ObservedPlayer fikaPlayer)
         {
-            private readonly ObservedPlayer _coopPlayer = coopPlayer;
+            private readonly ObservedPlayer _fikaPlayer = fikaPlayer;
             public Item item;
 
             internal AbstractHandsController ReturnController()
             {
-                return CoopObservedFirearmController.Create(_coopPlayer, (Weapon)item);
+                return CoopObservedFirearmController.Create(_fikaPlayer, (Weapon)item);
             }
         }
 
-        private class CreateGrenadeControllerHandler(ObservedPlayer coopPlayer)
+        private class CreateGrenadeControllerHandler(ObservedPlayer fikaPlayer)
         {
-            private readonly ObservedPlayer coopPlayer = coopPlayer;
+            private readonly ObservedPlayer fikaPlayer = fikaPlayer;
             public Item Item;
 
             internal AbstractHandsController ReturnController()
             {
-                return CoopObservedGrenadeController.Create(coopPlayer, (ThrowWeapItemClass)Item);
+                return CoopObservedGrenadeController.Create(fikaPlayer, (ThrowWeapItemClass)Item);
             }
         }
 
-        private class CreateMedsControllerHandler(ObservedPlayer coopPlayer, Item item, GStruct375<EBodyPart> bodyParts, float amount, int animationVariant)
+        private class CreateMedsControllerHandler(ObservedPlayer fikaPlayer, Item item, GStruct375<EBodyPart> bodyParts, float amount, int animationVariant)
         {
-            private readonly ObservedPlayer _coopPlayer = coopPlayer;
+            private readonly ObservedPlayer _fikaPlayer = fikaPlayer;
             public readonly Item Item = item;
             private readonly GStruct375<EBodyPart> _bodyParts = bodyParts;
             private readonly float _amount = amount;
@@ -2068,62 +2068,62 @@ namespace Fika.Core.Main.Players
 
             internal AbstractHandsController ReturnController()
             {
-                return CoopObservedMedsController.Create(_coopPlayer, Item, _bodyParts, _amount, _animationVariant);
+                return CoopObservedMedsController.Create(_fikaPlayer, Item, _bodyParts, _amount, _animationVariant);
             }
         }
 
-        private class CreateKnifeControllerHandler(ObservedPlayer coopPlayer)
+        private class CreateKnifeControllerHandler(ObservedPlayer fikaPlayer)
         {
-            private readonly ObservedPlayer _coopPlayer = coopPlayer;
+            private readonly ObservedPlayer _fikaPlayer = fikaPlayer;
             public KnifeComponent Knife;
 
             internal AbstractHandsController ReturnController()
             {
-                return CoopObservedKnifeController.Create(_coopPlayer, Knife);
+                return CoopObservedKnifeController.Create(_fikaPlayer, Knife);
             }
         }
 
-        private class CreateQuickGrenadeControllerHandler(ObservedPlayer coopPlayer)
+        private class CreateQuickGrenadeControllerHandler(ObservedPlayer fikaPlayer)
         {
-            private readonly ObservedPlayer _coopPlayer = coopPlayer;
+            private readonly ObservedPlayer _fikaPlayer = fikaPlayer;
             public Item tem;
 
             internal AbstractHandsController ReturnController()
             {
-                return CoopObservedQuickGrenadeController.Create(_coopPlayer, (ThrowWeapItemClass)tem);
+                return CoopObservedQuickGrenadeController.Create(_fikaPlayer, (ThrowWeapItemClass)tem);
             }
         }
 
-        private class CreateQuickKnifeControllerHandler(ObservedPlayer coopPlayer)
+        private class CreateQuickKnifeControllerHandler(ObservedPlayer fikaPlayer)
         {
-            private readonly ObservedPlayer _coopPlayer = coopPlayer;
+            private readonly ObservedPlayer _fikaPlayer = fikaPlayer;
             public KnifeComponent Knife;
 
             internal AbstractHandsController ReturnController()
             {
-                return QuickKnifeKickController.smethod_9<QuickKnifeKickController>(_coopPlayer, Knife);
+                return QuickKnifeKickController.smethod_9<QuickKnifeKickController>(_fikaPlayer, Knife);
             }
         }
 
-        private class CreateUsableItemControllerHandler(ObservedPlayer coopPlayer, Item item)
+        private class CreateUsableItemControllerHandler(ObservedPlayer fikaPlayer, Item item)
         {
-            private readonly ObservedPlayer _coopPlayer = coopPlayer;
+            private readonly ObservedPlayer _fikaPlayer = fikaPlayer;
             public readonly Item Item = item;
 
             internal AbstractHandsController ReturnController()
             {
-                return UsableItemController.smethod_6<UsableItemController>(_coopPlayer, Item);
+                return UsableItemController.smethod_6<UsableItemController>(_fikaPlayer, Item);
             }
         }
 
-        private class CreateQuickUseItemControllerHandler(ObservedPlayer coopPlayer, Item item)
+        private class CreateQuickUseItemControllerHandler(ObservedPlayer fikaPlayer, Item item)
         {
-            private readonly ObservedPlayer _coopPlayer = coopPlayer;
+            private readonly ObservedPlayer _fikaPlayer = fikaPlayer;
             public readonly Item Item = item;
 
             internal AbstractHandsController ReturnController()
             {
-                return QuickUseItemController.smethod_6<QuickUseItemController>(_coopPlayer, Item);
+                return QuickUseItemController.smethod_6<QuickUseItemController>(_fikaPlayer, Item);
             }
         }
     }

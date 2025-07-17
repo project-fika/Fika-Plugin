@@ -21,22 +21,22 @@ namespace Fika.Core.Main.Patches.PlayerPatches
         {
             if (iPlayer != null)
             {
-                if (iPlayer is FikaBot coopBot)
+                if (iPlayer is FikaBot fikaBot)
                 {
                     __instance.InitColliderSettings();
-                    __instance.playerBridge = new BotPlayerBridge(coopBot);
+                    __instance.playerBridge = new BotPlayerBridge(fikaBot);
                     return false;
                 }
 
-                if (iPlayer is ObservedPlayer observedCoopPlayer)
+                if (iPlayer is ObservedPlayer observedPlayer)
                 {
                     __instance.InitColliderSettings();
                     if (FikaBackendUtils.IsServer)
                     {
-                        __instance.playerBridge = new ObservedHostBridge(observedCoopPlayer);
+                        __instance.playerBridge = new ObservedHostBridge(observedPlayer);
                         return false;
                     }
-                    __instance.playerBridge = new ObservedClientBridge(observedCoopPlayer);
+                    __instance.playerBridge = new ObservedClientBridge(observedPlayer);
                     return false;
                 }
             }

@@ -75,9 +75,9 @@ namespace Fika.Core.Main.HostClasses
 
             if (!transitPlayers.ContainsKey(player.ProfileId))
             {
-                if (player is FikaPlayer coopPlayer)
+                if (player is FikaPlayer fikaPlayer)
                 {
-                    coopPlayer.UpdateBtrTraderServiceData().HandleExceptions();
+                    fikaPlayer.UpdateBtrTraderServiceData().HandleExceptions();
                 }
 
                 if (player.IsYourPlayer)
@@ -257,11 +257,11 @@ namespace Fika.Core.Main.HostClasses
         private bool CheckForPlayers(Player player, int pointId)
         {
             int humanPlayers = 0;
-            foreach (FikaPlayer coopPlayer in Singleton<IFikaNetworkManager>.Instance.CoopHandler.HumanPlayers)
+            foreach (FikaPlayer fikaPlayer in Singleton<IFikaNetworkManager>.Instance.CoopHandler.HumanPlayers)
             {
-                if (coopPlayer.HealthController.IsAlive)
+                if (fikaPlayer.HealthController.IsAlive)
                 {
-                    if (coopPlayer.IsYourPlayer && FikaBackendUtils.IsHeadless)
+                    if (fikaPlayer.IsYourPlayer && FikaBackendUtils.IsHeadless)
                     {
                         continue;
                     }

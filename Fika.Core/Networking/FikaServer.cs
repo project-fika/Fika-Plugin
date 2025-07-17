@@ -52,7 +52,7 @@ using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using UnityEngine;
 #if DEBUG
-using static Fika.Core.Networking.CommandPacket;
+using static Fika.Core.Networking.Packets.Debug.CommandPacket;
 # endif
 using static Fika.Core.Networking.Packets.World.GenericSubPackets;
 using static Fika.Core.Networking.NetworkUtils;
@@ -62,6 +62,7 @@ using Fika.Core.Networking.Packets.Player;
 using Fika.Core.Networking.Packets.World;
 using Fika.Core.Networking.Packets.FirearmController;
 using Fika.Core.Networking.Packets.Communication;
+using Fika.Core.Networking.Packets.Debug;
 
 namespace Fika.Core.Networking
 {
@@ -658,7 +659,7 @@ namespace Fika.Core.Networking
         {
             SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
 
-            if (_coopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer playerToApply))
+            if (_coopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer playerToApply))
             {
                 FikaGlobals.SpawnItemInWorld(packet.Item, playerToApply);
             }
@@ -771,22 +772,22 @@ namespace Fika.Core.Networking
                         iconType: EFT.Communications.ENotificationIconType.Alert);
                     foreach (FikaPlayer player in _coopHandler.HumanPlayers)
                     {
-                        if (player.ProfileId == packet.ProfileId && player is ObservedPlayer observedCoopPlayer)
+                        if (player.ProfileId == packet.ProfileId && player is ObservedPlayer observedPlayer)
                         {
                             ReconnectPacket ownCharacterPacket = new()
                             {
                                 Type = EReconnectDataType.OwnCharacter,
-                                Profile = observedCoopPlayer.Profile,
-                                ProfileHealthClass = observedCoopPlayer.NetworkHealthController.Store(),
-                                PlayerPosition = observedCoopPlayer.Position
+                                Profile = observedPlayer.Profile,
+                                ProfileHealthClass = observedPlayer.NetworkHealthController.Store(),
+                                PlayerPosition = observedPlayer.Position
                             };
 
                             SendDataToPeer(peer, ref ownCharacterPacket, DeliveryMethod.ReliableOrdered);
 
-                            observedCoopPlayer.HealthBar.ClearEffects();
+                            observedPlayer.HealthBar.ClearEffects();
                             GenericPacket clearEffectsPacket = new()
                             {
-                                NetId = observedCoopPlayer.NetId,
+                                NetId = observedPlayer.NetId,
                                 Type = EGenericSubPacketType.ClearEffects
                             };
 
@@ -1077,9 +1078,9 @@ namespace Fika.Core.Networking
             return netId;
         }
 
-        public void SetupGameVariables(FikaPlayer coopPlayer)
+        public void SetupGameVariables(FikaPlayer fikaPlayer)
         {
-            _hostPlayer = coopPlayer;
+            _hostPlayer = fikaPlayer;
         }
 
         public void CreateFikaChat()

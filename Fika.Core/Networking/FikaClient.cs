@@ -942,9 +942,9 @@ namespace Fika.Core.Networking
             }
         }
 
-        public void SetupGameVariables(FikaPlayer coopPlayer)
+        public void SetupGameVariables(FikaPlayer fikaPlayer)
         {
-            MyPlayer = coopPlayer;            
+            MyPlayer = fikaPlayer;            
         }
 
         public void CreateFikaChat()

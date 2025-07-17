@@ -11,7 +11,7 @@ namespace Fika.Core.Main.BotClasses
     public sealed class BotHealthController(Profile.ProfileHealthClass healthInfo, Player player, InventoryController inventoryController, SkillManager skillManager, bool aiHealth)
         : GClass2882(healthInfo, player, inventoryController, skillManager, aiHealth)
     {
-        private readonly FikaBot _coopBot = (FikaBot)player;
+        private readonly FikaBot _fikaBot = (FikaBot)player;
         public override bool _sendNetworkSyncPackets
         {
             get
@@ -54,8 +54,8 @@ namespace Fika.Core.Main.BotClasses
         {
             if (packet.SyncType == NetworkHealthSyncPacketStruct.ESyncType.IsAlive && !packet.Data.IsAlive.IsAlive)
             {
-                HealthSyncPacket deathPacket = _coopBot.SetupCorpseSyncPacket(packet);
-                _coopBot.PacketSender.SendPacket(ref deathPacket);
+                HealthSyncPacket deathPacket = _fikaBot.SetupCorpseSyncPacket(packet);
+                _fikaBot.PacketSender.SendPacket(ref deathPacket);
                 return;
             }
 
@@ -63,10 +63,10 @@ namespace Fika.Core.Main.BotClasses
             {
                 HealthSyncPacket netPacket = new()
                 {
-                    NetId = _coopBot.NetId,
+                    NetId = _fikaBot.NetId,
                     Packet = packet
                 };
-                _coopBot.PacketSender.SendPacket(ref netPacket);
+                _fikaBot.PacketSender.SendPacket(ref netPacket);
             }
         }
     }

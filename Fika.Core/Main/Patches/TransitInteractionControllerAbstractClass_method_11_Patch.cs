@@ -17,9 +17,9 @@ namespace Fika.Core.Main.Patches
         [PatchPrefix]
         public static void Prefix(Player player)
         {
-            if (FikaBackendUtils.IsClient && player.IsYourPlayer && player is FikaPlayer coopPlayer)
+            if (FikaBackendUtils.IsClient && player.IsYourPlayer && player is FikaPlayer fikaPlayer)
             {
-                coopPlayer.InventoryController.GetTraderServicesDataFromServer(FikaGlobals.TransitTraderId);
+                fikaPlayer.InventoryController.GetTraderServicesDataFromServer(FikaGlobals.TransitTraderId);
             }
         }
     }

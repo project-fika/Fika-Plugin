@@ -54,13 +54,13 @@ namespace Fika.Core.Main.Patches
                 return;
             }
 
-            FikaPlayer coopPlayer = (FikaPlayer)Singleton<GameWorld>.Instance.GetAlivePlayerByProfileID(player.ProfileId);
+            FikaPlayer fikaPlayer = (FikaPlayer)Singleton<GameWorld>.Instance.GetAlivePlayerByProfileID(player.ProfileId);
             if (isCollateral && distance > collateralDamageRange)
             {
                 return;
             }
 
-            if (coopPlayer != null)
+            if (fikaPlayer != null)
             {
                 float num2 = 1f - distance / collateralDamageRange;
                 IEnumerable<BodyPartCollider> enumerable = isCollateral ? player.PlayerBones.BodyPartColliders.Where(minefield.method_4)
@@ -77,7 +77,7 @@ namespace Fika.Core.Main.Patches
                 {
                     DamagePacket packet = new()
                     {
-                        NetId = coopPlayer.NetId,
+                        NetId = fikaPlayer.NetId,
                         DamageType = EDamageType.Landmine,
                         Damage = num4 * num2,
                         ArmorDamage = 0.5f,
@@ -87,7 +87,7 @@ namespace Fika.Core.Main.Patches
                         ColliderType = bodyPartCollider.BodyPartColliderType,
                         BodyPartType = bodyPartCollider.BodyPartType
                     };
-                    coopPlayer.PacketSender.SendPacket(ref packet);
+                    fikaPlayer.PacketSender.SendPacket(ref packet);
                     if (++num5 >= num3)
                     {
                         break;

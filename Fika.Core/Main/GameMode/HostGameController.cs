@@ -215,7 +215,7 @@ namespace Fika.Core.Main.GameMode
             }
 
             int netId = 1000;
-            FikaBot coopBot;
+            FikaBot fikaBot;
             if (Bots.ContainsKey(profile.Id))
             {
                 return null;
@@ -244,13 +244,13 @@ namespace Fika.Core.Main.GameMode
             }
 
             // Check for GClass increments on filter
-            coopBot = await FikaBot.CreateBot(_gameWorld, netId, position, Quaternion.identity, "Player",
+            fikaBot = await FikaBot.CreateBot(_gameWorld, netId, position, Quaternion.identity, "Player",
                "Bot_", EPointOfView.ThirdPerson, profile, true, _updateQueue, Player.EUpdateMode.Auto,
                Player.EUpdateMode.Auto, BackendConfigAbstractClass.Config.CharacterController.BotPlayerMode, FikaGlobals.GetOtherPlayerSensitivity,
                 FikaGlobals.GetOtherPlayerSensitivity, ObservedViewFilter.Default, mongoId, nextOperationId);
 
-            coopBot.Location = Location.Id;
-            Bots.Add(coopBot.ProfileId, coopBot);
+            fikaBot.Location = Location.Id;
+            Bots.Add(fikaBot.ProfileId, fikaBot);
 
             if (profile.Info.Side is not EPlayerSide.Savage)
             {
@@ -277,12 +277,12 @@ namespace Fika.Core.Main.GameMode
 
             if (FikaPlugin.DisableBotMetabolism.Value)
             {
-                coopBot.HealthController.DisableMetabolism();
+                fikaBot.HealthController.DisableMetabolism();
             }
-            _coopHandler.Players.Add(coopBot.NetId, coopBot);
-            _botStateManager.AddBot(coopBot);
+            _coopHandler.Players.Add(fikaBot.NetId, fikaBot);
+            _botStateManager.AddBot(fikaBot);
 
-            return coopBot;
+            return fikaBot;
         }
 
         /// <summary>
@@ -396,8 +396,8 @@ namespace Fika.Core.Main.GameMode
                 botOwner.Dispose();
             }
 
-            FikaPlayer coopPlayer = (FikaPlayer)bot;
-            coopHandler.Players.Remove(coopPlayer.NetId);
+            FikaPlayer fikaPlayer = (FikaPlayer)bot;
+            coopHandler.Players.Remove(fikaPlayer.NetId);
             Bots.Remove(bot.ProfileId);
         }
         #endregion
@@ -908,10 +908,10 @@ namespace Fika.Core.Main.GameMode
 
             if (_coopHandler != null)
             {
-                FikaPlayer coopPlayer = player;
-                coopGame.ExtractedPlayers.Add(coopPlayer.NetId);
-                _coopHandler.ExtractedPlayers.Add(coopPlayer.NetId);
-                _coopHandler.Players.Remove(coopPlayer.NetId);
+                FikaPlayer fikaPlayer = player;
+                coopGame.ExtractedPlayers.Add(fikaPlayer.NetId);
+                _coopHandler.ExtractedPlayers.Add(fikaPlayer.NetId);
+                _coopHandler.Players.Remove(fikaPlayer.NetId);
 
                 preloaderUI.StartBlackScreenShow(2f, 2f, () =>
                 {
@@ -958,10 +958,10 @@ namespace Fika.Core.Main.GameMode
 
             if (!FikaBackendUtils.IsHeadless)
             {
-                FikaPlayer coopPlayer = (FikaPlayer)Singleton<GameWorld>.Instance.MainPlayer;
-                if (coopPlayer.PacketSender != null)
+                FikaPlayer fikaPlayer = (FikaPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+                if (fikaPlayer.PacketSender != null)
                 {
-                    coopPlayer.PacketSender.DestroyThis();
+                    fikaPlayer.PacketSender.DestroyThis();
                 }
             }
 

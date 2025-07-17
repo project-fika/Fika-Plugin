@@ -13,12 +13,12 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
     /// </summary>
     public class FikaClientQuickGrenadeController : EFT.Player.QuickGrenadeThrowHandsController
     {
-        protected FikaPlayer _coopPlayer;
+        protected FikaPlayer _fikaPlayer;
 
         public static FikaClientQuickGrenadeController Create(FikaPlayer player, ThrowWeapItemClass item)
         {
             FikaClientQuickGrenadeController controller = smethod_9<FikaClientQuickGrenadeController>(player, item);
-            controller._coopPlayer = player;
+            controller._fikaPlayer = player;
             return controller;
         }
 
@@ -26,7 +26,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
         {
             WeaponPacket packet = new()
             {
-                NetId = _coopPlayer.NetId,
+                NetId = _fikaPlayer.NetId,
                 Type = EFirearmSubPacketType.Grenade,
                 SubPacket = new GrenadePacket()
                 {
@@ -37,7 +37,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                     LowThrow = lowThrow
                 }
             };
-            _coopPlayer.PacketSender.SendPacket(ref packet);
+            _fikaPlayer.PacketSender.SendPacket(ref packet);
 
             base.vmethod_2(timeSinceSafetyLevelRemoved, position, rotation, force, lowThrow);
         }

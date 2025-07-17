@@ -33,9 +33,9 @@ namespace Fika.Core.Main.ClientClasses
             if (!transitPlayers.ContainsKey(player.ProfileId))
             {
                 //TransferItemsController.InitPlayerStash(player);
-                if (player is FikaPlayer coopPlayer)
+                if (player is FikaPlayer fikaPlayer)
                 {
-                    coopPlayer.UpdateBtrTraderServiceData().HandleExceptions();
+                    fikaPlayer.UpdateBtrTraderServiceData().HandleExceptions();
                 }
             }
         }

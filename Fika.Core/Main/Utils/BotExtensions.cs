@@ -104,9 +104,9 @@ namespace Fika.Core.Main.Utils
                 return true;
             }
 
-            FikaBot coopBot = (FikaBot)kvp.Value;
+            FikaBot fikaBot = (FikaBot)kvp.Value;
 
-            if (coopBot != null)
+            if (fikaBot != null)
             {
 #if DEBUG
                 _logger.LogWarning("Bot is not started, skipping");

@@ -9,6 +9,7 @@ using Fika.Core.Main.HostClasses;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
+using Fika.Core.Networking.Packets.Debug;
 using HarmonyLib;
 using LiteNetLib;
 using System;
@@ -45,7 +46,7 @@ namespace Fika.Core.Console
 
                 int count = 0;
                 BifacialTransform targetPosition = coopHandler.MyPlayer.Transform;
-                foreach (CoopPlayer player in coopHandler.Players.Values)
+                foreach (FikaPlayer player in coopHandler.Players.Values)
                 {
                     if (player.IsAI && player.HealthController.IsAlive)
                     {
@@ -80,7 +81,7 @@ namespace Fika.Core.Console
             {
                 int count = 0;
                 BifacialTransform targetPosition;
-                if (coopHandler.Players.TryGetValue(netId, out CoopPlayer target))
+                if (coopHandler.Players.TryGetValue(netId, out FikaPlayer target))
                 {
                     targetPosition = target.Transform;
                 }
@@ -90,7 +91,7 @@ namespace Fika.Core.Console
                     return;
                 }
 
-                foreach (CoopPlayer player in coopHandler.Players.Values)
+                foreach (FikaPlayer player in coopHandler.Players.Values)
                 {
                     if (player.IsAI && player.HealthController.IsAlive)
                     {
@@ -157,7 +158,7 @@ namespace Fika.Core.Console
                 return;
             }
 
-            CoopPlayer localPlayer = (CoopPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+            FikaPlayer localPlayer = (FikaPlayer)Singleton<GameWorld>.Instance.MainPlayer;
 
             coopGame.Extract(localPlayer, null);
         }
@@ -266,7 +267,7 @@ namespace Fika.Core.Console
             }
 
             GameWorld gameWorld = Singleton<GameWorld>.Instance;
-            CoopPlayer player = (CoopPlayer)gameWorld.MainPlayer;
+            FikaPlayer player = (FikaPlayer)gameWorld.MainPlayer;
             if (!player.HealthController.IsAlive)
             {
                 LogError("You cannot spawn an item while dead!");
@@ -392,7 +393,7 @@ namespace Fika.Core.Console
                 return;
             }
 
-            CoopHostGameWorld gameWorld = (CoopHostGameWorld)Singleton<GameWorld>.Instance;
+            FikaHostGameWorld gameWorld = (FikaHostGameWorld)Singleton<GameWorld>.Instance;
             if (gameWorld == null)
             {
                 LogError("GameWorld does not exist or you are a client!");

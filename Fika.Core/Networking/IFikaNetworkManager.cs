@@ -20,7 +20,7 @@ namespace Fika.Core.Networking
         public bool AllowVOIP { get; set; }
         public List<ObservedPlayer> ObservedCoopPlayers { get; set; }
         public void CreateFikaChat();
-        public void SetupGameVariables(FikaPlayer coopPlayer);
+        public void SetupGameVariables(FikaPlayer fikaPlayer);
         public void SendVOIPPacket(ref VOIPPacket packet, NetPeer peer = null);
         public void SendVOIPData(ArraySegment<byte> data, NetPeer peer = null);
         /// <summary>
