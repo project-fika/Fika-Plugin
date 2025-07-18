@@ -54,7 +54,6 @@ namespace Fika.Core.Main.Utils
         public static bool IsTransit { get; set; }
         public static bool IsSpectator { get; internal set; }
         public static bool IsHostNatPunch { get; internal set; }
-        public static int HostExpectedNumberOfPlayers { get; set; } = 1;
         public static string RemoteIp { get; internal set; }
         public static int RemotePort { get; internal set; }
         public static int LocalPort { get; internal set; } = 0;
@@ -74,7 +73,6 @@ namespace Fika.Core.Main.Utils
         {
             if (!IsTransit)
             {
-                HostExpectedNumberOfPlayers = 1;
                 IsSpectator = false;
                 IsHeadlessRequester = false;
             }

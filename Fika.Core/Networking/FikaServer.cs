@@ -129,6 +129,7 @@ namespace Fika.Core.Networking
         public ESideType RaidSide { get; set; }
         public bool AllowVOIP { get; set; }
         public List<ObservedPlayer> ObservedCoopPlayers { get; set; }
+        public int PlayerAmount { get; set; }
 
         private int _sendRate;
         private NetPacketProcessor _packetProcessor;
@@ -185,6 +186,7 @@ namespace Fika.Core.Networking
             _snapshotCount = 0;
             _snapshots = _snapshots = new(512, Allocator.Persistent);
             ObservedCoopPlayers = [];
+            PlayerAmount = 1;
 
             ReadyClients = 0;
 
@@ -1432,8 +1434,17 @@ namespace Fika.Core.Networking
             _logger.LogInfo($"Connection established with {peer.Address}:{peer.Port}, id: {peer.Id}");
 
             HasHadPeer = true;
+            PlayerAmount++;
 
             FikaEventDispatcher.DispatchEvent(new PeerConnectedEvent(peer, this));
+
+            GenericPacket genericPacket = new()
+            {
+                NetId = 0,
+                Type = EGenericSubPacketType.UpdateBackendData,
+                SubPacket = new UpdateBackendData(PlayerAmount)
+            };
+            SendDataToAll(ref genericPacket, DeliveryMethod.ReliableOrdered);
         }
 
         public void OnNetworkError(IPEndPoint endPoint, SocketError socketErrorCode)
@@ -1544,6 +1555,15 @@ namespace Fika.Core.Networking
                 packet.SubPacket.Execute();
                 SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
             }
+
+            PlayerAmount--;
+            GenericPacket genericPacket = new()
+            {
+                NetId = 0,
+                Type = EGenericSubPacketType.UpdateBackendData,
+                SubPacket = new UpdateBackendData(PlayerAmount)
+            };
+            SendDataToAll(ref genericPacket, DeliveryMethod.ReliableOrdered);
 
             if (_netServer.ConnectedPeersCount == 0)
             {

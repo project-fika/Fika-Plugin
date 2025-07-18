@@ -495,8 +495,6 @@ namespace Fika.Core.Main.GameMode
 
             Logger.LogInfo("Raid has been started...");
 
-            FikaBackendUtils.HostExpectedNumberOfPlayers = server.NetServer.ConnectedPeersCount + 1;
-
             if (startButton != null)
             {
                 GameObject.Destroy(startButton);
@@ -513,7 +511,7 @@ namespace Fika.Core.Main.GameMode
 
         public override async Task WaitForOtherPlayersToLoad()
         {
-            float expectedPlayers = FikaBackendUtils.HostExpectedNumberOfPlayers;
+            float expectedPlayers = Singleton<IFikaNetworkManager>.Instance.PlayerAmount;
             if (expectedPlayers <= 1)
             {
                 if (DynamicAI != null)

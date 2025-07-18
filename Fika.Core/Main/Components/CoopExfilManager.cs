@@ -5,6 +5,7 @@ using EFT.Interactive.SecretExfiltrations;
 using Fika.Core.Main.GameMode;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
+using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.World;
 using System.Collections.Generic;
 using System.Linq;
@@ -93,9 +94,9 @@ namespace Fika.Core.Main.Components
                 exfiltrationPoint.OnStatusChanged += ExfiltrationPoint_OnStatusChanged;
                 exfiltrationPoint.OnStatusChanged += _game.method_9;
                 _game.UpdateExfiltrationUi(exfiltrationPoint, false, true);
-                if (FikaPlugin.Instance.DynamicVExfils && exfiltrationPoint.Settings.PlayersCount > 0 && exfiltrationPoint.Settings.PlayersCount < FikaBackendUtils.HostExpectedNumberOfPlayers)
+                if (FikaPlugin.Instance.DynamicVExfils && exfiltrationPoint.Settings.PlayersCount > 0 && exfiltrationPoint.Settings.PlayersCount < Singleton<IFikaNetworkManager>.Instance.PlayerAmount)
                 {
-                    exfiltrationPoint.Settings.PlayersCount = FikaBackendUtils.HostExpectedNumberOfPlayers;
+                    exfiltrationPoint.Settings.PlayersCount = Singleton<IFikaNetworkManager>.Instance.PlayerAmount;
                 }
             }
 

@@ -115,6 +115,7 @@ namespace Fika.Core.Networking
         public ESideType RaidSide { get; set; }
         public bool AllowVOIP { get; set; }
         public List<ObservedPlayer> ObservedCoopPlayers { get; set; }
+        public int PlayerAmount { get; set; }
 
         private NetPacketProcessor _packetProcessor;
         private int _sendRate;
@@ -157,6 +158,7 @@ namespace Fika.Core.Networking
             _snapshotCount = 0;
             _snapshots = new(512, Allocator.Persistent);
             ObservedCoopPlayers = [];
+            PlayerAmount = 1;
 
             Ping = 0;
             ServerFPS = 0;
@@ -1028,7 +1030,7 @@ namespace Fika.Core.Networking
             HostLoaded = packet.HostLoaded;
             if (packet.AmountOfPeers > 0)
             {
-                FikaBackendUtils.HostExpectedNumberOfPlayers = packet.AmountOfPeers;
+                Singleton<IFikaNetworkManager>.Instance.PlayerAmount = packet.AmountOfPeers;
             }
         }
 

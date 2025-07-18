@@ -250,26 +250,26 @@ namespace Fika.Core.Networking.Packets.World
 
         public class UpdateBackendData : ISubPacket
         {
-            public int ExpectedPlayers;
+            public int PlayerAmount;
 
-            public UpdateBackendData(int expectedPlayers)
+            public UpdateBackendData(int playerAmount)
             {
-                ExpectedPlayers = expectedPlayers;
+                PlayerAmount = playerAmount;
             }
 
             public UpdateBackendData(NetDataReader reader)
             {
-                ExpectedPlayers = reader.GetInt();
+                PlayerAmount = reader.GetInt();
             }
 
             public void Execute(FikaPlayer player)
             {
-                FikaBackendUtils.HostExpectedNumberOfPlayers = ExpectedPlayers;
+                Singleton<IFikaNetworkManager>.Instance.PlayerAmount = PlayerAmount;
             }
 
             public void Serialize(NetDataWriter writer)
             {
-                writer.Put(ExpectedPlayers);
+                writer.Put(PlayerAmount);
             }
         }
 

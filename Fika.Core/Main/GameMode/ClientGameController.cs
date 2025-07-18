@@ -85,7 +85,7 @@ namespace Fika.Core.Main.GameMode
 
         public override async Task WaitForOtherPlayersToLoad()
         {
-            float expectedPlayers = FikaBackendUtils.HostExpectedNumberOfPlayers;
+            float expectedPlayers = Singleton<IFikaNetworkManager>.Instance.PlayerAmount;
             if (FikaBackendUtils.IsHeadlessGame)
             {
                 expectedPlayers--;
