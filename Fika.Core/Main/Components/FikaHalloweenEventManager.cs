@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Fika.Core.Main.Components
 {
-    internal class CoopHalloweenEventManager : MonoBehaviour
+    internal class FikaHalloweenEventManager : MonoBehaviour
     {
         private ManualLogSource _logger;
 

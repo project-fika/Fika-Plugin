@@ -6,14 +6,14 @@ using UnityEngine;
 
 namespace Fika.Core.Main.Components
 {
-    public class CoopTimeManager : MonoBehaviour
+    public class FikaTimeManager : MonoBehaviour
     {
         public CoopGame CoopGame;
         public GameTimerClass GameTimer;
 
-        public static CoopTimeManager Create(CoopGame game)
+        public static FikaTimeManager Create(CoopGame game)
         {
-            CoopTimeManager timeManager = game.gameObject.AddComponent<CoopTimeManager>();
+            FikaTimeManager timeManager = game.gameObject.AddComponent<FikaTimeManager>();
             timeManager.CoopGame = game;
             timeManager.GameTimer = game.GameTimer;
             return timeManager;

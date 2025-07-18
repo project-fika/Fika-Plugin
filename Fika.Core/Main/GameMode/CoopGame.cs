@@ -174,7 +174,7 @@ namespace Fika.Core.Main.GameMode
                 Destroy(endByTimerScenario);
             }
 
-            coopGame.GameController.TimeManager = CoopTimeManager.Create(coopGame);
+            coopGame.GameController.TimeManager = FikaTimeManager.Create(coopGame);
             coopGame.GameController.RaidSettings = raidSettings;
             coopGame.GameController.ThrownGrenades = [];
 

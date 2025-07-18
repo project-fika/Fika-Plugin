@@ -70,7 +70,7 @@ namespace Fika.Core.Main.GameMode
 
         public bool IsServer { get; private set; }
         public bool RaidStarted { get; internal set; }
-        public CoopTimeManager TimeManager { get; set; }
+        public FikaTimeManager TimeManager { get; set; }
 
         // Weather
         public ESeason Season
@@ -130,7 +130,7 @@ namespace Fika.Core.Main.GameMode
         protected SpawnPointManagerClass _spawnPoints;
         protected ISpawnPoint _spawnPoint;
 
-        private CoopHalloweenEventManager _halloweenEventManager;
+        private FikaHalloweenEventManager _halloweenEventManager;
         private FikaDebug _fikaDebug;
 
         private ESeason _season;
@@ -499,7 +499,7 @@ namespace Fika.Core.Main.GameMode
 
                 if (IsServer)
                 {
-                    _halloweenEventManager = gameWorld.gameObject.GetOrAddComponent<CoopHalloweenEventManager>();
+                    _halloweenEventManager = gameWorld.gameObject.GetOrAddComponent<FikaHalloweenEventManager>();
                 }
             }
         }
