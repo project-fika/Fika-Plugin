@@ -77,6 +77,15 @@ namespace Fika.Core.Main.GameMode
         protected readonly Dictionary<int, int> _botQueue = [];
         protected readonly GameDateTime _gameDateTime;
 
+        /// <summary>
+        /// How long in seconds until a bot is force spawned if not every client could load it
+        /// </summary>
+        private readonly float _botTimeout = 30f;
+        /// <summary>
+        /// The <see cref="Task.Delay(int)"/> in every loop during the <see cref="_botTimeout"/>
+        /// </summary>
+        private readonly float _botTimeoutDelay = 0.25f;
+
         public GameStatus Status
         {
             get
@@ -309,20 +318,22 @@ namespace Fika.Core.Main.GameMode
         private async Task WaitForPlayersToLoadBotProfile(int netId)
         {
             _botQueue.Add(netId, 0);
-            DateTime start = DateTime.Now;
             FikaServer server = Singleton<FikaServer>.Instance;
             int connectedPeers = server.NetServer.ConnectedPeersCount;
 
+            float elapsedSeconds = 0f;
+
             while (_botQueue[netId] < connectedPeers)
             {
-                if (start.Subtract(DateTime.Now).TotalSeconds >= 30) // ~30 second failsafe
+                if (elapsedSeconds >= _botTimeout)
                 {
-                    Logger.LogWarning("WaitForPlayersToLoadBotProfile: Took too long to receive all packets!");
+                    Logger.LogWarning("WaitForPlayersToLoadBotProfile::Took to long for every player to load the bot, force spawning!");
                     _botQueue.Remove(netId);
                     return;
                 }
 
-                await Task.Delay(250);
+                await Task.Delay((int)(_botTimeoutDelay * 1000)); // multiply 0.X * 1000 to get milliseconds
+                elapsedSeconds += _botTimeoutDelay;
                 connectedPeers = server.NetServer.ConnectedPeersCount;
             }
 
