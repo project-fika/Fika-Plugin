@@ -570,7 +570,7 @@ namespace Fika.Core.Main.GameMode
                 await clientGameController.InitExfils();
             }
 
-            GameController.ExfilManager = gameObject.AddComponent<CoopExfilManager>();
+            GameController.ExfilManager = gameObject.AddComponent<FikaExfilManager>();
 
             if (Location_0.AccessKeys != null && Location_0.AccessKeys.Length > 0)
             {

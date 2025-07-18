@@ -89,7 +89,7 @@ namespace Fika.Core.Main.GameMode
         public bool WeatherReady { get; internal set; }
         public WeatherClass[] WeatherClasses { get; set; }
         public SeasonsSettingsClass SeasonsSettings { get; set; }
-        public CoopExfilManager ExfilManager { get; set; }
+        public FikaExfilManager ExfilManager { get; set; }
 
         // Raid data
         public List<ThrowWeapItemClass> ThrownGrenades { get; set; }

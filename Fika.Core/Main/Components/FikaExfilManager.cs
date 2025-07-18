@@ -4,7 +4,6 @@ using EFT.Interactive;
 using EFT.Interactive.SecretExfiltrations;
 using Fika.Core.Main.GameMode;
 using Fika.Core.Main.Players;
-using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.World;
 using System.Collections.Generic;
@@ -15,7 +14,7 @@ using static Fika.Core.Networking.Packets.World.GenericSubPackets;
 
 namespace Fika.Core.Main.Components
 {
-    public class CoopExfilManager : MonoBehaviour
+    public class FikaExfilManager : MonoBehaviour
     {
         private CoopGame _game;
         private List<ExtractionPlayerHandler> _playerHandlers;
@@ -42,11 +41,11 @@ namespace Fika.Core.Main.Components
             for (int i = 0; i < _playerHandlers.Count; i++)
             {
                 ExtractionPlayerHandler playerHandler = _playerHandlers[i];
-                if (playerHandler.startTime + playerHandler.point.Settings.ExfiltrationTime - _game.PastTime <= 0)
+                if (playerHandler.StartTime + playerHandler.ExfilPoint.Settings.ExfiltrationTime - _game.PastTime <= 0)
                 {
                     _playerHandlers.Remove(playerHandler);
-                    _game.ExitLocation = playerHandler.point.Settings.Name;
-                    _game.Extract(playerHandler.player, playerHandler.point);
+                    _game.ExitLocation = playerHandler.ExfilPoint.Settings.Name;
+                    _game.Extract(playerHandler.Player, playerHandler.ExfilPoint);
                 }
             }
 
@@ -55,7 +54,7 @@ namespace Fika.Core.Main.Components
                 ExfiltrationPoint exfiltrationPoint = _countdownPoints[i];
                 if (_game.PastTime - exfiltrationPoint.ExfiltrationStartTime > exfiltrationPoint.Settings.ExfiltrationTime)
                 {
-                    foreach (Player player in exfiltrationPoint.Entered.ToArray())
+                    foreach (Player player in exfiltrationPoint.Entered)
                     {
                         if (player == null)
                         {
@@ -87,8 +86,9 @@ namespace Fika.Core.Main.Components
 
         public void Run(ExfiltrationPoint[] exfilPoints, SecretExfiltrationPoint[] secretExfilPoints)
         {
-            foreach (ExfiltrationPoint exfiltrationPoint in exfilPoints)
+            for (int i = 0; i < exfilPoints.Length; i++)
             {
+                ExfiltrationPoint exfiltrationPoint = exfilPoints[i];
                 exfiltrationPoint.OnStartExtraction += ExfiltrationPoint_OnStartExtraction;
                 exfiltrationPoint.OnCancelExtraction += ExfiltrationPoint_OnCancelExtraction;
                 exfiltrationPoint.OnStatusChanged += ExfiltrationPoint_OnStatusChanged;
@@ -100,8 +100,9 @@ namespace Fika.Core.Main.Components
                 }
             }
 
-            foreach (SecretExfiltrationPoint secretExfiltrationPoint in secretExfilPoints)
+            for (int i = 0; i < secretExfilPoints.Length; i++)
             {
+                SecretExfiltrationPoint secretExfiltrationPoint = secretExfilPoints[i];
                 secretExfiltrationPoint.OnStartExtraction += ExfiltrationPoint_OnStartExtraction;
                 secretExfiltrationPoint.OnCancelExtraction += ExfiltrationPoint_OnCancelExtraction;
                 secretExfiltrationPoint.OnStatusChanged += ExfiltrationPoint_OnStatusChanged;
@@ -135,8 +136,9 @@ namespace Fika.Core.Main.Components
 
             if (_exfiltrationPoints != null)
             {
-                foreach (ExfiltrationPoint exfiltrationPoint in _exfiltrationPoints)
+                for (int i = 0; i < _exfiltrationPoints.Length; i++)
                 {
+                    ExfiltrationPoint exfiltrationPoint = _exfiltrationPoints[i];
                     exfiltrationPoint.OnStartExtraction -= ExfiltrationPoint_OnStartExtraction;
                     exfiltrationPoint.OnCancelExtraction -= ExfiltrationPoint_OnCancelExtraction;
                     exfiltrationPoint.OnStatusChanged -= ExfiltrationPoint_OnStatusChanged;
@@ -147,8 +149,9 @@ namespace Fika.Core.Main.Components
 
             if (_secretExfiltrationPoints != null)
             {
-                foreach (SecretExfiltrationPoint secretExfiltrationPoint in _secretExfiltrationPoints)
+                for (int i = 0; i < _secretExfiltrationPoints.Length; i++)
                 {
+                    SecretExfiltrationPoint secretExfiltrationPoint = _secretExfiltrationPoints[i];
                     secretExfiltrationPoint.OnStartExtraction -= ExfiltrationPoint_OnStartExtraction;
                     secretExfiltrationPoint.OnCancelExtraction -= ExfiltrationPoint_OnCancelExtraction;
                     secretExfiltrationPoint.OnStatusChanged -= ExfiltrationPoint_OnStatusChanged;
@@ -183,7 +186,7 @@ namespace Fika.Core.Main.Components
                 return;
             }
 
-            ExtractionPlayerHandler extractionPlayerHandler = _playerHandlers.FirstOrDefault(x => x.player == player);
+            ExtractionPlayerHandler extractionPlayerHandler = _playerHandlers.FirstOrDefault(x => x.Player == player);
             if (extractionPlayerHandler != null)
             {
                 _playerHandlers.Remove(extractionPlayerHandler);
@@ -197,7 +200,7 @@ namespace Fika.Core.Main.Components
                 return;
             }
 
-            if (_playerHandlers.All(x => x.player != player))
+            if (_playerHandlers.All(x => x.Player != player))
             {
                 _playerHandlers.Add(new(player, point, _game.PastTime));
             }
@@ -234,9 +237,9 @@ namespace Fika.Core.Main.Components
 
         private class ExtractionPlayerHandler(Player player, ExfiltrationPoint point, float startTime)
         {
-            public FikaPlayer player = (FikaPlayer)player;
-            public ExfiltrationPoint point = point;
-            public float startTime = startTime;
+            public FikaPlayer Player = (FikaPlayer)player;
+            public ExfiltrationPoint ExfilPoint = point;
+            public float StartTime = startTime;
         }
     }
 }
