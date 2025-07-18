@@ -1070,36 +1070,35 @@ namespace Fika.Core.Main.GameMode
                 num = (short)Array.IndexOf(gameWorld.Platforms, lootItem.Platform);
             }
             /*Corpse corpse;*/
-            if (lootItem is Corpse or ObservedCorpse)
-            {
-                return null;
-            }
             LootItemPositionClass lootItemPositionClass;
             // TODO: Send corpses instead of killing the players...
             /*if ((corpse = lootItem as Corpse) != null)
-			{
-				lootItemPositionClass = new CorpseLootItemClass
-				{
-					Customization = corpse.Customization,
-					Side = corpse.Side,
-					Bones = ((num > -1) ? corpse.TransformSyncsRelativeToPlatform : corpse.TransformSyncs),
-					ProfileID = corpse.PlayerProfileID
-				};
-			}
-			else
-			{
-				lootItemPositionClass = new LootItemPositionClass();
-			}*/
-            lootItemPositionClass = new LootItemPositionClass();
+            {
+                lootItemPositionClass = new GClass1397
+                {
+                    Customization = corpse.Customization,
+                    Side = corpse.Side,
+                    Bones = (num > -1) ? corpse.TransformSyncsRelativeToPlatform : corpse.TransformSyncs,
+                    ProfileID = corpse.PlayerProfileID,
+                    IsZombieCorpse = corpse.IsZombieCorpse
+                };
+            }
+            else
+            {
+                lootItemPositionClass = new LootItemPositionClass();
+            }*/
             Transform transform = lootItem.transform;
-            lootItemPositionClass.Position = ((num > -1) ? transform.localPosition : transform.position);
-            lootItemPositionClass.Rotation = ((num > -1) ? transform.localRotation.eulerAngles : transform.rotation.eulerAngles);
-            lootItemPositionClass.Item = lootItem.ItemOwner.RootItem;
-            lootItemPositionClass.ValidProfiles = lootItem.ValidProfiles;
-            lootItemPositionClass.Id = lootItem.StaticId;
-            lootItemPositionClass.IsContainer = lootItem.StaticId != null;
-            lootItemPositionClass.Shift = lootItem.Shift;
-            lootItemPositionClass.PlatformId = num;
+            lootItemPositionClass = new LootItemPositionClass
+            {
+                Position = (num > -1) ? transform.localPosition : transform.position,
+                Rotation = (num > -1) ? transform.localRotation.eulerAngles : transform.rotation.eulerAngles,
+                Item = lootItem.ItemOwner.RootItem,
+                ValidProfiles = lootItem.ValidProfiles,
+                Id = lootItem.StaticId,
+                IsContainer = lootItem.StaticId != null,
+                Shift = lootItem.Shift,
+                PlatformId = num
+            };
 
             return lootItemPositionClass;
         }
