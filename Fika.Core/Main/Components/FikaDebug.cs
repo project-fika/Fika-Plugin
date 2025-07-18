@@ -1,12 +1,11 @@
 ﻿using Comfort.Common;
-using Fika.Core.Main.Components;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Fika.Core.Main.Custom
+namespace Fika.Core.Main.Components
 {
     internal class FikaDebug : MonoBehaviour
     {
@@ -47,7 +46,7 @@ namespace Fika.Core.Main.Custom
         {
             if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
             {
-                this._coopHandler = coopHandler;
+                _coopHandler = coopHandler;
 
                 if (FikaBackendUtils.IsServer)
                 {

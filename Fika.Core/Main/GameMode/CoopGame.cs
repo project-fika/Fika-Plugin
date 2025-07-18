@@ -14,7 +14,6 @@ using EFT.UI;
 using EFT.UI.Screens;
 using Fika.Core.Main.ClientClasses;
 using Fika.Core.Main.Components;
-using Fika.Core.Main.Custom;
 using Fika.Core.Main.Patches;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
