@@ -3,13 +3,12 @@
 using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
-using Fika.Core.Main.Components;
 using Fika.Core.Main.GameMode;
 using Fika.Core.Main.Players;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Fika.Core.Main.Custom
+namespace Fika.Core.Main.Components
 {
     public class FikaDynamicAI : MonoBehaviour
     {

@@ -11,7 +11,7 @@ using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.Vaulting;
 using EFT.Visual;
-using Fika.Core.Main.Custom;
+using Fika.Core.Main.Components;
 using Fika.Core.Main.Factories;
 using Fika.Core.Main.GameMode;
 using Fika.Core.Main.ObservedClasses;

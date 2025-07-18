@@ -12,7 +12,6 @@ using EFT.UI;
 using EFT.Weather;
 using Fika.Core.Main.ClientClasses;
 using Fika.Core.Main.Components;
-using Fika.Core.Main.Custom;
 using Fika.Core.Main.FreeCamera;
 using Fika.Core.Main.HostClasses;
 using Fika.Core.Main.ObservedClasses;

@@ -14,7 +14,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Fika.Core.Main.Custom
+namespace Fika.Core.Main.Components
 {
     /// <summary>
     /// Displays a health bar over another player <br/>
@@ -147,7 +147,7 @@ namespace Fika.Core.Main.Custom
             _playerPlate.ScalarObjectScreen.SetActive(true);
 
             float processedDistance = Mathf.Clamp(sqrDistance / 625, 0.6f, 1f);
-            Vector3 position = new(_currentPlayer.PlayerBones.Neck.position.x, _currentPlayer.PlayerBones.Neck.position.y + (1f * processedDistance), _currentPlayer.PlayerBones.Neck.position.z);
+            Vector3 position = new(_currentPlayer.PlayerBones.Neck.position.x, _currentPlayer.PlayerBones.Neck.position.y + 1f * processedDistance, _currentPlayer.PlayerBones.Neck.position.z);
 
             if (!WorldToScreen.GetScreenPoint(position, _mainPlayer, out Vector3 screenPoint, FikaPlugin.NamePlateUseOpticZoom.Value, false))
             {
@@ -186,7 +186,7 @@ namespace Fika.Core.Main.Custom
                 float sqrDistFromCenter = (screenCenter - playerPosition).sqrMagnitude;
                 float minScreenSizeHalf = Mathf.Min(screenWidth, screenHeight) / 2;
                 float maxSqrDistFromCenter = minScreenSizeHalf * minScreenSizeHalf;
-                distFromCenterMultiplier = Mathf.Clamp01(1 - (sqrDistFromCenter / maxSqrDistFromCenter));
+                distFromCenterMultiplier = Mathf.Clamp01(1 - sqrDistFromCenter / maxSqrDistFromCenter);
             }
 
             float alpha = 1f;

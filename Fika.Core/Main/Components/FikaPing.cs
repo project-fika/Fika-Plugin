@@ -3,7 +3,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Fika.Core.Main.Custom
+namespace Fika.Core.Main.Components
 {
     internal class FikaPing : MonoBehaviour
     {
