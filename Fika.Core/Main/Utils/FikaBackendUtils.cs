@@ -26,7 +26,7 @@ namespace Fika.Core.Main.Utils
     {
         internal static MatchMakerAcceptScreen MatchMakerAcceptScreenInstance;
         /// <summary>
-        /// The local player <see cref="EFT.Profile"/>
+        /// The local player PMC <see cref="EFT.Profile"/>
         /// </summary>
         public static Profile Profile
         {
