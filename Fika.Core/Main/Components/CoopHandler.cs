@@ -194,31 +194,25 @@ namespace Fika.Core.Main.Components
 
         public EQuitState GetQuitState()
         {
-            EQuitState quitState = EQuitState.None;
-
-            if (LocalGameInstance == null)
+            // error?
+            if (LocalGameInstance == null || MyPlayer == null)
             {
-                return quitState;
+                return EQuitState.None;
             }
 
-            if (MyPlayer == null)
-            {
-                return quitState;
-            }
-
-            // Check alive status
+            // are we alive
             if (!MyPlayer.HealthController.IsAlive)
             {
-                quitState = EQuitState.Dead;
+                return EQuitState.Dead;
             }
 
-            // Extractions
+            // have we extracted
             if (LocalGameInstance.ExtractedPlayers.Contains(MyPlayer.NetId))
             {
-                quitState = EQuitState.Extracted;
+                return EQuitState.Extracted;
             }
 
-            return quitState;
+            return EQuitState.None;
         }
 
         /// <summary>
