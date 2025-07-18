@@ -305,7 +305,7 @@ namespace Fika.Core.Main.GameMode
             }
             else
             {
-                Logger.LogError($"IncreaseLoadedPlayers: could not find netId {netId}!");
+                Logger.LogError($"IncreaseLoadedPlayers::Could not find netId {netId}!");
             }
         }
 
@@ -326,7 +326,7 @@ namespace Fika.Core.Main.GameMode
             {
                 if (elapsedSeconds >= _botTimeout)
                 {
-                    Logger.LogWarning("WaitForPlayersToLoadBotProfile::Took to long for every player to load the bot, force spawning!");
+                    Logger.LogWarning("WaitForPlayersToLoadBotProfile::Took too long for every player to load the bot, force spawning!");
                     _botQueue.Remove(netId);
                     return;
                 }

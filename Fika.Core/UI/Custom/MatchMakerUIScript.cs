@@ -545,12 +545,12 @@ namespace Fika.Core.UI.Custom
 
                 bool localPlayerInRaid = false;
                 bool localPlayerDead = false;
-                foreach (KeyValuePair<string, bool> player in entry.Players)
+                foreach ((MongoID profileId, bool player) in entry.Players)
                 {
-                    if (player.Key == _profileId)
+                    if (profileId == _profileId)
                     {
                         localPlayerInRaid = true;
-                        localPlayerDead = player.Value;
+                        localPlayerDead = player;
                     }
                 }
 

@@ -11,7 +11,7 @@ namespace Fika.Core.Networking.Http
         public string RaidCode;
 
         [DataMember(Name = "serverId")]
-        public string ServerId;
+        public MongoID ServerId;
 
         [DataMember(Name = "hostUsername")]
         public string HostUsername;
@@ -37,7 +37,7 @@ namespace Fika.Core.Networking.Http
         [DataMember(Name = "isSpectator")]
         public bool IsSpectator;
 
-        public CreateMatch(string raidCode, string serverId, string hostUsername, bool isSpectator, long timestamp, RaidSettings settings, uint crc32, ESideType side, EDateTime time)
+        public CreateMatch(string raidCode, MongoID serverId, string hostUsername, bool isSpectator, long timestamp, RaidSettings settings, uint crc32, ESideType side, EDateTime time)
         {
             RaidCode = raidCode;
             ServerId = serverId;
