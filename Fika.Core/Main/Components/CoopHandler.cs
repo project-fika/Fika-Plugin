@@ -127,18 +127,8 @@ namespace Fika.Core.Main.Components
             HumanPlayers = [];
             ExtractedPlayers = [];
             ShouldSync = false;
-        }
-
-        protected void Start()
-        {
-            if (FikaBackendUtils.IsClient)
-            {
-                _isClient = true;
-                _charSyncCounter = 0f;
-                return;
-            }
-
-            _isClient = false;
+            _charSyncCounter = 0f;
+            _isClient = FikaBackendUtils.IsClient;
         }
 
         protected void Update()
