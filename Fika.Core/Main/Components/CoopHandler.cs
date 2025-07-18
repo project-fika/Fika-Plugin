@@ -495,7 +495,7 @@ namespace Fika.Core.Main.Components
             otherPlayer.InitObservedPlayer();
 
 #if DEBUG
-            _logger.LogInfo($"CreateLocalPlayer::{profile.Info.Nickname}::Spawned.");
+            _logger.LogInfo($"CreateLocalPlayer::{profile.GetCorrectedNickname()}::Spawned.");
 #endif
 
             EHandsControllerType controllerType = spawnObject.ControllerType;
@@ -518,7 +518,7 @@ namespace Fika.Core.Main.Components
         private IEnumerator AddClientToBotEnemies(BotsController botController, LocalPlayer playerToAdd)
         {
             IFikaGame coopGame = LocalGameInstance;
-            _logger.LogInfo($"AddClientToBotEnemies: " + playerToAdd.Profile.Nickname);
+            _logger.LogInfo($"AddClientToBotEnemies: " + playerToAdd.Profile.GetCorrectedNickname());
             while (coopGame.GameController.GameInstance.Status != GameStatus.Running && !botController.IsEnable)
             {
                 yield return null;
@@ -530,7 +530,7 @@ namespace Fika.Core.Main.Components
             }
 
 #if DEBUG
-            _logger.LogInfo($"Adding Client {playerToAdd.Profile.Nickname} to enemy list");
+            _logger.LogInfo($"Adding Client {playerToAdd.Profile.GetCorrectedNickname()} to enemy list");
 #endif
             botController.AddActivePLayer(playerToAdd);
 
@@ -548,12 +548,12 @@ namespace Fika.Core.Main.Components
             if (found)
             {
 #if DEBUG
-                _logger.LogInfo($"Verified that {playerToAdd.Profile.Nickname} was added to the enemy list.");
+                _logger.LogInfo($"Verified that {playerToAdd.Profile.GetCorrectedNickname()} was added to the enemy list.");
 #endif
                 yield break;
             }
 
-            _logger.LogError($"Failed to add {playerToAdd.Profile.Nickname} to the enemy list.");
+            _logger.LogError($"Failed to add {playerToAdd.Profile.GetCorrectedNickname()} to the enemy list.");
         }
 
         public void CheckIds(List<int> playerIds, List<int> missingIds)
