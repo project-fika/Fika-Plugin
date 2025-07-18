@@ -468,9 +468,16 @@ namespace Fika.Core.Main.Components
                 if (profile.Info.Side is EPlayerSide.Bear or EPlayerSide.Usec)
                 {
                     Item backpack = profile.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack).ContainedItem;
-                    backpack?.GetAllItems()
-                        .Where(i => i != backpack)
-                        .ExecuteForEach(i => i.SpawnedInSession = true);
+                    if (backpack != null)
+                    {
+                        foreach (Item backpackItem in backpack.GetAllItems())
+                        {
+                            if (backpackItem != backpack)
+                            {
+                                backpackItem.SpawnedInSession = true;
+                            }
+                        }
+                    }
 
                     // We still want DogTags to be 'FiR'
                     Item item = otherPlayer.Inventory.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem;
