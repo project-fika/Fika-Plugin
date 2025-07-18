@@ -41,13 +41,12 @@ namespace Fika.Core.Main.Components
         /// If the <see cref="CoopHandler"/> should sync and spawn profiles during <see cref="Update"/>
         /// </summary>
         public bool ShouldSync { get; set; }
-
         /// <summary>
         /// Dictionary of key = <see cref="FikaPlayer.NetId"/>, value = <see cref="FikaPlayer"/>
         /// </summary>
         public Dictionary<int, FikaPlayer> Players { get; internal set; }
         /// <summary>
-        /// All human players in the form of <see cref="FikaPlayer"/> (excluding headless if not playing as a headless client)
+        /// All human players in the form of <see cref="FikaPlayer"/>
         /// </summary>
         public List<FikaPlayer> HumanPlayers { get; internal set; }
         /// <summary>
@@ -233,49 +232,54 @@ namespace Fika.Core.Main.Components
             }
 
             EQuitState quitState = GetQuitState();
-            if (quitState != EQuitState.None && !_requestQuitGame)
+            if (quitState == EQuitState.None || _requestQuitGame)
             {
-                //Log to both the in-game console as well as into the BepInEx logfile
-                ConsoleScreen.Log($"{FikaPlugin.ExtractKey.Value} pressed, attempting to extract!");
-                _logger.LogInfo($"{FikaPlugin.ExtractKey.Value} pressed, attempting to extract!");
-
-                _requestQuitGame = true;
-                IFikaGame fikaGame = LocalGameInstance;
-
-                // If you are the server / host
-                if (!_isClient)
-                {
-                    if (fikaGame.ExitStatus == ExitStatus.Transit && HumanPlayers.Count <= 1)
-                    {
-                        fikaGame.Stop(Singleton<GameWorld>.Instance.MainPlayer.ProfileId, fikaGame.ExitStatus, fikaGame.ExitLocation, 0);
-                        return;
-                    }
-                    // A host needs to wait for the team to extract or die!
-                    if ((Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount > 0) && quitState != EQuitState.None)
-                    {
-                        NotificationManagerClass.DisplayWarningNotification(LocaleUtils.HOST_CANNOT_EXTRACT.Localized());
-                        _requestQuitGame = false;
-                        return;
-                    }
-                    else if (Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount == 0
-                        && Singleton<FikaServer>.Instance.TimeSinceLastPeerDisconnected > DateTime.Now.AddSeconds(-5)
-                        && Singleton<FikaServer>.Instance.HasHadPeer)
-                    {
-                        NotificationManagerClass.DisplayWarningNotification(LocaleUtils.HOST_WAIT_5_SECONDS.Localized());
-                        _requestQuitGame = false;
-                        return;
-                    }
-                    else
-                    {
-                        fikaGame.Stop(Singleton<GameWorld>.Instance.MainPlayer.ProfileId, fikaGame.ExitStatus, MyPlayer.ActiveHealthController.IsAlive ? fikaGame.ExitLocation : null, 0);
-                    }
-                }
-                else
-                {
-                    fikaGame.Stop(Singleton<GameWorld>.Instance.MainPlayer.ProfileId, fikaGame.ExitStatus, MyPlayer.ActiveHealthController.IsAlive ? fikaGame.ExitLocation : null, 0);
-                }
                 return;
             }
+
+            string keyName = FikaPlugin.ExtractKey.Value.ToString();
+            ConsoleScreen.Log($"{keyName} pressed, attempting to extract!");
+            _logger.LogInfo($"{keyName} pressed, attempting to extract!");
+
+            _requestQuitGame = true;
+            IFikaGame fikaGame = LocalGameInstance;
+
+            bool isPlayerAlive = MyPlayer.ActiveHealthController.IsAlive;
+            string exitLocation = isPlayerAlive ? fikaGame.ExitLocation : null;
+
+            // client logic
+            if (_isClient)
+            {
+                fikaGame.Stop(MyPlayer.ProfileId, fikaGame.ExitStatus, exitLocation, 0);
+                return;
+            }
+
+            // host logic
+            FikaServer server = Singleton<FikaServer>.Instance;
+            int peers = server.NetServer.ConnectedPeersCount;
+
+            if (fikaGame.ExitStatus == ExitStatus.Transit && HumanPlayers.Count <= 1)
+            {
+                fikaGame.Stop(MyPlayer.ProfileId, fikaGame.ExitStatus, exitLocation, 0);
+                return;
+            }
+
+            if (peers > 0)
+            {
+                NotificationManagerClass.DisplayWarningNotification(LocaleUtils.HOST_CANNOT_EXTRACT.Localized());
+                _requestQuitGame = false;
+                return;
+            }
+
+            bool recentDisconnect = server.TimeSinceLastPeerDisconnected > DateTime.Now.AddSeconds(-5);
+            if (server.HasHadPeer && recentDisconnect)
+            {
+                NotificationManagerClass.DisplayWarningNotification(LocaleUtils.HOST_WAIT_5_SECONDS.Localized());
+                _requestQuitGame = false;
+                return;
+            }
+
+            fikaGame.Stop(MyPlayer.ProfileId, fikaGame.ExitStatus, exitLocation, 0);
         }
 
         private async void SpawnPlayer(SpawnObject spawnObject)
