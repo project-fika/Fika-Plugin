@@ -14,9 +14,9 @@ namespace Fika.Core.Networking.Packets.Communication
         public CharacterSyncPacket(Dictionary<int, FikaPlayer> players)
         {
             PlayerIds = new(players.Count);
-            foreach (KeyValuePair<int, FikaPlayer> kvp in players)
+            foreach ((int netid, _) in players)
             {
-                PlayerIds.Add(kvp.Value.NetId);
+                PlayerIds.Add(netid);
             }
         }
 
