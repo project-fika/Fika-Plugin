@@ -738,6 +738,13 @@ namespace Fika.Core.Main.Players
         }
 
         #region proceed
+        public override void Proceed(bool withNetwork, Callback<GInterface180> callback, bool scheduled = true)
+        {
+            Func<EmptyHandsController> func = new(ProceedEmptyHandsController);
+            new Process<EmptyHandsController, GInterface180>(this, func, null, false)
+                .method_0(null, callback, scheduled);
+        }
+
         public override void Proceed(KnifeComponent knife, Callback<IKnifeController> callback, bool scheduled = true)
         {
             HandsControllerFactory factory = new(this, knifeComponent: knife);
@@ -1454,6 +1461,12 @@ namespace Fika.Core.Main.Players
             // Do nothing
         }
 
+        public override void SetControllerInsteadRemovedOne(Item removingItem, Callback callback)
+        {
+            SetControllerInsteadRemovedOneHandler handler = new(this, callback);
+            Proceed(false, handler.HandleResult); 
+        }
+
         public override void ManualUpdate(float deltaTime, float? platformDeltaTime = null, int loop = 1)
         {
             method_13(deltaTime);
@@ -1671,6 +1684,22 @@ namespace Fika.Core.Main.Players
             }
         }
 
+        private class SetControllerInsteadRemovedOneHandler(ObservedPlayer observedPlayer, Callback callback)
+        {
+            private readonly ObservedPlayer _observedPlayer = observedPlayer;
+            private readonly Callback _callback = callback;
+
+            public void HandleResult(Result<GInterface180> result)
+            {
+                if (_observedPlayer._removeFromHandsCallback == _callback)
+                {
+                    _observedPlayer._removeFromHandsCallback = null;
+                }
+
+                _callback?.Invoke(result);
+            }
+        }
+
         #region handControllers
         private void CreateHandsController(Func<AbstractHandsController> controllerFactory, Item item)
         {
@@ -1742,6 +1771,11 @@ namespace Fika.Core.Main.Players
         }
 
         private AbstractHandsController ReturnEmptyHandsController()
+        {
+            return ObservedEmptyHandsController.Create(this);
+        }
+
+        private ObservedEmptyHandsController ProceedEmptyHandsController()
         {
             return ObservedEmptyHandsController.Create(this);
         }
