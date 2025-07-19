@@ -167,7 +167,7 @@ namespace Fika.Core.Main.FreeCamera
                 return;
             }
 
-            CoopHandler.EQuitState quitState = _coopHandler.GetQuitState();
+            CoopHandler.EQuitState quitState = _coopHandler.QuitState;
             if (quitState != CoopHandler.EQuitState.Extracted)
             {
                 _lastKnownPosition = Player.PlayerBones.Neck.position;

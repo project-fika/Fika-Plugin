@@ -63,6 +63,34 @@ namespace Fika.Core.Main.Components
         /// List of <see cref="FikaPlayer.NetId"/>s that have extracted
         /// </summary>
         public List<int> ExtractedPlayers { get; internal set; }
+        /// <summary>
+        /// Returns the current <see cref="EQuitState"/>
+        /// </summary>
+        public EQuitState QuitState
+        {
+            get
+            {
+                // error?
+                if (LocalGameInstance == null || MyPlayer == null)
+                {
+                    return EQuitState.None;
+                }
+
+                // are we alive
+                if (!MyPlayer.HealthController.IsAlive)
+                {
+                    return EQuitState.Dead;
+                }
+
+                // have we extracted
+                if (LocalGameInstance.ExtractedPlayers.Contains(MyPlayer.NetId))
+                {
+                    return EQuitState.Extracted;
+                }
+
+                return EQuitState.None;
+            }
+        }
 
         private ManualLogSource _logger;
         /// <summary>
@@ -182,29 +210,6 @@ namespace Fika.Core.Main.Components
             Singleton<GameWorld>.Instance.World_0.method_0(null);
         }
 
-        public EQuitState GetQuitState()
-        {
-            // error?
-            if (LocalGameInstance == null || MyPlayer == null)
-            {
-                return EQuitState.None;
-            }
-
-            // are we alive
-            if (!MyPlayer.HealthController.IsAlive)
-            {
-                return EQuitState.Dead;
-            }
-
-            // have we extracted
-            if (LocalGameInstance.ExtractedPlayers.Contains(MyPlayer.NetId))
-            {
-                return EQuitState.Extracted;
-            }
-
-            return EQuitState.None;
-        }
-
         /// <summary>
         /// This handles the ways of exiting the active game session
         /// </summary>
@@ -215,7 +220,7 @@ namespace Fika.Core.Main.Components
                 return;
             }
 
-            EQuitState quitState = GetQuitState();
+            EQuitState quitState = QuitState;
             if (quitState == EQuitState.None || _requestQuitGame)
             {
                 return;
