@@ -1234,7 +1234,8 @@ namespace Fika.Core
                 {
                     Category = networkHeader,
                     DispName = LocaleUtils.BEPINEX_USE_UPNP_T.Localized(),
-                    Order = 4
+                    Order = 4,
+                    IsAdvanced = true
                 }),
                 "Use UPnP", ref failed, headers);
 
@@ -1243,7 +1244,8 @@ namespace Fika.Core
                 {
                     Category = networkHeader,
                     DispName = LocaleUtils.BEPINEX_USE_NAT_PUNCH_T.Localized(),
-                    Order = 3
+                    Order = 3,
+                    IsAdvanced = true
                 }),
                 "Use NAT Punching", ref failed, headers);
 
