@@ -1463,8 +1463,9 @@ namespace Fika.Core.Main.Players
 
         public override void SetControllerInsteadRemovedOne(Item removingItem, Callback callback)
         {
-            SetControllerInsteadRemovedOneHandler handler = new(this, callback);
-            Proceed(false, handler.HandleResult); 
+            _removeFromHandsCallback = callback;
+            /*SetControllerInsteadRemovedOneHandler handler = new(this, callback);
+            Proceed(false, handler.HandleResult); */
         }
 
         public override void ManualUpdate(float deltaTime, float? platformDeltaTime = null, int loop = 1)
@@ -1684,22 +1685,6 @@ namespace Fika.Core.Main.Players
             }
         }
 
-        private class SetControllerInsteadRemovedOneHandler(ObservedPlayer observedPlayer, Callback callback)
-        {
-            private readonly ObservedPlayer _observedPlayer = observedPlayer;
-            private readonly Callback _callback = callback;
-
-            public void HandleResult(Result<GInterface180> result)
-            {
-                if (_observedPlayer._removeFromHandsCallback == _callback)
-                {
-                    _observedPlayer._removeFromHandsCallback = null;
-                }
-
-                _callback?.Invoke(result);
-            }
-        }
-
         #region handControllers
         private void CreateHandsController(Func<AbstractHandsController> controllerFactory, Item item)
         {
@@ -1719,6 +1704,11 @@ namespace Fika.Core.Main.Players
                 if (HandsController != null)
                 {
                     Destroy(HandsController);
+                }
+                if (_removeFromHandsCallback != null)
+                {
+                    _removeFromHandsCallback.Invoke(SuccessfulResult.New);
+                    _removeFromHandsCallback = null;
                 }
                 HandsController = null;
             }
