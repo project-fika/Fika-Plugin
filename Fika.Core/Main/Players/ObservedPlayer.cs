@@ -552,7 +552,7 @@ namespace Fika.Core.Main.Players
 
             ShotReactions(damageInfo, bodyPartType);
             ApplyHitDebuff(damageInfo.Damage, 0f, bodyPartType, damageInfo.DamageType);
-            bool flag = !string.IsNullOrEmpty(damageInfo.DeflectedBy);
+            bool flag = damageInfo.DeflectedBy != null;
             float damage = damageInfo.Damage;
             List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
             MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1)
@@ -560,7 +560,7 @@ namespace Fika.Core.Main.Players
             ShotInfoClass hitInfo = new()
             {
                 PoV = PointOfView,
-                Penetrated = string.IsNullOrEmpty(damageInfo.BlockedBy) || string.IsNullOrEmpty(damageInfo.DeflectedBy),
+                Penetrated = damageInfo.Penetrated,
                 Material = materialType
             };
             float num = damage - damageInfo.Damage;
@@ -647,7 +647,7 @@ namespace Fika.Core.Main.Players
                 return null;
             }
 
-            bool flag = !string.IsNullOrEmpty(damageInfo.DeflectedBy);
+            bool flag = damageInfo.DeflectedBy != null;
             float damage = damageInfo.Damage;
             List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
             MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1)
@@ -655,7 +655,7 @@ namespace Fika.Core.Main.Players
             ShotInfoClass hitInfo = new()
             {
                 PoV = PointOfView,
-                Penetrated = string.IsNullOrEmpty(damageInfo.BlockedBy) || string.IsNullOrEmpty(damageInfo.DeflectedBy),
+                Penetrated = damageInfo.Penetrated,
                 Material = materialType
             };
             float num = damage - damageInfo.Damage;

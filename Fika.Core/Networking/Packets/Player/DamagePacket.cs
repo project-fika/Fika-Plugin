@@ -27,9 +27,10 @@ namespace Fika.Core.Networking.Packets.Player
 
         public MongoID? BlockedBy;
         public MongoID? DeflectedBy;
-        public MongoID? SourceId;
         public MongoID? ProfileId;
         public MongoID? WeaponId;
+
+        public string SourceId;
 
         public void Deserialize(NetDataReader reader)
         {
@@ -54,9 +55,10 @@ namespace Fika.Core.Networking.Packets.Player
 
             BlockedBy = reader.GetNullableMongoID();
             DeflectedBy = reader.GetNullableMongoID();
-            SourceId = reader.GetNullableMongoID();
             ProfileId = reader.GetNullableMongoID();
             WeaponId = reader.GetNullableMongoID();
+
+            SourceId = reader.GetString();
         }
 
         public void Serialize(NetDataWriter writer)
@@ -82,9 +84,10 @@ namespace Fika.Core.Networking.Packets.Player
 
             writer.PutNullableMongoID(BlockedBy);
             writer.PutNullableMongoID(DeflectedBy);
-            writer.PutNullableMongoID(SourceId);
             writer.PutNullableMongoID(ProfileId);
             writer.PutNullableMongoID(WeaponId);
+
+            writer.Put(SourceId);
         }
     }
 }
