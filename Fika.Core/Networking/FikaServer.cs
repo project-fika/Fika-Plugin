@@ -284,7 +284,16 @@ namespace Fika.Core.Networking
             {
                 if (FikaPlugin.ForceBindIP.Value != "Disabled")
                 {
-                    _netServer.Start(FikaPlugin.ForceBindIP.Value, "", _port);
+                    if (IPAddress.TryParse(FikaPlugin.ForceBindIP.Value, out IPAddress ipv4))
+                    {
+                        _netServer.Start(ipv4, IPAddress.IPv6Any, _port);
+                    }
+                    else
+                    {
+                        string error = $"{FikaPlugin.ForceBindIP.Value} could not be parsed into a valid IP, raid will not start";
+                        NotificationManagerClass.DisplayWarningNotification(error, EFT.Communications.ENotificationDurationType.Long);
+                        throw new ParseException(error);
+                    }
                 }
                 else
                 {
