@@ -29,7 +29,7 @@ namespace Fika.Core.Networking.Http
 
         public static async Task<IPAddress> GetPublicIP()
         {
-            HttpClient client = Traverse.Create(_httpClient).Field<HttpClient>("_httpv").Value;
+            HttpClient client = _httpClient.HttpClient;
             string[] urls = [
                 "https://api.ipify.org/",
                 "https://checkip.amazonaws.com/",
