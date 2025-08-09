@@ -1359,25 +1359,6 @@ namespace Fika.Core.Networking
             peer.Send(_dataWriter.AsReadOnlySpan, deliveryMethod);
         }
 
-        /*public void SendDataToAll<T>(ref T packet, DeliveryMethod deliveryMethod, NetPeer peerToExclude = null) where T : INetSerializable
-        {
-            _dataWriter.Reset();
-
-            _dataWriter.PutEnum(EPacketType.Serializable);
-            if (peerToExclude != null)
-            {
-                if (NetServer.ConnectedPeersCount > 1)
-                {
-                    _packetProcessor.WriteNetSerializable(_dataWriter, ref packet);
-                    _netServer.SendToAll(_dataWriter.AsReadOnlySpan, deliveryMethod, peerToExclude);
-                }
-                return;
-            }
-
-            _packetProcessor.WriteNetSerializable(_dataWriter, ref packet);
-            _netServer.SendToAll(_dataWriter.AsReadOnlySpan, deliveryMethod);
-        }*/
-
         public void SendReusableToAll<T>(T packet, DeliveryMethod deliveryMethod, NetPeer peerToExlude = null) where T : class, IReusable, new()
         {
             _dataWriter.Reset();
