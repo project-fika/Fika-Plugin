@@ -286,7 +286,7 @@ namespace Fika.Core.Networking
             RegisterPacket<SideEffectPacket>(OnSideEffectPacketReceived);
             RegisterPacket<RequestPacket>(OnRequestPacketReceived);
             RegisterPacket<CharacterSyncPacket>(OnCharacterSyncPacketReceived);
-            RegisterPacket<InraidQuestPacket>(OnInraidQuestPacketReceived);
+            RegisterPacket<InRaidQuestPacket>(OnInraidQuestPacketReceived);
             RegisterPacket<EventControllerEventPacket>(OnEventControllerEventPacketReceived);
             RegisterPacket<EventControllerInteractPacket>(OnEventControllerInteractPacketReceived);
             RegisterPacket<SyncTrapsPacket>(OnSyncTrapsPacketReceived);
@@ -330,7 +330,7 @@ namespace Fika.Core.Networking
             }
         }
 
-        private void OnInraidQuestPacketReceived(InraidQuestPacket packet)
+        private void OnInraidQuestPacketReceived(InRaidQuestPacket packet)
         {
             if (_coopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer player))
             {
@@ -633,7 +633,7 @@ namespace Fika.Core.Networking
                     {
                         MongoId = playerToApply.InventoryController.CurrentId
                     };
-                    SendData(ref response, DeliveryMethod.ReliableOrdered);
+                    SendData(ref response, DeliveryMethod.ReliableOrdered, true);
                 }
             }
         }
@@ -1165,7 +1165,27 @@ namespace Fika.Core.Networking
             FikaEventDispatcher.DispatchEvent(new FikaNetworkManagerDestroyedEvent(this));
         }
 
-        public void SendData<T>(ref T packet, DeliveryMethod deliveryMethod) where T : INetSerializable
+        public void SendData<T>(ref T packet, DeliveryMethod deliveryMethod, bool multicast = false) where T : INetSerializable
+        {
+            _dataWriter.Reset();
+            _dataWriter.Put(multicast);
+            _dataWriter.PutEnum(EPacketType.Serializable);
+
+            _packetProcessor.WriteNetSerializable(_dataWriter, ref packet);
+            _netClient.FirstPeer.Send(_dataWriter.AsReadOnlySpan, deliveryMethod);
+        }
+
+        public void SendDataToPeer<T>(ref T packet, DeliveryMethod deliveryMethod, NetPeer peer) where T : INetSerializable
+        {
+            _dataWriter.Reset();
+            _dataWriter.Put(false);
+            _dataWriter.PutEnum(EPacketType.Serializable);
+
+            _packetProcessor.WriteNetSerializable(_dataWriter, ref packet);
+            peer.Send(_dataWriter.AsReadOnlySpan, deliveryMethod);
+        }
+
+        /*public void SendData<T>(ref T packet, DeliveryMethod deliveryMethod) where T : INetSerializable
         {
             if (_netClient.FirstPeer == null)
             {
@@ -1177,7 +1197,7 @@ namespace Fika.Core.Networking
             _dataWriter.PutEnum(EPacketType.Serializable);
             _packetProcessor.WriteNetSerializable(_dataWriter, ref packet);
             _netClient.FirstPeer.Send(_dataWriter.AsReadOnlySpan, deliveryMethod);
-        }
+        }*/
 
         public void SendVOIPPacket(ref VOIPPacket packet, NetPeer peer = null)
         {
@@ -1187,7 +1207,7 @@ namespace Fika.Core.Networking
                 return;
             }
 
-            SendData(ref packet, DeliveryMethod.ReliableOrdered);
+            SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
         }
 
         public void SendVOIPData(ArraySegment<byte> data, NetPeer peer = null)
@@ -1195,15 +1215,26 @@ namespace Fika.Core.Networking
             _dataWriter.Reset();
 
             _dataWriter.PutEnum(EPacketType.VOIP);
+            _dataWriter.Put(true);
             _dataWriter.PutBytesWithLength(data.Array, data.Offset, (ushort)data.Count);
             _netClient.FirstPeer.Send(_dataWriter.AsReadOnlySpan, DeliveryMethod.Sequenced);
         }
 
+        /// <summary>
+        /// Sends a reusable packet
+        /// </summary>
+        /// <typeparam name="T">The <see cref="IReusable"/> to send</typeparam>
+        /// <param name="packet">The <see cref="INetSerializable"/> to send</param>
+        /// <param name="deliveryMethod">The deliverymethod</param>
+        /// <remarks>
+        /// Reusable will always be of type multicast when sent from a client
+        /// </remarks>
         public void SendReusable<T>(T packet, DeliveryMethod deliveryMethod) where T : class, IReusable, new()
         {
             _dataWriter.Reset();
 
             _dataWriter.PutEnum(EPacketType.Serializable);
+            _dataWriter.Put(false);
             _packetProcessor.Write(_dataWriter, packet);
             _netClient.FirstPeer.Send(_dataWriter.AsReadOnlySpan, deliveryMethod);
 

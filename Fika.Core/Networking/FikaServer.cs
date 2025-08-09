@@ -435,7 +435,7 @@ namespace Fika.Core.Networking
             RegisterPacket<SideEffectPacket, NetPeer>(OnSideEffectPacketReceived);
             RegisterPacket<RequestPacket, NetPeer>(OnRequestPacketReceived);
             RegisterPacket<NetworkSettingsPacket, NetPeer>(OnNetworkSettingsPacketReceived);
-            RegisterPacket<InraidQuestPacket, NetPeer>(OnInraidQuestPacketReceived);
+            RegisterPacket<InRaidQuestPacket, NetPeer>(OnInraidQuestPacketReceived);
             RegisterPacket<EventControllerInteractPacket, NetPeer>(OnEventControllerInteractPacketReceived);
 
             RegisterReusable<WorldPacket, NetPeer>(OnWorldPacketReceived);
@@ -453,9 +453,8 @@ namespace Fika.Core.Networking
             }
         }
 
-        private void OnInraidQuestPacketReceived(InraidQuestPacket packet, NetPeer peer)
+        private void OnInraidQuestPacketReceived(InRaidQuestPacket packet, NetPeer peer)
         {
-            SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
             if (_coopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer player))
             {
                 if (player.AbstractQuestControllerClass is ObservedQuestController controller)
@@ -482,7 +481,7 @@ namespace Fika.Core.Networking
                 NetId = netId,
                 AllowVOIP = AllowVOIP
             };
-            SendDataToPeer(peer, ref response, DeliveryMethod.ReliableOrdered);
+            SendDataToPeer(ref response, DeliveryMethod.ReliableOrdered, peer);
         }
 
         private void OnWorldPacketReceived(WorldPacket packet, NetPeer peer)
@@ -519,7 +518,6 @@ namespace Fika.Core.Networking
 #if DEBUG
             _logger.LogWarning("OnSideEffectPacketReceived: Received");
 #endif
-            SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
 
             GameWorld gameWorld = Singleton<GameWorld>.Instance;
             if (gameWorld == null)
@@ -562,7 +560,7 @@ namespace Fika.Core.Networking
             }
             FikaBackendUtils.AddPartyMembers(_visualProfiles);
             packet.Profiles = _visualProfiles;
-            SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+            SendData(ref packet, DeliveryMethod.ReliableOrdered);
 
             GenericPacket notifPacket = new()
             {
@@ -575,15 +573,13 @@ namespace Fika.Core.Networking
             {
                 notifPacket.SubPacket.Execute();
             }
-            SendDataToAll(ref notifPacket, DeliveryMethod.ReliableOrdered, peer);
+            SendDataToPeer(ref notifPacket, DeliveryMethod.ReliableOrdered, peer);
 
             peer.Tag = kvp.Key.Info.MainProfileNickname;
         }
 
         private void OnPingPacketReceived(PingPacket packet, NetPeer peer)
         {
-            SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
-
             if (FikaPlugin.UsePingSystem.Value && !FikaBackendUtils.IsHeadless)
             {
                 PingFactory.ReceivePing(packet.PingLocation, packet.PingType, packet.PingColor, packet.Nickname, packet.LocaleId);
@@ -625,8 +621,6 @@ namespace Fika.Core.Networking
 
         private void OnSyncTransitControllersPacketReceived(SyncTransitControllersPacket packet, NetPeer peer)
         {
-            SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
-
             TransitControllerAbstractClass transitController = Singleton<GameWorld>.Instance.TransitController;
             if (transitController != null)
             {
@@ -667,7 +661,7 @@ namespace Fika.Core.Networking
 
         private void OnSpawnItemPacketReceived(SpawnItemPacket packet, NetPeer peer)
         {
-            SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
+            SendData(ref packet, DeliveryMethod.ReliableOrdered, peer);
 
             if (_coopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer playerToApply))
             {
@@ -678,7 +672,6 @@ namespace Fika.Core.Networking
 
         private void OnUsableItemPacketReceived(UsableItemPacket packet, NetPeer peer)
         {
-            SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
             if (_coopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer playerToApply))
             {
                 playerToApply.HandleUsableItemPacket(packet);
@@ -728,13 +721,13 @@ namespace Fika.Core.Networking
                 }
             };
 
-            SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+            SendData(ref packet, DeliveryMethod.ReliableOrdered);
         }
 
         public void SendFlareSuccessEvent(string profileId, bool canSendAirdrop)
         {
             FlareSuccessPacket packet = new(profileId, canSendAirdrop);
-            SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+            SendData(ref packet, DeliveryMethod.ReliableOrdered);
         }
 
         private void OnBTRInteractionPacketReceived(BTRInteractionPacket packet, NetPeer peer)
@@ -752,7 +745,7 @@ namespace Fika.Core.Networking
                         Data = packet.Data
                     };
 
-                    SendDataToAll(ref response, DeliveryMethod.ReliableOrdered);
+                    SendData(ref response, DeliveryMethod.ReliableOrdered);
                 }
             }
         }
@@ -763,7 +756,6 @@ namespace Fika.Core.Networking
             {
                 if (playerToApply is ObservedPlayer observedPlayer)
                 {
-                    SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
                     if (observedPlayer.InventoryController is ObservedInventoryController observedController)
                     {
                         observedController.SetNewID(packet.MongoId);
@@ -792,7 +784,7 @@ namespace Fika.Core.Networking
                                 PlayerPosition = observedPlayer.Position
                             };
 
-                            SendDataToPeer(peer, ref ownCharacterPacket, DeliveryMethod.ReliableOrdered);
+                            SendDataToPeer(ref ownCharacterPacket, DeliveryMethod.ReliableOrdered, peer);
 
                             observedPlayer.HealthBar.ClearEffects();
                             GenericPacket clearEffectsPacket = new()
@@ -801,7 +793,7 @@ namespace Fika.Core.Networking
                                 Type = EGenericSubPacketType.ClearEffects
                             };
 
-                            SendDataToAll(ref clearEffectsPacket, DeliveryMethod.ReliableOrdered, peer);
+                            SendData(ref clearEffectsPacket, DeliveryMethod.ReliableOrdered, peer);
                         }
                     }
 
@@ -829,7 +821,7 @@ namespace Fika.Core.Networking
                         ThrowableData = smokeData
                     };
 
-                    SendDataToPeer(peer, ref throwablePacket, DeliveryMethod.ReliableOrdered);
+                    SendDataToPeer(ref throwablePacket, DeliveryMethod.ReliableOrdered, peer);
                 }
 
                 List<WorldInteractiveObject.WorldInteractiveDataPacketStruct> interactivesData = [];
@@ -852,7 +844,7 @@ namespace Fika.Core.Networking
                         InteractivesData = interactivesData
                     };
 
-                    SendDataToPeer(peer, ref interactivePacket, DeliveryMethod.ReliableOrdered);
+                    SendDataToPeer(ref interactivePacket, DeliveryMethod.ReliableOrdered, peer);
                 }
 
                 IEnumerable<LampController> lampControllers = LocationScene.GetAllObjects<LampController>(false);
@@ -870,7 +862,7 @@ namespace Fika.Core.Networking
                         LampStates = lampStates
                     };
 
-                    SendDataToPeer(peer, ref lampPacket, DeliveryMethod.ReliableOrdered);
+                    SendDataToPeer(ref lampPacket, DeliveryMethod.ReliableOrdered, peer);
                 }
 
                 GClass816<int, WindowBreaker>.GStruct45 windows = gameWorld.Windows.GetValuesEnumerator();
@@ -891,7 +883,7 @@ namespace Fika.Core.Networking
                         WindowBreakerStates = windowData
                     };
 
-                    SendDataToPeer(peer, ref windowPacket, DeliveryMethod.ReliableOrdered);
+                    SendDataToPeer(ref windowPacket, DeliveryMethod.ReliableOrdered, peer);
                 }
 
                 foreach (FikaPlayer player in _coopHandler.Players.Values)
@@ -925,7 +917,7 @@ namespace Fika.Core.Networking
                         characterPacket.PlayerInfoPacket.IsStationary = player.MovementContext.IsStationaryWeaponInHands;
                     }
 
-                    SendDataToPeer(peer, ref characterPacket, DeliveryMethod.ReliableOrdered);
+                    SendDataToPeer(ref characterPacket, DeliveryMethod.ReliableOrdered, peer);
                 }
 
                 ReconnectPacket finishPacket = new()
@@ -933,7 +925,7 @@ namespace Fika.Core.Networking
                     Type = EReconnectDataType.Finished
                 };
 
-                SendDataToPeer(peer, ref finishPacket, DeliveryMethod.ReliableOrdered);
+                SendDataToPeer(ref finishPacket, DeliveryMethod.ReliableOrdered, peer);
             }
         }
 
@@ -947,7 +939,7 @@ namespace Fika.Core.Networking
                     Data = (fikaGame.GameController as HostGameController).GetHostLootItems()
                 };
 
-                SendDataToPeer(peer, ref response, DeliveryMethod.ReliableOrdered);
+                SendDataToPeer(ref response, DeliveryMethod.ReliableOrdered, peer);
             }
         }
 
@@ -965,7 +957,7 @@ namespace Fika.Core.Networking
                             Interactables = (Dictionary<string, int>)world.Interactables
                         };
 
-                        SendDataToPeer(peer, ref response, DeliveryMethod.ReliableOrdered);
+                        SendDataToPeer(ref response, DeliveryMethod.ReliableOrdered, peer);
                     }
                 }
             }
@@ -1015,8 +1007,6 @@ namespace Fika.Core.Networking
 
         private void OnQuestDropItemPacketReceived(QuestDropItemPacket packet, NetPeer peer)
         {
-            SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
-
             if (_hostPlayer == null)
             {
                 return;
@@ -1033,8 +1023,6 @@ namespace Fika.Core.Networking
 
         private void OnQuestItemPacketReceived(QuestItemPacket packet, NetPeer peer)
         {
-            SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
-
             if (_hostPlayer == null)
             {
                 return;
@@ -1051,8 +1039,6 @@ namespace Fika.Core.Networking
 
         private void OnQuestConditionPacketReceived(QuestConditionPacket packet, NetPeer peer)
         {
-            SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
-
             if (_hostPlayer == null)
             {
                 return;
@@ -1076,8 +1062,6 @@ namespace Fika.Core.Networking
                 _fikaChat.AddMessage(new(packet.Nickname, packet.Message), true);
                 _fikaChat.OpenChat(true);
             }
-
-            SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
         }
 
         public int PopNetId()
@@ -1114,19 +1098,15 @@ namespace Fika.Core.Networking
                     packet.PlayerInfoPacket.ControllerId, packet.PlayerInfoPacket.FirstOperationId, packet.PlayerInfoPacket.IsZombie,
                     packet.PlayerInfoPacket.ControllerType, packet.PlayerInfoPacket.ItemId);
             }
-
-            SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
         }
 
         private void OnGenericPacketReceived(GenericPacket packet, NetPeer peer)
         {
-            SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
             packet.SubPacket.Execute();
         }
 
         private void OnHealthSyncPacketReceived(HealthSyncPacket packet, NetPeer peer)
         {
-            SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
             if (_coopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer playerToApply))
             {
                 if (playerToApply is ObservedPlayer observedPlayer)
@@ -1178,12 +1158,11 @@ namespace Fika.Core.Networking
                 respondPackage.SessionTime = gameTimer.SessionTime.Value;
             }
 
-            SendDataToAll(ref respondPackage, DeliveryMethod.ReliableOrdered);
+            SendData(ref respondPackage, DeliveryMethod.ReliableOrdered);
         }
 
         private void OnCommonPlayerPacketReceived(CommonPlayerPacket packet, NetPeer peer)
         {
-            SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
             if (_coopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer playerToApply))
             {
                 packet.SubPacket.Execute(playerToApply);
@@ -1213,18 +1192,18 @@ namespace Fika.Core.Networking
                             {
                                 Error = result.Error.ToString()
                             };
-                            SendDataToPeer(peer, ref callbackPacket, DeliveryMethod.ReliableOrdered);
+                            SendDataToPeer(ref callbackPacket, DeliveryMethod.ReliableOrdered, peer);
 
                             ResyncInventoryIdPacket resyncPacket = new(playerToApply.NetId);
-                            SendDataToPeer(peer, ref resyncPacket, DeliveryMethod.ReliableOrdered);
+                            SendDataToPeer(ref resyncPacket, DeliveryMethod.ReliableOrdered, peer);
                             return;
                         }
 
                         InventoryOperationHandler handler = new(result, packet.CallbackId, packet.NetId, peer, this);
                         operationCallbackPacket = new(playerToApply.NetId, packet.CallbackId, EOperationStatus.Started);
-                        SendDataToPeer(peer, ref operationCallbackPacket, DeliveryMethod.ReliableOrdered);
+                        SendDataToPeer(ref operationCallbackPacket, DeliveryMethod.ReliableOrdered, peer);
 
-                        SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
+                        SendData(ref packet, DeliveryMethod.ReliableOrdered, peer);
                         handler.OperationResult.Value.method_1(handler.HandleResult);
                     }
                     else
@@ -1239,10 +1218,10 @@ namespace Fika.Core.Networking
                     {
                         Error = exception.Message
                     };
-                    SendDataToPeer(peer, ref callbackPacket, DeliveryMethod.ReliableOrdered);
+                    SendDataToPeer(ref callbackPacket, DeliveryMethod.ReliableOrdered, peer);
 
                     ResyncInventoryIdPacket resyncPacket = new(playerToApply.NetId);
-                    SendDataToPeer(peer, ref resyncPacket, DeliveryMethod.ReliableOrdered);
+                    SendDataToPeer(ref resyncPacket, DeliveryMethod.ReliableOrdered, peer);
                 }
             }
         }
@@ -1256,14 +1235,11 @@ namespace Fika.Core.Networking
                     playerToApply.HandleDamagePacket(in packet);
                     return;
                 }
-
-                SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
             }
         }
 
         private void OnArmorDamagePacketReceived(ArmorDamagePacket packet, NetPeer peer)
         {
-            SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
             if (_coopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer playerToApply))
             {
                 playerToApply.HandleArmorDamagePacket(packet);
@@ -1272,7 +1248,6 @@ namespace Fika.Core.Networking
 
         private void OnWeaponPacketReceived(WeaponPacket packet, NetPeer peer)
         {
-            SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
             if (_coopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer playerToApply))
             {
                 packet.SubPacket.Execute(playerToApply);
@@ -1281,8 +1256,6 @@ namespace Fika.Core.Networking
 
         private void OnPlayerStatePacketReceived(PlayerStatePacket packet, NetPeer peer)
         {
-            SendDataToAll(ref packet, DeliveryMethod.Unreliable, peer);
-
             if (_snapshotCount < _snapshots.Length)
             {
                 _snapshots[_snapshotCount] = packet;
@@ -1338,7 +1311,7 @@ namespace Fika.Core.Networking
             int fps = (int)(1f / Time.unscaledDeltaTime);
             StatisticsPacket packet = new(fps);
 
-            SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+            SendData(ref packet, DeliveryMethod.ReliableUnordered);
         }
 
         protected void OnDestroy()
@@ -1359,7 +1332,34 @@ namespace Fika.Core.Networking
             FikaEventDispatcher.DispatchEvent(new FikaNetworkManagerDestroyedEvent(this));
         }
 
-        public void SendDataToAll<T>(ref T packet, DeliveryMethod deliveryMethod, NetPeer peerToExclude = null) where T : INetSerializable
+        public void SendData<T>(ref T packet, DeliveryMethod deliveryMethod, bool multicast = false) where T : INetSerializable
+        {
+            _dataWriter.Reset();
+            _dataWriter.PutEnum(EPacketType.Serializable);
+
+            _packetProcessor.WriteNetSerializable(_dataWriter, ref packet);
+            _netServer.SendToAll(_dataWriter.AsReadOnlySpan, deliveryMethod);
+        }
+
+        public void SendData<T>(ref T packet, DeliveryMethod deliveryMethod, NetPeer peerToIgnore) where T : INetSerializable
+        {
+            _dataWriter.Reset();
+            _dataWriter.PutEnum(EPacketType.Serializable);
+
+            _packetProcessor.WriteNetSerializable(_dataWriter, ref packet);
+            _netServer.SendToAll(_dataWriter.AsReadOnlySpan, deliveryMethod, peerToIgnore);
+        }
+
+        public void SendDataToPeer<T>(ref T packet, DeliveryMethod deliveryMethod, NetPeer peer) where T : INetSerializable
+        {
+            _dataWriter.Reset();
+            _dataWriter.PutEnum(EPacketType.Serializable);
+
+            _packetProcessor.WriteNetSerializable(_dataWriter, ref packet);
+            peer.Send(_dataWriter.AsReadOnlySpan, deliveryMethod);
+        }
+
+        /*public void SendDataToAll<T>(ref T packet, DeliveryMethod deliveryMethod, NetPeer peerToExclude = null) where T : INetSerializable
         {
             _dataWriter.Reset();
 
@@ -1376,7 +1376,7 @@ namespace Fika.Core.Networking
 
             _packetProcessor.WriteNetSerializable(_dataWriter, ref packet);
             _netServer.SendToAll(_dataWriter.AsReadOnlySpan, deliveryMethod);
-        }
+        }*/
 
         public void SendReusableToAll<T>(T packet, DeliveryMethod deliveryMethod, NetPeer peerToExlude = null) where T : class, IReusable, new()
         {
@@ -1396,14 +1396,14 @@ namespace Fika.Core.Networking
             packet.Flush();
         }
 
-        public void SendDataToPeer<T>(NetPeer peer, ref T packet, DeliveryMethod deliveryMethod) where T : INetSerializable
+        /*public void SendDataToPeer<T>(NetPeer peer, ref T packet, DeliveryMethod deliveryMethod) where T : INetSerializable
         {
             _dataWriter.Reset();
 
             _dataWriter.PutEnum(EPacketType.Serializable);
             _packetProcessor.WriteNetSerializable(_dataWriter, ref packet);
             peer.Send(_dataWriter.AsReadOnlySpan, deliveryMethod);
-        }
+        }*/
 
         public void SendVOIPData(ArraySegment<byte> data, NetPeer peer = null)
         {
@@ -1433,7 +1433,7 @@ namespace Fika.Core.Networking
                 return;
             }
 
-            SendDataToPeer(peer, ref packet, DeliveryMethod.ReliableOrdered);
+            SendDataToPeer(ref packet, DeliveryMethod.ReliableOrdered, peer);
         }
 
         public void OnPeerConnected(NetPeer peer)
@@ -1453,7 +1453,7 @@ namespace Fika.Core.Networking
                 Type = EGenericSubPacketType.UpdateBackendData,
                 SubPacket = new UpdateBackendData(PlayerAmount)
             };
-            SendDataToAll(ref genericPacket, DeliveryMethod.ReliableOrdered);
+            SendData(ref genericPacket, DeliveryMethod.ReliableOrdered);
         }
 
         public void OnNetworkError(IPEndPoint endPoint, SocketError socketErrorCode)
@@ -1562,7 +1562,7 @@ namespace Fika.Core.Networking
                 };
 
                 packet.SubPacket.Execute();
-                SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered, peer);
+                SendData(ref packet, DeliveryMethod.ReliableOrdered, peer);
             }
 
             PlayerAmount--;
@@ -1572,7 +1572,7 @@ namespace Fika.Core.Networking
                 Type = EGenericSubPacketType.UpdateBackendData,
                 SubPacket = new UpdateBackendData(PlayerAmount)
             };
-            SendDataToAll(ref genericPacket, DeliveryMethod.ReliableOrdered);
+            SendData(ref genericPacket, DeliveryMethod.ReliableOrdered);
 
             if (_netServer.ConnectedPeersCount == 0)
             {
@@ -1619,6 +1619,13 @@ namespace Fika.Core.Networking
 
         public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
         {
+            // check for multicast
+            if (reader.GetByte() == 1)
+            {
+                // we're skipping the multicast byte as clients do not care about it
+                _netServer.SendToAll(reader.RawData.AsSpan(1), deliveryMethod, peer);
+            }
+
             switch (reader.GetEnum<EPacketType>())
             {
                 case EPacketType.Serializable:
@@ -1718,16 +1725,16 @@ namespace Fika.Core.Networking
                 {
                     _server._logger.LogError($"Error in operation: {result.Error ?? "An unknown error has occured"}");
                     operationCallbackPacket = new(_netId, _operationId, EOperationStatus.Failed, result.Error ?? "An unknown error has occured");
-                    _server.SendDataToPeer(_peer, ref operationCallbackPacket, DeliveryMethod.ReliableOrdered);
+                    _server.SendDataToPeer(ref operationCallbackPacket, DeliveryMethod.ReliableOrdered, _peer);
 
                     ResyncInventoryIdPacket resyncPacket = new(_netId);
-                    _server.SendDataToPeer(_peer, ref resyncPacket, DeliveryMethod.ReliableOrdered);
+                    _server.SendDataToPeer(ref resyncPacket, DeliveryMethod.ReliableOrdered, _peer);
 
                     return;
                 }
 
                 operationCallbackPacket = new(_netId, _operationId, EOperationStatus.Succeeded);
-                _server.SendDataToPeer(_peer, ref operationCallbackPacket, DeliveryMethod.ReliableOrdered);
+                _server.SendDataToPeer(ref operationCallbackPacket, DeliveryMethod.ReliableOrdered, _peer);
             }
         }
     }

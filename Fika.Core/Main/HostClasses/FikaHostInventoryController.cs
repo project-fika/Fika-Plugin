@@ -113,7 +113,7 @@ namespace Fika.Core.Main.HostClasses
                                 Nickname = _fikaPlayer.Profile.Info.MainProfileNickname,
                                 ItemId = lootedItem.TemplateId,
                             };
-                            _fikaPlayer.PacketSender.SendPacket(ref packet);
+                            _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
                         }
                     }
                     base.vmethod_1(operation, callback);
@@ -162,7 +162,7 @@ namespace Fika.Core.Main.HostClasses
                     OperationBytes = eftWriter.ToArray()
                 };
 
-                _fikaPlayer.PacketSender.SendPacket(ref packet);
+                _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered);
                 return;
             }
             handler.operation.Dispose();

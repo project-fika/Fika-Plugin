@@ -29,7 +29,7 @@ namespace Fika.Core.Main.Patches
                 Data = packet
             };
 
-            Singleton<FikaServer>.Instance.SendDataToAll(ref btrPacket, DeliveryMethod.Unreliable);
+            Singleton<IFikaNetworkManager>.Instance.SendData(ref btrPacket, DeliveryMethod.Unreliable);
         }
     }
 }

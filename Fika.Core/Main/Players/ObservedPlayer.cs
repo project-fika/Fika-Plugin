@@ -24,6 +24,7 @@ using Fika.Core.Networking.Packets.Player;
 using Fika.Core.Utils;
 using HarmonyLib;
 using JsonType;
+using LiteNetLib;
 using RootMotion.FinalIK;
 using System;
 using System.Collections;
@@ -490,7 +491,7 @@ namespace Fika.Core.Main.Players
                 SourceId = DamageInfo.SourceId,
                 WeaponId = DamageInfo.Weapon != null ? DamageInfo.Weapon.Id : string.Empty
             };
-            PacketSender.SendPacket(ref packet);
+            PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
         }
 
         public override void ApplyDamageInfo(DamageInfoStruct DamageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, float absorbed)
@@ -533,7 +534,7 @@ namespace Fika.Core.Main.Players
                 ArmorDamage = DamageInfo.ArmorDamage,
                 WeaponId = DamageInfo.Weapon.Id
             };
-            PacketSender.SendPacket(ref packet);
+            PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
 
             return new()
             {
@@ -591,7 +592,7 @@ namespace Fika.Core.Main.Players
                 Material = materialType,
                 WeaponId = damageInfo.Weapon.Id
             };
-            PacketSender.SendPacket(ref packet);
+            PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
 
             // Run this to get weapon skill
             ManageAggressor(damageInfo, bodyPartType, colliderType);
@@ -686,7 +687,7 @@ namespace Fika.Core.Main.Players
                 Material = materialType,
                 WeaponId = damageInfo.Weapon.Id
             };
-            PacketSender.SendPacket(ref packet);
+            PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
 
             // Run this to get weapon skill
             ManageAggressor(damageInfo, bodyPartType, colliderType);
@@ -1296,7 +1297,7 @@ namespace Fika.Core.Main.Players
                     Type = BotStatePacket.EStateType.LoadBot
                 };
 
-                PacketSender.Client.SendData(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+                PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered);
 
                 IVaultingComponent vaultingComponent = playerTraverse.Field<IVaultingComponent>("_vaultingComponent").Value;
                 if (vaultingComponent != null)

@@ -28,8 +28,7 @@ namespace Fika.Core.Main.PacketHandlers
     {
         public bool Enabled { get; set; }
         public bool SendState { get; set; }
-        public FikaServer Server { get; set; }
-        public FikaClient Client { get; set; }
+        public IFikaNetworkManager NetworkManager { get; set; }
 
         private FikaPlayer _player;
         private PlayerStatePacket _state;
@@ -62,10 +61,10 @@ namespace Fika.Core.Main.PacketHandlers
         {
             ServerPacketSender sender = player.gameObject.AddComponent<ServerPacketSender>();
             sender._player = player;
-            sender.Server = Singleton<FikaServer>.Instance;
+            sender.NetworkManager = Singleton<FikaServer>.Instance;
             sender.enabled = false;
             sender._lastPingTime = DateTime.Now;
-            sender._updateRate = sender.Server.SendRate;
+            sender._updateRate = sender.NetworkManager.SendRate;
             sender._updateCount = 0;
             sender._updatesPerTick = 1f / sender._updateRate;
             sender._state = new(player.NetId);
@@ -91,7 +90,7 @@ namespace Fika.Core.Main.PacketHandlers
                 return;
             }
 
-            Server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+            NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered);
         }
 
         protected void Update()
@@ -112,7 +111,7 @@ namespace Fika.Core.Main.PacketHandlers
         private void SendPlayerState()
         {
             _state.UpdateData(_player, IsMoving);
-            Server.SendDataToAll(ref _state, DeliveryMethod.Unreliable);
+            NetworkManager.SendData(ref _state, DeliveryMethod.Unreliable);
         }
 
         protected void LateUpdate()
@@ -221,7 +220,7 @@ namespace Fika.Core.Main.PacketHandlers
                     LocaleId = string.IsNullOrEmpty(localeId) ? string.Empty : localeId
                 };
 
-                SendPacket(ref packet, true);
+                NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered);
 
                 if (FikaPlugin.PlayPingAnimation.Value && _player.HealthController.IsAlive)
                 {
@@ -232,14 +231,7 @@ namespace Fika.Core.Main.PacketHandlers
 
         public void DestroyThis()
         {
-            if (Server != null)
-            {
-                Server = null;
-            }
-            if (Client != null)
-            {
-                Client = null;
-            }
+            NetworkManager = null;
             Destroy(this);
         }
     }

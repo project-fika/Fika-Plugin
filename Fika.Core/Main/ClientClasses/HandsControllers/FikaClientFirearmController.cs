@@ -6,6 +6,7 @@ using EFT.InventoryLogic;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Packets.FirearmController;
+using LiteNetLib;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -136,7 +137,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                     NetId = _fikaPlayer.NetId,
                     Type = EFirearmSubPacketType.ToggleBipod
                 };
-                _fikaPlayer.PacketSender.SendPacket(ref packet);
+                _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             }
             return success;
         }
@@ -151,7 +152,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                     NetId = _fikaPlayer.NetId,
                     Type = EFirearmSubPacketType.CheckChamber
                 };
-                _fikaPlayer.PacketSender.SendPacket(ref packet);
+                _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             }
             return flag;
         }
@@ -166,7 +167,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                     NetId = _fikaPlayer.NetId,
                     Type = EFirearmSubPacketType.CheckAmmo
                 };
-                _fikaPlayer.PacketSender.SendPacket(ref packet);
+                _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             }
             return flag;
         }
@@ -185,7 +186,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                         FireMode = fireMode
                     }
                 };
-                _fikaPlayer.PacketSender.SendPacket(ref packet);
+                _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             }
             return flag;
         }
@@ -202,7 +203,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                     AimingIndex = IsAiming ? Item.AimIndex.Value : -1
                 }
             };
-            _fikaPlayer.PacketSender.SendPacket(ref packet);
+            _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
         }
 
         public override void SetAim(bool value)
@@ -221,7 +222,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                         AimingIndex = IsAiming ? Item.AimIndex.Value : -1
                     }
                 };
-                _fikaPlayer.PacketSender.SendPacket(ref packet);
+                _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             }
         }
 
@@ -239,7 +240,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                         AimingIndex = -1
                     }
                 };
-                _fikaPlayer.PacketSender.SendPacket(ref packet);
+                _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             }
         }
 
@@ -253,7 +254,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                     NetId = _fikaPlayer.NetId,
                     Type = EFirearmSubPacketType.CheckFireMode
                 };
-                _fikaPlayer.PacketSender.SendPacket(ref packet);
+                _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             }
             return flag;
         }
@@ -267,7 +268,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                 Type = EFirearmSubPacketType.ShotInfo,
                 SubPacket = new ShotInfoPacket(chamberIndex, underbarrelShot, EShotType.DryFire)
             };
-            _fikaPlayer.PacketSender.SendPacket(ref packet);
+            _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
         }
 
         public override bool ExamineWeapon()
@@ -280,7 +281,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                     NetId = _fikaPlayer.NetId,
                     Type = EFirearmSubPacketType.ExamineWeapon
                 };
-                _fikaPlayer.PacketSender.SendPacket(ref packet);
+                _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             }
             return flag;
         }
@@ -320,7 +321,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                 Weapon.IsUnderBarrelDeviceActive || _isGrenadeLauncher, weapon.MalfState.SlideOnOverheatReached, shotType)
             };
 
-            _fikaPlayer.PacketSender.SendPacket(ref packet);
+            _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             _fikaPlayer.StatisticsManager.OnShot(Weapon, ammo);
 
             base.InitiateShot(weapon, ammo, shotPosition, shotDirection, fireportPosition, chamberIndex, overheat);
@@ -341,7 +342,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                         MagId = magazine.Id
                     }
                 };
-                _fikaPlayer.PacketSender.SendPacket(ref packet);
+                _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
                 return;
             }
 
@@ -397,7 +398,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                         AmmoIds = reloadingAmmoIds
                     }
                 };
-                _fikaPlayer.PacketSender.SendPacket(ref packet);
+                _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
 
                 CurrentOperation.ReloadGrenadeLauncher(ammoPack, callback);
                 return;
@@ -454,7 +455,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                         States = lightsStates
                     }
                 };
-                _fikaPlayer.PacketSender.SendPacket(ref packet);
+                _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             }
 
             return base.SetLightsState(lightsStates, force);
@@ -494,7 +495,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                     States = scopeStates
                 }
             };
-            _fikaPlayer.PacketSender.SendPacket(ref packet);
+            _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
         }
 
         public override void ShotMisfired(AmmoItemClass ammo, Weapon.EMalfunctionState malfunctionState, float overheat)
@@ -526,7 +527,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                 Type = EFirearmSubPacketType.ShotInfo,
                 SubPacket = new ShotInfoPacket(ammo.TemplateId, overheat, shotType)
             };
-            _fikaPlayer.PacketSender.SendPacket(ref packet);
+            _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
 
             base.ShotMisfired(ammo, malfunctionState, overheat);
         }
@@ -541,7 +542,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                     NetId = _fikaPlayer.NetId,
                     Type = EFirearmSubPacketType.ToggleLauncher
                 };
-                _fikaPlayer.PacketSender.SendPacket(ref packet);
+                _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             }
             return flag;
         }
@@ -554,7 +555,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                 NetId = _fikaPlayer.NetId,
                 Type = EFirearmSubPacketType.Loot
             };
-            _fikaPlayer.PacketSender.SendPacket(ref packet);
+            _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
         }
 
         public override void SetInventoryOpened(bool opened)
@@ -569,7 +570,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                     Open = opened
                 }
             };
-            _fikaPlayer.PacketSender.SendPacket(ref packet);
+            _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
         }
 
         public override void ChangeLeftStance()
@@ -584,7 +585,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                     LeftStance = _fikaPlayer.MovementContext.LeftStanceEnabled
                 }
             };
-            _fikaPlayer.PacketSender.SendPacket(ref packet);
+            _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
         }
 
         public override void SendStartOneShotFire()
@@ -598,7 +599,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                     StartOneShotFire = true
                 }
             };
-            _fikaPlayer.PacketSender.SendPacket(ref packet);
+            _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
         }
 
         public override void CreateFlareShot(AmmoItemClass flareItem, Vector3 shotPosition, Vector3 forward)
@@ -614,7 +615,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                     AmmoTemplateId = flareItem.TemplateId
                 }
             };
-            _fikaPlayer.PacketSender.SendPacket(ref packet);
+            _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             base.CreateFlareShot(flareItem, shotPosition, forward);
         }
 
@@ -631,7 +632,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                     ShotForward = forward
                 }
             };
-            _fikaPlayer.PacketSender.SendPacket(ref packet);
+            _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             base.CreateRocketShot(rocketItem, shotPosition, forward, smokeport);
         }
 
@@ -648,7 +649,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                     AmmoLoadedToMag = amount
                 }
             };
-            _fikaPlayer.PacketSender.SendPacket(ref packet);
+            _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
         }
 
         public override void RollCylinder(bool rollToZeroCamora)
@@ -667,7 +668,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                     RollToZeroCamora = rollToZeroCamora
                 }
             };
-            _fikaPlayer.PacketSender.SendPacket(ref packet);
+            _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
 
             CurrentOperation.RollCylinder(null, rollToZeroCamora);
         }
@@ -687,7 +688,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                         AmmoLoadedToMag = amount
                     }
                 };
-                _fikaPlayer.PacketSender.SendPacket(ref packet);
+                _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             }
         }
 
@@ -698,7 +699,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                 NetId = _fikaPlayer.NetId,
                 Type = EFirearmSubPacketType.ReloadBoltAction
             };
-            _fikaPlayer.PacketSender.SendPacket(ref packet);
+            _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
         }
 
         private class FirearmClass1(Player.FirearmController controller) : CylinderReloadOperationClass(controller)
@@ -858,7 +859,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                             LocationDescription = locationDescription,
                         }
                     };
-                    _fikaPlayer.PacketSender.SendPacket(ref packet);
+                    _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
                 }
             }
         }
@@ -890,7 +891,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                             AmmoIds = _ammoIds
                         }
                     };
-                    _fikaPlayer.PacketSender.SendPacket(ref packet);
+                    _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
                 }
             }
         }
@@ -932,7 +933,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                             LocationDescription = locationDescription
                         }
                     };
-                    _fikaPlayer.PacketSender.SendPacket(ref packet);
+                    _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
                 }
             }
         }
@@ -957,7 +958,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                             AmmoIds = _ammoIds
                         }
                     };
-                    _fikaPlayer.PacketSender.SendPacket(ref packet);
+                    _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
                 }
             }
         }

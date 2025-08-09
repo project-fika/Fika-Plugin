@@ -196,7 +196,7 @@ namespace Fika.Core.Main.Components
         private void SyncPlayersWithClients()
         {
             CharacterSyncPacket characterSyncPacket = new(Players);
-            Singleton<FikaServer>.Instance.SendDataToAll(ref characterSyncPacket, DeliveryMethod.ReliableOrdered);
+            Singleton<IFikaNetworkManager>.Instance.SendData(ref characterSyncPacket, DeliveryMethod.ReliableOrdered);
         }
 
         protected void OnDestroy()

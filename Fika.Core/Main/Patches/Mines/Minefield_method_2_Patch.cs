@@ -5,6 +5,7 @@ using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Packets.Player;
 using Fika.Core.Patching;
+using LiteNetLib;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -86,7 +87,7 @@ namespace Fika.Core.Main.Patches
                         ColliderType = bodyPartCollider.BodyPartColliderType,
                         BodyPartType = bodyPartCollider.BodyPartType
                     };
-                    fikaPlayer.PacketSender.SendPacket(ref packet);
+                    fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
                     if (++num5 >= num3)
                     {
                         break;

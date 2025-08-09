@@ -7,6 +7,7 @@ using EFT.InventoryLogic.Operations;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Packets.Player;
 using JetBrains.Annotations;
+using LiteNetLib;
 using System.Threading.Tasks;
 using static EFT.Player;
 
@@ -63,7 +64,7 @@ namespace Fika.Core.Main.BotClasses
                     OperationBytes = eftWriter.ToArray()
                 };
 
-                _fikaBot.PacketSender.SendPacket(ref packet);
+                _fikaBot.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered);
             }
             HandleOperation(operation, callback).HandleExceptions();
         }

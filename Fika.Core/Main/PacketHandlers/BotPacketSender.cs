@@ -6,17 +6,14 @@ using Fika.Core.Main.Players;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Player;
 using LiteNetLib;
-using LiteNetLib.Utils;
 using UnityEngine;
 
 namespace Fika.Core.Main.PacketHandlers
 {
     public class BotPacketSender : MonoBehaviour, IPacketSender
     {
-        public bool Enabled { get; set; }
         public bool SendState { get; set; }
-        public FikaServer Server { get; set; }
-        public FikaClient Client { get; set; }
+        public IFikaNetworkManager NetworkManager { get; set; }
 
         private FikaPlayer _player;
         private bool _sendPackets;
@@ -34,10 +31,9 @@ namespace Fika.Core.Main.PacketHandlers
         {
             BotPacketSender sender = bot.gameObject.AddComponent<BotPacketSender>();
             sender._player = bot;
-            sender.Server = Singleton<FikaServer>.Instance;
+            sender.NetworkManager = Singleton<FikaServer>.Instance;
             sender._state = new(bot.NetId);
             sender._animHash = PlayerAnimator.INERT_PARAM_HASH;
-            sender.Enabled = true;
             sender.SendState = true;
             return sender;
         }
@@ -57,14 +53,6 @@ namespace Fika.Core.Main.PacketHandlers
             _sendPackets = false;
         }
 
-        public void SendPacket<T>(ref T packet, bool force = false) where T : INetSerializable
-        {
-            if (Server != null)
-            {
-                Server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
-            }
-        }
-
         public void SendPlayerState()
         {
             if (!_sendPackets)
@@ -73,19 +61,12 @@ namespace Fika.Core.Main.PacketHandlers
             }
 
             _state.UpdateData(_player, IsMoving);
-            Server.SendDataToAll(ref _state, DeliveryMethod.Unreliable);
+            NetworkManager.SendData(ref _state, DeliveryMethod.Unreliable);
         }
 
         public void DestroyThis()
         {
-            if (Server != null)
-            {
-                Server = null;
-            }
-            if (Client != null)
-            {
-                Client = null;
-            }
+            NetworkManager = null;
             Destroy(this);
         }
     }

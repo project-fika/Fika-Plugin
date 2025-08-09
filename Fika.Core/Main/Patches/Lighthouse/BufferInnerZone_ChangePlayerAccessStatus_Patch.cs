@@ -30,7 +30,7 @@ namespace Fika.Core.Main.Patches
                 Available = status
             };
 
-            Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+            Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
         }
     }
 }

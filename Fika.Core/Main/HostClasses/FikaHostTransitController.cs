@@ -97,7 +97,7 @@ namespace Fika.Core.Main.HostClasses
                     }
                 };
 
-                _server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+                _server.SendData(ref packet, DeliveryMethod.ReliableOrdered);
                 return;
             }
             Dictionary_0[point.parameters.id].GroupEnter(player);
@@ -134,7 +134,7 @@ namespace Fika.Core.Main.HostClasses
                 }
             };
 
-            _server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+            _server.SendData(ref packet, DeliveryMethod.ReliableOrdered);
         }
 
         public override void Sizes(Dictionary<int, byte> sizes)
@@ -164,7 +164,7 @@ namespace Fika.Core.Main.HostClasses
                 }
             };
 
-            _server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+            _server.SendData(ref packet, DeliveryMethod.ReliableOrdered);
         }
 
         public override void Timers(int pointId, Dictionary<int, ushort> timers)
@@ -196,7 +196,7 @@ namespace Fika.Core.Main.HostClasses
                 }
             };
 
-            _server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+            _server.SendData(ref packet, DeliveryMethod.ReliableOrdered);
         }
 
         public override void InactivePointNotification(int playerId, int pointId)
@@ -219,7 +219,7 @@ namespace Fika.Core.Main.HostClasses
                 }
             };
 
-            _server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+            _server.SendData(ref packet, DeliveryMethod.ReliableOrdered);
         }
 
         public override void InteractWithTransit(Player player, TransitInteractionPacketStruct packet)
@@ -302,7 +302,7 @@ namespace Fika.Core.Main.HostClasses
                     }
                 };
 
-                _server.SendDataToAll(ref messagePacket, DeliveryMethod.ReliableOrdered);
+                _server.SendData(ref messagePacket, DeliveryMethod.ReliableOrdered);
                 return false;
             }
 
@@ -360,7 +360,7 @@ namespace Fika.Core.Main.HostClasses
 
             _transittedPlayers.Add(player.Id);
 
-            _server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+            _server.SendData(ref packet, DeliveryMethod.ReliableOrdered);
         }
 
         public override void Dispose()

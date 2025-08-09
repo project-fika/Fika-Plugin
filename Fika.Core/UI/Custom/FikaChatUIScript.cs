@@ -108,14 +108,7 @@ namespace Fika.Core.UI.Custom
             AddMessage(chatMessage);
 
             TextMessagePacket packet = new(_nickname, message);
-            if (_isServer)
-            {
-                Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
-            }
-            else
-            {
-                Singleton<FikaClient>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
-            }
+            Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             Singleton<GUISounds>.Instance.PlayChatSound(ESocialNetworkSoundType.OutgoingMessage);
             _fikaChatUI.InputField.DeactivateInputField();
             _fikaChatUI.InputField.text = string.Empty;

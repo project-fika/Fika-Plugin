@@ -16,6 +16,7 @@ using Fika.Core.Networking.Packets.Communication;
 using Fika.Core.Networking.Packets.Player;
 using Fika.Core.Utils;
 using HarmonyLib;
+using LiteNetLib;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -163,7 +164,7 @@ namespace Fika.Core.Main.Players
                             PhraseIndex = clip.NetId
                         }
                     };
-                    PacketSender.SendPacket(ref packet);
+                    PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
                 }
             }
             else
@@ -337,7 +338,7 @@ namespace Fika.Core.Main.Players
                 };
                 if (PacketSender != null)
                 {
-                    PacketSender.SendPacket(ref packet, true);
+                    PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
                 }
             }
         }
@@ -354,7 +355,7 @@ namespace Fika.Core.Main.Players
                 };
                 if (PacketSender != null)
                 {
-                    PacketSender.SendPacket(ref packet, true);
+                    PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
                 }
             }
         }
@@ -376,7 +377,7 @@ namespace Fika.Core.Main.Players
                         Type = BotStatePacket.EStateType.DisposeBot
                     };
 
-                    server.SendDataToAll(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+                    server.SendData(ref packet, DeliveryMethod.ReliableOrdered);
                     fikaGame.GameController.Bots.Remove(ProfileId);
                 }
             }
@@ -419,7 +420,7 @@ namespace Fika.Core.Main.Players
                         ItemId = weapon.Id
                     }
                 };
-                _fikaBot.PacketSender.SendPacket(ref packet);
+                _fikaBot.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             }
 
             internal void HandleResult(IResult result)

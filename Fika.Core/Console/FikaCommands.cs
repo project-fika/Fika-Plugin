@@ -298,12 +298,7 @@ namespace Fika.Core.Console
                 Item = item
             };
 
-            if (FikaBackendUtils.IsServer)
-            {
-                Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
-                return;
-            }
-            Singleton<FikaClient>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+            Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
         }
 
         /// <summary>

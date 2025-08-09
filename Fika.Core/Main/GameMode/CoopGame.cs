@@ -317,7 +317,7 @@ namespace Fika.Core.Main.GameMode
                     packet.PlayerInfoPacket.IsStationary = fikaPlayer.MovementContext.IsStationaryWeaponInHands;
                 }
 
-                client.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+                client.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             }
 
             _logger.LogInfo("Adding debug component...");

@@ -63,7 +63,7 @@ namespace Fika.Core.Main.ClientClasses
                     }
                 };
 
-                Singleton<FikaClient>.Instance.SendData(ref request, DeliveryMethod.ReliableOrdered);
+                Singleton<IFikaNetworkManager>.Instance.SendData(ref request, DeliveryMethod.ReliableOrdered);
                 return;
             }
 
@@ -119,7 +119,7 @@ namespace Fika.Core.Main.ClientClasses
                                 Nickname = _fikaPlayer.Profile.Info.MainProfileNickname,
                                 ItemId = lootedItem.TemplateId
                             };
-                            _fikaPlayer.PacketSender.SendPacket(ref questPacket);
+                            _fikaPlayer.PacketSender.NetworkManager.SendData(ref questPacket, DeliveryMethod.ReliableOrdered, true);
                         }
                     }
                     base.vmethod_1(operation, callback);
@@ -165,7 +165,7 @@ namespace Fika.Core.Main.ClientClasses
             ConsoleScreen.Log($"InvOperation: {operation.GetType().Name}, Id: {operation.Id}");
 #endif
 
-            _fikaPlayer.PacketSender.SendPacket(ref packet);
+            _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered);
         }
 
         public override bool HasCultistAmulet(out CultistAmuletItemClass amulet)

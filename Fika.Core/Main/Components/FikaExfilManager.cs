@@ -6,6 +6,7 @@ using Fika.Core.Main.GameMode;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.World;
+using LiteNetLib;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -126,7 +127,7 @@ namespace Fika.Core.Main.Components
                 SubPacket = new SecretExfilFound(mainPlayer.GroupId, exitName)
             };
 
-            mainPlayer.PacketSender.SendPacket(ref packet);
+            mainPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
         }
 
         public void Stop()
@@ -229,7 +230,7 @@ namespace Fika.Core.Main.Components
                         SubPacket = new ExfilCountdown(point.Settings.Name, point.ExfiltrationStartTime)
                     };
 
-                    mainPlayer.PacketSender.SendPacket(ref packet);
+                    mainPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
                 }
                 _countdownPoints.Add(point);
             }

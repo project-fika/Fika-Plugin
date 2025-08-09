@@ -172,7 +172,7 @@ namespace Fika.Core.Main.GameMode
                 SessionTime = SessionTime.Value
             };
 
-            server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+            server.SendData(ref packet, DeliveryMethod.ReliableOrdered);
             LootData = null;
 
             yield break;
@@ -244,7 +244,7 @@ namespace Fika.Core.Main.GameMode
                 IsZombie = profile.Info.Settings.UseSimpleAnimator
             }, true, true, position, netId);
             packet.PlayerInfoPacket.HealthByteArray = profile.Health.SerializeHealthInfo();
-            Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+            Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
 
             if (server.NetServer.ConnectedPeersCount > 0)
             {
@@ -514,7 +514,7 @@ namespace Fika.Core.Main.GameMode
             {
                 AmountOfPeers = server.NetServer.ConnectedPeersCount + 1
             };
-            server.SendDataToAll(ref continuePacket, DeliveryMethod.ReliableOrdered);
+            server.SendData(ref continuePacket, DeliveryMethod.ReliableOrdered);
             SetStatusModel status = new(FikaBackendUtils.GroupId, LobbyEntry.ELobbyStatus.IN_GAME);
             await FikaRequestHandler.UpdateSetStatus(status);
         }
@@ -554,7 +554,7 @@ namespace Fika.Core.Main.GameMode
                 ReadyPlayers = server.ReadyClients
             };
 
-            server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+            server.SendData(ref packet, DeliveryMethod.ReliableOrdered);
 
 #if DEBUG
             Logger.LogWarning("Server: Waiting for server.ReadyClients < expected players, expected: " + expectedPlayers);
@@ -581,7 +581,7 @@ namespace Fika.Core.Main.GameMode
                 ReadyPlayers = server.ReadyClients
             };
 
-            server.SendDataToAll(ref finalPacket, DeliveryMethod.ReliableOrdered);
+            server.SendData(ref finalPacket, DeliveryMethod.ReliableOrdered);
         }
 
         public override async Task GenerateWeathers()
@@ -894,7 +894,7 @@ namespace Fika.Core.Main.GameMode
                         Type = EGenericSubPacketType.UpdateBackendData,
                         SubPacket = new GenericSubPackets.UpdateBackendData(hostController.AliveTransitPlayers)
                     };
-                    Singleton<FikaServer>.Instance.SendDataToAll(ref backendPacket, DeliveryMethod.ReliableOrdered);
+                    Singleton<IFikaNetworkManager>.Instance.SendData(ref backendPacket, DeliveryMethod.ReliableOrdered);
                 }
             }
 
@@ -906,7 +906,7 @@ namespace Fika.Core.Main.GameMode
 
             try // This is to allow clients to extract if they lose connection
             {
-                Singleton<FikaServer>.Instance.SendDataToAll(ref genericPacket, DeliveryMethod.ReliableOrdered);
+                Singleton<IFikaNetworkManager>.Instance.SendData(ref genericPacket, DeliveryMethod.ReliableOrdered);
                 ClearHostAI(player);
             }
             catch
@@ -1158,7 +1158,7 @@ namespace Fika.Core.Main.GameMode
             };
             Buffer.BlockCopy(writer.Buffer, 0, packet.Data, 0, writer.BytesWritten);
 
-            Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+            Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
         }
 
         private bool IsBarbedWireTrap(TrapSyncable trap)

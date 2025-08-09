@@ -4,6 +4,7 @@ using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Packets.Player;
+using LiteNetLib;
 
 namespace Fika.Core.Main.BotClasses
 {
@@ -54,7 +55,7 @@ namespace Fika.Core.Main.BotClasses
             if (packet.SyncType == NetworkHealthSyncPacketStruct.ESyncType.IsAlive && !packet.Data.IsAlive.IsAlive)
             {
                 HealthSyncPacket deathPacket = _fikaBot.SetupCorpseSyncPacket(packet);
-                _fikaBot.PacketSender.SendPacket(ref deathPacket);
+                _fikaBot.PacketSender.NetworkManager.SendData(ref deathPacket, DeliveryMethod.ReliableUnordered, true);
                 return;
             }
 
@@ -65,7 +66,7 @@ namespace Fika.Core.Main.BotClasses
                     NetId = _fikaBot.NetId,
                     Packet = packet
                 };
-                _fikaBot.PacketSender.SendPacket(ref netPacket);
+                _fikaBot.PacketSender.NetworkManager.SendData(ref netPacket, DeliveryMethod.ReliableOrdered, true);
             }
         }
     }

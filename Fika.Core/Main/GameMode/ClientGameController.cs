@@ -20,6 +20,7 @@ using Fika.Core.Utils;
 using LiteNetLib;
 using System;
 using System.Collections;
+using System.Net.Sockets;
 using System.Threading.Tasks;
 using UnityEngine;
 using static Fika.Core.Networking.Packets.SubPacket;
@@ -430,7 +431,7 @@ namespace Fika.Core.Main.GameMode
 
             try // This is to allow clients to extract if they lose connection
             {
-                Singleton<FikaClient>.Instance.SendData(ref genericPacket, DeliveryMethod.ReliableOrdered);
+                Singleton<IFikaNetworkManager>.Instance.SendData(ref genericPacket, DeliveryMethod.ReliableOrdered, true);
             }
             catch
             {

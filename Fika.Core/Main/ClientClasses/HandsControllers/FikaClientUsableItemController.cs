@@ -24,7 +24,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                 HasCompassState = true,
                 CompassState = isActive
             };
-            _fikaPlayer.PacketSender.SendPacket(ref packet);
+            _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered, true);
         }
 
         public override bool ExamineWeapon()
@@ -36,7 +36,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                 {
                     ExamineWeapon = true
                 };
-                _fikaPlayer.PacketSender.SendPacket(ref packet);
+                _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered, true);
             }
             return flag;
         }
@@ -52,7 +52,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                     HasAim = value,
                     AimState = isAiming
                 };
-                _fikaPlayer.PacketSender.SendPacket(ref packet);
+                _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered, true);
             }
         }
     }

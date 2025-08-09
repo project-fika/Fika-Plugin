@@ -10,11 +10,11 @@ namespace Fika.Core.Main.ObservedClasses
     public class ObservedQuestController(Profile profile, InventoryController inventoryController, IPlayerSearchController searchController, IQuestActions session)
         : GClass3800(profile, inventoryController, searchController, session)
     {
-        public void HandleInraidQuestPacket(InraidQuestPacket packet)
+        public void HandleInraidQuestPacket(InRaidQuestPacket packet)
         {
             switch (packet.Type)
             {
-                case InraidQuestPacket.InraidQuestType.Finish:
+                case InRaidQuestPacket.InraidQuestType.Finish:
                     {
                         FikaGlobals.LogInfo($"Processing {packet.Items.Count} items fom quest reward for {Profile.Info.MainProfileNickname}");
                         List<QuestRewardDataClass> readList = [];
@@ -53,7 +53,7 @@ namespace Fika.Core.Main.ObservedClasses
                         method_5(results);
                     }
                     break;
-                case InraidQuestPacket.InraidQuestType.Handover:
+                case InRaidQuestPacket.InraidQuestType.Handover:
                     {
                         FikaGlobals.LogInfo($"Discarding {packet.ItemIdsToRemove.Count} items from {Profile.Info.MainProfileNickname}");
                         List<Item> itemsToRemove = [];

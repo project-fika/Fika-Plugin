@@ -17,7 +17,6 @@ using Fika.Core.Networking.Packets.Communication;
 using Fika.Core.Networking.Packets.Player;
 using Fika.Core.UI.Custom;
 using LiteNetLib;
-using LiteNetLib.Utils;
 using System;
 using System.Linq;
 using UnityEngine;
@@ -26,10 +25,8 @@ namespace Fika.Core.Main.PacketHandlers
 {
     public class ClientPacketSender : MonoBehaviour, IPacketSender
     {
-        public bool Enabled { get; set; }
         public bool SendState { get; set; }
-        public FikaServer Server { get; set; }
-        public FikaClient Client { get; set; }
+        public IFikaNetworkManager NetworkManager { get; set; }
 
         private FikaPlayer _player;
         private PlayerStatePacket _state;
@@ -63,10 +60,10 @@ namespace Fika.Core.Main.PacketHandlers
         {
             ClientPacketSender sender = player.gameObject.AddComponent<ClientPacketSender>();
             sender._player = player;
-            sender.Client = Singleton<FikaClient>.Instance;
+            sender.NetworkManager = Singleton<FikaClient>.Instance;
             sender.enabled = false;
             sender._lastPingTime = DateTime.Now;
-            sender._updateRate = sender.Client.SendRate;
+            sender._updateRate = sender.NetworkManager.SendRate;
             sender._updateCount = 0;
             sender._updatesPerTick = 1f / sender._updateRate;
             sender._state = new(player.NetId);
@@ -77,22 +74,11 @@ namespace Fika.Core.Main.PacketHandlers
         public void Init()
         {
             enabled = true;
-            Enabled = true;
             SendState = true;
             if (_player.AbstractQuestControllerClass is ClientSharedQuestController sharedQuestController)
             {
                 sharedQuestController.LateInit();
             }
-        }
-
-        public void SendPacket<T>(ref T packet, bool forced = false) where T : INetSerializable
-        {
-            if (!Enabled && !forced)
-            {
-                return;
-            }
-
-            Client.SendData(ref packet, DeliveryMethod.ReliableOrdered);
         }
 
         protected void Update()
@@ -113,7 +99,7 @@ namespace Fika.Core.Main.PacketHandlers
         private void SendPlayerState()
         {
             _state.UpdateData(_player, IsMoving);
-            Client.SendData(ref _state, DeliveryMethod.Unreliable);
+            NetworkManager.SendData(ref _state, DeliveryMethod.Unreliable, true);
         }
 
         protected void LateUpdate()
@@ -222,7 +208,7 @@ namespace Fika.Core.Main.PacketHandlers
                     LocaleId = string.IsNullOrEmpty(localeId) ? string.Empty : localeId
                 };
 
-                SendPacket(ref packet, true);
+                NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
 
                 if (FikaPlugin.PlayPingAnimation.Value && _player.HealthController.IsAlive)
                 {
@@ -233,14 +219,7 @@ namespace Fika.Core.Main.PacketHandlers
 
         public void DestroyThis()
         {
-            if (Server != null)
-            {
-                Server = null;
-            }
-            if (Client != null)
-            {
-                Client = null;
-            }
+            NetworkManager = null;
             Destroy(this);
         }
     }

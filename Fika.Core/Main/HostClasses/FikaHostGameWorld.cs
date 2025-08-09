@@ -102,7 +102,7 @@ namespace Fika.Core.Main.HostClasses
                 SubPacket = new MineEvent(directional.transform.position)
             };
 
-            Server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+            Server.SendData(ref packet, DeliveryMethod.ReliableOrdered);
         }
 
         public override void Dispose()
@@ -175,7 +175,7 @@ namespace Fika.Core.Main.HostClasses
                 }
             };
 
-            Server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+            Server.SendData(ref packet, DeliveryMethod.ReliableOrdered);
         }
 
         public override void TriggerTripwire(TripwireSynchronizableObject tripwire)

@@ -108,7 +108,7 @@ namespace Fika.Core.Main.HostClasses
                 SubPacket = new BorderZoneEvent(player.iPlayer.ProfileId, zone.Id)
             };
 
-            _server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+            _server.SendData(ref packet, DeliveryMethod.ReliableOrdered);
         }
     }
 }

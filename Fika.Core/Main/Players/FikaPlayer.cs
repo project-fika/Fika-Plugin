@@ -25,6 +25,7 @@ using Fika.Core.Networking.Packets.World;
 using Fika.Core.Networking.VOIP;
 using HarmonyLib;
 using JsonType;
+using LiteNetLib;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -235,7 +236,7 @@ namespace Fika.Core.Main.Players
                 Type = EGenericSubPacketType.MuffledState,
                 SubPacket = new GenericSubPackets.MuffledState(NetId, isMuffled)
             };
-            PacketSender.SendPacket(ref packet);
+            PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
         }
 
         public override void OnWeaponMastered(MasterSkillClass masterSkill)
@@ -330,7 +331,7 @@ namespace Fika.Core.Main.Players
                     Scheduled = scheduled
                 }
             };
-            PacketSender.SendPacket(ref packet);
+            PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
         }
 
         public override void Proceed(FoodDrinkItemClass foodDrink, float amount, Callback<GInterface185> callback, int animationVariant, bool scheduled = true)
@@ -451,7 +452,7 @@ namespace Fika.Core.Main.Players
                     FastDrop = fastDrop
                 }
             };
-            PacketSender.SendPacket(ref packet);
+            PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             base.DropCurrentController(callback, fastDrop, nextControllerItem);
         }
 
@@ -657,7 +658,7 @@ namespace Fika.Core.Main.Players
                     InventoryOpen = opened
                 }
             };
-            PacketSender.SendPacket(ref packet);
+            PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
         }
 
         public override void SetCompassState(bool value)
@@ -672,28 +673,25 @@ namespace Fika.Core.Main.Players
                     Enabled = value
                 }
             };
-            PacketSender.SendPacket(ref packet);
+            PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
         }
 
         public override void SendHeadlightsPacket(bool isSilent)
         {
-            if (PacketSender != null && PacketSender.Enabled)
-            {
-                FirearmLightStateStruct[] lightStates = [.. _helmetLightControllers.Select(FikaGlobals.GetFirearmLightStates)];
+            FirearmLightStateStruct[] lightStates = [.. _helmetLightControllers.Select(FikaGlobals.GetFirearmLightStates)];
 
-                CommonPlayerPacket packet = new()
+            CommonPlayerPacket packet = new()
+            {
+                NetId = NetId,
+                Type = ECommonSubPacketType.HeadLights,
+                SubPacket = new HeadLightsPacket()
                 {
-                    NetId = NetId,
-                    Type = ECommonSubPacketType.HeadLights,
-                    SubPacket = new HeadLightsPacket()
-                    {
-                        Amount = lightStates.Length,
-                        IsSilent = isSilent,
-                        LightStates = lightStates
-                    }
-                };
-                PacketSender.SendPacket(ref packet);
-            }
+                    Amount = lightStates.Length,
+                    IsSilent = isSilent,
+                    LightStates = lightStates
+                }
+            };
+            PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
         }
 
         public override void SendWeaponLightPacket()
@@ -739,7 +737,7 @@ namespace Fika.Core.Main.Players
                     SubPacket = subPacket
                 };
 
-                PacketSender.SendPacket(ref packet);
+                PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             }
         }
 
@@ -759,7 +757,7 @@ namespace Fika.Core.Main.Players
                         PhraseIndex = clip.NetId
                     }
                 };
-                PacketSender.SendPacket(ref packet);
+                PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             }
         }
 
@@ -801,7 +799,7 @@ namespace Fika.Core.Main.Players
                     Id = stationaryWeapon.Id
                 }
             };
-            PacketSender.SendPacket(ref packet);
+            PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
         }
 
         // Start
@@ -820,7 +818,7 @@ namespace Fika.Core.Main.Players
                     ItemId = (interactionResult is KeyInteractionResultClass keyInteractionResult) ? keyInteractionResult.Key.Item.Id : null
                 }
             };
-            PacketSender.SendPacket(ref packet);
+            PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
         }
 
         // Execute
@@ -842,7 +840,7 @@ namespace Fika.Core.Main.Players
                     }
                 };
 
-                PacketSender.SendPacket(ref packet);
+                PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             }
             UpdateInteractionCast();
         }
@@ -860,7 +858,7 @@ namespace Fika.Core.Main.Players
                         Interaction = interaction
                     }
                 };
-                PacketSender.SendPacket(ref packet);
+                PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             }
         }
 
@@ -898,7 +896,7 @@ namespace Fika.Core.Main.Players
                 Type = ECommonSubPacketType.Mounting,
                 SubPacket = packet
             };
-            PacketSender.SendPacket(ref netPacket);
+            PacketSender.NetworkManager.SendData(ref netPacket, DeliveryMethod.ReliableOrdered, true);
         }
 
         public override void vmethod_3(TransitControllerAbstractClass controller, int transitPointId, string keyId, EDateTime time)
@@ -951,13 +949,7 @@ namespace Fika.Core.Main.Players
                 SubPacket = new GenericSubPackets.DisarmTripwire(data)
             };
 
-            if (FikaBackendUtils.IsServer)
-            {
-                Singleton<FikaServer>.Instance.SendDataToAll(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
-                return;
-            }
-
-            Singleton<FikaClient>.Instance.SendData(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+            PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
         }
 
         public override void vmethod_5(GClass2114 controller, int objectId, EventObject.EInteraction interaction)
@@ -974,7 +966,7 @@ namespace Fika.Core.Main.Players
                     NetId = NetId,
                     Data = packet
                 };
-                PacketSender.SendPacket(ref interactPacket, true);
+                PacketSender.NetworkManager.SendData(ref interactPacket, DeliveryMethod.ReliableOrdered, true);
             }
             UpdateInteractionCast();
         }
@@ -1058,7 +1050,7 @@ namespace Fika.Core.Main.Players
 #endif
             }
             base.OnDead(damageType);
-            PacketSender.Enabled = false;
+            PacketSender.SendState = false;
             if (IsYourPlayer)
             {
                 StartCoroutine(LocalPlayerDied());
@@ -1151,7 +1143,7 @@ namespace Fika.Core.Main.Players
             {
                 Data = btr.GetInteractWithBtrPacket(placeId, interaction)
             };
-            client.SendData(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+            client.SendData(ref packet, DeliveryMethod.ReliableOrdered);
             UpdateInteractionCast();
         }
 
@@ -1310,7 +1302,7 @@ namespace Fika.Core.Main.Players
                     ItemId = armor.Item.Id,
                     Durability = armor.Repairable.Durability
                 };
-                PacketSender.SendPacket(ref packet);
+                PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             }
         }
 
@@ -1334,7 +1326,7 @@ namespace Fika.Core.Main.Players
                     ItemIds = ids,
                     Durabilities = durabilities,
                 };
-                PacketSender.SendPacket(ref packet);
+                PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             }
         }*/
 
@@ -1404,7 +1396,7 @@ namespace Fika.Core.Main.Players
                 Value = sideEffect.Value
             };
 
-            PacketSender.SendPacket(ref packet, true);
+            PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             _shouldSendSideEffect = false;
         }
 
@@ -1459,7 +1451,6 @@ namespace Fika.Core.Main.Players
         {
             if (PacketSender != null)
             {
-                PacketSender.Enabled = false;
                 PacketSender.DestroyThis();
                 PacketSender = null;
             }
@@ -1493,7 +1484,7 @@ namespace Fika.Core.Main.Players
                     AbsoluteForwardVelocity = VaultingParameters.AbsoluteForwardVelocity
                 }
             };
-            PacketSender.SendPacket(ref packet);
+            PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
         }
 
         public void ReceiveTraderServicesData(List<TraderServicesClass> services)
@@ -1576,7 +1567,7 @@ namespace Fika.Core.Main.Players
                         InteractionType = EInteractionType.Close
                     }
                 };
-                player.PacketSender.SendPacket(ref packet);
+                player.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
 
                 container.Interact(new InteractionResult(EInteractionType.Close));
                 if (player.MovementContext.LevelOnApproachStart > 0f)
@@ -1611,7 +1602,7 @@ namespace Fika.Core.Main.Players
                         ItemId = weapon.Id
                     }
                 };
-                fikaPlayer.PacketSender.SendPacket(ref packet);
+                fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             }
 
             internal void HandleResult(IResult result)
@@ -1647,7 +1638,7 @@ namespace Fika.Core.Main.Players
                         ItemId = _item.Id
                     }
                 };
-                _fikaPlayer.PacketSender.SendPacket(ref packet);
+                _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             }
 
             internal void HandleResult(IResult result)
@@ -1683,7 +1674,7 @@ namespace Fika.Core.Main.Players
                         ItemId = item.Id
                     }
                 };
-                fikaPlayer.PacketSender.SendPacket(ref packet);
+                fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             }
 
             internal void HandleResult(IResult result)
@@ -1719,7 +1710,7 @@ namespace Fika.Core.Main.Players
                         ItemId = item.Id
                     }
                 };
-                fikaPlayer.PacketSender.SendPacket(ref packet);
+                fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             }
 
             internal void HandleResult(IResult result)
@@ -1759,7 +1750,7 @@ namespace Fika.Core.Main.Players
                         BodyParts = bodyParts
                     }
                 };
-                fikaPlayer.PacketSender.SendPacket(ref packet);
+                fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             }
 
             internal void HandleResult(IResult result)
@@ -1801,7 +1792,7 @@ namespace Fika.Core.Main.Players
                         BodyParts = bodyParts
                     }
                 };
-                fikaPlayer.PacketSender.SendPacket(ref packet);
+                fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             }
 
             internal void HandleResult(IResult result)
@@ -1837,7 +1828,7 @@ namespace Fika.Core.Main.Players
                         ItemId = knife.Item.Id
                     }
                 };
-                fikaPlayer.PacketSender.SendPacket(ref packet);
+                fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             }
 
             internal void HandleResult(IResult result)
@@ -1873,7 +1864,7 @@ namespace Fika.Core.Main.Players
                         ItemId = knife.Item.Id
                     }
                 };
-                fikaPlayer.PacketSender.SendPacket(ref packet);
+                fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             }
 
             internal void HandleResult(IResult result)
@@ -1909,7 +1900,7 @@ namespace Fika.Core.Main.Players
                         ItemId = throwWeap.Id
                     }
                 };
-                fikaPlayer.PacketSender.SendPacket(ref packet);
+                fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             }
 
             internal void HandleResult(IResult result)
@@ -1945,7 +1936,7 @@ namespace Fika.Core.Main.Players
                         ItemId = throwWeap.Id
                     }
                 };
-                fikaPlayer.PacketSender.SendPacket(ref packet);
+                fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             }
 
             internal void HandleResult(IResult result)

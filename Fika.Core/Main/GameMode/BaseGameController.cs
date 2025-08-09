@@ -448,13 +448,7 @@ namespace Fika.Core.Main.GameMode
                     Maps = transitData.maps
                 };
 
-                if (IsServer)
-                {
-                    Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
-                    return;
-                }
-
-                Singleton<FikaClient>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+                Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
                 return;
             }
 
@@ -532,7 +526,7 @@ namespace Fika.Core.Main.GameMode
                 Type = EGenericSubPacketType.SpawnBTR,
                 SubPacket = new BtrSpawn(spawnEvent.Position, spawnEvent.Rotation, spawnEvent.PlayerProfileId)
             };
-            Singleton<FikaServer>.Instance.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+            Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
         }
 
         /// <summary>

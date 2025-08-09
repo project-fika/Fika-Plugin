@@ -6,6 +6,7 @@ using EFT.InventoryLogic;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Packets.FirearmController;
+using LiteNetLib;
 using System;
 using UnityEngine;
 using static Fika.Core.Networking.Packets.FirearmController.FirearmSubPackets;
@@ -47,7 +48,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                     Type = EGrenadePacketType.ExamineWeapon
                 }
             };
-            player.PacketSender.SendPacket(ref packet);
+            player.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             base.ExamineWeapon();
         }
 
@@ -62,7 +63,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                     Type = EGrenadePacketType.HighThrow
                 }
             };
-            player.PacketSender.SendPacket(ref packet);
+            player.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             base.HighThrow();
         }
 
@@ -77,7 +78,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                     Type = EGrenadePacketType.LowThrow
                 }
             };
-            player.PacketSender.SendPacket(ref packet);
+            player.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             base.LowThrow();
         }
 
@@ -92,7 +93,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                     Type = EGrenadePacketType.PullRingForHighThrow
                 }
             };
-            player.PacketSender.SendPacket(ref packet);
+            player.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             base.PullRingForHighThrow();
         }
 
@@ -107,7 +108,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                     Type = EGrenadePacketType.PullRingForLowThrow
                 }
             };
-            player.PacketSender.SendPacket(ref packet);
+            player.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             base.PullRingForLowThrow();
         }
 
@@ -127,7 +128,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                     LowThrow = lowThrow
                 }
             };
-            player.PacketSender.SendPacket(ref packet);
+            player.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             base.vmethod_2(timeSinceSafetyLevelRemoved, position, rotation, force, lowThrow);
         }
 
@@ -142,7 +143,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                     PlantTripwire = true
                 }
             };
-            player.PacketSender.SendPacket(ref packet);
+            player.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             base.PlantTripwire();
         }
 
@@ -170,7 +171,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                                 ChangeToIdle = true
                             }
                         };
-                        player.PacketSender.SendPacket(ref packet);
+                        player.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
                     }
                 }
                 else
@@ -184,7 +185,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                             ChangeToPlant = true
                         }
                     };
-                    player.PacketSender.SendPacket(ref packet);
+                    player.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
                 }
             }
             base.ChangeFireMode(fireMode);
@@ -199,7 +200,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                 NetId = player.NetId,
                 Type = EFirearmSubPacketType.CancelGrenade
             };
-            player.PacketSender.SendPacket(ref packet);
+            player.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             base.ActualDrop(controller, animationSpeed, callback, fastDrop);
         }
     }

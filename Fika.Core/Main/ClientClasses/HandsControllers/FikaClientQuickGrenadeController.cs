@@ -2,6 +2,7 @@
 
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Packets.FirearmController;
+using LiteNetLib;
 using UnityEngine;
 using static Fika.Core.Networking.Packets.FirearmController.FirearmSubPackets;
 using static Fika.Core.Networking.Packets.SubPacket;
@@ -37,7 +38,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                     LowThrow = lowThrow
                 }
             };
-            _fikaPlayer.PacketSender.SendPacket(ref packet);
+            _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
 
             base.vmethod_2(timeSinceSafetyLevelRemoved, position, rotation, force, lowThrow);
         }

@@ -65,7 +65,7 @@ namespace Fika.Core.Main.HostClasses
                 Type = EventControllerEventPacket.EEventType.StateEvent,
                 Event = stateEvent
             };
-            Singleton<FikaServer>.Instance.SendDataToAll(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+            Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
         }
 
         private void NoRequiredItemNotification(Player player)
@@ -85,7 +85,7 @@ namespace Fika.Core.Main.HostClasses
                     Type = RunddansMessagesEvent.EType.NoRequiredItem
                 }
             };
-            Singleton<FikaServer>.Instance.SendDataToAll(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+            Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
         }
 
         private void NotInteractableNotification(Player player)
@@ -105,7 +105,7 @@ namespace Fika.Core.Main.HostClasses
                     Type = RunddansMessagesEvent.EType.NonInteractive
                 }
             };
-            Singleton<FikaServer>.Instance.SendDataToAll(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+            Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
         }
     }
 }

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Fika.Core.Networking.Packets.Backend
 {
-    public class InraidQuestPacket : INetSerializable
+    public class InRaidQuestPacket : INetSerializable
     {
         public int NetId;
         public InraidQuestType Type;

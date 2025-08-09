@@ -54,7 +54,7 @@ namespace Fika.Core.Networking.Packets.World
                             fikaGame.GameController.SpawnPoint.Position, fikaGame.GameController.SpawnPoint.Rotation)
                         };
 
-                        server.SendDataToPeer(peer, ref response, DeliveryMethod.ReliableOrdered);
+                        server.SendDataToPeer(ref response, DeliveryMethod.ReliableOrdered, peer);
                         return;
                     }
                 }
@@ -129,7 +129,7 @@ namespace Fika.Core.Networking.Packets.World
                         }
                     };
 
-                    server.SendDataToPeer(peer, ref response, DeliveryMethod.ReliableOrdered);
+                    server.SendDataToPeer(ref response, DeliveryMethod.ReliableOrdered, peer);
                 }
             }
 
@@ -212,7 +212,7 @@ namespace Fika.Core.Networking.Packets.World
                         Data = writer.Data
                     }
                 };
-                server.SendDataToPeer(peer, ref response, DeliveryMethod.ReliableOrdered);
+                server.SendDataToPeer(ref response, DeliveryMethod.ReliableOrdered, peer);
             }
 
             public void HandleResponse()
@@ -317,7 +317,7 @@ namespace Fika.Core.Networking.Packets.World
                         }
                     };
 
-                    server.SendDataToPeer(peer, ref response, DeliveryMethod.ReliableOrdered);
+                    server.SendDataToPeer(ref response, DeliveryMethod.ReliableOrdered, peer);
                 }
             }
 
@@ -423,7 +423,7 @@ namespace Fika.Core.Networking.Packets.World
                                 packet.PlayerInfoPacket.IsStationary = fikaPlayer.MovementContext.IsStationaryWeaponInHands;
                             }
 
-                            server.SendDataToPeer(peer, ref packet, DeliveryMethod.ReliableOrdered);
+                            server.SendDataToPeer(ref packet, DeliveryMethod.ReliableOrdered, peer);
                         }
                     }
                 }

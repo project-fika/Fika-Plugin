@@ -47,7 +47,7 @@ namespace Fika.Core.Main.Components
                 SyncEvent = summonStartedEvent
             };
 
-            _server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+            _server.SendData(ref packet, DeliveryMethod.ReliableOrdered);
         }
 
         private void OnHalloweenSyncStateEvent(HalloweenSyncStateEvent syncStateEvent)
@@ -62,7 +62,7 @@ namespace Fika.Core.Main.Components
                 SyncEvent = syncStateEvent
             };
 
-            _server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+            _server.SendData(ref packet, DeliveryMethod.ReliableOrdered);
         }
 
         private void OnHalloweenSyncExitsEvent(HalloweenSyncExitsEvent syncStateEvent)
@@ -77,7 +77,7 @@ namespace Fika.Core.Main.Components
                 SyncEvent = syncStateEvent
             };
 
-            _server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);
+            _server.SendData(ref packet, DeliveryMethod.ReliableOrdered);
         }
     }
 }

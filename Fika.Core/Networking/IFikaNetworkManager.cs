@@ -22,6 +22,23 @@ namespace Fika.Core.Networking
         public int PlayerAmount { get; set; }
         public void CreateFikaChat();
         public void SetupGameVariables(FikaPlayer fikaPlayer);
+        /// <summary>
+        /// Sends a packet
+        /// </summary>
+        /// <typeparam name="T">The type of packet to send, which must implement <see cref="INetSerializable"/></typeparam>
+        /// <param name="data">The packet instance to send, passed by reference</param>
+        /// <param name="multicast">If <see langword="true"/>, the packet will be sent to multiple recipients; otherwise, it will be sent to a single target (server is always multicast)</param>
+        public void SendData<T>(ref T packet, DeliveryMethod deliveryMethod, bool multicast = false) where T : INetSerializable;
+        /// <summary>
+        /// Sends a packet of data directly to a specific peer
+        /// </summary>
+        /// <typeparam name="T">The type of packet to send, which must implement <see cref="INetSerializable"/></typeparam>
+        /// <param name="data">The packet instance to send, passed by reference</param>
+        /// <param name="peer">The target <see cref="NetPeer"/> that will receive the packet</param>
+        /// <remarks>
+        /// Should only be used as a <see cref="FikaServer"/>, since a <see cref="FikaClient"/> only has one <see cref="NetPeer"/>
+        /// </remarks>
+        public void SendDataToPeer<T>(ref T packet, DeliveryMethod deliveryMethod, NetPeer peer) where T : INetSerializable;
         public void SendVOIPPacket(ref VOIPPacket packet, NetPeer peer = null);
         public void SendVOIPData(ArraySegment<byte> data, NetPeer peer = null);
         /// <summary>

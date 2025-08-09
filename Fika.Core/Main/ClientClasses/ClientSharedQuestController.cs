@@ -5,6 +5,7 @@ using EFT.Quests;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Packets.Communication;
 using Fika.Core.Utils;
+using LiteNetLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -83,7 +84,7 @@ namespace Fika.Core.Main.ClientClasses
 #if DEBUG
             FikaPlugin.Instance.FikaLogger.LogInfo($"Profile_OnItemZoneDropped: Sending quest progress itemId:{itemId} zoneId:{zoneId}");
 #endif
-            _player.PacketSender.SendPacket(ref packet);
+            _player.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
         }
 
         public override void OnConditionValueChanged(QuestClass conditional, EQuestStatus status, Condition condition, bool notify = true)
@@ -159,7 +160,7 @@ namespace Fika.Core.Main.ClientClasses
 #if DEBUG
                     FikaPlugin.Instance.FikaLogger.LogInfo("SendQuestPacket: Sending quest progress");
 #endif
-                    _player.PacketSender.SendPacket(ref packet);
+                    _player.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
                 }
             }
         }

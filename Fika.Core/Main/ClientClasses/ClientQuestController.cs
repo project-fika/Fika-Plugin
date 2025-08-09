@@ -3,7 +3,9 @@ using EFT;
 using EFT.InventoryLogic;
 using EFT.Quests;
 using Fika.Core.Main.Players;
+using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Backend;
+using LiteNetLib;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -34,14 +36,14 @@ namespace Fika.Core.Main.ClientClasses
             GStruct459<GStruct419<QuestClass>> finishResult = await base.FinishQuest(quest, runNetworkTransaction);
             if (finishResult.Succeeded && hasRewards)
             {
-                InraidQuestPacket packet = new()
+                InRaidQuestPacket packet = new()
                 {
                     NetId = _player.NetId,
-                    Type = InraidQuestPacket.InraidQuestType.Finish,
+                    Type = InRaidQuestPacket.InraidQuestType.Finish,
                     Items = items
                 };
 
-                _player.PacketSender.SendPacket(ref packet);
+                _player.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             }
             return finishResult;
         }
@@ -78,14 +80,14 @@ namespace Fika.Core.Main.ClientClasses
             if (handoverResult.Succeed && hasNonQuestItem)
             {
 
-                InraidQuestPacket packet = new()
+                InRaidQuestPacket packet = new()
                 {
                     NetId = _player.NetId,
-                    Type = InraidQuestPacket.InraidQuestType.Handover,
+                    Type = InRaidQuestPacket.InraidQuestType.Handover,
                     ItemIdsToRemove = itemIds
                 };
 
-                _player.PacketSender.SendPacket(ref packet);
+                _player.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             }
             return handoverResult;
         }

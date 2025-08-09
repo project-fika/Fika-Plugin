@@ -3,6 +3,7 @@
 using EFT.InventoryLogic;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Packets.FirearmController;
+using LiteNetLib;
 using static Fika.Core.Networking.Packets.FirearmController.FirearmSubPackets;
 using static Fika.Core.Networking.Packets.SubPacket;
 
@@ -32,7 +33,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                     Examine = true
                 }
             };
-            _fikaPlayer.PacketSender.SendPacket(ref packet);
+            _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
         }
 
         public override bool MakeKnifeKick()
@@ -50,7 +51,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                         Kick = true
                     }
                 };
-                _fikaPlayer.PacketSender.SendPacket(ref packet);
+                _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             }
 
             return knifeKick;
@@ -71,7 +72,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                         AltKick = true
                     }
                 };
-                _fikaPlayer.PacketSender.SendPacket(ref packet);
+                _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             }
 
             return alternateKnifeKick;
@@ -90,7 +91,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                     BreakCombo = true
                 }
             };
-            _fikaPlayer.PacketSender.SendPacket(ref packet);
+            _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
         }
     }
 }
