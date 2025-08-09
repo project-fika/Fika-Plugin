@@ -1167,12 +1167,16 @@ namespace Fika.Core.Networking
 
         public void SendData<T>(ref T packet, DeliveryMethod deliveryMethod, bool multicast = false) where T : INetSerializable
         {
-            _dataWriter.Reset();
-            _dataWriter.Put(multicast);
-            _dataWriter.PutEnum(EPacketType.Serializable);
+            NetPeer peer = _netClient.FirstPeer;
+            if (peer != null)
+            {
+                _dataWriter.Reset();
+                _dataWriter.Put(multicast);
+                _dataWriter.PutEnum(EPacketType.Serializable);
 
-            _packetProcessor.WriteNetSerializable(_dataWriter, ref packet);
-            _netClient.FirstPeer.Send(_dataWriter.AsReadOnlySpan, deliveryMethod);
+                _packetProcessor.WriteNetSerializable(_dataWriter, ref packet);
+                peer.Send(_dataWriter.AsReadOnlySpan, deliveryMethod); 
+            }
         }
 
         public void SendDataToPeer<T>(ref T packet, DeliveryMethod deliveryMethod, NetPeer peer) where T : INetSerializable
@@ -1198,12 +1202,16 @@ namespace Fika.Core.Networking
 
         public void SendVOIPData(ArraySegment<byte> data, NetPeer peer = null)
         {
-            _dataWriter.Reset();
+            NetPeer firstPeer = _netClient.FirstPeer;
+            if (firstPeer != null)
+            {
+                _dataWriter.Reset();
 
-            _dataWriter.Put(false);
-            _dataWriter.PutEnum(EPacketType.VOIP);
-            _dataWriter.PutBytesWithLength(data.Array, data.Offset, (ushort)data.Count);
-            _netClient.FirstPeer.Send(_dataWriter.AsReadOnlySpan, DeliveryMethod.Sequenced);
+                _dataWriter.Put(false);
+                _dataWriter.PutEnum(EPacketType.VOIP);
+                _dataWriter.PutBytesWithLength(data.Array, data.Offset, (ushort)data.Count);
+                firstPeer.Send(_dataWriter.AsReadOnlySpan, DeliveryMethod.Sequenced); 
+            }
         }
 
         /// <summary>
@@ -1217,12 +1225,16 @@ namespace Fika.Core.Networking
         /// </remarks>
         public void SendReusable<T>(T packet, DeliveryMethod deliveryMethod) where T : class, IReusable, new()
         {
-            _dataWriter.Reset();
+            NetPeer peer = _netClient.FirstPeer;
+            if (peer != null)
+            {
+                _dataWriter.Reset();
 
-            _dataWriter.Put(false);
-            _dataWriter.PutEnum(EPacketType.Serializable);
-            _packetProcessor.Write(_dataWriter, packet);
-            _netClient.FirstPeer.Send(_dataWriter.AsReadOnlySpan, deliveryMethod);
+                _dataWriter.Put(false);
+                _dataWriter.PutEnum(EPacketType.Serializable);
+                _packetProcessor.Write(_dataWriter, packet);
+                peer.Send(_dataWriter.AsReadOnlySpan, deliveryMethod); 
+            }
 
             packet.Flush();
         }
