@@ -1595,7 +1595,7 @@ namespace Fika.Core.Networking
             if (reader.GetByte() == 1)
             {
                 // we're skipping the multicast byte as clients do not care about it
-                _netServer.SendToAll(reader.RawData.AsSpan(1), deliveryMethod, peer);
+                _netServer.SendToAll(reader.GetRemainingBytesSpan(), deliveryMethod, peer);
             }
 
             switch (reader.GetEnum<EPacketType>())
