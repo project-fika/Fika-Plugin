@@ -678,20 +678,23 @@ namespace Fika.Core.Main.Players
 
         public override void SendHeadlightsPacket(bool isSilent)
         {
-            FirearmLightStateStruct[] lightStates = [.. _helmetLightControllers.Select(FikaGlobals.GetFirearmLightStates)];
-
-            CommonPlayerPacket packet = new()
+            if (PacketSender != null && PacketSender.NetworkManager != null)
             {
-                NetId = NetId,
-                Type = ECommonSubPacketType.HeadLights,
-                SubPacket = new HeadLightsPacket()
+                FirearmLightStateStruct[] lightStates = [.. _helmetLightControllers.Select(FikaGlobals.GetFirearmLightStates)];
+
+                CommonPlayerPacket packet = new()
                 {
-                    Amount = lightStates.Length,
-                    IsSilent = isSilent,
-                    LightStates = lightStates
-                }
-            };
-            PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+                    NetId = NetId,
+                    Type = ECommonSubPacketType.HeadLights,
+                    SubPacket = new HeadLightsPacket()
+                    {
+                        Amount = lightStates.Length,
+                        IsSilent = isSilent,
+                        LightStates = lightStates
+                    }
+                };
+                PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true); 
+            }
         }
 
         public override void SendWeaponLightPacket()
