@@ -1219,8 +1219,8 @@ namespace Fika.Core.Networking
         {
             _dataWriter.Reset();
 
-            _dataWriter.PutEnum(EPacketType.Serializable);
             _dataWriter.Put(false);
+            _dataWriter.PutEnum(EPacketType.Serializable);
             _packetProcessor.Write(_dataWriter, packet);
             _netClient.FirstPeer.Send(_dataWriter.AsReadOnlySpan, deliveryMethod);
 

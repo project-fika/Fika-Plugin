@@ -33,7 +33,7 @@ namespace Fika.Core.Jobs
             int amount = netManager.ObservedCoopPlayers.Count;
             for (int i = 0; i < amount; i++)
             {
-                Singleton<IFikaNetworkManager>.Instance.ObservedCoopPlayers[i].Snapshotter
+                netManager.ObservedCoopPlayers[i].Snapshotter
                     .ManualUpdate(_unscaledDeltaTime);
             }
         }
