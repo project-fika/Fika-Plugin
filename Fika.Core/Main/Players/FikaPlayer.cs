@@ -594,10 +594,6 @@ namespace Fika.Core.Main.Players
                 AbstractQuestControllerClass.CheckKillConditionCounter(value, playerProfileId, targetEquipment, damage.Weapon,
                                 bodyPart, Location, distance, role.ToStringNoBox(), CurrentHour, enemyEffects,
                                 killer.HealthController.BodyPartEffects, zoneIds, killer.HealthController.ActiveBuffsNames());
-
-                /*AbstractAchievementControllerClass.CheckKillConditionCounter(value, playerProfileId, targetEquipment, damage.Weapon,
-                    bodyPart, Location, distance, role.ToStringNoBox(), hour, enemyEffects,
-                    killer.HealthController.BodyPartEffects, zoneIds, killer.HealthController.ActiveBuffsNames());*/
             }
         }
 
