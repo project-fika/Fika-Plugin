@@ -1377,15 +1377,6 @@ namespace Fika.Core.Networking
             packet.Flush();
         }
 
-        /*public void SendDataToPeer<T>(NetPeer peer, ref T packet, DeliveryMethod deliveryMethod) where T : INetSerializable
-        {
-            _dataWriter.Reset();
-
-            _dataWriter.PutEnum(EPacketType.Serializable);
-            _packetProcessor.WriteNetSerializable(_dataWriter, ref packet);
-            peer.Send(_dataWriter.AsReadOnlySpan, deliveryMethod);
-        }*/
-
         public void SendVOIPData(ArraySegment<byte> data, NetPeer peer = null)
         {
             if (peer == null)
