@@ -1185,20 +1185,6 @@ namespace Fika.Core.Networking
             peer.Send(_dataWriter.AsReadOnlySpan, deliveryMethod);
         }
 
-        /*public void SendData<T>(ref T packet, DeliveryMethod deliveryMethod) where T : INetSerializable
-        {
-            if (_netClient.FirstPeer == null)
-            {
-                return;
-            }
-
-            _dataWriter.Reset();
-
-            _dataWriter.PutEnum(EPacketType.Serializable);
-            _packetProcessor.WriteNetSerializable(_dataWriter, ref packet);
-            _netClient.FirstPeer.Send(_dataWriter.AsReadOnlySpan, deliveryMethod);
-        }*/
-
         public void SendVOIPPacket(ref VOIPPacket packet, NetPeer peer = null)
         {
             if (packet.Data == null)
@@ -1207,15 +1193,15 @@ namespace Fika.Core.Networking
                 return;
             }
 
-            SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+            SendData(ref packet, DeliveryMethod.ReliableOrdered);
         }
 
         public void SendVOIPData(ArraySegment<byte> data, NetPeer peer = null)
         {
             _dataWriter.Reset();
 
+            _dataWriter.Put(false);
             _dataWriter.PutEnum(EPacketType.VOIP);
-            _dataWriter.Put(true);
             _dataWriter.PutBytesWithLength(data.Array, data.Offset, (ushort)data.Count);
             _netClient.FirstPeer.Send(_dataWriter.AsReadOnlySpan, DeliveryMethod.Sequenced);
         }
