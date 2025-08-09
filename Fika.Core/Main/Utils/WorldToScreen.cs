@@ -13,105 +13,104 @@ namespace Fika.Core.Main.Utils
     {
         public static bool GetScreenPoint(Vector3 worldPosition, FikaPlayer mainPlayer, out Vector3 screenPoint, bool useOpticCamera = true, bool skip = false)
         {
-            CameraClass worldCameraInstance = CameraClass.Instance;
-            Camera worldCamera = worldCameraInstance.Camera;
-
             screenPoint = Vector3.zero;
 
+            CameraClass camClass = CameraClass.Instance;
+            Camera worldCamera = camClass.Camera;
             if (mainPlayer == null || worldCamera == null)
             {
                 return false;
             }
 
-            ProceduralWeaponAnimation weaponAnimation = mainPlayer.ProceduralWeaponAnimation;
+            ProceduralWeaponAnimation weaponAnim = mainPlayer.ProceduralWeaponAnimation;
+            bool opticSuccess = false;
 
-            if (useOpticCamera && weaponAnimation != null)
+            if (useOpticCamera && IsZoomedOpticAiming(weaponAnim))
             {
-                if (weaponAnimation.IsAiming && weaponAnimation.CurrentScope.IsOptic)
-                {
-                    if (GetScopeZoomLevel(weaponAnimation) > 1f)
-                    {
-                        Camera opticCamera = worldCameraInstance.OpticCameraManager.Camera;
-
-                        float renderScale = worldCameraInstance.SSAA.GetCurrentSSRatio();
-
-                        int width = worldCameraInstance.SSAA.GetInputWidth();
-                        int height = worldCameraInstance.SSAA.GetInputHeight();
-
-                        if (renderScale > 1)
-                        {
-                            width = Screen.width;
-                            height = Screen.height;
-                        }
-
-                        //get difference between center of optic & center of screen
-                        Vector3 opticCenterScreenPosition = GetOpticCenterScreenPosition(weaponAnimation, worldCamera);
-                        Vector3 opticCenterScreenOffset = opticCenterScreenPosition - (new Vector3(width, height, 0f) / 2);
-
-                        //worldCamera uses DLSS/FSR/SSAA scaled resolution, opticCamera does not so it must be manually scaled
-                        Vector3 opticCameraOffset = new(width / 2 - opticCamera.pixelWidth * renderScale / 2, height / 2 - opticCamera.pixelHeight * renderScale / 2, 0);
-
-                        //must manually scale output of opticCamera.WorldToScreenPoint
-                        Vector3 initialOpticScreenPoint = opticCamera.WorldToScreenPoint(worldPosition) * renderScale;
-
-                        //the scaled point on the screen offset for the zoom & position of the optic camera
-                        Vector3 opticScreenPoint = (initialOpticScreenPoint + opticCameraOffset);
-
-                        if (opticScreenPoint.z > 0f)
-                        {
-                            //since optic sways & is not always centered offset the point to compensate
-                            screenPoint = opticScreenPoint + opticCenterScreenOffset;
-                        }
-                    }
-                }
+                opticSuccess = TryProjectOptic(worldPosition, weaponAnim, camClass, out screenPoint);
             }
 
-            // Not able to find a zoomed optic screen point
-            if (screenPoint == Vector3.zero)
+            if (!opticSuccess)
             {
                 screenPoint = worldCamera.WorldToScreenPoint(worldPosition);
             }
 
-            if (screenPoint.z > 0f)
-            {
-                return true;
-            }
-
-            return skip;
+            return screenPoint.z > 0f || skip;
         }
 
-        private static float GetScopeZoomLevel(ProceduralWeaponAnimation weaponAnimation)
+        private static bool IsZoomedOpticAiming(ProceduralWeaponAnimation weaponAnim)
         {
-            SightComponent weaponSight = weaponAnimation.CurrentAimingMod;
+            return weaponAnim != null &&
+                   weaponAnim.IsAiming &&
+                   weaponAnim.CurrentScope != null &&
+                   weaponAnim.CurrentScope.IsOptic &&
+                   GetScopeZoomLevel(weaponAnim) > 1f;
+        }
 
-            if (weaponSight == null)
+        private static bool TryProjectOptic(Vector3 worldPosition, ProceduralWeaponAnimation weaponAnim, CameraClass camClass, out Vector3 screenPoint)
+        {
+            screenPoint = Vector3.zero;
+
+            Camera opticCam = camClass.OpticCameraManager.Camera;
+            if (opticCam == null)
+            {
+                return false;
+            }
+
+            float renderScale = camClass.SSAA.GetCurrentSSRatio();
+            int width = (renderScale > 1) ? Screen.width : camClass.SSAA.GetInputWidth();
+            int height = (renderScale > 1) ? Screen.height : camClass.SSAA.GetInputHeight();
+
+            // offset between optic center and screen center
+            Vector3 opticCenterScreenPos = GetOpticCenterScreenPosition(weaponAnim, camClass.Camera);
+            Vector3 opticCenterOffset = opticCenterScreenPos - new Vector3(width, height, 0f) / 2f;
+
+            // optic camera output needs manual scaling
+            Vector3 opticCamOffset = new(
+                width / 2f - opticCam.pixelWidth * renderScale / 2f,
+                height / 2f - opticCam.pixelHeight * renderScale / 2f,
+                0f
+            );
+
+            Vector3 initialOpticScreenPoint = opticCam.WorldToScreenPoint(worldPosition) * renderScale;
+            Vector3 opticScreenPoint = initialOpticScreenPoint + opticCamOffset;
+
+            if (opticScreenPoint.z <= 0f)
+            {
+                return false;
+            }
+
+            // compensate for optic sway
+            screenPoint = opticScreenPoint + opticCenterOffset;
+            return true;
+        }
+
+        private static float GetScopeZoomLevel(ProceduralWeaponAnimation weaponAnim)
+        {
+            SightComponent sight = weaponAnim?.CurrentAimingMod;
+            if (sight == null)
             {
                 return 1f;
             }
 
-            if (weaponSight.ScopeZoomValue != 0)
-            {
-                return weaponSight.ScopeZoomValue;
-            }
-
-            return weaponSight.GetCurrentOpticZoom();
+            return (sight.ScopeZoomValue != 0) ? sight.ScopeZoomValue : sight.GetCurrentOpticZoom();
         }
 
-        private static Vector3 GetOpticCenterScreenPosition(ProceduralWeaponAnimation weaponAnimation, Camera worldCamera)
+        private static Vector3 GetOpticCenterScreenPosition(ProceduralWeaponAnimation weaponAnim, Camera worldCamera)
         {
-            if (weaponAnimation == null)
+            if (weaponAnim == null)
             {
                 return Vector3.zero;
             }
 
-            OpticSight currentOptic = CameraClass.Instance.OpticCameraManager.CurrentOpticSight;
-            if (currentOptic == null)
+            OpticSight optic = CameraClass.Instance.OpticCameraManager.CurrentOpticSight;
+            if (optic == null)
             {
                 return Vector3.zero;
             }
 
-            Transform lensTransform = currentOptic.LensRenderer.transform;
-            return worldCamera.WorldToScreenPoint(lensTransform.position);
+            Transform lens = optic.LensRenderer.transform;
+            return worldCamera.WorldToScreenPoint(lens.position);
         }
 
         public static void TargetOutOfSight(bool outOfSight, Vector3 indicatorPosition, RectTransform rectTransform, RectTransform canvasRect)
