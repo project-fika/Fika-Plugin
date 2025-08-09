@@ -586,11 +586,10 @@ namespace Fika.Core.Networking
             MongoID id = new()
             {
                 TimeStamp = reader.GetUInt(),
-                Counter = reader.GetULong(),
-                StringID = null
+                Counter = reader.GetULong()
             };
 
-            id.StringID = id.method_1();
+            id.StringID = NetworkUtils.FormatMongoId(id.TimeStamp, id.Counter);
             id.method_0();
 
             return id;

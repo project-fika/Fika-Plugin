@@ -70,6 +70,15 @@ namespace Fika.Core.Networking
             return result;
         }
 
+        public static string FormatMongoId(uint timeStamp, ulong counter)
+        {
+            return string.Create(24, (timeStamp, counter), (span, state) =>
+            {
+                state.timeStamp.TryFormat(span[..8], out _, "x8");
+                state.counter.TryFormat(span[8..], out _, "x16");
+            });
+        }
+
         /// <summary>
         /// Used to determine what kind of packet was received on the <see cref="IFikaNetworkManager"/>
         /// </summary>
