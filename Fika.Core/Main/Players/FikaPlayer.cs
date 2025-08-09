@@ -569,7 +569,6 @@ namespace Fika.Core.Main.Players
             }
 
             List<string> list = ["Any"];
-
             switch (playerSide)
             {
                 case EPlayerSide.Usec:
@@ -1346,9 +1345,9 @@ namespace Fika.Core.Main.Players
                 ArmorDamage = packet.ArmorDamage
             };
 
-            if (!string.IsNullOrEmpty(packet.ProfileId))
+            if (packet.ProfileId.HasValue)
             {
-                IPlayerOwner player = Singleton<GameWorld>.Instance.GetAlivePlayerBridgeByProfileID(packet.ProfileId);
+                IPlayerOwner player = Singleton<GameWorld>.Instance.GetAlivePlayerBridgeByProfileID(packet.ProfileId.Value);
 
                 if (player != null)
                 {

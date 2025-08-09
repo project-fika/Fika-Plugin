@@ -55,7 +55,7 @@ namespace Fika.Core.Main.BotClasses
             if (packet.SyncType == NetworkHealthSyncPacketStruct.ESyncType.IsAlive && !packet.Data.IsAlive.IsAlive)
             {
                 HealthSyncPacket deathPacket = _fikaBot.SetupCorpseSyncPacket(packet);
-                _fikaBot.PacketSender.NetworkManager.SendData(ref deathPacket, DeliveryMethod.ReliableUnordered, true);
+                _fikaBot.PacketSender.NetworkManager.SendData(ref deathPacket, DeliveryMethod.ReliableOrdered, true);
                 return;
             }
 

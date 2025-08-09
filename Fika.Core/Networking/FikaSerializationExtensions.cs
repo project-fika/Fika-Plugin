@@ -572,7 +572,8 @@ namespace Fika.Core.Networking
         /// <param name="mongoId"></param>
         public static void PutMongoID(this NetDataWriter writer, MongoID mongoId)
         {
-            writer.Put(HexStringToBytes(mongoId), 0, 12);
+            writer.Put(mongoId.TimeStamp);
+            writer.Put(mongoId.Counter);
         }
 
         /// <summary>
@@ -582,8 +583,17 @@ namespace Fika.Core.Networking
         /// <returns>A new <see cref="MongoID"/></returns>
         public static MongoID GetMongoID(this NetDataReader reader)
         {
-            reader.GetBytes(_byteBuffer, 0, 12);
-            return new(BytesToHexString(_byteBuffer));
+            MongoID id = new()
+            {
+                TimeStamp = reader.GetUInt(),
+                Counter = reader.GetULong(),
+                StringID = null
+            };
+
+            id.StringID = id.method_1();
+            id.method_0();
+
+            return id;
         }
 
         /// <summary>
@@ -596,7 +606,7 @@ namespace Fika.Core.Networking
             writer.Put(mongoId.HasValue);
             if (mongoId.HasValue)
             {
-                writer.Put(HexStringToBytes(mongoId.Value), 0, 12);
+                writer.PutMongoID(mongoId.Value);
             }
         }
 
@@ -612,8 +622,7 @@ namespace Fika.Core.Networking
                 return null;
             }
 
-            reader.GetBytes(_byteBuffer, 0, 12);
-            return new(BytesToHexString(_byteBuffer));
+            return reader.GetMongoID();
         }
 
         /// <summary>

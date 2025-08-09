@@ -1075,9 +1075,9 @@ namespace Fika.Core.Main.Players
                 ArmorDamage = packet.ArmorDamage
             };
 
-            if (!string.IsNullOrEmpty(packet.ProfileId))
+            if (packet.ProfileId.HasValue)
             {
-                IPlayerOwner player = Singleton<GameWorld>.Instance.GetAlivePlayerBridgeByProfileID(packet.ProfileId);
+                IPlayerOwner player = Singleton<GameWorld>.Instance.GetAlivePlayerBridgeByProfileID(packet.ProfileId.Value);
 
                 if (player != null)
                 {
@@ -1925,7 +1925,7 @@ namespace Fika.Core.Main.Players
             LastBodyPart = bodyPart;
             _lastWeaponId = weaponId;
 
-            if (LastDamageInfo.Weapon is null && !string.IsNullOrEmpty(_lastWeaponId))
+            if (LastDamageInfo.Weapon == null && !string.IsNullOrEmpty(_lastWeaponId))
             {
                 FindKillerWeapon();
             }
