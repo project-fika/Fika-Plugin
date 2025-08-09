@@ -102,7 +102,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
         {
             if (Item is RocketLauncherItemClass)
             {
-                return new GClass1867(this);
+                return new GClass1869(this);
             }
             if (Item.IsFlareGun)
             {
