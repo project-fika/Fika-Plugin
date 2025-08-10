@@ -6,7 +6,7 @@ using static Fika.Core.Networking.Packets.SubPacket;
 
 namespace Fika.Core.Networking
 {
-    internal static class FirearmSubPacketPool
+    internal sealed class FirearmSubPacketPool
     {
         public static void CreatePool()
         {
