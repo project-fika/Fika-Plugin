@@ -3,6 +3,7 @@ using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Main.ObservedClasses;
 using Fika.Core.Main.Players;
+using Fika.Core.Networking.Pools;
 using LiteNetLib.Utils;
 using System;
 using System.Collections.Generic;
@@ -22,7 +23,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public static ToggleAimPacket FromValue(int aimingIndex)
             {
-                ToggleAimPacket packet = FirearmSubPacketPool.GetPacket<ToggleAimPacket>(EFirearmSubPacketType.ToggleAim);
+                ToggleAimPacket packet = FirearmSubPacketPoolManager.Instance.GetPacket<ToggleAimPacket>(EFirearmSubPacketType.ToggleAim);
                 packet.AimingIndex = aimingIndex;
                 return packet;
             }
@@ -67,7 +68,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public static ChangeFireModePacket FromValue(Weapon.EFireMode fireMode)
             {
-                ChangeFireModePacket packet = FirearmSubPacketPool.GetPacket<ChangeFireModePacket>(EFirearmSubPacketType.ChangeFireMode);
+                ChangeFireModePacket packet = FirearmSubPacketPoolManager.Instance.GetPacket<ChangeFireModePacket>(EFirearmSubPacketType.ChangeFireMode);
                 packet.FireMode = fireMode;
                 return packet;
             }
@@ -112,7 +113,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public static ExamineWeaponPacket FromValue()
             {
-                return FirearmSubPacketPool.GetPacket<ExamineWeaponPacket>(EFirearmSubPacketType.ExamineWeapon);
+                return FirearmSubPacketPoolManager.Instance.GetPacket<ExamineWeaponPacket>(EFirearmSubPacketType.ExamineWeapon);
             }
 
             public static ExamineWeaponPacket CreateInstance()
@@ -153,7 +154,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public static CheckAmmoPacket FromValue()
             {
-                return FirearmSubPacketPool.GetPacket<CheckAmmoPacket>(EFirearmSubPacketType.CheckAmmo);
+                return FirearmSubPacketPoolManager.Instance.GetPacket<CheckAmmoPacket>(EFirearmSubPacketType.CheckAmmo);
             }
 
             public static CheckAmmoPacket CreateInstance()
@@ -194,7 +195,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public static ToggleLauncherPacket FromValue()
             {
-                return FirearmSubPacketPool.GetPacket<ToggleLauncherPacket>(EFirearmSubPacketType.ToggleLauncher);
+                return FirearmSubPacketPoolManager.Instance.GetPacket<ToggleLauncherPacket>(EFirearmSubPacketType.ToggleLauncher);
             }
 
             public static ToggleLauncherPacket CreateInstance()
@@ -235,7 +236,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public static ToggleInventoryPacket FromValue(bool open)
             {
-                ToggleInventoryPacket packet = FirearmSubPacketPool.GetPacket<ToggleInventoryPacket>(EFirearmSubPacketType.ToggleInventory);
+                ToggleInventoryPacket packet = FirearmSubPacketPoolManager.Instance.GetPacket<ToggleInventoryPacket>(EFirearmSubPacketType.ToggleInventory);
                 packet.Open = open;
                 return packet;
             }
@@ -280,7 +281,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public static FirearmLootPacket FromValue()
             {
-                return FirearmSubPacketPool.GetPacket<FirearmLootPacket>(EFirearmSubPacketType.Loot);
+                return FirearmSubPacketPoolManager.Instance.GetPacket<FirearmLootPacket>(EFirearmSubPacketType.Loot);
             }
 
             public static FirearmLootPacket CreateInstance()
@@ -318,7 +319,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public static CancelGrenadePacket FromValue()
             {
-                return FirearmSubPacketPool.GetPacket<CancelGrenadePacket>(EFirearmSubPacketType.CancelGrenade);
+                return FirearmSubPacketPoolManager.Instance.GetPacket<CancelGrenadePacket>(EFirearmSubPacketType.CancelGrenade);
             }
 
             public static CancelGrenadePacket CreateInstance()
@@ -359,7 +360,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public static CompassChangePacket FromValue(bool enabled)
             {
-                CompassChangePacket packet = FirearmSubPacketPool.GetPacket<CompassChangePacket>(EFirearmSubPacketType.CompassChange);
+                CompassChangePacket packet = FirearmSubPacketPoolManager.Instance.GetPacket<CompassChangePacket>(EFirearmSubPacketType.CompassChange);
                 packet.Enabled = enabled;
                 return packet;
             }
@@ -404,7 +405,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public static LeftStanceChangePacket FromValue(bool leftStance)
             {
-                LeftStanceChangePacket packet = FirearmSubPacketPool.GetPacket<LeftStanceChangePacket>(EFirearmSubPacketType.LeftStanceChange);
+                LeftStanceChangePacket packet = FirearmSubPacketPoolManager.Instance.GetPacket<LeftStanceChangePacket>(EFirearmSubPacketType.LeftStanceChange);
                 packet.LeftStance = leftStance;
                 return packet;
             }
@@ -452,7 +453,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public static RollCylinderPacket FromValue(bool rollToZeroCamora)
             {
-                RollCylinderPacket packet = FirearmSubPacketPool.GetPacket<RollCylinderPacket>(EFirearmSubPacketType.RollCylinder);
+                RollCylinderPacket packet = FirearmSubPacketPoolManager.Instance.GetPacket<RollCylinderPacket>(EFirearmSubPacketType.RollCylinder);
                 packet.RollToZeroCamora = rollToZeroCamora;
                 return packet;
             }
@@ -497,7 +498,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public static ReloadBoltActionPacket FromValue()
             {
-                return FirearmSubPacketPool.GetPacket<ReloadBoltActionPacket>(EFirearmSubPacketType.ReloadBoltAction);
+                return FirearmSubPacketPoolManager.Instance.GetPacket<ReloadBoltActionPacket>(EFirearmSubPacketType.ReloadBoltAction);
             }
 
             public static ReloadBoltActionPacket CreateInstance()
@@ -538,7 +539,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public static CheckChamberPacket FromValue()
             {
-                return FirearmSubPacketPool.GetPacket<CheckChamberPacket>(EFirearmSubPacketType.CheckChamber);
+                return FirearmSubPacketPoolManager.Instance.GetPacket<CheckChamberPacket>(EFirearmSubPacketType.CheckChamber);
             }
 
             public static CheckChamberPacket CreateInstance()
@@ -579,7 +580,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public static CheckFireModePacket FromValue()
             {
-                return FirearmSubPacketPool.GetPacket<CheckFireModePacket>(EFirearmSubPacketType.CheckFireMode);
+                return FirearmSubPacketPoolManager.Instance.GetPacket<CheckFireModePacket>(EFirearmSubPacketType.CheckFireMode);
             }
 
             public static CheckFireModePacket CreateInstance()
@@ -620,7 +621,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public static UnderbarrelSightingRangeUpPacket FromValue()
             {
-                return FirearmSubPacketPool.GetPacket<UnderbarrelSightingRangeUpPacket>(EFirearmSubPacketType.UnderbarrelSightingRangeUp);
+                return FirearmSubPacketPoolManager.Instance.GetPacket<UnderbarrelSightingRangeUpPacket>(EFirearmSubPacketType.UnderbarrelSightingRangeUp);
             }
 
             public static UnderbarrelSightingRangeUpPacket CreateInstance()
@@ -661,7 +662,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public static UnderbarrelSightingRangeDownPacket FromValue()
             {
-                return FirearmSubPacketPool.GetPacket<UnderbarrelSightingRangeDownPacket>(EFirearmSubPacketType.UnderbarrelSightingRangeDown);
+                return FirearmSubPacketPoolManager.Instance.GetPacket<UnderbarrelSightingRangeDownPacket>(EFirearmSubPacketType.UnderbarrelSightingRangeDown);
             }
 
 
@@ -703,7 +704,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public static ToggleBipodPacket FromValue()
             {
-                return FirearmSubPacketPool.GetPacket<ToggleBipodPacket>(EFirearmSubPacketType.ToggleBipod);
+                return FirearmSubPacketPoolManager.Instance.GetPacket<ToggleBipodPacket>(EFirearmSubPacketType.ToggleBipod);
             }
 
 
@@ -762,7 +763,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public static ShotInfoPacket FromDryShot(int chamberIndex, bool underbarrelShot, EShotType shotType)
             {
-                ShotInfoPacket packet = FirearmSubPacketPool.GetPacket<ShotInfoPacket>(EFirearmSubPacketType.ShotInfo);
+                ShotInfoPacket packet = FirearmSubPacketPoolManager.Instance.GetPacket<ShotInfoPacket>(EFirearmSubPacketType.ShotInfo);
                 packet.ShotType = shotType;
                 packet.ChamberIndex = chamberIndex;
                 packet.UnderbarrelShot = underbarrelShot;
@@ -771,7 +772,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public static ShotInfoPacket FromMisfire(MongoID ammoTemplate, float overheat, EShotType shotType)
             {
-                ShotInfoPacket packet = FirearmSubPacketPool.GetPacket<ShotInfoPacket>(EFirearmSubPacketType.ShotInfo);
+                ShotInfoPacket packet = FirearmSubPacketPoolManager.Instance.GetPacket<ShotInfoPacket>(EFirearmSubPacketType.ShotInfo);
                 packet.AmmoTemplate = ammoTemplate;
                 packet.Overheat = overheat;
                 packet.ShotType = shotType;
@@ -782,7 +783,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
                 float lastShotOverheat, float lastShotTime, float durability, int chamberIndex, bool underbarrelShot,
                 bool slideOnOverheatReached, EShotType shotType)
             {
-                ShotInfoPacket packet = FirearmSubPacketPool.GetPacket<ShotInfoPacket>(EFirearmSubPacketType.ShotInfo);
+                ShotInfoPacket packet = FirearmSubPacketPoolManager.Instance.GetPacket<ShotInfoPacket>(EFirearmSubPacketType.ShotInfo);
                 packet.ShotPosition = shotPosition;
                 packet.ShotDirection = shotDirection;
                 packet.AmmoTemplate = ammoTemplate;
@@ -880,7 +881,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public static KnifePacket FromValue(bool examine, bool kick, bool altKick, bool breakCombo)
             {
-                KnifePacket packet = FirearmSubPacketPool.GetPacket<KnifePacket>(EFirearmSubPacketType.Knife);
+                KnifePacket packet = FirearmSubPacketPoolManager.Instance.GetPacket<KnifePacket>(EFirearmSubPacketType.Knife);
                 packet.Examine = examine;
                 packet.Kick = kick;
                 packet.AltKick = altKick;
@@ -963,7 +964,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
             public static GrenadePacket FromValue(Quaternion grenadeRotation, Vector3 grenadePosition, Vector3 throwForce,
                 EGrenadePacketType type, bool hasGrenade, bool lowThrow, bool plantTripwire, bool changeToIdle, bool changeToPlant)
             {
-                GrenadePacket packet = FirearmSubPacketPool.GetPacket<GrenadePacket>(EFirearmSubPacketType.Grenade);
+                GrenadePacket packet = FirearmSubPacketPoolManager.Instance.GetPacket<GrenadePacket>(EFirearmSubPacketType.Grenade);
                 packet.GrenadeRotation = grenadeRotation;
                 packet.GrenadePosition = grenadePosition;
                 packet.ThrowForce = throwForce;
@@ -1111,7 +1112,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public static LightStatesPacket FromValue(int amount, FirearmLightStateStruct[] states)
             {
-                LightStatesPacket packet = FirearmSubPacketPool.GetPacket<LightStatesPacket>(EFirearmSubPacketType.ToggleLightStates);
+                LightStatesPacket packet = FirearmSubPacketPoolManager.Instance.GetPacket<LightStatesPacket>(EFirearmSubPacketType.ToggleLightStates);
                 packet.Amount = amount;
                 packet.States = states;
                 return packet;
@@ -1180,7 +1181,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
             }
             public static ScopeStatesPacket FromValue(int amount, FirearmScopeStateStruct[] states)
             {
-                ScopeStatesPacket packet = FirearmSubPacketPool.GetPacket<ScopeStatesPacket>(EFirearmSubPacketType.ToggleScopeStates);
+                ScopeStatesPacket packet = FirearmSubPacketPoolManager.Instance.GetPacket<ScopeStatesPacket>(EFirearmSubPacketType.ToggleScopeStates);
                 packet.Amount = amount;
                 packet.States = states;
                 return packet;
@@ -1252,7 +1253,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public static ReloadMagPacket FromValue(MongoID magId, byte[] locationDescription, bool reload)
             {
-                ReloadMagPacket packet = FirearmSubPacketPool.GetPacket<ReloadMagPacket>(EFirearmSubPacketType.ReloadMag);
+                ReloadMagPacket packet = FirearmSubPacketPoolManager.Instance.GetPacket<ReloadMagPacket>(EFirearmSubPacketType.ReloadMag);
                 packet.MagId = magId;
                 packet.LocationDescription = locationDescription;
                 packet.Reload = reload;
@@ -1362,7 +1363,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public static QuickReloadMagPacket FromValue(MongoID magId, bool reload)
             {
-                QuickReloadMagPacket packet = FirearmSubPacketPool.GetPacket<QuickReloadMagPacket>(EFirearmSubPacketType.QuickReloadMag);
+                QuickReloadMagPacket packet = FirearmSubPacketPoolManager.Instance.GetPacket<QuickReloadMagPacket>(EFirearmSubPacketType.QuickReloadMag);
                 packet.MagId = magId;
                 packet.Reload = reload;
                 return packet;
@@ -1441,7 +1442,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public static ReloadWithAmmoPacket FromValue(bool reload, EReloadWithAmmoStatus status, int ammoLoadedToMag = 0, string[] ammoIds = null)
             {
-                ReloadWithAmmoPacket packet = FirearmSubPacketPool.GetPacket<ReloadWithAmmoPacket>(EFirearmSubPacketType.ReloadWithAmmo);
+                ReloadWithAmmoPacket packet = FirearmSubPacketPoolManager.Instance.GetPacket<ReloadWithAmmoPacket>(EFirearmSubPacketType.ReloadWithAmmo);
                 packet.Reload = reload;
                 packet.Status = status;
                 packet.AmmoLoadedToMag = ammoLoadedToMag;
@@ -1533,7 +1534,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public static CylinderMagPacket FromValue(EReloadWithAmmoStatus status, int camoraIndex, int ammoLoadedToMag, bool changed, bool hammerClosed, bool reload, string[] ammoIds)
             {
-                CylinderMagPacket packet = FirearmSubPacketPool.GetPacket<CylinderMagPacket>(EFirearmSubPacketType.CylinderMag);
+                CylinderMagPacket packet = FirearmSubPacketPoolManager.Instance.GetPacket<CylinderMagPacket>(EFirearmSubPacketType.CylinderMag);
                 packet.Status = status;
                 packet.CamoraIndex = camoraIndex;
                 packet.AmmoLoadedToMag = ammoLoadedToMag;
@@ -1640,7 +1641,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public static ReloadLauncherPacket FromValue(bool reload, string[] ammoIds)
             {
-                ReloadLauncherPacket packet = FirearmSubPacketPool.GetPacket<ReloadLauncherPacket>(EFirearmSubPacketType.ReloadLauncher);
+                ReloadLauncherPacket packet = FirearmSubPacketPoolManager.Instance.GetPacket<ReloadLauncherPacket>(EFirearmSubPacketType.ReloadLauncher);
                 packet.Reload = reload;
                 packet.AmmoIds = ammoIds;
                 return packet;
@@ -1699,7 +1700,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public static ReloadBarrelsPacket FromValue(bool reload, string[] ammoIds, byte[] locationDescription)
             {
-                ReloadBarrelsPacket packet = FirearmSubPacketPool.GetPacket<ReloadBarrelsPacket>(EFirearmSubPacketType.ReloadBarrels);
+                ReloadBarrelsPacket packet = FirearmSubPacketPoolManager.Instance.GetPacket<ReloadBarrelsPacket>(EFirearmSubPacketType.ReloadBarrels);
                 packet.Reload = reload;
                 packet.AmmoIds = ammoIds;
                 packet.LocationDescription = locationDescription;
@@ -1786,7 +1787,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public static FlareShotPacket FromValue(Vector3 shotPosition, Vector3 shotForward, MongoID ammoTemplateId, bool startOneShotFire)
             {
-                FlareShotPacket packet = FirearmSubPacketPool.GetPacket<FlareShotPacket>(EFirearmSubPacketType.FlareShot);
+                FlareShotPacket packet = FirearmSubPacketPoolManager.Instance.GetPacket<FlareShotPacket>(EFirearmSubPacketType.FlareShot);
                 packet.ShotPosition = shotPosition;
                 packet.ShotForward = shotForward;
                 packet.AmmoTemplateId = ammoTemplateId;
@@ -1873,7 +1874,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public static RocketShotPacket FromValue(Vector3 shotPosition, Vector3 shotForward, MongoID ammoTemplate)
             {
-                RocketShotPacket packet = FirearmSubPacketPool.GetPacket<RocketShotPacket>(EFirearmSubPacketType.RocketShot);
+                RocketShotPacket packet = FirearmSubPacketPoolManager.Instance.GetPacket<RocketShotPacket>(EFirearmSubPacketType.RocketShot);
                 packet.ShotPosition = shotPosition;
                 packet.ShotForward = shotForward;
                 packet.AmmoTemplateId = ammoTemplate;

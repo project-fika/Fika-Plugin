@@ -31,6 +31,7 @@ using Fika.Core.Networking.Packets.Debug;
 using Fika.Core.Networking.Packets.FirearmController;
 using Fika.Core.Networking.Packets.Player;
 using Fika.Core.Networking.Packets.World;
+using Fika.Core.Networking.Pools;
 using Fika.Core.Networking.VOIP;
 using Fika.Core.UI.Custom;
 using Fika.Core.Utils;
@@ -242,7 +243,7 @@ namespace Fika.Core.Networking
 
         private void RegisterPacketsAndTypes()
         {
-            FirearmSubPacketPool.CreatePool();
+            FirearmSubPacketPoolManager.Instance.CreatePool();
 
             RegisterCustomType(FikaSerializationExtensions.PutRagdollStruct, FikaSerializationExtensions.GetRagdollStruct);
             RegisterCustomType(FikaSerializationExtensions.PutArtilleryStruct, FikaSerializationExtensions.GetArtilleryStruct);
@@ -1159,7 +1160,7 @@ namespace Fika.Core.Networking
             _stateHandle.Complete();
             _snapshots.Dispose();
 
-            FirearmSubPacketPool.ClearPool();
+            FirearmSubPacketPoolManager.Release();
 
             if (_fikaChat != null)
             {

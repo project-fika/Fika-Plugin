@@ -6,9 +6,9 @@ using EFT.InventoryLogic;
 using Fika.Core.Main.PacketHandlers;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
-using Fika.Core.Networking;
 using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.FirearmController;
+using Fika.Core.Networking.Pools;
 using System;
 using System.Collections.Generic;
 using static Fika.Core.Networking.Packets.FirearmController.FirearmSubPackets;
@@ -202,7 +202,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
         {
             base.ChangeAimingMode();
             _packet.Type = EFirearmSubPacketType.ToggleAim;
-            _packet.SubPacket = FirearmSubPacketPool.GetPacket<IPoolSubPacket>(EFirearmSubPacketType.ToggleAim);
+            _packet.SubPacket = FirearmSubPacketPoolManager.Instance.GetPacket<IPoolSubPacket>(EFirearmSubPacketType.ToggleAim);
             _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
         }
 

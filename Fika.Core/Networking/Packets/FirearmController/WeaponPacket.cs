@@ -1,4 +1,5 @@
 ﻿using Fika.Core.Main.Players;
+using Fika.Core.Networking.Pools;
 using LiteNetLib.Utils;
 using static Fika.Core.Networking.Packets.SubPacket;
 
@@ -13,14 +14,14 @@ namespace Fika.Core.Networking.Packets.FirearmController
         public void Execute(FikaPlayer player)
         {
             SubPacket.Execute(player);
-            FirearmSubPacketPool.ReturnPacket(this);
+            FirearmSubPacketPoolManager.Instance.ReturnPacket(Type, SubPacket);
         }
 
         public void Deserialize(NetDataReader reader)
         {
             NetId = reader.GetInt();
             Type = reader.GetEnum<EFirearmSubPacketType>();
-            SubPacket = FirearmSubPacketPool.GetPacket<IPoolSubPacket>(Type);
+            SubPacket = FirearmSubPacketPoolManager.Instance.GetPacket<IPoolSubPacket>(Type);
             SubPacket.Deserialize(reader);
         }
 
@@ -35,7 +36,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
         {
             if (SubPacket != null)
             {
-                FirearmSubPacketPool.ReturnPacket(this);
+                FirearmSubPacketPoolManager.Instance.ReturnPacket(Type, SubPacket);
                 SubPacket = null; 
             }
         }
