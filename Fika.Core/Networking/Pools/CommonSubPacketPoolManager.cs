@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
+using static Fika.Core.Networking.Packets.Player.CommonSubPackets;
 using static Fika.Core.Networking.Packets.SubPacket;
 
 namespace Fika.Core.Networking.Pools
@@ -23,7 +25,20 @@ namespace Fika.Core.Networking.Pools
 
         private CommonSubPacketPoolManager()
         {
-            _subPacketFactories = [];
+            _subPacketFactories = new Dictionary<ECommonSubPacketType, Func<IPoolSubPacket>>()
+            {
+                { ECommonSubPacketType.Phrase, PhrasePacket.CreateInstance },
+                { ECommonSubPacketType.WorldInteraction, WorldInteractionPacket.CreateInstance },
+                { ECommonSubPacketType.ContainerInteraction, ContainerInteractionPacket.CreateInstance },
+                { ECommonSubPacketType.Proceed, ProceedPacket.CreateInstance },
+                { ECommonSubPacketType.HeadLights, HeadLightsPacket.CreateInstance },
+                { ECommonSubPacketType.InventoryChanged, InventoryChangedPacket.CreateInstance },
+                { ECommonSubPacketType.Drop, DropPacket.CreateInstance },
+                { ECommonSubPacketType.Stationary, StationaryPacket.CreateInstance },
+                { ECommonSubPacketType.Vault, VaultPacket.CreateInstance },
+                { ECommonSubPacketType.Interaction, InteractionPacket.CreateInstance },
+                { ECommonSubPacketType.Mounting, MountingPacket.CreateInstance }
+            };
         }
     }
 }

@@ -22,9 +22,11 @@ using Fika.Core.Networking.Packets.Communication;
 using Fika.Core.Networking.Packets.FirearmController;
 using Fika.Core.Networking.Packets.Player;
 using Fika.Core.Networking.Packets.World;
+using Fika.Core.Networking.Pools;
 using Fika.Core.Networking.VOIP;
 using HarmonyLib;
 using JsonType;
+using RootMotion.FinalIK;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -51,6 +53,7 @@ namespace Fika.Core.Main.Players
         public bool IsObservedAI;
         public Dictionary<uint, Action<ServerOperationStatus>> OperationCallbacks = [];
         public Snapshotter Snapshotter;
+        public CommonPlayerPacket CommonPacket;
         public bool WaitingForCallback
         {
             get
@@ -99,6 +102,10 @@ namespace Fika.Core.Main.Players
             player.IsYourPlayer = true;
             player.NetId = netId;
             player._voipHandler = VoipSettingsClass.Default;
+            player.CommonPacket = new()
+            {
+                NetId = netId
+            };
 
             PlayerOwnerInventoryController inventoryController = FikaBackendUtils.IsServer ? new FikaHostInventoryController(player, profile, false)
                 : new ClientInventoryController(player, profile, false);
@@ -319,17 +326,9 @@ namespace Fika.Core.Main.Players
         public override void Proceed(bool withNetwork, Callback<GInterface180> callback, bool scheduled = true)
         {
             base.Proceed(withNetwork, callback, scheduled);
-            CommonPlayerPacket packet = new()
-            {
-                NetId = NetId,
-                Type = ECommonSubPacketType.Proceed,
-                SubPacket = new ProceedPacket()
-                {
-                    ProceedType = EProceedType.EmptyHands,
-                    Scheduled = scheduled
-                }
-            };
-            PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+            CommonPacket.Type = ECommonSubPacketType.Proceed;
+            CommonPacket.SubPacket = ProceedPacket.FromValue(default, null, 0f, 0, EProceedType.EmptyHands, scheduled);
+            PacketSender.NetworkManager.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
         }
 
         public override void Proceed(FoodDrinkItemClass foodDrink, float amount, Callback<GInterface185> callback, int animationVariant, bool scheduled = true)
@@ -338,9 +337,9 @@ namespace Fika.Core.Main.Players
             FoodControllerHandler handler = new(this, foodDrink, amount, bodyparts, animationVariant);
 
             Func<MedsController> func = new(handler.ReturnController);
-            handler.process = new(this, func, foodDrink, false);
-            handler.confirmCallback = new(handler.SendPacket);
-            handler.process.method_0(new(handler.HandleResult), callback, scheduled);
+            handler.Process = new(this, func, foodDrink, false);
+            handler.ConfirmCallback = new(handler.SendPacket);
+            handler.Process.method_0(new(handler.HandleResult), callback, scheduled);
         }
 
         public override void Proceed(MedsItemClass meds, GStruct375<EBodyPart> bodyParts, Callback<GInterface185> callback, int animationVariant, bool scheduled = true)
@@ -348,9 +347,9 @@ namespace Fika.Core.Main.Players
             MedsControllerHandler handler = new(this, meds, bodyParts, animationVariant);
 
             Func<MedsController> func = new(handler.ReturnController);
-            handler.process = new(this, func, meds, false);
-            handler.confirmCallback = new(handler.SendPacket);
-            handler.process.method_0(new(handler.HandleResult), callback, scheduled);
+            handler.Process = new(this, func, meds, false);
+            handler.ConfirmCallback = new(handler.SendPacket);
+            handler.Process.method_0(new(handler.HandleResult), callback, scheduled);
         }
 
         public override void Proceed<T>(Item item, Callback<GInterface184> callback, bool scheduled = true)
@@ -360,18 +359,18 @@ namespace Fika.Core.Main.Players
                 PortableRangeFinderControllerHandler rangeFinderHandler = new(this, item);
 
                 Func<PortableRangeFinderController> rangeFinderFunc = new(rangeFinderHandler.ReturnController);
-                rangeFinderHandler.process = new(this, rangeFinderFunc, item, false);
-                rangeFinderHandler.confirmCallback = new(rangeFinderHandler.SendPacket);
-                rangeFinderHandler.process.method_0(new(rangeFinderHandler.HandleResult), callback, scheduled);
+                rangeFinderHandler.Process = new(this, rangeFinderFunc, item, false);
+                rangeFinderHandler.ConfirmCallback = new(rangeFinderHandler.SendPacket);
+                rangeFinderHandler.Process.method_0(new(rangeFinderHandler.HandleResult), callback, scheduled);
                 return;
             }
 
             UsableItemControllerHandler handler = new(this, item);
 
             Func<UsableItemController> func = new(handler.ReturnController);
-            handler.process = new(this, func, item, false);
-            handler.confirmCallback = new(handler.SendPacket);
-            handler.process.method_0(new(handler.HandleResult), callback, scheduled);
+            handler.Process = new(this, func, item, false);
+            handler.ConfirmCallback = new(handler.SendPacket);
+            handler.Process.method_0(new(handler.HandleResult), callback, scheduled);
         }
 
         public override void Proceed(Item item, Callback<IOnHandsUseCallback> callback, bool scheduled = true)
@@ -379,9 +378,9 @@ namespace Fika.Core.Main.Players
             QuickUseItemControllerHandler handler = new(this, item);
 
             Func<QuickUseItemController> func = new(handler.ReturnController);
-            handler.process = new(this, func, item, true);
-            handler.confirmCallback = new(handler.SendPacket);
-            handler.process.method_0(new(handler.HandleResult), callback, scheduled);
+            handler.Process = new(this, func, item, true);
+            handler.ConfirmCallback = new(handler.SendPacket);
+            handler.Process.method_0(new(handler.HandleResult), callback, scheduled);
         }
 
         public override void Proceed(KnifeComponent knife, Callback<IKnifeController> callback, bool scheduled = true)
@@ -389,9 +388,9 @@ namespace Fika.Core.Main.Players
             KnifeControllerHandler handler = new(this, knife);
 
             Func<KnifeController> func = new(handler.ReturnController);
-            handler.process = new(this, func, handler.knife.Item, false);
-            handler.confirmCallback = new(handler.SendPacket);
-            handler.process.method_0(new(handler.HandleResult), callback, scheduled);
+            handler.Process = new(this, func, handler.Knife.Item, false);
+            handler.ConfirmCallback = new(handler.SendPacket);
+            handler.Process.method_0(new(handler.HandleResult), callback, scheduled);
         }
 
         public override void Proceed(KnifeComponent knife, Callback<GInterface189> callback, bool scheduled = true)
@@ -399,9 +398,9 @@ namespace Fika.Core.Main.Players
             QuickKnifeControllerHandler handler = new(this, knife);
 
             Func<QuickKnifeKickController> func = new(handler.ReturnController);
-            handler.process = new(this, func, handler.knife.Item, true);
-            handler.confirmCallback = new(handler.SendPacket);
-            handler.process.method_0(new(handler.HandleResult), callback, scheduled);
+            handler.Process = new(this, func, handler.Knife.Item, true);
+            handler.ConfirmCallback = new(handler.SendPacket);
+            handler.Process.method_0(new(handler.HandleResult), callback, scheduled);
         }
 
         public override void Proceed(ThrowWeapItemClass throwWeap, Callback<GInterface188> callback, bool scheduled = true)
@@ -409,9 +408,9 @@ namespace Fika.Core.Main.Players
             QuickGrenadeControllerHandler handler = new(this, throwWeap);
 
             Func<QuickGrenadeThrowHandsController> func = new(handler.ReturnController);
-            handler.process = new(this, func, throwWeap, false);
-            handler.confirmCallback = new(handler.SendPacket);
-            handler.process.method_0(new(handler.HandleResult), callback, scheduled);
+            handler.Process = new(this, func, throwWeap, false);
+            handler.ConfirmCallback = new(handler.SendPacket);
+            handler.Process.method_0(new(handler.HandleResult), callback, scheduled);
         }
 
         public override void Proceed(ThrowWeapItemClass throwWeap, Callback<IHandsThrowController> callback, bool scheduled = true)
@@ -419,9 +418,9 @@ namespace Fika.Core.Main.Players
             GrenadeControllerHandler handler = new(this, throwWeap);
 
             Func<GrenadeHandsController> func = new(handler.ReturnController);
-            handler.process = new(this, func, throwWeap, false);
-            handler.confirmCallback = new(handler.SendPacket);
-            handler.process.method_0(new(handler.HandleResult), callback, scheduled);
+            handler.Process = new(this, func, throwWeap, false);
+            handler.ConfirmCallback = new(handler.SendPacket);
+            handler.Process.method_0(new(handler.HandleResult), callback, scheduled);
         }
 
         public override void Proceed(Weapon weapon, Callback<IFirearmHandsController> callback, bool scheduled = true)
@@ -430,27 +429,20 @@ namespace Fika.Core.Main.Players
             bool flag = false;
             if (_handsController is FirearmController firearmController)
             {
-                flag = firearmController.CheckForFastWeaponSwitch(handler.weapon);
+                flag = firearmController.CheckForFastWeaponSwitch(handler.Weapon);
             }
             Func<FirearmController> func = new(handler.ReturnController);
-            handler.process = new Process<FirearmController, IFirearmHandsController>(this, func, handler.weapon, flag);
-            handler.confirmCallback = new(handler.SendPacket);
-            handler.process.method_0(new(handler.HandleResult), callback, scheduled);
+            handler.Process = new Process<FirearmController, IFirearmHandsController>(this, func, handler.Weapon, flag);
+            handler.ConfirmCallback = new(handler.SendPacket);
+            handler.Process.method_0(new(handler.HandleResult), callback, scheduled);
         }
         #endregion
 
         public override void DropCurrentController(Action callback, bool fastDrop, Item nextControllerItem = null)
         {
-            CommonPlayerPacket packet = new()
-            {
-                NetId = NetId,
-                Type = ECommonSubPacketType.Drop,
-                SubPacket = new DropPacket()
-                {
-                    FastDrop = fastDrop
-                }
-            };
-            PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+            CommonPacket.Type = ECommonSubPacketType.Drop;
+            CommonPacket.SubPacket = DropPacket.FromValue(fastDrop);
+            PacketSender.NetworkManager.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
             base.DropCurrentController(callback, fastDrop, nextControllerItem);
         }
 
@@ -642,16 +634,10 @@ namespace Fika.Core.Main.Players
             }
 
             base.SetInventoryOpened(opened);
-            CommonPlayerPacket packet = new()
-            {
-                NetId = NetId,
-                Type = ECommonSubPacketType.InventoryChanged,
-                SubPacket = new InventoryChangedPacket()
-                {
-                    InventoryOpen = opened
-                }
-            };
-            PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+
+            CommonPacket.Type = ECommonSubPacketType.InventoryChanged;
+            CommonPacket.SubPacket = InventoryChangedPacket.FromValue(opened);
+            PacketSender.NetworkManager.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
         }
 
         public override void SetCompassState(bool value)
@@ -674,18 +660,9 @@ namespace Fika.Core.Main.Players
             {
                 FirearmLightStateStruct[] lightStates = [.. _helmetLightControllers.Select(FikaGlobals.GetFirearmLightStates)];
 
-                CommonPlayerPacket packet = new()
-                {
-                    NetId = NetId,
-                    Type = ECommonSubPacketType.HeadLights,
-                    SubPacket = new HeadLightsPacket()
-                    {
-                        Amount = lightStates.Length,
-                        IsSilent = isSilent,
-                        LightStates = lightStates
-                    }
-                };
-                PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+                CommonPacket.Type = ECommonSubPacketType.HeadLights;
+                CommonPacket.SubPacket = HeadLightsPacket.FromValue(lightStates.Length, isSilent, lightStates);
+                PacketSender.NetworkManager.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
             }
         }
 
@@ -718,17 +695,9 @@ namespace Fika.Core.Main.Players
 
             if (ActiveHealthController.IsAlive)
             {
-                CommonPlayerPacket packet = new()
-                {
-                    NetId = NetId,
-                    Type = ECommonSubPacketType.Phrase,
-                    SubPacket = new PhrasePacket()
-                    {
-                        PhraseTrigger = @event,
-                        PhraseIndex = clip.NetId
-                    }
-                };
-                PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+                CommonPacket.Type = ECommonSubPacketType.Phrase;
+                CommonPacket.SubPacket = PhrasePacket.FromValue(@event, clip.NetId);
+                PacketSender.NetworkManager.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
             }
         }
 
@@ -760,36 +729,21 @@ namespace Fika.Core.Main.Players
             }
 
             base.OperateStationaryWeapon(stationaryWeapon, command);
-            CommonPlayerPacket packet = new()
-            {
-                NetId = NetId,
-                Type = ECommonSubPacketType.Stationary,
-                SubPacket = new StationaryPacket()
-                {
-                    Command = (EStationaryCommand)command,
-                    Id = stationaryWeapon.Id
-                }
-            };
-            PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+
+            CommonPacket.Type = ECommonSubPacketType.Stationary;
+            CommonPacket.SubPacket = StationaryPacket.FromValue((EStationaryCommand)command, stationaryWeapon.Id);
+            PacketSender.NetworkManager.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
         }
 
         // Start
         public override void vmethod_0(WorldInteractiveObject interactiveObject, InteractionResult interactionResult, Action callback)
         {
             base.vmethod_0(interactiveObject, interactionResult, callback);
-            CommonPlayerPacket packet = new()
-            {
-                NetId = NetId,
-                Type = ECommonSubPacketType.WorldInteraction,
-                SubPacket = new WorldInteractionPacket()
-                {
-                    InteractiveId = interactiveObject.Id,
-                    InteractionType = interactionResult.InteractionType,
-                    InteractionStage = EInteractionStage.Start,
-                    ItemId = (interactionResult is KeyInteractionResultClass keyInteractionResult) ? keyInteractionResult.Key.Item.Id : null
-                }
-            };
-            PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+
+            CommonPacket.Type = ECommonSubPacketType.WorldInteraction;
+            CommonPacket.SubPacket = WorldInteractionPacket.FromValue(interactiveObject.Id, interactionResult.InteractionType,
+                EInteractionStage.Start, (interactionResult is KeyInteractionResultClass keyInteractionResult) ? keyInteractionResult.Key.Item.Id : null);
+            PacketSender.NetworkManager.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
         }
 
         // Execute
@@ -798,20 +752,10 @@ namespace Fika.Core.Main.Players
             base.vmethod_1(door, interactionResult);
             if (!door.ForceLocalInteraction)
             {
-                CommonPlayerPacket packet = new()
-                {
-                    NetId = NetId,
-                    Type = ECommonSubPacketType.WorldInteraction,
-                    SubPacket = new WorldInteractionPacket()
-                    {
-                        InteractiveId = door.Id,
-                        InteractionType = interactionResult.InteractionType,
-                        InteractionStage = EInteractionStage.Execute,
-                        ItemId = (interactionResult is KeyInteractionResultClass keyInteractionResult) ? keyInteractionResult.Key.Item.Id : string.Empty
-                    }
-                };
-
-                PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+                CommonPacket.Type = ECommonSubPacketType.WorldInteraction;
+                CommonPacket.SubPacket = WorldInteractionPacket.FromValue(door.Id, interactionResult.InteractionType,
+                    EInteractionStage.Execute, (interactionResult is KeyInteractionResultClass keyInteractionResult) ? keyInteractionResult.Key.Item.Id : null);
+                PacketSender.NetworkManager.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
             }
             UpdateInteractionCast();
         }
@@ -820,16 +764,9 @@ namespace Fika.Core.Main.Players
         {
             if (!FikaGlobals.BlockedInteractions.Contains(interaction))
             {
-                CommonPlayerPacket packet = new()
-                {
-                    NetId = NetId,
-                    Type = ECommonSubPacketType.Interaction,
-                    SubPacket = new InteractionPacket()
-                    {
-                        Interaction = interaction
-                    }
-                };
-                PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+                CommonPacket.Type = ECommonSubPacketType.Interaction;
+                CommonPacket.SubPacket = InteractionPacket.FromValue(interaction);
+                PacketSender.NetworkManager.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
             }
         }
 
@@ -840,15 +777,10 @@ namespace Fika.Core.Main.Players
 
         public override void OnMounting(MountingPacketStruct.EMountingCommand command)
         {
-            MountingPacket packet = new()
-            {
-                Command = command,
-                IsMounted = MovementContext.IsInMountedState,
-                MountDirection = MovementContext.IsInMountedState ? MovementContext.PlayerMountingPointData.MountPointData.MountDirection : default,
-                MountingPoint = MovementContext.IsInMountedState ? MovementContext.PlayerMountingPointData.MountPointData.MountPoint : default,
-                CurrentMountingPointVerticalOffset = MovementContext.IsInMountedState ? MovementContext.PlayerMountingPointData.CurrentMountingPointVerticalOffset : 0f,
-                MountingDirection = MovementContext.IsInMountedState ? (short)MovementContext.PlayerMountingPointData.MountPointData.MountSideDirection : (short)0
-            };
+            MountingPacket packet = MountingPacket.FromValue(command, MovementContext.IsInMountedState, MovementContext.IsInMountedState ? MovementContext.PlayerMountingPointData.MountPointData.MountDirection : default,
+                MovementContext.IsInMountedState ? MovementContext.PlayerMountingPointData.MountPointData.MountPoint : default,
+                MovementContext.IsInMountedState ? MovementContext.PlayerMountingPointData.CurrentMountingPointVerticalOffset : 0f,
+               MovementContext.IsInMountedState ? (short)MovementContext.PlayerMountingPointData.MountPointData.MountSideDirection : (short)0);
             if (command == MountingPacketStruct.EMountingCommand.Enter)
             {
                 packet.TransitionTime = MovementContext.PlayerMountingPointData.CurrentApproachTime;
@@ -861,13 +793,9 @@ namespace Fika.Core.Main.Players
                 packet.YawLimit = MovementContext.PlayerMountingPointData.YawLimit;
             }
 
-            CommonPlayerPacket netPacket = new()
-            {
-                NetId = NetId,
-                Type = ECommonSubPacketType.Mounting,
-                SubPacket = packet
-            };
-            PacketSender.NetworkManager.SendData(ref netPacket, DeliveryMethod.ReliableOrdered, true);
+            CommonPacket.Type = ECommonSubPacketType.Mounting;
+            CommonPacket.SubPacket = packet;
+            PacketSender.NetworkManager.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
         }
 
         public override void vmethod_3(TransitControllerAbstractClass controller, int transitPointId, string keyId, EDateTime time)
@@ -1028,6 +956,16 @@ namespace Fika.Core.Main.Players
             }
         }
 
+        public override void OnDestroy()
+        {
+            if (IsAI || IsYourPlayer)
+            {
+                CommonPacket?.Clear();
+                CommonPacket = null; 
+            }
+            base.OnDestroy();
+        }
+
         private void GenerateDogtagDetails()
         {
             if (LastDamageInfo.Weapon == null && !string.IsNullOrEmpty(_lastWeaponId))
@@ -1094,7 +1032,7 @@ namespace Fika.Core.Main.Players
         public override void TryInteractionCallback(LootableContainer container)
         {
             LootableContainerInteractionHandler handler = new(this, container);
-            if (handler.container != null && _openAction != null)
+            if (handler.Container != null && _openAction != null)
             {
                 _openAction(handler.Handle);
             }
@@ -1440,22 +1378,11 @@ namespace Fika.Core.Main.Players
 
         public override void OnVaulting()
         {
-            CommonPlayerPacket packet = new()
-            {
-                NetId = NetId,
-                Type = ECommonSubPacketType.Vault,
-                SubPacket = new VaultPacket()
-                {
-                    VaultingStrategy = VaultingParameters.GetVaultingStrategy(),
-                    VaultingPoint = VaultingParameters.MaxWeightPointPosition,
-                    VaultingHeight = VaultingParameters.VaultingHeight,
-                    VaultingLength = VaultingParameters.VaultingLength,
-                    VaultingSpeed = MovementContext.VaultingSpeed,
-                    BehindObstacleHeight = VaultingParameters.BehindObstacleRatio,
-                    AbsoluteForwardVelocity = VaultingParameters.AbsoluteForwardVelocity
-                }
-            };
-            PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+            CommonPacket.Type = ECommonSubPacketType.Vault;
+            CommonPacket.SubPacket = VaultPacket.FromValue(VaultingParameters.GetVaultingStrategy(), VaultingParameters.MaxWeightPointPosition,
+                VaultingParameters.VaultingHeight, VaultingParameters.VaultingLength, MovementContext.VaultingSpeed,
+                VaultingParameters.BehindObstacleRatio, VaultingParameters.AbsoluteForwardVelocity);
+            PacketSender.NetworkManager.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
         }
 
         public void ReceiveTraderServicesData(List<TraderServicesClass> services)
@@ -1523,64 +1450,49 @@ namespace Fika.Core.Main.Players
 
         private class LootableContainerInteractionHandler(FikaPlayer player, LootableContainer container)
         {
-            private readonly FikaPlayer player = player;
-            public readonly LootableContainer container = container;
+            private readonly FikaPlayer _player = player;
+            public readonly LootableContainer Container = container;
 
             public void Handle()
             {
-                CommonPlayerPacket packet = new()
-                {
-                    NetId = player.NetId,
-                    Type = ECommonSubPacketType.ContainerInteraction,
-                    SubPacket = new ContainerInteractionPacket()
-                    {
-                        InteractiveId = container.Id,
-                        InteractionType = EInteractionType.Close
-                    }
-                };
-                player.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+                _player.CommonPacket.Type = ECommonSubPacketType.ContainerInteraction;
+                _player.CommonPacket.SubPacket = ContainerInteractionPacket.FromValue(Container.Id, EInteractionType.Close);
+                _player.PacketSender.NetworkManager.SendNetReusable(ref _player.CommonPacket, DeliveryMethod.ReliableOrdered, true);
 
-                container.Interact(new InteractionResult(EInteractionType.Close));
-                if (player.MovementContext.LevelOnApproachStart > 0f)
+                Container.Interact(new InteractionResult(EInteractionType.Close));
+                if (_player.MovementContext.LevelOnApproachStart > 0f)
                 {
-                    player.MovementContext.SetPoseLevel(player.MovementContext.LevelOnApproachStart, false);
-                    player.MovementContext.LevelOnApproachStart = -1f;
+                    _player.MovementContext.SetPoseLevel(_player.MovementContext.LevelOnApproachStart, false);
+                    _player.MovementContext.LevelOnApproachStart = -1f;
                 }
             }
         }
 
         private class FirearmControllerHandler(FikaPlayer fikaPlayer, Weapon weapon)
         {
-            private readonly FikaPlayer fikaPlayer = fikaPlayer;
-            public readonly Weapon weapon = weapon;
-            public Process<FirearmController, IFirearmHandsController> process;
-            public Action confirmCallback;
+            private readonly FikaPlayer _fikaPlayer = fikaPlayer;
+            public readonly Weapon Weapon = weapon;
+            public Process<FirearmController, IFirearmHandsController> Process;
+            public Action ConfirmCallback;
 
             internal FikaClientFirearmController ReturnController()
             {
-                return FikaClientFirearmController.Create(fikaPlayer, weapon);
+                return FikaClientFirearmController.Create(_fikaPlayer, Weapon);
             }
 
             internal void SendPacket()
             {
-                CommonPlayerPacket packet = new()
-                {
-                    NetId = fikaPlayer.NetId,
-                    Type = ECommonSubPacketType.Proceed,
-                    SubPacket = new ProceedPacket()
-                    {
-                        ProceedType = weapon.IsStationaryWeapon ? EProceedType.Stationary : EProceedType.Weapon,
-                        ItemId = weapon.Id
-                    }
-                };
-                fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+                _fikaPlayer.CommonPacket.Type = ECommonSubPacketType.Proceed;
+                _fikaPlayer.CommonPacket.SubPacket = ProceedPacket.FromValue(default, Weapon.Id, 0f, 0,
+                    Weapon.IsStationaryWeapon ? EProceedType.Stationary : EProceedType.Weapon, false);
+                _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _fikaPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
             }
 
             internal void HandleResult(IResult result)
             {
                 if (result.Succeed)
                 {
-                    confirmCallback();
+                    ConfirmCallback();
                 }
             }
         }
@@ -1589,8 +1501,8 @@ namespace Fika.Core.Main.Players
         {
             private readonly FikaPlayer _fikaPlayer = fikaPlayer;
             private readonly Item _item = item;
-            public Process<UsableItemController, GInterface184> process;
-            public Action confirmCallback;
+            public Process<UsableItemController, GInterface184> Process;
+            public Action ConfirmCallback;
 
             internal FikaClientUsableItemController ReturnController()
             {
@@ -1599,322 +1511,247 @@ namespace Fika.Core.Main.Players
 
             internal void SendPacket()
             {
-                CommonPlayerPacket packet = new()
-                {
-                    NetId = _fikaPlayer.NetId,
-                    Type = ECommonSubPacketType.Proceed,
-                    SubPacket = new ProceedPacket()
-                    {
-                        ProceedType = EProceedType.UsableItem,
-                        ItemId = _item.Id
-                    }
-                };
-                _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+                _fikaPlayer.CommonPacket.Type = ECommonSubPacketType.Proceed;
+                _fikaPlayer.CommonPacket.SubPacket = ProceedPacket.FromValue(default, _item.Id, 0f, 0, EProceedType.UsableItem, false);
+                _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _fikaPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
             }
 
             internal void HandleResult(IResult result)
             {
                 if (result.Succeed)
                 {
-                    confirmCallback();
+                    ConfirmCallback();
                 }
             }
         }
 
         private class PortableRangeFinderControllerHandler(FikaPlayer fikaPlayer, Item item)
         {
-            private readonly FikaPlayer fikaPlayer = fikaPlayer;
-            private readonly Item item = item;
-            public Process<PortableRangeFinderController, GInterface184> process;
-            public Action confirmCallback;
+            private readonly FikaPlayer _fikaPlayer = fikaPlayer;
+            private readonly Item _item = item;
+            public Process<PortableRangeFinderController, GInterface184> Process;
+            public Action ConfirmCallback;
 
             internal FikaClientPortableRangeFinderController ReturnController()
             {
-                return FikaClientPortableRangeFinderController.Create(fikaPlayer, item);
+                return FikaClientPortableRangeFinderController.Create(_fikaPlayer, _item);
             }
 
             internal void SendPacket()
             {
-                CommonPlayerPacket packet = new()
-                {
-                    NetId = fikaPlayer.NetId,
-                    Type = ECommonSubPacketType.Proceed,
-                    SubPacket = new ProceedPacket()
-                    {
-                        ProceedType = EProceedType.UsableItem,
-                        ItemId = item.Id
-                    }
-                };
-                fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+                _fikaPlayer.CommonPacket.Type = ECommonSubPacketType.Proceed;
+                _fikaPlayer.CommonPacket.SubPacket = ProceedPacket.FromValue(default, _item.Id, 0f, 0, EProceedType.UsableItem, false);
+                _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _fikaPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
             }
 
             internal void HandleResult(IResult result)
             {
                 if (result.Succeed)
                 {
-                    confirmCallback();
+                    ConfirmCallback();
                 }
             }
         }
 
         private class QuickUseItemControllerHandler(FikaPlayer fikaPlayer, Item item)
         {
-            private readonly FikaPlayer fikaPlayer = fikaPlayer;
-            private readonly Item item = item;
-            public Process<QuickUseItemController, IOnHandsUseCallback> process;
-            public Action confirmCallback;
+            private readonly FikaPlayer _fikaPlayer = fikaPlayer;
+            private readonly Item _item = item;
+            public Process<QuickUseItemController, IOnHandsUseCallback> Process;
+            public Action ConfirmCallback;
 
             internal QuickUseItemController ReturnController()
             {
-                return QuickUseItemController.smethod_6<QuickUseItemController>(fikaPlayer, item);
+                return QuickUseItemController.smethod_6<QuickUseItemController>(_fikaPlayer, _item);
             }
 
             internal void SendPacket()
             {
-                CommonPlayerPacket packet = new()
-                {
-                    NetId = fikaPlayer.NetId,
-                    Type = ECommonSubPacketType.Proceed,
-                    SubPacket = new ProceedPacket()
-                    {
-                        ProceedType = EProceedType.QuickUse,
-                        ItemId = item.Id
-                    }
-                };
-                fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+                _fikaPlayer.CommonPacket.Type = ECommonSubPacketType.Proceed;
+                _fikaPlayer.CommonPacket.SubPacket = ProceedPacket.FromValue(default, _item.Id, 0f, 0, EProceedType.QuickUse, false);
+                _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _fikaPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
             }
 
             internal void HandleResult(IResult result)
             {
                 if (result.Succeed)
                 {
-                    confirmCallback();
+                    ConfirmCallback();
                 }
             }
         }
 
         private class MedsControllerHandler(FikaPlayer fikaPlayer, MedsItemClass meds, GStruct375<EBodyPart> bodyParts, int animationVariant)
         {
-            private readonly FikaPlayer fikaPlayer = fikaPlayer;
-            private readonly MedsItemClass meds = meds;
-            private readonly GStruct375<EBodyPart> bodyParts = bodyParts;
-            private readonly int animationVariant = animationVariant;
-            public Process<MedsController, GInterface185> process;
-            public Action confirmCallback;
+            private readonly FikaPlayer _fikaPlayer = fikaPlayer;
+            private readonly MedsItemClass _meds = meds;
+            private readonly GStruct375<EBodyPart> _bodyParts = bodyParts;
+            private readonly int _animationVariant = animationVariant;
+            public Process<MedsController, GInterface185> Process;
+            public Action ConfirmCallback;
 
             internal MedsController ReturnController()
             {
-                return MedsController.smethod_6<MedsController>(fikaPlayer, meds, bodyParts, 1f, animationVariant);
+                return MedsController.smethod_6<MedsController>(_fikaPlayer, _meds, _bodyParts, 1f, _animationVariant);
             }
 
             internal void SendPacket()
             {
-                CommonPlayerPacket packet = new()
-                {
-                    NetId = fikaPlayer.NetId,
-                    Type = ECommonSubPacketType.Proceed,
-                    SubPacket = new ProceedPacket()
-                    {
-                        ProceedType = EProceedType.MedsClass,
-                        ItemId = meds.Id,
-                        AnimationVariant = animationVariant,
-                        BodyParts = bodyParts
-                    }
-                };
-                fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+                _fikaPlayer.CommonPacket.Type = ECommonSubPacketType.Proceed;
+                _fikaPlayer.CommonPacket.SubPacket = ProceedPacket.FromValue(_bodyParts, _meds.Id, 0f, _animationVariant,
+                    EProceedType.MedsClass, false);
+                _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _fikaPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
             }
 
             internal void HandleResult(IResult result)
             {
                 if (result.Succeed)
                 {
-                    confirmCallback();
+                    ConfirmCallback();
                 }
             }
         }
 
         private class FoodControllerHandler(FikaPlayer fikaPlayer, FoodDrinkItemClass foodDrink, float amount, GStruct375<EBodyPart> bodyParts, int animationVariant)
         {
-            private readonly FikaPlayer fikaPlayer = fikaPlayer;
-            private readonly FoodDrinkItemClass foodDrink = foodDrink;
-            private readonly float amount = amount;
-            private readonly GStruct375<EBodyPart> bodyParts = bodyParts;
-            private readonly int animationVariant = animationVariant;
-            public Process<MedsController, GInterface185> process;
-            public Action confirmCallback;
+            private readonly FikaPlayer _fikaPlayer = fikaPlayer;
+            private readonly FoodDrinkItemClass _foodDrink = foodDrink;
+            private readonly float _amount = amount;
+            private readonly GStruct375<EBodyPart> _bodyParts = bodyParts;
+            private readonly int _animationVariant = animationVariant;
+            public Process<MedsController, GInterface185> Process;
+            public Action ConfirmCallback;
 
             internal MedsController ReturnController()
             {
-                return MedsController.smethod_6<MedsController>(fikaPlayer, foodDrink, bodyParts, amount, animationVariant);
+                return MedsController.smethod_6<MedsController>(_fikaPlayer, _foodDrink, _bodyParts, _amount, _animationVariant);
             }
 
             internal void SendPacket()
             {
-                CommonPlayerPacket packet = new()
-                {
-                    NetId = fikaPlayer.NetId,
-                    Type = ECommonSubPacketType.Proceed,
-                    SubPacket = new ProceedPacket()
-                    {
-                        ProceedType = EProceedType.MedsClass,
-                        ItemId = foodDrink.Id,
-                        Amount = amount,
-                        AnimationVariant = animationVariant,
-                        BodyParts = bodyParts
-                    }
-                };
-                fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+                _fikaPlayer.CommonPacket.Type = ECommonSubPacketType.Proceed;
+                _fikaPlayer.CommonPacket.SubPacket = ProceedPacket.FromValue(_bodyParts, _foodDrink.Id, _amount, _animationVariant,
+                    EProceedType.MedsClass, false);
+                _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _fikaPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
             }
 
             internal void HandleResult(IResult result)
             {
                 if (result.Succeed)
                 {
-                    confirmCallback();
+                    ConfirmCallback();
                 }
             }
         }
 
         private class KnifeControllerHandler(FikaPlayer fikaPlayer, KnifeComponent knife)
         {
-            private readonly FikaPlayer fikaPlayer = fikaPlayer;
-            public readonly KnifeComponent knife = knife;
-            public Process<KnifeController, IKnifeController> process;
-            public Action confirmCallback;
+            private readonly FikaPlayer _fikaPlayer = fikaPlayer;
+            public readonly KnifeComponent Knife = knife;
+            public Process<KnifeController, IKnifeController> Process;
+            public Action ConfirmCallback;
 
             internal FikaClientKnifeController ReturnController()
             {
-                return FikaClientKnifeController.Create(fikaPlayer, knife);
+                return FikaClientKnifeController.Create(_fikaPlayer, Knife);
             }
 
             internal void SendPacket()
             {
-                CommonPlayerPacket packet = new()
-                {
-                    NetId = fikaPlayer.NetId,
-                    Type = ECommonSubPacketType.Proceed,
-                    SubPacket = new ProceedPacket()
-                    {
-                        ProceedType = EProceedType.Knife,
-                        ItemId = knife.Item.Id
-                    }
-                };
-                fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+                _fikaPlayer.CommonPacket.Type = ECommonSubPacketType.Proceed;
+                _fikaPlayer.CommonPacket.SubPacket = ProceedPacket.FromValue(default, Knife.Item.Id, 0f, 0, EProceedType.Knife, false);
+                _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _fikaPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
             }
 
             internal void HandleResult(IResult result)
             {
                 if (result.Succeed)
                 {
-                    confirmCallback();
+                    ConfirmCallback();
                 }
             }
         }
 
         private class QuickKnifeControllerHandler(FikaPlayer fikaPlayer, KnifeComponent knife)
         {
-            private readonly FikaPlayer fikaPlayer = fikaPlayer;
-            public readonly KnifeComponent knife = knife;
-            public Process<QuickKnifeKickController, GInterface189> process;
-            public Action confirmCallback;
+            private readonly FikaPlayer _fikaPlayer = fikaPlayer;
+            public readonly KnifeComponent Knife = knife;
+            public Process<QuickKnifeKickController, GInterface189> Process;
+            public Action ConfirmCallback;
 
             internal QuickKnifeKickController ReturnController()
             {
-                return QuickKnifeKickController.smethod_9<QuickKnifeKickController>(fikaPlayer, knife);
+                return QuickKnifeKickController.smethod_9<QuickKnifeKickController>(_fikaPlayer, Knife);
             }
 
             internal void SendPacket()
             {
-                CommonPlayerPacket packet = new()
-                {
-                    NetId = fikaPlayer.NetId,
-                    Type = ECommonSubPacketType.Proceed,
-                    SubPacket = new ProceedPacket()
-                    {
-                        ProceedType = EProceedType.QuickKnifeKick,
-                        ItemId = knife.Item.Id
-                    }
-                };
-                fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+                _fikaPlayer.CommonPacket.Type = ECommonSubPacketType.Proceed;
+                _fikaPlayer.CommonPacket.SubPacket = ProceedPacket.FromValue(default, Knife.Item.Id, 0f, 0, EProceedType.QuickKnifeKick, false);
+                _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _fikaPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
             }
 
             internal void HandleResult(IResult result)
             {
                 if (result.Succeed)
                 {
-                    confirmCallback();
+                    ConfirmCallback();
                 }
             }
         }
 
         private class GrenadeControllerHandler(FikaPlayer fikaPlayer, ThrowWeapItemClass throwWeap)
         {
-            private readonly FikaPlayer fikaPlayer = fikaPlayer;
-            private readonly ThrowWeapItemClass throwWeap = throwWeap;
-            public Process<GrenadeHandsController, IHandsThrowController> process;
-            public Action confirmCallback;
+            private readonly FikaPlayer _fikaPlayer = fikaPlayer;
+            private readonly ThrowWeapItemClass _throwWeap = throwWeap;
+            public Process<GrenadeHandsController, IHandsThrowController> Process;
+            public Action ConfirmCallback;
 
             internal FikaClientGrenadeController ReturnController()
             {
-                return FikaClientGrenadeController.Create(fikaPlayer, throwWeap);
+                return FikaClientGrenadeController.Create(_fikaPlayer, _throwWeap);
             }
 
             internal void SendPacket()
             {
-                CommonPlayerPacket packet = new()
-                {
-                    NetId = fikaPlayer.NetId,
-                    Type = ECommonSubPacketType.Proceed,
-                    SubPacket = new ProceedPacket()
-                    {
-                        ProceedType = EProceedType.GrenadeClass,
-                        ItemId = throwWeap.Id
-                    }
-                };
-                fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+                _fikaPlayer.CommonPacket.Type = ECommonSubPacketType.Proceed;
+                _fikaPlayer.CommonPacket.SubPacket = ProceedPacket.FromValue(default, _throwWeap.Id, 0f, 0, EProceedType.GrenadeClass, false);
+                _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _fikaPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
             }
 
             internal void HandleResult(IResult result)
             {
                 if (result.Succeed)
                 {
-                    confirmCallback();
+                    ConfirmCallback();
                 }
             }
         }
 
         private class QuickGrenadeControllerHandler(FikaPlayer fikaPlayer, ThrowWeapItemClass throwWeap)
         {
-            private readonly FikaPlayer fikaPlayer = fikaPlayer;
-            private readonly ThrowWeapItemClass throwWeap = throwWeap;
-            public Process<QuickGrenadeThrowHandsController, GInterface188> process;
-            public Action confirmCallback;
+            private readonly FikaPlayer _fikaPlayer = fikaPlayer;
+            private readonly ThrowWeapItemClass _throwWeap = throwWeap;
+            public Process<QuickGrenadeThrowHandsController, GInterface188> Process;
+            public Action ConfirmCallback;
 
             internal FikaClientQuickGrenadeController ReturnController()
             {
-                return FikaClientQuickGrenadeController.Create(fikaPlayer, throwWeap);
+                return FikaClientQuickGrenadeController.Create(_fikaPlayer, _throwWeap);
             }
 
             internal void SendPacket()
             {
-                CommonPlayerPacket packet = new()
-                {
-                    NetId = fikaPlayer.NetId,
-                    Type = ECommonSubPacketType.Proceed,
-                    SubPacket = new ProceedPacket()
-                    {
-                        ProceedType = EProceedType.QuickGrenadeThrow,
-                        ItemId = throwWeap.Id
-                    }
-                };
-                fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+                _fikaPlayer.CommonPacket.Type = ECommonSubPacketType.Proceed;
+                _fikaPlayer.CommonPacket.SubPacket = ProceedPacket.FromValue(default, _throwWeap.Id, 0f, 0, EProceedType.QuickGrenadeThrow, false);
+                _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _fikaPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
             }
 
             internal void HandleResult(IResult result)
             {
                 if (result.Succeed)
                 {
-                    confirmCallback();
+                    ConfirmCallback();
                 }
             }
         }

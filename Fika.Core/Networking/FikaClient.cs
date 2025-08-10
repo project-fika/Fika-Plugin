@@ -243,7 +243,7 @@ namespace Fika.Core.Networking
 
         private void RegisterPacketsAndTypes()
         {
-            FirearmSubPacketPoolManager.Instance.CreatePool();
+            PoolUtils.CreateAll();
 
             RegisterCustomType(FikaSerializationExtensions.PutRagdollStruct, FikaSerializationExtensions.GetRagdollStruct);
             RegisterCustomType(FikaSerializationExtensions.PutArtilleryStruct, FikaSerializationExtensions.GetArtilleryStruct);
@@ -256,7 +256,7 @@ namespace Fika.Core.Networking
             RegisterPacket<DamagePacket>(OnDamagePacketReceived);
             RegisterPacket<ArmorDamagePacket>(OnArmorDamagePacketReceived);
             RegisterPacket<InventoryPacket>(OnInventoryPacketReceived);
-            RegisterPacket<CommonPlayerPacket>(OnCommonPlayerPacketReceived);
+            //RegisterPacket<CommonPlayerPacket>(OnCommonPlayerPacketReceived);
             RegisterPacket<InformationPacket>(OnInformationPacketReceived);
             RegisterPacket<HealthSyncPacket>(OnHealthSyncPacketReceived);
             RegisterPacket<GenericPacket>(OnGenericPacketReceived);
@@ -295,6 +295,7 @@ namespace Fika.Core.Networking
             RegisterReusable<WorldPacket>(OnWorldPacketReceived);
 
             RegisterNetReusable<WeaponPacket>(OnWeaponPacketReceived);
+            RegisterNetReusable<CommonPlayerPacket>(OnCommonPlayerPacketReceived);
         }
 
         private void OnSyncTrapsPacketReceived(SyncTrapsPacket packet)
@@ -1160,7 +1161,7 @@ namespace Fika.Core.Networking
             _stateHandle.Complete();
             _snapshots.Dispose();
 
-            FirearmSubPacketPoolManager.Release();
+            PoolUtils.ReleaseAll();
 
             if (_fikaChat != null)
             {

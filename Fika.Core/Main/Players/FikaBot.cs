@@ -61,6 +61,10 @@ namespace Fika.Core.Main.Players
             player._isHeadless = FikaBackendUtils.IsHeadless;
             player.IsYourPlayer = false;
             player.NetId = playerId;
+            player.CommonPacket = new()
+            {
+                NetId = playerId
+            };
 
             BotInventoryController inventoryController = new(player, profile, true, currentId, nextOperationId);
 
@@ -152,17 +156,9 @@ namespace Fika.Core.Main.Players
             {
                 if (ActiveHealthController.IsAlive)
                 {
-                    CommonPlayerPacket packet = new()
-                    {
-                        NetId = NetId,
-                        Type = ECommonSubPacketType.Phrase,
-                        SubPacket = new PhrasePacket()
-                        {
-                            PhraseTrigger = @event,
-                            PhraseIndex = clip.NetId
-                        }
-                    };
-                    PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+                    CommonPacket.Type = ECommonSubPacketType.Phrase;
+                    CommonPacket.SubPacket = PhrasePacket.FromValue(@event, clip.NetId);
+                    PacketSender.NetworkManager.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
                 }
             }
             else
@@ -286,10 +282,10 @@ namespace Fika.Core.Main.Players
             FirearmController firearmController;
             if ((firearmController = _handsController as FirearmController) != null)
             {
-                flag = firearmController.CheckForFastWeaponSwitch(handler.weapon);
+                flag = firearmController.CheckForFastWeaponSwitch(handler.Weapon);
             }
             Func<FirearmController> func = new(handler.ReturnController);
-            handler.Process = new Process<FirearmController, IFirearmHandsController>(this, func, handler.weapon, flag);
+            handler.Process = new Process<FirearmController, IFirearmHandsController>(this, func, handler.Weapon, flag);
             handler.ConfirmCallback = new(handler.SendPacket);
             handler.Process.method_0(new(handler.HandleResult), callback, scheduled);
         }
@@ -397,28 +393,21 @@ namespace Fika.Core.Main.Players
         private class BotFirearmControllerHandler(FikaBot fikaBot, Weapon weapon)
         {
             private readonly FikaBot _fikaBot = fikaBot;
-            public readonly Weapon weapon = weapon;
+            public readonly Weapon Weapon = weapon;
             public Process<FirearmController, IFirearmHandsController> Process;
             public Action ConfirmCallback;
 
             internal BotFirearmController ReturnController()
             {
-                return BotFirearmController.Create(_fikaBot, weapon);
+                return BotFirearmController.Create(_fikaBot, Weapon);
             }
 
             internal void SendPacket()
             {
-                CommonPlayerPacket packet = new()
-                {
-                    NetId = _fikaBot.NetId,
-                    Type = ECommonSubPacketType.Proceed,
-                    SubPacket = new ProceedPacket()
-                    {
-                        ProceedType = weapon.IsStationaryWeapon ? EProceedType.Stationary : EProceedType.Weapon,
-                        ItemId = weapon.Id
-                    }
-                };
-                _fikaBot.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+                _fikaBot.CommonPacket.Type = ECommonSubPacketType.Proceed;
+                _fikaBot.CommonPacket.SubPacket = ProceedPacket.FromValue(default, Weapon.Id, 0f, 0,
+                    Weapon.IsStationaryWeapon ? EProceedType.Stationary : EProceedType.Weapon, false);
+                _fikaBot.PacketSender.NetworkManager.SendNetReusable(ref _fikaBot.CommonPacket, DeliveryMethod.ReliableOrdered, true);
             }
 
             internal void HandleResult(IResult result)

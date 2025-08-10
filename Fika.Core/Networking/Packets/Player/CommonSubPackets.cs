@@ -7,6 +7,7 @@ using EFT.WeaponMounting;
 using Fika.Core.Main.ObservedClasses;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
+using Fika.Core.Networking.Pools;
 using LiteNetLib.Utils;
 using System;
 using static Fika.Core.Main.Players.FikaPlayer;
@@ -16,18 +17,30 @@ namespace Fika.Core.Networking.Packets.Player
 {
     public class CommonSubPackets
     {
-        public struct PhrasePacket : ISubPacket
+        public class PhrasePacket : IPoolSubPacket
         {
+            private PhrasePacket()
+            {
+
+            }
+
+            public static PhrasePacket CreateInstance()
+            {
+                return new();
+            }
+
+            public static PhrasePacket FromValue(EPhraseTrigger trigger, int index)
+            {
+                PhrasePacket packet = CommonSubPacketPoolManager.Instance.GetPacket<PhrasePacket>(ECommonSubPacketType.Phrase);
+                packet.PhraseTrigger = trigger;
+                packet.PhraseIndex = index;
+                return packet;
+            }
+
             public EPhraseTrigger PhraseTrigger;
             public int PhraseIndex;
 
-            public PhrasePacket(NetDataReader reader)
-            {
-                PhraseTrigger = (EPhraseTrigger)reader.GetByte();
-                PhraseIndex = reader.GetInt();
-            }
-
-            public readonly void Execute(FikaPlayer player)
+            public void Execute(FikaPlayer player)
             {
                 if (player.gameObject.activeSelf && player.HealthController.IsAlive)
                 {
@@ -35,32 +48,53 @@ namespace Fika.Core.Networking.Packets.Player
                 }
             }
 
-            public readonly void Serialize(NetDataWriter writer)
+            public void Serialize(NetDataWriter writer)
             {
-                writer.Put((byte)PhraseTrigger);
+                writer.PutEnum(PhraseTrigger);
                 writer.Put(PhraseIndex);
+            }
+
+            public void Deserialize(NetDataReader reader)
+            {
+                PhraseTrigger = reader.GetEnum<EPhraseTrigger>();
+                PhraseIndex = reader.GetInt();
+            }
+
+            public void Dispose()
+            {
+                PhraseTrigger = EPhraseTrigger.None;
+                PhraseIndex = 0;
             }
         }
 
-        public struct WorldInteractionPacket : ISubPacket
+        public class WorldInteractionPacket : IPoolSubPacket
         {
+            private WorldInteractionPacket()
+            {
+
+            }
+
+            public static WorldInteractionPacket CreateInstance()
+            {
+                return new();
+            }
+
+            public static WorldInteractionPacket FromValue(string interactiveId, EInteractionType interactionType, EInteractionStage interactionStage, string itemId = null)
+            {
+                WorldInteractionPacket packet = CommonSubPacketPoolManager.Instance.GetPacket<WorldInteractionPacket>(ECommonSubPacketType.WorldInteraction);
+                packet.InteractiveId = interactiveId;
+                packet.InteractionType = interactionType;
+                packet.InteractionStage = interactionStage;
+                packet.ItemId = itemId;
+                return packet;
+            }
+
             public string InteractiveId;
             public EInteractionType InteractionType;
             public EInteractionStage InteractionStage;
             public string ItemId;
 
-            public WorldInteractionPacket(NetDataReader reader)
-            {
-                InteractiveId = reader.GetString();
-                InteractionType = (EInteractionType)reader.GetByte();
-                InteractionStage = reader.GetEnum<EInteractionStage>();
-                if (InteractionType == EInteractionType.Unlock)
-                {
-                    ItemId = reader.GetString();
-                }
-            }
-
-            public readonly void Execute(FikaPlayer player)
+            public void Execute(FikaPlayer player)
             {
                 WorldInteractiveObject worldInteractiveObject = Singleton<GameWorld>.Instance.FindDoor(InteractiveId);
                 if (worldInteractiveObject != null)
@@ -132,30 +166,61 @@ namespace Fika.Core.Networking.Packets.Player
                 }
             }
 
-            public readonly void Serialize(NetDataWriter writer)
+            public void Serialize(NetDataWriter writer)
             {
                 writer.Put(InteractiveId);
-                writer.Put((byte)InteractionType);
+                writer.PutEnum(InteractionType);
                 writer.PutEnum(InteractionStage);
                 if (InteractionType == EInteractionType.Unlock)
                 {
                     writer.Put(ItemId);
                 }
             }
+
+            public void Deserialize(NetDataReader reader)
+            {
+                InteractiveId = reader.GetString();
+                InteractionType = reader.GetEnum<EInteractionType>();
+                InteractionStage = reader.GetEnum<EInteractionStage>();
+                if (InteractionType == EInteractionType.Unlock)
+                {
+                    ItemId = reader.GetString();
+                }
+            }
+
+            public void Dispose()
+            {
+                InteractiveId = null;
+                InteractionType = default;
+                InteractionStage = default;
+                ItemId = null;
+            }
         }
 
-        public struct ContainerInteractionPacket : ISubPacket
+        public class ContainerInteractionPacket : IPoolSubPacket
         {
+            private ContainerInteractionPacket()
+            {
+
+            }
+
+            public static ContainerInteractionPacket CreateInstance()
+            {
+                return new();
+            }
+
+            public static ContainerInteractionPacket FromValue(string interactiveId, EInteractionType interactionType)
+            {
+                ContainerInteractionPacket packet = CommonSubPacketPoolManager.Instance.GetPacket<ContainerInteractionPacket>(ECommonSubPacketType.ContainerInteraction);
+                packet.InteractiveId = interactiveId;
+                packet.InteractionType = interactionType;
+                return packet;
+            }
+
             public string InteractiveId;
             public EInteractionType InteractionType;
 
-            public ContainerInteractionPacket(NetDataReader reader)
-            {
-                InteractiveId = reader.GetString();
-                InteractionType = (EInteractionType)reader.GetByte();
-            }
-
-            public readonly void Execute(FikaPlayer player)
+            public void Execute(FikaPlayer player)
             {
                 WorldInteractiveObject lootableContainer = Singleton<GameWorld>.Instance.FindDoor(InteractiveId);
                 if (lootableContainer != null)
@@ -172,15 +237,49 @@ namespace Fika.Core.Networking.Packets.Player
                 }
             }
 
-            public readonly void Serialize(NetDataWriter writer)
+            public void Serialize(NetDataWriter writer)
             {
                 writer.Put(InteractiveId);
-                writer.Put((byte)InteractionType);
+                writer.PutEnum(InteractionType);
+            }
+
+            public void Deserialize(NetDataReader reader)
+            {
+                InteractiveId = reader.GetString();
+                InteractionType = reader.GetEnum<EInteractionType>();
+            }
+
+            public void Dispose()
+            {
+                InteractiveId = null;
+                InteractionType = default;
             }
         }
 
-        public struct ProceedPacket : ISubPacket
+        public class ProceedPacket : IPoolSubPacket
         {
+            private ProceedPacket()
+            {
+
+            }
+
+            public static ProceedPacket CreateInstance()
+            {
+                return new();
+            }
+
+            public static ProceedPacket FromValue(GStruct375<EBodyPart> bodyParts, MongoID itemId, float amount, int animationVariant, EProceedType proceedType, bool scheduled)
+            {
+                ProceedPacket packet = CommonSubPacketPoolManager.Instance.GetPacket<ProceedPacket>(ECommonSubPacketType.Proceed);
+                packet.BodyParts = bodyParts;
+                packet.ItemId = itemId;
+                packet.Amount = amount;
+                packet.AnimationVariant = animationVariant;
+                packet.ProceedType = proceedType;
+                packet.Scheduled = scheduled;
+                return packet;
+            }
+
             public GStruct375<EBodyPart> BodyParts;
             public MongoID ItemId;
             public float Amount;
@@ -188,37 +287,11 @@ namespace Fika.Core.Networking.Packets.Player
             public EProceedType ProceedType;
             public bool Scheduled;
 
-            public ProceedPacket(NetDataReader reader)
-            {
-                ProceedType = reader.GetEnum<EProceedType>();
-                if (ProceedType is not EProceedType.EmptyHands)
-                {
-                    ItemId = reader.GetMongoID();
-                }
-                else
-                {
-                    Scheduled = reader.GetBool();
-                }
-                if (ProceedType is EProceedType.FoodClass or EProceedType.MedsClass)
-                {
-                    Amount = reader.GetFloat();
-                    AnimationVariant = reader.GetInt();
-                    if (ProceedType is EProceedType.MedsClass)
-                    {
-                        int bodyPartsAmount = reader.GetInt();
-                        for (int i = 0; i < bodyPartsAmount; i++)
-                        {
-                            BodyParts.Add((EBodyPart)reader.GetByte());
-                        }
-                    }
-                }
-            }
-
             public void Execute(FikaPlayer player)
             {
                 if (player is ObservedPlayer observedPlayer)
                 {
-                    observedPlayer.HandleProceedPacket(in this);
+                    observedPlayer.HandleProceedPacket(this);
                 }
             }
 
@@ -243,20 +316,95 @@ namespace Fika.Core.Networking.Packets.Player
                         writer.Put(bodyPartsAmount);
                         for (int i = 0; i < bodyPartsAmount; i++)
                         {
-                            writer.Put((byte)BodyParts[i]);
+                            writer.PutEnum(BodyParts[i]);
                         }
                     }
                 }
             }
+
+            public void Deserialize(NetDataReader reader)
+            {
+                ProceedType = reader.GetEnum<EProceedType>();
+                if (ProceedType is not EProceedType.EmptyHands)
+                {
+                    ItemId = reader.GetMongoID();
+                }
+                else
+                {
+                    Scheduled = reader.GetBool();
+                }
+                if (ProceedType is EProceedType.FoodClass or EProceedType.MedsClass)
+                {
+                    Amount = reader.GetFloat();
+                    AnimationVariant = reader.GetInt();
+                    if (ProceedType is EProceedType.MedsClass)
+                    {
+                        int bodyPartsAmount = reader.GetInt();
+                        for (int i = 0; i < bodyPartsAmount; i++)
+                        {
+                            BodyParts.Add(reader.GetEnum<EBodyPart>());
+                        }
+                    }
+                }
+            }
+
+            public void Dispose()
+            {
+                BodyParts = default;
+                ItemId = default;
+                Amount = 0f;
+                AnimationVariant = 0;
+                ProceedType = default;
+                Scheduled = false;
+            }
         }
 
-        public struct HeadLightsPacket : ISubPacket
+        public class HeadLightsPacket : IPoolSubPacket
         {
+            private HeadLightsPacket()
+            {
+
+            }
+
+            public static HeadLightsPacket CreateInstance()
+            {
+                return new();
+            }
+
+            public static HeadLightsPacket FromValue(int amount, bool isSilent, FirearmLightStateStruct[] lightStates)
+            {
+                HeadLightsPacket packet = CommonSubPacketPoolManager.Instance.GetPacket<HeadLightsPacket>(ECommonSubPacketType.HeadLights);
+                packet.Amount = amount;
+                packet.IsSilent = isSilent;
+                packet.LightStates = lightStates;
+                return packet;
+            }
+
             public int Amount;
             public bool IsSilent;
             public FirearmLightStateStruct[] LightStates;
 
-            public HeadLightsPacket(NetDataReader reader)
+            public void Execute(FikaPlayer player)
+            {
+                player.HandleHeadLightsPacket(this);
+            }
+
+            public void Serialize(NetDataWriter writer)
+            {
+                writer.Put(Amount);
+                writer.Put(IsSilent);
+                if (Amount > 0)
+                {
+                    for (int i = 0; i < Amount; i++)
+                    {
+                        writer.Put(LightStates[i].Id);
+                        writer.Put(LightStates[i].IsActive);
+                        writer.Put(LightStates[i].LightMode);
+                    }
+                }
+            }
+
+            public void Deserialize(NetDataReader reader)
             {
                 Amount = reader.GetInt();
                 IsSilent = reader.GetBool();
@@ -275,120 +423,220 @@ namespace Fika.Core.Networking.Packets.Player
                 }
             }
 
-            public readonly void Execute(FikaPlayer player)
+            public void Dispose()
             {
-                player.HandleHeadLightsPacket(this);
-            }
-
-            public readonly void Serialize(NetDataWriter writer)
-            {
-                writer.Put(Amount);
-                writer.Put(IsSilent);
-                if (Amount > 0)
-                {
-                    for (int i = 0; i < Amount; i++)
-                    {
-                        writer.Put(LightStates[i].Id);
-                        writer.Put(LightStates[i].IsActive);
-                        writer.Put(LightStates[i].LightMode);
-                    }
-                }
+                Amount = 0;
+                IsSilent = false;
+                LightStates = null;
             }
         }
 
-        public struct InventoryChangedPacket : ISubPacket
+        public class InventoryChangedPacket : IPoolSubPacket
         {
-            public bool InventoryOpen;
-
-            public InventoryChangedPacket(NetDataReader reader)
+            private InventoryChangedPacket()
             {
-                InventoryOpen = reader.GetBool();
+
             }
 
-            public readonly void Execute(FikaPlayer player)
+            public static InventoryChangedPacket CreateInstance()
+            {
+                return new();
+            }
+
+            public static InventoryChangedPacket FromValue(bool inventoryOpen)
+            {
+                InventoryChangedPacket packet = CommonSubPacketPoolManager.Instance.GetPacket<InventoryChangedPacket>(ECommonSubPacketType.InventoryChanged);
+                packet.InventoryOpen = inventoryOpen;
+                return packet;
+            }
+
+            public bool InventoryOpen;
+
+            public void Execute(FikaPlayer player)
             {
                 player.HandleInventoryOpenedPacket(InventoryOpen);
             }
 
-            public readonly void Serialize(NetDataWriter writer)
+            public void Serialize(NetDataWriter writer)
             {
                 writer.Put(InventoryOpen);
             }
-        }
 
-        public struct DropPacket : ISubPacket
-        {
-            public bool FastDrop;
-
-            public DropPacket(NetDataReader reader)
+            public void Deserialize(NetDataReader reader)
             {
-                FastDrop = reader.GetBool();
+                InventoryOpen = reader.GetBool();
             }
 
-            public readonly void Execute(FikaPlayer player)
+            public void Dispose()
+            {
+                InventoryOpen = false;
+            }
+        }
+
+        public class DropPacket : IPoolSubPacket
+        {
+            private DropPacket()
+            {
+
+            }
+
+            public static DropPacket CreateInstance()
+            {
+                return new();
+            }
+
+            public static DropPacket FromValue(bool fastDrop)
+            {
+                DropPacket packet = CommonSubPacketPoolManager.Instance.GetPacket<DropPacket>(ECommonSubPacketType.Drop);
+                packet.FastDrop = fastDrop;
+                return packet;
+            }
+
+            public bool FastDrop;
+
+            public void Execute(FikaPlayer player)
             {
                 player.HandleDropPacket(FastDrop);
             }
 
-            public readonly void Serialize(NetDataWriter writer)
+            public void Serialize(NetDataWriter writer)
             {
                 writer.Put(FastDrop);
             }
+
+            public void Deserialize(NetDataReader reader)
+            {
+                FastDrop = reader.GetBool();
+            }
+
+            public void Dispose()
+            {
+                FastDrop = false;
+            }
         }
 
-        public struct StationaryPacket : ISubPacket
+        public class StationaryPacket : IPoolSubPacket
         {
+            private StationaryPacket()
+            {
+
+            }
+
+            public static StationaryPacket CreateInstance()
+            {
+                return new();
+            }
+
+            public static StationaryPacket FromValue(EStationaryCommand command, string id = null)
+            {
+                StationaryPacket packet = CommonSubPacketPoolManager.Instance.GetPacket<StationaryPacket>(ECommonSubPacketType.Stationary);
+                packet.Command = command;
+                packet.Id = id;
+                return packet;
+            }
+
             public EStationaryCommand Command;
             public string Id;
 
-            public StationaryPacket(NetDataReader reader)
-            {
-                Command = (EStationaryCommand)reader.GetByte();
-                if (Command == EStationaryCommand.Occupy)
-                {
-                    Id = reader.GetString();
-                }
-            }
-
-            public readonly void Execute(FikaPlayer player)
+            public void Execute(FikaPlayer player)
             {
                 StationaryWeapon stationaryWeapon = (Command == EStationaryCommand.Occupy)
                     ? Singleton<GameWorld>.Instance.FindStationaryWeapon(Id) : null;
                 player.ObservedStationaryInteract(stationaryWeapon, (StationaryPacketStruct.EStationaryCommand)Command);
             }
 
-            public readonly void Serialize(NetDataWriter writer)
+            public void Serialize(NetDataWriter writer)
             {
-                writer.Put((byte)Command);
+                writer.PutEnum(Command);
                 if (Command == EStationaryCommand.Occupy)
                 {
                     writer.Put(Id);
                 }
             }
-        }
 
-        public struct InteractionPacket : ISubPacket
-        {
-            public EInteraction Interaction;
-
-            public InteractionPacket(NetDataReader reader)
+            public void Deserialize(NetDataReader reader)
             {
-                Interaction = (EInteraction)reader.GetByte();
+                Command = reader.GetEnum<EStationaryCommand>();
+                if (Command == EStationaryCommand.Occupy)
+                {
+                    Id = reader.GetString();
+                }
             }
 
-            public readonly void Execute(FikaPlayer player)
+            public void Dispose()
+            {
+                Command = default;
+                Id = null;
+            }
+        }
+
+        public class InteractionPacket : IPoolSubPacket
+        {
+            private InteractionPacket()
+            {
+
+            }
+
+            public static InteractionPacket CreateInstance()
+            {
+                return new();
+            }
+
+            public static InteractionPacket FromValue(EInteraction interaction)
+            {
+                InteractionPacket packet = CreateInstance();
+                packet.Interaction = interaction;
+                return packet;
+            }
+
+            public EInteraction Interaction;
+
+            public void Execute(FikaPlayer player)
             {
                 player.SetInteractInHands(Interaction);
             }
 
-            public readonly void Serialize(NetDataWriter writer)
+            public void Serialize(NetDataWriter writer)
             {
                 writer.Put((byte)Interaction);
             }
+
+            public void Deserialize(NetDataReader reader)
+            {
+                Interaction = reader.GetEnum<EInteraction>();
+            }
+
+            public void Dispose()
+            {
+                Interaction = default;
+            }
         }
 
-        public struct VaultPacket : ISubPacket
+        public class VaultPacket : IPoolSubPacket
         {
+            private VaultPacket()
+            {
+
+            }
+
+            public static VaultPacket CreateInstance()
+            {
+                return new();
+            }
+
+            public static VaultPacket FromValue(EVaultingStrategy vaultingStrategy, Vector3 vaultingPoint, float vaultingHeight, float vaultingLength, float vaultingSpeed, float behindObstacleHeight, float absoluteForwardVelocity)
+            {
+                VaultPacket packet = CommonSubPacketPoolManager.Instance.GetPacket<VaultPacket>(ECommonSubPacketType.Vault);
+                packet.VaultingStrategy = vaultingStrategy;
+                packet.VaultingPoint = vaultingPoint;
+                packet.VaultingHeight = vaultingHeight;
+                packet.VaultingLength = vaultingLength;
+                packet.VaultingSpeed = vaultingSpeed;
+                packet.BehindObstacleHeight = behindObstacleHeight;
+                packet.AbsoluteForwardVelocity = absoluteForwardVelocity;
+                return packet;
+            }
+
             public EVaultingStrategy VaultingStrategy;
             public Vector3 VaultingPoint;
             public float VaultingHeight;
@@ -397,18 +645,7 @@ namespace Fika.Core.Networking.Packets.Player
             public float BehindObstacleHeight;
             public float AbsoluteForwardVelocity;
 
-            public VaultPacket(NetDataReader reader)
-            {
-                VaultingStrategy = (EVaultingStrategy)reader.GetByte();
-                VaultingPoint = reader.GetStruct<Vector3>();
-                VaultingHeight = reader.GetFloat();
-                VaultingLength = reader.GetFloat();
-                VaultingSpeed = reader.GetFloat();
-                BehindObstacleHeight = reader.GetFloat();
-                AbsoluteForwardVelocity = reader.GetFloat();
-            }
-
-            public readonly void Execute(FikaPlayer player)
+            public void Execute(FikaPlayer player)
             {
                 // A headless client can get stuck in permanent high-velocity states due to vaulting, skip it
                 if (!FikaBackendUtils.IsHeadless)
@@ -417,9 +654,9 @@ namespace Fika.Core.Networking.Packets.Player
                 }
             }
 
-            public readonly void Serialize(NetDataWriter writer)
+            public void Serialize(NetDataWriter writer)
             {
-                writer.Put((byte)VaultingStrategy);
+                writer.PutEnum(VaultingStrategy);
                 writer.PutStruct(VaultingPoint);
                 writer.Put(VaultingHeight);
                 writer.Put(VaultingLength);
@@ -427,10 +664,55 @@ namespace Fika.Core.Networking.Packets.Player
                 writer.Put(BehindObstacleHeight);
                 writer.Put(AbsoluteForwardVelocity);
             }
+
+            public void Deserialize(NetDataReader reader)
+            {
+                VaultingStrategy = reader.GetEnum<EVaultingStrategy>();
+                VaultingPoint = reader.GetStruct<Vector3>();
+                VaultingHeight = reader.GetFloat();
+                VaultingLength = reader.GetFloat();
+                VaultingSpeed = reader.GetFloat();
+                BehindObstacleHeight = reader.GetFloat();
+                AbsoluteForwardVelocity = reader.GetFloat();
+            }
+
+            public void Dispose()
+            {
+                VaultingStrategy = default;
+                VaultingPoint = default;
+                VaultingHeight = 0f;
+                VaultingLength = 0f;
+                VaultingSpeed = 0f;
+                BehindObstacleHeight = 0f;
+                AbsoluteForwardVelocity = 0f;
+            }
         }
 
-        public struct MountingPacket : ISubPacket
+        public class MountingPacket : IPoolSubPacket
         {
+            private MountingPacket()
+            {
+
+            }
+
+            public static MountingPacket CreateInstance()
+            {
+                return new();
+            }
+
+            public static MountingPacket FromValue(MountingPacketStruct.EMountingCommand command, bool isMounted,
+                Vector3 mountDirection, Vector3 mountingPoint, float currentMountingPointVerticalOffset, short mountingDirection)
+            {
+                MountingPacket packet = CommonSubPacketPoolManager.Instance.GetPacket<MountingPacket>(ECommonSubPacketType.Mounting);
+                packet.Command = command;
+                packet.IsMounted = isMounted;
+                packet.MountDirection = mountDirection;
+                packet.MountingPoint = mountingPoint;
+                packet.CurrentMountingPointVerticalOffset = currentMountingPointVerticalOffset;
+                packet.MountingDirection = mountingDirection;
+                return packet;
+            }
+
             public MountingPacketStruct.EMountingCommand Command;
             public bool IsMounted;
             public Vector3 MountDirection;
@@ -446,35 +728,7 @@ namespace Fika.Core.Networking.Packets.Player
             public short MountingDirection;
             public float TransitionTime;
 
-            public MountingPacket(NetDataReader reader)
-            {
-                Command = (MountingPacketStruct.EMountingCommand)reader.GetByte();
-                if (Command == MountingPacketStruct.EMountingCommand.Update)
-                {
-                    CurrentMountingPointVerticalOffset = reader.GetFloat();
-                }
-                if (Command is <= MountingPacketStruct.EMountingCommand.Exit)
-                {
-                    IsMounted = reader.GetBool();
-                }
-                ;
-                if (Command == MountingPacketStruct.EMountingCommand.Enter)
-                {
-                    MountDirection = reader.GetStruct<Vector3>();
-                    MountingPoint = reader.GetStruct<Vector3>();
-                    MountingDirection = reader.GetShort();
-                    TransitionTime = reader.GetFloat();
-                    TargetPos = reader.GetStruct<Vector3>();
-                    TargetPoseLevel = reader.GetFloat();
-                    TargetHandsRotation = reader.GetFloat();
-                    TargetBodyRotation = reader.GetStruct<Quaternion>();
-                    PoseLimit = reader.GetStruct<Vector2>();
-                    PitchLimit = reader.GetStruct<Vector2>();
-                    YawLimit = reader.GetStruct<Vector2>();
-                }
-            }
-
-            public readonly void Execute(FikaPlayer player)
+            public void Execute(FikaPlayer player)
             {
                 switch (Command)
                 {
@@ -510,7 +764,7 @@ namespace Fika.Core.Networking.Packets.Player
                 }
             }
 
-            public readonly void Serialize(NetDataWriter writer)
+            public void Serialize(NetDataWriter writer)
             {
                 writer.Put((byte)Command);
                 if (Command == MountingPacketStruct.EMountingCommand.Update)
@@ -535,6 +789,52 @@ namespace Fika.Core.Networking.Packets.Player
                     writer.PutStruct(PitchLimit);
                     writer.PutStruct(YawLimit);
                 }
+            }
+
+            public void Deserialize(NetDataReader reader)
+            {
+                Command = (MountingPacketStruct.EMountingCommand)reader.GetByte();
+                if (Command == MountingPacketStruct.EMountingCommand.Update)
+                {
+                    CurrentMountingPointVerticalOffset = reader.GetFloat();
+                }
+                if (Command is <= MountingPacketStruct.EMountingCommand.Exit)
+                {
+                    IsMounted = reader.GetBool();
+                }
+                ;
+                if (Command == MountingPacketStruct.EMountingCommand.Enter)
+                {
+                    MountDirection = reader.GetStruct<Vector3>();
+                    MountingPoint = reader.GetStruct<Vector3>();
+                    MountingDirection = reader.GetShort();
+                    TransitionTime = reader.GetFloat();
+                    TargetPos = reader.GetStruct<Vector3>();
+                    TargetPoseLevel = reader.GetFloat();
+                    TargetHandsRotation = reader.GetFloat();
+                    TargetBodyRotation = reader.GetStruct<Quaternion>();
+                    PoseLimit = reader.GetStruct<Vector2>();
+                    PitchLimit = reader.GetStruct<Vector2>();
+                    YawLimit = reader.GetStruct<Vector2>();
+                }
+            }
+
+            public void Dispose()
+            {
+                Command = default;
+                IsMounted = false;
+                MountDirection = default;
+                MountingPoint = default;
+                TargetPos = default;
+                TargetPoseLevel = 0f;
+                TargetHandsRotation = 0f;
+                PoseLimit = default;
+                PitchLimit = default;
+                YawLimit = default;
+                TargetBodyRotation = default;
+                CurrentMountingPointVerticalOffset = 0f;
+                MountingDirection = 0;
+                TransitionTime = 0f;
             }
         }
     }

@@ -1346,7 +1346,7 @@ namespace Fika.Core.Networking
             }
         }*/
 
-        public static ISubPacket GetCommonSubPacket(this NetDataReader reader, ECommonSubPacketType type)
+        /*public static ISubPacket GetCommonSubPacket(this NetDataReader reader, ECommonSubPacketType type)
         {
             switch (type)
             {
@@ -1376,7 +1376,7 @@ namespace Fika.Core.Networking
                     FikaPlugin.Instance.FikaLogger.LogError("GetCommonSubPacket: type was outside of bounds!");
                     return null;
             }
-        }
+        }*/
 
         public static ISubPacket GetGenericSubPacket(this NetDataReader reader, EGenericSubPacketType type, int netId)
         {
