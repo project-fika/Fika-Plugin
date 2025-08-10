@@ -18,6 +18,10 @@ namespace Fika.Core.Main.BotClasses
         {
             BotFirearmController controller = smethod_6<BotFirearmController>(player, weapon);
             controller._fikaPlayer = player;
+            controller._packet = new()
+            {
+                NetId = player.NetId
+            };
             return controller;
         }
     }

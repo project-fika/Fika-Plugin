@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Fika.Core.Networking.Packets;
+using System;
 using System.Collections.Generic;
 
 namespace LiteNetLib.Utils
@@ -176,6 +177,12 @@ namespace LiteNetLib.Utils
             _netSerializer.Serialize(writer, packet);
         }
 
+        public void WriteNetReusable<T>(NetDataWriter writer, ref T packet) where T : INetReusable
+        {
+            WriteShortHash<T>(writer);
+            packet.Serialize(writer);
+        }
+
         public void WriteNetSerializable<T>(NetDataWriter writer, ref T packet) where T : INetSerializable
         {
             WriteShortHash<T>(writer);
@@ -283,8 +290,27 @@ namespace LiteNetLib.Utils
         /// </summary>
         /// <param name="onReceive">event that will be called when packet deserialized with ReadPacket method</param>
         /// <exception cref="InvalidTypeException"><typeparamref name="T"/>'s fields are not supported, or it has no fields</exception>
+        public void SubscribeNetReusable<T>(Action<T> onReceive)
+            where T : class, INetReusable, new()
+        {
+            _netSerializer.Register<T>();
+            T reference = new();
+            _callbacks[GetShortHash<T>()] = (reader, userData) =>
+            {
+                reference.Deserialize(reader);
+                onReceive(reference);
+                reference.Flush();
+            };
+        }
+
+        /// <summary>
+        /// Register and subscribe to packet receive event
+        /// This method will overwrite last received packet class on receive (less garbage)
+        /// </summary>
+        /// <param name="onReceive">event that will be called when packet deserialized with ReadPacket method</param>
+        /// <exception cref="InvalidTypeException"><typeparamref name="T"/>'s fields are not supported, or it has no fields</exception>
         public void SubscribeNetReusable<T, TUserData>(Action<T, TUserData> onReceive)
-            where T : class, INetSerializable, new()
+            where T : class, INetReusable, new()
         {
             _netSerializer.Register<T>();
             T reference = new();
@@ -292,6 +318,7 @@ namespace LiteNetLib.Utils
             {
                 reference.Deserialize(reader);
                 onReceive(reference, (TUserData)userData);
+                reference.Flush();
             };
         }
 

@@ -859,7 +859,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
             {
                 ShotPosition = default;
                 ShotDirection = default;
-                AmmoTemplate = null;
+                AmmoTemplate = default;
                 Overheat = 0f;
                 LastShotOverheat = 0f;
                 LastShotTime = 0f;
@@ -1859,7 +1859,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
             {
                 ShotPosition = default;
                 ShotForward = default;
-                AmmoTemplateId = null;
+                AmmoTemplateId = default;
                 StartOneShotFire = false;
             }
         }

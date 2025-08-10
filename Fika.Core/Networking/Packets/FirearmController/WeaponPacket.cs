@@ -4,13 +4,13 @@ using static Fika.Core.Networking.Packets.SubPacket;
 
 namespace Fika.Core.Networking.Packets.FirearmController
 {
-    public struct WeaponPacket : INetSerializable
+    public class WeaponPacket : INetReusable
     {
         public int NetId;
         public EFirearmSubPacketType Type;
         public IPoolSubPacket SubPacket;
 
-        public readonly void Execute(FikaPlayer player)
+        public void Execute(FikaPlayer player)
         {
             SubPacket.Execute(player);
             FirearmSubPacketPool.ReturnPacket(this);
@@ -24,11 +24,25 @@ namespace Fika.Core.Networking.Packets.FirearmController
             SubPacket.Deserialize(reader);
         }
 
-        public readonly void Serialize(NetDataWriter writer)
+        public void Serialize(NetDataWriter writer)
         {
             writer.Put(NetId);
             writer.PutEnum(Type);
             SubPacket?.Serialize(writer);
+        }
+
+        public void Clear()
+        {
+            if (SubPacket != null)
+            {
+                FirearmSubPacketPool.ReturnPacket(this);
+                SubPacket = null; 
+            }
+        }
+
+        public void Flush()
+        {
+            SubPacket = null;
         }
     }
 }

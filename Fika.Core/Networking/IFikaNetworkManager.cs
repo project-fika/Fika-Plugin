@@ -28,6 +28,7 @@ namespace Fika.Core.Networking
         /// <param name="data">The packet instance to send, passed by reference</param>
         /// <param name="multicast">If <see langword="true"/>, the packet will be sent to multiple recipients; otherwise, it will be sent to a single target (server is always multicast)</param>
         public void SendData<T>(ref T packet, DeliveryMethod deliveryMethod, bool multicast = false) where T : INetSerializable;
+        public void SendNetReusable<T>(ref T packet, DeliveryMethod deliveryMethod, bool multicast = false) where T : INetReusable;
         /// <summary>
         /// Sends a packet of data directly to a specific peer
         /// </summary>
@@ -66,6 +67,8 @@ namespace Fika.Core.Networking
         /// <typeparam name="T">The packet</typeparam>
         /// <param name="handle">The <see cref="Action"/> to run when receiving the packet</param>
         public void RegisterReusable<T, TUserData>(Action<T, TUserData> handle) where T : class, IReusable, new();
+        public void RegisterNetReusable<T>(Action<T> handle) where T : class, INetReusable, new();
+        public void RegisterNetReusable<T, TUserData>(Action<T, TUserData> handle) where T : class, INetReusable, new();
         /// <summary>
         /// Registers a custom type to the <see cref="NetPacketProcessor"/> so that it can handle serializing the type
         /// </summary>

@@ -408,7 +408,7 @@ namespace Fika.Core.Networking
             RegisterCustomType(FikaSerializationExtensions.PutLootSyncStruct, FikaSerializationExtensions.GetLootSyncStruct);
 
             RegisterPacket<PlayerStatePacket, NetPeer>(OnPlayerStatePacketReceived);
-            RegisterPacket<WeaponPacket, NetPeer>(OnWeaponPacketReceived);
+            //RegisterPacket<WeaponPacket, NetPeer>(OnWeaponPacketReceived);
             RegisterPacket<DamagePacket, NetPeer>(OnDamagePacketReceived);
             RegisterPacket<ArmorDamagePacket, NetPeer>(OnArmorDamagePacketReceived);
             RegisterPacket<InventoryPacket, NetPeer>(OnInventoryPacketReceived);
@@ -439,6 +439,7 @@ namespace Fika.Core.Networking
             RegisterPacket<EventControllerInteractPacket, NetPeer>(OnEventControllerInteractPacketReceived);
 
             RegisterReusable<WorldPacket, NetPeer>(OnWorldPacketReceived);
+            RegisterNetReusable<WeaponPacket, NetPeer>(OnWeaponPacketReceived);
         }
 
         private void OnEventControllerInteractPacketReceived(EventControllerInteractPacket packet, NetPeer peer)
@@ -1343,6 +1344,17 @@ namespace Fika.Core.Networking
             _netServer.SendToAll(_dataWriter.AsReadOnlySpan, deliveryMethod);
         }
 
+        public void SendNetReusable<T>(ref T packet, DeliveryMethod deliveryMethod, bool multicast = false) where T : INetReusable
+        {
+            _dataWriter.Reset();
+            _dataWriter.PutEnum(EPacketType.Serializable);
+
+            _packetProcessor.WriteNetReusable(_dataWriter, ref packet);
+            _netServer.SendToAll(_dataWriter.AsReadOnlySpan, deliveryMethod);
+
+            packet.Clear();
+        }
+
         public void SendData<T>(ref T packet, DeliveryMethod deliveryMethod, NetPeer peerToIgnore) where T : INetSerializable
         {
             _dataWriter.Reset();
@@ -1658,6 +1670,16 @@ namespace Fika.Core.Networking
         public void RegisterReusable<T, TUserData>(Action<T, TUserData> handle) where T : class, IReusable, new()
         {
             _packetProcessor.SubscribeReusable(handle);
+        }
+
+        public void RegisterNetReusable<T>(Action<T> handle) where T : class, INetReusable, new()
+        {
+            _packetProcessor.SubscribeNetReusable(handle);
+        }
+
+        public void RegisterNetReusable<T, TUserData>(Action<T, TUserData> handle) where T : class, INetReusable, new()
+        {
+            _packetProcessor.SubscribeNetReusable(handle);
         }
 
         public void RegisterCustomType<T>(Action<NetDataWriter, T> writeDelegate, Func<NetDataReader, T> readDelegate)

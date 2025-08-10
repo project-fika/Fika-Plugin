@@ -657,13 +657,15 @@ namespace Fika.Core.Main.Players
         public override void SetCompassState(bool value)
         {
             base.SetCompassState(value);
-            WeaponPacket packet = new()
+            if (PacketSender == null)
             {
-                NetId = NetId,
-                Type = EFirearmSubPacketType.CompassChange,
-                SubPacket = CompassChangePacket.FromValue(value)
-            };
-            PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+                return;
+            }
+
+            if (HandsController is FikaClientFirearmController controller)
+            {
+                controller.SendCompassState(CompassChangePacket.FromValue(value));
+            }
         }
 
         public override void SendHeadlightsPacket(bool isSilent)
@@ -706,16 +708,7 @@ namespace Fika.Core.Main.Players
                     return;
                 }
 
-                LightStatesPacket subPacket = LightStatesPacket.FromValue(array.Length, array);
-
-                WeaponPacket packet = new()
-                {
-                    NetId = NetId,
-                    Type = EFirearmSubPacketType.ToggleLightStates,
-                    SubPacket = subPacket
-                };
-
-                PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+                controller.SendLightStates(LightStatesPacket.FromValue(array.Length, array));
             }
         }
 
