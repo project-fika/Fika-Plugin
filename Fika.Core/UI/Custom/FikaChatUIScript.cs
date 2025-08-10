@@ -4,11 +4,9 @@ using EFT.UI;
 using Fika.Core.Bundles;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
-using LiteNetLib;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using UnityEngine;
 using UnityEngine.EventSystems;
 
 namespace Fika.Core.UI.Custom

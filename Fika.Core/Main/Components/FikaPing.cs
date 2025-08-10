@@ -1,6 +1,5 @@
 ﻿// © 2025 Lacyway All Rights Reserved
 
-using UnityEngine;
 using UnityEngine.UI;
 
 namespace Fika.Core.Main.Components

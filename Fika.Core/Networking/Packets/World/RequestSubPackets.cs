@@ -4,11 +4,9 @@ using Fika.Core.Main.GameMode;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Packets.Communication;
-using LiteNetLib;
 using LiteNetLib.Utils;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 using static Fika.Core.Networking.Packets.SubPacket;
 
 namespace Fika.Core.Networking.Packets.World
@@ -36,8 +34,8 @@ namespace Fika.Core.Networking.Packets.World
             public SpawnPointRequest(NetDataReader reader)
             {
                 Infiltration = reader.GetString();
-                Position = reader.GetVector3();
-                Rotation = reader.GetQuaternion();
+                Position = reader.GetStruct<Vector3>();
+                Rotation = reader.GetStruct<Quaternion>();
             }
 
             public void HandleRequest(NetPeer peer, FikaServer server)
@@ -85,8 +83,8 @@ namespace Fika.Core.Networking.Packets.World
             public void Serialize(NetDataWriter writer)
             {
                 writer.Put(Infiltration);
-                writer.PutVector3(Position);
-                writer.PutQuaternion(Rotation);
+                writer.PutStruct(Position);
+                writer.PutStruct(Rotation);
             }
         }
 
@@ -104,7 +102,7 @@ namespace Fika.Core.Networking.Packets.World
             public WeatherRequest(NetDataReader reader)
             {
                 Season = reader.GetEnum<ESeason>();
-                SpringSnowFactor = reader.GetVector3();
+                SpringSnowFactor = reader.GetStruct<Vector3>();
                 int amount = reader.GetInt();
                 WeatherClasses = new WeatherClass[amount];
                 for (int i = 0; i < amount; i++)
@@ -156,7 +154,7 @@ namespace Fika.Core.Networking.Packets.World
             public void Serialize(NetDataWriter writer)
             {
                 writer.PutEnum(Season);
-                writer.PutVector3(SpringSnowFactor);
+                writer.PutStruct(SpringSnowFactor);
                 int amount = WeatherClasses.Length;
                 writer.Put(amount);
                 for (int i = 0; i < amount; i++)

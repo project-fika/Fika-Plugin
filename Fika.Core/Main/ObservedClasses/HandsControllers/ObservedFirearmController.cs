@@ -8,7 +8,6 @@ using HarmonyLib;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using static EFT.Player;
 using static Fika.Core.Networking.Packets.FirearmController.FirearmSubPackets;
 

@@ -3,7 +3,6 @@
 using EFT;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Packets;
-using UnityEngine;
 
 namespace Fika.Core.Main.ObservedClasses
 {

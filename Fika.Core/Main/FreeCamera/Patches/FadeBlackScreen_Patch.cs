@@ -2,7 +2,6 @@
 using Fika.Core.Patching;
 using System;
 using System.Reflection;
-using UnityEngine;
 using UnityEngine.UI;
 
 namespace Fika.Core.Main.FreeCamera.Patches

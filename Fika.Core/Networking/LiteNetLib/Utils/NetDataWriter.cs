@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 
@@ -312,7 +313,7 @@ namespace LiteNetLib.Utils
 
             FastBitConverter.GetBytes(_data, _position, (ushort)data.Length);
 
-            Span<byte> destSpan = new Span<byte>(_data, _position + 2, data.Length);
+            Span<byte> destSpan = new(_data, _position + 2, data.Length);
             data.CopyTo(destSpan);
 
             _position += 2 + data.Length;
@@ -321,7 +322,7 @@ namespace LiteNetLib.Utils
         public void PutBytesWithLength(byte[] data)
         {
             PutArray(data, 1);
-        }        
+        }
 
         public void Put(bool value)
         {
@@ -468,6 +469,58 @@ namespace LiteNetLib.Utils
         public void Put<T>(T obj) where T : INetSerializable
         {
             obj.Serialize(this);
+        }
+
+        /// <summary>
+        /// Writes a struct of type <typeparamref name="T"/> to the internal data buffer at the current position. <br/>
+        /// Automatically resizes the buffer if <see cref="_autoResize"/> is enabled. <br/>
+        /// Advances the position by the size of <typeparamref name="T"/>.
+        /// </summary>
+        /// <typeparam name="T">An unmanaged struct type to write.</typeparam>
+        /// <param name="value">The struct value to write.</param>
+        public unsafe void PutStruct<T>(in T value) where T : unmanaged
+        {
+            int size = sizeof(T);
+            if (_autoResize)
+            {
+                ResizeIfNeed(_position + size);
+            }
+
+            fixed (byte* destPtr = &_data[_position])
+            fixed (T* srcPtr = &value)
+            {
+                Buffer.MemoryCopy(srcPtr, destPtr, _data.Length - _position, size);
+            }
+            _position += size;
+        }
+
+        /// <summary>
+        /// Writes an enum value of type <typeparamref name="T"/> to the internal data buffer at the current position. <br/>
+        /// Automatically resizes the buffer if <see cref="_autoResize"/> is enabled.
+        /// Advances the position by the size of <typeparamref name="T"/>.
+        /// </summary>
+        /// <typeparam name="T">An unmanaged enum type to write.</typeparam>
+        /// <param name="en">The enum value to write.</param>
+        public void PutEnum<T>(T en) where T : unmanaged, Enum
+        {
+            int size = Unsafe.SizeOf<T>();
+            if (_autoResize)
+            {
+                ResizeIfNeed(_position + size);
+            }
+
+            Span<byte> span = stackalloc byte[size];
+            MemoryMarshal.Write(span, ref en);
+            Put(span);
+        }
+
+        /// <summary>
+        /// Serializes a <see cref="DateTime"/> to the <paramref name="writer"/>
+        /// </summary>
+        /// <param name="dateTime">The <see cref="DateTime"/> to serialize</param>
+        public void PutDateTime(DateTime dateTime)
+        {
+            Put(dateTime.ToOADate());
         }
     }
 }

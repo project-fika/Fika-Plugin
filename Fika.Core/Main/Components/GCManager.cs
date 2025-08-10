@@ -1,5 +1,4 @@
-﻿using UnityEngine;
-using UnityEngine.Scripting;
+﻿using UnityEngine.Scripting;
 
 namespace Fika.Core.Main.Components
 {

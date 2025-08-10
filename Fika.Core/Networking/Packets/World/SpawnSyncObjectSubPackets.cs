@@ -8,7 +8,6 @@ using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using LiteNetLib.Utils;
 using System;
-using UnityEngine;
 using static Fika.Core.Networking.Packets.SubPacket;
 
 namespace Fika.Core.Networking.Packets.World
@@ -38,9 +37,9 @@ namespace Fika.Core.Networking.Packets.World
                 GrenadeTemplate = reader.GetString();
                 GrenadeId = reader.GetString();
                 ProfileId = reader.GetString();
-                Position = reader.GetVector3();
-                ToPosition = reader.GetVector3();
-                Rotation = reader.GetQuaternion();
+                Position = reader.GetStruct<Vector3>();
+                ToPosition = reader.GetStruct<Vector3>();
+                Rotation = reader.GetStruct<Quaternion>();
             }
 
             public void Execute(FikaPlayer player)
@@ -73,9 +72,9 @@ namespace Fika.Core.Networking.Packets.World
                 writer.Put(GrenadeTemplate);
                 writer.Put(GrenadeId);
                 writer.Put(ProfileId);
-                writer.PutVector3(Position);
-                writer.PutVector3(ToPosition);
-                writer.PutQuaternion(Rotation);
+                writer.PutStruct(Position);
+                writer.PutStruct(ToPosition);
+                writer.PutStruct(Rotation);
             }
         }
 
@@ -94,8 +93,8 @@ namespace Fika.Core.Networking.Packets.World
             public SpawnAirplane(NetDataReader reader)
             {
                 ObjectId = reader.GetInt();
-                Position = reader.GetVector3();
-                Rotation = reader.GetQuaternion();
+                Position = reader.GetStruct<Vector3>();
+                Rotation = reader.GetStruct<Quaternion>();
             }
 
             public void Execute(FikaPlayer player)
@@ -115,8 +114,8 @@ namespace Fika.Core.Networking.Packets.World
             public void Serialize(NetDataWriter writer)
             {
                 writer.Put(ObjectId);
-                writer.PutVector3(Position);
-                writer.PutQuaternion(Rotation);
+                writer.PutStruct(Position);
+                writer.PutStruct(Rotation);
             }
         }
 
@@ -140,8 +139,8 @@ namespace Fika.Core.Networking.Packets.World
             {
                 ObjectId = reader.GetInt();
                 IsStatic = reader.GetBool();
-                Position = reader.GetVector3();
-                Rotation = reader.GetQuaternion();
+                Position = reader.GetStruct<Vector3>();
+                Rotation = reader.GetStruct<Quaternion>();
                 AirdropType = (EAirdropType)reader.GetByte();
                 AirdropItem = reader.GetAirdropItem();
                 ContainerId = reader.GetMongoID();
@@ -195,8 +194,8 @@ namespace Fika.Core.Networking.Packets.World
             {
                 writer.Put(ObjectId);
                 writer.Put(IsStatic);
-                writer.PutVector3(Position);
-                writer.PutQuaternion(Rotation);
+                writer.PutStruct(Position);
+                writer.PutStruct(Rotation);
                 writer.Put((byte)AirdropType);
                 writer.PutItem(AirdropItem);
                 writer.PutMongoID(ContainerId);

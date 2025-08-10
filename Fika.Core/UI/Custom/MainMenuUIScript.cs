@@ -9,7 +9,6 @@ using JsonType;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using static Fika.Core.UI.FikaUIGlobals;
 
 namespace Fika.Core.UI.Custom

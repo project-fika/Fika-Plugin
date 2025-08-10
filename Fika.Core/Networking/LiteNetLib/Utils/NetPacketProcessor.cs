@@ -277,6 +277,24 @@ namespace LiteNetLib.Utils
             };
         }
 
+        /// <summary>
+        /// Register and subscribe to packet receive event
+        /// This method will overwrite last received packet class on receive (less garbage)
+        /// </summary>
+        /// <param name="onReceive">event that will be called when packet deserialized with ReadPacket method</param>
+        /// <exception cref="InvalidTypeException"><typeparamref name="T"/>'s fields are not supported, or it has no fields</exception>
+        public void SubscribeNetReusable<T, TUserData>(Action<T, TUserData> onReceive)
+            where T : class, INetSerializable, new()
+        {
+            _netSerializer.Register<T>();
+            T reference = new();
+            _callbacks[GetShortHash<T>()] = (reader, userData) =>
+            {
+                reference.Deserialize(reader);
+                onReceive(reference, (TUserData)userData);
+            };
+        }
+
         public void SubscribeNetSerializable<T, TUserData>(
             Action<T, TUserData> onReceive,
             Func<T> packetConstructor) where T : INetSerializable

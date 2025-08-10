@@ -433,7 +433,7 @@ namespace LiteNetLib.Utils
 #if LITENETLIB_SPANS || NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1 || NETCOREAPP3_1 || NET5_0 || NETSTANDARD2_1
             double result = MemoryMarshal.Read<double>(_data.AsSpan(_position));
             _position += 8;
-            return result; 
+            return result;
 #else
             double result = BitConverter.ToDouble(_data, _position);
             _position += 8;
@@ -484,7 +484,7 @@ namespace LiteNetLib.Utils
         public Guid GetGuid()
         {
 #if LITENETLIB_SPANS || NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1 || NETCOREAPP3_1 || NET5_0 || NETSTANDARD2_1
-            var result =  new Guid(_data.AsSpan(_position, 16));
+            var result = new Guid(_data.AsSpan(_position, 16));
             _position += 16;
             return result;
 #else
@@ -564,7 +564,46 @@ namespace LiteNetLib.Utils
         {
             return GetArray<byte>(1);
         }
-#endregion
+
+        /// <summary>
+        /// Reads a struct of type <typeparamref name="T"/> from the internal data buffer at the current position. <br/>
+        /// Advances the position by the size of <typeparamref name="T"/>.
+        /// </summary>
+        /// <typeparam name="T">An unmanaged struct type to read.</typeparam>
+        /// <returns>The struct value read from the buffer.</returns>
+        public unsafe T GetStruct<T>() where T : unmanaged
+        {
+            int size = sizeof(T);
+            fixed (byte* ptr = &_data[_position])
+            {
+                T value = *(T*)ptr;
+                _position += size;
+                return value;
+            }
+        }
+
+        /// <summary>
+        /// Reads an enum value of type <typeparamref name="T"/> from the internal data buffer at the current position. <br/>
+        /// Advances the position by the size of <typeparamref name="T"/>.
+        /// </summary>
+        /// <typeparam name="T">An unmanaged enum type to read.</typeparam>
+        /// <returns>The enum value read from the buffer.</returns>
+        public T GetEnum<T>() where T : unmanaged, Enum
+        {
+            ReadOnlySpan<byte> span = GetSpan(Unsafe.SizeOf<T>());
+            return MemoryMarshal.Read<T>(span);
+        }
+
+        /// <summary>
+        /// Deserializes a <see cref="DateTime"/> from the <paramref name="reader"/>
+        /// </summary>
+        /// <param name="reader">The <see cref="NetDataReader"/> to read data from</param>
+        /// <returns>The deserialized <see cref="DateTime"/></returns>
+        public DateTime GetDateTime()
+        {
+            return DateTime.FromOADate(GetDouble());
+        }
+        #endregion
 
         #region PeekMethods
 

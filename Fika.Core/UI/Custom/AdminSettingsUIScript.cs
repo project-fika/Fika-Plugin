@@ -4,7 +4,6 @@ using Fika.Core.Bundles;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Http;
 using System;
-using UnityEngine;
 
 public class AdminSettingsUIScript : MonoBehaviour
 {

@@ -6,7 +6,6 @@ using Fika.Core.Main.Players;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using UnityEngine;
 
 namespace Fika.Core.Main.ObservedClasses
 {

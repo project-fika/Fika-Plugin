@@ -6,7 +6,6 @@ using Fika.Core.Utils;
 using HarmonyLib;
 using System.Collections.Generic;
 using System.Reflection;
-using UnityEngine;
 
 namespace Fika.Core.Main.Patches
 {

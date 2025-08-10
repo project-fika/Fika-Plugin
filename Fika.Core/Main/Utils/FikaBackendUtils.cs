@@ -11,7 +11,6 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
-using UnityEngine;
 
 namespace Fika.Core.Main.Utils
 {

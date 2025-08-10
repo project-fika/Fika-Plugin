@@ -1,5 +1,4 @@
 ﻿using EFT;
-using UnityEngine;
 
 namespace Fika.Core.Main.ObservedClasses.MovementStates
 {

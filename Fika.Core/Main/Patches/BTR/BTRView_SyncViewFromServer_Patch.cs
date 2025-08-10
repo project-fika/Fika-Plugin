@@ -4,7 +4,6 @@ using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.World;
 using Fika.Core.Patching;
-using LiteNetLib;
 using System.Reflection;
 
 namespace Fika.Core.Main.Patches

@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-namespace Fika.Core.Main.ObservedClasses.Snapshotting
+﻿namespace Fika.Core.Main.ObservedClasses.Snapshotting
 {
     internal class ObservedState
     {

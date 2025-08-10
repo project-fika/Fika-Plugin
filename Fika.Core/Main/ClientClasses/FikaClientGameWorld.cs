@@ -8,7 +8,6 @@ using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using Systems.Effects;
-using UnityEngine;
 
 namespace Fika.Core.Main.ClientClasses
 {

@@ -15,8 +15,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using UnityEngine;
-using Logger = BepInEx.Logging.Logger;
 
 namespace Fika.Core.Utils
 {

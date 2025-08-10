@@ -10,7 +10,7 @@ namespace Fika.Core.Networking.Packets.World
         {
             ref BTRDataPacketStruct data = ref Data;
 
-            data.position = reader.GetVector3();
+            data.position = reader.GetStruct<Vector3>();
             data.BtrBotId = reader.GetInt();
             data.MoveSpeed = reader.GetFloat();
             data.moveDirection = reader.GetByte();
@@ -26,12 +26,12 @@ namespace Fika.Core.Networking.Packets.World
             data.State = reader.GetByte();
             data.gunsBlockRotation = reader.GetFloat();
             data.turretRotation = reader.GetFloat();
-            data.rotation = reader.GetQuaternion();
+            data.rotation = reader.GetStruct<Quaternion>();
         }
 
         public readonly void Serialize(NetDataWriter writer)
         {
-            writer.PutVector3(Data.position);
+            writer.PutStruct(Data.position);
             writer.Put(Data.BtrBotId);
             writer.Put(Data.MoveSpeed);
             writer.Put(Data.moveDirection);
@@ -47,7 +47,7 @@ namespace Fika.Core.Networking.Packets.World
             writer.Put(Data.State);
             writer.Put(Data.gunsBlockRotation);
             writer.Put(Data.turretRotation);
-            writer.PutQuaternion(Data.rotation);
+            writer.PutStruct(Data.rotation);
         }
     }
 }

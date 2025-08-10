@@ -1,6 +1,5 @@
 ﻿using Fika.Core.Utils;
 using TMPro;
-using UnityEngine;
 using UnityEngine.UI;
 using static Fika.Core.UI.FikaUIGlobals;
 

@@ -3,9 +3,7 @@ using EFT;
 using EFT.InventoryLogic;
 using EFT.Quests;
 using Fika.Core.Main.Players;
-using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Backend;
-using LiteNetLib;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

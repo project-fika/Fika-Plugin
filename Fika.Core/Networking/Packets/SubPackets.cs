@@ -3,7 +3,6 @@
 using EFT;
 using EFT.InventoryLogic;
 using System;
-using UnityEngine;
 
 namespace Fika.Core.Networking.Packets
 {

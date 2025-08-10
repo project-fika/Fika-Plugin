@@ -3,7 +3,6 @@ using Fika.Core.Main.GameMode;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace Fika.Core.Main.Components
 {

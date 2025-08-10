@@ -8,25 +8,27 @@ namespace Fika.Core.Networking.Packets.FirearmController
     {
         public int NetId;
         public EFirearmSubPacketType Type;
-        public ISubPacket SubPacket;
+        public IPoolSubPacket SubPacket;
 
         public readonly void Execute(FikaPlayer player)
         {
             SubPacket.Execute(player);
+            FirearmSubPacketPool.ReturnPacket(this);
         }
 
         public void Deserialize(NetDataReader reader)
         {
             NetId = reader.GetInt();
             Type = reader.GetEnum<EFirearmSubPacketType>();
-            SubPacket = reader.GetFirearmSubPacket(Type);
+            SubPacket = FirearmSubPacketPool.GetPacket<IPoolSubPacket>(Type);
+            SubPacket.Deserialize(reader);
         }
 
         public readonly void Serialize(NetDataWriter writer)
         {
             writer.Put(NetId);
             writer.PutEnum(Type);
-            writer.PutFirearmSubPacket(SubPacket, Type);
+            SubPacket?.Serialize(writer);
         }
     }
 }

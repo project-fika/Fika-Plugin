@@ -35,7 +35,6 @@ using Fika.Core.Networking.VOIP;
 using Fika.Core.UI.Custom;
 using Fika.Core.Utils;
 using HarmonyLib;
-using LiteNetLib;
 using LiteNetLib.Utils;
 using System;
 using System.Collections.Generic;
@@ -46,7 +45,6 @@ using System.Threading.Tasks;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
-using UnityEngine;
 using static Fika.Core.Networking.NetworkUtils;
 
 namespace Fika.Core.Networking
@@ -244,6 +242,8 @@ namespace Fika.Core.Networking
 
         private void RegisterPacketsAndTypes()
         {
+            FirearmSubPacketPool.CreatePool();
+
             RegisterCustomType(FikaSerializationExtensions.PutRagdollStruct, FikaSerializationExtensions.GetRagdollStruct);
             RegisterCustomType(FikaSerializationExtensions.PutArtilleryStruct, FikaSerializationExtensions.GetArtilleryStruct);
             RegisterCustomType(FikaSerializationExtensions.PutGrenadeStruct, FikaSerializationExtensions.GetGrenadeStruct);
@@ -1157,6 +1157,8 @@ namespace Fika.Core.Networking
             _stateHandle.Complete();
             _snapshots.Dispose();
 
+            FirearmSubPacketPool.ClearPool();
+
             if (_fikaChat != null)
             {
                 Destroy(_fikaChat);
@@ -1175,7 +1177,7 @@ namespace Fika.Core.Networking
                 _dataWriter.PutEnum(EPacketType.Serializable);
 
                 _packetProcessor.WriteNetSerializable(_dataWriter, ref packet);
-                peer.Send(_dataWriter.AsReadOnlySpan, deliveryMethod); 
+                peer.Send(_dataWriter.AsReadOnlySpan, deliveryMethod);
             }
         }
 
@@ -1210,7 +1212,7 @@ namespace Fika.Core.Networking
                 _dataWriter.Put(false);
                 _dataWriter.PutEnum(EPacketType.VOIP);
                 _dataWriter.PutBytesWithLength(data.Array, data.Offset, (ushort)data.Count);
-                firstPeer.Send(_dataWriter.AsReadOnlySpan, DeliveryMethod.Sequenced); 
+                firstPeer.Send(_dataWriter.AsReadOnlySpan, DeliveryMethod.Sequenced);
             }
         }
 
@@ -1233,7 +1235,7 @@ namespace Fika.Core.Networking
                 _dataWriter.Put(false);
                 _dataWriter.PutEnum(EPacketType.Serializable);
                 _packetProcessor.Write(_dataWriter, packet);
-                peer.Send(_dataWriter.AsReadOnlySpan, deliveryMethod); 
+                peer.Send(_dataWriter.AsReadOnlySpan, deliveryMethod);
             }
 
             packet.Flush();

@@ -2,8 +2,6 @@
 
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Packets.FirearmController;
-using LiteNetLib;
-using UnityEngine;
 using static Fika.Core.Networking.Packets.FirearmController.FirearmSubPackets;
 using static Fika.Core.Networking.Packets.SubPacket;
 
@@ -29,14 +27,8 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
             {
                 NetId = _fikaPlayer.NetId,
                 Type = EFirearmSubPacketType.Grenade,
-                SubPacket = new GrenadePacket()
-                {
-                    HasGrenade = true,
-                    GrenadeRotation = rotation,
-                    GrenadePosition = position,
-                    ThrowForce = force,
-                    LowThrow = lowThrow
-                }
+                SubPacket = GrenadePacket.FromValue(rotation, position, force, EGrenadePacketType.None,
+                true, lowThrow, false, false, false)
             };
             _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
 

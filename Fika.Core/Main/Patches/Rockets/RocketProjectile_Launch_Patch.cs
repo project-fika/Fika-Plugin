@@ -4,7 +4,6 @@ using EFT.RocketLauncher;
 using Fika.Core.Main.Utils;
 using Fika.Core.Patching;
 using System.Reflection;
-using UnityEngine;
 
 namespace Fika.Core.Main.Patches.Rockets
 {

@@ -1,5 +1,4 @@
 ﻿using Fika.Core.Networking;
-using LiteNetLib;
 
 namespace Fika.Core.Modding.Events
 {

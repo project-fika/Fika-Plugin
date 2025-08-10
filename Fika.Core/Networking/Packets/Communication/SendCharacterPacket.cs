@@ -1,5 +1,4 @@
 ﻿using LiteNetLib.Utils;
-using UnityEngine;
 using static Fika.Core.Networking.Packets.SubPackets;
 
 namespace Fika.Core.Networking.Packets.Communication
@@ -17,7 +16,7 @@ namespace Fika.Core.Networking.Packets.Communication
             PlayerInfoPacket = reader.GetPlayerInfoPacket();
             IsAlive = reader.GetBool();
             IsAI = reader.GetBool();
-            Position = reader.GetVector3();
+            Position = reader.GetStruct<Vector3>();
             NetId = reader.GetInt();
         }
 
@@ -26,7 +25,7 @@ namespace Fika.Core.Networking.Packets.Communication
             writer.PutPlayerInfoPacket(PlayerInfoPacket);
             writer.Put(IsAlive);
             writer.Put(IsAI);
-            writer.PutVector3(Position);
+            writer.PutStruct(Position);
             writer.Put(NetId);
         }
     }

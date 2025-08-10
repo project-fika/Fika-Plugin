@@ -3,7 +3,6 @@ using EFT.UI.Matchmaker;
 using Fika.Core.Patching;
 using System.Collections.Generic;
 using System.Reflection;
-using UnityEngine;
 
 namespace Fika.Core.UI.Patches
 {

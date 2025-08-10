@@ -1,7 +1,6 @@
 ﻿// © 2025 Lacyway All Rights Reserved
 
 using EFT;
-using UnityEngine;
 
 namespace Fika.Core.Main.ObservedClasses.MovementStates
 {

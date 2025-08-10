@@ -11,7 +11,6 @@ using Fika.Core.Main.Utils;
 using System;
 using System.Collections.Generic;
 using TMPro;
-using UnityEngine;
 using UnityEngine.UI;
 
 namespace Fika.Core.Main.Components

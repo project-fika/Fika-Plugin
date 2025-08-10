@@ -13,7 +13,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using UnityEngine;
 using static Fika.Core.FikaPlugin;
 
 namespace Fika.Core.Main.Utils

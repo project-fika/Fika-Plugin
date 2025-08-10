@@ -25,13 +25,11 @@ using Fika.Core.Networking.Packets.World;
 using Fika.Core.Networking.VOIP;
 using HarmonyLib;
 using JsonType;
-using LiteNetLib;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using UnityEngine;
 using static Fika.Core.Main.ClientClasses.ClientInventoryController;
 using static Fika.Core.Networking.Packets.FirearmController.FirearmSubPackets;
 using static Fika.Core.Networking.Packets.Player.CommonSubPackets;
@@ -663,10 +661,7 @@ namespace Fika.Core.Main.Players
             {
                 NetId = NetId,
                 Type = EFirearmSubPacketType.CompassChange,
-                SubPacket = new CompassChangePacket()
-                {
-                    Enabled = value
-                }
+                SubPacket = CompassChangePacket.FromValue(value)
             };
             PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
         }
@@ -688,7 +683,7 @@ namespace Fika.Core.Main.Players
                         LightStates = lightStates
                     }
                 };
-                PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true); 
+                PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             }
         }
 
@@ -711,22 +706,7 @@ namespace Fika.Core.Main.Players
                     return;
                 }
 
-                LightStatesPacket subPacket = new()
-                {
-                    Amount = array.Length,
-                    States = array
-                };
-
-                for (int i = 0; i < array.Length; i++)
-                {
-                    FirearmLightStateStruct firearmLightStateStruct = array[i];
-                    subPacket.States[i] = new FirearmLightStateStruct
-                    {
-                        Id = firearmLightStateStruct.Id,
-                        IsActive = firearmLightStateStruct.IsActive,
-                        LightMode = firearmLightStateStruct.LightMode
-                    };
-                }
+                LightStatesPacket subPacket = LightStatesPacket.FromValue(array.Length, array);
 
                 WeaponPacket packet = new()
                 {

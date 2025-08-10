@@ -1,7 +1,6 @@
 ﻿using EFT;
 using EFT.Ballistics;
 using LiteNetLib.Utils;
-using UnityEngine;
 
 namespace Fika.Core.Networking.Packets.Player
 {
@@ -41,9 +40,9 @@ namespace Fika.Core.Networking.Packets.Player
             PenetrationPower = reader.GetFloat();
             ArmorDamage = reader.GetFloat();
 
-            Direction = reader.GetVector3();
-            Point = reader.GetVector3();
-            HitNormal = reader.GetVector3();
+            Direction = reader.GetStruct<Vector3>();
+            Point = reader.GetStruct<Vector3>();
+            HitNormal = reader.GetStruct<Vector3>();
 
             FragmentIndex = reader.GetInt();
 
@@ -70,9 +69,9 @@ namespace Fika.Core.Networking.Packets.Player
             writer.Put(PenetrationPower);
             writer.Put(ArmorDamage);
 
-            writer.PutVector3(Direction);
-            writer.PutVector3(Point);
-            writer.PutVector3(HitNormal);
+            writer.PutStruct(Direction);
+            writer.PutStruct(Point);
+            writer.PutStruct(HitNormal);
 
             writer.Put(FragmentIndex);
 

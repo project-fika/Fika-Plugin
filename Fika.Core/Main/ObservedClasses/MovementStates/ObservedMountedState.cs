@@ -2,7 +2,6 @@
 using EFT;
 using EFT.WeaponMounting;
 using System;
-using UnityEngine;
 
 namespace Fika.Core.Main.ObservedClasses.MovementStates
 {

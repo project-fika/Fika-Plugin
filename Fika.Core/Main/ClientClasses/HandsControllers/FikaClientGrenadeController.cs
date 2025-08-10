@@ -6,9 +6,7 @@ using EFT.InventoryLogic;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Packets.FirearmController;
-using LiteNetLib;
 using System;
-using UnityEngine;
 using static Fika.Core.Networking.Packets.FirearmController.FirearmSubPackets;
 using static Fika.Core.Networking.Packets.SubPacket;
 
@@ -16,22 +14,22 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
 {
     public class FikaClientGrenadeController : Player.GrenadeHandsController
     {
-        protected FikaPlayer player;
-        private bool isClient;
+        protected FikaPlayer _fikaPlayer;
+        private bool _isClient;
 
         public static FikaClientGrenadeController Create(FikaPlayer player, ThrowWeapItemClass item)
         {
             FikaClientGrenadeController controller = smethod_9<FikaClientGrenadeController>(player, item);
-            controller.player = player;
-            controller.isClient = FikaBackendUtils.IsClient;
+            controller._fikaPlayer = player;
+            controller._isClient = FikaBackendUtils.IsClient;
             return controller;
         }
 
         public override bool CanThrow()
         {
-            if (isClient)
+            if (_isClient)
             {
-                return !player.WaitingForCallback && base.CanThrow();
+                return !_fikaPlayer.WaitingForCallback && base.CanThrow();
             }
 
             return base.CanThrow();
@@ -41,14 +39,12 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
         {
             WeaponPacket packet = new()
             {
-                NetId = player.NetId,
+                NetId = _fikaPlayer.NetId,
                 Type = EFirearmSubPacketType.Grenade,
-                SubPacket = new GrenadePacket()
-                {
-                    Type = EGrenadePacketType.ExamineWeapon
-                }
+                SubPacket = GrenadePacket.FromValue(default, default, default, EGrenadePacketType.ExamineWeapon,
+                false, false, false, false, false)
             };
-            player.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+            _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             base.ExamineWeapon();
         }
 
@@ -56,14 +52,12 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
         {
             WeaponPacket packet = new()
             {
-                NetId = player.NetId,
+                NetId = _fikaPlayer.NetId,
                 Type = EFirearmSubPacketType.Grenade,
-                SubPacket = new GrenadePacket()
-                {
-                    Type = EGrenadePacketType.HighThrow
-                }
+                SubPacket = GrenadePacket.FromValue(default, default, default, EGrenadePacketType.HighThrow,
+                false, false, false, false, false)
             };
-            player.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+            _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             base.HighThrow();
         }
 
@@ -71,14 +65,12 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
         {
             WeaponPacket packet = new()
             {
-                NetId = player.NetId,
+                NetId = _fikaPlayer.NetId,
                 Type = EFirearmSubPacketType.Grenade,
-                SubPacket = new GrenadePacket()
-                {
-                    Type = EGrenadePacketType.LowThrow
-                }
+                SubPacket = GrenadePacket.FromValue(default, default, default, EGrenadePacketType.LowThrow,
+                false, false, false, false, false)
             };
-            player.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+            _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             base.LowThrow();
         }
 
@@ -86,14 +78,12 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
         {
             WeaponPacket packet = new()
             {
-                NetId = player.NetId,
+                NetId = _fikaPlayer.NetId,
                 Type = EFirearmSubPacketType.Grenade,
-                SubPacket = new GrenadePacket()
-                {
-                    Type = EGrenadePacketType.PullRingForHighThrow
-                }
+                SubPacket = GrenadePacket.FromValue(default, default, default, EGrenadePacketType.PullRingForHighThrow,
+                false, false, false, false, false)
             };
-            player.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+            _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             base.PullRingForHighThrow();
         }
 
@@ -101,14 +91,12 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
         {
             WeaponPacket packet = new()
             {
-                NetId = player.NetId,
+                NetId = _fikaPlayer.NetId,
                 Type = EFirearmSubPacketType.Grenade,
-                SubPacket = new GrenadePacket()
-                {
-                    Type = EGrenadePacketType.PullRingForLowThrow
-                }
+                SubPacket = GrenadePacket.FromValue(default, default, default, EGrenadePacketType.PullRingForLowThrow,
+                false, false, false, false, false)
             };
-            player.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+            _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             base.PullRingForLowThrow();
         }
 
@@ -116,19 +104,12 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
         {
             WeaponPacket packet = new()
             {
-                NetId = player.NetId,
+                NetId = _fikaPlayer.NetId,
                 Type = EFirearmSubPacketType.Grenade,
-                SubPacket = new GrenadePacket()
-                {
-                    Type = EGrenadePacketType.None,
-                    HasGrenade = true,
-                    GrenadeRotation = rotation,
-                    GrenadePosition = position,
-                    ThrowForce = force,
-                    LowThrow = lowThrow
-                }
+                SubPacket = GrenadePacket.FromValue(rotation, position, force, EGrenadePacketType.None,
+                true, lowThrow, false, false, false)
             };
-            player.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+            _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             base.vmethod_2(timeSinceSafetyLevelRemoved, position, rotation, force, lowThrow);
         }
 
@@ -136,14 +117,12 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
         {
             WeaponPacket packet = new()
             {
-                NetId = player.NetId,
+                NetId = _fikaPlayer.NetId,
                 Type = EFirearmSubPacketType.Grenade,
-                SubPacket = new GrenadePacket()
-                {
-                    PlantTripwire = true
-                }
+                SubPacket = GrenadePacket.FromValue(default, default, default, EGrenadePacketType.None,
+                false, false, true, false, false)
             };
-            player.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+            _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             base.PlantTripwire();
         }
 
@@ -164,28 +143,24 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                     {
                         WeaponPacket packet = new()
                         {
-                            NetId = player.NetId,
+                            NetId = _fikaPlayer.NetId,
                             Type = EFirearmSubPacketType.Grenade,
-                            SubPacket = new GrenadePacket()
-                            {
-                                ChangeToIdle = true
-                            }
+                            SubPacket = GrenadePacket.FromValue(default, default, default, EGrenadePacketType.None,
+                false, false, false, true, false)
                         };
-                        player.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+                        _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
                     }
                 }
                 else
                 {
                     WeaponPacket packet = new()
                     {
-                        NetId = player.NetId,
+                        NetId = _fikaPlayer.NetId,
                         Type = EFirearmSubPacketType.Grenade,
-                        SubPacket = new GrenadePacket()
-                        {
-                            ChangeToPlant = true
-                        }
+                        SubPacket = GrenadePacket.FromValue(default, default, default, EGrenadePacketType.None,
+                false, false, false, false, true)
                     };
-                    player.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+                    _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
                 }
             }
             base.ChangeFireMode(fireMode);
@@ -193,14 +168,12 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
 
         public override void ActualDrop(Result<IHandsThrowController> controller, float animationSpeed, Action callback, bool fastDrop)
         {
-            // TODO: Override Class1025
-
             WeaponPacket packet = new()
             {
-                NetId = player.NetId,
+                NetId = _fikaPlayer.NetId,
                 Type = EFirearmSubPacketType.CancelGrenade
             };
-            player.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+            _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             base.ActualDrop(controller, animationSpeed, callback, fastDrop);
         }
     }

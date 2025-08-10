@@ -11,27 +11,27 @@ namespace Fika.Core.Networking.Packets.World
             ref LootSyncStruct data = ref Data;
 
             data.Id = reader.GetInt();
-            data.Position = reader.GetVector3();
-            data.Rotation = reader.GetQuaternion();
+            data.Position = reader.GetStruct<Vector3>();
+            data.Rotation = reader.GetStruct<Quaternion>();
             data.Done = reader.GetBool();
 
             if (!data.Done)
             {
-                data.Velocity = reader.GetVector3();
-                data.AngularVelocity = reader.GetVector3();
+                data.Velocity = reader.GetStruct<Vector3>();
+                data.AngularVelocity = reader.GetStruct<Vector3>();
             }
         }
 
         public readonly void Serialize(NetDataWriter writer)
         {
             writer.Put(Data.Id);
-            writer.PutVector3(Data.Position);
-            writer.PutQuaternion(Data.Rotation);
+            writer.PutStruct(Data.Position);
+            writer.PutStruct(Data.Rotation);
             writer.Put(Data.Done);
             if (!Data.Done)
             {
-                writer.PutVector3(Data.Velocity);
-                writer.PutVector3(Data.AngularVelocity);
+                writer.PutStruct(Data.Velocity);
+                writer.PutStruct(Data.AngularVelocity);
             }
         }
     }

@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
-using UnityEngine;
 
 namespace Fika.Core.Bundles
 {

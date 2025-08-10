@@ -16,10 +16,8 @@ using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Communication;
 using Fika.Core.Networking.Packets.Player;
 using Fika.Core.UI.Custom;
-using LiteNetLib;
 using System;
 using System.Linq;
-using UnityEngine;
 
 namespace Fika.Core.Main.PacketHandlers
 {

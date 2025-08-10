@@ -4,7 +4,6 @@ using Diz.LanguageExtensions;
 using EFT;
 using Fika.Core.Main.ObservedClasses.MovementStates;
 using System;
-using UnityEngine;
 
 namespace Fika.Core.Main.ObservedClasses
 {

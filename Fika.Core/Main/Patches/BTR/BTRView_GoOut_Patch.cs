@@ -8,12 +8,10 @@ using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.World;
 using Fika.Core.Patching;
 using HarmonyLib;
-using LiteNetLib;
 using System;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using UnityEngine;
 
 namespace Fika.Core.Main.Patches
 {

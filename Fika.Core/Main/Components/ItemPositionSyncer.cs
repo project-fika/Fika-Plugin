@@ -2,7 +2,6 @@
 using EFT.Interactive;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
-using UnityEngine;
 
 namespace Fika.Core.Main.Components
 {

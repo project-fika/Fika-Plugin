@@ -3,11 +3,9 @@ using EFT.UI;
 using Fika.Core.Bundles;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
-using LiteNetLib;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
-using UnityEngine;
 
 namespace Fika.Core.UI.Custom
 {

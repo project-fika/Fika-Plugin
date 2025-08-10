@@ -3,7 +3,6 @@ using Fika.Core.Main.Players;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Player;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace Fika.Core.Main.ObservedClasses.Snapshotting
 {

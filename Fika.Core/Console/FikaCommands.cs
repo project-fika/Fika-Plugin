@@ -11,10 +11,8 @@ using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Debug;
 using HarmonyLib;
-using LiteNetLib;
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 using static Fika.Core.Networking.Packets.Debug.CommandPacket;
 
 namespace Fika.Core.Console

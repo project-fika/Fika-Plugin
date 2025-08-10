@@ -1,7 +1,6 @@
 ﻿using EFT.UI;
 using Fika.Core.Patching;
 using System.Reflection;
-using UnityEngine;
 
 namespace Fika.Core.UI.Patches
 {

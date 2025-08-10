@@ -1,7 +1,6 @@
 ﻿// © 2025 Lacyway All Rights Reserved
 
 using TMPro;
-using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>

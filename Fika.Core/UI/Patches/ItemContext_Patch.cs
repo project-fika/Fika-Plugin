@@ -12,7 +12,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using TMPro;
-using UnityEngine;
 using static Fika.Core.UI.FikaUIGlobals;
 
 namespace Fika.Core.UI.Patches

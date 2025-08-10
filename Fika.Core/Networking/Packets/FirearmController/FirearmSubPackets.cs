@@ -6,7 +6,6 @@ using Fika.Core.Main.Players;
 using LiteNetLib.Utils;
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 using static EFT.Player;
 using static Fika.Core.Networking.Packets.SubPacket;
 
@@ -14,11 +13,28 @@ namespace Fika.Core.Networking.Packets.FirearmController
 {
     public class FirearmSubPackets
     {
-        public struct ToggleAimPacket(NetDataReader reader) : ISubPacket
+        public class ToggleAimPacket : IPoolSubPacket
         {
-            public int AimingIndex = reader.GetInt();
+            private ToggleAimPacket()
+            {
 
-            public readonly void Execute(FikaPlayer player)
+            }
+
+            public static ToggleAimPacket FromValue(int aimingIndex)
+            {
+                ToggleAimPacket packet = FirearmSubPacketPool.GetPacket<ToggleAimPacket>(EFirearmSubPacketType.ToggleAim);
+                packet.AimingIndex = aimingIndex;
+                return packet;
+            }
+
+            public static ToggleAimPacket CreateInstance()
+            {
+                return new();
+            }
+
+            public int AimingIndex;
+
+            public void Execute(FikaPlayer player)
             {
                 if (player.HandsController is ObservedFirearmController controller)
                 {
@@ -26,17 +42,44 @@ namespace Fika.Core.Networking.Packets.FirearmController
                 }
             }
 
-            public readonly void Serialize(NetDataWriter writer)
+            public void Serialize(NetDataWriter writer)
             {
                 writer.Put(AimingIndex);
             }
+
+            public void Deserialize(NetDataReader reader)
+            {
+                AimingIndex = reader.GetInt();
+            }
+
+            public void Dispose()
+            {
+                AimingIndex = 0;
+            }
         }
 
-        public struct ChangeFireModePacket(NetDataReader reader) : ISubPacket
+        public class ChangeFireModePacket : IPoolSubPacket
         {
-            public Weapon.EFireMode FireMode = reader.GetEnum<Weapon.EFireMode>();
+            private ChangeFireModePacket()
+            {
 
-            public readonly void Execute(FikaPlayer player)
+            }
+
+            public static ChangeFireModePacket FromValue(Weapon.EFireMode fireMode)
+            {
+                ChangeFireModePacket packet = FirearmSubPacketPool.GetPacket<ChangeFireModePacket>(EFirearmSubPacketType.ChangeFireMode);
+                packet.FireMode = fireMode;
+                return packet;
+            }
+
+            public static ChangeFireModePacket CreateInstance()
+            {
+                return new();
+            }
+
+            public Weapon.EFireMode FireMode;
+
+            public void Execute(FikaPlayer player)
             {
                 if (player.HandsController is ObservedFirearmController controller)
                 {
@@ -44,15 +87,40 @@ namespace Fika.Core.Networking.Packets.FirearmController
                 }
             }
 
-            public readonly void Serialize(NetDataWriter writer)
+            public void Serialize(NetDataWriter writer)
             {
                 writer.PutEnum(FireMode);
             }
+
+            public void Deserialize(NetDataReader reader)
+            {
+                FireMode = reader.GetEnum<Weapon.EFireMode>();
+            }
+
+            public void Dispose()
+            {
+                FireMode = Weapon.EFireMode.fullauto;
+            }
         }
 
-        public struct ExamineWeaponPacket : ISubPacket
+        public class ExamineWeaponPacket : IPoolSubPacket
         {
-            public readonly void Execute(FikaPlayer player)
+            private ExamineWeaponPacket()
+            {
+
+            }
+
+            public static ExamineWeaponPacket FromValue()
+            {
+                return FirearmSubPacketPool.GetPacket<ExamineWeaponPacket>(EFirearmSubPacketType.ExamineWeapon);
+            }
+
+            public static ExamineWeaponPacket CreateInstance()
+            {
+                return new();
+            }
+
+            public void Execute(FikaPlayer player)
             {
                 if (player.HandsController is ObservedFirearmController controller)
                 {
@@ -62,13 +130,38 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public void Serialize(NetDataWriter writer)
             {
-                throw new NotImplementedException();
+                // do nothing
+            }
+
+            public void Deserialize(NetDataReader reader)
+            {
+                // do nothing
+            }
+
+            public void Dispose()
+            {
+                // do nothing
             }
         }
 
-        public struct CheckAmmoPacket : ISubPacket
+        public class CheckAmmoPacket : IPoolSubPacket
         {
-            public readonly void Execute(FikaPlayer player)
+            private CheckAmmoPacket()
+            {
+
+            }
+
+            public static CheckAmmoPacket FromValue()
+            {
+                return FirearmSubPacketPool.GetPacket<CheckAmmoPacket>(EFirearmSubPacketType.CheckAmmo);
+            }
+
+            public static CheckAmmoPacket CreateInstance()
+            {
+                return new();
+            }
+
+            public void Execute(FikaPlayer player)
             {
                 if (player.HandsController is ObservedFirearmController controller)
                 {
@@ -78,13 +171,38 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public void Serialize(NetDataWriter writer)
             {
-                throw new NotImplementedException();
+                // do nothing
+            }
+
+            public void Deserialize(NetDataReader reader)
+            {
+                // do nothing
+            }
+
+            public void Dispose()
+            {
+                // do nothing
             }
         }
 
-        public struct ToggleLauncherPacket : ISubPacket
+        public class ToggleLauncherPacket : IPoolSubPacket
         {
-            public readonly void Execute(FikaPlayer player)
+            private ToggleLauncherPacket()
+            {
+
+            }
+
+            public static ToggleLauncherPacket FromValue()
+            {
+                return FirearmSubPacketPool.GetPacket<ToggleLauncherPacket>(EFirearmSubPacketType.ToggleLauncher);
+            }
+
+            public static ToggleLauncherPacket CreateInstance()
+            {
+                return new();
+            }
+
+            public void Execute(FikaPlayer player)
             {
                 if (player.HandsController is ObservedFirearmController controller)
                 {
@@ -94,15 +212,42 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public void Serialize(NetDataWriter writer)
             {
-                throw new NotImplementedException();
+                // do nothing
+            }
+
+            public void Deserialize(NetDataReader reader)
+            {
+                // do nothing
+            }
+
+            public void Dispose()
+            {
+                // do nothing
             }
         }
 
-        public struct ToggleInventoryPacket(NetDataReader reader) : ISubPacket
+        public class ToggleInventoryPacket : IPoolSubPacket
         {
-            public bool Open = reader.GetBool();
+            private ToggleInventoryPacket()
+            {
 
-            public readonly void Execute(FikaPlayer player)
+            }
+
+            public static ToggleInventoryPacket FromValue(bool open)
+            {
+                ToggleInventoryPacket packet = FirearmSubPacketPool.GetPacket<ToggleInventoryPacket>(EFirearmSubPacketType.ToggleInventory);
+                packet.Open = open;
+                return packet;
+            }
+
+            public static ToggleInventoryPacket CreateInstance()
+            {
+                return new();
+            }
+
+            public bool Open;
+
+            public void Execute(FikaPlayer player)
             {
                 if (player.HandsController is ObservedFirearmController controller)
                 {
@@ -110,28 +255,78 @@ namespace Fika.Core.Networking.Packets.FirearmController
                 }
             }
 
-            public readonly void Serialize(NetDataWriter writer)
+            public void Serialize(NetDataWriter writer)
             {
                 writer.Put(Open);
             }
+
+            public void Deserialize(NetDataReader reader)
+            {
+                Open = reader.GetBool();
+            }
+
+            public void Dispose()
+            {
+                Open = false;
+            }
         }
 
-        public struct FirearmLootPacket : ISubPacket
+        public class FirearmLootPacket : IPoolSubPacket
         {
-            public readonly void Execute(FikaPlayer player)
+            private FirearmLootPacket()
+            {
+
+            }
+
+            public static FirearmLootPacket FromValue()
+            {
+                return FirearmSubPacketPool.GetPacket<FirearmLootPacket>(EFirearmSubPacketType.Loot);
+            }
+
+            public static FirearmLootPacket CreateInstance()
+            {
+                return new();
+            }
+
+            public void Execute(FikaPlayer player)
             {
                 player.HandsController.Loot(true);
             }
 
             public void Serialize(NetDataWriter writer)
             {
-                throw new NotImplementedException();
+                // do nothing
+            }
+
+            public void Deserialize(NetDataReader reader)
+            {
+                // do nothing
+            }
+
+            public void Dispose()
+            {
+                // do nothing
             }
         }
 
-        public struct CancelGrenadePacket : ISubPacket
+        public class CancelGrenadePacket : IPoolSubPacket
         {
-            public readonly void Execute(FikaPlayer player)
+            private CancelGrenadePacket()
+            {
+
+            }
+
+            public static CancelGrenadePacket FromValue()
+            {
+                return FirearmSubPacketPool.GetPacket<CancelGrenadePacket>(EFirearmSubPacketType.CancelGrenade);
+            }
+
+            public static CancelGrenadePacket CreateInstance()
+            {
+                return new();
+            }
+
+            public void Execute(FikaPlayer player)
             {
                 if (player.HandsController is ObservedGrenadeController grenadeController)
                 {
@@ -141,15 +336,42 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public void Serialize(NetDataWriter writer)
             {
-                throw new NotImplementedException();
+                // do nothing
+            }
+
+            public void Deserialize(NetDataReader reader)
+            {
+                // do nothing
+            }
+
+            public void Dispose()
+            {
+                // do nothing
             }
         }
 
-        public struct CompassChangePacket(NetDataReader reader) : ISubPacket
+        public class CompassChangePacket : IPoolSubPacket
         {
-            public bool Enabled = reader.GetBool();
+            private CompassChangePacket()
+            {
 
-            public readonly void Execute(FikaPlayer player)
+            }
+
+            public static CompassChangePacket FromValue(bool enabled)
+            {
+                CompassChangePacket packet = FirearmSubPacketPool.GetPacket<CompassChangePacket>(EFirearmSubPacketType.CompassChange);
+                packet.Enabled = enabled;
+                return packet;
+            }
+
+            public static CompassChangePacket CreateInstance()
+            {
+                return new();
+            }
+
+            public bool Enabled;
+
+            public void Execute(FikaPlayer player)
             {
                 if (player.HandsController is ItemHandsController handsController)
                 {
@@ -157,17 +379,44 @@ namespace Fika.Core.Networking.Packets.FirearmController
                 }
             }
 
-            public readonly void Serialize(NetDataWriter writer)
+            public void Serialize(NetDataWriter writer)
             {
                 writer.Put(Enabled);
             }
+
+            public void Deserialize(NetDataReader reader)
+            {
+                Enabled = reader.GetBool();
+            }
+
+            public void Dispose()
+            {
+                Enabled = false;
+            }
         }
 
-        public struct LeftStanceChangePacket(NetDataReader reader) : ISubPacket
+        public class LeftStanceChangePacket : IPoolSubPacket
         {
-            public bool LeftStance = reader.GetBool();
+            private LeftStanceChangePacket()
+            {
 
-            public readonly void Execute(FikaPlayer player)
+            }
+
+            public static LeftStanceChangePacket FromValue(bool leftStance)
+            {
+                LeftStanceChangePacket packet = FirearmSubPacketPool.GetPacket<LeftStanceChangePacket>(EFirearmSubPacketType.LeftStanceChange);
+                packet.LeftStance = leftStance;
+                return packet;
+            }
+
+            public static LeftStanceChangePacket CreateInstance()
+            {
+                return new();
+            }
+
+            public bool LeftStance;
+
+            public void Execute(FikaPlayer player)
             {
                 if (player.HandsController is ObservedFirearmController controller)
                 {
@@ -178,17 +427,44 @@ namespace Fika.Core.Networking.Packets.FirearmController
                 }
             }
 
-            public readonly void Serialize(NetDataWriter writer)
+            public void Serialize(NetDataWriter writer)
             {
                 writer.Put(LeftStance);
             }
+
+            public void Deserialize(NetDataReader reader)
+            {
+                LeftStance = reader.GetBool();
+            }
+
+            public void Dispose()
+            {
+                LeftStance = false;
+            }
         }
 
-        public struct RollCylinderPacket(NetDataReader reader) : ISubPacket
+        public class RollCylinderPacket : IPoolSubPacket
         {
-            public bool RollToZeroCamora = reader.GetBool();
+            private RollCylinderPacket()
+            {
 
-            public readonly void Execute(FikaPlayer player)
+            }
+
+            public static RollCylinderPacket FromValue(bool rollToZeroCamora)
+            {
+                RollCylinderPacket packet = FirearmSubPacketPool.GetPacket<RollCylinderPacket>(EFirearmSubPacketType.RollCylinder);
+                packet.RollToZeroCamora = rollToZeroCamora;
+                return packet;
+            }
+
+            public static RollCylinderPacket CreateInstance()
+            {
+                return new();
+            }
+
+            public bool RollToZeroCamora;
+
+            public void Execute(FikaPlayer player)
             {
                 if (player.HandsController is ObservedFirearmController controller && controller.Weapon is RevolverItemClass)
                 {
@@ -196,15 +472,40 @@ namespace Fika.Core.Networking.Packets.FirearmController
                 }
             }
 
-            public readonly void Serialize(NetDataWriter writer)
+            public void Serialize(NetDataWriter writer)
             {
                 writer.Put(RollToZeroCamora);
             }
+
+            public void Deserialize(NetDataReader reader)
+            {
+                RollToZeroCamora = reader.GetBool();
+            }
+
+            public void Dispose()
+            {
+                RollToZeroCamora = false;
+            }
         }
 
-        public struct ReloadBoltActionPacket : ISubPacket
+        public class ReloadBoltActionPacket : IPoolSubPacket
         {
-            public readonly void Execute(FikaPlayer player)
+            private ReloadBoltActionPacket()
+            {
+
+            }
+
+            public static ReloadBoltActionPacket FromValue()
+            {
+                return FirearmSubPacketPool.GetPacket<ReloadBoltActionPacket>(EFirearmSubPacketType.ReloadBoltAction);
+            }
+
+            public static ReloadBoltActionPacket CreateInstance()
+            {
+                return new();
+            }
+
+            public void Execute(FikaPlayer player)
             {
                 if (player.HandsController is ObservedFirearmController controller)
                 {
@@ -214,13 +515,38 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public void Serialize(NetDataWriter writer)
             {
-                throw new NotImplementedException();
+                // do nothing
+            }
+
+            public void Deserialize(NetDataReader reader)
+            {
+                // do nothing
+            }
+
+            public void Dispose()
+            {
+                // do nothing
             }
         }
 
-        public struct CheckChamberPacket : ISubPacket
+        public class CheckChamberPacket : IPoolSubPacket
         {
-            public readonly void Execute(FikaPlayer player)
+            private CheckChamberPacket()
+            {
+
+            }
+
+            public static CheckChamberPacket FromValue()
+            {
+                return FirearmSubPacketPool.GetPacket<CheckChamberPacket>(EFirearmSubPacketType.CheckChamber);
+            }
+
+            public static CheckChamberPacket CreateInstance()
+            {
+                return new();
+            }
+
+            public void Execute(FikaPlayer player)
             {
                 if (player.HandsController is ObservedFirearmController controller)
                 {
@@ -230,13 +556,38 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public void Serialize(NetDataWriter writer)
             {
-                throw new NotImplementedException();
+                // do nothing
+            }
+
+            public void Deserialize(NetDataReader reader)
+            {
+                // do nothing
+            }
+
+            public void Dispose()
+            {
+                // do nothing
             }
         }
 
-        public struct CheckFireModePacket : ISubPacket
+        public class CheckFireModePacket : IPoolSubPacket
         {
-            public readonly void Execute(FikaPlayer player)
+            private CheckFireModePacket()
+            {
+
+            }
+
+            public static CheckFireModePacket FromValue()
+            {
+                return FirearmSubPacketPool.GetPacket<CheckFireModePacket>(EFirearmSubPacketType.CheckFireMode);
+            }
+
+            public static CheckFireModePacket CreateInstance()
+            {
+                return new();
+            }
+
+            public void Execute(FikaPlayer player)
             {
                 if (player.HandsController is ObservedFirearmController controller)
                 {
@@ -246,13 +597,38 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public void Serialize(NetDataWriter writer)
             {
-                throw new NotImplementedException();
+                // do nothing
+            }
+
+            public void Deserialize(NetDataReader reader)
+            {
+                // do nothing
+            }
+
+            public void Dispose()
+            {
+                // do nothing
             }
         }
 
-        public struct UnderbarrelSightingRangeUpPacket : ISubPacket
+        public class UnderbarrelSightingRangeUpPacket : IPoolSubPacket
         {
-            public readonly void Execute(FikaPlayer player)
+            private UnderbarrelSightingRangeUpPacket()
+            {
+
+            }
+
+            public static UnderbarrelSightingRangeUpPacket FromValue()
+            {
+                return FirearmSubPacketPool.GetPacket<UnderbarrelSightingRangeUpPacket>(EFirearmSubPacketType.UnderbarrelSightingRangeUp);
+            }
+
+            public static UnderbarrelSightingRangeUpPacket CreateInstance()
+            {
+                return new();
+            }
+
+            public void Execute(FikaPlayer player)
             {
                 if (player.HandsController is ObservedFirearmController controller)
                 {
@@ -262,13 +638,39 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public void Serialize(NetDataWriter writer)
             {
-                throw new NotImplementedException();
+                // do nothing
+            }
+
+            public void Deserialize(NetDataReader reader)
+            {
+                // do nothing
+            }
+
+            public void Dispose()
+            {
+                // do nothing
             }
         }
 
-        public struct UnderbarrelSightingRangeDownPacket : ISubPacket
+        public class UnderbarrelSightingRangeDownPacket : IPoolSubPacket
         {
-            public readonly void Execute(FikaPlayer player)
+            private UnderbarrelSightingRangeDownPacket()
+            {
+
+            }
+
+            public static UnderbarrelSightingRangeDownPacket FromValue()
+            {
+                return FirearmSubPacketPool.GetPacket<UnderbarrelSightingRangeDownPacket>(EFirearmSubPacketType.UnderbarrelSightingRangeDown);
+            }
+
+
+            public static UnderbarrelSightingRangeDownPacket CreateInstance()
+            {
+                return new();
+            }
+
+            public void Execute(FikaPlayer player)
             {
                 if (player.HandsController is ObservedFirearmController controller)
                 {
@@ -278,13 +680,39 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public void Serialize(NetDataWriter writer)
             {
-                throw new NotImplementedException();
+                // do nothing
+            }
+
+            public void Deserialize(NetDataReader reader)
+            {
+                // do nothing
+            }
+
+            public void Dispose()
+            {
+                // do nothing
             }
         }
 
-        public struct ToggleBipodPacket : ISubPacket
+        public class ToggleBipodPacket : IPoolSubPacket
         {
-            public readonly void Execute(FikaPlayer player)
+            private ToggleBipodPacket()
+            {
+
+            }
+
+            public static ToggleBipodPacket FromValue()
+            {
+                return FirearmSubPacketPool.GetPacket<ToggleBipodPacket>(EFirearmSubPacketType.ToggleBipod);
+            }
+
+
+            public static ToggleBipodPacket CreateInstance()
+            {
+                return new();
+            }
+
+            public void Execute(FikaPlayer player)
             {
                 if (player.HandsController is ObservedFirearmController controller)
                 {
@@ -294,75 +722,79 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public void Serialize(NetDataWriter writer)
             {
-                throw new NotImplementedException();
+                // do nothing
+            }
+
+            public void Deserialize(NetDataReader reader)
+            {
+                // do nothing
+            }
+
+            public void Dispose()
+            {
+                // do nothing
             }
         }
 
-        public readonly struct ShotInfoPacket : ISubPacket
+        public class ShotInfoPacket : IPoolSubPacket
         {
-            public readonly Vector3 ShotPosition;
-            public readonly Vector3 ShotDirection;
-            public readonly MongoID AmmoTemplate;
-            public readonly float Overheat;
-            public readonly float LastShotOverheat;
-            public readonly float LastShotTime;
-            public readonly float Durability;
-            public readonly int ChamberIndex;
-            public readonly bool UnderbarrelShot;
-            public readonly bool SlideOnOverheatReached;
-            public readonly EShotType ShotType;
-
-            public ShotInfoPacket(NetDataReader reader)
+            private ShotInfoPacket()
             {
-                ShotType = reader.GetEnum<EShotType>();
-                if (ShotType == EShotType.DryFire)
-                {
-                    ChamberIndex = reader.GetPackedInt(0, 16);
-                    UnderbarrelShot = reader.GetBool();
-                    return;
-                }
 
-                ShotPosition = reader.GetVector3();
-                ShotDirection = reader.GetVector3();
-                AmmoTemplate = reader.GetMongoID();
-                Overheat = reader.GetPackedFloat(0f, 200f, EFloatCompression.High);
-                LastShotOverheat = reader.GetPackedFloat(0f, 200f, EFloatCompression.High);
-                LastShotTime = reader.GetFloat();
-                Durability = reader.GetPackedFloat(0f, 100f, EFloatCompression.High);
-                ChamberIndex = reader.GetPackedInt(0, 16);
-                UnderbarrelShot = reader.GetBool();
-                SlideOnOverheatReached = reader.GetBool();
             }
 
-            public ShotInfoPacket(int chamberIndex, bool underbarrelShot, EShotType shotType)
+            public static ShotInfoPacket CreateInstance()
             {
-                ShotType = shotType;
-                ChamberIndex = chamberIndex;
-                UnderbarrelShot = underbarrelShot;
+                return new();
             }
 
-            public ShotInfoPacket(MongoID ammoTemplate, float overheat, EShotType shotType)
+            public Vector3 ShotPosition;
+            public Vector3 ShotDirection;
+            public MongoID AmmoTemplate;
+            public float Overheat;
+            public float LastShotOverheat;
+            public float LastShotTime;
+            public float Durability;
+            public int ChamberIndex;
+            public bool UnderbarrelShot;
+            public bool SlideOnOverheatReached;
+            public EShotType ShotType;
+
+            public static ShotInfoPacket FromDryShot(int chamberIndex, bool underbarrelShot, EShotType shotType)
             {
-                AmmoTemplate = ammoTemplate;
-                Overheat = overheat;
-                ShotType = shotType;
+                ShotInfoPacket packet = FirearmSubPacketPool.GetPacket<ShotInfoPacket>(EFirearmSubPacketType.ShotInfo);
+                packet.ShotType = shotType;
+                packet.ChamberIndex = chamberIndex;
+                packet.UnderbarrelShot = underbarrelShot;
+                return packet;
             }
 
-            public ShotInfoPacket(Vector3 shotPosition, Vector3 shotDirection, MongoID ammoTemplate, float overheat,
+            public static ShotInfoPacket FromMisfire(MongoID ammoTemplate, float overheat, EShotType shotType)
+            {
+                ShotInfoPacket packet = FirearmSubPacketPool.GetPacket<ShotInfoPacket>(EFirearmSubPacketType.ShotInfo);
+                packet.AmmoTemplate = ammoTemplate;
+                packet.Overheat = overheat;
+                packet.ShotType = shotType;
+                return packet;
+            }
+
+            public static ShotInfoPacket FromShot(Vector3 shotPosition, Vector3 shotDirection, MongoID ammoTemplate, float overheat,
                 float lastShotOverheat, float lastShotTime, float durability, int chamberIndex, bool underbarrelShot,
                 bool slideOnOverheatReached, EShotType shotType)
             {
-                ShotPosition = shotPosition;
-                ShotDirection = shotDirection;
-                AmmoTemplate = ammoTemplate;
-                Overheat = overheat;
-                LastShotOverheat = lastShotOverheat;
-                LastShotTime = lastShotTime;
-                Durability = durability;
-                ChamberIndex = chamberIndex;
-                UnderbarrelShot = underbarrelShot;
-                SlideOnOverheatReached = slideOnOverheatReached;
-                ShotType = shotType;
+                ShotInfoPacket packet = FirearmSubPacketPool.GetPacket<ShotInfoPacket>(EFirearmSubPacketType.ShotInfo);
+                packet.ShotPosition = shotPosition;
+                packet.ShotDirection = shotDirection;
+                packet.AmmoTemplate = ammoTemplate;
+                packet.Overheat = overheat;
+                packet.LastShotOverheat = lastShotOverheat;
+                packet.LastShotTime = lastShotTime;
+                packet.Durability = durability;
+                packet.ChamberIndex = chamberIndex;
+                packet.UnderbarrelShot = underbarrelShot;
+                packet.SlideOnOverheatReached = slideOnOverheatReached;
+                packet.ShotType = shotType;
+                return packet;
             }
 
             public void Execute(FikaPlayer player)
@@ -375,11 +807,11 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
                 if (player.HandsController is ObservedFirearmController controller)
                 {
-                    controller.HandleShotInfoPacket(in this, player.InventoryController);
+                    controller.HandleShotInfoPacket(this, player.InventoryController);
                 }
             }
 
-            public readonly void Serialize(NetDataWriter writer)
+            public void Serialize(NetDataWriter writer)
             {
                 writer.PutEnum(ShotType);
                 if (ShotType == EShotType.DryFire)
@@ -389,8 +821,8 @@ namespace Fika.Core.Networking.Packets.FirearmController
                     return;
                 }
 
-                writer.PutVector3(ShotPosition);
-                writer.PutVector3(ShotDirection);
+                writer.PutStruct(ShotPosition);
+                writer.PutStruct(ShotDirection);
                 writer.PutMongoID(AmmoTemplate);
                 writer.PutPackedFloat(Overheat, 0f, 200f, EFloatCompression.High);
                 writer.PutPackedFloat(LastShotOverheat, 0f, 200f, EFloatCompression.High);
@@ -400,16 +832,73 @@ namespace Fika.Core.Networking.Packets.FirearmController
                 writer.Put(UnderbarrelShot);
                 writer.Put(SlideOnOverheatReached);
             }
+
+            public void Deserialize(NetDataReader reader)
+            {
+                ShotType = reader.GetEnum<EShotType>();
+                if (ShotType == EShotType.DryFire)
+                {
+                    ChamberIndex = reader.GetPackedInt(0, 16);
+                    UnderbarrelShot = reader.GetBool();
+                    return;
+                }
+
+                ShotPosition = reader.GetStruct<Vector3>();
+                ShotDirection = reader.GetStruct<Vector3>();
+                AmmoTemplate = reader.GetMongoID();
+                Overheat = reader.GetPackedFloat(0f, 200f, EFloatCompression.High);
+                LastShotOverheat = reader.GetPackedFloat(0f, 200f, EFloatCompression.High);
+                LastShotTime = reader.GetFloat();
+                Durability = reader.GetPackedFloat(0f, 100f, EFloatCompression.High);
+                ChamberIndex = reader.GetPackedInt(0, 16);
+                UnderbarrelShot = reader.GetBool();
+                SlideOnOverheatReached = reader.GetBool();
+            }
+
+            public void Dispose()
+            {
+                ShotPosition = default;
+                ShotDirection = default;
+                AmmoTemplate = null;
+                Overheat = 0f;
+                LastShotOverheat = 0f;
+                LastShotTime = 0f;
+                Durability = 0f;
+                ChamberIndex = 0;
+                UnderbarrelShot = false;
+                SlideOnOverheatReached = false;
+                ShotType = default;
+            }
         }
 
-        public struct KnifePacket(NetDataReader reader) : ISubPacket
+        public class KnifePacket : IPoolSubPacket
         {
-            public bool Examine = reader.GetBool();
-            public bool Kick = reader.GetBool();
-            public bool AltKick = reader.GetBool();
-            public bool BreakCombo = reader.GetBool();
+            private KnifePacket()
+            {
 
-            public readonly void Execute(FikaPlayer player)
+            }
+
+            public static KnifePacket FromValue(bool examine, bool kick, bool altKick, bool breakCombo)
+            {
+                KnifePacket packet = FirearmSubPacketPool.GetPacket<KnifePacket>(EFirearmSubPacketType.Knife);
+                packet.Examine = examine;
+                packet.Kick = kick;
+                packet.AltKick = altKick;
+                packet.BreakCombo = breakCombo;
+                return packet;
+            }
+
+            public static KnifePacket CreateInstance()
+            {
+                return new();
+            }
+
+            public bool Examine;
+            public bool Kick;
+            public bool AltKick;
+            public bool BreakCombo;
+
+            public void Execute(FikaPlayer player)
             {
                 if (player.HandsController is ObservedKnifeController knifeController)
                 {
@@ -439,17 +928,59 @@ namespace Fika.Core.Networking.Packets.FirearmController
                 }
             }
 
-            public readonly void Serialize(NetDataWriter writer)
+            public void Serialize(NetDataWriter writer)
             {
                 writer.Put(Examine);
                 writer.Put(Kick);
                 writer.Put(AltKick);
                 writer.Put(BreakCombo);
             }
+
+            public void Deserialize(NetDataReader reader)
+            {
+                Examine = reader.GetBool();
+                Kick = reader.GetBool();
+                AltKick = reader.GetBool();
+                BreakCombo = reader.GetBool();
+            }
+
+            public void Dispose()
+            {
+                Examine = false;
+                Kick = false;
+                AltKick = false;
+                BreakCombo = false;
+            }
         }
 
-        public struct GrenadePacket : ISubPacket
+        public class GrenadePacket : IPoolSubPacket
         {
+            private GrenadePacket()
+            {
+
+            }
+
+            public static GrenadePacket FromValue(Quaternion grenadeRotation, Vector3 grenadePosition, Vector3 throwForce,
+                EGrenadePacketType type, bool hasGrenade, bool lowThrow, bool plantTripwire, bool changeToIdle, bool changeToPlant)
+            {
+                GrenadePacket packet = FirearmSubPacketPool.GetPacket<GrenadePacket>(EFirearmSubPacketType.Grenade);
+                packet.GrenadeRotation = grenadeRotation;
+                packet.GrenadePosition = grenadePosition;
+                packet.ThrowForce = throwForce;
+                packet.Type = type;
+                packet.HasGrenade = hasGrenade;
+                packet.LowThrow = lowThrow;
+                packet.PlantTripwire = plantTripwire;
+                packet.ChangeToIdle = changeToIdle;
+                packet.ChangeToPlant = changeToPlant;
+                return packet;
+            }
+
+            public static GrenadePacket CreateInstance()
+            {
+                return new();
+            }
+
             public Quaternion GrenadeRotation;
             public Vector3 GrenadePosition;
             public Vector3 ThrowForce;
@@ -460,23 +991,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
             public bool ChangeToIdle;
             public bool ChangeToPlant;
 
-            public GrenadePacket(NetDataReader reader)
-            {
-                Type = reader.GetEnum<EGrenadePacketType>();
-                HasGrenade = reader.GetBool();
-                if (HasGrenade)
-                {
-                    GrenadeRotation = reader.GetQuaternion();
-                    GrenadePosition = reader.GetVector3();
-                    ThrowForce = reader.GetVector3();
-                    LowThrow = reader.GetBool();
-                }
-                PlantTripwire = reader.GetBool();
-                ChangeToIdle = reader.GetBool();
-                ChangeToPlant = reader.GetBool();
-            }
-
-            public readonly void Execute(FikaPlayer player)
+            public void Execute(FikaPlayer player)
             {
                 if (player.HandsController is ObservedGrenadeController controller)
                 {
@@ -541,29 +1056,98 @@ namespace Fika.Core.Networking.Packets.FirearmController
                 }
             }
 
-            public readonly void Serialize(NetDataWriter writer)
+            public void Serialize(NetDataWriter writer)
             {
                 writer.PutEnum(Type);
                 writer.Put(HasGrenade);
                 if (HasGrenade)
                 {
-                    writer.PutQuaternion(GrenadeRotation);
-                    writer.PutVector3(GrenadePosition);
-                    writer.PutVector3(ThrowForce);
+                    writer.PutStruct(GrenadeRotation);
+                    writer.PutStruct(GrenadePosition);
+                    writer.PutStruct(ThrowForce);
                     writer.Put(LowThrow);
                 }
                 writer.Put(PlantTripwire);
                 writer.Put(ChangeToIdle);
                 writer.Put(ChangeToPlant);
             }
+
+            public void Deserialize(NetDataReader reader)
+            {
+                Type = reader.GetEnum<EGrenadePacketType>();
+                HasGrenade = reader.GetBool();
+                if (HasGrenade)
+                {
+                    GrenadeRotation = reader.GetStruct<Quaternion>();
+                    GrenadePosition = reader.GetStruct<Vector3>();
+                    ThrowForce = reader.GetStruct<Vector3>();
+                    LowThrow = reader.GetBool();
+                }
+                PlantTripwire = reader.GetBool();
+                ChangeToIdle = reader.GetBool();
+                ChangeToPlant = reader.GetBool();
+            }
+
+            public void Dispose()
+            {
+                GrenadeRotation = default;
+                GrenadePosition = default;
+                ThrowForce = default;
+                Type = default;
+                HasGrenade = false;
+                LowThrow = false;
+                PlantTripwire = false;
+                ChangeToIdle = false;
+                ChangeToPlant = false;
+            }
         }
 
-        public struct LightStatesPacket : ISubPacket
+        public class LightStatesPacket : IPoolSubPacket
         {
+            private LightStatesPacket()
+            {
+
+            }
+
+            public static LightStatesPacket FromValue(int amount, FirearmLightStateStruct[] states)
+            {
+                LightStatesPacket packet = FirearmSubPacketPool.GetPacket<LightStatesPacket>(EFirearmSubPacketType.ToggleLightStates);
+                packet.Amount = amount;
+                packet.States = states;
+                return packet;
+            }
+
+            public static LightStatesPacket CreateInstance()
+            {
+                return new();
+            }
+
             public int Amount;
             public FirearmLightStateStruct[] States;
 
-            public LightStatesPacket(NetDataReader reader)
+            public void Execute(FikaPlayer player)
+            {
+                if (player.HandsController is ObservedFirearmController controller)
+                {
+                    controller.SetLightsState(States, true);
+                }
+            }
+
+            public void Serialize(NetDataWriter writer)
+            {
+                writer.Put(Amount);
+                if (Amount > 0)
+                {
+                    for (int i = 0; i < Amount; i++)
+                    {
+                        writer.Put(States[i].Id);
+                        writer.Put(States[i].IsActive);
+                        writer.Put(States[i].LightMode);
+                    }
+                }
+            }
+
+            public void Deserialize(NetDataReader reader)
             {
                 Amount = reader.GetInt();
                 if (Amount > 0)
@@ -581,15 +1165,44 @@ namespace Fika.Core.Networking.Packets.FirearmController
                 }
             }
 
-            public readonly void Execute(FikaPlayer player)
+            public void Dispose()
+            {
+                Amount = 0;
+                States = null;
+            }
+        }
+
+        public class ScopeStatesPacket : IPoolSubPacket
+        {
+            private ScopeStatesPacket()
+            {
+
+            }
+            public static ScopeStatesPacket FromValue(int amount, FirearmScopeStateStruct[] states)
+            {
+                ScopeStatesPacket packet = FirearmSubPacketPool.GetPacket<ScopeStatesPacket>(EFirearmSubPacketType.ToggleScopeStates);
+                packet.Amount = amount;
+                packet.States = states;
+                return packet;
+            }
+
+            public static ScopeStatesPacket CreateInstance()
+            {
+                return new();
+            }
+
+            public int Amount;
+            public FirearmScopeStateStruct[] States;
+
+            public void Execute(FikaPlayer player)
             {
                 if (player.HandsController is ObservedFirearmController controller)
                 {
-                    controller.SetLightsState(States, true);
+                    controller.SetScopeMode(States);
                 }
             }
 
-            public readonly void Serialize(NetDataWriter writer)
+            public void Serialize(NetDataWriter writer)
             {
                 writer.Put(Amount);
                 if (Amount > 0)
@@ -597,19 +1210,14 @@ namespace Fika.Core.Networking.Packets.FirearmController
                     for (int i = 0; i < Amount; i++)
                     {
                         writer.Put(States[i].Id);
-                        writer.Put(States[i].IsActive);
-                        writer.Put(States[i].LightMode);
+                        writer.Put(States[i].ScopeMode);
+                        writer.Put(States[i].ScopeIndexInsideSight);
+                        writer.Put(States[i].ScopeCalibrationIndex);
                     }
                 }
             }
-        }
 
-        public struct ScopeStatesPacket : ISubPacket
-        {
-            public int Amount;
-            public FirearmScopeStateStruct[] States;
-
-            public ScopeStatesPacket(NetDataReader reader)
+            public void Deserialize(NetDataReader reader)
             {
                 Amount = reader.GetInt();
                 if (Amount > 0)
@@ -628,47 +1236,39 @@ namespace Fika.Core.Networking.Packets.FirearmController
                 }
             }
 
-            public readonly void Execute(FikaPlayer player)
+            public void Dispose()
             {
-                if (player.HandsController is ObservedFirearmController controller)
-                {
-                    controller.SetScopeMode(States);
-                }
-            }
-
-            public readonly void Serialize(NetDataWriter writer)
-            {
-                writer.Put(Amount);
-                if (Amount > 0)
-                {
-                    for (int i = 0; i < Amount; i++)
-                    {
-                        writer.Put(States[i].Id);
-                        writer.Put(States[i].ScopeMode);
-                        writer.Put(States[i].ScopeIndexInsideSight);
-                        writer.Put(States[i].ScopeCalibrationIndex);
-                    }
-                }
+                Amount = 0;
+                States = null;
             }
         }
 
-        public struct ReloadMagPacket : ISubPacket
+        public class ReloadMagPacket : IPoolSubPacket
         {
+            private ReloadMagPacket()
+            {
+
+            }
+
+            public static ReloadMagPacket FromValue(MongoID magId, byte[] locationDescription, bool reload)
+            {
+                ReloadMagPacket packet = FirearmSubPacketPool.GetPacket<ReloadMagPacket>(EFirearmSubPacketType.ReloadMag);
+                packet.MagId = magId;
+                packet.LocationDescription = locationDescription;
+                packet.Reload = reload;
+                return packet;
+            }
+
+            public static ReloadMagPacket CreateInstance()
+            {
+                return new();
+            }
+
             public MongoID MagId;
             public byte[] LocationDescription;
             public bool Reload;
 
-            public ReloadMagPacket(NetDataReader reader)
-            {
-                Reload = reader.GetBool();
-                if (Reload)
-                {
-                    MagId = reader.GetMongoID();
-                    LocationDescription = reader.GetByteArray();
-                }
-            }
-
-            public readonly void Execute(FikaPlayer player)
+            public void Execute(FikaPlayer player)
             {
                 if (player.HandsController is ObservedFirearmController controller)
                 {
@@ -725,7 +1325,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
                 }
             }
 
-            public readonly void Serialize(NetDataWriter writer)
+            public void Serialize(NetDataWriter writer)
             {
                 writer.Put(Reload);
                 if (Reload)
@@ -734,23 +1334,49 @@ namespace Fika.Core.Networking.Packets.FirearmController
                     writer.PutByteArray(LocationDescription);
                 }
             }
-        }
 
-        public struct QuickReloadMagPacket : ISubPacket
-        {
-            public MongoID MagId;
-            public bool Reload;
-
-            public QuickReloadMagPacket(NetDataReader reader)
+            public void Deserialize(NetDataReader reader)
             {
                 Reload = reader.GetBool();
                 if (Reload)
                 {
                     MagId = reader.GetMongoID();
+                    LocationDescription = reader.GetByteArray();
                 }
             }
 
-            public readonly void Execute(FikaPlayer player)
+            public void Dispose()
+            {
+                MagId = default;
+                LocationDescription = null;
+                Reload = false;
+            }
+        }
+
+        public class QuickReloadMagPacket : IPoolSubPacket
+        {
+            private QuickReloadMagPacket()
+            {
+
+            }
+
+            public static QuickReloadMagPacket FromValue(MongoID magId, bool reload)
+            {
+                QuickReloadMagPacket packet = FirearmSubPacketPool.GetPacket<QuickReloadMagPacket>(EFirearmSubPacketType.QuickReloadMag);
+                packet.MagId = magId;
+                packet.Reload = reload;
+                return packet;
+            }
+
+            public static QuickReloadMagPacket CreateInstance()
+            {
+                return new();
+            }
+
+            public MongoID MagId;
+            public bool Reload;
+
+            public void Execute(FikaPlayer player)
             {
                 if (player.HandsController is ObservedFirearmController controller)
                 {
@@ -781,7 +1407,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
                 }
             }
 
-            public readonly void Serialize(NetDataWriter writer)
+            public void Serialize(NetDataWriter writer)
             {
                 writer.Put(Reload);
                 if (Reload)
@@ -789,33 +1415,51 @@ namespace Fika.Core.Networking.Packets.FirearmController
                     writer.PutMongoID(MagId);
                 }
             }
+
+            public void Deserialize(NetDataReader reader)
+            {
+                Reload = reader.GetBool();
+                if (Reload)
+                {
+                    MagId = reader.GetMongoID();
+                }
+            }
+
+            public void Dispose()
+            {
+                MagId = default;
+                Reload = false;
+            }
         }
 
-        public struct ReloadWithAmmoPacket : ISubPacket
+        public class ReloadWithAmmoPacket : IPoolSubPacket
         {
+            private ReloadWithAmmoPacket()
+            {
+
+            }
+
+            public static ReloadWithAmmoPacket FromValue(bool reload, EReloadWithAmmoStatus status, int ammoLoadedToMag = 0, string[] ammoIds = null)
+            {
+                ReloadWithAmmoPacket packet = FirearmSubPacketPool.GetPacket<ReloadWithAmmoPacket>(EFirearmSubPacketType.ReloadWithAmmo);
+                packet.Reload = reload;
+                packet.Status = status;
+                packet.AmmoLoadedToMag = ammoLoadedToMag;
+                packet.AmmoIds = ammoIds;
+                return packet;
+            }
+
+            public static ReloadWithAmmoPacket CreateInstance()
+            {
+                return new();
+            }
+
             public bool Reload;
             public EReloadWithAmmoStatus Status;
             public int AmmoLoadedToMag;
             public string[] AmmoIds;
 
-            public ReloadWithAmmoPacket(NetDataReader reader)
-            {
-                Reload = reader.GetBool();
-                if (Reload)
-                {
-                    Status = reader.GetEnum<EReloadWithAmmoStatus>();
-                    if (Status == EReloadWithAmmoStatus.StartReload)
-                    {
-                        AmmoIds = reader.GetStringArray();
-                    }
-                    if (Status is EReloadWithAmmoStatus.EndReload or EReloadWithAmmoStatus.AbortReload)
-                    {
-                        AmmoLoadedToMag = reader.GetInt();
-                    }
-                }
-            }
-
-            public readonly void Execute(FikaPlayer player)
+            public void Execute(FikaPlayer player)
             {
                 if (player.HandsController is ObservedFirearmController controller)
                 {
@@ -837,7 +1481,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
                 }
             }
 
-            public readonly void Serialize(NetDataWriter writer)
+            public void Serialize(NetDataWriter writer)
             {
                 writer.Put(Reload);
                 if (Reload)
@@ -853,10 +1497,58 @@ namespace Fika.Core.Networking.Packets.FirearmController
                     }
                 }
             }
+
+            public void Deserialize(NetDataReader reader)
+            {
+                Reload = reader.GetBool();
+                if (Reload)
+                {
+                    Status = reader.GetEnum<EReloadWithAmmoStatus>();
+                    if (Status == EReloadWithAmmoStatus.StartReload)
+                    {
+                        AmmoIds = reader.GetStringArray();
+                    }
+                    if (Status is EReloadWithAmmoStatus.EndReload or EReloadWithAmmoStatus.AbortReload)
+                    {
+                        AmmoLoadedToMag = reader.GetInt();
+                    }
+                }
+            }
+
+            public void Dispose()
+            {
+                Reload = false;
+                Status = EReloadWithAmmoStatus.None;
+                AmmoLoadedToMag = 0;
+                AmmoIds = null;
+            }
         }
 
-        public struct CylinderMagPacket : ISubPacket
+        public class CylinderMagPacket : IPoolSubPacket
         {
+            private CylinderMagPacket()
+            {
+
+            }
+
+            public static CylinderMagPacket FromValue(EReloadWithAmmoStatus status, int camoraIndex, int ammoLoadedToMag, bool changed, bool hammerClosed, bool reload, string[] ammoIds)
+            {
+                CylinderMagPacket packet = FirearmSubPacketPool.GetPacket<CylinderMagPacket>(EFirearmSubPacketType.CylinderMag);
+                packet.Status = status;
+                packet.CamoraIndex = camoraIndex;
+                packet.AmmoLoadedToMag = ammoLoadedToMag;
+                packet.Changed = changed;
+                packet.HammerClosed = hammerClosed;
+                packet.Reload = reload;
+                packet.AmmoIds = ammoIds;
+                return packet;
+            }
+
+            public static CylinderMagPacket CreateInstance()
+            {
+                return new();
+            }
+
             public EReloadWithAmmoStatus Status;
             public int CamoraIndex;
             public int AmmoLoadedToMag;
@@ -865,24 +1557,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
             public bool Reload;
             public string[] AmmoIds;
 
-            public CylinderMagPacket(NetDataReader reader)
-            {
-                Changed = reader.GetBool();
-                if (Changed)
-                {
-                    CamoraIndex = reader.GetInt();
-                    HammerClosed = reader.GetBool();
-                }
-                Reload = reader.GetBool();
-                if (Reload)
-                {
-                    Status = reader.GetEnum<EReloadWithAmmoStatus>();
-                    AmmoLoadedToMag = reader.GetInt();
-                    AmmoIds = reader.GetStringArray();
-                }
-            }
-
-            public readonly void Execute(FikaPlayer player)
+            public void Execute(FikaPlayer player)
             {
                 if (player.HandsController is ObservedFirearmController controller)
                 {
@@ -910,7 +1585,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
                 }
             }
 
-            public readonly void Serialize(NetDataWriter writer)
+            public void Serialize(NetDataWriter writer)
             {
                 writer.Put(Changed);
                 if (Changed)
@@ -926,23 +1601,60 @@ namespace Fika.Core.Networking.Packets.FirearmController
                     writer.PutArray(AmmoIds);
                 }
             }
-        }
 
-        public struct ReloadLauncherPacket : ISubPacket
-        {
-            public string[] AmmoIds;
-            public bool Reload;
-
-            public ReloadLauncherPacket(NetDataReader reader)
+            public void Deserialize(NetDataReader reader)
             {
+                Changed = reader.GetBool();
+                if (Changed)
+                {
+                    CamoraIndex = reader.GetInt();
+                    HammerClosed = reader.GetBool();
+                }
                 Reload = reader.GetBool();
                 if (Reload)
                 {
+                    Status = reader.GetEnum<EReloadWithAmmoStatus>();
+                    AmmoLoadedToMag = reader.GetInt();
                     AmmoIds = reader.GetStringArray();
                 }
             }
 
-            public readonly void Execute(FikaPlayer player)
+            public void Dispose()
+            {
+                Status = default;
+                CamoraIndex = 0;
+                AmmoLoadedToMag = 0;
+                Changed = false;
+                HammerClosed = false;
+                Reload = false;
+                AmmoIds = null;
+            }
+        }
+
+        public class ReloadLauncherPacket : IPoolSubPacket
+        {
+            private ReloadLauncherPacket()
+            {
+
+            }
+
+            public static ReloadLauncherPacket FromValue(bool reload, string[] ammoIds)
+            {
+                ReloadLauncherPacket packet = FirearmSubPacketPool.GetPacket<ReloadLauncherPacket>(EFirearmSubPacketType.ReloadLauncher);
+                packet.Reload = reload;
+                packet.AmmoIds = ammoIds;
+                return packet;
+            }
+
+            public static ReloadLauncherPacket CreateInstance()
+            {
+                return new();
+            }
+
+            public string[] AmmoIds;
+            public bool Reload;
+
+            public void Execute(FikaPlayer player)
             {
                 if (player.HandsController is ObservedFirearmController controller)
                 {
@@ -953,7 +1665,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
                 }
             }
 
-            public readonly void Serialize(NetDataWriter writer)
+            public void Serialize(NetDataWriter writer)
             {
                 writer.Put(Reload);
                 if (Reload)
@@ -961,25 +1673,49 @@ namespace Fika.Core.Networking.Packets.FirearmController
                     writer.PutArray(AmmoIds);
                 }
             }
-        }
 
-        public struct ReloadBarrelsPacket : ISubPacket
-        {
-            public string[] AmmoIds;
-            public byte[] LocationDescription;
-            public bool Reload;
-
-            public ReloadBarrelsPacket(NetDataReader reader)
+            public void Deserialize(NetDataReader reader)
             {
                 Reload = reader.GetBool();
                 if (Reload)
                 {
                     AmmoIds = reader.GetStringArray();
-                    LocationDescription = reader.GetByteArray();
                 }
             }
 
-            public readonly void Execute(FikaPlayer player)
+            public void Dispose()
+            {
+                Reload = false;
+                AmmoIds = null;
+            }
+        }
+
+        public class ReloadBarrelsPacket : IPoolSubPacket
+        {
+            private ReloadBarrelsPacket()
+            {
+
+            }
+
+            public static ReloadBarrelsPacket FromValue(bool reload, string[] ammoIds, byte[] locationDescription)
+            {
+                ReloadBarrelsPacket packet = FirearmSubPacketPool.GetPacket<ReloadBarrelsPacket>(EFirearmSubPacketType.ReloadBarrels);
+                packet.Reload = reload;
+                packet.AmmoIds = ammoIds;
+                packet.LocationDescription = locationDescription;
+                return packet;
+            }
+
+            public static ReloadBarrelsPacket CreateInstance()
+            {
+                return new();
+            }
+
+            public string[] AmmoIds;
+            public byte[] LocationDescription;
+            public bool Reload;
+
+            public void Execute(FikaPlayer player)
             {
                 if (player.HandsController is ObservedFirearmController controller)
                 {
@@ -1013,7 +1749,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
                 }
             }
 
-            public readonly void Serialize(NetDataWriter writer)
+            public void Serialize(NetDataWriter writer)
             {
                 writer.Put(Reload);
                 if (Reload)
@@ -1022,27 +1758,53 @@ namespace Fika.Core.Networking.Packets.FirearmController
                     writer.PutByteArray(LocationDescription);
                 }
             }
+
+            public void Deserialize(NetDataReader reader)
+            {
+                Reload = reader.GetBool();
+                if (Reload)
+                {
+                    AmmoIds = reader.GetStringArray();
+                    LocationDescription = reader.GetByteArray();
+                }
+            }
+
+            public void Dispose()
+            {
+                Reload = false;
+                AmmoIds = null;
+                LocationDescription = null;
+            }
         }
 
-        public struct FlareShotPacket : ISubPacket
+        public class FlareShotPacket : IPoolSubPacket
         {
+            private FlareShotPacket()
+            {
+
+            }
+
+            public static FlareShotPacket FromValue(Vector3 shotPosition, Vector3 shotForward, MongoID ammoTemplateId, bool startOneShotFire)
+            {
+                FlareShotPacket packet = FirearmSubPacketPool.GetPacket<FlareShotPacket>(EFirearmSubPacketType.FlareShot);
+                packet.ShotPosition = shotPosition;
+                packet.ShotForward = shotForward;
+                packet.AmmoTemplateId = ammoTemplateId;
+                packet.StartOneShotFire = startOneShotFire;
+                return packet;
+            }
+
+            public static FlareShotPacket CreateInstance()
+            {
+                return new();
+            }
+
             public Vector3 ShotPosition;
             public Vector3 ShotForward;
             public MongoID AmmoTemplateId;
             public bool StartOneShotFire;
 
-            public FlareShotPacket(NetDataReader reader)
-            {
-                StartOneShotFire = reader.GetBool();
-                if (!StartOneShotFire)
-                {
-                    ShotPosition = reader.GetVector3();
-                    ShotForward = reader.GetVector3();
-                    AmmoTemplateId = reader.GetMongoID();
-                }
-            }
-
-            public readonly void Execute(FikaPlayer player)
+            public void Execute(FikaPlayer player)
             {
                 if (player.HandsController is ObservedFirearmController controller)
                 {
@@ -1071,25 +1833,63 @@ namespace Fika.Core.Networking.Packets.FirearmController
                 }
             }
 
-            public readonly void Serialize(NetDataWriter writer)
+            public void Serialize(NetDataWriter writer)
             {
                 writer.Put(StartOneShotFire);
                 if (!StartOneShotFire)
                 {
-                    writer.PutVector3(ShotPosition);
-                    writer.PutVector3(ShotForward);
+                    writer.PutStruct(ShotPosition);
+                    writer.PutStruct(ShotForward);
                     writer.PutMongoID(AmmoTemplateId);
                 }
             }
+
+            public void Deserialize(NetDataReader reader)
+            {
+                StartOneShotFire = reader.GetBool();
+                if (!StartOneShotFire)
+                {
+                    ShotPosition = reader.GetStruct<Vector3>();
+                    ShotForward = reader.GetStruct<Vector3>();
+                    AmmoTemplateId = reader.GetMongoID();
+                }
+            }
+
+            public void Dispose()
+            {
+                ShotPosition = default;
+                ShotForward = default;
+                AmmoTemplateId = null;
+                StartOneShotFire = false;
+            }
         }
 
-        public struct RocketShotPacket(NetDataReader reader) : ISubPacket
+        public class RocketShotPacket : IPoolSubPacket
         {
-            public Vector3 ShotPosition = reader.GetVector3();
-            public Vector3 ShotForward = reader.GetVector3();
-            public MongoID AmmoTemplateId = reader.GetMongoID();
+            private RocketShotPacket()
+            {
 
-            public readonly void Execute(FikaPlayer player)
+            }
+
+            public static RocketShotPacket FromValue(Vector3 shotPosition, Vector3 shotForward, MongoID ammoTemplate)
+            {
+                RocketShotPacket packet = FirearmSubPacketPool.GetPacket<RocketShotPacket>(EFirearmSubPacketType.RocketShot);
+                packet.ShotPosition = shotPosition;
+                packet.ShotForward = shotForward;
+                packet.AmmoTemplateId = ammoTemplate;
+                return packet;
+            }
+
+            public static RocketShotPacket CreateInstance()
+            {
+                return new();
+            }
+
+            public Vector3 ShotPosition;
+            public Vector3 ShotForward;
+            public MongoID AmmoTemplateId;
+
+            public void Execute(FikaPlayer player)
             {
                 if (player.HandsController is ObservedFirearmController controller)
                 {
@@ -1098,11 +1898,25 @@ namespace Fika.Core.Networking.Packets.FirearmController
                 }
             }
 
-            public readonly void Serialize(NetDataWriter writer)
+            public void Serialize(NetDataWriter writer)
             {
-                writer.PutVector3(ShotPosition);
-                writer.PutVector3(ShotForward);
+                writer.PutStruct(ShotPosition);
+                writer.PutStruct(ShotForward);
                 writer.PutMongoID(AmmoTemplateId);
+            }
+
+            public void Deserialize(NetDataReader reader)
+            {
+                ShotPosition = reader.GetStruct<Vector3>();
+                ShotForward = reader.GetStruct<Vector3>();
+                AmmoTemplateId = reader.GetMongoID();
+            }
+
+            public void Dispose()
+            {
+                ShotPosition = default;
+                ShotForward = default;
+                AmmoTemplateId = default;
             }
         }
     }

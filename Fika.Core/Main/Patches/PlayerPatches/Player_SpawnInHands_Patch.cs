@@ -5,7 +5,6 @@ using EFT.InventoryLogic;
 using Fika.Core.Patching;
 using RootMotion.FinalIK;
 using System.Reflection;
-using UnityEngine;
 
 namespace Fika.Core.Main.Patches
 {

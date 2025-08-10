@@ -3,7 +3,6 @@ using EFT;
 using Fika.Core.Main.Components;
 using Fika.Core.Main.Players;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace Fika.Core.Main.Utils
 {

@@ -3,7 +3,6 @@ using EFT;
 using EFT.Interactive;
 using LiteNetLib.Utils;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace Fika.Core.Networking.Packets.World
 {
@@ -48,7 +47,7 @@ namespace Fika.Core.Networking.Packets.World
                     case EReconnectDataType.OwnCharacter:
                         Profile = reader.GetProfile();
                         ProfileHealthClass = SimpleZlib.Decompress(reader.GetByteArray()).ParseJsonTo<Profile.ProfileHealthClass>();
-                        PlayerPosition = reader.GetVector3();
+                        PlayerPosition = reader.GetStruct<Vector3>();
                         break;
                     case EReconnectDataType.Finished:
                     default:
@@ -82,7 +81,7 @@ namespace Fika.Core.Networking.Packets.World
                     case EReconnectDataType.OwnCharacter:
                         writer.PutProfile(Profile);
                         writer.PutByteArray(SimpleZlib.CompressToBytes(ProfileHealthClass.ToJson(), 4));
-                        writer.PutVector3(PlayerPosition);
+                        writer.PutStruct(PlayerPosition);
                         break;
                     case EReconnectDataType.Finished:
                     default:

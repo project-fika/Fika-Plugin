@@ -10,12 +10,10 @@ using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Communication;
 using Fika.Core.Utils;
-using LiteNetLib;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 
 namespace Fika.Core.Main.Components
 {

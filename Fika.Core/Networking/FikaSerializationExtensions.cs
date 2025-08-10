@@ -10,11 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using UnityEngine;
 using static BasePhysicalClass;
-using static Fika.Core.Networking.Packets.FirearmController.FirearmSubPackets;
 using static Fika.Core.Networking.Packets.Player.CommonSubPackets;
 using static Fika.Core.Networking.Packets.SubPacket;
 using static Fika.Core.Networking.Packets.SubPackets;
@@ -28,97 +24,6 @@ namespace Fika.Core.Networking
     /// </summary>
     public static class FikaSerializationExtensions
     {
-        private static readonly byte[] _byteBuffer = new byte[12];
-        private static readonly char[] _charBuffer = new char[24];
-
-        /// <summary>
-        /// Serializes a <see cref="Vector3"/> to the <paramref name="writer"/>
-        /// </summary>
-        /// <param name="writer">The <see cref="NetDataWriter"/> to write data to</param>
-        /// <param name="vector">The <see cref="Vector3"/> to serialize</param>
-        public static void PutVector3(this NetDataWriter writer, Vector3 vector)
-        {
-            Span<byte> buffer = stackalloc byte[12];
-            MemoryMarshal.Write(buffer, ref vector);
-            writer.Put(buffer);
-        }
-
-        /// <summary>
-        /// Deserializes a <see cref="Vector3"/> from the <paramref name="reader"/>
-        /// </summary>
-        /// <param name="reader">The <see cref="NetDataReader"/> to read data from</param>
-        /// <returns>The deserialized <see cref="Vector3"/></returns>
-        public static Vector3 GetVector3(this NetDataReader reader)
-        {
-            return MemoryMarshal.Read<Vector3>(reader.GetSpan(12));
-        }
-
-        /// <summary>
-        /// Serializes a <see cref="Vector2"/> to the <paramref name="writer"/>
-        /// </summary>
-        /// <param name="writer">The <see cref="NetDataWriter"/> to write data to</param>
-        /// <param name="vector">The <see cref="Vector2"/> to serialize</param>
-        public static void PutVector2(this NetDataWriter writer, Vector2 vector)
-        {
-            Span<byte> buffer = stackalloc byte[8];
-            MemoryMarshal.Write(buffer, ref vector);
-            writer.Put(buffer);
-        }
-
-        /// <summary>
-        /// Deserializes a <see cref="Vector2"/> from the <paramref name="reader"/>
-        /// </summary>
-        /// <param name="reader">The <see cref="NetDataReader"/> to read data from</param>
-        /// <returns>The deserialized <see cref="Vector2"/></returns>
-        public static Vector2 GetVector2(this NetDataReader reader)
-        {
-            return MemoryMarshal.Read<Vector2>(reader.GetSpan(8));
-        }
-
-        /// <summary>
-        /// Serializes a <see cref="Quaternion"/> to the <paramref name="writer"/>
-        /// </summary>
-        /// <param name="writer">The <see cref="NetDataWriter"/> to write data to</param>
-        /// <param name="quaternion">The <see cref="Quaternion"/> to serialize</param>
-        public static void PutQuaternion(this NetDataWriter writer, Quaternion quaternion)
-        {
-            Span<byte> buffer = stackalloc byte[16];
-            MemoryMarshal.Write(buffer, ref quaternion);
-            writer.Put(buffer);
-        }
-
-        /// <summary>
-        /// Deserializes a <see cref="Quaternion"/> from the <paramref name="reader"/>
-        /// </summary>
-        /// <param name="reader">The <see cref="NetDataReader"/> to read data from</param>
-        /// <returns>The deserialized <see cref="Quaternion"/></returns>
-        public static Quaternion GetQuaternion(this NetDataReader reader)
-        {
-            return MemoryMarshal.Read<Quaternion>(reader.GetSpan(16));
-        }
-
-        /// <summary>
-        /// Serializes a <see cref="Color"/> to the <paramref name="writer"/>
-        /// </summary>
-        /// <param name="writer">The <see cref="NetDataWriter"/> to write data to</param>
-        /// <param name="color">The <see cref="Color"/> to serialize</param>
-        public static void PutColor(this NetDataWriter writer, Color color)
-        {
-            Span<byte> buffer = stackalloc byte[16];
-            MemoryMarshal.Write(buffer, ref color);
-            writer.Put(buffer);
-        }
-
-        /// <summary>
-        /// Deserializes a <see cref="Color"/> from the <paramref name="reader"/>
-        /// </summary>
-        /// <param name="reader">The <see cref="NetDataReader"/> to read data from</param>
-        /// <returns>The deserialized <see cref="Color"/></returns>
-        public static Color GetColor(this NetDataReader reader)
-        {
-            return MemoryMarshal.Read<Color>(reader.GetSpan(16));
-        }
-
         /// <summary>
         /// Serializes a <see cref="PhysicalStateStruct"/> struct to the <paramref name="writer"/>
         /// </summary>
@@ -241,72 +146,6 @@ namespace Fika.Core.Networking
         }
 
         /// <summary>
-        /// Serializes an <see cref="ArraySegment{T}"/> of <see cref="byte"/> to the <paramref name="writer"/>
-        /// </summary>
-        /// <param name="writer">The <see cref="NetDataWriter"/> to write data to</param>
-        /// <param name="segment">The <see cref="ArraySegment{T}"/> of bytes to serialize</param>
-        public static void PutByteSegment(this NetDataWriter writer, ArraySegment<byte> segment)
-        {
-            writer.PutBytesWithLength(segment.Array, segment.Offset, (ushort)segment.Count);
-        }
-
-        /// <summary>
-        /// Deserializes a <see cref="byte"/> array from the <paramref name="reader"/>
-        /// </summary>
-        /// <param name="reader">The <see cref="NetDataReader"/> to read data from</param>
-        /// <returns>The deserialized byte array</returns>
-        public static byte[] GetByteSegment(this NetDataReader reader)
-        {
-            return reader.GetBytesWithLength();
-        }
-
-        /// <summary>
-        /// Writes the enum value to the writer using <see cref="MemoryMarshal"/> to handle all enum sizes correctly
-        /// </summary>
-        /// <typeparam name="T">The enum type constrained to unmanaged enums</typeparam>
-        /// <param name="writer">The writer to write the enum bytes to</param>
-        /// <param name="en">The enum value to write</param>
-        public static void PutEnum<T>(this NetDataWriter writer, T en) where T : unmanaged, Enum
-        {
-            Span<byte> span = stackalloc byte[Unsafe.SizeOf<T>()];
-            MemoryMarshal.Write(span, ref en);
-            writer.Put(span);
-        }
-
-        /// <summary>
-        /// Reads bytes from the reader and converts them to the enum type using <see cref="MemoryMarshal"/> <br/>
-        /// Supports enums with any underlying type size
-        /// </summary>
-        /// <typeparam name="T">The enum type constrained to unmanaged enums</typeparam>
-        /// <param name="reader">The reader to read the bytes from</param>
-        /// <returns>The deserialized enum value</returns>
-        public static T GetEnum<T>(this NetDataReader reader) where T : unmanaged, Enum
-        {
-            ReadOnlySpan<byte> span = reader.GetSpan(Unsafe.SizeOf<T>());
-            return MemoryMarshal.Read<T>(span);
-        }
-
-        /// <summary>
-        /// Serializes a <see cref="DateTime"/> to the <paramref name="writer"/>
-        /// </summary>
-        /// <param name="writer">The <see cref="NetDataWriter"/> to write data to</param>
-        /// <param name="dateTime">The <see cref="DateTime"/> to serialize</param>
-        public static void PutDateTime(this NetDataWriter writer, DateTime dateTime)
-        {
-            writer.Put(dateTime.ToOADate());
-        }
-
-        /// <summary>
-        /// Deserializes a <see cref="DateTime"/> from the <paramref name="reader"/>
-        /// </summary>
-        /// <param name="reader">The <see cref="NetDataReader"/> to read data from</param>
-        /// <returns>The deserialized <see cref="DateTime"/></returns>
-        public static DateTime GetDateTime(this NetDataReader reader)
-        {
-            return DateTime.FromOADate(reader.GetDouble());
-        }
-
-        /// <summary>
         /// Serializes an <see cref="Item"/> to the <paramref name="writer"/>. <br/>
         /// Casting to inherited types should be handled inside the packet for consistency.
         /// </summary>
@@ -403,10 +242,10 @@ namespace Fika.Core.Networking
             foreach (SmokeGrenadeDataPacketStruct data in throwables)
             {
                 writer.Put(data.Id);
-                writer.PutVector3(data.Position);
+                writer.PutStruct(data.Position);
                 writer.Put(data.Template);
                 writer.Put(data.Time);
-                writer.PutQuaternion(data.Orientation);
+                writer.PutStruct(data.Orientation);
                 writer.Put(data.PlatformId);
             }
         }
@@ -425,10 +264,10 @@ namespace Fika.Core.Networking
                 SmokeGrenadeDataPacketStruct data = new()
                 {
                     Id = reader.GetString(),
-                    Position = reader.GetVector3(),
+                    Position = reader.GetStruct<Vector3>(),
                     Template = reader.GetString(),
                     Time = reader.GetInt(),
-                    Orientation = reader.GetQuaternion(),
+                    Orientation = reader.GetStruct<Quaternion>(),
                     PlatformId = reader.GetShort()
                 };
                 throwables.Add(data);
@@ -544,7 +383,7 @@ namespace Fika.Core.Networking
             foreach (KeyValuePair<int, Vector3> windowBreakerState in windowBreakerStates)
             {
                 writer.Put(windowBreakerState.Key);
-                writer.PutVector3(windowBreakerState.Value);
+                writer.PutStruct(windowBreakerState.Value);
             }
         }
 
@@ -559,7 +398,7 @@ namespace Fika.Core.Networking
             Dictionary<int, Vector3> states = new(amount);
             for (int i = 0; i < amount; i++)
             {
-                states.Add(reader.GetInt(), reader.GetVector3());
+                states.Add(reader.GetInt(), reader.GetStruct<Vector3>());
             }
 
             return states;
@@ -759,7 +598,7 @@ namespace Fika.Core.Networking
         public static void PutArtilleryStruct(this NetDataWriter writer, ArtilleryPacketStruct artilleryStruct)
         {
             writer.Put(artilleryStruct.id);
-            writer.PutVector3(artilleryStruct.position);
+            writer.PutStruct(artilleryStruct.position);
             writer.Put(artilleryStruct.explosion);
         }
 
@@ -773,7 +612,7 @@ namespace Fika.Core.Networking
             return new()
             {
                 id = reader.GetInt(),
-                position = reader.GetVector3(),
+                position = reader.GetStruct<Vector3>(),
                 explosion = reader.GetBool()
             };
         }
@@ -786,14 +625,14 @@ namespace Fika.Core.Networking
         public static void PutGrenadeStruct(this NetDataWriter writer, GrenadeDataPacketStruct grenadeStruct)
         {
             writer.Put(grenadeStruct.Id);
-            writer.PutVector3(grenadeStruct.Position);
-            writer.PutQuaternion(grenadeStruct.Rotation);
+            writer.PutStruct(grenadeStruct.Position);
+            writer.PutStruct(grenadeStruct.Rotation);
             writer.Put(grenadeStruct.CollisionNumber);
             writer.Put(grenadeStruct.Done);
             if (!grenadeStruct.Done)
             {
-                writer.PutVector3(grenadeStruct.Velocity);
-                writer.PutVector3(grenadeStruct.AngularVelocity);
+                writer.PutStruct(grenadeStruct.Velocity);
+                writer.PutStruct(grenadeStruct.AngularVelocity);
             }
         }
 
@@ -807,15 +646,15 @@ namespace Fika.Core.Networking
             GrenadeDataPacketStruct grenadeStruct = new()
             {
                 Id = reader.GetInt(),
-                Position = reader.GetVector3(),
-                Rotation = reader.GetQuaternion(),
+                Position = reader.GetStruct<Vector3>(),
+                Rotation = reader.GetStruct<Quaternion>(),
                 CollisionNumber = reader.GetByte()
             };
 
             if (!reader.GetBool())
             {
-                grenadeStruct.Velocity = reader.GetVector3();
-                grenadeStruct.AngularVelocity = reader.GetVector3();
+                grenadeStruct.Velocity = reader.GetStruct<Vector3>();
+                grenadeStruct.AngularVelocity = reader.GetStruct<Vector3>();
                 return grenadeStruct;
             }
 
@@ -836,8 +675,8 @@ namespace Fika.Core.Networking
             switch (airplaneDataPacketStruct.ObjectType)
             {
                 case SynchronizableObjectType.AirDrop:
-                    writer.PutVector3(airplaneDataPacketStruct.Position);
-                    writer.PutVector3(airplaneDataPacketStruct.Rotation);
+                    writer.PutStruct(airplaneDataPacketStruct.Position);
+                    writer.PutStruct(airplaneDataPacketStruct.Rotation);
                     writer.Put(airplaneDataPacketStruct.Outdated);
                     writer.Put(airplaneDataPacketStruct.IsStatic);
                     writer.PutEnum(airplaneDataPacketStruct.PacketData.AirdropDataPacket.AirdropType);
@@ -846,16 +685,16 @@ namespace Fika.Core.Networking
                     writer.Put(airplaneDataPacketStruct.PacketData.AirdropDataPacket.UniqueId);
                     return;
                 case SynchronizableObjectType.AirPlane:
-                    writer.PutVector3(airplaneDataPacketStruct.Position);
-                    writer.PutVector3(airplaneDataPacketStruct.Rotation);
+                    writer.PutStruct(airplaneDataPacketStruct.Position);
+                    writer.PutStruct(airplaneDataPacketStruct.Rotation);
                     writer.Put(airplaneDataPacketStruct.PacketData.AirplaneDataPacket.AirplanePercent);
                     writer.Put(airplaneDataPacketStruct.Outdated);
                     writer.Put(airplaneDataPacketStruct.IsStatic);
                     return;
                 case SynchronizableObjectType.Tripwire:
                     writer.PutEnum(airplaneDataPacketStruct.PacketData.TripwireDataPacket.State);
-                    writer.PutVector3(airplaneDataPacketStruct.Position);
-                    writer.PutVector3(airplaneDataPacketStruct.Rotation);
+                    writer.PutStruct(airplaneDataPacketStruct.Position);
+                    writer.PutStruct(airplaneDataPacketStruct.Rotation);
                     writer.Put(airplaneDataPacketStruct.IsActive);
                     return;
             }
@@ -878,8 +717,8 @@ namespace Fika.Core.Networking
             switch (packet.ObjectType)
             {
                 case SynchronizableObjectType.AirDrop:
-                    packet.Position = reader.GetVector3();
-                    packet.Rotation = reader.GetVector3();
+                    packet.Position = reader.GetStruct<Vector3>();
+                    packet.Rotation = reader.GetStruct<Vector3>();
                     packet.Outdated = reader.GetBool();
                     packet.IsStatic = reader.GetBool();
                     packet.PacketData.AirdropDataPacket = new()
@@ -891,8 +730,8 @@ namespace Fika.Core.Networking
                     };
                     break;
                 case SynchronizableObjectType.AirPlane:
-                    packet.Position = reader.GetVector3();
-                    packet.Rotation = reader.GetVector3();
+                    packet.Position = reader.GetStruct<Vector3>();
+                    packet.Rotation = reader.GetStruct<Vector3>();
                     packet.PacketData.AirplaneDataPacket = new()
                     {
                         AirplanePercent = reader.GetInt()
@@ -905,8 +744,8 @@ namespace Fika.Core.Networking
                     {
                         State = reader.GetEnum<ETripwireState>()
                     };
-                    packet.Position = reader.GetVector3();
-                    packet.Rotation = reader.GetVector3();
+                    packet.Position = reader.GetStruct<Vector3>();
+                    packet.Rotation = reader.GetStruct<Vector3>();
                     packet.IsActive = reader.GetBool();
                     break;
             }
@@ -969,10 +808,10 @@ namespace Fika.Core.Networking
         {
             writer.Put(weatherClass.Time);
 
-            writer.PutVector2(weatherClass.MainWindDirection);
-            writer.PutVector2(weatherClass.MainWindPosition);
-            writer.PutVector2(weatherClass.TopWindDirection);
-            writer.PutVector2(weatherClass.TopWindPosition);
+            writer.PutStruct(weatherClass.MainWindDirection);
+            writer.PutStruct(weatherClass.MainWindPosition);
+            writer.PutStruct(weatherClass.TopWindDirection);
+            writer.PutStruct(weatherClass.TopWindPosition);
 
             writer.Put(weatherClass.AtmospherePressure);
             writer.Put(weatherClass.Cloudness);
@@ -1001,10 +840,10 @@ namespace Fika.Core.Networking
             {
                 Time = reader.GetLong(),
 
-                MainWindDirection = reader.GetVector2(),
-                MainWindPosition = reader.GetVector2(),
-                TopWindDirection = reader.GetVector2(),
-                TopWindPosition = reader.GetVector2(),
+                MainWindDirection = reader.GetStruct<Vector2>(),
+                MainWindPosition = reader.GetStruct<Vector2>(),
+                TopWindDirection = reader.GetStruct<Vector2>(),
+                TopWindPosition = reader.GetStruct<Vector2>(),
 
                 AtmospherePressure = reader.GetFloat(),
                 Cloudness = reader.GetFloat(),
@@ -1032,9 +871,9 @@ namespace Fika.Core.Networking
         {
             writer.PutItemDescriptor(packet.InventoryDescriptor);
 
-            writer.PutVector3(packet.Direction);
-            writer.PutVector3(packet.Point);
-            writer.PutVector3(packet.OverallVelocity);
+            writer.PutStruct(packet.Direction);
+            writer.PutStruct(packet.Point);
+            writer.PutStruct(packet.OverallVelocity);
             writer.Put(packet.Force);
 
             writer.PutEnum(packet.BodyPartColliderType);
@@ -1052,9 +891,9 @@ namespace Fika.Core.Networking
             {
                 InventoryDescriptor = reader.GetItemDescriptor(),
 
-                Direction = reader.GetVector3(),
-                Point = reader.GetVector3(),
-                OverallVelocity = reader.GetVector3(),
+                Direction = reader.GetStruct<Vector3>(),
+                Point = reader.GetStruct<Vector3>(),
+                OverallVelocity = reader.GetStruct<Vector3>(),
                 Force = reader.GetFloat(),
 
                 BodyPartColliderType = reader.GetEnum<EBodyPartColliderType>(),
@@ -1117,7 +956,7 @@ namespace Fika.Core.Networking
         public static void PutRagdollStruct(this NetDataWriter writer, RagdollPacketStruct packet)
         {
             writer.Put(packet.Id);
-            writer.PutVector3(packet.Position);
+            writer.PutStruct(packet.Position);
             writer.Put(packet.Done);
 
             if (packet.Done && packet.TransformSyncs != null)
@@ -1125,8 +964,8 @@ namespace Fika.Core.Networking
                 GStruct135[] transforms = packet.TransformSyncs;
                 for (int i = 0; i < 12; i++)
                 {
-                    writer.PutVector3(transforms[i].Position);
-                    writer.PutQuaternion(transforms[i].Rotation);
+                    writer.PutStruct(transforms[i].Position);
+                    writer.PutStruct(transforms[i].Rotation);
                 }
             }
         }
@@ -1141,7 +980,7 @@ namespace Fika.Core.Networking
             RagdollPacketStruct packet = new()
             {
                 Id = reader.GetInt(),
-                Position = reader.GetVector3(),
+                Position = reader.GetStruct<Vector3>(),
                 Done = reader.GetBool()
             };
 
@@ -1152,8 +991,8 @@ namespace Fika.Core.Networking
                 {
                     packet.TransformSyncs[i] = new()
                     {
-                        Position = reader.GetVector3(),
-                        Rotation = reader.GetQuaternion()
+                        Position = reader.GetStruct<Vector3>(),
+                        Rotation = reader.GetStruct<Quaternion>()
                     };
                 }
             }
@@ -1169,14 +1008,14 @@ namespace Fika.Core.Networking
         public static void PutLootSyncStruct(this NetDataWriter writer, LootSyncStruct packet)
         {
             writer.Put(packet.Id);
-            writer.PutVector3(packet.Position);
-            writer.PutQuaternion(packet.Rotation);
+            writer.PutStruct(packet.Position);
+            writer.PutStruct(packet.Rotation);
             writer.Put(packet.Done);
 
             if (!packet.Done)
             {
-                writer.PutVector3(packet.Velocity);
-                writer.PutVector3(packet.AngularVelocity);
+                writer.PutStruct(packet.Velocity);
+                writer.PutStruct(packet.AngularVelocity);
             }
         }
 
@@ -1190,15 +1029,15 @@ namespace Fika.Core.Networking
             LootSyncStruct data = new()
             {
                 Id = reader.GetInt(),
-                Position = reader.GetVector3(),
-                Rotation = reader.GetQuaternion(),
+                Position = reader.GetStruct<Vector3>(),
+                Rotation = reader.GetStruct<Quaternion>(),
                 Done = reader.GetBool()
             };
 
             if (!data.Done)
             {
-                data.Velocity = reader.GetVector3();
-                data.AngularVelocity = reader.GetVector3();
+                data.Velocity = reader.GetStruct<Vector3>();
+                data.AngularVelocity = reader.GetStruct<Vector3>();
             }
 
             return data;
@@ -1393,100 +1232,6 @@ namespace Fika.Core.Networking
             };
         }
 
-        /// <summary>
-        /// Converts a 24-character hexadecimal string to a 12-byte array
-        /// </summary>
-        /// <param name="hex">A hexadecimal string expected to be 24 characters long</param>
-        /// <returns>A byte array of length 12 containing the converted values</returns>
-        /// <exception cref="ArgumentNullException">Thrown when the input hex string is null</exception>
-        /// <exception cref="ArgumentException">Thrown when the input string is not exactly 24 characters long</exception>
-        private static byte[] HexStringToBytes(string hex)
-        {
-            if (hex == null)
-            {
-                throw new ArgumentNullException(nameof(hex));
-            }
-
-            if (hex.Length != 24)
-            {
-                throw new ArgumentException("Hex string must be 24 characters long.", nameof(hex));
-            }
-
-            for (int i = 0; i < 12; i++)
-            {
-                int high = FromHexChar(hex[i * 2]);
-                int low = FromHexChar(hex[i * 2 + 1]);
-                _byteBuffer[i] = (byte)((high << 4) | low);
-            }
-
-            return _byteBuffer;
-        }
-
-        /// <summary>
-        /// Converts a 12-byte array into a 24-character hexadecimal string
-        /// </summary>
-        /// <param name="bytes">A byte array expected to be 12 bytes long</param>
-        /// <returns>A 24-character string representing the hexadecimal value of the input bytes</returns>
-        /// <exception cref="ArgumentNullException">Thrown when the input byte array is null</exception>
-        /// <exception cref="ArgumentException">Thrown when the input byte array is not exactly 12 bytes long</exception>
-        private static string BytesToHexString(byte[] bytes)
-        {
-            if (bytes == null)
-            {
-                throw new ArgumentNullException(nameof(bytes));
-            }
-
-            if (bytes.Length != 12)
-            {
-                throw new ArgumentException("Byte array must be 12 bytes long.", nameof(bytes));
-            }
-
-            for (int i = 0; i < 12; i++)
-            {
-                byte b = bytes[i];
-                _charBuffer[i * 2] = ToHexChar(b >> 4);
-                _charBuffer[i * 2 + 1] = ToHexChar(b & 0xF);
-            }
-
-            return new string(_charBuffer);
-        }
-
-        /// <summary>
-        /// Converts a hexadecimal character into its integer value
-        /// </summary>
-        /// <param name="c">A character representing a hexadecimal digit (0-9, a-f, A-F)</param>
-        /// <returns>An integer value corresponding to the hex digit</returns>
-        /// <exception cref="ArgumentException">Thrown when the character is not a valid hex digit</exception>
-        private static int FromHexChar(char c)
-        {
-            if (c >= '0' && c <= '9')
-            {
-                return c - '0';
-            }
-
-            if (c >= 'a' && c <= 'f')
-            {
-                return c - 'a' + 10;
-            }
-
-            if (c >= 'A' && c <= 'F')
-            {
-                return c - 'A' + 10;
-            }
-
-            throw new ArgumentException($"Invalid hex character: {c}");
-        }
-
-        /// <summary>
-        /// Converts an integer value (0-15) to its corresponding hexadecimal character
-        /// </summary>
-        /// <param name="val">An integer value from 0 to 15</param>
-        /// <returns>A character representing the hexadecimal digit</returns>
-        private static char ToHexChar(int val)
-        {
-            return (char)(val < 10 ? ('0' + val) : ('a' + (val - 10)));
-        }
-
         public static void PutFirearmSubPacket(this NetDataWriter writer, ISubPacket packet, EFirearmSubPacketType type)
         {
             switch (type)
@@ -1531,7 +1276,7 @@ namespace Fika.Core.Networking
             }
         }
 
-        public static ISubPacket GetFirearmSubPacket(this NetDataReader reader, EFirearmSubPacketType type)
+        /*public static ISubPacket GetFirearmSubPacket(this NetDataReader reader, EFirearmSubPacketType type)
         {
             switch (type)
             {
@@ -1599,7 +1344,7 @@ namespace Fika.Core.Networking
                     FikaPlugin.Instance.FikaLogger.LogError("GetFirearmSubPacket: type was outside of bounds!");
                     return null;
             }
-        }
+        }*/
 
         public static ISubPacket GetCommonSubPacket(this NetDataReader reader, ECommonSubPacketType type)
         {

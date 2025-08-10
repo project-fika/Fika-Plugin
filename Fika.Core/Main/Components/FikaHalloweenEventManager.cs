@@ -3,9 +3,7 @@ using Comfort.Common;
 using EFT.GlobalEvents;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.World;
-using LiteNetLib;
 using System;
-using UnityEngine;
 
 namespace Fika.Core.Main.Components
 {

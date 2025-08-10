@@ -3,7 +3,6 @@
 using EFT.InventoryLogic;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Packets.FirearmController;
-using LiteNetLib;
 using static Fika.Core.Networking.Packets.FirearmController.FirearmSubPackets;
 using static Fika.Core.Networking.Packets.SubPacket;
 
@@ -28,10 +27,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
             {
                 NetId = _fikaPlayer.NetId,
                 Type = EFirearmSubPacketType.Knife,
-                SubPacket = new KnifePacket()
-                {
-                    Examine = true
-                }
+                SubPacket = KnifePacket.FromValue(true, false, false, false)
             };
             _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
         }
@@ -46,10 +42,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                 {
                     NetId = _fikaPlayer.NetId,
                     Type = EFirearmSubPacketType.Knife,
-                    SubPacket = new KnifePacket()
-                    {
-                        Kick = true
-                    }
+                    SubPacket = KnifePacket.FromValue(false, true, false, false)
                 };
                 _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             }
@@ -67,10 +60,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
                 {
                     NetId = _fikaPlayer.NetId,
                     Type = EFirearmSubPacketType.Knife,
-                    SubPacket = new KnifePacket()
-                    {
-                        AltKick = true
-                    }
+                    SubPacket = KnifePacket.FromValue(false, false, true, false)
                 };
                 _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             }
@@ -86,10 +76,7 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers
             {
                 NetId = _fikaPlayer.NetId,
                 Type = EFirearmSubPacketType.Knife,
-                SubPacket = new KnifePacket()
-                {
-                    BreakCombo = true
-                }
+                SubPacket = KnifePacket.FromValue(false, false, false, true)
             };
             _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
         }

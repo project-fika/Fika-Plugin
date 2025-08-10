@@ -7,7 +7,6 @@ using EFT.InventoryLogic.Operations;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Packets.Player;
 using JetBrains.Annotations;
-using LiteNetLib;
 using System.Threading.Tasks;
 using static EFT.Player;
 

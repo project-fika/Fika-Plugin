@@ -1,7 +1,6 @@
 ﻿using Comfort.Common;
 using EFT;
 using Fika.Core.Main.Players;
-using UnityEngine;
 
 namespace Fika.Core.Main.ClientClasses
 {

@@ -9,7 +9,6 @@ using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using LiteNetLib.Utils;
 using System;
-using UnityEngine;
 using static Fika.Core.Main.Players.FikaPlayer;
 using static Fika.Core.Networking.Packets.SubPacket;
 
@@ -401,7 +400,7 @@ namespace Fika.Core.Networking.Packets.Player
             public VaultPacket(NetDataReader reader)
             {
                 VaultingStrategy = (EVaultingStrategy)reader.GetByte();
-                VaultingPoint = reader.GetVector3();
+                VaultingPoint = reader.GetStruct<Vector3>();
                 VaultingHeight = reader.GetFloat();
                 VaultingLength = reader.GetFloat();
                 VaultingSpeed = reader.GetFloat();
@@ -421,7 +420,7 @@ namespace Fika.Core.Networking.Packets.Player
             public readonly void Serialize(NetDataWriter writer)
             {
                 writer.Put((byte)VaultingStrategy);
-                writer.PutVector3(VaultingPoint);
+                writer.PutStruct(VaultingPoint);
                 writer.Put(VaultingHeight);
                 writer.Put(VaultingLength);
                 writer.Put(VaultingSpeed);
@@ -461,17 +460,17 @@ namespace Fika.Core.Networking.Packets.Player
                 ;
                 if (Command == MountingPacketStruct.EMountingCommand.Enter)
                 {
-                    MountDirection = reader.GetVector3();
-                    MountingPoint = reader.GetVector3();
+                    MountDirection = reader.GetStruct<Vector3>();
+                    MountingPoint = reader.GetStruct<Vector3>();
                     MountingDirection = reader.GetShort();
                     TransitionTime = reader.GetFloat();
-                    TargetPos = reader.GetVector3();
+                    TargetPos = reader.GetStruct<Vector3>();
                     TargetPoseLevel = reader.GetFloat();
                     TargetHandsRotation = reader.GetFloat();
-                    TargetBodyRotation = reader.GetQuaternion();
-                    PoseLimit = reader.GetVector2();
-                    PitchLimit = reader.GetVector2();
-                    YawLimit = reader.GetVector2();
+                    TargetBodyRotation = reader.GetStruct<Quaternion>();
+                    PoseLimit = reader.GetStruct<Vector2>();
+                    PitchLimit = reader.GetStruct<Vector2>();
+                    YawLimit = reader.GetStruct<Vector2>();
                 }
             }
 
@@ -524,17 +523,17 @@ namespace Fika.Core.Networking.Packets.Player
                 }
                 if (Command == MountingPacketStruct.EMountingCommand.Enter)
                 {
-                    writer.PutVector3(MountDirection);
-                    writer.PutVector3(MountingPoint);
+                    writer.PutStruct(MountDirection);
+                    writer.PutStruct(MountingPoint);
                     writer.Put(MountingDirection);
                     writer.Put(TransitionTime);
-                    writer.PutVector3(TargetPos);
+                    writer.PutStruct(TargetPos);
                     writer.Put(TargetPoseLevel);
                     writer.Put(TargetHandsRotation);
-                    writer.PutQuaternion(TargetBodyRotation);
-                    writer.PutVector2(PoseLimit);
-                    writer.PutVector2(PitchLimit);
-                    writer.PutVector2(YawLimit);
+                    writer.PutStruct(TargetBodyRotation);
+                    writer.PutStruct(PoseLimit);
+                    writer.PutStruct(PitchLimit);
+                    writer.PutStruct(YawLimit);
                 }
             }
         }

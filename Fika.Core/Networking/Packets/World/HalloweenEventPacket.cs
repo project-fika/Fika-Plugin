@@ -17,7 +17,7 @@ namespace Fika.Core.Networking.Packets.World
                 case EHalloweenPacketType.Summon:
                     SyncEvent = new HalloweenSummonStartedEvent()
                     {
-                        PointPosition = reader.GetVector3()
+                        PointPosition = reader.GetStruct<Vector3>()
                     };
                     break;
                 case EHalloweenPacketType.Sync:
@@ -43,7 +43,7 @@ namespace Fika.Core.Networking.Packets.World
                 case EHalloweenPacketType.Summon:
                     if (SyncEvent is HalloweenSummonStartedEvent startedEvent)
                     {
-                        writer.PutVector3(startedEvent.PointPosition);
+                        writer.PutStruct(startedEvent.PointPosition);
                     }
                     break;
                 case EHalloweenPacketType.Sync:

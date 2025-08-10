@@ -2,7 +2,6 @@
 using EFT;
 using EFT.Interactive;
 using Fika.Core.Main.HostClasses;
-using UnityEngine;
 
 namespace Fika.Core.Main.Components
 {

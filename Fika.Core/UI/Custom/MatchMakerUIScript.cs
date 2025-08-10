@@ -15,7 +15,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Net;
 using TMPro;
-using UnityEngine;
 using UnityEngine.UI;
 using static Fika.Core.UI.FikaUIGlobals;
 
@@ -199,7 +198,7 @@ namespace Fika.Core.UI.Custom
                 _fikaMatchMakerUi.HeadlessSelection.ClearOptions();
 
                 List<TMP_Dropdown.OptionData> optionDatas = [];
-                
+
                 // Sort availableHeadlesses alphabetically by Alias
                 Array.Sort(availableHeadlesses, (x, y) => string.Compare(x.Alias, y.Alias, StringComparison.OrdinalIgnoreCase));
                 for (int i = 0; i < availableHeadlesses.Length; i++)

@@ -2,7 +2,6 @@
 using EFT;
 using Fika.Core.Main.GameMode;
 using Fika.Core.Main.Players;
-using UnityEngine;
 
 namespace Fika.Core.Main.Components
 {

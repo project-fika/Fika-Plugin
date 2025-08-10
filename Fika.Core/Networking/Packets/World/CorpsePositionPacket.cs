@@ -11,7 +11,7 @@ namespace Fika.Core.Networking.Packets.World
             Data = new()
             {
                 Id = reader.GetInt(),
-                Position = reader.GetVector3(),
+                Position = reader.GetStruct<Vector3>(),
                 Done = reader.GetBool()
             };
 
@@ -22,8 +22,8 @@ namespace Fika.Core.Networking.Packets.World
                 {
                     Data.TransformSyncs[i] = new()
                     {
-                        Position = reader.GetVector3(),
-                        Rotation = reader.GetQuaternion()
+                        Position = reader.GetStruct<Vector3>(),
+                        Rotation = reader.GetStruct<Quaternion>()
                     };
                 }
             }
@@ -32,7 +32,7 @@ namespace Fika.Core.Networking.Packets.World
         public readonly void Serialize(NetDataWriter writer)
         {
             writer.Put(Data.Id);
-            writer.PutVector3(Data.Position);
+            writer.PutStruct(Data.Position);
             writer.Put(Data.Done);
 
             if (Data.Done && Data.TransformSyncs != null)
@@ -40,8 +40,8 @@ namespace Fika.Core.Networking.Packets.World
                 GStruct135[] transforms = Data.TransformSyncs;
                 for (int i = 0; i < 12; i++)
                 {
-                    writer.PutVector3(transforms[i].Position);
-                    writer.PutQuaternion(transforms[i].Rotation);
+                    writer.PutStruct(transforms[i].Position);
+                    writer.PutStruct(transforms[i].Rotation);
                 }
             }
         }

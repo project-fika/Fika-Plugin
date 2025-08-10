@@ -2,7 +2,6 @@
 using EFT.CameraControl;
 using EFT.InventoryLogic;
 using Fika.Core.Main.Players;
-using UnityEngine;
 
 namespace Fika.Core.Main.Utils
 {

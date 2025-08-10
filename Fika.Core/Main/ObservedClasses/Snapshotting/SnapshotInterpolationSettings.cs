@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-namespace Fika.Core.Main.ObservedClasses.Snapshotting
+﻿namespace Fika.Core.Main.ObservedClasses.Snapshotting
 {
     /// <summary>
     /// Settings used for the <see cref="Snapshotter{T}"/>

@@ -11,7 +11,6 @@ using Fika.Core.UI.Custom;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using UnityEngine;
 
 namespace Fika.Core.Networking
 {

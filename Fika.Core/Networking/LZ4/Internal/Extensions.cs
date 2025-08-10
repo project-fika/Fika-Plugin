@@ -1,6 +1,5 @@
 #nullable enable
 
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
@@ -10,7 +9,7 @@ namespace System;
 
 internal static class Extensions
 {
-	/*internal static T Required<T>(
+    /*internal static T Required<T>(
 		[NotNull] this T? value,
 		[CallerArgumentExpression("value")] string name = null!) =>
 		value ?? ThrowArgumentNullException<T>(name);
@@ -24,30 +23,30 @@ internal static class Extensions
 		if (!value) ThrowAssertionFailed(name);
 	}*/
 
-	[DoesNotReturn]
-	[MethodImpl(MethodImplOptions.NoInlining)]
-	private static void ThrowAssertionFailed(string? name) =>
-		throw new ArgumentException($"{name ?? "<unknown>"} assertion failed");
-	
-	[DoesNotReturn]
-	[MethodImpl(MethodImplOptions.NoInlining)]
-	private static T ThrowArgumentNullException<T>(string name) => 
-		throw new ArgumentNullException(name);
+    [DoesNotReturn]
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void ThrowAssertionFailed(string? name) =>
+        throw new ArgumentException($"{name ?? "<unknown>"} assertion failed");
 
-	internal static void Validate<T>(
-		this T[]? buffer, int offset, int length,
-		bool allowNullIfEmpty = false)
-	{
-		if (allowNullIfEmpty && buffer is null && offset == 0 && length == 0)
-			return;
+    [DoesNotReturn]
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static T ThrowArgumentNullException<T>(string name) =>
+        throw new ArgumentNullException(name);
 
-		if (buffer is null)
-			throw new ArgumentNullException(
-				nameof(buffer), "cannot be null");
+    internal static void Validate<T>(
+        this T[]? buffer, int offset, int length,
+        bool allowNullIfEmpty = false)
+    {
+        if (allowNullIfEmpty && buffer is null && offset == 0 && length == 0)
+            return;
 
-		var valid = offset >= 0 && length >= 0 && offset + length <= buffer.Length;
-		if (!valid)
-			throw new ArgumentException(
-				$"invalid offset/length combination: {offset}/{length}");
-	}
+        if (buffer is null)
+            throw new ArgumentNullException(
+                nameof(buffer), "cannot be null");
+
+        var valid = offset >= 0 && length >= 0 && offset + length <= buffer.Length;
+        if (!valid)
+            throw new ArgumentException(
+                $"invalid offset/length combination: {offset}/{length}");
+    }
 }

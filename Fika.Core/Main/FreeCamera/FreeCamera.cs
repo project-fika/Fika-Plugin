@@ -9,8 +9,6 @@ using Fika.Core.Main.Utils;
 using Fika.Core.Utils;
 using System;
 using System.Collections.Generic;
-using System.Threading;
-using UnityEngine;
 
 namespace Fika.Core.Main.FreeCamera
 {
@@ -644,12 +642,12 @@ namespace Fika.Core.Main.FreeCamera
 
                 Player player = Singleton<GameWorld>.Instance.MainPlayer;
                 if (player != null)
-                {                    
+                {
                     if (player.HealthController.IsAlive)
                     {
                         if (!extracted)
                         {
-                            SetCameraPosition(player.CameraPosition); 
+                            SetCameraPosition(player.CameraPosition);
                         }
 
                         if (player.NightVisionObserver.Component != null && player.NightVisionObserver.Component.Togglable.On)

@@ -5,8 +5,6 @@ using EFT;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Player;
-using LiteNetLib;
-using UnityEngine;
 
 namespace Fika.Core.Main.PacketHandlers
 {

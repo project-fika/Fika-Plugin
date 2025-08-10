@@ -2,7 +2,6 @@
 using EFT;
 using EFT.Ballistics;
 using Fika.Core.Main.Players;
-using UnityEngine;
 
 namespace Fika.Core.Main.BotClasses
 {

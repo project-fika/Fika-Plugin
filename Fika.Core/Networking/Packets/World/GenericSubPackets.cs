@@ -13,7 +13,6 @@ using Fika.Core.Utils;
 using LiteNetLib.Utils;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 using static Fika.Core.Networking.Packets.SubPacket;
 using static Fika.Core.UI.FikaUIGlobals;
 
@@ -367,7 +366,7 @@ namespace Fika.Core.Networking.Packets.World
 
             public MineEvent(NetDataReader reader)
             {
-                MinePosition = reader.GetVector3();
+                MinePosition = reader.GetStruct<Vector3>();
             }
 
             public void Execute(FikaPlayer player = null)
@@ -389,7 +388,7 @@ namespace Fika.Core.Networking.Packets.World
 
             public void Serialize(NetDataWriter writer)
             {
-                writer.PutVector3(MinePosition);
+                writer.PutStruct(MinePosition);
             }
         }
 
@@ -487,8 +486,8 @@ namespace Fika.Core.Networking.Packets.World
 
             public BtrSpawn(NetDataReader reader)
             {
-                Position = reader.GetVector3();
-                Rotation = reader.GetQuaternion();
+                Position = reader.GetStruct<Vector3>();
+                Rotation = reader.GetStruct<Quaternion>();
                 PlayerProfileId = reader.GetString();
             }
 
@@ -499,8 +498,8 @@ namespace Fika.Core.Networking.Packets.World
 
             public void Serialize(NetDataWriter writer)
             {
-                writer.PutVector3(Position);
-                writer.PutQuaternion(Rotation);
+                writer.PutStruct(Position);
+                writer.PutStruct(Rotation);
                 writer.Put(PlayerProfileId);
             }
         }

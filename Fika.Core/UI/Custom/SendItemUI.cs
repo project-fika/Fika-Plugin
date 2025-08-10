@@ -1,7 +1,6 @@
 ﻿using EFT.UI;
 using Fika.Core.Utils;
 using TMPro;
-using UnityEngine;
 using UnityEngine.UI;
 
 public class SendItemUI : MonoBehaviour

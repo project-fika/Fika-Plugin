@@ -1,7 +1,6 @@
 ﻿using Fika.Core.Main.ObservedClasses.Snapshotting;
 using Fika.Core.Main.Players;
 using LiteNetLib.Utils;
-using UnityEngine;
 
 namespace Fika.Core.Networking.Packets.Player
 {
@@ -62,7 +61,7 @@ namespace Fika.Core.Networking.Packets.Player
             writer.PutPackedInt(Blindfire, -1, 1);
             writer.PutEnum(State);
 
-            writer.PutVector3(Position);
+            writer.PutStruct(Position);
             writer.PutHeadRotation(HeadRotation);
             writer.PutRotation(Rotation);
             writer.PutMovementDirection(MovementDirection);
@@ -92,7 +91,7 @@ namespace Fika.Core.Networking.Packets.Player
             Blindfire = reader.GetPackedInt(-1, 1);
             State = reader.GetEnum<EPlayerState>();
 
-            Position = reader.GetVector3();
+            Position = reader.GetStruct<Vector3>();
             HeadRotation = reader.GetHeadRotation();
             Rotation = reader.GetRotation();
             MovementDirection = reader.GetMovementDirection();

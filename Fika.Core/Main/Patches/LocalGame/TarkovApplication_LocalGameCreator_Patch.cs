@@ -16,7 +16,6 @@ using SPT.SinglePlayer.Utils.InRaid;
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
-using UnityEngine;
 
 namespace Fika.Core.Main.Patches
 {

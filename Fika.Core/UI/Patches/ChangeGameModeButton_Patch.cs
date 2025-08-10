@@ -2,7 +2,6 @@
 using Fika.Core.Patching;
 using System.Reflection;
 using TMPro;
-using UnityEngine;
 using UnityEngine.UI;
 using static Fika.Core.UI.FikaUIGlobals;
 

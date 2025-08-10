@@ -1,6 +1,5 @@
 ﻿using Fika.Core.Main.Factories;
 using LiteNetLib.Utils;
-using UnityEngine;
 
 namespace Fika.Core.Networking.Packets.Communication
 {
@@ -14,18 +13,18 @@ namespace Fika.Core.Networking.Packets.Communication
 
         public void Deserialize(NetDataReader reader)
         {
-            PingLocation = reader.GetVector3();
+            PingLocation = reader.GetStruct<Vector3>();
             PingType = (PingFactory.EPingType)reader.GetByte();
-            PingColor = reader.GetColor();
+            PingColor = reader.GetStruct<Color>();
             Nickname = reader.GetString();
             LocaleId = reader.GetString();
         }
 
         public readonly void Serialize(NetDataWriter writer)
         {
-            writer.PutVector3(PingLocation);
+            writer.PutStruct(PingLocation);
             writer.Put((byte)PingType);
-            writer.PutColor(PingColor);
+            writer.PutStruct(PingColor);
             writer.Put(Nickname);
             writer.Put(LocaleId);
         }

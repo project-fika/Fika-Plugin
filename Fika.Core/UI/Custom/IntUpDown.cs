@@ -1,7 +1,6 @@
 ﻿#pragma warning disable CS0169
 #pragma warning disable CS0649
 using TMPro;
-using UnityEngine;
 using UnityEngine.UI;
 
 public class IntUpDown : MonoBehaviour

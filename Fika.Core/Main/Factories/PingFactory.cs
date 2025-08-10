@@ -9,7 +9,6 @@ using Fika.Core.UI;
 using Fika.Core.Utils;
 using System.Collections.Generic;
 using TMPro;
-using UnityEngine;
 using UnityEngine.UI;
 using Object = System.Object;
 

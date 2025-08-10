@@ -1,5 +1,4 @@
 ﻿using System.Runtime.CompilerServices;
-using UnityEngine;
 
 namespace Fika.Core.Main.ObservedClasses.Snapshotting
 {

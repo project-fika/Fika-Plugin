@@ -5,7 +5,6 @@ using EFT.Quests;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Packets.Communication;
 using Fika.Core.Utils;
-using LiteNetLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;

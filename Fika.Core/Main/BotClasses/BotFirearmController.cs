@@ -1,7 +1,6 @@
 ﻿using EFT.InventoryLogic;
 using Fika.Core.Main.ClientClasses.HandsControllers;
 using Fika.Core.Main.Players;
-using UnityEngine;
 
 namespace Fika.Core.Main.BotClasses
 {

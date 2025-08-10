@@ -4,7 +4,6 @@ using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Packets.Player;
-using LiteNetLib;
 
 namespace Fika.Core.Main.BotClasses
 {

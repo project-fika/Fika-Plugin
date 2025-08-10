@@ -1,7 +1,6 @@
 ﻿using EFT;
 using Fika.Core.Main.Utils;
 using System;
-using UnityEngine;
 
 namespace Fika.Core.Main.ClientClasses
 {

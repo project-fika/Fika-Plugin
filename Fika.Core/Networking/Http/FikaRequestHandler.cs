@@ -4,7 +4,6 @@ using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Models;
 using Fika.Core.Networking.Models.Presence;
 using Fika.Core.UI.Models;
-using HarmonyLib;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SPT.Common.Http;

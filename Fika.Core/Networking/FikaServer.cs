@@ -35,7 +35,6 @@ using Fika.Core.Networking.VOIP;
 using Fika.Core.UI.Custom;
 using Fika.Core.Utils;
 using HarmonyLib;
-using LiteNetLib;
 using LiteNetLib.Utils;
 using Open.Nat;
 using SPT.Common.Http;
@@ -49,7 +48,6 @@ using System.Threading.Tasks;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
-using UnityEngine;
 #if DEBUG
 using static Fika.Core.Networking.Packets.Debug.CommandPacket;
 using Fika.Core.Networking.Packets.Debug;
@@ -401,6 +399,8 @@ namespace Fika.Core.Networking
 
         private void RegisterPacketsAndTypes()
         {
+            FirearmSubPacketPool.CreatePool();
+
             RegisterCustomType(FikaSerializationExtensions.PutRagdollStruct, FikaSerializationExtensions.GetRagdollStruct);
             RegisterCustomType(FikaSerializationExtensions.PutArtilleryStruct, FikaSerializationExtensions.GetArtilleryStruct);
             RegisterCustomType(FikaSerializationExtensions.PutGrenadeStruct, FikaSerializationExtensions.GetGrenadeStruct);
@@ -573,7 +573,7 @@ namespace Fika.Core.Networking
             {
                 notifPacket.SubPacket.Execute();
             }
-            SendDataToPeer(ref notifPacket, DeliveryMethod.ReliableOrdered, peer);
+            SendData(ref notifPacket, DeliveryMethod.ReliableOrdered, peer);
 
             peer.Tag = kvp.Key.Info.MainProfileNickname;
         }
@@ -1319,6 +1319,8 @@ namespace Fika.Core.Networking
             _netServer?.Stop();
             _stateHandle.Complete();
             _snapshots.Dispose();
+
+            FirearmSubPacketPool.ClearPool();
 
             if (_fikaChat != null)
             {
