@@ -452,9 +452,9 @@ namespace LiteNetLib.Utils
                 return string.Empty;
 
             int actualSize = size - 1;
-            string result = maxLength > 0 && NetDataWriter.uTF8Encoding.Value.GetCharCount(_data, _position, actualSize) > maxLength ?
+            string result = maxLength > 0 && NetDataWriter.UTF8Encoding.Value.GetCharCount(_data, _position, actualSize) > maxLength ?
                 string.Empty :
-                NetDataWriter.uTF8Encoding.Value.GetString(_data, _position, actualSize);
+                NetDataWriter.UTF8Encoding.Value.GetString(_data, _position, actualSize);
             _position += actualSize;
             return result;
         }
@@ -466,7 +466,7 @@ namespace LiteNetLib.Utils
                 return string.Empty;
 
             int actualSize = size - 1;
-            string result = NetDataWriter.uTF8Encoding.Value.GetString(_data, _position, actualSize);
+            string result = NetDataWriter.UTF8Encoding.Value.GetString(_data, _position, actualSize);
             _position += actualSize;
             return result;
         }
@@ -476,7 +476,7 @@ namespace LiteNetLib.Utils
             int size = GetInt();
             if (size <= 0)
                 return string.Empty;
-            string result = NetDataWriter.uTF8Encoding.Value.GetString(_data, _position, size);
+            string result = NetDataWriter.UTF8Encoding.Value.GetString(_data, _position, size);
             _position += size;
             return result;
         }
@@ -638,9 +638,9 @@ namespace LiteNetLib.Utils
                 return string.Empty;
 
             int actualSize = size - 1;
-            return (maxLength > 0 && NetDataWriter.uTF8Encoding.Value.GetCharCount(_data, _position + 2, actualSize) > maxLength) ?
+            return (maxLength > 0 && NetDataWriter.UTF8Encoding.Value.GetCharCount(_data, _position + 2, actualSize) > maxLength) ?
                 string.Empty :
-                NetDataWriter.uTF8Encoding.Value.GetString(_data, _position + 2, actualSize);
+                NetDataWriter.UTF8Encoding.Value.GetString(_data, _position + 2, actualSize);
         }
 
         public string PeekString()
@@ -650,7 +650,7 @@ namespace LiteNetLib.Utils
                 return string.Empty;
 
             int actualSize = size - 1;
-            return NetDataWriter.uTF8Encoding.Value.GetString(_data, _position + 2, actualSize);
+            return NetDataWriter.UTF8Encoding.Value.GetString(_data, _position + 2, actualSize);
         }
         #endregion
 
