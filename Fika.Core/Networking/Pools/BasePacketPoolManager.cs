@@ -7,6 +7,10 @@ namespace Fika.Core.Networking.Pools
         where TEnum : Enum
         where TType : class, IDisposable
     {
+        protected Dictionary<TEnum, Func<TType>> _subPacketFactories;
+        private bool _poolExists;
+        private Dictionary<TEnum, PacketPool<TType>> _pool;
+
         public void CreatePool()
         {
             if (_pool == null)
@@ -65,10 +69,5 @@ namespace Fika.Core.Networking.Pools
 
             return packet;
         }
-
-        private bool _poolExists;
-        private Dictionary<TEnum, PacketPool<TType>> _pool;
-
-        protected Dictionary<TEnum, Func<TType>> _subPacketFactories;
     }
 }
