@@ -66,7 +66,7 @@ namespace Fika.Core.Networking.VOIP
                 return;
             }
 
-            connection.Peer.SendData(packet, true);
+            connection.Peer.SendData(packet, DeliveryMethod.ReliableOrdered);
         }
 
         protected override void SendUnreliable(FikaVOIPPeer connection, ArraySegment<byte> packet)
@@ -77,7 +77,7 @@ namespace Fika.Core.Networking.VOIP
                 return;
             }
 
-            connection.Peer.SendData(packet, false);
+            connection.Peer.SendData(packet, DeliveryMethod.Sequenced);
         }
 
         public override void SendReliable(List<FikaVOIPPeer> connections, ArraySegment<byte> packet)

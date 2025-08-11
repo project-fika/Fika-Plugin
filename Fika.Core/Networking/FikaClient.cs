@@ -140,9 +140,9 @@ namespace Fika.Core.Networking
                 UnconnectedMessagesEnabled = true,
                 UpdateTime = 50,
                 NatPunchEnabled = false,
+                AutoRecycle = true,
                 IPv6Enabled = false,
                 DisconnectTimeout = FikaPlugin.ConnectionTimeout.Value * 1000,
-                UseNativeSockets = FikaPlugin.NativeSockets.Value,
                 EnableStatistics = true,
                 MaxConnectAttempts = 5,
                 ReconnectDelay = 1 * 1000,
@@ -1207,18 +1207,7 @@ namespace Fika.Core.Networking
             peer.Send(_dataWriter.AsReadOnlySpan, deliveryMethod);
         }
 
-        public void SendVOIPPacket(ref VOIPPacket packet, NetPeer peer = null)
-        {
-            if (packet.Data == null)
-            {
-                _logger.LogError("SendVOIPPacket: data was null");
-                return;
-            }
-
-            SendData(ref packet, DeliveryMethod.ReliableOrdered);
-        }
-
-        public void SendVOIPData(ArraySegment<byte> data, NetPeer peer = null)
+        public void SendVOIPData(ArraySegment<byte> data, DeliveryMethod deliveryMethod, NetPeer peer = null)
         {
             NetPeer firstPeer = _netClient.FirstPeer;
             if (firstPeer != null)
@@ -1227,8 +1216,9 @@ namespace Fika.Core.Networking
 
                 _dataWriter.Put(false);
                 _dataWriter.PutEnum(EPacketType.VOIP);
-                _dataWriter.PutBytesWithLength(data.Array, data.Offset, (ushort)data.Count);
-                firstPeer.Send(_dataWriter.AsReadOnlySpan, DeliveryMethod.Sequenced);
+                //_dataWriter.PutBytesWithLength(data.Array, data.Offset, (ushort)data.Count);
+                _dataWriter.Put(data.AsSpan());
+                firstPeer.Send(_dataWriter.AsReadOnlySpan, deliveryMethod);
             }
         }
 
@@ -1300,7 +1290,7 @@ namespace Fika.Core.Networking
                     _packetProcessor.ReadAllPackets(reader, peer);
                     break;
                 case EPacketType.VOIP:
-                    VOIPClient.NetworkReceivedPacket(new(reader.GetBytesWithLength()));
+                    VOIPClient.NetworkReceivedPacket(reader.GetRemainingBytesSegment());
                     break;
             }
         }

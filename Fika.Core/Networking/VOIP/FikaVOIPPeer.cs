@@ -42,14 +42,14 @@ namespace Fika.Core.Networking.VOIP
     public interface IPeer
     {
         public bool IsLocal { get; set; }
-        void SendData(ArraySegment<byte> data, bool reliable);
+        void SendData(ArraySegment<byte> data, DeliveryMethod deliveryMethod);
     }
 
     public class LocalPeer : IPeer
     {
         public bool IsLocal { get; set; } = true;
 
-        public void SendData(ArraySegment<byte> data, bool reliable)
+        public void SendData(ArraySegment<byte> data, DeliveryMethod deliveryMethod)
         {
             Singleton<FikaServer>.Instance.VOIPClient.NetworkReceivedPacket(data);
         }
@@ -69,20 +69,9 @@ namespace Fika.Core.Networking.VOIP
 
         private readonly NetPeer _peer = peer;
 
-        public void SendData(ArraySegment<byte> data, bool reliable)
+        public readonly void SendData(ArraySegment<byte> data, DeliveryMethod deliveryMethod)
         {
-            if (reliable)
-            {
-                VOIPPacket packet = new()
-                {
-                    Data = data.Array
-                };
-                Singleton<IFikaNetworkManager>.Instance.SendVOIPPacket(ref packet, _peer);
-            }
-            else
-            {
-                Singleton<IFikaNetworkManager>.Instance.SendVOIPData(data, _peer);
-            }
+            Singleton<IFikaNetworkManager>.Instance.SendVOIPData(data, deliveryMethod, _peer);
         }
     }
 }

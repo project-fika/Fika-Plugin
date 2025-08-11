@@ -167,7 +167,6 @@ namespace Fika.Core.Networking
                 AutoRecycle = true,
                 IPv6Enabled = false,
                 DisconnectTimeout = FikaPlugin.ConnectionTimeout.Value * 1000,
-                UseNativeSockets = FikaPlugin.NativeSockets.Value,
                 EnableStatistics = true,
                 NatPunchEnabled = true,
                 ChannelsCount = 2
@@ -1394,7 +1393,7 @@ namespace Fika.Core.Networking
             packet.Flush();
         }
 
-        public void SendVOIPData(ArraySegment<byte> data, NetPeer peer = null)
+        public void SendVOIPData(ArraySegment<byte> data, DeliveryMethod deliveryMethod, NetPeer peer = null)
         {
             if (peer == null)
             {
@@ -1404,8 +1403,8 @@ namespace Fika.Core.Networking
 
             _dataWriter.Reset();
             _dataWriter.PutEnum(EPacketType.VOIP);
-            _dataWriter.PutBytesWithLength(data.Array, data.Offset, (ushort)data.Count);
-            peer.Send(_dataWriter.AsReadOnlySpan, DeliveryMethod.Sequenced);
+            _dataWriter.Put(data.AsSpan());
+            peer.Send(_dataWriter.AsReadOnlySpan, deliveryMethod);
         }
 
         public void SendVOIPPacket(ref VOIPPacket packet, NetPeer peer = null)
@@ -1622,7 +1621,7 @@ namespace Fika.Core.Networking
                     break;
                 case EPacketType.VOIP:
                     VOIPServer.NetworkReceivedPacket(new(new RemotePeer(peer)),
-                        new(reader.GetBytesWithLength()));
+                        reader.GetRemainingBytesSegment());
                     break;
             }
         }

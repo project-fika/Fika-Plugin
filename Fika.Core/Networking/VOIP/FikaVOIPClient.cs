@@ -49,12 +49,7 @@ namespace Fika.Core.Networking.VOIP
                 return;
             }
 
-            VOIPPacket voipPacket = new()
-            {
-                Data = packet.Array
-            };
-
-            Singleton<IFikaNetworkManager>.Instance.SendVOIPPacket(ref voipPacket);
+            Singleton<IFikaNetworkManager>.Instance.SendVOIPData(packet, DeliveryMethod.ReliableOrdered);
         }
 
         protected override void SendUnreliable(ArraySegment<byte> packet)
@@ -64,7 +59,7 @@ namespace Fika.Core.Networking.VOIP
                 return;
             }
 
-            Singleton<IFikaNetworkManager>.Instance.SendVOIPData(packet);
+            Singleton<IFikaNetworkManager>.Instance.SendVOIPData(packet, DeliveryMethod.Sequenced);
         }
     }
 }

@@ -39,8 +39,7 @@ namespace Fika.Core.Networking
         /// Should only be used as a <see cref="FikaServer"/>, since a <see cref="FikaClient"/> only has one <see cref="NetPeer"/>
         /// </remarks>
         public void SendDataToPeer<T>(ref T packet, DeliveryMethod deliveryMethod, NetPeer peer) where T : INetSerializable;
-        public void SendVOIPPacket(ref VOIPPacket packet, NetPeer peer = null);
-        public void SendVOIPData(ArraySegment<byte> data, NetPeer peer = null);
+        public void SendVOIPData(ArraySegment<byte> data, DeliveryMethod deliveryMethod, NetPeer peer = null);
         /// <summary>
         /// Registers a packet to the <see cref="NetPacketProcessor"/>
         /// </summary>
