@@ -1,5 +1,7 @@
 ﻿// © 2025 Lacyway All Rights Reserved
 
+using Fika.Core.Main.Players;
+using Fika.Core.Networking.Pooling;
 using LiteNetLib.Utils;
 using static Fika.Core.Networking.Packets.SubPacket;
 
@@ -9,17 +11,24 @@ namespace Fika.Core.Networking.Packets.World
     /// Packet used for many different things to reduce packet bloat
     /// </summary>
     /// <param name="packageType"></param>
-    public class GenericPacket : INetSerializable
+    public class GenericPacket : INetReusable
     {
         public int NetId;
         public EGenericSubPacketType Type;
-        public ISubPacket SubPacket;
+        public IPoolSubPacket SubPacket;
+
+        public void Execute(FikaPlayer player = null)
+        {
+            SubPacket.Execute(player);
+            GenericSubPacketPoolManager.Instance.ReturnPacket(Type, SubPacket);
+        }
 
         public void Deserialize(NetDataReader reader)
         {
             NetId = reader.GetInt();
             Type = reader.GetEnum<EGenericSubPacketType>();
-            SubPacket = reader.GetGenericSubPacket(Type, NetId);
+            SubPacket = GenericSubPacketPoolManager.Instance.GetPacket<IPoolSubPacket>(Type);
+            SubPacket.Deserialize(reader);
         }
 
         public void Serialize(NetDataWriter writer)
@@ -27,6 +36,20 @@ namespace Fika.Core.Networking.Packets.World
             writer.Put(NetId);
             writer.PutEnum(Type);
             SubPacket?.Serialize(writer);
+        }
+
+        public void Clear()
+        {
+            if (SubPacket != null)
+            {
+                GenericSubPacketPoolManager.Instance.ReturnPacket(Type, SubPacket);
+                SubPacket = null;
+            }
+        }
+
+        public void Flush()
+        {
+            SubPacket = null;
         }
     }
 }

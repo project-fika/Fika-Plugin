@@ -7,6 +7,7 @@ using LiteNetLib.Utils;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using static Fika.Core.Networking.Packets.SubPacket;
 
 namespace Fika.Core.Networking
 {
@@ -28,7 +29,8 @@ namespace Fika.Core.Networking
         /// <param name="data">The packet instance to send, passed by reference</param>
         /// <param name="multicast">If <see langword="true"/>, the packet will be sent to multiple recipients; otherwise, it will be sent to a single target (server is always multicast)</param>
         public void SendData<T>(ref T packet, DeliveryMethod deliveryMethod, bool multicast = false) where T : INetSerializable;
-        public void SendNetReusable<T>(ref T packet, DeliveryMethod deliveryMethod, bool multicast = false) where T : INetReusable;
+        public void SendGenericPacket(EGenericSubPacketType type, IPoolSubPacket subpacket, bool multicast = false, NetPeer peerToIgnore = null);
+        public void SendNetReusable<T>(ref T packet, DeliveryMethod deliveryMethod, bool multicast = false, NetPeer peerToIgnore = null) where T : INetReusable;
         /// <summary>
         /// Sends a packet of data directly to a specific peer
         /// </summary>

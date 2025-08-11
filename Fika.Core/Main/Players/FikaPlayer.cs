@@ -232,13 +232,8 @@ namespace Fika.Core.Main.Players
 
         public override void SendVoiceMuffledState(bool isMuffled)
         {
-            GenericPacket packet = new()
-            {
-                NetId = NetId,
-                Type = EGenericSubPacketType.MuffledState,
-                SubPacket = new GenericSubPackets.MuffledState(NetId, isMuffled)
-            };
-            PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+            Singleton<IFikaNetworkManager>.Instance.SendGenericPacket(EGenericSubPacketType.MuffledState,
+                    GenericSubPackets.MuffledState.FromValue(NetId, isMuffled), true);
         }
 
         public override void OnWeaponMastered(MasterSkillClass masterSkill)
@@ -838,14 +833,8 @@ namespace Fika.Core.Main.Players
             };
             UpdateInteractionCast();
 
-            GenericPacket packet = new()
-            {
-                NetId = NetId,
-                Type = EGenericSubPacketType.DisarmTripwire,
-                SubPacket = new GenericSubPackets.DisarmTripwire(data)
-            };
-
-            PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+            Singleton<IFikaNetworkManager>.Instance.SendGenericPacket(EGenericSubPacketType.DisarmTripwire,
+                    GenericSubPackets.DisarmTripwire.FromValue(data), true);
         }
 
         public override void vmethod_5(GClass2114 controller, int objectId, EventObject.EInteraction interaction)

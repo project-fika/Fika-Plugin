@@ -13,7 +13,6 @@ using System.Linq;
 using static BasePhysicalClass;
 using static Fika.Core.Networking.Packets.SubPacket;
 using static Fika.Core.Networking.Packets.SubPackets;
-using static Fika.Core.Networking.Packets.World.GenericSubPackets;
 using static Fika.Core.Networking.Packets.World.RequestSubPackets;
 
 namespace Fika.Core.Networking
@@ -1377,7 +1376,7 @@ namespace Fika.Core.Networking
             }
         }*/
 
-        public static ISubPacket GetGenericSubPacket(this NetDataReader reader, EGenericSubPacketType type, int netId)
+        /*public static ISubPacket GetGenericSubPacket(this NetDataReader reader, EGenericSubPacketType type, int netId)
         {
             switch (type)
             {
@@ -1409,7 +1408,7 @@ namespace Fika.Core.Networking
                     FikaPlugin.Instance.FikaLogger.LogError("GetGenericSubPacket: type was outside of bounds!");
                     return null;
             }
-        }
+        }*/
 
         public static IRequestPacket GetRequestSubPacket(this NetDataReader reader, ERequestSubPacketType type)
         {

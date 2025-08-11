@@ -5,7 +5,6 @@ using EFT.Interactive.SecretExfiltrations;
 using Fika.Core.Main.GameMode;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking;
-using Fika.Core.Networking.Packets.World;
 using System.Collections.Generic;
 using System.Linq;
 using static Fika.Core.Networking.Packets.SubPacket;
@@ -118,14 +117,8 @@ namespace Fika.Core.Main.Components
         private void SecretExfiltrationPoint_OnPointFoundEvent(string exitName, bool sharedExit)
         {
             FikaPlayer mainPlayer = (FikaPlayer)Singleton<GameWorld>.Instance.MainPlayer;
-            GenericPacket packet = new()
-            {
-                NetId = mainPlayer.NetId,
-                Type = EGenericSubPacketType.SecretExfilFound,
-                SubPacket = new SecretExfilFound(mainPlayer.GroupId, exitName)
-            };
-
-            mainPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+            Singleton<IFikaNetworkManager>.Instance.SendGenericPacket(EGenericSubPacketType.SecretExfilFound,
+                SecretExfilFound.FromValue(mainPlayer.GroupId, exitName), true);
         }
 
         public void Stop()
@@ -219,16 +212,8 @@ namespace Fika.Core.Main.Components
                 if (point.ExfiltrationStartTime is <= 0 and > -90)
                 {
                     point.ExfiltrationStartTime = _game.PastTime;
-
-                    FikaPlayer mainPlayer = (FikaPlayer)Singleton<GameWorld>.Instance.MainPlayer;
-                    GenericPacket packet = new()
-                    {
-                        NetId = mainPlayer.NetId,
-                        Type = EGenericSubPacketType.ExfilCountdown,
-                        SubPacket = new ExfilCountdown(point.Settings.Name, point.ExfiltrationStartTime)
-                    };
-
-                    mainPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+                    Singleton<IFikaNetworkManager>.Instance.SendGenericPacket(EGenericSubPacketType.ExfilCountdown,
+                            ExfilCountdown.FromValue(point.Settings.Name, point.ExfiltrationStartTime), true);
                 }
                 _countdownPoints.Add(point);
             }

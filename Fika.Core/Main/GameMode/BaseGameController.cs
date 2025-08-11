@@ -518,13 +518,8 @@ namespace Fika.Core.Main.GameMode
 
         private void OnBtrSpawn(BtrSpawnOnThePathEvent spawnEvent)
         {
-            GenericPacket packet = new()
-            {
-                NetId = 0,
-                Type = EGenericSubPacketType.SpawnBTR,
-                SubPacket = new BtrSpawn(spawnEvent.Position, spawnEvent.Rotation, spawnEvent.PlayerProfileId)
-            };
-            Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+            Singleton<IFikaNetworkManager>.Instance.SendGenericPacket(EGenericSubPacketType.SpawnBTR,
+                BtrSpawn.FromValue(spawnEvent.Position, spawnEvent.Rotation, spawnEvent.PlayerProfileId), true);
         }
 
         /// <summary>

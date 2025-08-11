@@ -11,7 +11,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
         public EFirearmSubPacketType Type;
         public IPoolSubPacket SubPacket;
 
-        public void Execute(FikaPlayer player)
+        public void Execute(FikaPlayer player = null)
         {
             SubPacket.Execute(player);
             FirearmSubPacketPoolManager.Instance.ReturnPacket(Type, SubPacket);

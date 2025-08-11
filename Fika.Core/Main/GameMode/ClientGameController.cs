@@ -420,23 +420,18 @@ namespace Fika.Core.Main.GameMode
                 }
             }
 
-            GenericPacket genericPacket = new()
-            {
-                NetId = player.NetId,
-                Type = EGenericSubPacketType.ClientExtract
-            };
-
-            try // This is to allow clients to extract if they lose connection
-            {
-                Singleton<IFikaNetworkManager>.Instance.SendData(ref genericPacket, DeliveryMethod.ReliableOrdered, true);
-            }
-            catch
-            {
-
-            }
-
             if (_coopHandler != null)
             {
+                try // This is to allow clients to extract if they lose connection
+                {
+                    Singleton<IFikaNetworkManager>.Instance.SendGenericPacket(EGenericSubPacketType.ClientExtract,
+                        GenericSubPackets.ClientExtract.FromValue(player.NetId), true);
+                }
+                catch
+                {
+
+                }
+
                 FikaPlayer fikaPlayer = player;
                 coopGame.ExtractedPlayers.Add(fikaPlayer.NetId);
                 _coopHandler.ExtractedPlayers.Add(fikaPlayer.NetId);

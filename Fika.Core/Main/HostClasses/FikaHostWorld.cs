@@ -100,14 +100,8 @@ namespace Fika.Core.Main.HostClasses
         /// <param name="arg4"></param>
         private void OnBorderZoneShot(IPlayerOwner player, BorderZone zone, float arg3, bool arg4)
         {
-            GenericPacket packet = new()
-            {
-                NetId = player.iPlayer.Id,
-                Type = SubPacket.EGenericSubPacketType.BorderZone,
-                SubPacket = new BorderZoneEvent(player.iPlayer.ProfileId, zone.Id)
-            };
-
-            _server.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+            _server.SendGenericPacket(SubPacket.EGenericSubPacketType.BorderZone,
+                BorderZoneEvent.FromValue(player.iPlayer.ProfileId, zone.Id), true);
         }
     }
 }

@@ -886,34 +886,24 @@ namespace Fika.Core.Main.GameMode
                 }
                 if (transitController is FikaHostTransitController hostController)
                 {
-                    GenericPacket backendPacket = new()
-                    {
-                        NetId = player.NetId,
-                        Type = EGenericSubPacketType.UpdateBackendData,
-                        SubPacket = new GenericSubPackets.UpdateBackendData(hostController.AliveTransitPlayers)
-                    };
-                    Singleton<IFikaNetworkManager>.Instance.SendData(ref backendPacket, DeliveryMethod.ReliableOrdered);
+                    Singleton<IFikaNetworkManager>.Instance.SendGenericPacket(EGenericSubPacketType.UpdateBackendData,
+                        GenericSubPackets.UpdateBackendData.FromValue(hostController.AliveTransitPlayers), true);
                 }
-            }
-
-            GenericPacket genericPacket = new()
-            {
-                NetId = player.NetId,
-                Type = EGenericSubPacketType.ClientExtract
-            };
-
-            try // This is to allow clients to extract if they lose connection
-            {
-                Singleton<IFikaNetworkManager>.Instance.SendData(ref genericPacket, DeliveryMethod.ReliableOrdered);
-                ClearHostAI(player);
-            }
-            catch
-            {
-
             }
 
             if (_coopHandler != null)
             {
+                try // This is to allow clients to extract if they lose connection
+                {
+                    Singleton<IFikaNetworkManager>.Instance.SendGenericPacket(EGenericSubPacketType.ClientExtract,
+                        GenericSubPackets.ClientExtract.FromValue(player.NetId), true);
+                    ClearHostAI(player);
+                }
+                catch
+                {
+
+                }
+
                 FikaPlayer fikaPlayer = player;
                 coopGame.ExtractedPlayers.Add(fikaPlayer.NetId);
                 _coopHandler.ExtractedPlayers.Add(fikaPlayer.NetId);

@@ -9,6 +9,7 @@ using Fika.Core.Main.Components;
 using Fika.Core.Main.GameMode;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
+using Fika.Core.Networking.Pooling;
 using Fika.Core.Utils;
 using LiteNetLib.Utils;
 using System.Collections.Generic;
@@ -20,16 +21,25 @@ namespace Fika.Core.Networking.Packets.World
 {
     public class GenericSubPackets
     {
-        public class ClientExtract : ISubPacket
+        public class ClientExtract : IPoolSubPacket
         {
             public int NetId;
 
-            public ClientExtract(int netId)
+            private ClientExtract() { }
+
+            public static ClientExtract CreateInstance()
             {
-                NetId = netId;
+                return new ClientExtract();
             }
 
-            public void Execute(FikaPlayer player)
+            public static ClientExtract FromValue(int netId)
+            {
+                ClientExtract packet = GenericSubPacketPoolManager.Instance.GetPacket<ClientExtract>(EGenericSubPacketType.ClientExtract);
+                packet.NetId = netId;
+                return packet;
+            }
+
+            public void Execute(FikaPlayer player = null)
             {
                 CoopHandler coopHandler = Singleton<IFikaNetworkManager>.Instance.CoopHandler;
                 if (coopHandler == null)
@@ -74,25 +84,40 @@ namespace Fika.Core.Networking.Packets.World
 
             public void Serialize(NetDataWriter writer)
             {
+                writer.Put(NetId);
+            }
 
+            public void Deserialize(NetDataReader reader)
+            {
+                NetId = reader.GetInt();
+            }
+
+            public void Dispose()
+            {
+                NetId = 0;
             }
         }
 
-        public class ClientConnected : ISubPacket
+
+        public class ClientConnected : IPoolSubPacket
         {
             public string Name;
 
-            public ClientConnected(string name)
+            private ClientConnected() { }
+
+            public static ClientConnected CreateInstance()
             {
-                Name = name;
+                return new ClientConnected();
             }
 
-            public ClientConnected(NetDataReader reader)
+            public static ClientConnected FromValue(string name)
             {
-                Name = reader.GetString();
+                ClientConnected packet = GenericSubPacketPoolManager.Instance.GetPacket<ClientConnected>(EGenericSubPacketType.ClientConnected);
+                packet.Name = name;
+                return packet;
             }
 
-            public void Execute(FikaPlayer player)
+            public void Execute(FikaPlayer player = null)
             {
                 string message = string.Format(LocaleUtils.UI_PLAYER_CONNECTED.Localized(), ColorizeText(EColor.BLUE, Name));
                 NotificationManagerClass.DisplayMessageNotification(message);
@@ -102,23 +127,38 @@ namespace Fika.Core.Networking.Packets.World
             {
                 writer.Put(Name);
             }
-        }
 
-        public class ClientDisconnected : ISubPacket
-        {
-            public string Name;
-
-            public ClientDisconnected(string name)
-            {
-                Name = name;
-            }
-
-            public ClientDisconnected(NetDataReader reader)
+            public void Deserialize(NetDataReader reader)
             {
                 Name = reader.GetString();
             }
 
-            public void Execute(FikaPlayer player)
+            public void Dispose()
+            {
+                Name = null;
+            }
+        }
+
+
+        public class ClientDisconnected : IPoolSubPacket
+        {
+            public string Name;
+
+            private ClientDisconnected() { }
+
+            public static ClientDisconnected CreateInstance()
+            {
+                return new ClientDisconnected();
+            }
+
+            public static ClientDisconnected FromValue(string name)
+            {
+                ClientDisconnected packet = GenericSubPacketPoolManager.Instance.GetPacket<ClientDisconnected>(EGenericSubPacketType.ClientDisconnected);
+                packet.Name = name;
+                return packet;
+            }
+
+            public void Execute(FikaPlayer player = null)
             {
                 string message = string.Format(LocaleUtils.UI_PLAYER_DISCONNECTED.Localized(), ColorizeText(EColor.BLUE, Name));
                 NotificationManagerClass.DisplayMessageNotification(message);
@@ -128,26 +168,40 @@ namespace Fika.Core.Networking.Packets.World
             {
                 writer.Put(Name);
             }
+
+            public void Deserialize(NetDataReader reader)
+            {
+                Name = reader.GetString();
+            }
+
+            public void Dispose()
+            {
+                Name = null;
+            }
         }
 
-        public class ExfilCountdown : ISubPacket
+
+        public class ExfilCountdown : IPoolSubPacket
         {
             public string ExfilName;
             public float ExfilStartTime;
 
-            public ExfilCountdown(string exfilName, float exfilStartTime)
+            private ExfilCountdown() { }
+
+            public static ExfilCountdown CreateInstance()
             {
-                ExfilName = exfilName;
-                ExfilStartTime = exfilStartTime;
+                return new ExfilCountdown();
             }
 
-            public ExfilCountdown(NetDataReader reader)
+            public static ExfilCountdown FromValue(string exfilName, float exfilStartTime)
             {
-                ExfilName = reader.GetString();
-                ExfilStartTime = reader.GetFloat();
+                ExfilCountdown packet = GenericSubPacketPoolManager.Instance.GetPacket<ExfilCountdown>(EGenericSubPacketType.ExfilCountdown);
+                packet.ExfilName = exfilName;
+                packet.ExfilStartTime = exfilStartTime;
+                return packet;
             }
 
-            public void Execute(FikaPlayer player)
+            public void Execute(FikaPlayer player = null)
             {
                 CoopHandler coopHandler = Singleton<IFikaNetworkManager>.Instance.CoopHandler;
                 if (coopHandler == null)
@@ -170,7 +224,6 @@ namespace Fika.Core.Networking.Packets.World
                     {
                         if (exfiltrationPoint.Settings.Name == ExfilName)
                         {
-
                             exfiltrationPoint.ExfiltrationStartTime = fikaGame != null ? fikaGame.GameController.GameInstance.PastTime : ExfilStartTime;
 
                             if (exfiltrationPoint.Status != EExfiltrationStatus.Countdown)
@@ -207,18 +260,40 @@ namespace Fika.Core.Networking.Packets.World
                 writer.Put(ExfilName);
                 writer.Put(ExfilStartTime);
             }
+
+            public void Deserialize(NetDataReader reader)
+            {
+                ExfilName = reader.GetString();
+                ExfilStartTime = reader.GetFloat();
+            }
+
+            public void Dispose()
+            {
+                ExfilName = null;
+                ExfilStartTime = 0f;
+            }
         }
 
-        public class ClearEffects : ISubPacket
+
+        public class ClearEffects : IPoolSubPacket
         {
             public int NetId;
 
-            public ClearEffects(int netId)
+            private ClearEffects() { }
+
+            public static ClearEffects CreateInstance()
             {
-                NetId = netId;
+                return new ClearEffects();
             }
 
-            public void Execute(FikaPlayer player)
+            public static ClearEffects FromValue(int netId)
+            {
+                ClearEffects packet = GenericSubPacketPoolManager.Instance.GetPacket<ClearEffects>(EGenericSubPacketType.ClearEffects);
+                packet.NetId = netId;
+                return packet;
+            }
+
+            public void Execute(FikaPlayer player = null)
             {
                 if (FikaBackendUtils.IsServer)
                 {
@@ -243,25 +318,40 @@ namespace Fika.Core.Networking.Packets.World
 
             public void Serialize(NetDataWriter writer)
             {
+                writer.Put(NetId);
+            }
 
+            public void Deserialize(NetDataReader reader)
+            {
+                NetId = reader.GetInt();
+            }
+
+            public void Dispose()
+            {
+                NetId = 0;
             }
         }
 
-        public class UpdateBackendData : ISubPacket
+
+        public class UpdateBackendData : IPoolSubPacket
         {
             public int PlayerAmount;
 
-            public UpdateBackendData(int playerAmount)
+            private UpdateBackendData() { }
+
+            public static UpdateBackendData CreateInstance()
             {
-                PlayerAmount = playerAmount;
+                return new();
             }
 
-            public UpdateBackendData(NetDataReader reader)
+            public static UpdateBackendData FromValue(int playerAmount)
             {
-                PlayerAmount = reader.GetInt();
+                UpdateBackendData packet = GenericSubPacketPoolManager.Instance.GetPacket<UpdateBackendData>(EGenericSubPacketType.UpdateBackendData);
+                packet.PlayerAmount = playerAmount;
+                return packet;
             }
 
-            public void Execute(FikaPlayer player)
+            public void Execute(FikaPlayer player = null)
             {
                 Singleton<IFikaNetworkManager>.Instance.PlayerAmount = PlayerAmount;
             }
@@ -270,28 +360,44 @@ namespace Fika.Core.Networking.Packets.World
             {
                 writer.Put(PlayerAmount);
             }
+
+            public void Deserialize(NetDataReader reader)
+            {
+                PlayerAmount = reader.GetInt();
+            }
+
+            public void Dispose()
+            {
+                PlayerAmount = 0;
+            }
         }
 
-        public class SecretExfilFound : ISubPacket
+
+        public class SecretExfilFound : IPoolSubPacket
         {
             public string GroupId;
             public string ExitName;
 
-            public SecretExfilFound(string groupId, string exitName)
+            private SecretExfilFound() { }
+
+            public static SecretExfilFound CreateInstance()
             {
-                GroupId = groupId;
-                ExitName = exitName;
+                return new SecretExfilFound();
             }
 
-            public SecretExfilFound(NetDataReader reader)
+            public static SecretExfilFound FromValue(string groupId, string exitName)
             {
-                GroupId = reader.GetString();
-                ExitName = reader.GetString();
+                SecretExfilFound packet = GenericSubPacketPoolManager.Instance.GetPacket<SecretExfilFound>(EGenericSubPacketType.SecretExfilFound);
+                packet.GroupId = groupId;
+                packet.ExitName = exitName;
+                return packet;
             }
 
-            public void Execute(FikaPlayer player)
+            public void Execute(FikaPlayer player = null)
             {
-                GlobalEventHandlerClass.Instance.CreateCommonEvent<SecretExfiltrationPointFoundShareEvent>().Invoke(GroupId, GroupId, ExitName);
+                GlobalEventHandlerClass.Instance
+                    .CreateCommonEvent<SecretExfiltrationPointFoundShareEvent>()
+                    .Invoke(GroupId, GroupId, ExitName);
             }
 
             public void Serialize(NetDataWriter writer)
@@ -299,49 +405,69 @@ namespace Fika.Core.Networking.Packets.World
                 writer.Put(GroupId);
                 writer.Put(ExitName);
             }
+
+            public void Deserialize(NetDataReader reader)
+            {
+                GroupId = reader.GetString();
+                ExitName = reader.GetString();
+            }
+
+            public void Dispose()
+            {
+                GroupId = null;
+                ExitName = null;
+            }
         }
 
-        public class BorderZoneEvent : ISubPacket
+
+        public class BorderZoneEvent : IPoolSubPacket
         {
             public string ProfileId;
             public int ZoneId;
 
-            public BorderZoneEvent(string profileId, int zoneId)
+            private BorderZoneEvent() { }
+
+            public static BorderZoneEvent CreateInstance()
             {
-                ProfileId = profileId;
-                ZoneId = zoneId;
+                return new BorderZoneEvent();
             }
 
-            public BorderZoneEvent(NetDataReader reader)
+            public static BorderZoneEvent FromValue(string profileId, int zoneId)
             {
-                ProfileId = reader.GetString();
-                ZoneId = reader.GetInt();
+                BorderZoneEvent packet = GenericSubPacketPoolManager.Instance.GetPacket<BorderZoneEvent>(EGenericSubPacketType.BorderZone);
+                packet.ProfileId = profileId;
+                packet.ZoneId = zoneId;
+                return packet;
             }
 
             public void Execute(FikaPlayer player = null)
             {
-                if (Singleton<GameWorld>.Instantiated)
+                if (!Singleton<GameWorld>.Instantiated)
                 {
-                    BorderZone[] borderZones = Singleton<GameWorld>.Instance.BorderZones;
-                    if (borderZones != null && borderZones.Length > 0)
+                    return;
+                }
+
+                BorderZone[] borderZones = Singleton<GameWorld>.Instance.BorderZones;
+                if (borderZones == null || borderZones.Length == 0)
+                {
+                    return;
+                }
+
+                foreach (BorderZone borderZone in borderZones)
+                {
+                    if (borderZone.Id == ZoneId)
                     {
-                        foreach (BorderZone borderZone in borderZones)
+                        List<IPlayer> players = Singleton<GameWorld>.Instance.RegisteredPlayers;
+                        foreach (IPlayer iPlayer in players)
                         {
-                            if (borderZone.Id == ZoneId)
+                            if (iPlayer.ProfileId == ProfileId)
                             {
-                                List<IPlayer> players = Singleton<GameWorld>.Instance.RegisteredPlayers;
-                                foreach (IPlayer iPlayer in players)
+                                IPlayerOwner playerBridge = Singleton<GameWorld>.Instance.GetAlivePlayerBridgeByProfileID(ProfileId);
+                                if (playerBridge != null)
                                 {
-                                    if (iPlayer.ProfileId == ProfileId)
-                                    {
-                                        IPlayerOwner playerBridge = Singleton<GameWorld>.Instance.GetAlivePlayerBridgeByProfileID(ProfileId);
-                                        if (playerBridge != null)
-                                        {
-                                            borderZone.ProcessIncomingPacket(playerBridge);
-                                        }
-                                        break;
-                                    }
+                                    borderZone.ProcessIncomingPacket(playerBridge);
                                 }
+                                break;
                             }
                         }
                     }
@@ -353,20 +479,37 @@ namespace Fika.Core.Networking.Packets.World
                 writer.Put(ProfileId);
                 writer.Put(ZoneId);
             }
+
+            public void Deserialize(NetDataReader reader)
+            {
+                ProfileId = reader.GetString();
+                ZoneId = reader.GetInt();
+            }
+
+            public void Dispose()
+            {
+                ProfileId = null;
+                ZoneId = 0;
+            }
         }
 
-        public class MineEvent : ISubPacket
+
+        public class MineEvent : IPoolSubPacket
         {
             public Vector3 MinePosition;
 
-            public MineEvent(Vector3 minePosition)
+            private MineEvent() { }
+
+            public static MineEvent CreateInstance()
             {
-                MinePosition = minePosition;
+                return new MineEvent();
             }
 
-            public MineEvent(NetDataReader reader)
+            public static MineEvent FromValue(Vector3 minePosition)
             {
-                MinePosition = reader.GetUnmanaged<Vector3>();
+                MineEvent packet = GenericSubPacketPoolManager.Instance.GetPacket<MineEvent>(EGenericSubPacketType.Mine);
+                packet.MinePosition = minePosition;
+                return packet;
             }
 
             public void Execute(FikaPlayer player = null)
@@ -390,20 +533,35 @@ namespace Fika.Core.Networking.Packets.World
             {
                 writer.PutUnmanaged(MinePosition);
             }
+
+            public void Deserialize(NetDataReader reader)
+            {
+                MinePosition = reader.GetUnmanaged<Vector3>();
+            }
+
+            public void Dispose()
+            {
+                MinePosition = default;
+            }
         }
 
-        public class DisarmTripwire : ISubPacket
+
+        public class DisarmTripwire : IPoolSubPacket
         {
             public AirplaneDataPacketStruct Data;
 
-            public DisarmTripwire(AirplaneDataPacketStruct data)
+            private DisarmTripwire() { }
+
+            public static DisarmTripwire CreateInstance()
             {
-                Data = data;
+                return new DisarmTripwire();
             }
 
-            public DisarmTripwire(NetDataReader reader)
+            public static DisarmTripwire FromValue(AirplaneDataPacketStruct data)
             {
-                Data = reader.GetAirplaneDataPacketStruct();
+                DisarmTripwire packet = GenericSubPacketPoolManager.Instance.GetPacket<DisarmTripwire>(EGenericSubPacketType.DisarmTripwire);
+                packet.Data = data;
+                return packet;
             }
 
             public void Execute(FikaPlayer player = null)
@@ -428,23 +586,37 @@ namespace Fika.Core.Networking.Packets.World
             {
                 writer.PutAirplaneDataPacketStruct(Data);
             }
+
+            public void Deserialize(NetDataReader reader)
+            {
+                Data = reader.GetAirplaneDataPacketStruct();
+            }
+
+            public void Dispose()
+            {
+                Data = default;
+            }
         }
 
-        public class MuffledState : ISubPacket
+
+        public class MuffledState : IPoolSubPacket
         {
             public int NetId;
             public bool Muffled;
 
-            public MuffledState(int netId, bool muffled)
+            private MuffledState() { }
+
+            public static MuffledState CreateInstance()
             {
-                NetId = netId;
-                Muffled = muffled;
+                return new MuffledState();
             }
 
-            public MuffledState(NetDataReader reader)
+            public static MuffledState FromValue(int netId, bool muffled)
             {
-                NetId = reader.GetInt();
-                Muffled = reader.GetBool();
+                MuffledState packet = GenericSubPacketPoolManager.Instance.GetPacket<MuffledState>(EGenericSubPacketType.MuffledState);
+                packet.NetId = netId;
+                packet.Muffled = muffled;
+                return packet;
             }
 
             public void Execute(FikaPlayer player = null)
@@ -469,26 +641,41 @@ namespace Fika.Core.Networking.Packets.World
                 writer.Put(NetId);
                 writer.Put(Muffled);
             }
+
+            public void Deserialize(NetDataReader reader)
+            {
+                NetId = reader.GetInt();
+                Muffled = reader.GetBool();
+            }
+
+            public void Dispose()
+            {
+                NetId = 0;
+                Muffled = false;
+            }
         }
 
-        public class BtrSpawn : ISubPacket
+
+        public class BtrSpawn : IPoolSubPacket
         {
             public Vector3 Position;
             public Quaternion Rotation;
             public string PlayerProfileId;
 
-            public BtrSpawn(Vector3 position, Quaternion rotation, string profileId)
+            private BtrSpawn() { }
+
+            public static BtrSpawn CreateInstance()
             {
-                Position = position;
-                Rotation = rotation;
-                PlayerProfileId = profileId;
+                return new BtrSpawn();
             }
 
-            public BtrSpawn(NetDataReader reader)
+            public static BtrSpawn FromValue(Vector3 position, Quaternion rotation, string profileId)
             {
-                Position = reader.GetUnmanaged<Vector3>();
-                Rotation = reader.GetUnmanaged<Quaternion>();
-                PlayerProfileId = reader.GetString();
+                BtrSpawn packet = GenericSubPacketPoolManager.Instance.GetPacket<BtrSpawn>(EGenericSubPacketType.SpawnBTR);
+                packet.Position = position;
+                packet.Rotation = rotation;
+                packet.PlayerProfileId = profileId;
+                return packet;
             }
 
             public void Execute(FikaPlayer player = null)
@@ -501,6 +688,20 @@ namespace Fika.Core.Networking.Packets.World
                 writer.PutUnmanaged(Position);
                 writer.PutUnmanaged(Rotation);
                 writer.Put(PlayerProfileId);
+            }
+
+            public void Deserialize(NetDataReader reader)
+            {
+                Position = reader.GetUnmanaged<Vector3>();
+                Rotation = reader.GetUnmanaged<Quaternion>();
+                PlayerProfileId = reader.GetString();
+            }
+
+            public void Dispose()
+            {
+                Position = default;
+                Rotation = default;
+                PlayerProfileId = null;
             }
         }
     }

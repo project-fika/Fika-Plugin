@@ -152,6 +152,7 @@ namespace Fika.Core.Networking
         [NativeDisableContainerSafetyRestriction]
         private NativeArray<ArraySegment<byte>> _snapshots;
         private int _snapshotCount;
+        private GenericPacket _genericPacket;
 
         internal FikaVOIPServer VOIPServer { get; set; }
         internal FikaVOIPClient VOIPClient { get; set; }
@@ -213,6 +214,10 @@ namespace Fika.Core.Networking
 
             _currentNetId = 2;
             NetId = 1;
+            _genericPacket = new()
+            {
+                NetId = NetId
+            };
 
             RegisterPacketsAndTypes();
 
@@ -408,14 +413,11 @@ namespace Fika.Core.Networking
             RegisterCustomType(FikaSerializationExtensions.PutLootSyncStruct, FikaSerializationExtensions.GetLootSyncStruct);
 
             RegisterPacket<PlayerStatePacket, NetPeer>(OnPlayerStatePacketReceived);
-            //RegisterPacket<WeaponPacket, NetPeer>(OnWeaponPacketReceived);
             RegisterPacket<DamagePacket, NetPeer>(OnDamagePacketReceived);
             RegisterPacket<ArmorDamagePacket, NetPeer>(OnArmorDamagePacketReceived);
             RegisterPacket<InventoryPacket, NetPeer>(OnInventoryPacketReceived);
-            //RegisterPacket<CommonPlayerPacket, NetPeer>(OnCommonPlayerPacketReceived);
             RegisterPacket<InformationPacket, NetPeer>(OnInformationPacketReceived);
             RegisterPacket<HealthSyncPacket, NetPeer>(OnHealthSyncPacketReceived);
-            RegisterPacket<GenericPacket, NetPeer>(OnGenericPacketReceived);
             RegisterPacket<SendCharacterPacket, NetPeer>(OnSendCharacterPacketReceived);
             RegisterPacket<TextMessagePacket, NetPeer>(OnTextMessagePacketReceived);
             RegisterPacket<QuestConditionPacket, NetPeer>(OnQuestConditionPacketReceived);
@@ -442,6 +444,7 @@ namespace Fika.Core.Networking
 
             RegisterNetReusable<WeaponPacket, NetPeer>(OnWeaponPacketReceived);
             RegisterNetReusable<CommonPlayerPacket, NetPeer>(OnCommonPlayerPacketReceived);
+            RegisterNetReusable<GenericPacket, NetPeer>(OnGenericPacketReceived);
         }
 
         private void OnEventControllerInteractPacketReceived(EventControllerInteractPacket packet, NetPeer peer)
@@ -556,29 +559,25 @@ namespace Fika.Core.Networking
                 return;
             }
 
-            KeyValuePair<Profile, bool> kvp = packet.Profiles.First();
-            if (!_visualProfiles.Any(x => x.Key.ProfileId == kvp.Key.ProfileId))
+            (Profile profile, bool isLeader) = packet.Profiles.First();
+            if (!_visualProfiles.Any(x => x.Key.ProfileId == profile.ProfileId))
             {
-                _visualProfiles.Add(kvp.Key, _visualProfiles.Count == 0 || kvp.Value);
+                _visualProfiles.Add(profile, _visualProfiles.Count == 0 || isLeader);
             }
             FikaBackendUtils.AddPartyMembers(_visualProfiles);
             packet.Profiles = _visualProfiles;
             SendData(ref packet, DeliveryMethod.ReliableOrdered);
 
-            GenericPacket notifPacket = new()
-            {
-                NetId = 1,
-                Type = EGenericSubPacketType.ClientConnected,
-                SubPacket = new ClientConnected(kvp.Key.Info.MainProfileNickname)
-            };
-
+            ClientConnected clientConnected = ClientConnected.FromValue(profile.Info.MainProfileNickname);
             if (!FikaBackendUtils.IsHeadless)
             {
-                notifPacket.SubPacket.Execute();
+                clientConnected.Execute();
             }
-            SendData(ref notifPacket, DeliveryMethod.ReliableOrdered, peer);
 
-            peer.Tag = kvp.Key.Info.MainProfileNickname;
+            SendGenericPacket(EGenericSubPacketType.ClientConnected,
+                clientConnected, true);
+
+            peer.Tag = profile.Info.MainProfileNickname;
         }
 
         private void OnPingPacketReceived(PingPacket packet, NetPeer peer)
@@ -790,13 +789,8 @@ namespace Fika.Core.Networking
                             SendDataToPeer(ref ownCharacterPacket, DeliveryMethod.ReliableOrdered, peer);
 
                             observedPlayer.HealthBar.ClearEffects();
-                            GenericPacket clearEffectsPacket = new()
-                            {
-                                NetId = observedPlayer.NetId,
-                                Type = EGenericSubPacketType.ClearEffects
-                            };
-
-                            SendData(ref clearEffectsPacket, DeliveryMethod.ReliableOrdered, peer);
+                            SendGenericPacket(EGenericSubPacketType.ClearEffects,
+                                ClearEffects.FromValue(observedPlayer.NetId), true, peer);
                         }
                     }
 
@@ -1105,7 +1099,7 @@ namespace Fika.Core.Networking
 
         private void OnGenericPacketReceived(GenericPacket packet, NetPeer peer)
         {
-            packet.SubPacket.Execute();
+            packet.Execute();
         }
 
         private void OnHealthSyncPacketReceived(HealthSyncPacket packet, NetPeer peer)
@@ -1331,6 +1325,7 @@ namespace Fika.Core.Networking
             _netServer?.Stop();
             _stateHandle.Complete();
             _snapshots.Dispose();
+            _genericPacket.Clear();
 
             PoolUtils.ReleaseAll();
 
@@ -1355,13 +1350,21 @@ namespace Fika.Core.Networking
             _netServer.SendToAll(_dataWriter.AsReadOnlySpan, deliveryMethod);
         }
 
-        public void SendNetReusable<T>(ref T packet, DeliveryMethod deliveryMethod, bool multicast = false) where T : INetReusable
+        public void SendGenericPacket(EGenericSubPacketType type, IPoolSubPacket subpacket, bool multicast = false, NetPeer peerToIgnore = null)
+        {
+            GenericPacket packet = _genericPacket;
+            packet.Type = type;
+            packet.SubPacket = subpacket;
+            SendNetReusable(ref packet, DeliveryMethod.ReliableOrdered, multicast, peerToIgnore);
+        }
+
+        public void SendNetReusable<T>(ref T packet, DeliveryMethod deliveryMethod, bool multicast = false, NetPeer peerToIgnore = null) where T : INetReusable
         {
             _dataWriter.Reset();
             _dataWriter.PutEnum(EPacketType.Serializable);
 
             _packetProcessor.WriteNetReusable(_dataWriter, ref packet);
-            _netServer.SendToAll(_dataWriter.AsReadOnlySpan, deliveryMethod);
+            _netServer.SendToAll(_dataWriter.AsReadOnlySpan, deliveryMethod, peerToIgnore);
 
             packet.Clear();
         }
@@ -1453,13 +1456,8 @@ namespace Fika.Core.Networking
 
             FikaEventDispatcher.DispatchEvent(new PeerConnectedEvent(peer, this));
 
-            GenericPacket genericPacket = new()
-            {
-                NetId = 0,
-                Type = EGenericSubPacketType.UpdateBackendData,
-                SubPacket = new UpdateBackendData(PlayerAmount)
-            };
-            SendData(ref genericPacket, DeliveryMethod.ReliableOrdered);
+            SendGenericPacket(EGenericSubPacketType.UpdateBackendData,
+                UpdateBackendData.FromValue(PlayerAmount), true);
         }
 
         public void OnNetworkError(IPEndPoint endPoint, SocketError socketErrorCode)
@@ -1488,8 +1486,6 @@ namespace Fika.Core.Networking
             if (reader.TryGetString(out string data))
             {
                 NetDataWriter resp;
-                _logger.LogWarning(data);
-
                 switch (data)
                 {
                     case "fika.hello":
@@ -1561,25 +1557,15 @@ namespace Fika.Core.Networking
 
             if (peer.Tag is string nickname)
             {
-                GenericPacket packet = new()
-                {
-                    NetId = 1,
-                    Type = EGenericSubPacketType.ClientDisconnected,
-                    SubPacket = new ClientDisconnected(nickname)
-                };
-
-                packet.SubPacket.Execute();
-                SendData(ref packet, DeliveryMethod.ReliableOrdered, peer);
+                ClientDisconnected disconnectPacket = ClientDisconnected.FromValue(nickname);
+                disconnectPacket.Execute();
+                SendGenericPacket(EGenericSubPacketType.ClientDisconnected,
+                    disconnectPacket, true, peer);
             }
 
             PlayerAmount--;
-            GenericPacket genericPacket = new()
-            {
-                NetId = 0,
-                Type = EGenericSubPacketType.UpdateBackendData,
-                SubPacket = new UpdateBackendData(PlayerAmount)
-            };
-            SendData(ref genericPacket, DeliveryMethod.ReliableOrdered);
+            SendGenericPacket(EGenericSubPacketType.UpdateBackendData,
+                UpdateBackendData.FromValue(PlayerAmount), true);
 
             if (_netServer.ConnectedPeersCount == 0)
             {

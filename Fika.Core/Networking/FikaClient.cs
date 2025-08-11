@@ -47,6 +47,7 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using static Fika.Core.Networking.NetworkUtils;
+using static Fika.Core.Networking.Packets.SubPacket;
 
 namespace Fika.Core.Networking
 {
@@ -128,6 +129,7 @@ namespace Fika.Core.Networking
         private List<int> _missingIds;
         private JobHandle _stateHandle;
         private int _snapshotCount;
+        private GenericPacket _genericPacket;
 
         [NativeDisableContainerSafetyRestriction]
         [NativeDisableParallelForRestriction]
@@ -167,6 +169,7 @@ namespace Fika.Core.Networking
             NetworkGameSession.LossPercent = 0;
 
             _myProfileId = FikaBackendUtils.Profile.ProfileId;
+            _genericPacket = new();
 
             RegisterPacketsAndTypes();
 
@@ -252,14 +255,11 @@ namespace Fika.Core.Networking
             RegisterCustomType(FikaSerializationExtensions.PutLootSyncStruct, FikaSerializationExtensions.GetLootSyncStruct);
 
             RegisterPacket<PlayerStatePacket>(OnPlayerStatePacketReceived);
-            //RegisterPacket<WeaponPacket>(OnWeaponPacketReceived);
             RegisterPacket<DamagePacket>(OnDamagePacketReceived);
             RegisterPacket<ArmorDamagePacket>(OnArmorDamagePacketReceived);
             RegisterPacket<InventoryPacket>(OnInventoryPacketReceived);
-            //RegisterPacket<CommonPlayerPacket>(OnCommonPlayerPacketReceived);
             RegisterPacket<InformationPacket>(OnInformationPacketReceived);
             RegisterPacket<HealthSyncPacket>(OnHealthSyncPacketReceived);
-            RegisterPacket<GenericPacket>(OnGenericPacketReceived);
             RegisterPacket<SendCharacterPacket>(OnSendCharacterPacketReceived);
             RegisterPacket<OperationCallbackPacket>(OnOperationCallbackPacketReceived);
             RegisterPacket<TextMessagePacket>(OnTextMessagePacketReceived);
@@ -296,6 +296,7 @@ namespace Fika.Core.Networking
 
             RegisterNetReusable<WeaponPacket>(OnWeaponPacketReceived);
             RegisterNetReusable<CommonPlayerPacket>(OnCommonPlayerPacketReceived);
+            RegisterNetReusable<GenericPacket>(OnGenericPacketReceived);
         }
 
         private void OnSyncTrapsPacketReceived(SyncTrapsPacket packet)
@@ -608,6 +609,8 @@ namespace Fika.Core.Networking
             _sendRate = packet.SendRate;
             NetId = packet.NetId;
             AllowVOIP = packet.AllowVOIP;
+
+            _genericPacket.NetId = packet.NetId;
         }
 
         private void OnUsableItemPacketReceived(UsableItemPacket packet)
@@ -986,7 +989,7 @@ namespace Fika.Core.Networking
 
         private void OnGenericPacketReceived(GenericPacket packet)
         {
-            packet.SubPacket.Execute();
+            packet.Execute();
         }
 
         private void OnHealthSyncPacketReceived(HealthSyncPacket packet)
@@ -1169,6 +1172,7 @@ namespace Fika.Core.Networking
             _netClient?.Stop();
             _stateHandle.Complete();
             _snapshots.Dispose();
+            _genericPacket.Clear();
 
             PoolUtils.ReleaseAll();
 
@@ -1204,7 +1208,15 @@ namespace Fika.Core.Networking
             _netClient.SendToAll(_dataWriter.AsReadOnlySpan, DeliveryMethod.Unreliable);
         }
 
-        public void SendNetReusable<T>(ref T packet, DeliveryMethod deliveryMethod, bool multicast = false) where T : INetReusable
+        public void SendGenericPacket(EGenericSubPacketType type, IPoolSubPacket subpacket, bool multicast = false, NetPeer peerToIgnore = null)
+        {
+            GenericPacket packet = _genericPacket;
+            packet.Type = type;
+            packet.SubPacket = subpacket;
+            SendNetReusable(ref packet, DeliveryMethod.ReliableOrdered, multicast);
+        }
+
+        public void SendNetReusable<T>(ref T packet, DeliveryMethod deliveryMethod, bool multicast = false, NetPeer peerToIgnore = null) where T : INetReusable
         {
             _dataWriter.Reset();
             _dataWriter.Put(multicast);

@@ -93,14 +93,8 @@ namespace Fika.Core.Main.HostClasses
                 return;
             }
 
-            GenericPacket packet = new()
-            {
-                NetId = 0,
-                Type = SubPacket.EGenericSubPacketType.Mine,
-                SubPacket = new MineEvent(directional.transform.position)
-            };
-
-            Server.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+            Server.SendGenericPacket(SubPacket.EGenericSubPacketType.Mine,
+                MineEvent.FromValue(directional.transform.position), true);
         }
 
         public override void Dispose()
