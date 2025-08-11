@@ -1,7 +1,6 @@
 ﻿using EFT.SynchronizableObjects;
 using LiteNetLib.Utils;
 using System;
-using static Fika.Core.Networking.Packets.SubPacket;
 using static Fika.Core.Networking.Packets.World.SpawnSyncObjectSubPackets;
 
 namespace Fika.Core.Networking.Packets.World

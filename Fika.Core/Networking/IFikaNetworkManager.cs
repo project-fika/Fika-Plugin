@@ -7,7 +7,6 @@ using LiteNetLib.Utils;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using static Fika.Core.Networking.Packets.SubPacket;
 
 namespace Fika.Core.Networking
 {

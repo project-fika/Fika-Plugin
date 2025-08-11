@@ -4,12 +4,12 @@ using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Main.Players;
+using Fika.Core.Networking.Packets.FirearmController;
 using HarmonyLib;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using static EFT.Player;
-using static Fika.Core.Networking.Packets.FirearmController.FirearmSubPackets;
 
 namespace Fika.Core.Main.ObservedClasses
 {

@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Fika.Core.Networking.Packets;
+using Fika.Core.Networking.Packets.Player;
+using System;
 using System.Collections.Generic;
 using System.Threading;
-using static Fika.Core.Networking.Packets.Player.CommonSubPackets;
-using static Fika.Core.Networking.Packets.SubPacket;
 
 namespace Fika.Core.Networking.Pooling
 {

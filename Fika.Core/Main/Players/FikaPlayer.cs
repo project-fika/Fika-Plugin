@@ -18,7 +18,9 @@ using Fika.Core.Main.PacketHandlers;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
+using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.Communication;
+using Fika.Core.Networking.Packets.FirearmController;
 using Fika.Core.Networking.Packets.Player;
 using Fika.Core.Networking.Packets.World;
 using Fika.Core.Networking.VOIP;
@@ -30,9 +32,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using static Fika.Core.Main.ClientClasses.ClientInventoryController;
-using static Fika.Core.Networking.Packets.FirearmController.FirearmSubPackets;
-using static Fika.Core.Networking.Packets.Player.CommonSubPackets;
-using static Fika.Core.Networking.Packets.SubPacket;
 using static Fika.Core.Networking.Packets.SubPackets;
 
 namespace Fika.Core.Main.Players
@@ -233,7 +232,7 @@ namespace Fika.Core.Main.Players
         public override void SendVoiceMuffledState(bool isMuffled)
         {
             Singleton<IFikaNetworkManager>.Instance.SendGenericPacket(EGenericSubPacketType.MuffledState,
-                    GenericSubPackets.MuffledState.FromValue(NetId, isMuffled), true);
+                    MuffledState.FromValue(NetId, isMuffled), true);
         }
 
         public override void OnWeaponMastered(MasterSkillClass masterSkill)
@@ -834,7 +833,7 @@ namespace Fika.Core.Main.Players
             UpdateInteractionCast();
 
             Singleton<IFikaNetworkManager>.Instance.SendGenericPacket(EGenericSubPacketType.DisarmTripwire,
-                    GenericSubPackets.DisarmTripwire.FromValue(data), true);
+                    DisarmTripwire.FromValue(data), true);
         }
 
         public override void vmethod_5(GClass2114 controller, int objectId, EventObject.EInteraction interaction)

@@ -5,7 +5,6 @@ using Fika.Core.Networking;
 using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.World;
 using System.Collections.Generic;
-using static Fika.Core.Networking.Packets.World.GenericSubPackets;
 
 namespace Fika.Core.Main.HostClasses
 {
@@ -100,7 +99,7 @@ namespace Fika.Core.Main.HostClasses
         /// <param name="arg4"></param>
         private void OnBorderZoneShot(IPlayerOwner player, BorderZone zone, float arg3, bool arg4)
         {
-            _server.SendGenericPacket(SubPacket.EGenericSubPacketType.BorderZone,
+            _server.SendGenericPacket(EGenericSubPacketType.BorderZone,
                 BorderZoneEvent.FromValue(player.iPlayer.ProfileId, zone.Id), true);
         }
     }

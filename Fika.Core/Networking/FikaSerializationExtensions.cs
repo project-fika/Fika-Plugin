@@ -5,13 +5,13 @@ using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
 using Fika.Core.Main.Utils;
+using Fika.Core.Networking.Packets;
 using LiteNetLib.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using static BasePhysicalClass;
-using static Fika.Core.Networking.Packets.SubPacket;
 using static Fika.Core.Networking.Packets.SubPackets;
 using static Fika.Core.Networking.Packets.World.RequestSubPackets;
 

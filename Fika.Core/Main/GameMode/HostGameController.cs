@@ -20,6 +20,7 @@ using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
+using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.Backend;
 using Fika.Core.Networking.Packets.Communication;
 using Fika.Core.Networking.Packets.World;
@@ -30,7 +31,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using static Fika.Core.Networking.Packets.SubPacket;
 using static LocationSettingsClass;
 
 namespace Fika.Core.Main.GameMode
@@ -887,7 +887,7 @@ namespace Fika.Core.Main.GameMode
                 if (transitController is FikaHostTransitController hostController)
                 {
                     Singleton<IFikaNetworkManager>.Instance.SendGenericPacket(EGenericSubPacketType.UpdateBackendData,
-                        GenericSubPackets.UpdateBackendData.FromValue(hostController.AliveTransitPlayers), true);
+                        UpdateBackendData.FromValue(hostController.AliveTransitPlayers), true);
                 }
             }
 
@@ -896,7 +896,7 @@ namespace Fika.Core.Main.GameMode
                 try // This is to allow clients to extract if they lose connection
                 {
                     Singleton<IFikaNetworkManager>.Instance.SendGenericPacket(EGenericSubPacketType.ClientExtract,
-                        GenericSubPackets.ClientExtract.FromValue(player.NetId), true);
+                        ClientExtract.FromValue(player.NetId), true);
                     ClearHostAI(player);
                 }
                 catch

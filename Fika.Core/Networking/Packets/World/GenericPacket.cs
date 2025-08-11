@@ -3,7 +3,6 @@
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Pooling;
 using LiteNetLib.Utils;
-using static Fika.Core.Networking.Packets.SubPacket;
 
 namespace Fika.Core.Networking.Packets.World
 {

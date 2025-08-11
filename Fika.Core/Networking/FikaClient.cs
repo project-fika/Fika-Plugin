@@ -47,7 +47,6 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using static Fika.Core.Networking.NetworkUtils;
-using static Fika.Core.Networking.Packets.SubPacket;
 
 namespace Fika.Core.Networking
 {
@@ -366,7 +365,7 @@ namespace Fika.Core.Networking
             {
                 RequestPacket request = new()
                 {
-                    Type = SubPacket.ERequestSubPacketType.CharacterSync,
+                    Type = ERequestSubPacketType.CharacterSync,
                     RequestSubPacket = new RequestSubPackets.RequestCharactersPacket(_missingIds)
                 };
 

@@ -8,7 +8,6 @@ using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using LiteNetLib.Utils;
 using System;
-using static Fika.Core.Networking.Packets.SubPacket;
 
 namespace Fika.Core.Networking.Packets.World
 {

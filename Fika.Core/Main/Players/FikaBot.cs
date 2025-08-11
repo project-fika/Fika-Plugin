@@ -12,14 +12,14 @@ using Fika.Core.Main.ObservedClasses;
 using Fika.Core.Main.PacketHandlers;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
+using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.Communication;
+using Fika.Core.Networking.Packets.Player;
 using Fika.Core.Utils;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using static Fika.Core.Networking.Packets.Player.CommonSubPackets;
-using static Fika.Core.Networking.Packets.SubPacket;
 using static Fika.Core.UI.FikaUIGlobals;
 
 namespace Fika.Core.Main.Players

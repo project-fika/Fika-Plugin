@@ -19,6 +19,7 @@ using Fika.Core.Main.ObservedClasses.Snapshotting;
 using Fika.Core.Main.PacketHandlers;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
+using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.Communication;
 using Fika.Core.Networking.Packets.Player;
 using Fika.Core.Utils;
@@ -30,8 +31,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine.Audio;
-using static Fika.Core.Networking.Packets.Player.CommonSubPackets;
-using static Fika.Core.Networking.Packets.SubPacket;
 using static Fika.Core.Networking.Packets.SubPackets;
 using static Fika.Core.UI.FikaUIGlobals;
 

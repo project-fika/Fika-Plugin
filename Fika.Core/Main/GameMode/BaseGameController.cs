@@ -21,6 +21,7 @@ using Fika.Core.Main.Utils;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking;
+using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.Backend;
 using Fika.Core.Networking.Packets.World;
 using Fika.Core.Utils;
@@ -32,8 +33,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine.Events;
-using static Fika.Core.Networking.Packets.SubPacket;
-using static Fika.Core.Networking.Packets.World.GenericSubPackets;
 using static LocationSettingsClass;
 
 namespace Fika.Core.Main.GameMode

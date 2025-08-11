@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Fika.Core.Networking.Packets;
+using Fika.Core.Networking.Packets.FirearmController;
+using System;
 using System.Threading;
-using static Fika.Core.Networking.Packets.FirearmController.FirearmSubPackets;
-using static Fika.Core.Networking.Packets.SubPacket;
 
 namespace Fika.Core.Networking.Pooling
 {

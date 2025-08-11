@@ -2,9 +2,8 @@
 
 using EFT.InventoryLogic;
 using Fika.Core.Main.Players;
+using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.FirearmController;
-using static Fika.Core.Networking.Packets.FirearmController.FirearmSubPackets;
-using static Fika.Core.Networking.Packets.SubPacket;
 
 namespace Fika.Core.Main.ClientClasses.HandsControllers
 {

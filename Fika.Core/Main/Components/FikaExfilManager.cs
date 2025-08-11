@@ -5,10 +5,10 @@ using EFT.Interactive.SecretExfiltrations;
 using Fika.Core.Main.GameMode;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking;
+using Fika.Core.Networking.Packets;
+using Fika.Core.Networking.Packets.World;
 using System.Collections.Generic;
 using System.Linq;
-using static Fika.Core.Networking.Packets.SubPacket;
-using static Fika.Core.Networking.Packets.World.GenericSubPackets;
 
 namespace Fika.Core.Main.Components
 {

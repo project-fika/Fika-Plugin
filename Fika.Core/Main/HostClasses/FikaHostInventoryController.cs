@@ -55,7 +55,7 @@ namespace Fika.Core.Main.HostClasses
             {
                 RequestPacket request = new()
                 {
-                    Type = SubPacket.ERequestSubPacketType.TraderServices,
+                    Type = ERequestSubPacketType.TraderServices,
                     RequestSubPacket = new RequestSubPackets.TraderServicesRequest()
                     {
                         NetId = _fikaPlayer.NetId,

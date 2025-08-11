@@ -1,9 +1,9 @@
 ﻿using Fika.Core.Main.Utils;
+using Fika.Core.Networking.Packets;
 using LiteNetLib.Utils;
-using static Fika.Core.Networking.Packets.SubPacket;
 using static Fika.Core.Networking.Packets.World.RequestSubPackets;
 
-namespace Fika.Core.Networking
+namespace Fika.Core.Networking.Packets.World
 {
     public class RequestPacket : INetSerializable
     {
@@ -20,7 +20,7 @@ namespace Fika.Core.Networking
             _hasSubPacket = reader.GetBool();
             if (_hasSubPacket)
             {
-                RequestSubPacket = FikaSerializationExtensions.GetRequestSubPacket(reader, Type);
+                RequestSubPacket = reader.GetRequestSubPacket(Type);
                 return;
             }
 

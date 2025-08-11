@@ -11,7 +11,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using static Fika.Core.Networking.Packets.World.GenericSubPackets;
 
 namespace Fika.Core.Main.HostClasses
 {
@@ -93,7 +92,7 @@ namespace Fika.Core.Main.HostClasses
                 return;
             }
 
-            Server.SendGenericPacket(SubPacket.EGenericSubPacketType.Mine,
+            Server.SendGenericPacket(EGenericSubPacketType.Mine,
                 MineEvent.FromValue(directional.transform.position), true);
         }
 
