@@ -8,7 +8,7 @@ using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.FirearmController;
-using Fika.Core.Networking.Pools;
+using Fika.Core.Networking.Pooling;
 using System;
 using System.Collections.Generic;
 using static Fika.Core.Networking.Packets.FirearmController.FirearmSubPackets;

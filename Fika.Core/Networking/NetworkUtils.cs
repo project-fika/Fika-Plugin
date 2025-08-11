@@ -88,6 +88,7 @@ namespace Fika.Core.Networking
             /// A packet that implements <see cref="INetSerializable"/>
             /// </summary>
             Serializable,
+            PlayerState,
             /// <summary>
             /// A voip packet that contains a raw byte array
             /// </summary>

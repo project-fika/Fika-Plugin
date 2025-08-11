@@ -3,7 +3,7 @@ using System.Threading;
 using static Fika.Core.Networking.Packets.FirearmController.FirearmSubPackets;
 using static Fika.Core.Networking.Packets.SubPacket;
 
-namespace Fika.Core.Networking.Pools
+namespace Fika.Core.Networking.Pooling
 {
     internal sealed class FirearmSubPacketPoolManager : BasePacketPoolManager<EFirearmSubPacketType, IPoolSubPacket>
     {

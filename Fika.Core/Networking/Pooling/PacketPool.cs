@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using static Fika.Core.Networking.Packets.SubPacket;
 
-namespace Fika.Core.Networking.Pools
+namespace Fika.Core.Networking.Pooling
 {
     /// <summary>
     /// A pool for reusable packets of type <typeparamref name="T"/>.

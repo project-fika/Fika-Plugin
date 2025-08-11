@@ -31,7 +31,7 @@ using Fika.Core.Networking.Packets.Debug;
 using Fika.Core.Networking.Packets.FirearmController;
 using Fika.Core.Networking.Packets.Player;
 using Fika.Core.Networking.Packets.World;
-using Fika.Core.Networking.Pools;
+using Fika.Core.Networking.Pooling;
 using Fika.Core.Networking.VOIP;
 using Fika.Core.UI.Custom;
 using Fika.Core.Utils;
@@ -131,7 +131,7 @@ namespace Fika.Core.Networking
 
         [NativeDisableContainerSafetyRestriction]
         [NativeDisableParallelForRestriction]
-        private NativeArray<PlayerStatePacket> _snapshots;
+        private NativeArray<ArraySegment<byte>> _snapshots;
 
         public async void Init()
         {
@@ -1108,11 +1108,11 @@ namespace Fika.Core.Networking
 
         private void OnPlayerStatePacketReceived(PlayerStatePacket packet)
         {
-            if (_snapshotCount < _snapshots.Length)
+            /*if (_snapshotCount < _snapshots.Length)
             {
                 _snapshots[_snapshotCount] = packet;
                 _snapshotCount++;
-            }
+            }*/
         }
 
         protected void Update()
@@ -1142,17 +1142,26 @@ namespace Fika.Core.Networking
 
         protected void LateUpdate()
         {
-            _stateHandle.Complete();
-            for (int i = 0; i < ObservedCoopPlayers.Count; i++)
+            try
             {
-                ObservedPlayer player = ObservedCoopPlayers[i];
-                if (player.CurrentPlayerState.ShouldUpdate)
+                _stateHandle.Complete();
+                for (int i = 0; i < ObservedCoopPlayers.Count; i++)
                 {
-                    player.ManualStateUpdate();
+                    ObservedPlayer player = ObservedCoopPlayers[i];
+                    if (player.CurrentPlayerState.ShouldUpdate)
+                    {
+                        player.ManualStateUpdate();
+                    }
                 }
             }
-
-            _snapshotCount = 0;
+            finally
+            {
+                for (int i = 0; i < _snapshotCount; i++)
+                {
+                    ArraySegmentPooling.Return(_snapshots[i]);
+                }
+                _snapshotCount = 0;
+            }
         }
 
         protected void OnDestroy()
@@ -1183,6 +1192,16 @@ namespace Fika.Core.Networking
                 _packetProcessor.WriteNetSerializable(_dataWriter, ref packet);
                 peer.Send(_dataWriter.AsReadOnlySpan, deliveryMethod);
             }
+        }
+
+        public void SendPlayerState(ref PlayerStatePacket2 packet)
+        {
+            _dataWriter.Reset();
+            _dataWriter.Put(true);
+            _dataWriter.PutEnum(EPacketType.PlayerState);
+            _dataWriter.PutUnmanaged(packet);
+
+            _netClient.SendToAll(_dataWriter.AsReadOnlySpan, DeliveryMethod.Unreliable);
         }
 
         public void SendNetReusable<T>(ref T packet, DeliveryMethod deliveryMethod, bool multicast = false) where T : INetReusable
@@ -1289,9 +1308,16 @@ namespace Fika.Core.Networking
                 case EPacketType.Serializable:
                     _packetProcessor.ReadAllPackets(reader, peer);
                     break;
+                case EPacketType.PlayerState:
+                    if (_snapshotCount < _snapshots.Length)
+                    {
+                        _snapshots[_snapshotCount++] = ArraySegmentPooling.Get(reader.GetRemainingBytesSpan());
+                    }                    
+                    break;
                 case EPacketType.VOIP:
                     VOIPClient.NetworkReceivedPacket(reader.GetRemainingBytesSegment());
                     break;
+                
             }
         }
 

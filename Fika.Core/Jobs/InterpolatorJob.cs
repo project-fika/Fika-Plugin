@@ -2,19 +2,20 @@
 using Fika.Core.Main.Players;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Player;
+using System;
 using Unity.Collections;
 using Unity.Jobs;
 
 namespace Fika.Core.Jobs
 {
-    internal readonly struct InterpolatorJob(float unscaledDeltaTime, double networkTime, NativeArray<PlayerStatePacket> snapshots, int amount) : IJob
+    internal readonly struct InterpolatorJob(float unscaledDeltaTime, double networkTime, NativeArray<ArraySegment<byte>> snapshots, int amount) : IJob
     {
         [ReadOnly]
         public readonly float _unscaledDeltaTime = unscaledDeltaTime;
         [ReadOnly]
         private readonly double _networkTime = networkTime;
         [ReadOnly]
-        private readonly NativeArray<PlayerStatePacket> _snapshots = snapshots;
+        private readonly NativeArray<ArraySegment<byte>> _snapshots = snapshots;
         [ReadOnly]
         private readonly int _amount = amount;
 
@@ -23,7 +24,8 @@ namespace Fika.Core.Jobs
             IFikaNetworkManager netManager = Singleton<IFikaNetworkManager>.Instance;
             for (int i = 0; i < _amount; i++)
             {
-                PlayerStatePacket packet = _snapshots[i];
+                ArraySegment<byte> buffer = _snapshots[i];
+                PlayerStatePacket2 packet = PlayerStatePacket2.FromBuffer(in buffer);
                 if (netManager.CoopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer player))
                 {
                     player.Snapshotter.Insert(ref packet, _networkTime);

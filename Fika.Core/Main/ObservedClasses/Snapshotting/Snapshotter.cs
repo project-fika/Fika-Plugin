@@ -8,7 +8,7 @@ namespace Fika.Core.Main.ObservedClasses.Snapshotting
 {
     public class Snapshotter
     {
-        private readonly SortedList<double, PlayerStatePacket> _buffer;
+        private readonly SortedList<double, PlayerStatePacket2> _buffer;
         private double _localTimeline;
         private double _localTimeScale;
         private readonly SnapshotInterpolationSettings _interpolationSettings;
@@ -45,14 +45,14 @@ namespace Fika.Core.Main.ObservedClasses.Snapshotting
         }
 
         /// <summary>
-        /// Checks the <see cref="_buffer"/> and <see cref="Interpolate(in PlayerStatePacket, in PlayerStatePacket, float)"/>s any snapshots
+        /// Checks the <see cref="_buffer"/> and <see cref="Interpolate(in PlayerStatePacket2, in PlayerStatePacket2, float)"/>s any snapshots
         /// </summary>
         public void ManualUpdate(float unscaledDeltaTime)
         {
             if (_buffer.Count > 0)
             {
-                SnapshotInterpolation.Step(_buffer, unscaledDeltaTime, ref _localTimeline, _localTimeScale, out PlayerStatePacket fromSnapshot,
-                    out PlayerStatePacket toSnapshot, out double ratio);
+                SnapshotInterpolation.Step(_buffer, unscaledDeltaTime, ref _localTimeline, _localTimeScale, out PlayerStatePacket2 fromSnapshot,
+                    out PlayerStatePacket2 toSnapshot, out double ratio);
                 Interpolate(in toSnapshot, in fromSnapshot, (float)ratio);
             }
         }
@@ -63,7 +63,7 @@ namespace Fika.Core.Main.ObservedClasses.Snapshotting
         /// <param name="to">Goal state</param>
         /// <param name="from">State to lerp from</param>
         /// <param name="ratio">Interpolation ratio</param>
-        public void Interpolate(in PlayerStatePacket to, in PlayerStatePacket from, float ratio)
+        public void Interpolate(in PlayerStatePacket2 to, in PlayerStatePacket2 from, float ratio)
         {
             ObservedState currentState = _player.CurrentPlayerState;
             currentState.ShouldUpdate = true;
@@ -107,7 +107,7 @@ namespace Fika.Core.Main.ObservedClasses.Snapshotting
         /// Inserts a snapshot to the <see cref="_buffer"/>
         /// </summary>
         /// <param name="snapshot"></param>
-        public void Insert(ref PlayerStatePacket snapshot, double networkTime)
+        public void Insert(ref PlayerStatePacket2 snapshot, double networkTime)
         {
             lock (_bufferLock)
             {

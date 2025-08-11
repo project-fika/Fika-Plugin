@@ -7,7 +7,7 @@ using EFT.WeaponMounting;
 using Fika.Core.Main.ObservedClasses;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
-using Fika.Core.Networking.Pools;
+using Fika.Core.Networking.Pooling;
 using LiteNetLib.Utils;
 using System;
 using static Fika.Core.Main.Players.FikaPlayer;

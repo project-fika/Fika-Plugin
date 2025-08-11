@@ -4,7 +4,7 @@ using System.Threading;
 using static Fika.Core.Networking.Packets.Player.CommonSubPackets;
 using static Fika.Core.Networking.Packets.SubPacket;
 
-namespace Fika.Core.Networking.Pools
+namespace Fika.Core.Networking.Pooling
 {
     internal sealed class CommonSubPacketPoolManager : BasePacketPoolManager<ECommonSubPacketType, IPoolSubPacket>
     {

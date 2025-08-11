@@ -22,7 +22,7 @@ using Fika.Core.Networking.Packets.Communication;
 using Fika.Core.Networking.Packets.FirearmController;
 using Fika.Core.Networking.Packets.Player;
 using Fika.Core.Networking.Packets.World;
-using Fika.Core.Networking.Pools;
+using Fika.Core.Networking.Pooling;
 using Fika.Core.Networking.VOIP;
 using HarmonyLib;
 using JsonType;

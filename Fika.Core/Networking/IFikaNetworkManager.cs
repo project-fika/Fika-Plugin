@@ -3,6 +3,7 @@ using Fika.Core.Main.Components;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.Communication;
+using Fika.Core.Networking.Packets.Player;
 using LiteNetLib.Utils;
 using System;
 using System.Collections.Generic;
@@ -39,6 +40,7 @@ namespace Fika.Core.Networking
         /// Should only be used as a <see cref="FikaServer"/>, since a <see cref="FikaClient"/> only has one <see cref="NetPeer"/>
         /// </remarks>
         public void SendDataToPeer<T>(ref T packet, DeliveryMethod deliveryMethod, NetPeer peer) where T : INetSerializable;
+        public void SendPlayerState(ref PlayerStatePacket2 packet);
         public void SendVOIPData(ArraySegment<byte> data, DeliveryMethod deliveryMethod, NetPeer peer = null);
         /// <summary>
         /// Registers a packet to the <see cref="NetPacketProcessor"/>

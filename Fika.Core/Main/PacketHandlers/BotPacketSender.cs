@@ -15,7 +15,7 @@ namespace Fika.Core.Main.PacketHandlers
 
         private FikaPlayer _player;
         private bool _sendPackets;
-        private PlayerStatePacket _state;
+        private PlayerStatePacket2 _state;
         private int _animHash;
         private bool IsMoving
         {
@@ -30,7 +30,10 @@ namespace Fika.Core.Main.PacketHandlers
             BotPacketSender sender = bot.gameObject.AddComponent<BotPacketSender>();
             sender._player = bot;
             sender.NetworkManager = Singleton<FikaServer>.Instance;
-            sender._state = new(bot.NetId);
+            sender._state = new()
+            {
+                NetId = (byte)bot.NetId
+            };
             sender._animHash = PlayerAnimator.INERT_PARAM_HASH;
             sender.SendState = true;
             return sender;
@@ -58,8 +61,8 @@ namespace Fika.Core.Main.PacketHandlers
                 return;
             }
 
-            _state.UpdateData(_player, IsMoving);
-            NetworkManager.SendData(ref _state, DeliveryMethod.Unreliable);
+            _state.UpdateFromPlayer(_player, IsMoving);
+            NetworkManager.SendPlayerState(ref _state);
         }
 
         public void DestroyThis()
