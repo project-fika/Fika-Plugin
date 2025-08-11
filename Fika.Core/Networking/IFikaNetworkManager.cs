@@ -2,7 +2,6 @@
 using Fika.Core.Main.Components;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Packets;
-using Fika.Core.Networking.Packets.Communication;
 using Fika.Core.Networking.Packets.Player;
 using LiteNetLib.Utils;
 using System;

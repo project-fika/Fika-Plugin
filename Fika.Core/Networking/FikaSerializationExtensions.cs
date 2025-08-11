@@ -11,7 +11,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using static BasePhysicalClass;
-using static Fika.Core.Networking.Packets.Player.CommonSubPackets;
 using static Fika.Core.Networking.Packets.SubPacket;
 using static Fika.Core.Networking.Packets.SubPackets;
 using static Fika.Core.Networking.Packets.World.GenericSubPackets;

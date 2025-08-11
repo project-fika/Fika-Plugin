@@ -19,14 +19,11 @@ using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Packets.Communication;
-using Fika.Core.Networking.Packets.FirearmController;
 using Fika.Core.Networking.Packets.Player;
 using Fika.Core.Networking.Packets.World;
-using Fika.Core.Networking.Pooling;
 using Fika.Core.Networking.VOIP;
 using HarmonyLib;
 using JsonType;
-using RootMotion.FinalIK;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -961,7 +958,7 @@ namespace Fika.Core.Main.Players
             if (IsAI || IsYourPlayer)
             {
                 CommonPacket?.Clear();
-                CommonPacket = null; 
+                CommonPacket = null;
             }
             base.OnDestroy();
         }

@@ -115,7 +115,7 @@ namespace Fika.Core.UI.Patches
                         ____toggleButtons.Remove(EMenuType.NewsHub);
                         ____hoverTooltipAreas.Remove(EMenuType.NewsHub);
                         GameObject.Destroy(surveyButton.gameObject);
-                        List<GameObject> newList = new(____newInformation);
+                        List<GameObject> newList = [.. ____newInformation];
                         newList.Remove(newList.Last());
                         ____newInformation = [.. newList];
 

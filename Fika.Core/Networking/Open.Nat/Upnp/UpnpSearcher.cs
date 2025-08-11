@@ -55,7 +55,7 @@ namespace Open.Nat
             _ipprovider = ipprovider;
             UdpClients = CreateUdpClients();
             _devices = new Dictionary<Uri, NatDevice>();
-            _lastFetched = new Dictionary<IPAddress, DateTime>();
+            _lastFetched = [];
         }
 
         private List<UdpClient> CreateUdpClients()

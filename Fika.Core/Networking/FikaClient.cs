@@ -1312,12 +1312,12 @@ namespace Fika.Core.Networking
                     if (_snapshotCount < _snapshots.Length)
                     {
                         _snapshots[_snapshotCount++] = ArraySegmentPooling.Get(reader.GetRemainingBytesSpan());
-                    }                    
+                    }
                     break;
                 case EPacketType.VOIP:
                     VOIPClient.NetworkReceivedPacket(reader.GetRemainingBytesSegment());
                     break;
-                
+
             }
         }
 

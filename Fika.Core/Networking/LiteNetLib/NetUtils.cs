@@ -23,7 +23,7 @@ namespace LiteNetLib
     /// </summary>
     public static class NetUtils
     {
-        private static readonly NetworkSorter NetworkSorter = new NetworkSorter();
+        private static readonly NetworkSorter NetworkSorter = new();
 
         public static IPEndPoint MakeEndPoint(string hostStr, int port)
         {
@@ -68,7 +68,7 @@ namespace LiteNetLib
         /// <returns>List with all local ip addresses</returns>
         public static List<string> GetLocalIpList(LocalAddrType addrType)
         {
-            List<string> targetList = new List<string>();
+            List<string> targetList = [];
             GetLocalIpList(targetList, addrType);
             return targetList;
         }
@@ -137,7 +137,7 @@ namespace LiteNetLib
             }
         }
 
-        private static readonly List<string> IpList = new List<string>();
+        private static readonly List<string> IpList = [];
         /// <summary>
         /// Get first detected local ip address
         /// </summary>

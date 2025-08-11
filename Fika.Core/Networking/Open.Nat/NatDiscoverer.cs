@@ -26,14 +26,14 @@ namespace Open.Nat
         /// <remarks>
         /// Open.NAT only supports SourceLevels.Verbose, SourceLevels.Error, SourceLevels.Warning and SourceLevels.Information.
         /// </remarks>
-        public readonly static TraceSource TraceSource = new TraceSource("Open.NAT");
+        public readonly static TraceSource TraceSource = new("Open.NAT");
 
-        private static readonly Dictionary<string, NatDevice> Devices = new Dictionary<string, NatDevice>();
+        private static readonly Dictionary<string, NatDevice> Devices = [];
 
         // Finalizer is never used however its destructor, that releases the open ports, is invoked by the
         // process as part of the shuting down step. So, don't remove it!
-        private static readonly Finalizer Finalizer = new Finalizer();
-        internal static readonly Timer RenewTimer = new Timer(RenewMappings, null, 5000, 2000);
+        private static readonly Finalizer Finalizer = new();
+        internal static readonly Timer RenewTimer = new(RenewMappings, null, 5000, 2000);
 
         /// <summary>
         /// Discovers and returns an UPnp or Pmp NAT device; otherwise a <see cref="NatDeviceNotFoundException">NatDeviceNotFoundException</see>

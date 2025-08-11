@@ -1088,21 +1088,21 @@ internal unsafe partial class LL64
         return 0;
     }
 
-    protected static cParams_t[] clTable = {
-        new cParams_t(lz4hc_strat_e.lz4hc, 2, 16), /* 0, unused */
-		new cParams_t(lz4hc_strat_e.lz4hc, 2, 16), /* 1, unused */
-		new cParams_t(lz4hc_strat_e.lz4hc, 2, 16), /* 2, unused */
-		new cParams_t(lz4hc_strat_e.lz4hc, 4, 16), /* 3 */
-		new cParams_t(lz4hc_strat_e.lz4hc, 8, 16), /* 4 */
-		new cParams_t(lz4hc_strat_e.lz4hc, 16, 16), /* 5 */
-		new cParams_t(lz4hc_strat_e.lz4hc, 32, 16), /* 6 */
-		new cParams_t(lz4hc_strat_e.lz4hc, 64, 16), /* 7 */
-		new cParams_t(lz4hc_strat_e.lz4hc, 128, 16), /* 8 */
-		new cParams_t(lz4hc_strat_e.lz4hc, 256, 16), /* 9 */
-		new cParams_t(lz4hc_strat_e.lz4opt, 96, 64), /*10==LZ4HC_CLEVEL_OPT_MIN*/
-		new cParams_t(lz4hc_strat_e.lz4opt, 512, 128), /*11 */
-		new cParams_t(lz4hc_strat_e.lz4opt, 16384, LZ4_OPT_NUM), /* 12==LZ4HC_CLEVEL_MAX */
-	};
+    protected static cParams_t[] clTable = [
+        new(lz4hc_strat_e.lz4hc, 2, 16), /* 0, unused */
+		new(lz4hc_strat_e.lz4hc, 2, 16), /* 1, unused */
+		new(lz4hc_strat_e.lz4hc, 2, 16), /* 2, unused */
+		new(lz4hc_strat_e.lz4hc, 4, 16), /* 3 */
+		new(lz4hc_strat_e.lz4hc, 8, 16), /* 4 */
+		new(lz4hc_strat_e.lz4hc, 16, 16), /* 5 */
+		new(lz4hc_strat_e.lz4hc, 32, 16), /* 6 */
+		new(lz4hc_strat_e.lz4hc, 64, 16), /* 7 */
+		new(lz4hc_strat_e.lz4hc, 128, 16), /* 8 */
+		new(lz4hc_strat_e.lz4hc, 256, 16), /* 9 */
+		new(lz4hc_strat_e.lz4opt, 96, 64), /*10==LZ4HC_CLEVEL_OPT_MIN*/
+		new(lz4hc_strat_e.lz4opt, 512, 128), /*11 */
+		new(lz4hc_strat_e.lz4opt, 16384, LZ4_OPT_NUM), /* 12==LZ4HC_CLEVEL_MAX */
+	];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int LZ4HC_compress_generic_internal(

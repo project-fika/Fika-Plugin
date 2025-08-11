@@ -94,12 +94,12 @@ namespace LiteNetLib
         }
 
         private readonly NetManager _socket;
-        private readonly ConcurrentQueue<RequestEventData> _requestEvents = new ConcurrentQueue<RequestEventData>();
-        private readonly ConcurrentQueue<SuccessEventData> _successEvents = new ConcurrentQueue<SuccessEventData>();
-        private readonly ConcurrentQueue<ResponseEventData> _responseEvents = new ConcurrentQueue<ResponseEventData>();
-        private readonly NetDataReader _cacheReader = new NetDataReader();
-        private readonly NetDataWriter _cacheWriter = new NetDataWriter();
-        private readonly NetPacketProcessor _netPacketProcessor = new NetPacketProcessor(MaxTokenLength);
+        private readonly ConcurrentQueue<RequestEventData> _requestEvents = new();
+        private readonly ConcurrentQueue<SuccessEventData> _successEvents = new();
+        private readonly ConcurrentQueue<ResponseEventData> _responseEvents = new();
+        private readonly NetDataReader _cacheReader = new();
+        private readonly NetDataWriter _cacheWriter = new();
+        private readonly NetPacketProcessor _netPacketProcessor = new(MaxTokenLength);
         private INatPunchListener _natPunchListener;
         public const int MaxTokenLength = 256;
 
@@ -151,12 +151,11 @@ namespace LiteNetLib
         {
             var req = new NatIntroduceResponsePacket
             {
-                Token = additionalInfo
+                Token = additionalInfo,
+                //First packet (server) send to client
+                Internal = hostInternal,
+                External = hostExternal
             };
-
-            //First packet (server) send to client
-            req.Internal = hostInternal;
-            req.External = hostExternal;
             Send(req, clientExternal);
 
             //Second packet (client) send to server

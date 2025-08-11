@@ -129,13 +129,13 @@ namespace LiteNetLib
             public IPEndPoint EndPoint;
             public DateTime TimeWhenGet;
         }
-        private readonly List<IncomingData> _pingSimulationList = new List<IncomingData>();
-        private readonly System.Random _randomGenerator = new System.Random();
+        private readonly List<IncomingData> _pingSimulationList = [];
+        private readonly System.Random _randomGenerator = new();
         private const int MinLatencyThreshold = 5;
 
         private Thread _logicThread;
         private bool _manualMode;
-        private readonly AutoResetEvent _updateTriggerEvent = new AutoResetEvent(true);
+        private readonly AutoResetEvent _updateTriggerEvent = new(true);
 
         private NetEvent _pendingEventHead;
         private NetEvent _pendingEventTail;
@@ -146,15 +146,15 @@ namespace LiteNetLib
         private readonly INtpEventListener _ntpEventListener;
         private readonly IPeerAddressChangedListener _peerAddressChangedListener;
 
-        private readonly Dictionary<IPEndPoint, ConnectionRequest> _requestsDict = new Dictionary<IPEndPoint, ConnectionRequest>();
-        private readonly ConcurrentDictionary<IPEndPoint, NtpRequest> _ntpRequests = new ConcurrentDictionary<IPEndPoint, NtpRequest>();
+        private readonly Dictionary<IPEndPoint, ConnectionRequest> _requestsDict = [];
+        private readonly ConcurrentDictionary<IPEndPoint, NtpRequest> _ntpRequests = new();
         private long _connectedPeersCount;
-        private readonly List<NetPeer> _connectedPeerListCache = new List<NetPeer>();
+        private readonly List<NetPeer> _connectedPeerListCache = [];
         private readonly PacketLayerBase _extraPacketLayer;
         private int _lastPeerId;
-        private ConcurrentQueue<int> _peerIds = new ConcurrentQueue<int>();
+        private ConcurrentQueue<int> _peerIds = new();
         private byte _channelsCount = 1;
-        private readonly object _eventLock = new object();
+        private readonly object _eventLock = new();
 
         /// <summary>
         ///     Used with <see cref="SimulateLatency"/> and <see cref="SimulatePacketLoss"/> to tag packets that
@@ -261,7 +261,7 @@ namespace LiteNetLib
         /// <summary>
         /// Statistics of all connections
         /// </summary>
-        public readonly NetStatistics Statistics = new NetStatistics();
+        public readonly NetStatistics Statistics = new();
 
         /// <summary>
         /// Toggles the collection of network statistics for the instance and all known peers
@@ -649,7 +649,7 @@ namespace LiteNetLib
                 if (ntpRequest.Value.NeedToKill)
                 {
                     if (requestsToRemove == null)
-                        requestsToRemove = new List<IPEndPoint>();
+                        requestsToRemove = [];
                     requestsToRemove.Add(ntpRequest.Key);
                 }
             }

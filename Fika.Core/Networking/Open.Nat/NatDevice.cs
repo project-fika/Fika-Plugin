@@ -52,7 +52,7 @@ namespace Open.Nat
         /// </summary>
         public abstract IPAddress LocalAddress { get; }
 
-        private readonly HashSet<Mapping> _openedMapping = new HashSet<Mapping>();
+        private readonly HashSet<Mapping> _openedMapping = [];
         protected DateTime LastSeen { get; private set; }
 
         internal void Touch()

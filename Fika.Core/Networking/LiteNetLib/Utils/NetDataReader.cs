@@ -1,5 +1,4 @@
-﻿using Fika.Core.Main.Utils;
-using System;
+﻿using System;
 using System.Net;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -589,7 +588,7 @@ namespace LiteNetLib.Utils
             if (_position + size > _data.Length)
             {
                 throw new IndexOutOfRangeException("Not enough data to read");
-            } 
+            }
 #endif
 
             T value = Unsafe.ReadUnaligned<T>(ref _data[_position]);

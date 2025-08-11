@@ -50,8 +50,8 @@ namespace Open.Nat
 
         private void CreateSocketsAndAddGateways()
         {
-            UdpClients = new List<UdpClient>();
-            _gatewayLists = new Dictionary<UdpClient, IEnumerable<IPEndPoint>>();
+            UdpClients = [];
+            _gatewayLists = [];
 
             try
             {

@@ -37,7 +37,7 @@ namespace Fika.Core.Networking.Packets.FirearmController
             if (SubPacket != null)
             {
                 FirearmSubPacketPoolManager.Instance.ReturnPacket(Type, SubPacket);
-                SubPacket = null; 
+                SubPacket = null;
             }
         }
 

@@ -60,12 +60,12 @@ namespace LiteNetLib
         private double _resendDelay = 27.0;
         private float _pingSendTimer;
         private float _rttResetTimer;
-        private readonly Stopwatch _pingTimer = new Stopwatch();
+        private readonly Stopwatch _pingTimer = new();
         private volatile float _timeSinceLastPacket;
         private long _remoteDelta;
 
         //Common
-        private readonly object _shutdownLock = new object();
+        private readonly object _shutdownLock = new();
 
         internal volatile NetPeer NextPeer;
         internal NetPeer PrevPeer;
@@ -86,7 +86,7 @@ namespace LiteNetLib
         private NetPacket[] _unreliableSecondQueue;
         private NetPacket[] _unreliableChannel;
         private int _unreliablePendingCount;
-        private readonly object _unreliableChannelLock = new object();
+        private readonly object _unreliableChannelLock = new();
 
         private readonly ConcurrentQueue<BaseChannel> _channelSendQueue;
         private readonly BaseChannel[] _channels;
@@ -99,7 +99,7 @@ namespace LiteNetLib
         private int _mtuCheckAttempts;
         private const int MtuCheckDelay = 1000;
         private const int MaxMtuCheckAttempts = 4;
-        private readonly object _mtuMutex = new object();
+        private readonly object _mtuMutex = new();
 
         //Fragment
         private class IncomingFragments
@@ -181,7 +181,7 @@ namespace LiteNetLib
         /// <summary>
         /// Remote UTC time (not accurate)
         /// </summary>
-        public DateTime RemoteUtcTime => new DateTime(DateTime.UtcNow.Ticks + _remoteDelta);
+        public DateTime RemoteUtcTime => new(DateTime.UtcNow.Ticks + _remoteDelta);
 
         /// <summary>
         /// Time since last packet received (including internal library packets) in milliseconds
@@ -249,8 +249,8 @@ namespace LiteNetLib
 
             _unreliableSecondQueue = new NetPacket[8];
             _unreliableChannel = new NetPacket[8];
-            _holdedFragments = new Dictionary<ushort, IncomingFragments>();
-            _deliveredFragments = new Dictionary<ushort, ushort>();
+            _holdedFragments = [];
+            _deliveredFragments = [];
 
             _channels = new BaseChannel[netManager.ChannelsCount * NetConstants.ChannelTypeCount];
             _channelSendQueue = new ConcurrentQueue<BaseChannel>();

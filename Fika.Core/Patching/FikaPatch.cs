@@ -60,7 +60,7 @@ namespace Fika.Core.Patching
         private List<HarmonyMethod> GetPatchMethods(Type attributeType)
         {
             Type T = GetType();
-            List<HarmonyMethod> methods = new();
+            List<HarmonyMethod> methods = [];
 
             foreach (MethodInfo method in T.GetMethods(BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.DeclaredOnly))
             {

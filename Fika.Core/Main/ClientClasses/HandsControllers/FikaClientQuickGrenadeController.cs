@@ -1,7 +1,6 @@
 ﻿// © 2025 Lacyway All Rights Reserved
 
 using Fika.Core.Main.Players;
-using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.FirearmController;
 using static Fika.Core.Networking.Packets.FirearmController.FirearmSubPackets;
 using static Fika.Core.Networking.Packets.SubPacket;

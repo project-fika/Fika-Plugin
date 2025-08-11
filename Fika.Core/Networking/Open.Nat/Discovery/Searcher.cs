@@ -38,7 +38,7 @@ namespace Open.Nat
 {
     internal abstract class Searcher
     {
-        private readonly List<NatDevice> _devices = new List<NatDevice>();
+        private readonly List<NatDevice> _devices = [];
         protected List<UdpClient> UdpClients;
         public EventHandler<DeviceEventArgs> DeviceFound;
         internal DateTime NextSearch = DateTime.UtcNow;

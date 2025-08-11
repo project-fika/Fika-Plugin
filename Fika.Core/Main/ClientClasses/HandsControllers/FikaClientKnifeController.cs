@@ -2,7 +2,6 @@
 
 using EFT.InventoryLogic;
 using Fika.Core.Main.Players;
-using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.FirearmController;
 using static Fika.Core.Networking.Packets.FirearmController.FirearmSubPackets;
 using static Fika.Core.Networking.Packets.SubPacket;
