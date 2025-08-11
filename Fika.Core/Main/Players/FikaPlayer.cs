@@ -327,7 +327,7 @@ namespace Fika.Core.Main.Players
         {
             base.Proceed(withNetwork, callback, scheduled);
             CommonPacket.Type = ECommonSubPacketType.Proceed;
-            CommonPacket.SubPacket = ProceedPacket.FromValue(default, null, 0f, 0, EProceedType.EmptyHands, scheduled);
+            CommonPacket.SubPacket = ProceedPacket.FromValue(default, default, 0f, 0, EProceedType.EmptyHands, scheduled);
             PacketSender.NetworkManager.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
         }
 
