@@ -37,7 +37,7 @@ namespace LiteNetLib.Utils
         {
             get
             {
-                return Data.AsSpan();
+                return new(Data, 0, Length);
             }
         }
 
