@@ -22,7 +22,7 @@ namespace Fika.Core.Networking.Packets.Player
 
             NetworkHealthSyncPacketStruct packet = new()
             {
-                SyncType = (ESyncType)reader.GetByte()
+                SyncType = reader.GetEnum<ESyncType>()
             };
             ref NetworkHealthDataPacketStruct data = ref packet.Data;
 
@@ -33,13 +33,13 @@ namespace Fika.Core.Networking.Packets.Player
                         ref NetworkHealthExtraDataTypeStruct addEffect = ref data.AddEffect;
                         addEffect.EffectId = reader.GetInt();
                         addEffect.Type = reader.GetByte();
-                        addEffect.BodyPart = (EBodyPart)reader.GetByte();
+                        addEffect.BodyPart = reader.GetEnum<EBodyPart>();
                         addEffect.DelayTime = reader.GetFloat();
                         addEffect.BuildUpTime = reader.GetFloat();
                         addEffect.WorkTime = reader.GetFloat();
                         addEffect.ResidueTime = reader.GetFloat();
                         addEffect.Strength = reader.GetPackedFloat(-100f, 100f, EFloatCompression.High);
-                        addEffect.ExtraDataType = (EExtraDataType)reader.GetByte();
+                        addEffect.ExtraDataType = reader.GetEnum<EExtraDataType>();
 
                         switch (addEffect.ExtraDataType)
                         {
@@ -106,10 +106,10 @@ namespace Fika.Core.Networking.Packets.Player
 
                         if (!alive.IsAlive)
                         {
-                            alive.DamageType = (EDamageType)reader.GetInt();
+                            alive.DamageType = reader.GetEnum<EDamageType>();
                             KillerId = reader.GetNullableMongoID();
                             WeaponId = reader.GetNullableMongoID();
-                            BodyPart = (EBodyPart)reader.GetByte();
+                            BodyPart = reader.GetEnum<EBodyPart>();
                             CorpseSyncPacket = reader.GetCorpseSyncPacket();
                             TriggerZones = reader.GetStringArray();
                         }
@@ -119,7 +119,7 @@ namespace Fika.Core.Networking.Packets.Player
                 case ESyncType.BodyHealth:
                     {
                         ref GStruct399 bh = ref data.BodyHealth;
-                        bh.BodyPart = (EBodyPart)reader.GetByte();
+                        bh.BodyPart = reader.GetEnum<EBodyPart>();
                         bh.Value = reader.GetFloat();
                         break;
                     }
@@ -143,21 +143,21 @@ namespace Fika.Core.Networking.Packets.Player
                 case ESyncType.ApplyDamage:
                     {
                         ref GStruct403 dmg = ref data.ApplyDamage;
-                        dmg.BodyPart = (EBodyPart)reader.GetByte();
+                        dmg.BodyPart = reader.GetEnum<EBodyPart>();
                         dmg.Damage = reader.GetFloat();
-                        dmg.DamageType = (EDamageType)reader.GetInt();
+                        dmg.DamageType = reader.GetEnum<EDamageType>();
                         break;
                     }
 
                 case ESyncType.DestroyedBodyPart:
                     {
                         ref GStruct404 destroyed = ref data.DestroyedBodyPart;
-                        destroyed.BodyPart = (EBodyPart)reader.GetByte();
+                        destroyed.BodyPart = reader.GetEnum<EBodyPart>();
                         destroyed.IsDestroyed = reader.GetBool();
 
                         if (destroyed.IsDestroyed)
                         {
-                            destroyed.DamageType = (EDamageType)reader.GetInt();
+                            destroyed.DamageType = reader.GetEnum<EDamageType>();
                         }
                         else
                         {
@@ -207,7 +207,7 @@ namespace Fika.Core.Networking.Packets.Player
         {
             writer.Put(NetId);
             ref readonly NetworkHealthDataPacketStruct packet = ref Packet.Data;
-            writer.Put((byte)Packet.SyncType);
+            writer.PutEnum(Packet.SyncType);
 
             switch (Packet.SyncType)
             {
@@ -216,13 +216,13 @@ namespace Fika.Core.Networking.Packets.Player
                         ref readonly NetworkHealthExtraDataTypeStruct addEffect = ref packet.AddEffect;
                         writer.Put(addEffect.EffectId);
                         writer.Put(addEffect.Type);
-                        writer.Put((byte)addEffect.BodyPart);
+                        writer.PutEnum(addEffect.BodyPart);
                         writer.Put(addEffect.DelayTime);
                         writer.Put(addEffect.BuildUpTime);
                         writer.Put(addEffect.WorkTime);
                         writer.Put(addEffect.ResidueTime);
                         writer.PutPackedFloat(addEffect.Strength, -100f, 100f, EFloatCompression.High);
-                        writer.Put((byte)addEffect.ExtraDataType);
+                        writer.PutEnum(addEffect.ExtraDataType);
 
                         switch (addEffect.ExtraDataType)
                         {
@@ -294,10 +294,10 @@ namespace Fika.Core.Networking.Packets.Player
                         writer.Put(alive.IsAlive);
                         if (!alive.IsAlive)
                         {
-                            writer.Put((int)alive.DamageType);
+                            writer.PutEnum(alive.DamageType);
                             writer.PutNullableMongoID(KillerId);
                             writer.PutNullableMongoID(WeaponId);
-                            writer.Put((byte)BodyPart);
+                            writer.PutEnum(BodyPart);
                             writer.PutCorpseSyncPacket(CorpseSyncPacket);
                             writer.PutArray(TriggerZones);
                         }
@@ -307,7 +307,7 @@ namespace Fika.Core.Networking.Packets.Player
                 case ESyncType.BodyHealth:
                     {
                         ref readonly GStruct399 bh = ref packet.BodyHealth;
-                        writer.Put((byte)bh.BodyPart);
+                        writer.PutEnum(bh.BodyPart);
                         writer.Put(bh.Value);
                         break;
                     }
@@ -331,19 +331,19 @@ namespace Fika.Core.Networking.Packets.Player
                 case ESyncType.ApplyDamage:
                     {
                         ref readonly GStruct403 dmg = ref packet.ApplyDamage;
-                        writer.Put((byte)dmg.BodyPart);
+                        writer.PutEnum(dmg.BodyPart);
                         writer.Put(dmg.Damage);
-                        writer.Put((int)dmg.DamageType);
+                        writer.PutEnum(dmg.DamageType);
                         break;
                     }
 
                 case ESyncType.DestroyedBodyPart:
                     {
                         ref readonly GStruct404 destroyed = ref packet.DestroyedBodyPart;
-                        writer.Put((byte)destroyed.BodyPart);
+                        writer.PutEnum(destroyed.BodyPart);
                         writer.Put(destroyed.IsDestroyed);
                         if (destroyed.IsDestroyed)
-                            writer.Put((int)destroyed.DamageType);
+                            writer.PutEnum(destroyed.DamageType);
                         else
                             writer.Put(destroyed.HealthMaximum);
                         break;
