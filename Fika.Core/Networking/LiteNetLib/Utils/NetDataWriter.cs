@@ -31,13 +31,13 @@ namespace LiteNetLib.Utils
         }
 
         /// <summary>
-        /// Returns a new <see cref="ReadOnlySpan{T}"/> of the <see cref="Data"/>
+        /// Returns a new <see cref="ReadOnlySpan{T}"/>(<see cref="byte"/>) of the <see cref="Data"/>
         /// </summary>
         public ReadOnlySpan<byte> AsReadOnlySpan
         {
             get
             {
-                return new(Data, 0, Length);
+                return Data.AsSpan();
             }
         }
 
