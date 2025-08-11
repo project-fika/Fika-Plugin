@@ -279,7 +279,7 @@ namespace Fika.Core.Networking.Packets.Player
         private static ushort PackFloatToUShort(float value, float min, float max)
         {
             float clamped = Mathf.Clamp(value, min, max);
-            int maxInt = 65535;
+            int maxInt = ushort.MaxValue;
             int quantized = Mathf.RoundToInt((clamped - min) / (max - min) * maxInt);
             return (ushort)quantized;
         }
@@ -287,7 +287,7 @@ namespace Fika.Core.Networking.Packets.Player
         private static byte PackIntToByte(int value, int minValue, int maxValue)
         {
             int minTarget = 0;
-            int maxTarget = 255;
+            int maxTarget = byte.MaxValue;
 
             int clampedValue = Mathf.Clamp(value, minValue, maxValue) - minValue;
             int rangeInput = maxValue - minValue;
@@ -300,26 +300,26 @@ namespace Fika.Core.Networking.Packets.Player
 
         private static float UnpackByteToFloat(byte packed, float min, float max)
         {
-            float normalized = packed / 255f;
+            float normalized = packed / float.MaxValue;
             return min + normalized * (max - min);
         }
 
         private static float UnpackUShortToFloat(ushort packed, float min, float max)
         {
-            float normalized = packed / 65535f;
+            float normalized = packed / float.MaxValue;
             return min + normalized * (max - min);
         }
 
         private static int UnpackByteToInt(byte packed, int minValue, int maxValue)
         {
-            float normalized = packed / 255f;
+            float normalized = packed / (float)byte.MaxValue;
             return (int)(minValue + normalized * (maxValue - minValue));
         }
 
         public static byte PackBools(params bool[] bools)
         {
             byte flags = 0;
-            for (int i = 0; i < bools.Length && i < 8; i++)
+            for (int i = 0; i < 7; i++)
             {
                 if (bools[i])
                 {

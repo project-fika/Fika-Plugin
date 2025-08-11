@@ -87,5 +87,4 @@ namespace Fika.Core.Networking.Pooling
             ArrayPool<byte>.Shared.Return(buffer.Array, false);
         }
     }
-
 }

@@ -108,5 +108,4 @@ namespace Fika.Core.Networking.Pooling
             return packet;
         }
     }
-
 }
