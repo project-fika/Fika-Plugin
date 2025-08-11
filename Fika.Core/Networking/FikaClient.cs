@@ -1042,7 +1042,7 @@ namespace Fika.Core.Networking
         {
             if (_coopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer playerToApply))
             {
-                packet.SubPacket.Execute(playerToApply);
+                packet.Execute(playerToApply);
             }
         }
 
@@ -1074,7 +1074,7 @@ namespace Fika.Core.Networking
         {
             if (_coopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer playerToApply))
             {
-                packet.SubPacket.Execute(playerToApply);
+                packet.Execute(playerToApply);
             }
         }
 
