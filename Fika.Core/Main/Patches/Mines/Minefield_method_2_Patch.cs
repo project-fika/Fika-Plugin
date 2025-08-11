@@ -3,6 +3,8 @@ using EFT;
 using EFT.Interactive;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
+using Fika.Core.Networking;
+using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.Player;
 using Fika.Core.Patching;
 using System.Collections.Generic;
@@ -73,19 +75,17 @@ namespace Fika.Core.Main.Patches
 
                 foreach (BodyPartCollider bodyPartCollider in enumerable)
                 {
-                    DamagePacket packet = new()
+                    fikaPlayer.CommonPacket.Type = ECommonSubPacketType.Damage;
+                    fikaPlayer.CommonPacket.SubPacket = DamagePacket.FromValue(fikaPlayer.NetId, new()
                     {
-                        NetId = fikaPlayer.NetId,
                         DamageType = EDamageType.Landmine,
                         Damage = num4 * num2,
                         ArmorDamage = 0.5f,
                         PenetrationPower = 30f,
-                        Direction = Vector3.zero,
-                        HitNormal = Vector3.zero,
-                        ColliderType = bodyPartCollider.BodyPartColliderType,
-                        BodyPartType = bodyPartCollider.BodyPartType
-                    };
-                    fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+                        Direction = default,
+                        HitNormal = default
+                    }, bodyPartCollider.BodyPartType, bodyPartCollider.BodyPartColliderType);
+                    Singleton<IFikaNetworkManager>.Instance.SendNetReusable(ref fikaPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
                     if (++num5 >= num3)
                     {
                         break;

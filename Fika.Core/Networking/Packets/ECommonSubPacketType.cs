@@ -58,6 +58,11 @@
         /// <summary>
         /// Mounting or dismounting action.
         /// </summary>
-        Mounting
+        Mounting,
+
+        /// <summary>
+        /// Dealing damage
+        /// </summary>
+        Damage
     }
 }

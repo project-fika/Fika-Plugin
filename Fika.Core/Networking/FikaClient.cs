@@ -253,8 +253,7 @@ namespace Fika.Core.Networking
             RegisterCustomType(FikaSerializationExtensions.PutAirplaneDataPacketStruct, FikaSerializationExtensions.GetAirplaneDataPacketStruct);
             RegisterCustomType(FikaSerializationExtensions.PutLootSyncStruct, FikaSerializationExtensions.GetLootSyncStruct);
 
-            RegisterPacket<PlayerStatePacket>(OnPlayerStatePacketReceived);
-            RegisterPacket<DamagePacket>(OnDamagePacketReceived);
+            RegisterPacket<PlayerStatePacket>(OnPlayerStatePacketReceived);            
             RegisterPacket<ArmorDamagePacket>(OnArmorDamagePacketReceived);
             RegisterPacket<InventoryPacket>(OnInventoryPacketReceived);
             RegisterPacket<InformationPacket>(OnInformationPacketReceived);
@@ -1053,14 +1052,6 @@ namespace Fika.Core.Networking
             if (_coopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer playerToApply))
             {
                 HandleInventoryPacket(ref packet, playerToApply);
-            }
-        }
-
-        private void OnDamagePacketReceived(DamagePacket packet)
-        {
-            if (_coopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer playerToApply) && playerToApply.IsYourPlayer)
-            {
-                playerToApply.HandleDamagePacket(in packet);
             }
         }
 

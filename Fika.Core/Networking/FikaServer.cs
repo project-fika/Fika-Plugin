@@ -411,7 +411,6 @@ namespace Fika.Core.Networking
             RegisterCustomType(FikaSerializationExtensions.PutLootSyncStruct, FikaSerializationExtensions.GetLootSyncStruct);
 
             RegisterPacket<PlayerStatePacket, NetPeer>(OnPlayerStatePacketReceived);
-            RegisterPacket<DamagePacket, NetPeer>(OnDamagePacketReceived);
             RegisterPacket<ArmorDamagePacket, NetPeer>(OnArmorDamagePacketReceived);
             RegisterPacket<InventoryPacket, NetPeer>(OnInventoryPacketReceived);
             RegisterPacket<InformationPacket, NetPeer>(OnInformationPacketReceived);
@@ -1217,18 +1216,6 @@ namespace Fika.Core.Networking
 
                     ResyncInventoryIdPacket resyncPacket = new(playerToApply.NetId);
                     SendDataToPeer(ref resyncPacket, DeliveryMethod.ReliableOrdered, peer);
-                }
-            }
-        }
-
-        private void OnDamagePacketReceived(DamagePacket packet, NetPeer peer)
-        {
-            if (_coopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer playerToApply))
-            {
-                if (playerToApply.IsAI || playerToApply.IsYourPlayer)
-                {
-                    playerToApply.HandleDamagePacket(in packet);
-                    return;
                 }
             }
         }

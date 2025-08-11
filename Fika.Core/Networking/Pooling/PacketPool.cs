@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Fika.Core.Main.Utils;
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
@@ -44,7 +45,19 @@ namespace Fika.Core.Networking.Pooling
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T Get()
         {
+#if DEBUG
+            if (_pool.Count > 0)
+            {
+                return _pool.Pop();
+            }
+            else
+            {
+                FikaGlobals.LogError($"[{typeof(T).Name}] Tried to pop but none existed?");
+                return _constructor();
+            }
+#else
             return _pool.Count > 0 ? _pool.Pop() : _constructor();
+#endif
         }
 
         /// <summary>

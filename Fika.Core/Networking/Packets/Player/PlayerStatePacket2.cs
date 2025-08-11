@@ -300,13 +300,13 @@ namespace Fika.Core.Networking.Packets.Player
 
         private static float UnpackByteToFloat(byte packed, float min, float max)
         {
-            float normalized = packed / float.MaxValue;
+            float normalized = packed / (float)byte.MaxValue;
             return min + normalized * (max - min);
         }
 
         private static float UnpackUShortToFloat(ushort packed, float min, float max)
         {
-            float normalized = packed / float.MaxValue;
+            float normalized = packed / (float)ushort.MaxValue;
             return min + normalized * (max - min);
         }
 

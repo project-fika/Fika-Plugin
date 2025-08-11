@@ -10,7 +10,7 @@ namespace Fika.Core.Networking.Packets.Player
         public ECommonSubPacketType Type;
         public IPoolSubPacket SubPacket;
 
-        public void Execute(FikaPlayer player)
+        public void Execute(FikaPlayer player = null)
         {
             SubPacket.Execute(player);
             CommonSubPacketPoolManager.Instance.ReturnPacket(Type, SubPacket);

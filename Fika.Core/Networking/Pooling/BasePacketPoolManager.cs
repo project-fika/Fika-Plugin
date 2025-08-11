@@ -99,13 +99,18 @@ namespace Fika.Core.Networking.Pooling
         /// <returns>The corresponding <see cref="PacketPool{TType}"/> instance.</returns>
         /// <exception cref="ArgumentException">Thrown if the specified type does not exist in the pool.</exception>
         private PacketPool<TType> WithdrawPacket(TEnum type)
-        {
+        {            
+#if DEBUG
             if (!_pool.TryGetValue(type, out PacketPool<TType> packet))
             {
                 throw new ArgumentException("Could not find given type in the packet pool manager!", nameof(type));
             }
 
             return packet;
+#else
+            return _pool[type];
+#endif
+
         }
     }
 }

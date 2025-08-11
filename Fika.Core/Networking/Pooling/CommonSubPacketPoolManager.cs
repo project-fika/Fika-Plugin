@@ -37,7 +37,8 @@ namespace Fika.Core.Networking.Pooling
                 { ECommonSubPacketType.Stationary, StationaryPacket.CreateInstance },
                 { ECommonSubPacketType.Vault, VaultPacket.CreateInstance },
                 { ECommonSubPacketType.Interaction, InteractionPacket.CreateInstance },
-                { ECommonSubPacketType.Mounting, MountingPacket.CreateInstance }
+                { ECommonSubPacketType.Mounting, MountingPacket.CreateInstance },
+                { ECommonSubPacketType.Damage, DamagePacket.CreateInstance }
             };
         }
     }

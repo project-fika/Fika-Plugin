@@ -22,6 +22,7 @@ using Fika.Core.Networking;
 using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.Communication;
 using Fika.Core.Networking.Packets.Player;
+using Fika.Core.Networking.Pooling;
 using Fika.Core.Utils;
 using HarmonyLib;
 using JsonType;
@@ -178,6 +179,10 @@ namespace Fika.Core.Main.Players
 
             player.IsYourPlayer = false;
             player.IsObservedAI = aiControl;
+            player.CommonPacket = new()
+            {
+                NetId = playerId
+            };
 
             ObservedInventoryController inventoryController = new(player, profile, true, firstId, firstOperationId, aiControl);
             ObservedHealthController healthController = new(healthBytes, player, inventoryController, profile.Skills);
@@ -474,21 +479,9 @@ namespace Fika.Core.Main.Players
             LastDamageInfo = DamageInfo;
             LastDamageType = DamageInfo.DamageType;
 
-            DamagePacket packet = new()
-            {
-                NetId = NetId,
-                Damage = DamageInfo.Damage,
-                DamageType = DamageInfo.DamageType,
-                BodyPartType = bodyPartType,
-                ColliderType = colliderType,
-                Direction = DamageInfo.Direction,
-                Point = DamageInfo.HitPoint,
-                HitNormal = DamageInfo.HitNormal,
-                PenetrationPower = DamageInfo.PenetrationPower,
-                SourceId = DamageInfo.SourceId,
-                WeaponId = DamageInfo.Weapon != null ? DamageInfo.Weapon.Id : string.Empty
-            };
-            PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+            CommonPacket.Type = ECommonSubPacketType.Damage;
+            CommonPacket.SubPacket = DamagePacket.FromValue(NetId, DamageInfo, bodyPartType, colliderType);
+            Singleton<IFikaNetworkManager>.Instance.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
         }
 
         public override void ApplyDamageInfo(DamageInfoStruct DamageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, float absorbed)
@@ -513,25 +506,9 @@ namespace Fika.Core.Main.Players
             LastDamageInfo = DamageInfo;
             LastDamageType = DamageInfo.DamageType;
 
-            DamagePacket packet = new()
-            {
-                NetId = NetId,
-                Damage = DamageInfo.Damage,
-                DamageType = DamageInfo.DamageType,
-                BodyPartType = bodyPartType,
-                ColliderType = colliderType,
-                ArmorPlateCollider = armorPlateCollider,
-                Direction = DamageInfo.Direction,
-                Point = DamageInfo.HitPoint,
-                HitNormal = DamageInfo.HitNormal,
-                PenetrationPower = DamageInfo.PenetrationPower,
-                BlockedBy = DamageInfo.BlockedBy,
-                DeflectedBy = DamageInfo.DeflectedBy,
-                SourceId = DamageInfo.SourceId,
-                ArmorDamage = DamageInfo.ArmorDamage,
-                WeaponId = DamageInfo.Weapon.Id
-            };
-            PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+            CommonPacket.Type = ECommonSubPacketType.Damage;
+            CommonPacket.SubPacket = DamagePacket.FromValue(NetId, DamageInfo, bodyPartType, colliderType, armorPlateCollider);
+            Singleton<IFikaNetworkManager>.Instance.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
 
             return new()
             {
@@ -569,27 +546,9 @@ namespace Fika.Core.Main.Players
             damageInfo.DidBodyDamage = damageInfo.Damage;
             ReceiveDamage(damageInfo.Damage, bodyPartType, damageInfo.DamageType, num, hitInfo.Material);
 
-            DamagePacket packet = new()
-            {
-                NetId = NetId,
-                Damage = damageInfo.Damage,
-                DamageType = damageInfo.DamageType,
-                BodyPartType = bodyPartType,
-                ColliderType = colliderType,
-                ArmorPlateCollider = armorPlateCollider,
-                Direction = damageInfo.Direction,
-                Point = damageInfo.HitPoint,
-                HitNormal = damageInfo.HitNormal,
-                PenetrationPower = damageInfo.PenetrationPower,
-                BlockedBy = damageInfo.BlockedBy,
-                DeflectedBy = damageInfo.DeflectedBy,
-                SourceId = damageInfo.SourceId,
-                ArmorDamage = damageInfo.ArmorDamage,
-                ProfileId = damageInfo.Player.iPlayer.ProfileId,
-                Material = materialType,
-                WeaponId = damageInfo.Weapon.Id
-            };
-            PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+            CommonPacket.Type = ECommonSubPacketType.Damage;
+            CommonPacket.SubPacket = DamagePacket.FromValue(NetId, damageInfo, bodyPartType, colliderType, armorPlateCollider, absorbed: num);
+            Singleton<IFikaNetworkManager>.Instance.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
 
             // Run this to get weapon skill
             ManageAggressor(damageInfo, bodyPartType, colliderType);
@@ -664,27 +623,9 @@ namespace Fika.Core.Main.Players
             damageInfo.DidBodyDamage = damageInfo.Damage;
             ReceiveDamage(damageInfo.Damage, bodyPartType, damageInfo.DamageType, num, hitInfo.Material);
 
-            DamagePacket packet = new()
-            {
-                NetId = NetId,
-                Damage = damageInfo.Damage,
-                DamageType = damageInfo.DamageType,
-                BodyPartType = bodyPartType,
-                ColliderType = colliderType,
-                ArmorPlateCollider = armorPlateCollider,
-                Direction = damageInfo.Direction,
-                Point = damageInfo.HitPoint,
-                HitNormal = damageInfo.HitNormal,
-                PenetrationPower = damageInfo.PenetrationPower,
-                BlockedBy = damageInfo.BlockedBy,
-                DeflectedBy = damageInfo.DeflectedBy,
-                SourceId = damageInfo.SourceId,
-                ArmorDamage = damageInfo.ArmorDamage,
-                ProfileId = damageInfo.Player.iPlayer.ProfileId,
-                Material = materialType,
-                WeaponId = damageInfo.Weapon.Id
-            };
-            PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+            CommonPacket.Type = ECommonSubPacketType.Damage;
+            CommonPacket.SubPacket = DamagePacket.FromValue(NetId, damageInfo, bodyPartType, colliderType, armorPlateCollider, absorbed: num);
+            Singleton<IFikaNetworkManager>.Instance.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
 
             // Run this to get weapon skill
             ManageAggressor(damageInfo, bodyPartType, colliderType);

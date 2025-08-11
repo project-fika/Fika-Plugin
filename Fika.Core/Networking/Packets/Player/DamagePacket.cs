@@ -1,11 +1,22 @@
-﻿using EFT;
+﻿using Comfort.Common;
+using EFT;
 using EFT.Ballistics;
+using Fika.Core.Main.Players;
+using Fika.Core.Networking.Pooling;
 using LiteNetLib.Utils;
+using static UnityEngine.Tilemaps.Tile;
 
 namespace Fika.Core.Networking.Packets.Player
 {
-    public struct DamagePacket : INetSerializable
+    public class DamagePacket : IPoolSubPacket
     {
+        private DamagePacket() { }
+
+        public static DamagePacket CreateInstance()
+        {
+            return new();
+        }
+
         public int NetId;
         public float Damage;
         public float Absorbed;
@@ -15,8 +26,6 @@ namespace Fika.Core.Networking.Packets.Player
         public Vector3 Direction;
         public Vector3 Point;
         public Vector3 HitNormal;
-
-        public int FragmentIndex;
 
         public EDamageType DamageType;
         public EBodyPart BodyPartType;
@@ -31,6 +40,45 @@ namespace Fika.Core.Networking.Packets.Player
 
         public string SourceId;
 
+        public static DamagePacket FromValue(int netId, in DamageInfoStruct damageInfo, EBodyPart bodyPartType,
+            EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider = default, MaterialType materialType = default, float absorbed = default)
+        {
+            DamagePacket packet = CommonSubPacketPoolManager.Instance.GetPacket<DamagePacket>(ECommonSubPacketType.Damage);
+
+            packet.NetId = netId;
+            packet.Damage = damageInfo.Damage;
+            packet.Absorbed = absorbed;
+            packet.PenetrationPower = damageInfo.PenetrationPower;
+            packet.ArmorDamage = damageInfo.ArmorDamage;
+
+            packet.Direction = damageInfo.Direction;
+            packet.Point = damageInfo.HitPoint;
+            packet.HitNormal = damageInfo.HitNormal;
+
+            packet.DamageType = damageInfo.DamageType;
+            packet.BodyPartType = bodyPartType;
+            packet.ColliderType = colliderType;
+            packet.ArmorPlateCollider = armorPlateCollider;
+            packet.Material = materialType;
+
+            packet.BlockedBy = damageInfo.BlockedBy;
+            packet.DeflectedBy = damageInfo.DeflectedBy;
+            packet.ProfileId = damageInfo.Player?.iPlayer.ProfileId;
+            packet.WeaponId = damageInfo.Weapon?.Id;
+
+            packet.SourceId = damageInfo.SourceId;
+
+            return packet;
+        }
+
+        public void Execute(FikaPlayer player = null)
+        {
+            if (player.IsAI || player.IsYourPlayer)
+            {
+                player.HandleDamagePacket(this); 
+            }
+        }
+
         public void Deserialize(NetDataReader reader)
         {
             NetId = reader.GetInt();
@@ -43,8 +91,6 @@ namespace Fika.Core.Networking.Packets.Player
             Direction = reader.GetUnmanaged<Vector3>();
             Point = reader.GetUnmanaged<Vector3>();
             HitNormal = reader.GetUnmanaged<Vector3>();
-
-            FragmentIndex = reader.GetInt();
 
             DamageType = reader.GetEnum<EDamageType>();
             BodyPartType = reader.GetEnum<EBodyPart>();
@@ -73,8 +119,6 @@ namespace Fika.Core.Networking.Packets.Player
             writer.PutUnmanaged(Point);
             writer.PutUnmanaged(HitNormal);
 
-            writer.Put(FragmentIndex);
-
             writer.PutEnum(DamageType);
             writer.PutEnum(BodyPartType);
             writer.PutEnum(ColliderType);
@@ -87,6 +131,32 @@ namespace Fika.Core.Networking.Packets.Player
             writer.PutNullableMongoID(WeaponId);
 
             writer.Put(SourceId);
+        }
+
+        public void Dispose()
+        {
+            NetId = default;
+            Damage = default;
+            Absorbed = default;
+            PenetrationPower = default;
+            ArmorDamage = default;
+
+            Direction = default;
+            Point = default;
+            HitNormal = default;
+
+            DamageType = default;
+            BodyPartType = default;
+            ColliderType = default;
+            ArmorPlateCollider = default;
+            Material = default;
+
+            BlockedBy = null;
+            DeflectedBy = null;
+            ProfileId = null;
+            WeaponId = null;
+
+            SourceId = null;
         }
     }
 }
