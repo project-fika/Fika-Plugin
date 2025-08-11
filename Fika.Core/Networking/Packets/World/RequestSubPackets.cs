@@ -34,8 +34,8 @@ namespace Fika.Core.Networking.Packets.World
             public SpawnPointRequest(NetDataReader reader)
             {
                 Infiltration = reader.GetString();
-                Position = reader.GetStruct<Vector3>();
-                Rotation = reader.GetStruct<Quaternion>();
+                Position = reader.GetUnmanaged<Vector3>();
+                Rotation = reader.GetUnmanaged<Quaternion>();
             }
 
             public void HandleRequest(NetPeer peer, FikaServer server)
@@ -83,8 +83,8 @@ namespace Fika.Core.Networking.Packets.World
             public void Serialize(NetDataWriter writer)
             {
                 writer.Put(Infiltration);
-                writer.PutStruct(Position);
-                writer.PutStruct(Rotation);
+                writer.PutUnmanaged(Position);
+                writer.PutUnmanaged(Rotation);
             }
         }
 
@@ -102,7 +102,7 @@ namespace Fika.Core.Networking.Packets.World
             public WeatherRequest(NetDataReader reader)
             {
                 Season = reader.GetEnum<ESeason>();
-                SpringSnowFactor = reader.GetStruct<Vector3>();
+                SpringSnowFactor = reader.GetUnmanaged<Vector3>();
                 int amount = reader.GetInt();
                 WeatherClasses = new WeatherClass[amount];
                 for (int i = 0; i < amount; i++)
@@ -154,7 +154,7 @@ namespace Fika.Core.Networking.Packets.World
             public void Serialize(NetDataWriter writer)
             {
                 writer.PutEnum(Season);
-                writer.PutStruct(SpringSnowFactor);
+                writer.PutUnmanaged(SpringSnowFactor);
                 int amount = WeatherClasses.Length;
                 writer.Put(amount);
                 for (int i = 0; i < amount; i++)

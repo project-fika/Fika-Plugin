@@ -1470,6 +1470,7 @@ namespace Fika.Core.Networking
             if (reader.TryGetString(out string data))
             {
                 NetDataWriter resp;
+                _logger.LogWarning(data);
 
                 switch (data)
                 {

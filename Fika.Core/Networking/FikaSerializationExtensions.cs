@@ -242,10 +242,10 @@ namespace Fika.Core.Networking
             foreach (SmokeGrenadeDataPacketStruct data in throwables)
             {
                 writer.Put(data.Id);
-                writer.PutStruct(data.Position);
+                writer.PutUnmanaged(data.Position);
                 writer.Put(data.Template);
                 writer.Put(data.Time);
-                writer.PutStruct(data.Orientation);
+                writer.PutUnmanaged(data.Orientation);
                 writer.Put(data.PlatformId);
             }
         }
@@ -264,10 +264,10 @@ namespace Fika.Core.Networking
                 SmokeGrenadeDataPacketStruct data = new()
                 {
                     Id = reader.GetString(),
-                    Position = reader.GetStruct<Vector3>(),
+                    Position = reader.GetUnmanaged<Vector3>(),
                     Template = reader.GetString(),
                     Time = reader.GetInt(),
-                    Orientation = reader.GetStruct<Quaternion>(),
+                    Orientation = reader.GetUnmanaged<Quaternion>(),
                     PlatformId = reader.GetShort()
                 };
                 throwables.Add(data);
@@ -383,7 +383,7 @@ namespace Fika.Core.Networking
             foreach (KeyValuePair<int, Vector3> windowBreakerState in windowBreakerStates)
             {
                 writer.Put(windowBreakerState.Key);
-                writer.PutStruct(windowBreakerState.Value);
+                writer.PutUnmanaged(windowBreakerState.Value);
             }
         }
 
@@ -398,7 +398,7 @@ namespace Fika.Core.Networking
             Dictionary<int, Vector3> states = new(amount);
             for (int i = 0; i < amount; i++)
             {
-                states.Add(reader.GetInt(), reader.GetStruct<Vector3>());
+                states.Add(reader.GetInt(), reader.GetUnmanaged<Vector3>());
             }
 
             return states;
@@ -598,7 +598,7 @@ namespace Fika.Core.Networking
         public static void PutArtilleryStruct(this NetDataWriter writer, ArtilleryPacketStruct artilleryStruct)
         {
             writer.Put(artilleryStruct.id);
-            writer.PutStruct(artilleryStruct.position);
+            writer.PutUnmanaged(artilleryStruct.position);
             writer.Put(artilleryStruct.explosion);
         }
 
@@ -612,7 +612,7 @@ namespace Fika.Core.Networking
             return new()
             {
                 id = reader.GetInt(),
-                position = reader.GetStruct<Vector3>(),
+                position = reader.GetUnmanaged<Vector3>(),
                 explosion = reader.GetBool()
             };
         }
@@ -625,14 +625,14 @@ namespace Fika.Core.Networking
         public static void PutGrenadeStruct(this NetDataWriter writer, GrenadeDataPacketStruct grenadeStruct)
         {
             writer.Put(grenadeStruct.Id);
-            writer.PutStruct(grenadeStruct.Position);
-            writer.PutStruct(grenadeStruct.Rotation);
+            writer.PutUnmanaged(grenadeStruct.Position);
+            writer.PutUnmanaged(grenadeStruct.Rotation);
             writer.Put(grenadeStruct.CollisionNumber);
             writer.Put(grenadeStruct.Done);
             if (!grenadeStruct.Done)
             {
-                writer.PutStruct(grenadeStruct.Velocity);
-                writer.PutStruct(grenadeStruct.AngularVelocity);
+                writer.PutUnmanaged(grenadeStruct.Velocity);
+                writer.PutUnmanaged(grenadeStruct.AngularVelocity);
             }
         }
 
@@ -646,15 +646,15 @@ namespace Fika.Core.Networking
             GrenadeDataPacketStruct grenadeStruct = new()
             {
                 Id = reader.GetInt(),
-                Position = reader.GetStruct<Vector3>(),
-                Rotation = reader.GetStruct<Quaternion>(),
+                Position = reader.GetUnmanaged<Vector3>(),
+                Rotation = reader.GetUnmanaged<Quaternion>(),
                 CollisionNumber = reader.GetByte()
             };
 
             if (!reader.GetBool())
             {
-                grenadeStruct.Velocity = reader.GetStruct<Vector3>();
-                grenadeStruct.AngularVelocity = reader.GetStruct<Vector3>();
+                grenadeStruct.Velocity = reader.GetUnmanaged<Vector3>();
+                grenadeStruct.AngularVelocity = reader.GetUnmanaged<Vector3>();
                 return grenadeStruct;
             }
 
@@ -675,8 +675,8 @@ namespace Fika.Core.Networking
             switch (airplaneDataPacketStruct.ObjectType)
             {
                 case SynchronizableObjectType.AirDrop:
-                    writer.PutStruct(airplaneDataPacketStruct.Position);
-                    writer.PutStruct(airplaneDataPacketStruct.Rotation);
+                    writer.PutUnmanaged(airplaneDataPacketStruct.Position);
+                    writer.PutUnmanaged(airplaneDataPacketStruct.Rotation);
                     writer.Put(airplaneDataPacketStruct.Outdated);
                     writer.Put(airplaneDataPacketStruct.IsStatic);
                     writer.PutEnum(airplaneDataPacketStruct.PacketData.AirdropDataPacket.AirdropType);
@@ -685,16 +685,16 @@ namespace Fika.Core.Networking
                     writer.Put(airplaneDataPacketStruct.PacketData.AirdropDataPacket.UniqueId);
                     return;
                 case SynchronizableObjectType.AirPlane:
-                    writer.PutStruct(airplaneDataPacketStruct.Position);
-                    writer.PutStruct(airplaneDataPacketStruct.Rotation);
+                    writer.PutUnmanaged(airplaneDataPacketStruct.Position);
+                    writer.PutUnmanaged(airplaneDataPacketStruct.Rotation);
                     writer.Put(airplaneDataPacketStruct.PacketData.AirplaneDataPacket.AirplanePercent);
                     writer.Put(airplaneDataPacketStruct.Outdated);
                     writer.Put(airplaneDataPacketStruct.IsStatic);
                     return;
                 case SynchronizableObjectType.Tripwire:
                     writer.PutEnum(airplaneDataPacketStruct.PacketData.TripwireDataPacket.State);
-                    writer.PutStruct(airplaneDataPacketStruct.Position);
-                    writer.PutStruct(airplaneDataPacketStruct.Rotation);
+                    writer.PutUnmanaged(airplaneDataPacketStruct.Position);
+                    writer.PutUnmanaged(airplaneDataPacketStruct.Rotation);
                     writer.Put(airplaneDataPacketStruct.IsActive);
                     return;
             }
@@ -717,8 +717,8 @@ namespace Fika.Core.Networking
             switch (packet.ObjectType)
             {
                 case SynchronizableObjectType.AirDrop:
-                    packet.Position = reader.GetStruct<Vector3>();
-                    packet.Rotation = reader.GetStruct<Vector3>();
+                    packet.Position = reader.GetUnmanaged<Vector3>();
+                    packet.Rotation = reader.GetUnmanaged<Vector3>();
                     packet.Outdated = reader.GetBool();
                     packet.IsStatic = reader.GetBool();
                     packet.PacketData.AirdropDataPacket = new()
@@ -730,8 +730,8 @@ namespace Fika.Core.Networking
                     };
                     break;
                 case SynchronizableObjectType.AirPlane:
-                    packet.Position = reader.GetStruct<Vector3>();
-                    packet.Rotation = reader.GetStruct<Vector3>();
+                    packet.Position = reader.GetUnmanaged<Vector3>();
+                    packet.Rotation = reader.GetUnmanaged<Vector3>();
                     packet.PacketData.AirplaneDataPacket = new()
                     {
                         AirplanePercent = reader.GetInt()
@@ -744,8 +744,8 @@ namespace Fika.Core.Networking
                     {
                         State = reader.GetEnum<ETripwireState>()
                     };
-                    packet.Position = reader.GetStruct<Vector3>();
-                    packet.Rotation = reader.GetStruct<Vector3>();
+                    packet.Position = reader.GetUnmanaged<Vector3>();
+                    packet.Rotation = reader.GetUnmanaged<Vector3>();
                     packet.IsActive = reader.GetBool();
                     break;
             }
@@ -808,10 +808,10 @@ namespace Fika.Core.Networking
         {
             writer.Put(weatherClass.Time);
 
-            writer.PutStruct(weatherClass.MainWindDirection);
-            writer.PutStruct(weatherClass.MainWindPosition);
-            writer.PutStruct(weatherClass.TopWindDirection);
-            writer.PutStruct(weatherClass.TopWindPosition);
+            writer.PutUnmanaged(weatherClass.MainWindDirection);
+            writer.PutUnmanaged(weatherClass.MainWindPosition);
+            writer.PutUnmanaged(weatherClass.TopWindDirection);
+            writer.PutUnmanaged(weatherClass.TopWindPosition);
 
             writer.Put(weatherClass.AtmospherePressure);
             writer.Put(weatherClass.Cloudness);
@@ -840,10 +840,10 @@ namespace Fika.Core.Networking
             {
                 Time = reader.GetLong(),
 
-                MainWindDirection = reader.GetStruct<Vector2>(),
-                MainWindPosition = reader.GetStruct<Vector2>(),
-                TopWindDirection = reader.GetStruct<Vector2>(),
-                TopWindPosition = reader.GetStruct<Vector2>(),
+                MainWindDirection = reader.GetUnmanaged<Vector2>(),
+                MainWindPosition = reader.GetUnmanaged<Vector2>(),
+                TopWindDirection = reader.GetUnmanaged<Vector2>(),
+                TopWindPosition = reader.GetUnmanaged<Vector2>(),
 
                 AtmospherePressure = reader.GetFloat(),
                 Cloudness = reader.GetFloat(),
@@ -871,9 +871,9 @@ namespace Fika.Core.Networking
         {
             writer.PutItemDescriptor(packet.InventoryDescriptor);
 
-            writer.PutStruct(packet.Direction);
-            writer.PutStruct(packet.Point);
-            writer.PutStruct(packet.OverallVelocity);
+            writer.PutUnmanaged(packet.Direction);
+            writer.PutUnmanaged(packet.Point);
+            writer.PutUnmanaged(packet.OverallVelocity);
             writer.Put(packet.Force);
 
             writer.PutEnum(packet.BodyPartColliderType);
@@ -891,9 +891,9 @@ namespace Fika.Core.Networking
             {
                 InventoryDescriptor = reader.GetItemDescriptor(),
 
-                Direction = reader.GetStruct<Vector3>(),
-                Point = reader.GetStruct<Vector3>(),
-                OverallVelocity = reader.GetStruct<Vector3>(),
+                Direction = reader.GetUnmanaged<Vector3>(),
+                Point = reader.GetUnmanaged<Vector3>(),
+                OverallVelocity = reader.GetUnmanaged<Vector3>(),
                 Force = reader.GetFloat(),
 
                 BodyPartColliderType = reader.GetEnum<EBodyPartColliderType>(),
@@ -956,7 +956,7 @@ namespace Fika.Core.Networking
         public static void PutRagdollStruct(this NetDataWriter writer, RagdollPacketStruct packet)
         {
             writer.Put(packet.Id);
-            writer.PutStruct(packet.Position);
+            writer.PutUnmanaged(packet.Position);
             writer.Put(packet.Done);
 
             if (packet.Done && packet.TransformSyncs != null)
@@ -964,8 +964,8 @@ namespace Fika.Core.Networking
                 GStruct135[] transforms = packet.TransformSyncs;
                 for (int i = 0; i < 12; i++)
                 {
-                    writer.PutStruct(transforms[i].Position);
-                    writer.PutStruct(transforms[i].Rotation);
+                    writer.PutUnmanaged(transforms[i].Position);
+                    writer.PutUnmanaged(transforms[i].Rotation);
                 }
             }
         }
@@ -980,7 +980,7 @@ namespace Fika.Core.Networking
             RagdollPacketStruct packet = new()
             {
                 Id = reader.GetInt(),
-                Position = reader.GetStruct<Vector3>(),
+                Position = reader.GetUnmanaged<Vector3>(),
                 Done = reader.GetBool()
             };
 
@@ -991,8 +991,8 @@ namespace Fika.Core.Networking
                 {
                     packet.TransformSyncs[i] = new()
                     {
-                        Position = reader.GetStruct<Vector3>(),
-                        Rotation = reader.GetStruct<Quaternion>()
+                        Position = reader.GetUnmanaged<Vector3>(),
+                        Rotation = reader.GetUnmanaged<Quaternion>()
                     };
                 }
             }
@@ -1008,14 +1008,14 @@ namespace Fika.Core.Networking
         public static void PutLootSyncStruct(this NetDataWriter writer, LootSyncStruct packet)
         {
             writer.Put(packet.Id);
-            writer.PutStruct(packet.Position);
-            writer.PutStruct(packet.Rotation);
+            writer.PutUnmanaged(packet.Position);
+            writer.PutUnmanaged(packet.Rotation);
             writer.Put(packet.Done);
 
             if (!packet.Done)
             {
-                writer.PutStruct(packet.Velocity);
-                writer.PutStruct(packet.AngularVelocity);
+                writer.PutUnmanaged(packet.Velocity);
+                writer.PutUnmanaged(packet.AngularVelocity);
             }
         }
 
@@ -1029,15 +1029,15 @@ namespace Fika.Core.Networking
             LootSyncStruct data = new()
             {
                 Id = reader.GetInt(),
-                Position = reader.GetStruct<Vector3>(),
-                Rotation = reader.GetStruct<Quaternion>(),
+                Position = reader.GetUnmanaged<Vector3>(),
+                Rotation = reader.GetUnmanaged<Quaternion>(),
                 Done = reader.GetBool()
             };
 
             if (!data.Done)
             {
-                data.Velocity = reader.GetStruct<Vector3>();
-                data.AngularVelocity = reader.GetStruct<Vector3>();
+                data.Velocity = reader.GetUnmanaged<Vector3>();
+                data.AngularVelocity = reader.GetUnmanaged<Vector3>();
             }
 
             return data;

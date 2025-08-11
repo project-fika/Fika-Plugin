@@ -822,8 +822,8 @@ namespace Fika.Core.Networking.Packets.FirearmController
                     return;
                 }
 
-                writer.PutStruct(ShotPosition);
-                writer.PutStruct(ShotDirection);
+                writer.PutUnmanaged(ShotPosition);
+                writer.PutUnmanaged(ShotDirection);
                 writer.PutMongoID(AmmoTemplate);
                 writer.PutPackedFloat(Overheat, 0f, 200f, EFloatCompression.High);
                 writer.PutPackedFloat(LastShotOverheat, 0f, 200f, EFloatCompression.High);
@@ -844,8 +844,8 @@ namespace Fika.Core.Networking.Packets.FirearmController
                     return;
                 }
 
-                ShotPosition = reader.GetStruct<Vector3>();
-                ShotDirection = reader.GetStruct<Vector3>();
+                ShotPosition = reader.GetUnmanaged<Vector3>();
+                ShotDirection = reader.GetUnmanaged<Vector3>();
                 AmmoTemplate = reader.GetMongoID();
                 Overheat = reader.GetPackedFloat(0f, 200f, EFloatCompression.High);
                 LastShotOverheat = reader.GetPackedFloat(0f, 200f, EFloatCompression.High);
@@ -1063,9 +1063,9 @@ namespace Fika.Core.Networking.Packets.FirearmController
                 writer.Put(HasGrenade);
                 if (HasGrenade)
                 {
-                    writer.PutStruct(GrenadeRotation);
-                    writer.PutStruct(GrenadePosition);
-                    writer.PutStruct(ThrowForce);
+                    writer.PutUnmanaged(GrenadeRotation);
+                    writer.PutUnmanaged(GrenadePosition);
+                    writer.PutUnmanaged(ThrowForce);
                     writer.Put(LowThrow);
                 }
                 writer.Put(PlantTripwire);
@@ -1079,9 +1079,9 @@ namespace Fika.Core.Networking.Packets.FirearmController
                 HasGrenade = reader.GetBool();
                 if (HasGrenade)
                 {
-                    GrenadeRotation = reader.GetStruct<Quaternion>();
-                    GrenadePosition = reader.GetStruct<Vector3>();
-                    ThrowForce = reader.GetStruct<Vector3>();
+                    GrenadeRotation = reader.GetUnmanaged<Quaternion>();
+                    GrenadePosition = reader.GetUnmanaged<Vector3>();
+                    ThrowForce = reader.GetUnmanaged<Vector3>();
                     LowThrow = reader.GetBool();
                 }
                 PlantTripwire = reader.GetBool();
@@ -1839,8 +1839,8 @@ namespace Fika.Core.Networking.Packets.FirearmController
                 writer.Put(StartOneShotFire);
                 if (!StartOneShotFire)
                 {
-                    writer.PutStruct(ShotPosition);
-                    writer.PutStruct(ShotForward);
+                    writer.PutUnmanaged(ShotPosition);
+                    writer.PutUnmanaged(ShotForward);
                     writer.PutMongoID(AmmoTemplateId);
                 }
             }
@@ -1850,8 +1850,8 @@ namespace Fika.Core.Networking.Packets.FirearmController
                 StartOneShotFire = reader.GetBool();
                 if (!StartOneShotFire)
                 {
-                    ShotPosition = reader.GetStruct<Vector3>();
-                    ShotForward = reader.GetStruct<Vector3>();
+                    ShotPosition = reader.GetUnmanaged<Vector3>();
+                    ShotForward = reader.GetUnmanaged<Vector3>();
                     AmmoTemplateId = reader.GetMongoID();
                 }
             }
@@ -1901,15 +1901,15 @@ namespace Fika.Core.Networking.Packets.FirearmController
 
             public void Serialize(NetDataWriter writer)
             {
-                writer.PutStruct(ShotPosition);
-                writer.PutStruct(ShotForward);
+                writer.PutUnmanaged(ShotPosition);
+                writer.PutUnmanaged(ShotForward);
                 writer.PutMongoID(AmmoTemplateId);
             }
 
             public void Deserialize(NetDataReader reader)
             {
-                ShotPosition = reader.GetStruct<Vector3>();
-                ShotForward = reader.GetStruct<Vector3>();
+                ShotPosition = reader.GetUnmanaged<Vector3>();
+                ShotForward = reader.GetUnmanaged<Vector3>();
                 AmmoTemplateId = reader.GetMongoID();
             }
 

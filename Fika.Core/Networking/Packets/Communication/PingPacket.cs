@@ -13,18 +13,18 @@ namespace Fika.Core.Networking.Packets.Communication
 
         public void Deserialize(NetDataReader reader)
         {
-            PingLocation = reader.GetStruct<Vector3>();
+            PingLocation = reader.GetUnmanaged<Vector3>();
             PingType = (PingFactory.EPingType)reader.GetByte();
-            PingColor = reader.GetStruct<Color>();
+            PingColor = reader.GetUnmanaged<Color>();
             Nickname = reader.GetString();
             LocaleId = reader.GetString();
         }
 
         public readonly void Serialize(NetDataWriter writer)
         {
-            writer.PutStruct(PingLocation);
+            writer.PutUnmanaged(PingLocation);
             writer.Put((byte)PingType);
-            writer.PutStruct(PingColor);
+            writer.PutUnmanaged(PingColor);
             writer.Put(Nickname);
             writer.Put(LocaleId);
         }

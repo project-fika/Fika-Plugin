@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Fika.Core.Main.Utils;
+using System;
 using System.Net;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -339,9 +340,8 @@ namespace LiteNetLib.Utils
         public ushort GetUShort()
         {
 #if LITENETLIB_SPANS || NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1 || NETCOREAPP3_1 || NET5_0 || NETSTANDARD2_1
-            ushort result = MemoryMarshal.Read<ushort>(_data.AsSpan(_position));
-            _position += 2;
-            return result;
+            //ushort result = MemoryMarshal.Read<ushort>(_data.AsSpan(_position));
+            return GetUnmanaged<ushort>();
 #else
             ushort result = BitConverter.ToUInt16(_data, _position);
             _position += 2;
@@ -352,9 +352,8 @@ namespace LiteNetLib.Utils
         public short GetShort()
         {
 #if LITENETLIB_SPANS || NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1 || NETCOREAPP3_1 || NET5_0 || NETSTANDARD2_1
-            short result = MemoryMarshal.Read<short>(_data.AsSpan(_position));
-            _position += 2;
-            return result;
+            //short result = MemoryMarshal.Read<short>(_data.AsSpan(_position));
+            return GetUnmanaged<short>();
 #else
             short result = BitConverter.ToInt16(_data, _position);
             _position += 2;
@@ -365,10 +364,8 @@ namespace LiteNetLib.Utils
         public long GetLong()
         {
 #if LITENETLIB_SPANS || NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1 || NETCOREAPP3_1 || NET5_0 || NETSTANDARD2_1
-
-            long result = MemoryMarshal.Read<long>(_data.AsSpan(_position));
-            _position += 8;
-            return result;
+            //long result = MemoryMarshal.Read<long>(_data.AsSpan(_position));
+            return GetUnmanaged<long>();
 #else
             long result = BitConverter.ToInt64(_data, _position);
             _position += 8;
@@ -379,9 +376,8 @@ namespace LiteNetLib.Utils
         public ulong GetULong()
         {
 #if LITENETLIB_SPANS || NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1 || NETCOREAPP3_1 || NET5_0 || NETSTANDARD2_1
-            ulong result = MemoryMarshal.Read<ulong>(_data.AsSpan(_position));
-            _position += 8;
-            return result;
+            //ulong result = MemoryMarshal.Read<ulong>(_data.AsSpan(_position));
+            return GetUnmanaged<ulong>();
 #else
             ulong result = BitConverter.ToUInt64(_data, _position);
             _position += 8;
@@ -392,9 +388,8 @@ namespace LiteNetLib.Utils
         public int GetInt()
         {
 #if LITENETLIB_SPANS || NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1 || NETCOREAPP3_1 || NET5_0 || NETSTANDARD2_1
-            int result = MemoryMarshal.Read<int>(_data.AsSpan(_position));
-            _position += 4;
-            return result;
+            //int result = MemoryMarshal.Read<int>(_data.AsSpan(_position));
+            return GetUnmanaged<int>();
 #else
             int result = BitConverter.ToInt32(_data, _position);
             _position += 4;
@@ -405,9 +400,8 @@ namespace LiteNetLib.Utils
         public uint GetUInt()
         {
 #if LITENETLIB_SPANS || NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1 || NETCOREAPP3_1 || NET5_0 || NETSTANDARD2_1
-            uint result = MemoryMarshal.Read<uint>(_data.AsSpan(_position));
-            _position += 4;
-            return result;
+            //uint result = MemoryMarshal.Read<uint>(_data.AsSpan(_position));
+            return GetUnmanaged<uint>();
 #else
             uint result = BitConverter.ToUInt32(_data, _position);
             _position += 4;
@@ -418,9 +412,8 @@ namespace LiteNetLib.Utils
         public float GetFloat()
         {
 #if LITENETLIB_SPANS || NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1 || NETCOREAPP3_1 || NET5_0 || NETSTANDARD2_1
-            float result = MemoryMarshal.Read<float>(_data.AsSpan(_position));
-            _position += 4;
-            return result;
+            //float result = MemoryMarshal.Read<float>(_data.AsSpan(_position));
+            return GetUnmanaged<float>();
 #else
             float result = BitConverter.ToSingle(_data, _position);
             _position += 4;
@@ -431,15 +424,15 @@ namespace LiteNetLib.Utils
         public double GetDouble()
         {
 #if LITENETLIB_SPANS || NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1 || NETCOREAPP3_1 || NET5_0 || NETSTANDARD2_1
-            double result = MemoryMarshal.Read<double>(_data.AsSpan(_position));
-            _position += 8;
-            return result;
+            //double result = MemoryMarshal.Read<double>(_data.AsSpan(_position));
+            return GetUnmanaged<double>();
 #else
             double result = BitConverter.ToDouble(_data, _position);
             _position += 8;
             return result;
 #endif
         }
+
 
         /// <summary>
         /// Note that "maxLength" only limits the number of characters in a string, not its size in bytes.
@@ -452,9 +445,17 @@ namespace LiteNetLib.Utils
                 return string.Empty;
 
             int actualSize = size - 1;
+#if LITENETLIB_SPANS || NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1 || NETCOREAPP3_1 || NET5_0 || NETSTANDARD2_1
+            ReadOnlySpan<byte> slice = _data.AsSpan(_position, actualSize);
+            string result = maxLength > 0 && NetDataWriter.UTF8Encoding.Value.GetCharCount(slice) > maxLength ?
+                string.Empty :
+                NetDataWriter.UTF8Encoding.Value.GetString(slice);
+#else
             string result = maxLength > 0 && NetDataWriter.UTF8Encoding.Value.GetCharCount(_data, _position, actualSize) > maxLength ?
                 string.Empty :
                 NetDataWriter.UTF8Encoding.Value.GetString(_data, _position, actualSize);
+#endif
+
             _position += actualSize;
             return result;
         }
@@ -466,8 +467,14 @@ namespace LiteNetLib.Utils
                 return string.Empty;
 
             int actualSize = size - 1;
-            string result = NetDataWriter.UTF8Encoding.Value.GetString(_data, _position, actualSize);
+#if LITENETLIB_SPANS || NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1 || NETCOREAPP3_1 || NET5_0 || NETSTANDARD2_1
+            ReadOnlySpan<byte> slice = _data.AsSpan(_position, actualSize);
+            string result = NetDataWriter.UTF8Encoding.Value.GetString(slice);
             _position += actualSize;
+#else
+            string result = NetDataWriter.UTF8Encoding.Value.GetString(_data, _position, actualSize);
+            _position += actualSize; 
+#endif
             return result;
         }
 
@@ -566,20 +573,43 @@ namespace LiteNetLib.Utils
         }
 
         /// <summary>
-        /// Reads a struct of type <typeparamref name="T"/> from the internal data buffer at the current position. <br/>
-        /// Advances the position by the size of <typeparamref name="T"/>.
+        /// Reads a value of type <typeparamref name="T"/> from the internal byte buffer at the current position,
+        /// advancing the position by the size of <typeparamref name="T"/>.
         /// </summary>
-        /// <typeparam name="T">An unmanaged struct type to read.</typeparam>
-        /// <returns>The struct value read from the buffer.</returns>
-        public unsafe T GetStruct<T>() where T : unmanaged
+        /// <typeparam name="T">An unmanaged value type to read from the buffer.</typeparam>
+        /// <returns>The value of type <typeparamref name="T"/> read from the buffer.</returns>
+        /// <exception cref="IndexOutOfRangeException">
+        /// Thrown in DEBUG mode if there is not enough data remaining in the buffer to read a value of type <typeparamref name="T"/>.
+        /// </exception>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe T GetUnmanaged<T>() where T : unmanaged
         {
             int size = sizeof(T);
-            fixed (byte* ptr = &_data[_position])
+#if DEBUG
+            if (_position + size > _data.Length)
             {
-                T value = *(T*)ptr;
-                _position += size;
-                return value;
-            }
+                throw new IndexOutOfRangeException("Not enough data to read");
+            } 
+#endif
+
+            T value = Unsafe.ReadUnaligned<T>(ref _data[_position]);
+            _position += size;
+            return value;
+        }
+
+        /// <summary>
+        /// Reads a value of type <typeparamref name="T"/> from the internal byte buffer at the current position,
+        /// advancing the position by the size of <typeparamref name="T"/>.
+        /// </summary>
+        /// <typeparam name="T">An unmanaged value type to read from the buffer.</typeparam>
+        /// <returns>The value of type <typeparamref name="T"/> read from the buffer.</returns>
+        /// <exception cref="IndexOutOfRangeException">
+        /// Thrown in DEBUG mode if there is not enough data remaining in the buffer to read a value of type <typeparamref name="T"/>.
+        /// </exception>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe T PeekUnmanaged<T>() where T : unmanaged
+        {
+            return Unsafe.ReadUnaligned<T>(ref _data[_position]);
         }
 
         /// <summary>
@@ -629,42 +659,50 @@ namespace LiteNetLib.Utils
 
         public ushort PeekUShort()
         {
-            return BitConverter.ToUInt16(_data, _position);
+            return PeekUnmanaged<ushort>();
+            //return BitConverter.ToUInt16(_data, _position);
         }
 
         public short PeekShort()
         {
-            return BitConverter.ToInt16(_data, _position);
+            return PeekUnmanaged<short>();
+            //return BitConverter.ToInt16(_data, _position);
         }
 
         public long PeekLong()
         {
-            return BitConverter.ToInt64(_data, _position);
+            return PeekUnmanaged<long>();
+            //return BitConverter.ToInt64(_data, _position);
         }
 
         public ulong PeekULong()
         {
-            return BitConverter.ToUInt64(_data, _position);
+            return PeekUnmanaged<ulong>();
+            //return BitConverter.ToUInt64(_data, _position);
         }
 
         public int PeekInt()
         {
-            return BitConverter.ToInt32(_data, _position);
+            return PeekUnmanaged<int>();
+            //return BitConverter.ToInt32(_data, _position);
         }
 
         public uint PeekUInt()
         {
-            return BitConverter.ToUInt32(_data, _position);
+            return PeekUnmanaged<uint>();
+            //return BitConverter.ToUInt32(_data, _position);
         }
 
         public float PeekFloat()
         {
-            return BitConverter.ToSingle(_data, _position);
+            return PeekUnmanaged<float>();
+            //return BitConverter.ToSingle(_data, _position);
         }
 
         public double PeekDouble()
         {
-            return BitConverter.ToDouble(_data, _position);
+            return PeekUnmanaged<double>();
+            //return BitConverter.ToDouble(_data, _position);
         }
 
         /// <summary>

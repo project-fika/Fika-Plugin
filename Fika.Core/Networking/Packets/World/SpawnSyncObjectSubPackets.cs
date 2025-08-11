@@ -37,9 +37,9 @@ namespace Fika.Core.Networking.Packets.World
                 GrenadeTemplate = reader.GetString();
                 GrenadeId = reader.GetString();
                 ProfileId = reader.GetString();
-                Position = reader.GetStruct<Vector3>();
-                ToPosition = reader.GetStruct<Vector3>();
-                Rotation = reader.GetStruct<Quaternion>();
+                Position = reader.GetUnmanaged<Vector3>();
+                ToPosition = reader.GetUnmanaged<Vector3>();
+                Rotation = reader.GetUnmanaged<Quaternion>();
             }
 
             public void Execute(FikaPlayer player)
@@ -72,9 +72,9 @@ namespace Fika.Core.Networking.Packets.World
                 writer.Put(GrenadeTemplate);
                 writer.Put(GrenadeId);
                 writer.Put(ProfileId);
-                writer.PutStruct(Position);
-                writer.PutStruct(ToPosition);
-                writer.PutStruct(Rotation);
+                writer.PutUnmanaged(Position);
+                writer.PutUnmanaged(ToPosition);
+                writer.PutUnmanaged(Rotation);
             }
         }
 
@@ -93,8 +93,8 @@ namespace Fika.Core.Networking.Packets.World
             public SpawnAirplane(NetDataReader reader)
             {
                 ObjectId = reader.GetInt();
-                Position = reader.GetStruct<Vector3>();
-                Rotation = reader.GetStruct<Quaternion>();
+                Position = reader.GetUnmanaged<Vector3>();
+                Rotation = reader.GetUnmanaged<Quaternion>();
             }
 
             public void Execute(FikaPlayer player)
@@ -114,8 +114,8 @@ namespace Fika.Core.Networking.Packets.World
             public void Serialize(NetDataWriter writer)
             {
                 writer.Put(ObjectId);
-                writer.PutStruct(Position);
-                writer.PutStruct(Rotation);
+                writer.PutUnmanaged(Position);
+                writer.PutUnmanaged(Rotation);
             }
         }
 
@@ -139,8 +139,8 @@ namespace Fika.Core.Networking.Packets.World
             {
                 ObjectId = reader.GetInt();
                 IsStatic = reader.GetBool();
-                Position = reader.GetStruct<Vector3>();
-                Rotation = reader.GetStruct<Quaternion>();
+                Position = reader.GetUnmanaged<Vector3>();
+                Rotation = reader.GetUnmanaged<Quaternion>();
                 AirdropType = (EAirdropType)reader.GetByte();
                 AirdropItem = reader.GetAirdropItem();
                 ContainerId = reader.GetMongoID();
@@ -194,8 +194,8 @@ namespace Fika.Core.Networking.Packets.World
             {
                 writer.Put(ObjectId);
                 writer.Put(IsStatic);
-                writer.PutStruct(Position);
-                writer.PutStruct(Rotation);
+                writer.PutUnmanaged(Position);
+                writer.PutUnmanaged(Rotation);
                 writer.Put((byte)AirdropType);
                 writer.PutItem(AirdropItem);
                 writer.PutMongoID(ContainerId);

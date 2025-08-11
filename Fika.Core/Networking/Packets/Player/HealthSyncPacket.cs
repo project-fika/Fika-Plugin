@@ -185,7 +185,7 @@ namespace Fika.Core.Networking.Packets.Player
                 case ESyncType.BurnEyes:
                     {
                         ref GStruct407 burn = ref data.BurnEyes;
-                        burn.Position = reader.GetStruct<Vector3>();
+                        burn.Position = reader.GetUnmanaged<Vector3>();
                         burn.DistanceStrength = reader.GetFloat();
                         burn.NormalTime = reader.GetFloat();
                         break;
@@ -368,7 +368,7 @@ namespace Fika.Core.Networking.Packets.Player
                 case ESyncType.BurnEyes:
                     {
                         ref readonly GStruct407 burn = ref packet.BurnEyes;
-                        writer.PutStruct(burn.Position);
+                        writer.PutUnmanaged(burn.Position);
                         writer.Put(burn.DistanceStrength);
                         writer.Put(burn.NormalTime);
                         break;

@@ -40,9 +40,9 @@ namespace Fika.Core.Networking.Packets.Player
             PenetrationPower = reader.GetFloat();
             ArmorDamage = reader.GetFloat();
 
-            Direction = reader.GetStruct<Vector3>();
-            Point = reader.GetStruct<Vector3>();
-            HitNormal = reader.GetStruct<Vector3>();
+            Direction = reader.GetUnmanaged<Vector3>();
+            Point = reader.GetUnmanaged<Vector3>();
+            HitNormal = reader.GetUnmanaged<Vector3>();
 
             FragmentIndex = reader.GetInt();
 
@@ -69,9 +69,9 @@ namespace Fika.Core.Networking.Packets.Player
             writer.Put(PenetrationPower);
             writer.Put(ArmorDamage);
 
-            writer.PutStruct(Direction);
-            writer.PutStruct(Point);
-            writer.PutStruct(HitNormal);
+            writer.PutUnmanaged(Direction);
+            writer.PutUnmanaged(Point);
+            writer.PutUnmanaged(HitNormal);
 
             writer.Put(FragmentIndex);
 

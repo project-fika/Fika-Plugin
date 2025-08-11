@@ -47,7 +47,7 @@ namespace Fika.Core.Networking.Packets.World
                     case EReconnectDataType.OwnCharacter:
                         Profile = reader.GetProfile();
                         ProfileHealthClass = SimpleZlib.Decompress(reader.GetByteArray()).ParseJsonTo<Profile.ProfileHealthClass>();
-                        PlayerPosition = reader.GetStruct<Vector3>();
+                        PlayerPosition = reader.GetUnmanaged<Vector3>();
                         break;
                     case EReconnectDataType.Finished:
                     default:
@@ -81,7 +81,7 @@ namespace Fika.Core.Networking.Packets.World
                     case EReconnectDataType.OwnCharacter:
                         writer.PutProfile(Profile);
                         writer.PutByteArray(SimpleZlib.CompressToBytes(ProfileHealthClass.ToJson(), 4));
-                        writer.PutStruct(PlayerPosition);
+                        writer.PutUnmanaged(PlayerPosition);
                         break;
                     case EReconnectDataType.Finished:
                     default:

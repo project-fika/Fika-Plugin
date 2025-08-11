@@ -16,7 +16,7 @@ namespace Fika.Core.Networking.Packets.Communication
             PlayerInfoPacket = reader.GetPlayerInfoPacket();
             IsAlive = reader.GetBool();
             IsAI = reader.GetBool();
-            Position = reader.GetStruct<Vector3>();
+            Position = reader.GetUnmanaged<Vector3>();
             NetId = reader.GetInt();
         }
 
@@ -25,7 +25,7 @@ namespace Fika.Core.Networking.Packets.Communication
             writer.PutPlayerInfoPacket(PlayerInfoPacket);
             writer.Put(IsAlive);
             writer.Put(IsAI);
-            writer.PutStruct(Position);
+            writer.PutUnmanaged(Position);
             writer.Put(NetId);
         }
     }

@@ -12,8 +12,8 @@ namespace Fika.Core.Networking.Packets.World
         {
             ref AirplaneDataPacketStruct data = ref Data;
             data.ObjectId = reader.GetInt();
-            data.Position = reader.GetStruct<Vector3>();
-            data.Rotation = reader.GetStruct<Vector3>();
+            data.Position = reader.GetUnmanaged<Vector3>();
+            data.Rotation = reader.GetUnmanaged<Vector3>();
             data.ObjectType = (SynchronizableObjectType)reader.GetByte();
 
             if (data.ObjectType == SynchronizableObjectType.AirDrop)
@@ -37,8 +37,8 @@ namespace Fika.Core.Networking.Packets.World
         public readonly void Serialize(NetDataWriter writer)
         {
             writer.Put(Data.ObjectId);
-            writer.PutStruct(Data.Position);
-            writer.PutStruct(Data.Rotation);
+            writer.PutUnmanaged(Data.Position);
+            writer.PutUnmanaged(Data.Rotation);
             writer.Put((byte)Data.ObjectType);
 
             if (Data.ObjectType == SynchronizableObjectType.AirDrop)

@@ -366,7 +366,7 @@ namespace Fika.Core.Networking.Packets.World
 
             public MineEvent(NetDataReader reader)
             {
-                MinePosition = reader.GetStruct<Vector3>();
+                MinePosition = reader.GetUnmanaged<Vector3>();
             }
 
             public void Execute(FikaPlayer player = null)
@@ -388,7 +388,7 @@ namespace Fika.Core.Networking.Packets.World
 
             public void Serialize(NetDataWriter writer)
             {
-                writer.PutStruct(MinePosition);
+                writer.PutUnmanaged(MinePosition);
             }
         }
 
@@ -486,8 +486,8 @@ namespace Fika.Core.Networking.Packets.World
 
             public BtrSpawn(NetDataReader reader)
             {
-                Position = reader.GetStruct<Vector3>();
-                Rotation = reader.GetStruct<Quaternion>();
+                Position = reader.GetUnmanaged<Vector3>();
+                Rotation = reader.GetUnmanaged<Quaternion>();
                 PlayerProfileId = reader.GetString();
             }
 
@@ -498,8 +498,8 @@ namespace Fika.Core.Networking.Packets.World
 
             public void Serialize(NetDataWriter writer)
             {
-                writer.PutStruct(Position);
-                writer.PutStruct(Rotation);
+                writer.PutUnmanaged(Position);
+                writer.PutUnmanaged(Rotation);
                 writer.Put(PlayerProfileId);
             }
         }

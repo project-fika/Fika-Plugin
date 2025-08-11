@@ -61,7 +61,7 @@ namespace Fika.Core.Networking.Packets.Player
             writer.PutPackedInt(Blindfire, -1, 1);
             writer.PutEnum(State);
 
-            writer.PutStruct(Position);
+            writer.PutUnmanaged(Position);
             writer.PutHeadRotation(HeadRotation);
             writer.PutRotation(Rotation);
             writer.PutMovementDirection(MovementDirection);
@@ -91,7 +91,7 @@ namespace Fika.Core.Networking.Packets.Player
             Blindfire = reader.GetPackedInt(-1, 1);
             State = reader.GetEnum<EPlayerState>();
 
-            Position = reader.GetStruct<Vector3>();
+            Position = reader.GetUnmanaged<Vector3>();
             HeadRotation = reader.GetHeadRotation();
             Rotation = reader.GetRotation();
             MovementDirection = reader.GetMovementDirection();

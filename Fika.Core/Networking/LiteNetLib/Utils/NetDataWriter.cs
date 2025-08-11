@@ -155,71 +155,80 @@ namespace LiteNetLib.Utils
 
         public void Put(float value)
         {
-            if (_autoResize)
+            PutUnmanaged(value);
+            /*if (_autoResize)
                 ResizeIfNeed(_position + 4);
             FastBitConverter.GetBytes(_data, _position, value);
-            _position += 4;
+            _position += 4;*/
         }
 
         public void Put(double value)
         {
-            if (_autoResize)
+            PutUnmanaged(value);
+            /*if (_autoResize)
                 ResizeIfNeed(_position + 8);
             FastBitConverter.GetBytes(_data, _position, value);
-            _position += 8;
+            _position += 8;*/
         }
 
         public void Put(long value)
         {
-            if (_autoResize)
+            PutUnmanaged(value);
+            /*if (_autoResize)
                 ResizeIfNeed(_position + 8);
             FastBitConverter.GetBytes(_data, _position, value);
-            _position += 8;
+            _position += 8;*/
         }
 
         public void Put(ulong value)
         {
-            if (_autoResize)
+            PutUnmanaged(value);
+            /*if (_autoResize)
                 ResizeIfNeed(_position + 8);
             FastBitConverter.GetBytes(_data, _position, value);
-            _position += 8;
+            _position += 8;*/
         }
 
         public void Put(int value)
         {
-            if (_autoResize)
+            PutUnmanaged(value);
+            /*if (_autoResize)
                 ResizeIfNeed(_position + 4);
             FastBitConverter.GetBytes(_data, _position, value);
-            _position += 4;
+            _position += 4;*/
         }
 
         public void Put(uint value)
         {
-            if (_autoResize)
+            PutUnmanaged(value);
+            /*if (_autoResize)
                 ResizeIfNeed(_position + 4);
             FastBitConverter.GetBytes(_data, _position, value);
-            _position += 4;
+            _position += 4;*/
         }
 
         public void Put(char value)
         {
-            Put((ushort)value);
+            PutUnmanaged((ushort)value);
+            /*Put((ushort)value);*/
         }
 
         public void Put(ushort value)
         {
-            if (_autoResize)
+            PutUnmanaged(value);
+            /*if (_autoResize)
                 ResizeIfNeed(_position + 2);
             FastBitConverter.GetBytes(_data, _position, value);
-            _position += 2;
+            _position += 2;*/
         }
 
         public void Put(short value)
         {
-            if (_autoResize)
+            PutUnmanaged(value);
+            /*if (_autoResize)
                 ResizeIfNeed(_position + 2);
             FastBitConverter.GetBytes(_data, _position, value);
-            _position += 2;
+            _position += 2;*/
         }
 
         public void Put(sbyte value)
@@ -228,6 +237,11 @@ namespace LiteNetLib.Utils
                 ResizeIfNeed(_position + 1);
             _data[_position] = (byte)value;
             _position++;
+
+            /*if (_autoResize)
+                ResizeIfNeed(_position + 1);
+            FastBitConverter.GetBytes(_data, _position, value);
+            _position += 1;*/
         }
 
         public void Put(byte value)
@@ -236,6 +250,11 @@ namespace LiteNetLib.Utils
                 ResizeIfNeed(_position + 1);
             _data[_position] = value;
             _position++;
+
+            /*if (_autoResize)
+                ResizeIfNeed(_position + 1);
+            FastBitConverter.GetBytes(_data, _position, value);
+            _position += 1;*/
         }
 
         public void Put(Guid value)
@@ -472,26 +491,21 @@ namespace LiteNetLib.Utils
         }
 
         /// <summary>
-        /// Writes a struct of type <typeparamref name="T"/> to the internal data buffer at the current position. <br/>
-        /// Automatically resizes the buffer if <see cref="_autoResize"/> is enabled. <br/>
-        /// Advances the position by the size of <typeparamref name="T"/>.
+        /// Writes a value of type <typeparamref name="T"/> into the internal byte buffer at the current position,
+        /// advancing the position by the size of <typeparamref name="T"/>.
         /// </summary>
-        /// <typeparam name="T">An unmanaged struct type to write.</typeparam>
-        /// <param name="value">The struct value to write.</param>
-        public unsafe void PutStruct<T>(in T value) where T : unmanaged
+        /// <typeparam name="T">An unmanaged value type to write into the buffer.</typeparam>
+        /// <param name="value">The value to write into the buffer.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe void PutUnmanaged<T>(T value) where T : unmanaged
         {
-            int size = sizeof(T);
             if (_autoResize)
             {
-                ResizeIfNeed(_position + size);
+                ResizeIfNeed(_position + sizeof(T));
             }
 
-            fixed (byte* destPtr = &_data[_position])
-            fixed (T* srcPtr = &value)
-            {
-                Buffer.MemoryCopy(srcPtr, destPtr, _data.Length - _position, size);
-            }
-            _position += size;
+            Unsafe.WriteUnaligned(ref _data[_position], value);
+            _position += sizeof(T);
         }
 
         /// <summary>
