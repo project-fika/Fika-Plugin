@@ -12,6 +12,7 @@
         {
             FirearmSubPacketPoolManager.Instance.CreatePool();
             CommonSubPacketPoolManager.Instance.CreatePool();
+            GenericSubPacketPoolManager.Instance.CreatePool();
         }
 
         /// <summary>
@@ -21,6 +22,7 @@
         {
             FirearmSubPacketPoolManager.Release();
             CommonSubPacketPoolManager.Release();
+            GenericSubPacketPoolManager.Release();
         }
     }
 }
