@@ -24,7 +24,7 @@ namespace Fika.Core.Networking.Pooling
 
         /// <summary>
         /// Creates a pool of packets for each packet type based on the registered factory functions.
-        /// Initializes pools with an initial capacity of 4.
+        /// Initializes pools with an initial capacity of 2.
         /// </summary>
         public void CreatePool()
         {
@@ -33,7 +33,7 @@ namespace Fika.Core.Networking.Pooling
                 _pool = [];
                 foreach ((TEnum key, Func<TType> value) in _subPacketFactories)
                 {
-                    _pool[key] = new PacketPool<TType>(4, value);
+                    _pool[key] = new PacketPool<TType>(2, value);
                 }
             }
 
