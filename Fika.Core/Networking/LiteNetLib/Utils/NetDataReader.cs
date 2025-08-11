@@ -598,6 +598,42 @@ namespace LiteNetLib.Utils
         }
 
         /// <summary>
+        /// Reads a nullable value of type <typeparamref name="T"/> from the internal byte buffer at the current position,
+        /// first reading a <see cref="bool"/> indicating whether the value is present,
+        /// and then reading the value itself if it exists. <br/>
+        /// Advances the position by 1 byte for the presence flag plus the size of <typeparamref name="T"/> if the value is present.
+        /// </summary>
+        /// <typeparam name="T">An unmanaged value type to read from the buffer.</typeparam>
+        /// <returns>
+        /// The nullable value of type <typeparamref name="T"/> read from the buffer.
+        /// Returns <see langword="null"/> if the presence flag indicates no value.
+        /// </returns>
+        /// <exception cref="IndexOutOfRangeException">
+        /// Thrown in DEBUG mode if there is not enough data remaining in the buffer to read the value.
+        /// </exception>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe T? GetNullableUnmanaged<T>() where T : unmanaged
+        {
+            bool hasValue = GetBool();
+#if DEBUG
+            int requiredSize = hasValue ? sizeof(T) : 0;
+            if (_position + requiredSize > _data.Length)
+            {
+                throw new IndexOutOfRangeException("Not enough data to read");
+            }
+#endif
+
+            if (!hasValue)
+            {
+                return null;
+            }
+
+            T value = Unsafe.ReadUnaligned<T>(ref _data[_position]);
+            _position += sizeof(T);
+            return value;
+        }
+
+        /// <summary>
         /// Reads a value of type <typeparamref name="T"/> from the internal byte buffer at the current position,
         /// advancing the position by the size of <typeparamref name="T"/>.
         /// </summary>

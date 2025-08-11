@@ -491,14 +491,41 @@ namespace LiteNetLib.Utils
         }
 
         /// <summary>
+        /// Writes a nullable value of type <typeparamref name="T"/> into the internal byte buffer at the current position,
+        /// first writing a <see cref="bool"/> indicating whether the value is present, 
+        /// and then writing the value itself if it exists. <br/> Advances the position by 1 byte for the presence flag plus
+        /// the size of <typeparamref name="T"/> if the value is present.
+        /// </summary>
+        /// <typeparam name="T">An unmanaged value type to write into the buffer.</typeparam>
+        /// <param name="value">The nullable value to write into the buffer. If <see langword="null"/>, only a <see langword="false"/> flag is written.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe void PutUnmanaged<T>(T value) where T : unmanaged
+        {
+            if (_autoResize)
+            {
+                ResizeIfNeed(_position + sizeof(T));
+            }
+
+            Unsafe.WriteUnaligned(ref _data[_position], value);
+            _position += sizeof(T);
+        }
+
+        /// <summary>
         /// Writes a value of type <typeparamref name="T"/> into the internal byte buffer at the current position,
         /// advancing the position by the size of <typeparamref name="T"/>.
         /// </summary>
         /// <typeparam name="T">An unmanaged value type to write into the buffer.</typeparam>
         /// <param name="value">The value to write into the buffer.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe void PutUnmanaged<T>(T value) where T : unmanaged
+        public unsafe void PutNullableUnmanaged<T>(T? value) where T : unmanaged
         {
+            bool hasValue = value.HasValue;
+            Put(hasValue);
+            if (!hasValue)
+            {
+                return;
+            }
+
             if (_autoResize)
             {
                 ResizeIfNeed(_position + sizeof(T));
