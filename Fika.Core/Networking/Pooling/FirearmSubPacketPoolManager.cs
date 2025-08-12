@@ -7,7 +7,7 @@ namespace Fika.Core.Networking.Pooling;
 
 internal sealed class FirearmSubPacketPoolManager : BasePacketPoolManager<EFirearmSubPacketType, IPoolSubPacket>
 {
-    private static Lazy<FirearmSubPacketPoolManager> _instance = new(() => new FirearmSubPacketPoolManager(), LazyThreadSafetyMode.None);
+    private static readonly Lazy<FirearmSubPacketPoolManager> _instance = new(() => new FirearmSubPacketPoolManager(), LazyThreadSafetyMode.None);
     public static FirearmSubPacketPoolManager Instance
     {
         get
@@ -19,7 +19,6 @@ internal sealed class FirearmSubPacketPoolManager : BasePacketPoolManager<EFirea
     public static void Release()
     {
         _instance.Value.ClearPool();
-        _instance = null;
     }
 
     private FirearmSubPacketPoolManager()
