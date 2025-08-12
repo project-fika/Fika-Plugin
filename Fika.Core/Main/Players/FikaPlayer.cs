@@ -44,7 +44,7 @@ namespace Fika.Core.Main.Players
         #region Fields and Properties
         public IPacketSender PacketSender;
         public float ObservedOverlap = 0f;
-        public CorpseSyncPacket CorpseSyncPacket = default;
+        public CorpseSyncPacketS CorpseSyncPacket = default;
         public int NetId;
         public bool IsObservedAI;
         public Dictionary<uint, Action<ServerOperationStatus>> OperationCallbacks = [];
@@ -860,7 +860,7 @@ namespace Fika.Core.Main.Players
             Corpse.Ragdoll.ApplyImpulse(LastDamageInfo.HitCollider, LastDamageInfo.Direction, LastDamageInfo.HitPoint, _corpseAppliedForce);
         }
 
-        public HealthSyncPacket SetupCorpseSyncPacket(NetworkHealthSyncPacketStruct packet)
+        public void SetupCorpseSyncPacket(NetworkHealthSyncPacketStruct packet)
         {
             float num = EFTHardSettings.Instance.HIT_FORCE;
             num *= 0.3f + 0.7f * Mathf.InverseLerp(50f, 20f, LastDamageInfo.PenetrationPower);
@@ -876,32 +876,32 @@ namespace Fika.Core.Main.Players
 
             InventoryDescriptorClass inventoryDescriptor = EFTItemSerializerClass.SerializeItem(Inventory.Equipment, FikaGlobals.SearchControllerSerializer);
 
-            HealthSyncPacket syncPacket = new()
+            HealthSyncPacket packets = HealthSyncPacket.FromValue(packet);
+            packets.BodyPart = LastBodyPart;
+            packets.CorpseSyncPacket = new()
             {
-                NetId = NetId,
-                Packet = packet,
-                BodyPart = LastBodyPart,
-                CorpseSyncPacket = new()
-                {
-                    BodyPartColliderType = LastDamageInfo.BodyPartColliderType,
-                    Direction = LastDamageInfo.Direction,
-                    Point = LastDamageInfo.HitPoint,
-                    Force = _corpseAppliedForce,
-                    OverallVelocity = Velocity,
-                    InventoryDescriptor = inventoryDescriptor,
-                    ItemSlot = EquipmentSlot.ArmBand
-                },
-                TriggerZones = TriggerZones.Count > 0 ? [.. TriggerZones] : null,
+                BodyPartColliderType = LastDamageInfo.BodyPartColliderType,
+                Direction = LastDamageInfo.Direction,
+                Point = LastDamageInfo.HitPoint,
+                Force = _corpseAppliedForce,
+                OverallVelocity = Velocity,
+                InventoryDescriptor = inventoryDescriptor,
+                ItemSlot = EquipmentSlot.ArmBand
             };
+
+            if (TriggerZones.Count > 0)
+            {
+                packets.TriggerZones.AddRange(TriggerZones);
+            }
 
             if (LastAggressor != null)
             {
-                syncPacket.KillerId = LastAggressor.ProfileId;
+                packets.KillerId = LastAggressor.ProfileId;
             }
 
             if (!string.IsNullOrEmpty(_lastWeaponId))
             {
-                syncPacket.WeaponId = _lastWeaponId;
+                packets.WeaponId = _lastWeaponId;
             }
 
             if (HandsController.Item != null)
@@ -912,13 +912,15 @@ namespace Fika.Core.Main.Players
                     EquipmentSlot weaponSlot = FikaGlobals.WeaponSlots[i];
                     if (heldItem == Equipment.GetSlot(weaponSlot).ContainedItem)
                     {
-                        syncPacket.CorpseSyncPacket.ItemSlot = weaponSlot;
+                        packets.CorpseSyncPacket.ItemSlot = weaponSlot;
                         break;
                     }
                 }
             }
 
-            return syncPacket;
+            CommonPacket.Type = ECommonSubPacketType.HealthSync;
+            CommonPacket.SubPacket = packets;
+            PacketSender.NetworkManager.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
         }
 
         public override void OnDead(EDamageType damageType)

@@ -257,7 +257,6 @@ namespace Fika.Core.Networking
             RegisterPacket<ArmorDamagePacket>(OnArmorDamagePacketReceived);
             RegisterPacket<InventoryPacket>(OnInventoryPacketReceived);
             RegisterPacket<InformationPacket>(OnInformationPacketReceived);
-            RegisterPacket<HealthSyncPacket>(OnHealthSyncPacketReceived);
             RegisterPacket<SendCharacterPacket>(OnSendCharacterPacketReceived);
             RegisterPacket<OperationCallbackPacket>(OnOperationCallbackPacketReceived);
             RegisterPacket<TextMessagePacket>(OnTextMessagePacketReceived);
@@ -988,32 +987,6 @@ namespace Fika.Core.Networking
         private void OnGenericPacketReceived(GenericPacket packet)
         {
             packet.Execute();
-        }
-
-        private void OnHealthSyncPacketReceived(HealthSyncPacket packet)
-        {
-            if (_coopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer playerToApply))
-            {
-                if (playerToApply is ObservedPlayer observedPlayer)
-                {
-                    if (packet.Packet.SyncType == NetworkHealthSyncPacketStruct.ESyncType.IsAlive && !packet.Packet.Data.IsAlive.IsAlive)
-                    {
-                        if (packet.KillerId.HasValue)
-                        {
-                            observedPlayer.SetAggressorData(packet.KillerId, packet.BodyPart, packet.WeaponId);
-                        }
-                        observedPlayer.CorpseSyncPacket = packet.CorpseSyncPacket;
-                        if (packet.TriggerZones.Length > 0)
-                        {
-                            observedPlayer.TriggerZones.Clear();
-                            observedPlayer.TriggerZones.AddRange(packet.TriggerZones);
-                        }
-                    }
-                    observedPlayer.NetworkHealthController.HandleSyncPacket(packet.Packet);
-                    return;
-                }
-                _logger.LogError($"OnHealthSyncPacketReceived::Player with id {playerToApply.NetId} was not observed. Name: {playerToApply.Profile.Nickname}");
-            }
         }
 
         private void OnInformationPacketReceived(InformationPacket packet)

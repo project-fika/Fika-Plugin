@@ -1,6 +1,7 @@
 ﻿using Fika.Core.Main.Utils;
 using System;
 using System.Collections.Generic;
+using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 
 namespace Fika.Core.Networking.Pooling
@@ -46,13 +47,15 @@ namespace Fika.Core.Networking.Pooling
         public T Get()
         {
 #if DEBUG
+            
             if (_pool.Count > 0)
             {
                 return _pool.Pop();
             }
             else
             {
-                FikaGlobals.LogError($"[{typeof(T).Name}] Tried to pop but none existed?");
+                T packet = _constructor();
+                FikaGlobals.LogError($"[{packet.GetType().Name}] Tried to pop but none existed?");
                 return _constructor();
             }
 #else

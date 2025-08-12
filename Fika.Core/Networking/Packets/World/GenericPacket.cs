@@ -18,8 +18,7 @@ namespace Fika.Core.Networking.Packets.World
 
         public void Execute(FikaPlayer player = null)
         {
-            SubPacket.Execute(player);
-            GenericSubPacketPoolManager.Instance.ReturnPacket(Type, SubPacket);
+            SubPacket.Execute(player);            
         }
 
         public void Deserialize(NetDataReader reader)
@@ -43,11 +42,13 @@ namespace Fika.Core.Networking.Packets.World
             {
                 GenericSubPacketPoolManager.Instance.ReturnPacket(Type, SubPacket);
                 SubPacket = null;
+                Type = default;
             }
         }
 
         public void Flush()
         {
+            GenericSubPacketPoolManager.Instance.ReturnPacket(Type, SubPacket);
             SubPacket = null;
         }
     }

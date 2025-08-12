@@ -1,4 +1,5 @@
 ﻿using Fika.Core.Main.Players;
+using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Pooling;
 using LiteNetLib.Utils;
 
@@ -12,8 +13,7 @@ namespace Fika.Core.Networking.Packets.Player
 
         public void Execute(FikaPlayer player = null)
         {
-            SubPacket.Execute(player);
-            CommonSubPacketPoolManager.Instance.ReturnPacket(Type, SubPacket);
+            SubPacket.Execute(player);            
         }
 
         public void Deserialize(NetDataReader reader)
@@ -37,11 +37,13 @@ namespace Fika.Core.Networking.Packets.Player
             {
                 CommonSubPacketPoolManager.Instance.ReturnPacket(Type, SubPacket);
                 SubPacket = null;
+                Type = default;
             }
         }
 
         public void Flush()
         {
+            CommonSubPacketPoolManager.Instance.ReturnPacket(Type, SubPacket);
             SubPacket = null;
         }
     }

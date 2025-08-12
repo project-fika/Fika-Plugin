@@ -26,22 +26,6 @@ namespace Fika.Core.Networking.Packets
             public bool IsZombie;
         }
 
-        public struct CorpseSyncPacket
-        {
-            public InventoryDescriptorClass InventoryDescriptor;
-            public Item ItemInHands;
-
-            public EBodyPartColliderType BodyPartColliderType;
-
-            public Vector3 Direction;
-            public Vector3 Point;
-            public Vector3 OverallVelocity;
-
-            public float Force;
-
-            public EquipmentSlot ItemSlot;
-        }
-
         public struct DeathInfoPacket
         {
             public string AccountId;

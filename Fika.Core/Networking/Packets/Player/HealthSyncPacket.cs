@@ -1,25 +1,62 @@
 ﻿using EFT;
+using EFT.InventoryLogic;
+using Fika.Core.Main.Players;
+using Fika.Core.Main.Utils;
+using Fika.Core.Networking.Pooling;
 using LiteNetLib.Utils;
-using static Fika.Core.Networking.Packets.SubPackets;
+using System.Collections.Generic;
 using static NetworkHealthSyncPacketStruct;
 using static NetworkHealthSyncPacketStruct.NetworkHealthExtraDataTypeStruct;
 
 namespace Fika.Core.Networking.Packets.Player
 {
-    public struct HealthSyncPacket : INetSerializable
+    public class HealthSyncPacket : IPoolSubPacket
     {
-        public int NetId;
+        private HealthSyncPacket() { }
+
+        public static HealthSyncPacket CreateInstance()
+        {
+            return new();
+        }
+
         public NetworkHealthSyncPacketStruct Packet;
         public MongoID? KillerId;
         public MongoID? WeaponId;
         public EBodyPart BodyPart;
-        public CorpseSyncPacket CorpseSyncPacket;
-        public string[] TriggerZones;
+        public CorpseSyncPacketS CorpseSyncPacket;
+        public List<string> TriggerZones = new(4);
+
+        public static HealthSyncPacket FromValue(NetworkHealthSyncPacketStruct value)
+        {
+            HealthSyncPacket packet = CommonSubPacketPoolManager.Instance.GetPacket<HealthSyncPacket>(ECommonSubPacketType.HealthSync);
+            packet.Packet = value;
+            return packet;
+        }
+
+        public void Execute(FikaPlayer player = null)
+        {
+            if (player is ObservedPlayer observedPlayer)
+            {
+                if (Packet.SyncType == ESyncType.IsAlive && !Packet.Data.IsAlive.IsAlive)
+                {
+                    if (KillerId.HasValue)
+                    {
+                        observedPlayer.SetAggressorData(KillerId, BodyPart, WeaponId);
+                    }
+                    observedPlayer.CorpseSyncPacket = CorpseSyncPacket;
+                    if (TriggerZones.Count > 0)
+                    {
+                        observedPlayer.TriggerZones.AddRange(TriggerZones);
+                    }
+                }
+                observedPlayer.NetworkHealthController.HandleSyncPacket(Packet);
+                return;
+            }
+            FikaGlobals.LogError($"OnHealthSyncPacketReceived::Player with id {player.NetId} was not observed. Name: {player.Profile.GetCorrectedNickname()}");
+        }
 
         public void Deserialize(NetDataReader reader)
         {
-            NetId = reader.GetInt();
-
             NetworkHealthSyncPacketStruct packet = new()
             {
                 SyncType = reader.GetEnum<ESyncType>()
@@ -111,7 +148,11 @@ namespace Fika.Core.Networking.Packets.Player
                             WeaponId = reader.GetNullableMongoID();
                             BodyPart = reader.GetEnum<EBodyPart>();
                             CorpseSyncPacket = reader.GetCorpseSyncPacket();
-                            TriggerZones = reader.GetStringArray();
+                            int count = reader.GetByte();
+                            for (int i = 0; i < count; i++)
+                            {
+                                TriggerZones.Add(reader.GetString());
+                            }
                         }
                         break;
                     }
@@ -203,9 +244,8 @@ namespace Fika.Core.Networking.Packets.Player
             Packet = packet;
         }
 
-        public readonly void Serialize(NetDataWriter writer)
+        public void Serialize(NetDataWriter writer)
         {
-            writer.Put(NetId);
             ref readonly NetworkHealthDataPacketStruct packet = ref Packet.Data;
             writer.PutEnum(Packet.SyncType);
 
@@ -299,7 +339,11 @@ namespace Fika.Core.Networking.Packets.Player
                             writer.PutNullableMongoID(WeaponId);
                             writer.PutEnum(BodyPart);
                             writer.PutCorpseSyncPacket(CorpseSyncPacket);
-                            writer.PutArray(TriggerZones);
+                            writer.Put((byte)TriggerZones.Count);
+                            for (int i = 0; i < TriggerZones.Count; i++)
+                            {
+                                writer.Put(TriggerZones[i]);
+                            }
                         }
                         break;
                     }
@@ -384,5 +428,33 @@ namespace Fika.Core.Networking.Packets.Player
             }
         }
 
+        public void Dispose()
+        {
+            if (Packet.SyncType is ESyncType.IsAlive)
+            {
+                KillerId = null;
+                WeaponId = null;
+                BodyPart = default;
+                CorpseSyncPacket = default;
+                TriggerZones.Clear();
+            }
+            Packet = default;
+        }
+    }
+
+    public struct CorpseSyncPacketS
+    {
+        public InventoryDescriptorClass InventoryDescriptor;
+        public Item ItemInHands;
+
+        public EBodyPartColliderType BodyPartColliderType;
+
+        public Vector3 Direction;
+        public Vector3 Point;
+        public Vector3 OverallVelocity;
+
+        public float Force;
+
+        public EquipmentSlot ItemSlot;
     }
 }

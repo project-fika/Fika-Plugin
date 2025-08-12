@@ -414,7 +414,6 @@ namespace Fika.Core.Networking
             RegisterPacket<ArmorDamagePacket, NetPeer>(OnArmorDamagePacketReceived);
             RegisterPacket<InventoryPacket, NetPeer>(OnInventoryPacketReceived);
             RegisterPacket<InformationPacket, NetPeer>(OnInformationPacketReceived);
-            RegisterPacket<HealthSyncPacket, NetPeer>(OnHealthSyncPacketReceived);
             RegisterPacket<SendCharacterPacket, NetPeer>(OnSendCharacterPacketReceived);
             RegisterPacket<TextMessagePacket, NetPeer>(OnTextMessagePacketReceived);
             RegisterPacket<QuestConditionPacket, NetPeer>(OnQuestConditionPacketReceived);
@@ -1097,32 +1096,6 @@ namespace Fika.Core.Networking
         private void OnGenericPacketReceived(GenericPacket packet, NetPeer peer)
         {
             packet.Execute();
-        }
-
-        private void OnHealthSyncPacketReceived(HealthSyncPacket packet, NetPeer peer)
-        {
-            if (_coopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer playerToApply))
-            {
-                if (playerToApply is ObservedPlayer observedPlayer)
-                {
-                    if (packet.Packet.SyncType == NetworkHealthSyncPacketStruct.ESyncType.IsAlive && !packet.Packet.Data.IsAlive.IsAlive)
-                    {
-                        if (packet.KillerId.HasValue)
-                        {
-                            observedPlayer.SetAggressorData(packet.KillerId, packet.BodyPart, packet.WeaponId);
-                        }
-                        observedPlayer.CorpseSyncPacket = packet.CorpseSyncPacket;
-                        if (packet.TriggerZones.Length > 0)
-                        {
-                            observedPlayer.TriggerZones.Clear();
-                            observedPlayer.TriggerZones.AddRange(packet.TriggerZones);
-                        }
-                    }
-                    observedPlayer.NetworkHealthController.HandleSyncPacket(packet.Packet);
-                    return;
-                }
-                _logger.LogError($"OnHealthSyncPacketReceived::Player with id {playerToApply.NetId} was not observed. Name: {playerToApply.Profile.Nickname}");
-            }
         }
 
         private void OnInformationPacketReceived(InformationPacket packet, NetPeer peer)

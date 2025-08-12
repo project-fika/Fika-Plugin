@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Fika.Core.Main.Utils;
+using System;
 using System.Collections.Generic;
 
 namespace Fika.Core.Networking.Pooling
@@ -33,7 +34,7 @@ namespace Fika.Core.Networking.Pooling
                 _pool = [];
                 foreach ((TEnum key, Func<TType> value) in _subPacketFactories)
                 {
-                    _pool[key] = new PacketPool<TType>(2, value);
+                    _pool[key] = new PacketPool<TType>(4, value);
                 }
             }
 

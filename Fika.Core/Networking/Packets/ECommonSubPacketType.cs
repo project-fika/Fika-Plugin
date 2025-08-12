@@ -63,6 +63,11 @@
         /// <summary>
         /// Dealing damage
         /// </summary>
-        Damage
+        Damage,
+
+        /// <summary>
+        /// Syncing health
+        /// </summary>
+        HealthSync
     }
 }
