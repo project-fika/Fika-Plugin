@@ -13,7 +13,7 @@ public struct PingPacket : INetSerializable
     public void Deserialize(NetDataReader reader)
     {
         PingLocation = reader.GetUnmanaged<Vector3>();
-        PingType = (PingFactory.EPingType)reader.GetByte();
+        PingType = reader.GetEnum<PingFactory.EPingType>();
         PingColor = reader.GetUnmanaged<Color>();
         Nickname = reader.GetString();
         LocaleId = reader.GetString();
@@ -22,7 +22,7 @@ public struct PingPacket : INetSerializable
     public readonly void Serialize(NetDataWriter writer)
     {
         writer.PutUnmanaged(PingLocation);
-        writer.Put((byte)PingType);
+        writer.PutEnum(PingType);
         writer.PutUnmanaged(PingColor);
         writer.Put(Nickname);
         writer.Put(LocaleId);
