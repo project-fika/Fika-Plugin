@@ -1,76 +1,75 @@
 ﻿using Comfort.Common;
 using System;
 
-namespace Fika.Core.Networking.VOIP
+namespace Fika.Core.Networking.VOIP;
+
+public readonly struct FikaVOIPPeer(IPeer connection) : IEquatable<FikaVOIPPeer>
 {
-    public readonly struct FikaVOIPPeer(IPeer connection) : IEquatable<FikaVOIPPeer>
+    public readonly IPeer Peer = connection;
+
+    public override int GetHashCode()
     {
-        public readonly IPeer Peer = connection;
+        return Peer.GetHashCode();
+    }
 
-        public override int GetHashCode()
+    public override string ToString()
+    {
+        return Peer.ToString();
+    }
+
+    public override bool Equals(object obj)
+    {
+        return obj != null && obj is FikaVOIPPeer peer && Equals(peer);
+    }
+
+    public bool Equals(FikaVOIPPeer other)
+    {
+        if (Peer == null)
         {
-            return Peer.GetHashCode();
+            return other.Peer == null;
         }
 
-        public override string ToString()
+        if (Peer is RemotePeer localRemote && other.Peer is RemotePeer otherRemote)
         {
-            return Peer.ToString();
+            return localRemote.Peer.Equals(otherRemote.Peer);
         }
 
-        public override bool Equals(object obj)
+        return Peer.Equals(other.Peer);
+    }
+}
+
+public interface IPeer
+{
+    public bool IsLocal { get; set; }
+    void SendData(ArraySegment<byte> data, DeliveryMethod deliveryMethod);
+}
+
+public class LocalPeer : IPeer
+{
+    public bool IsLocal { get; set; } = true;
+
+    public void SendData(ArraySegment<byte> data, DeliveryMethod deliveryMethod)
+    {
+        Singleton<FikaServer>.Instance.VOIPClient.NetworkReceivedPacket(data);
+    }
+}
+
+public struct RemotePeer(NetPeer peer) : IPeer
+{
+    public bool IsLocal { get; set; } = false;
+
+    public readonly NetPeer Peer
+    {
+        get
         {
-            return obj != null && obj is FikaVOIPPeer peer && Equals(peer);
-        }
-
-        public bool Equals(FikaVOIPPeer other)
-        {
-            if (Peer == null)
-            {
-                return other.Peer == null;
-            }
-
-            if (Peer is RemotePeer localRemote && other.Peer is RemotePeer otherRemote)
-            {
-                return localRemote.Peer.Equals(otherRemote.Peer);
-            }
-
-            return Peer.Equals(other.Peer);
+            return _peer;
         }
     }
 
-    public interface IPeer
+    private readonly NetPeer _peer = peer;
+
+    public readonly void SendData(ArraySegment<byte> data, DeliveryMethod deliveryMethod)
     {
-        public bool IsLocal { get; set; }
-        void SendData(ArraySegment<byte> data, DeliveryMethod deliveryMethod);
-    }
-
-    public class LocalPeer : IPeer
-    {
-        public bool IsLocal { get; set; } = true;
-
-        public void SendData(ArraySegment<byte> data, DeliveryMethod deliveryMethod)
-        {
-            Singleton<FikaServer>.Instance.VOIPClient.NetworkReceivedPacket(data);
-        }
-    }
-
-    public struct RemotePeer(NetPeer peer) : IPeer
-    {
-        public bool IsLocal { get; set; } = false;
-
-        public readonly NetPeer Peer
-        {
-            get
-            {
-                return _peer;
-            }
-        }
-
-        private readonly NetPeer _peer = peer;
-
-        public readonly void SendData(ArraySegment<byte> data, DeliveryMethod deliveryMethod)
-        {
-            Singleton<IFikaNetworkManager>.Instance.SendVOIPData(data, deliveryMethod, _peer);
-        }
+        Singleton<IFikaNetworkManager>.Instance.SendVOIPData(data, deliveryMethod, _peer);
     }
 }

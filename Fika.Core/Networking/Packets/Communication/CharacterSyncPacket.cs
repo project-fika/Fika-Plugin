@@ -2,46 +2,45 @@
 using LiteNetLib.Utils;
 using System.Collections.Generic;
 
-namespace Fika.Core.Networking.Packets.Communication
+namespace Fika.Core.Networking.Packets.Communication;
+
+public class CharacterSyncPacket : INetSerializable
 {
-    public class CharacterSyncPacket : INetSerializable
+    public CharacterSyncPacket()
     {
-        public CharacterSyncPacket()
-        {
 
+    }
+
+    public CharacterSyncPacket(Dictionary<int, FikaPlayer> players)
+    {
+        PlayerIds = new(players.Count);
+        foreach ((int netid, _) in players)
+        {
+            PlayerIds.Add(netid);
         }
+    }
 
-        public CharacterSyncPacket(Dictionary<int, FikaPlayer> players)
+    public List<int> PlayerIds;
+
+    public void Deserialize(NetDataReader reader)
+    {
+        ushort amount = reader.GetUShort();
+        if (amount > 0)
         {
-            PlayerIds = new(players.Count);
-            foreach ((int netid, _) in players)
+            PlayerIds = new(amount);
+            for (int i = 0; i < amount; i++)
             {
-                PlayerIds.Add(netid);
+                PlayerIds.Add(reader.GetInt());
             }
         }
+    }
 
-        public List<int> PlayerIds;
-
-        public void Deserialize(NetDataReader reader)
+    public void Serialize(NetDataWriter writer)
+    {
+        writer.Put((ushort)PlayerIds.Count);
+        foreach (int netId in PlayerIds)
         {
-            ushort amount = reader.GetUShort();
-            if (amount > 0)
-            {
-                PlayerIds = new(amount);
-                for (int i = 0; i < amount; i++)
-                {
-                    PlayerIds.Add(reader.GetInt());
-                }
-            }
-        }
-
-        public void Serialize(NetDataWriter writer)
-        {
-            writer.Put((ushort)PlayerIds.Count);
-            foreach (int netId in PlayerIds)
-            {
-                writer.Put(netId);
-            }
+            writer.Put(netId);
         }
     }
 }

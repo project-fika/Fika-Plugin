@@ -1,11 +1,10 @@
 ﻿
-namespace Fika.Core.Networking.Websocket
+namespace Fika.Core.Networking.Websocket;
+
+public enum EFikaHeadlessWSMessageType
 {
-    public enum EFikaHeadlessWSMessageType
-    {
-        KeepAlive = 0,
-        HeadlessStartRaid = 1,
-        RequesterJoinRaid = 2,
-        ShutdownClient = 4
-    }
+    KeepAlive = 0,
+    HeadlessStartRaid = 1,
+    RequesterJoinRaid = 2,
+    ShutdownClient = 4
 }

@@ -2,55 +2,54 @@
 using Fika.Core.Networking.Pooling;
 using LiteNetLib.Utils;
 
-namespace Fika.Core.Networking.Packets.Player
+namespace Fika.Core.Networking.Packets.Player;
+
+public class PhrasePacket : IPoolSubPacket
 {
-    public class PhrasePacket : IPoolSubPacket
+    private PhrasePacket()
     {
-        private PhrasePacket()
+
+    }
+
+    public static PhrasePacket CreateInstance()
+    {
+        return new();
+    }
+
+    public static PhrasePacket FromValue(EPhraseTrigger trigger, int index)
+    {
+        PhrasePacket packet = CommonSubPacketPoolManager.Instance.GetPacket<PhrasePacket>(ECommonSubPacketType.Phrase);
+        packet.PhraseTrigger = trigger;
+        packet.PhraseIndex = index;
+        return packet;
+    }
+
+    public EPhraseTrigger PhraseTrigger;
+    public int PhraseIndex;
+
+    public void Execute(FikaPlayer player)
+    {
+        if (player.gameObject.activeSelf && player.HealthController.IsAlive)
         {
-
+            player.Speaker.PlayDirect(PhraseTrigger, PhraseIndex);
         }
+    }
 
-        public static PhrasePacket CreateInstance()
-        {
-            return new();
-        }
+    public void Serialize(NetDataWriter writer)
+    {
+        writer.PutEnum(PhraseTrigger);
+        writer.Put(PhraseIndex);
+    }
 
-        public static PhrasePacket FromValue(EPhraseTrigger trigger, int index)
-        {
-            PhrasePacket packet = CommonSubPacketPoolManager.Instance.GetPacket<PhrasePacket>(ECommonSubPacketType.Phrase);
-            packet.PhraseTrigger = trigger;
-            packet.PhraseIndex = index;
-            return packet;
-        }
+    public void Deserialize(NetDataReader reader)
+    {
+        PhraseTrigger = reader.GetEnum<EPhraseTrigger>();
+        PhraseIndex = reader.GetInt();
+    }
 
-        public EPhraseTrigger PhraseTrigger;
-        public int PhraseIndex;
-
-        public void Execute(FikaPlayer player)
-        {
-            if (player.gameObject.activeSelf && player.HealthController.IsAlive)
-            {
-                player.Speaker.PlayDirect(PhraseTrigger, PhraseIndex);
-            }
-        }
-
-        public void Serialize(NetDataWriter writer)
-        {
-            writer.PutEnum(PhraseTrigger);
-            writer.Put(PhraseIndex);
-        }
-
-        public void Deserialize(NetDataReader reader)
-        {
-            PhraseTrigger = reader.GetEnum<EPhraseTrigger>();
-            PhraseIndex = reader.GetInt();
-        }
-
-        public void Dispose()
-        {
-            PhraseTrigger = EPhraseTrigger.None;
-            PhraseIndex = 0;
-        }
+    public void Dispose()
+    {
+        PhraseTrigger = EPhraseTrigger.None;
+        PhraseIndex = 0;
     }
 }

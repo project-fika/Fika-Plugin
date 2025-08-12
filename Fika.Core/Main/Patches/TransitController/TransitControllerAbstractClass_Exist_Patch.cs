@@ -4,35 +4,34 @@ using Fika.Core.Main.Utils;
 using Fika.Core.Patching;
 using System.Reflection;
 
-namespace Fika.Core.Main.Patches
+namespace Fika.Core.Main.Patches;
+
+public class TransitControllerAbstractClass_Exist_Patch : FikaPatch
 {
-    public class TransitControllerAbstractClass_Exist_Patch : FikaPatch
+    protected override MethodBase GetTargetMethod()
     {
-        protected override MethodBase GetTargetMethod()
-        {
-            return typeof(TransitControllerAbstractClass)
-                .GetMethod(nameof(TransitControllerAbstractClass.Exist))
-                .MakeGenericMethod(typeof(TransitInteractionControllerAbstractClass));
-        }
+        return typeof(TransitControllerAbstractClass)
+            .GetMethod(nameof(TransitControllerAbstractClass.Exist))
+            .MakeGenericMethod(typeof(TransitInteractionControllerAbstractClass));
+    }
 
-        [PatchPrefix]
-        public static bool Prefix(ref bool __result, ref TransitControllerAbstractClass transitController)
+    [PatchPrefix]
+    public static bool Prefix(ref bool __result, ref TransitControllerAbstractClass transitController)
+    {
+        if (FikaGlobals.IsInRaid)
         {
-            if (FikaGlobals.IsInRaid)
+            GameWorld gameWorld = Singleton<GameWorld>.Instance;
+            if (gameWorld != null)
             {
-                GameWorld gameWorld = Singleton<GameWorld>.Instance;
-                if (gameWorld != null)
+                transitController = gameWorld.TransitController;
+                if (transitController != null)
                 {
-                    transitController = gameWorld.TransitController;
-                    if (transitController != null)
-                    {
-                        __result = true;
-                    }
+                    __result = true;
                 }
-                return false;
             }
-
-            return true;
+            return false;
         }
+
+        return true;
     }
 }

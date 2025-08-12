@@ -5,22 +5,21 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace Fika.Core.Main.Patches.Subsystems
-{
-    /// <summary>
-    /// Prevents logic that is never used from being injected into the <see cref="UnityEngine.LowLevel.PlayerLoop"/>
-    /// </summary>
-    internal class CustomPlayerLoopSystemsInjector_MoveUNetUpdateSystemOnPreUpdate_Transpiler : FikaPatch
-    {
-        protected override MethodBase GetTargetMethod()
-        {
-            return typeof(CustomPlayerLoopSystemsInjector).GetMethod(nameof(CustomPlayerLoopSystemsInjector.MoveUNetUpdateSystemOnPreUpdate));
-        }
+namespace Fika.Core.Main.Patches.Subsystems;
 
-        [PatchTranspiler]
-        public static IEnumerable<CodeInstruction> Transpile()
-        {
-            yield return new(OpCodes.Ret);
-        }
+/// <summary>
+/// Prevents logic that is never used from being injected into the <see cref="UnityEngine.LowLevel.PlayerLoop"/>
+/// </summary>
+internal class CustomPlayerLoopSystemsInjector_MoveUNetUpdateSystemOnPreUpdate_Transpiler : FikaPatch
+{
+    protected override MethodBase GetTargetMethod()
+    {
+        return typeof(CustomPlayerLoopSystemsInjector).GetMethod(nameof(CustomPlayerLoopSystemsInjector.MoveUNetUpdateSystemOnPreUpdate));
+    }
+
+    [PatchTranspiler]
+    public static IEnumerable<CodeInstruction> Transpile()
+    {
+        yield return new(OpCodes.Ret);
     }
 }

@@ -3,46 +3,45 @@ using Fika.Core.Main.Players;
 using Fika.Core.Networking.Pooling;
 using LiteNetLib.Utils;
 
-namespace Fika.Core.Networking.Packets.FirearmController
+namespace Fika.Core.Networking.Packets.FirearmController;
+
+public class UnderbarrelSightingRangeUpPacket : IPoolSubPacket
 {
-    public class UnderbarrelSightingRangeUpPacket : IPoolSubPacket
+    private UnderbarrelSightingRangeUpPacket()
     {
-        private UnderbarrelSightingRangeUpPacket()
-        {
 
-        }
+    }
 
-        public static UnderbarrelSightingRangeUpPacket FromValue()
-        {
-            return FirearmSubPacketPoolManager.Instance.GetPacket<UnderbarrelSightingRangeUpPacket>(EFirearmSubPacketType.UnderbarrelSightingRangeUp);
-        }
+    public static UnderbarrelSightingRangeUpPacket FromValue()
+    {
+        return FirearmSubPacketPoolManager.Instance.GetPacket<UnderbarrelSightingRangeUpPacket>(EFirearmSubPacketType.UnderbarrelSightingRangeUp);
+    }
 
-        public static UnderbarrelSightingRangeUpPacket CreateInstance()
-        {
-            return new();
-        }
+    public static UnderbarrelSightingRangeUpPacket CreateInstance()
+    {
+        return new();
+    }
 
-        public void Execute(FikaPlayer player)
+    public void Execute(FikaPlayer player)
+    {
+        if (player.HandsController is ObservedFirearmController controller)
         {
-            if (player.HandsController is ObservedFirearmController controller)
-            {
-                controller.UnderbarrelSightingRangeUp();
-            }
+            controller.UnderbarrelSightingRangeUp();
         }
+    }
 
-        public void Serialize(NetDataWriter writer)
-        {
-            // do nothing
-        }
+    public void Serialize(NetDataWriter writer)
+    {
+        // do nothing
+    }
 
-        public void Deserialize(NetDataReader reader)
-        {
-            // do nothing
-        }
+    public void Deserialize(NetDataReader reader)
+    {
+        // do nothing
+    }
 
-        public void Dispose()
-        {
-            // do nothing
-        }
+    public void Dispose()
+    {
+        // do nothing
     }
 }

@@ -1,23 +1,22 @@
 ﻿using Fika.Core.Patching;
 using System.Reflection;
 
-namespace Fika.Core.Main.Patches
-{
-    public class WeaponManagerClass_ValidateScopeSmoothZoomUpdate_Patch : FikaPatch
-    {
-        protected override MethodBase GetTargetMethod()
-        {
-            return typeof(WeaponManagerClass).GetMethod(nameof(WeaponManagerClass.ValidateScopeSmoothZoomUpdate));
-        }
+namespace Fika.Core.Main.Patches;
 
-        [PatchPrefix]
-        public static bool Prefix(WeaponManagerClass __instance)
+public class WeaponManagerClass_ValidateScopeSmoothZoomUpdate_Patch : FikaPatch
+{
+    protected override MethodBase GetTargetMethod()
+    {
+        return typeof(WeaponManagerClass).GetMethod(nameof(WeaponManagerClass.ValidateScopeSmoothZoomUpdate));
+    }
+
+    [PatchPrefix]
+    public static bool Prefix(WeaponManagerClass __instance)
+    {
+        if (__instance.Player != null && !__instance.Player.IsYourPlayer)
         {
-            if (__instance.Player != null && !__instance.Player.IsYourPlayer)
-            {
-                return false;
-            }
-            return true;
+            return false;
         }
+        return true;
     }
 }

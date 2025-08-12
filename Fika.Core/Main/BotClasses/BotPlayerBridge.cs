@@ -3,80 +3,79 @@ using EFT;
 using EFT.Ballistics;
 using Fika.Core.Main.Players;
 
-namespace Fika.Core.Main.BotClasses
+namespace Fika.Core.Main.BotClasses;
+
+public class BotPlayerBridge(FikaBot bot) : BodyPartCollider.IPlayerBridge
 {
-    public class BotPlayerBridge(FikaBot bot) : BodyPartCollider.IPlayerBridge
+    private readonly FikaBot _bot = bot;
+
+    public IPlayer iPlayer
     {
-        private readonly FikaBot _bot = bot;
-
-        public IPlayer iPlayer
+        get
         {
-            get
-            {
-                return _bot;
-            }
+            return _bot;
+        }
+    }
+
+    public float WorldTime
+    {
+        get
+        {
+            return Singleton<AbstractGame>.Instance.LastServerTimeStamp;
+        }
+    }
+
+    public bool UsingSimplifiedSkeleton
+    {
+        get
+        {
+            return _bot.UsedSimplifiedSkeleton;
+        }
+    }
+
+    public void ApplyDamageInfo(DamageInfoStruct damageInfo, EBodyPart bodyPartType, EBodyPartColliderType bodyPartCollider, float absorbed)
+    {
+        _bot.ApplyDamageInfo(damageInfo, bodyPartType, bodyPartCollider, absorbed);
+    }
+
+    public ShotInfoClass ApplyShot(DamageInfoStruct damageInfo, EBodyPart bodyPart, EBodyPartColliderType bodyPartCollider, EArmorPlateCollider armorPlateCollider, ShotIdStruct shotId)
+    {
+        if (damageInfo.DamageType is EDamageType.Explosion or EDamageType.Landmine or EDamageType.Sniper)
+        {
+            return _bot.ApplyShot(damageInfo, bodyPart, bodyPartCollider, armorPlateCollider, shotId);
         }
 
-        public float WorldTime
+        if (damageInfo.Player != null && (damageInfo.Player.iPlayer.IsYourPlayer || damageInfo.Player.IsAI))
         {
-            get
-            {
-                return Singleton<AbstractGame>.Instance.LastServerTimeStamp;
-            }
+            return _bot.ApplyShot(damageInfo, bodyPart, bodyPartCollider, armorPlateCollider, shotId);
         }
 
-        public bool UsingSimplifiedSkeleton
+        _bot.ShotReactions(damageInfo, bodyPart);
+        return new()
         {
-            get
-            {
-                return _bot.UsedSimplifiedSkeleton;
-            }
-        }
+            PoV = EPointOfView.ThirdPerson,
+            Penetrated = damageInfo.Penetrated,
+            Material = MaterialType.Body
+        };
+    }
 
-        public void ApplyDamageInfo(DamageInfoStruct damageInfo, EBodyPart bodyPartType, EBodyPartColliderType bodyPartCollider, float absorbed)
-        {
-            _bot.ApplyDamageInfo(damageInfo, bodyPartType, bodyPartCollider, absorbed);
-        }
+    public bool CheckArmorHitByDirection(BodyPartCollider bodypart, Vector3 hitpoint, Vector3 shotNormal, Vector3 shotDirection)
+    {
+        return _bot.CheckArmorHitByDirection(bodypart);
+    }
 
-        public ShotInfoClass ApplyShot(DamageInfoStruct damageInfo, EBodyPart bodyPart, EBodyPartColliderType bodyPartCollider, EArmorPlateCollider armorPlateCollider, ShotIdStruct shotId)
-        {
-            if (damageInfo.DamageType is EDamageType.Explosion or EDamageType.Landmine or EDamageType.Sniper)
-            {
-                return _bot.ApplyShot(damageInfo, bodyPart, bodyPartCollider, armorPlateCollider, shotId);
-            }
+    public bool IsShotDeflectedByHeavyArmor(EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, int shotSeed)
+    {
+        return _bot.IsShotDeflectedByHeavyArmor(colliderType, armorPlateCollider, shotSeed);
+    }
 
-            if (damageInfo.Player != null && (damageInfo.Player.iPlayer.IsYourPlayer || damageInfo.Player.IsAI))
-            {
-                return _bot.ApplyShot(damageInfo, bodyPart, bodyPartCollider, armorPlateCollider, shotId);
-            }
+    public bool SetShotStatus(BodyPartCollider bodypart, EftBulletClass shot, Vector3 hitpoint, Vector3 shotNormal, Vector3 shotDirection)
+    {
+        return _bot.SetShotStatus(bodypart, shot, hitpoint, shotNormal, shotDirection);
+    }
 
-            _bot.ShotReactions(damageInfo, bodyPart);
-            return new()
-            {
-                PoV = EPointOfView.ThirdPerson,
-                Penetrated = damageInfo.Penetrated,
-                Material = MaterialType.Body
-            };
-        }
-
-        public bool CheckArmorHitByDirection(BodyPartCollider bodypart, Vector3 hitpoint, Vector3 shotNormal, Vector3 shotDirection)
-        {
-            return _bot.CheckArmorHitByDirection(bodypart);
-        }
-
-        public bool IsShotDeflectedByHeavyArmor(EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, int shotSeed)
-        {
-            return _bot.IsShotDeflectedByHeavyArmor(colliderType, armorPlateCollider, shotSeed);
-        }
-
-        public bool SetShotStatus(BodyPartCollider bodypart, EftBulletClass shot, Vector3 hitpoint, Vector3 shotNormal, Vector3 shotDirection)
-        {
-            return _bot.SetShotStatus(bodypart, shot, hitpoint, shotNormal, shotDirection);
-        }
-
-        public bool TryGetArmorResistData(BodyPartCollider bodyPart, float penetrationPower, out ArmorResistanceStruct armorResistanceData)
-        {
-            return _bot.TryGetArmorResistData(bodyPart, penetrationPower, out armorResistanceData);
-        }
+    public bool TryGetArmorResistData(BodyPartCollider bodyPart, float penetrationPower, out ArmorResistanceStruct armorResistanceData)
+    {
+        return _bot.TryGetArmorResistData(bodyPart, penetrationPower, out armorResistanceData);
     }
 }

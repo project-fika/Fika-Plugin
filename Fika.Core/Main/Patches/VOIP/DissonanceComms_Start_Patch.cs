@@ -3,21 +3,20 @@ using Fika.Core.Patching;
 using HarmonyLib;
 using System.Reflection;
 
-namespace Fika.Core.Main.Patches.VOIP
+namespace Fika.Core.Main.Patches.VOIP;
+
+public class DissonanceComms_Start_Patch : FikaPatch
 {
-    public class DissonanceComms_Start_Patch : FikaPatch
+    public static bool IsReady;
+
+    protected override MethodBase GetTargetMethod()
     {
-        public static bool IsReady;
+        return AccessTools.Method(typeof(DissonanceComms), "Start");
+    }
 
-        protected override MethodBase GetTargetMethod()
-        {
-            return AccessTools.Method(typeof(DissonanceComms), "Start");
-        }
-
-        [PatchPrefix]
-        public static bool Prefix()
-        {
-            return IsReady;
-        }
+    [PatchPrefix]
+    public static bool Prefix()
+    {
+        return IsReady;
     }
 }

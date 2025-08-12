@@ -3,42 +3,52 @@ using Fika.Core.Patching;
 using System;
 using System.Reflection;
 
-namespace Fika.Core.Main.Patches
+namespace Fika.Core.Main.Patches;
+
+public class BotCacher_Patch : FikaPatch
 {
-    public class BotCacher_Patch : FikaPatch
+    protected override MethodBase GetTargetMethod()
     {
-        protected override MethodBase GetTargetMethod()
+        return typeof(LocalBotSettingsProviderClass)
+            .GetMethod(nameof(LocalBotSettingsProviderClass.LoadInternal),
+            BindingFlags.Static | BindingFlags.Public);
+    }
+
+    [PatchPrefix]
+    private static bool PatchPrefix(out CoreBotSettingsClass core, ref bool __result)
+    {
+        if (FikaPlugin.Instance.BotDifficulties != null)
         {
-            return typeof(LocalBotSettingsProviderClass)
-                .GetMethod(nameof(LocalBotSettingsProviderClass.LoadInternal),
-                BindingFlags.Static | BindingFlags.Public);
+            core = FikaPlugin.Instance.BotDifficulties.CoreSettings;
+        }
+        else
+        {
+            string text = LocalBotSettingsProviderClass.LoadCoreByString();
+            if (text == null)
+            {
+                core = null;
+                __result = false;
+                return false;
+            }
+            core = CoreBotSettingsClass.Create(text);
         }
 
-        [PatchPrefix]
-        private static bool PatchPrefix(out CoreBotSettingsClass core, ref bool __result)
+        foreach (object type in Enum.GetValues(typeof(WildSpawnType)))
         {
-            if (FikaPlugin.Instance.BotDifficulties != null)
+            foreach (object difficulty in Enum.GetValues(typeof(BotDifficulty)))
             {
-                core = FikaPlugin.Instance.BotDifficulties.CoreSettings;
-            }
-            else
-            {
-                string text = LocalBotSettingsProviderClass.LoadCoreByString();
-                if (text == null)
+                BotSettingsComponents botSettingsComponents;
+                botSettingsComponents = FikaPlugin.Instance.BotDifficulties.GetComponent((BotDifficulty)difficulty, (WildSpawnType)type);
+                if (botSettingsComponents != null)
                 {
-                    core = null;
-                    __result = false;
-                    return false;
+                    if (!LocalBotSettingsProviderClass.Gclass621_1.ContainsKey((BotDifficulty)difficulty, (WildSpawnType)type))
+                    {
+                        LocalBotSettingsProviderClass.Gclass621_1.Add((BotDifficulty)difficulty, (WildSpawnType)type, botSettingsComponents);
+                    }
                 }
-                core = CoreBotSettingsClass.Create(text);
-            }
-
-            foreach (object type in Enum.GetValues(typeof(WildSpawnType)))
-            {
-                foreach (object difficulty in Enum.GetValues(typeof(BotDifficulty)))
+                else
                 {
-                    BotSettingsComponents botSettingsComponents;
-                    botSettingsComponents = FikaPlugin.Instance.BotDifficulties.GetComponent((BotDifficulty)difficulty, (WildSpawnType)type);
+                    botSettingsComponents = LocalBotSettingsProviderClass.smethod_4(LocalBotSettingsProviderClass.CheckOnExclude((BotDifficulty)difficulty, (WildSpawnType)type), (WildSpawnType)type, false, true);
                     if (botSettingsComponents != null)
                     {
                         if (!LocalBotSettingsProviderClass.Gclass621_1.ContainsKey((BotDifficulty)difficulty, (WildSpawnType)type))
@@ -48,25 +58,14 @@ namespace Fika.Core.Main.Patches
                     }
                     else
                     {
-                        botSettingsComponents = LocalBotSettingsProviderClass.smethod_4(LocalBotSettingsProviderClass.CheckOnExclude((BotDifficulty)difficulty, (WildSpawnType)type), (WildSpawnType)type, false, true);
-                        if (botSettingsComponents != null)
-                        {
-                            if (!LocalBotSettingsProviderClass.Gclass621_1.ContainsKey((BotDifficulty)difficulty, (WildSpawnType)type))
-                            {
-                                LocalBotSettingsProviderClass.Gclass621_1.Add((BotDifficulty)difficulty, (WildSpawnType)type, botSettingsComponents);
-                            }
-                        }
-                        else
-                        {
-                            __result = false;
-                            return false;
-                        }
+                        __result = false;
+                        return false;
                     }
                 }
             }
-
-            __result = true;
-            return false;
         }
+
+        __result = true;
+        return false;
     }
 }

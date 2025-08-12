@@ -1,9 +1,8 @@
 ﻿using Fika.Core.Networking;
 
-namespace Fika.Core.Modding.Events
+namespace Fika.Core.Modding.Events;
+
+public class FikaNetworkManagerCreatedEvent(IFikaNetworkManager manager) : FikaEvent
 {
-    public class FikaNetworkManagerCreatedEvent(IFikaNetworkManager manager) : FikaEvent
-    {
-        public IFikaNetworkManager Manager { get; } = manager;
-    }
+    public IFikaNetworkManager Manager { get; } = manager;
 }

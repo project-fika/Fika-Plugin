@@ -1,19 +1,18 @@
 ﻿using LiteNetLib.Utils;
 
-namespace Fika.Core.Networking.Packets.Backend
+namespace Fika.Core.Networking.Packets.Backend;
+
+public struct StatisticsPacket(int serverFps) : INetSerializable
 {
-    public struct StatisticsPacket(int serverFps) : INetSerializable
+    public int ServerFPS = serverFps;
+
+    public void Deserialize(NetDataReader reader)
     {
-        public int ServerFPS = serverFps;
+        ServerFPS = reader.GetInt();
+    }
 
-        public void Deserialize(NetDataReader reader)
-        {
-            ServerFPS = reader.GetInt();
-        }
-
-        public readonly void Serialize(NetDataWriter writer)
-        {
-            writer.Put(ServerFPS);
-        }
+    public readonly void Serialize(NetDataWriter writer)
+    {
+        writer.Put(ServerFPS);
     }
 }

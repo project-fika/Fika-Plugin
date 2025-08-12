@@ -5,56 +5,55 @@ using Fika.Core.Networking.Pooling;
 using LiteNetLib.Utils;
 using System.Linq;
 
-namespace Fika.Core.Networking.Packets.World
+namespace Fika.Core.Networking.Packets.World;
+
+public class MineEvent : IPoolSubPacket
 {
-    public class MineEvent : IPoolSubPacket
+    public Vector3 MinePosition;
+
+    private MineEvent() { }
+
+    public static MineEvent CreateInstance()
     {
-        public Vector3 MinePosition;
+        return new MineEvent();
+    }
 
-        private MineEvent() { }
+    public static MineEvent FromValue(Vector3 minePosition)
+    {
+        MineEvent packet = GenericSubPacketPoolManager.Instance.GetPacket<MineEvent>(EGenericSubPacketType.Mine);
+        packet.MinePosition = minePosition;
+        return packet;
+    }
 
-        public static MineEvent CreateInstance()
+    public void Execute(FikaPlayer player = null)
+    {
+        if (Singleton<GameWorld>.Instance.MineManager != null)
         {
-            return new MineEvent();
-        }
-
-        public static MineEvent FromValue(Vector3 minePosition)
-        {
-            MineEvent packet = GenericSubPacketPoolManager.Instance.GetPacket<MineEvent>(EGenericSubPacketType.Mine);
-            packet.MinePosition = minePosition;
-            return packet;
-        }
-
-        public void Execute(FikaPlayer player = null)
-        {
-            if (Singleton<GameWorld>.Instance.MineManager != null)
+            NetworkGame<EftGamePlayerOwner>.Class1557 mineSeeker = new()
             {
-                NetworkGame<EftGamePlayerOwner>.Class1557 mineSeeker = new()
-                {
-                    minePosition = MinePosition
-                };
-                MineDirectional mineDirectional = Singleton<GameWorld>.Instance.MineManager.Mines.FirstOrDefault(mineSeeker.method_0);
-                if (mineDirectional == null)
-                {
-                    return;
-                }
-                mineDirectional.Explosion();
+                minePosition = MinePosition
+            };
+            MineDirectional mineDirectional = Singleton<GameWorld>.Instance.MineManager.Mines.FirstOrDefault(mineSeeker.method_0);
+            if (mineDirectional == null)
+            {
+                return;
             }
+            mineDirectional.Explosion();
         }
+    }
 
-        public void Serialize(NetDataWriter writer)
-        {
-            writer.PutUnmanaged(MinePosition);
-        }
+    public void Serialize(NetDataWriter writer)
+    {
+        writer.PutUnmanaged(MinePosition);
+    }
 
-        public void Deserialize(NetDataReader reader)
-        {
-            MinePosition = reader.GetUnmanaged<Vector3>();
-        }
+    public void Deserialize(NetDataReader reader)
+    {
+        MinePosition = reader.GetUnmanaged<Vector3>();
+    }
 
-        public void Dispose()
-        {
-            MinePosition = default;
-        }
+    public void Dispose()
+    {
+        MinePosition = default;
     }
 }

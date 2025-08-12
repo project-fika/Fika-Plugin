@@ -1,22 +1,21 @@
 ﻿using System.Runtime.CompilerServices;
 
-namespace Fika.Core.Main.ObservedClasses.Snapshotting
+namespace Fika.Core.Main.ObservedClasses.Snapshotting;
+
+/// <summary>
+/// Used to sync snapshots for replication
+/// </summary>
+public static class NetworkTimeSync
 {
     /// <summary>
-    /// Used to sync snapshots for replication
-    /// </summary>
-    public static class NetworkTimeSync
+    /// Gets the current time in the game since start as a <see cref="double"/>
+    /// </summary>        
+    public static double NetworkTime
     {
-        /// <summary>
-        /// Gets the current time in the game since start as a <see cref="double"/>
-        /// </summary>        
-        public static double NetworkTime
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get
-            {
-                return Time.unscaledTimeAsDouble;
-            }
+            return Time.unscaledTimeAsDouble;
         }
     }
 }

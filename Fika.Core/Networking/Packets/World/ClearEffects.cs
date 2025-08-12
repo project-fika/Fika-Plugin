@@ -5,62 +5,61 @@ using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Pooling;
 using LiteNetLib.Utils;
 
-namespace Fika.Core.Networking.Packets.World
+namespace Fika.Core.Networking.Packets.World;
+
+public class ClearEffects : IPoolSubPacket
 {
-    public class ClearEffects : IPoolSubPacket
+    public int NetId;
+
+    private ClearEffects() { }
+
+    public static ClearEffects CreateInstance()
     {
-        public int NetId;
+        return new ClearEffects();
+    }
 
-        private ClearEffects() { }
+    public static ClearEffects FromValue(int netId)
+    {
+        ClearEffects packet = GenericSubPacketPoolManager.Instance.GetPacket<ClearEffects>(EGenericSubPacketType.ClearEffects);
+        packet.NetId = netId;
+        return packet;
+    }
 
-        public static ClearEffects CreateInstance()
+    public void Execute(FikaPlayer player = null)
+    {
+        if (FikaBackendUtils.IsServer)
         {
-            return new ClearEffects();
+            return;
         }
 
-        public static ClearEffects FromValue(int netId)
+        CoopHandler coopHandler = Singleton<IFikaNetworkManager>.Instance.CoopHandler;
+        if (coopHandler == null)
         {
-            ClearEffects packet = GenericSubPacketPoolManager.Instance.GetPacket<ClearEffects>(EGenericSubPacketType.ClearEffects);
-            packet.NetId = netId;
-            return packet;
+            FikaPlugin.Instance.FikaLogger.LogError("ClientExtract: CoopHandler was null!");
+            return;
         }
 
-        public void Execute(FikaPlayer player = null)
+        if (coopHandler.Players.TryGetValue(NetId, out FikaPlayer playerToApply))
         {
-            if (FikaBackendUtils.IsServer)
+            if (playerToApply is ObservedPlayer observedPlayer)
             {
-                return;
-            }
-
-            CoopHandler coopHandler = Singleton<IFikaNetworkManager>.Instance.CoopHandler;
-            if (coopHandler == null)
-            {
-                FikaPlugin.Instance.FikaLogger.LogError("ClientExtract: CoopHandler was null!");
-                return;
-            }
-
-            if (coopHandler.Players.TryGetValue(NetId, out FikaPlayer playerToApply))
-            {
-                if (playerToApply is ObservedPlayer observedPlayer)
-                {
-                    observedPlayer.HealthBar.ClearEffects();
-                }
+                observedPlayer.HealthBar.ClearEffects();
             }
         }
+    }
 
-        public void Serialize(NetDataWriter writer)
-        {
-            writer.Put(NetId);
-        }
+    public void Serialize(NetDataWriter writer)
+    {
+        writer.Put(NetId);
+    }
 
-        public void Deserialize(NetDataReader reader)
-        {
-            NetId = reader.GetInt();
-        }
+    public void Deserialize(NetDataReader reader)
+    {
+        NetId = reader.GetInt();
+    }
 
-        public void Dispose()
-        {
-            NetId = 0;
-        }
+    public void Dispose()
+    {
+        NetId = 0;
     }
 }

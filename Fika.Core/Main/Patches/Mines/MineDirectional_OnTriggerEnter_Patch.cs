@@ -2,23 +2,22 @@
 using Fika.Core.Patching;
 using System.Reflection;
 
-namespace Fika.Core.Main.Patches
-{
-    public class MineDirectional_OnTriggerEnter_Patch : FikaPatch
-    {
-        protected override MethodBase GetTargetMethod()
-        {
-            return typeof(MineDirectional).GetMethod(nameof(MineDirectional.OnTriggerEnter));
-        }
+namespace Fika.Core.Main.Patches;
 
-        [PatchPrefix]
-        public static bool Prefix()
+public class MineDirectional_OnTriggerEnter_Patch : FikaPatch
+{
+    protected override MethodBase GetTargetMethod()
+    {
+        return typeof(MineDirectional).GetMethod(nameof(MineDirectional.OnTriggerEnter));
+    }
+
+    [PatchPrefix]
+    public static bool Prefix()
+    {
+        if (FikaBackendUtils.IsClient)
         {
-            if (FikaBackendUtils.IsClient)
-            {
-                return false;
-            }
-            return true;
+            return false;
         }
+        return true;
     }
 }

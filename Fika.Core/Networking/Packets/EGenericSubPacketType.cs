@@ -1,78 +1,77 @@
-﻿namespace Fika.Core.Networking.Packets
+﻿namespace Fika.Core.Networking.Packets;
+
+/// <summary>
+/// Represents generic game-level packet events unrelated to specific systems.
+/// </summary>
+public enum EGenericSubPacketType : byte
 {
     /// <summary>
-    /// Represents generic game-level packet events unrelated to specific systems.
+    /// Client extraction event.
     /// </summary>
-    public enum EGenericSubPacketType : byte
-    {
-        /// <summary>
-        /// Client extraction event.
-        /// </summary>
-        ClientExtract,
+    ClientExtract,
 
-        /// <summary>
-        /// Client connected to the server.
-        /// </summary>
-        ClientConnected,
+    /// <summary>
+    /// Client connected to the server.
+    /// </summary>
+    ClientConnected,
 
-        /// <summary>
-        /// Client disconnected from the server.
-        /// </summary>
-        ClientDisconnected,
+    /// <summary>
+    /// Client disconnected from the server.
+    /// </summary>
+    ClientDisconnected,
 
-        /// <summary>
-        /// Exfiltration countdown event.
-        /// </summary>
-        ExfilCountdown,
+    /// <summary>
+    /// Exfiltration countdown event.
+    /// </summary>
+    ExfilCountdown,
 
-        /// <summary>
-        /// Clear all active effects.
-        /// </summary>
-        ClearEffects,
+    /// <summary>
+    /// Clear all active effects.
+    /// </summary>
+    ClearEffects,
 
-        /// <summary>
-        /// Update backend data.
-        /// </summary>
-        UpdateBackendData,
+    /// <summary>
+    /// Update backend data.
+    /// </summary>
+    UpdateBackendData,
 
-        /// <summary>
-        /// Secret exfiltration found event.
-        /// </summary>
-        SecretExfilFound,
+    /// <summary>
+    /// Secret exfiltration found event.
+    /// </summary>
+    SecretExfilFound,
 
-        /// <summary>
-        /// Border zone event.
-        /// </summary>
-        BorderZone,
+    /// <summary>
+    /// Border zone event.
+    /// </summary>
+    BorderZone,
 
-        /// <summary>
-        /// Mine triggered.
-        /// </summary>
-        Mine,
+    /// <summary>
+    /// Mine triggered.
+    /// </summary>
+    Mine,
 
-        /// <summary>
-        /// Disarm a tripwire event.
-        /// </summary>
-        DisarmTripwire,
+    /// <summary>
+    /// Disarm a tripwire event.
+    /// </summary>
+    DisarmTripwire,
 
-        /// <summary>
-        /// Player muffled state changed.
-        /// </summary>
-        MuffledState,
+    /// <summary>
+    /// Player muffled state changed.
+    /// </summary>
+    MuffledState,
 
-        /// <summary>
-        /// Spawns the BTR vehicle.
-        /// </summary>
-        SpawnBTR
+    /// <summary>
+    /// Spawns the BTR vehicle.
+    /// </summary>
+    SpawnBTR
 
-        /// <summary>
-        /// Train synchronization event (commented out).
-        /// </summary>
-        // TrainSync,
+    /// <summary>
+    /// Train synchronization event (commented out).
+    /// </summary>
+    // TrainSync,
 
-        /// <summary>
-        /// Trader service notification event (commented out).
-        /// </summary>
-        // TraderServiceNotification,
-    }
+    /// <summary>
+    /// Trader service notification event (commented out).
+    /// </summary>
+    // TraderServiceNotification,
 }

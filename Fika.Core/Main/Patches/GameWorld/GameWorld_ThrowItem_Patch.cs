@@ -6,32 +6,31 @@ using Fika.Core.Patching;
 using System.Linq;
 using System.Reflection;
 
-namespace Fika.Core.Main.Patches
+namespace Fika.Core.Main.Patches;
+
+public class GameWorld_ThrowItem_Patch : FikaPatch
 {
-    public class GameWorld_ThrowItem_Patch : FikaPatch
+    private static readonly FieldInfo _networkPhysics = typeof(ObservedLootItem)
+        .GetField("bool_3", BindingFlags.Instance | BindingFlags.NonPublic);
+
+    protected override MethodBase GetTargetMethod()
     {
-        private static readonly FieldInfo _networkPhysics = typeof(ObservedLootItem)
-            .GetField("bool_3", BindingFlags.Instance | BindingFlags.NonPublic);
+        return typeof(GameWorld).GetMethods()
+            .First(x => x.Name == nameof(GameWorld.ThrowItem) && x.GetParameters().Length == 3);
+    }
 
-        protected override MethodBase GetTargetMethod()
+    [PatchPostfix]
+    public static void Postfix(LootItem __result, IPlayer player)
+    {
+        if (__result is ObservedLootItem observedLootItem)
         {
-            return typeof(GameWorld).GetMethods()
-                .First(x => x.Name == nameof(GameWorld.ThrowItem) && x.GetParameters().Length == 3);
-        }
-
-        [PatchPostfix]
-        public static void Postfix(LootItem __result, IPlayer player)
-        {
-            if (__result is ObservedLootItem observedLootItem)
+            if (player.IsYourPlayer || player.IsAI)
             {
-                if (player.IsYourPlayer || player.IsAI)
-                {
-                    ItemPositionSyncer.Create(observedLootItem.gameObject, FikaBackendUtils.IsServer, observedLootItem);
-                    return;
-                }
-
-                _networkPhysics.SetValue(observedLootItem, true);
+                ItemPositionSyncer.Create(observedLootItem.gameObject, FikaBackendUtils.IsServer, observedLootItem);
+                return;
             }
+
+            _networkPhysics.SetValue(observedLootItem, true);
         }
     }
 }

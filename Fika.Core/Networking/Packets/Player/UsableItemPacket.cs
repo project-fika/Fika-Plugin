@@ -1,46 +1,45 @@
 ﻿using LiteNetLib.Utils;
 
-namespace Fika.Core.Networking.Packets.Player
+namespace Fika.Core.Networking.Packets.Player;
+
+public struct UsableItemPacket(int netId) : INetSerializable
 {
-    public struct UsableItemPacket(int netId) : INetSerializable
+    public int NetId = netId;
+    public bool HasCompassState;
+    public bool CompassState;
+    public bool ExamineWeapon;
+    public bool HasAim;
+    public bool AimState;
+
+    public void Deserialize(NetDataReader reader)
     {
-        public int NetId = netId;
-        public bool HasCompassState;
-        public bool CompassState;
-        public bool ExamineWeapon;
-        public bool HasAim;
-        public bool AimState;
-
-        public void Deserialize(NetDataReader reader)
+        NetId = reader.GetInt();
+        HasCompassState = reader.GetBool();
+        if (HasCompassState)
         {
-            NetId = reader.GetInt();
-            HasCompassState = reader.GetBool();
-            if (HasCompassState)
-            {
-                CompassState = reader.GetBool();
-            }
-            ExamineWeapon = reader.GetBool();
-            HasAim = reader.GetBool();
-            if (HasAim)
-            {
-                AimState = reader.GetBool();
-            }
+            CompassState = reader.GetBool();
         }
-
-        public readonly void Serialize(NetDataWriter writer)
+        ExamineWeapon = reader.GetBool();
+        HasAim = reader.GetBool();
+        if (HasAim)
         {
-            writer.Put(NetId);
-            writer.Put(HasCompassState);
-            if (HasCompassState)
-            {
-                writer.Put(CompassState);
-            }
-            writer.Put(ExamineWeapon);
-            writer.Put(HasAim);
-            if (HasAim)
-            {
-                writer.Put(AimState);
-            }
+            AimState = reader.GetBool();
+        }
+    }
+
+    public readonly void Serialize(NetDataWriter writer)
+    {
+        writer.Put(NetId);
+        writer.Put(HasCompassState);
+        if (HasCompassState)
+        {
+            writer.Put(CompassState);
+        }
+        writer.Put(ExamineWeapon);
+        writer.Put(HasAim);
+        if (HasAim)
+        {
+            writer.Put(AimState);
         }
     }
 }

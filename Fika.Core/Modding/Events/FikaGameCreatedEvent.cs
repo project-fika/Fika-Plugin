@@ -1,9 +1,8 @@
 ﻿using Fika.Core.Main.GameMode;
 
-namespace Fika.Core.Modding.Events
+namespace Fika.Core.Modding.Events;
+
+public class FikaGameCreatedEvent(IFikaGame game) : FikaEvent
 {
-    public class FikaGameCreatedEvent(IFikaGame game) : FikaEvent
-    {
-        public IFikaGame Game { get; } = game;
-    }
+    public IFikaGame Game { get; } = game;
 }

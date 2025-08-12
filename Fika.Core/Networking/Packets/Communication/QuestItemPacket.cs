@@ -1,23 +1,22 @@
 ﻿using EFT;
 using LiteNetLib.Utils;
 
-namespace Fika.Core.Networking.Packets.Communication
+namespace Fika.Core.Networking.Packets.Communication;
+
+public struct QuestItemPacket : INetSerializable
 {
-    public struct QuestItemPacket : INetSerializable
+    public string Nickname;
+    public MongoID? ItemId;
+
+    public void Deserialize(NetDataReader reader)
     {
-        public string Nickname;
-        public MongoID? ItemId;
+        Nickname = reader.GetString();
+        ItemId = reader.GetNullableMongoID();
+    }
 
-        public void Deserialize(NetDataReader reader)
-        {
-            Nickname = reader.GetString();
-            ItemId = reader.GetNullableMongoID();
-        }
-
-        public readonly void Serialize(NetDataWriter writer)
-        {
-            writer.Put(Nickname);
-            writer.PutNullableMongoID(ItemId);
-        }
+    public readonly void Serialize(NetDataWriter writer)
+    {
+        writer.Put(Nickname);
+        writer.PutNullableMongoID(ItemId);
     }
 }

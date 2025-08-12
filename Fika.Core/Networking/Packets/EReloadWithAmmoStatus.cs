@@ -1,28 +1,27 @@
-﻿namespace Fika.Core.Networking.Packets
+﻿namespace Fika.Core.Networking.Packets;
+
+/// <summary>
+/// Describes the state of a reload operation with ammunition.
+/// </summary>
+public enum EReloadWithAmmoStatus : byte
 {
     /// <summary>
-    /// Describes the state of a reload operation with ammunition.
+    /// No reload in progress.
     /// </summary>
-    public enum EReloadWithAmmoStatus : byte
-    {
-        /// <summary>
-        /// No reload in progress.
-        /// </summary>
-        None,
+    None,
 
-        /// <summary>
-        /// Reload has started.
-        /// </summary>
-        StartReload,
+    /// <summary>
+    /// Reload has started.
+    /// </summary>
+    StartReload,
 
-        /// <summary>
-        /// Reload has completed.
-        /// </summary>
-        EndReload,
+    /// <summary>
+    /// Reload has completed.
+    /// </summary>
+    EndReload,
 
-        /// <summary>
-        /// Reload has been aborted.
-        /// </summary>
-        AbortReload
-    }
+    /// <summary>
+    /// Reload has been aborted.
+    /// </summary>
+    AbortReload
 }

@@ -3,50 +3,49 @@ using Fika.Core.Main.Players;
 using Fika.Core.Networking.Pooling;
 using LiteNetLib.Utils;
 
-namespace Fika.Core.Networking.Packets.FirearmController
+namespace Fika.Core.Networking.Packets.FirearmController;
+
+public class ToggleInventoryPacket : IPoolSubPacket
 {
-    public class ToggleInventoryPacket : IPoolSubPacket
+    private ToggleInventoryPacket()
     {
-        private ToggleInventoryPacket()
+
+    }
+
+    public static ToggleInventoryPacket FromValue(bool open)
+    {
+        ToggleInventoryPacket packet = FirearmSubPacketPoolManager.Instance.GetPacket<ToggleInventoryPacket>(EFirearmSubPacketType.ToggleInventory);
+        packet.Open = open;
+        return packet;
+    }
+
+    public static ToggleInventoryPacket CreateInstance()
+    {
+        return new();
+    }
+
+    public bool Open;
+
+    public void Execute(FikaPlayer player)
+    {
+        if (player.HandsController is ObservedFirearmController controller)
         {
-
+            controller.SetInventoryOpened(Open);
         }
+    }
 
-        public static ToggleInventoryPacket FromValue(bool open)
-        {
-            ToggleInventoryPacket packet = FirearmSubPacketPoolManager.Instance.GetPacket<ToggleInventoryPacket>(EFirearmSubPacketType.ToggleInventory);
-            packet.Open = open;
-            return packet;
-        }
+    public void Serialize(NetDataWriter writer)
+    {
+        writer.Put(Open);
+    }
 
-        public static ToggleInventoryPacket CreateInstance()
-        {
-            return new();
-        }
+    public void Deserialize(NetDataReader reader)
+    {
+        Open = reader.GetBool();
+    }
 
-        public bool Open;
-
-        public void Execute(FikaPlayer player)
-        {
-            if (player.HandsController is ObservedFirearmController controller)
-            {
-                controller.SetInventoryOpened(Open);
-            }
-        }
-
-        public void Serialize(NetDataWriter writer)
-        {
-            writer.Put(Open);
-        }
-
-        public void Deserialize(NetDataReader reader)
-        {
-            Open = reader.GetBool();
-        }
-
-        public void Dispose()
-        {
-            Open = false;
-        }
+    public void Dispose()
+    {
+        Open = false;
     }
 }

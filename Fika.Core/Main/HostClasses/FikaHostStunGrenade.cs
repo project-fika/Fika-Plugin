@@ -1,13 +1,12 @@
-﻿namespace Fika.Core.Main.HostClasses
+﻿namespace Fika.Core.Main.HostClasses;
+
+public class FikaHostStunGrenade : StunGrenade
 {
-    public class FikaHostStunGrenade : StunGrenade
+    public override bool HasNetData
     {
-        public override bool HasNetData
+        get
         {
-            get
-            {
-                return true;
-            }
+            return true;
         }
     }
 }

@@ -10,170 +10,169 @@ using HarmonyLib;
 using JetBrains.Annotations;
 using System.Collections.Generic;
 
-namespace Fika.Core.Main.ObservedClasses
+namespace Fika.Core.Main.ObservedClasses;
+
+public class ObservedInventoryController : Player.PlayerInventoryController, Interface16
 {
-    public class ObservedInventoryController : Player.PlayerInventoryController, Interface16
+    private readonly IPlayerSearchController _searchController;
+    private readonly FikaPlayer _fikaPlayer;
+    public override bool HasDiscardLimits
     {
-        private readonly IPlayerSearchController _searchController;
-        private readonly FikaPlayer _fikaPlayer;
-        public override bool HasDiscardLimits
-        {
-            get
-            {
-                return false;
-            }
-        }
-
-        public override IPlayerSearchController PlayerSearchController
-        {
-            get
-            {
-                return _searchController;
-            }
-        }
-
-        public ObservedInventoryController(Player player, Profile profile, bool examined, MongoID firstId, ushort firstOperationId, bool aiControl) : base(player, profile, examined)
-        {
-            MongoID_0 = firstId;
-            Ushort_0 = firstOperationId;
-            _searchController = new AISearchControllerClass();
-            _fikaPlayer = (FikaPlayer)player;
-        }
-
-        public override void AddDiscardLimits(Item rootItem, IEnumerable<DestroyedItemsStruct> destroyedItems)
-        {
-            // Do nothing
-        }
-
-        public override IEnumerable<DestroyedItemsStruct> GetItemsOverDiscardLimit(Item item)
-        {
-            return [];
-        }
-
-        public override bool HasDiscardLimit(Item item, out int limit)
-        {
-            limit = 0;
-            return false;
-        }
-        public override GStruct461<bool> TryThrowItem(Item item, Callback callback = null, bool silent = false)
-        {
-            ThrowItem(item, false, callback);
-            return true;
-        }
-
-        public override bool CheckOverLimit(IEnumerable<Item> items, [CanBeNull] ItemAddress to, bool useItemCountInEquipment, out InteractionsHandlerClass.GClass3947 error)
-        {
-            error = null;
-            return true;
-        }
-
-        public override bool IsLimitedAtAddress(Item item, [CanBeNull] ItemAddress address, out int limit)
-        {
-            return IsLimitedAtAddress(item.TemplateId, address, out limit);
-        }
-
-        public override bool IsLimitedAtAddress(string templateId, ItemAddress address, out int limit)
-        {
-            limit = -1;
-            return false;
-        }
-
-        public override void StrictCheckMagazine(MagazineItemClass magazine, bool status, int skill = 0, bool notify = false, bool useOperation = true)
-        {
-            // Do nothing
-        }
-
-        public override void OnAmmoLoadedCall(int count)
-        {
-            // Do nothing
-        }
-
-        public override void OnAmmoUnloadedCall(int count)
-        {
-            // Do nothing
-        }
-
-        public override void OnMagazineCheckCall()
-        {
-            // Do nothing
-        }
-
-        public override bool IsInventoryBlocked()
+        get
         {
             return false;
         }
+    }
 
-        public override bool vmethod_0(BaseInventoryOperationClass operation)
+    public override IPlayerSearchController PlayerSearchController
+    {
+        get
         {
-            return true;
+            return _searchController;
         }
+    }
 
-        public override SearchContentOperation vmethod_2(SearchableItemItemClass item)
+    public ObservedInventoryController(Player player, Profile profile, bool examined, MongoID firstId, ushort firstOperationId, bool aiControl) : base(player, profile, examined)
+    {
+        MongoID_0 = firstId;
+        Ushort_0 = firstOperationId;
+        _searchController = new AISearchControllerClass();
+        _fikaPlayer = (FikaPlayer)player;
+    }
+
+    public override void AddDiscardLimits(Item rootItem, IEnumerable<DestroyedItemsStruct> destroyedItems)
+    {
+        // Do nothing
+    }
+
+    public override IEnumerable<DestroyedItemsStruct> GetItemsOverDiscardLimit(Item item)
+    {
+        return [];
+    }
+
+    public override bool HasDiscardLimit(Item item, out int limit)
+    {
+        limit = 0;
+        return false;
+    }
+    public override GStruct461<bool> TryThrowItem(Item item, Callback callback = null, bool silent = false)
+    {
+        ThrowItem(item, false, callback);
+        return true;
+    }
+
+    public override bool CheckOverLimit(IEnumerable<Item> items, [CanBeNull] ItemAddress to, bool useItemCountInEquipment, out InteractionsHandlerClass.GClass3947 error)
+    {
+        error = null;
+        return true;
+    }
+
+    public override bool IsLimitedAtAddress(Item item, [CanBeNull] ItemAddress address, out int limit)
+    {
+        return IsLimitedAtAddress(item.TemplateId, address, out limit);
+    }
+
+    public override bool IsLimitedAtAddress(string templateId, ItemAddress address, out int limit)
+    {
+        limit = -1;
+        return false;
+    }
+
+    public override void StrictCheckMagazine(MagazineItemClass magazine, bool status, int skill = 0, bool notify = false, bool useOperation = true)
+    {
+        // Do nothing
+    }
+
+    public override void OnAmmoLoadedCall(int count)
+    {
+        // Do nothing
+    }
+
+    public override void OnAmmoUnloadedCall(int count)
+    {
+        // Do nothing
+    }
+
+    public override void OnMagazineCheckCall()
+    {
+        // Do nothing
+    }
+
+    public override bool IsInventoryBlocked()
+    {
+        return false;
+    }
+
+    public override bool vmethod_0(BaseInventoryOperationClass operation)
+    {
+        return true;
+    }
+
+    public override SearchContentOperation vmethod_2(SearchableItemItemClass item)
+    {
+        return null;
+    }
+
+    public override void InProcess(TraderControllerClass executor, Item item, ItemAddress to, bool succeed, GInterface421 operation, Callback callback)
+    {
+        if (!succeed)
         {
-            return null;
+            callback.Succeed();
+            return;
         }
-
-        public override void InProcess(TraderControllerClass executor, Item item, ItemAddress to, bool succeed, GInterface421 operation, Callback callback)
+        if (!executor.CheckTransferOwners(item, to, out Error error))
         {
-            if (!succeed)
-            {
-                callback.Succeed();
-                return;
-            }
-            if (!executor.CheckTransferOwners(item, to, out Error error))
-            {
-                callback.Fail(error.ToString());
-                return;
-            }
-            HandleInProcess(item, to, operation, callback);
-            _fikaPlayer.StatisticsManager.OnGrabLoot(item);
+            callback.Fail(error.ToString());
+            return;
         }
+        HandleInProcess(item, to, operation, callback);
+        _fikaPlayer.StatisticsManager.OnGrabLoot(item);
+    }
 
-        private void HandleInProcess(Item item, ItemAddress to, GInterface421 operation, Callback callback)
+    private void HandleInProcess(Item item, ItemAddress to, GInterface421 operation, Callback callback)
+    {
+        Player.Class1256 handler = new()
         {
-            Player.Class1256 handler = new()
-            {
-                player_0 = _fikaPlayer,
-                callback = callback
-            };
+            player_0 = _fikaPlayer,
+            callback = callback
+        };
 
-            if (!_fikaPlayer.HealthController.IsAlive)
-            {
-                handler.callback.Succeed();
-                return;
-            }
-
-            if ((item.Parent != to || operation is FoldOperationClass) && handler.player_0.HandsController.CanExecute(operation))
-            {
-                Traverse.Create(handler.player_0).Field<Callback>("_setInHandsCallback").Value = handler.callback;
-                RaiseInOutProcessEvents(new(handler.player_0.HandsController.Item, CommandStatus.Begin, this));
-                handler.player_0.HandsController.Execute(operation, new Callback(handler.method_1));
-                return;
-            }
-
-            if (operation is FoldOperationClass && !handler.player_0.HandsController.CanExecute(operation))
-            {
-                handler.callback.Fail("Can't perform operation");
-                return;
-            }
-
+        if (!_fikaPlayer.HealthController.IsAlive)
+        {
             handler.callback.Succeed();
+            return;
         }
 
-        public override void GetTraderServicesDataFromServer(string traderId)
+        if ((item.Parent != to || operation is FoldOperationClass) && handler.player_0.HandsController.CanExecute(operation))
         {
-            // Do nothing
+            Traverse.Create(handler.player_0).Field<Callback>("_setInHandsCallback").Value = handler.callback;
+            RaiseInOutProcessEvents(new(handler.player_0.HandsController.Item, CommandStatus.Begin, this));
+            handler.player_0.HandsController.Execute(operation, new Callback(handler.method_1));
+            return;
         }
 
-        public void SetNewID(MongoID newId)
+        if (operation is FoldOperationClass && !handler.player_0.HandsController.CanExecute(operation))
         {
-            MongoID_0 = newId;
+            handler.callback.Fail("Can't perform operation");
+            return;
         }
 
-        OperationDataStruct Interface16.CreateOperationFromDescriptor(BaseDescriptorClass descriptor)
-        {
-            method_13(descriptor);
-            return descriptor.ToInventoryOperation(_fikaPlayer);
-        }
+        handler.callback.Succeed();
+    }
+
+    public override void GetTraderServicesDataFromServer(string traderId)
+    {
+        // Do nothing
+    }
+
+    public void SetNewID(MongoID newId)
+    {
+        MongoID_0 = newId;
+    }
+
+    OperationDataStruct Interface16.CreateOperationFromDescriptor(BaseDescriptorClass descriptor)
+    {
+        method_13(descriptor);
+        return descriptor.ToInventoryOperation(_fikaPlayer);
     }
 }

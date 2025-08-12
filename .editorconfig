@@ -6,6 +6,9 @@ dotnet_diagnostic.CS0618.severity = none
 # IDE0031: Use null propagation (does not work well with Unity)
 dotnet_diagnostic.IDE0031.severity = none
 
+# IDE0161: Use file-scoped namespace
+csharp_style_namespace_declarations = file_scoped:warning
+
 # Custom config
 tab_width = 4
 indent_size = 4

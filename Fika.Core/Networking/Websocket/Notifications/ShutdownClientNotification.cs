@@ -1,13 +1,12 @@
-﻿namespace Fika.Core.Networking.Websocket.Notifications
+﻿namespace Fika.Core.Networking.Websocket.Notifications;
+
+public class ShutdownClientNotification : NotificationAbstractClass
 {
-    public class ShutdownClientNotification : NotificationAbstractClass
+    public override string Description
     {
-        public override string Description
+        get
         {
-            get
-            {
-                return "Shutting down client";
-            }
+            return "Shutting down client";
         }
     }
 }

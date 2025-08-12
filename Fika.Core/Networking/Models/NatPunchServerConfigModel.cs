@@ -2,51 +2,50 @@
 using System.Reflection;
 using System.Runtime.Serialization;
 
-namespace Fika.Core.Networking.Http
+namespace Fika.Core.Networking.Http;
+
+[DataContract]
+public struct NatPunchServerConfigModel
 {
-    [DataContract]
-    public struct NatPunchServerConfigModel
+    [DataMember(Name = "enable")]
+    public bool Enable;
+
+    [DataMember(Name = "port")]
+    public int Port;
+
+    [DataMember(Name = "natIntroduceAmount")]
+    public int NatIntroduceAmount;
+
+    public NatPunchServerConfigModel(bool enable, int port, int natIntroduceAmount)
     {
-        [DataMember(Name = "enable")]
-        public bool Enable;
+        Enable = enable;
+        Port = port;
+        NatIntroduceAmount = natIntroduceAmount;
+    }
 
-        [DataMember(Name = "port")]
-        public int Port;
-
-        [DataMember(Name = "natIntroduceAmount")]
-        public int NatIntroduceAmount;
-
-        public NatPunchServerConfigModel(bool enable, int port, int natIntroduceAmount)
+    public readonly void LogValues()
+    {
+        FikaPlugin.Instance.FikaLogger.LogInfo("Received NatPunchServer config from server:");
+        FieldInfo[] fields = typeof(NatPunchServerConfigModel).GetFields();
+        foreach (FieldInfo field in fields)
         {
-            Enable = enable;
-            Port = port;
-            NatIntroduceAmount = natIntroduceAmount;
-        }
-
-        public readonly void LogValues()
-        {
-            FikaPlugin.Instance.FikaLogger.LogInfo("Received NatPunchServer config from server:");
-            FieldInfo[] fields = typeof(NatPunchServerConfigModel).GetFields();
-            foreach (FieldInfo field in fields)
+            object value = field.GetValue(this);
+            if (value is Array valueArray)
             {
-                object value = field.GetValue(this);
-                if (value is Array valueArray)
+                string values = "";
+                for (int i = 0; i < valueArray.Length; i++)
                 {
-                    string values = "";
-                    for (int i = 0; i < valueArray.Length; i++)
+                    if (i == 0)
                     {
-                        if (i == 0)
-                        {
-                            values = valueArray.GetValue(i).ToString();
-                            continue;
-                        }
-                        values = values + ", " + valueArray.GetValue(i).ToString();
+                        values = valueArray.GetValue(i).ToString();
+                        continue;
                     }
-                    FikaPlugin.Instance.FikaLogger.LogInfo(field.Name + ": " + values);
-                    continue;
+                    values = values + ", " + valueArray.GetValue(i).ToString();
                 }
-                FikaPlugin.Instance.FikaLogger.LogInfo(field.Name + ": " + value);
+                FikaPlugin.Instance.FikaLogger.LogInfo(field.Name + ": " + values);
+                continue;
             }
+            FikaPlugin.Instance.FikaLogger.LogInfo(field.Name + ": " + value);
         }
     }
 }

@@ -1,24 +1,23 @@
 ﻿using EFT;
 using System.Collections.Generic;
 
-namespace Fika.Core.Main.Components
-{
-    public abstract class ViewFilter : IViewFilter
-    {
-        public abstract HashSet<EBodyModelPart> AllowedParts { get; }
+namespace Fika.Core.Main.Components;
 
-        public GClass2030 FilterCustomization(GClass2030 customization)
+public abstract class ViewFilter : IViewFilter
+{
+    public abstract HashSet<EBodyModelPart> AllowedParts { get; }
+
+    public GClass2030 FilterCustomization(GClass2030 customization)
+    {
+        GClass2030 value = new(customization);
+        for (int i = 0; i < GClass864<EBodyModelPart>.Values.Count; i++)
         {
-            GClass2030 value = new(customization);
-            for (int i = 0; i < GClass864<EBodyModelPart>.Values.Count; i++)
+            EBodyModelPart bodyPart = GClass864<EBodyModelPart>.Values[i];
+            if (!AllowedParts.Contains(bodyPart))
             {
-                EBodyModelPart bodyPart = GClass864<EBodyModelPart>.Values[i];
-                if (!AllowedParts.Contains(bodyPart))
-                {
-                    value.Remove(bodyPart);
-                }
+                value.Remove(bodyPart);
             }
-            return value;
         }
+        return value;
     }
 }

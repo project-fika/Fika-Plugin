@@ -1,30 +1,29 @@
 ﻿using LiteNetLib.Utils;
 
-namespace Fika.Core.Networking.Packets.Communication
+namespace Fika.Core.Networking.Packets.Communication;
+
+public struct BotStatePacket : INetSerializable
 {
-    public struct BotStatePacket : INetSerializable
+    public int NetId;
+    public EStateType Type;
+
+    public void Deserialize(NetDataReader reader)
     {
-        public int NetId;
-        public EStateType Type;
+        NetId = reader.GetInt();
+        Type = (EStateType)reader.GetByte();
+    }
 
-        public void Deserialize(NetDataReader reader)
-        {
-            NetId = reader.GetInt();
-            Type = (EStateType)reader.GetByte();
-        }
+    public readonly void Serialize(NetDataWriter writer)
+    {
+        writer.Put(NetId);
+        writer.Put((byte)Type);
+    }
 
-        public readonly void Serialize(NetDataWriter writer)
-        {
-            writer.Put(NetId);
-            writer.Put((byte)Type);
-        }
-
-        public enum EStateType
-        {
-            LoadBot,
-            DisposeBot,
-            EnableBot,
-            DisableBot
-        }
+    public enum EStateType
+    {
+        LoadBot,
+        DisposeBot,
+        EnableBot,
+        DisableBot
     }
 }

@@ -4,64 +4,63 @@ using System;
 using System.Reflection;
 using UnityEngine.UI;
 
-namespace Fika.Core.Main.FreeCamera.Patches
+namespace Fika.Core.Main.FreeCamera.Patches;
+
+[IgnoreAutoPatch]
+internal class FadeBlackScreen_Patch : FikaPatch
 {
-    [IgnoreAutoPatch]
-    internal class FadeBlackScreen_Patch : FikaPatch
+    protected override MethodBase GetTargetMethod()
     {
-        protected override MethodBase GetTargetMethod()
-        {
-            return typeof(PreloaderUI)
-                .GetMethod(nameof(PreloaderUI.FadeBlackScreen));
-        }
-
-        [PatchPrefix]
-        public static bool Prefix()
-        {
-            return false;
-        }
+        return typeof(PreloaderUI)
+            .GetMethod(nameof(PreloaderUI.FadeBlackScreen));
     }
 
-    [IgnoreAutoPatch]
-    internal class StartBlackScreenShow_Patch : FikaPatch
+    [PatchPrefix]
+    public static bool Prefix()
     {
-        protected override MethodBase GetTargetMethod()
-        {
-            return typeof(PreloaderUI).GetMethod(nameof(PreloaderUI.StartBlackScreenShow));
-        }
+        return false;
+    }
+}
 
-        [PatchPrefix]
-        public static bool Prefix()
-        {
-            return false;
-        }
-
-        [PatchPostfix]
-        public static void Postfix(Action callback)
-        {
-            callback?.Invoke();
-        }
+[IgnoreAutoPatch]
+internal class StartBlackScreenShow_Patch : FikaPatch
+{
+    protected override MethodBase GetTargetMethod()
+    {
+        return typeof(PreloaderUI).GetMethod(nameof(PreloaderUI.StartBlackScreenShow));
     }
 
-    [IgnoreAutoPatch]
-    internal class SetBlackImageAlpha_Patch : FikaPatch
+    [PatchPrefix]
+    public static bool Prefix()
     {
-        protected override MethodBase GetTargetMethod()
-        {
-            return typeof(PreloaderUI).GetMethod(nameof(PreloaderUI.SetBlackImageAlpha));
-        }
+        return false;
+    }
 
-        [PatchPrefix]
-        public static bool Prefix()
-        {
-            return false;
-        }
+    [PatchPostfix]
+    public static void Postfix(Action callback)
+    {
+        callback?.Invoke();
+    }
+}
 
-        [PatchPostfix]
-        public static void Postfix(float alpha, Image ____overlapBlackImage)
-        {
-            ____overlapBlackImage.gameObject.SetActive(value: true);
-            ____overlapBlackImage.color = new Color(0f, 0f, 0f, 0f);
-        }
+[IgnoreAutoPatch]
+internal class SetBlackImageAlpha_Patch : FikaPatch
+{
+    protected override MethodBase GetTargetMethod()
+    {
+        return typeof(PreloaderUI).GetMethod(nameof(PreloaderUI.SetBlackImageAlpha));
+    }
+
+    [PatchPrefix]
+    public static bool Prefix()
+    {
+        return false;
+    }
+
+    [PatchPostfix]
+    public static void Postfix(float alpha, Image ____overlapBlackImage)
+    {
+        ____overlapBlackImage.gameObject.SetActive(value: true);
+        ____overlapBlackImage.color = new Color(0f, 0f, 0f, 0f);
     }
 }

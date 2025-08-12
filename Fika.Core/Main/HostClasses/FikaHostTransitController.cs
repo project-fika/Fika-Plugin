@@ -11,114 +11,77 @@ using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Communication;
 using System.Collections.Generic;
 
-namespace Fika.Core.Main.HostClasses
+namespace Fika.Core.Main.HostClasses;
+
+public class FikaHostTransitController : LocalGameTransitControllerClass
 {
-    public class FikaHostTransitController : LocalGameTransitControllerClass
+    public FikaHostTransitController(BackendConfigSettingsClass.TransitSettingsClass settings, LocationSettingsClass.Location.TransitParameters[] parameters, Profile profile, LocalRaidSettings localRaidSettings)
+        : base(settings, parameters, profile, localRaidSettings)
     {
-        public FikaHostTransitController(BackendConfigSettingsClass.TransitSettingsClass settings, LocationSettingsClass.Location.TransitParameters[] parameters, Profile profile, LocalRaidSettings localRaidSettings)
-            : base(settings, parameters, profile, localRaidSettings)
+        _localRaidSettings = localRaidSettings;
+        string[] array = [.. localRaidSettings.transition.visitedLocations.EmptyIfNull(), localRaidSettings.location];
+        summonedTransits[profile.Id] = new(localRaidSettings.transition.transitionRaidId, localRaidSettings.transition.transitionCount, array,
+            localRaidSettings.transitionType.HasFlagNoBox(ELocationTransition.Event));
+        TransferItemsController.InitItemControllerServer(FikaGlobals.TransitTraderId, FikaGlobals.TransitTraderName);
+        _server = Singleton<FikaServer>.Instance;
+        _playersInTransitZone = [];
+        _transittedPlayers = [];
+    }
+
+    public void PostConstruct()
+    {
+        OnPlayerEnter = FikaGlobals.ClearDelegates(OnPlayerEnter);
+        OnPlayerEnter += OnHostPlayerEnter;
+        OnPlayerExit = FikaGlobals.ClearDelegates(OnPlayerExit);
+        OnPlayerExit += OnHostPlayerExit;
+    }
+
+    private readonly LocalRaidSettings _localRaidSettings;
+    private readonly FikaServer _server;
+    private readonly Dictionary<Player, int> _playersInTransitZone;
+    private readonly List<int> _transittedPlayers;
+
+    public int AliveTransitPlayers
+    {
+        get
         {
-            _localRaidSettings = localRaidSettings;
-            string[] array = [.. localRaidSettings.transition.visitedLocations.EmptyIfNull(), localRaidSettings.location];
-            summonedTransits[profile.Id] = new(localRaidSettings.transition.transitionRaidId, localRaidSettings.transition.transitionCount, array,
-                localRaidSettings.transitionType.HasFlagNoBox(ELocationTransition.Event));
-            TransferItemsController.InitItemControllerServer(FikaGlobals.TransitTraderId, FikaGlobals.TransitTraderName);
-            _server = Singleton<FikaServer>.Instance;
-            _playersInTransitZone = [];
-            _transittedPlayers = [];
+            return _transittedPlayers.Count;
         }
+    }
 
-        public void PostConstruct()
+    private void OnHostPlayerEnter(TransitPoint point, Player player)
+    {
+        if (!method_11(player, point.parameters.id, out string _))
         {
-            OnPlayerEnter = FikaGlobals.ClearDelegates(OnPlayerEnter);
-            OnPlayerEnter += OnHostPlayerEnter;
-            OnPlayerExit = FikaGlobals.ClearDelegates(OnPlayerExit);
-            OnPlayerExit += OnHostPlayerExit;
-        }
-
-        private readonly LocalRaidSettings _localRaidSettings;
-        private readonly FikaServer _server;
-        private readonly Dictionary<Player, int> _playersInTransitZone;
-        private readonly List<int> _transittedPlayers;
-
-        public int AliveTransitPlayers
-        {
-            get
+            if (player.IsYourPlayer)
             {
-                return _transittedPlayers.Count;
+                method_13();
             }
+            return;
         }
-
-        private void OnHostPlayerEnter(TransitPoint point, Player player)
+        else
         {
             if (!method_11(player, point.parameters.id, out string _))
             {
-                if (player.IsYourPlayer)
-                {
-                    method_13();
-                }
                 return;
             }
-            else
-            {
-                if (!method_11(player, point.parameters.id, out string _))
-                {
-                    return;
-                }
-            }
-
-            if (!_playersInTransitZone.ContainsKey(player))
-            {
-                _playersInTransitZone.Add(player, point.parameters.id);
-            }
-
-            if (!transitPlayers.ContainsKey(player.ProfileId))
-            {
-                if (player is FikaPlayer fikaPlayer)
-                {
-                    fikaPlayer.UpdateBtrTraderServiceData().HandleExceptions();
-                }
-
-                if (player.IsYourPlayer)
-                {
-                    method_14(point.parameters.id, player, method_17());
-                    return;
-                }
-
-                TransitEventPacket packet = new()
-                {
-                    EventType = TransitEventPacket.ETransitEventType.Interaction,
-                    TransitEvent = new TransitInteractionEvent()
-                    {
-                        PlayerId = player.Id,
-                        PointId = point.parameters.id,
-                        Type = TransitInteractionEvent.EType.Show
-                    }
-                };
-
-                _server.SendData(ref packet, DeliveryMethod.ReliableOrdered);
-                return;
-            }
-            Dictionary_0[point.parameters.id].GroupEnter(player);
         }
 
-        private void OnHostPlayerExit(TransitPoint point, Player player)
+        if (!_playersInTransitZone.ContainsKey(player))
         {
-            if (_playersInTransitZone.TryGetValue(player, out int value))
+            _playersInTransitZone.Add(player, point.parameters.id);
+        }
+
+        if (!transitPlayers.ContainsKey(player.ProfileId))
+        {
+            if (player is FikaPlayer fikaPlayer)
             {
-                if (value == point.parameters.id)
-                {
-                    _playersInTransitZone.Remove(player);
-                }
+                fikaPlayer.UpdateBtrTraderServiceData().HandleExceptions();
             }
 
-            if (transitPlayers.ContainsKey(player.ProfileId))
-            {
-                point.GroupExit(player);
-            }
             if (player.IsYourPlayer)
             {
-                method_18(player);
+                method_14(point.parameters.id, player, method_17());
                 return;
             }
 
@@ -129,258 +92,294 @@ namespace Fika.Core.Main.HostClasses
                 {
                     PlayerId = player.Id,
                     PointId = point.parameters.id,
-                    Type = TransitInteractionEvent.EType.Hide
+                    Type = TransitInteractionEvent.EType.Show
                 }
             };
 
             _server.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+            return;
+        }
+        Dictionary_0[point.parameters.id].GroupEnter(player);
+    }
+
+    private void OnHostPlayerExit(TransitPoint point, Player player)
+    {
+        if (_playersInTransitZone.TryGetValue(player, out int value))
+        {
+            if (value == point.parameters.id)
+            {
+                _playersInTransitZone.Remove(player);
+            }
         }
 
-        public override void Sizes(Dictionary<int, byte> sizes)
+        if (transitPlayers.ContainsKey(player.ProfileId))
         {
-#if DEBUG
-            foreach (KeyValuePair<int, byte> item in sizes)
+            point.GroupExit(player);
+        }
+        if (player.IsYourPlayer)
+        {
+            method_18(player);
+            return;
+        }
+
+        TransitEventPacket packet = new()
+        {
+            EventType = TransitEventPacket.ETransitEventType.Interaction,
+            TransitEvent = new TransitInteractionEvent()
             {
-                FikaPlugin.Instance.FikaLogger.LogWarning($"int: {item.Key}, byte: {item.Value}");
+                PlayerId = player.Id,
+                PointId = point.parameters.id,
+                Type = TransitInteractionEvent.EType.Hide
             }
+        };
+
+        _server.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+    }
+
+    public override void Sizes(Dictionary<int, byte> sizes)
+    {
+#if DEBUG
+        foreach (KeyValuePair<int, byte> item in sizes)
+        {
+            FikaPlugin.Instance.FikaLogger.LogWarning($"int: {item.Key}, byte: {item.Value}");
+        }
 #endif
 
-            foreach (KeyValuePair<int, byte> size in sizes)
+        foreach (KeyValuePair<int, byte> size in sizes)
+        {
+            if (GamePlayerOwner.MyPlayer.Id == size.Key)
             {
-                if (GamePlayerOwner.MyPlayer.Id == size.Key)
-                {
-                    MonoBehaviourSingleton<GameUI>.Instance.LocationTransitGroupSize.Display();
-                    MonoBehaviourSingleton<GameUI>.Instance.LocationTransitGroupSize.Show((int)size.Value);
-                }
+                MonoBehaviourSingleton<GameUI>.Instance.LocationTransitGroupSize.Display();
+                MonoBehaviourSingleton<GameUI>.Instance.LocationTransitGroupSize.Show((int)size.Value);
             }
-
-            TransitEventPacket packet = new()
-            {
-                EventType = TransitEventPacket.ETransitEventType.GroupSize,
-                TransitEvent = new TransitGroupSizeEvent()
-                {
-                    Sizes = sizes
-                }
-            };
-
-            _server.SendData(ref packet, DeliveryMethod.ReliableOrdered);
         }
 
-        public override void Timers(int pointId, Dictionary<int, ushort> timers)
+        TransitEventPacket packet = new()
         {
-#if DEBUG
-            foreach (KeyValuePair<int, ushort> item in timers)
+            EventType = TransitEventPacket.ETransitEventType.GroupSize,
+            TransitEvent = new TransitGroupSizeEvent()
             {
-                FikaPlugin.Instance.FikaLogger.LogWarning($"int: {item.Key}, ushort: {item.Value}");
+                Sizes = sizes
             }
+        };
+
+        _server.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+    }
+
+    public override void Timers(int pointId, Dictionary<int, ushort> timers)
+    {
+#if DEBUG
+        foreach (KeyValuePair<int, ushort> item in timers)
+        {
+            FikaPlugin.Instance.FikaLogger.LogWarning($"int: {item.Key}, ushort: {item.Value}");
+        }
 #endif
 
-            foreach (KeyValuePair<int, ushort> timer in timers)
-            {
-                if (GamePlayerOwner.MyPlayer.Id == timer.Key)
-                {
-                    method_12(pointId);
-                    MonoBehaviourSingleton<GameUI>.Instance.LocationTransitTimerPanel.Display();
-                    MonoBehaviourSingleton<GameUI>.Instance.LocationTransitTimerPanel.Show((float)timer.Value);
-                }
-            }
-
-            TransitEventPacket packet = new()
-            {
-                EventType = TransitEventPacket.ETransitEventType.GroupTimer,
-                TransitEvent = new TransitGroupTimerEvent()
-                {
-                    PointId = pointId,
-                    Timers = timers
-                }
-            };
-
-            _server.SendData(ref packet, DeliveryMethod.ReliableOrdered);
-        }
-
-        public override void InactivePointNotification(int playerId, int pointId)
+        foreach (KeyValuePair<int, ushort> timer in timers)
         {
-            if (GamePlayerOwner.MyPlayer.Id == playerId)
+            if (GamePlayerOwner.MyPlayer.Id == timer.Key)
             {
-                NotificationManagerClass.DisplayWarningNotification("Transit/InactivePoint".Localized(null), ENotificationDurationType.Default);
                 method_12(pointId);
-                return;
+                MonoBehaviourSingleton<GameUI>.Instance.LocationTransitTimerPanel.Display();
+                MonoBehaviourSingleton<GameUI>.Instance.LocationTransitTimerPanel.Show((float)timer.Value);
             }
-
-            TransitEventPacket packet = new()
-            {
-                EventType = TransitEventPacket.ETransitEventType.Interaction,
-                TransitEvent = new TransitInteractionEvent()
-                {
-                    PlayerId = playerId,
-                    PointId = pointId,
-                    Type = TransitInteractionEvent.EType.InactivePoint
-                }
-            };
-
-            _server.SendData(ref packet, DeliveryMethod.ReliableOrdered);
         }
 
-        public override void InteractWithTransit(Player player, TransitInteractionPacketStruct packet)
+        TransitEventPacket packet = new()
         {
-            TransitPoint point = Dictionary_0[packet.pointId];
-            if (point == null)
+            EventType = TransitEventPacket.ETransitEventType.GroupTimer,
+            TransitEvent = new TransitGroupTimerEvent()
             {
-                return;
+                PointId = pointId,
+                Timers = timers
             }
+        };
 
-            if (!CheckForPlayers(player, packet.pointId))
+        _server.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+    }
+
+    public override void InactivePointNotification(int playerId, int pointId)
+    {
+        if (GamePlayerOwner.MyPlayer.Id == playerId)
+        {
+            NotificationManagerClass.DisplayWarningNotification("Transit/InactivePoint".Localized(null), ENotificationDurationType.Default);
+            method_12(pointId);
+            return;
+        }
+
+        TransitEventPacket packet = new()
+        {
+            EventType = TransitEventPacket.ETransitEventType.Interaction,
+            TransitEvent = new TransitInteractionEvent()
             {
-                return;
+                PlayerId = playerId,
+                PointId = pointId,
+                Type = TransitInteractionEvent.EType.InactivePoint
             }
+        };
 
-            if (player.IsYourPlayer)
-            {
-                method_18(player);
-                transitPlayers.Add(player.ProfileId, player.Id);
-                profileKeys[player.ProfileId] = packet.keyId;
-                Dictionary_0[packet.pointId].GroupEnter(player);
-                ExfiltrationControllerClass.Instance.BannedPlayers.Add(player.Id);
-                ExfiltrationControllerClass.Instance.CancelExtractionForPlayer(player);
-                ExfiltrationControllerClass.Instance.DisableExitsInteraction();
-                return;
-            }
+        _server.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+    }
 
-            transitPlayers[player.ProfileId] = player.Id;
+    public override void InteractWithTransit(Player player, TransitInteractionPacketStruct packet)
+    {
+        TransitPoint point = Dictionary_0[packet.pointId];
+        if (point == null)
+        {
+            return;
+        }
+
+        if (!CheckForPlayers(player, packet.pointId))
+        {
+            return;
+        }
+
+        if (player.IsYourPlayer)
+        {
+            method_18(player);
+            transitPlayers.Add(player.ProfileId, player.Id);
             profileKeys[player.ProfileId] = packet.keyId;
             Dictionary_0[packet.pointId].GroupEnter(player);
             ExfiltrationControllerClass.Instance.BannedPlayers.Add(player.Id);
             ExfiltrationControllerClass.Instance.CancelExtractionForPlayer(player);
+            ExfiltrationControllerClass.Instance.DisableExitsInteraction();
+            return;
         }
 
-        private bool CheckForPlayers(Player player, int pointId)
+        transitPlayers[player.ProfileId] = player.Id;
+        profileKeys[player.ProfileId] = packet.keyId;
+        Dictionary_0[packet.pointId].GroupEnter(player);
+        ExfiltrationControllerClass.Instance.BannedPlayers.Add(player.Id);
+        ExfiltrationControllerClass.Instance.CancelExtractionForPlayer(player);
+    }
+
+    private bool CheckForPlayers(Player player, int pointId)
+    {
+        int humanPlayers = 0;
+        foreach (FikaPlayer fikaPlayer in Singleton<IFikaNetworkManager>.Instance.CoopHandler.HumanPlayers)
         {
-            int humanPlayers = 0;
-            foreach (FikaPlayer fikaPlayer in Singleton<IFikaNetworkManager>.Instance.CoopHandler.HumanPlayers)
+            if (fikaPlayer.HealthController.IsAlive)
             {
-                if (fikaPlayer.HealthController.IsAlive)
+                if (fikaPlayer.IsYourPlayer && FikaBackendUtils.IsHeadless)
                 {
-                    if (fikaPlayer.IsYourPlayer && FikaBackendUtils.IsHeadless)
-                    {
-                        continue;
-                    }
-
-                    humanPlayers++;
-                }
-            }
-
-            int playersInPoint = 0;
-            foreach (KeyValuePair<Player, int> item in _playersInTransitZone)
-            {
-                if (item.Key.HealthController.IsAlive)
-                {
-                    if (item.Value == pointId)
-                    {
-                        playersInPoint++;
-                    }
-                }
-            }
-
-            if (playersInPoint < humanPlayers)
-            {
-                if (player.IsYourPlayer)
-                {
-                    NotificationManagerClass.DisplayWarningNotification(TransitMessagesEvent.EType.NonAllTeammates.ToString(), ENotificationDurationType.Default);
-                    return false;
+                    continue;
                 }
 
-                Dictionary<int, TransitMessagesEvent.EType> messages = [];
-                messages.Add(player.Id, TransitMessagesEvent.EType.NonAllTeammates);
-
-                TransitEventPacket messagePacket = new()
-                {
-                    EventType = TransitEventPacket.ETransitEventType.Messages,
-                    TransitEvent = new TransitMessagesEvent()
-                    {
-                        Messages = messages
-                    }
-                };
-
-                _server.SendData(ref messagePacket, DeliveryMethod.ReliableOrdered);
-                return false;
+                humanPlayers++;
             }
-
-            return true;
         }
 
-        public override void Transit(TransitPoint point, int playersCount, string hash, Dictionary<string, ProfileKey> keys, Player player)
+        int playersInPoint = 0;
+        foreach (KeyValuePair<Player, int> item in _playersInTransitZone)
+        {
+            if (item.Key.HealthController.IsAlive)
+            {
+                if (item.Value == pointId)
+                {
+                    playersInPoint++;
+                }
+            }
+        }
+
+        if (playersInPoint < humanPlayers)
         {
             if (player.IsYourPlayer)
             {
-                string location = point.parameters.location;
-                ERaidMode eraidMode = ERaidMode.Local;
-                if (TarkovApplication.Exist(out TarkovApplication tarkovApplication))
-                {
-                    eraidMode = ERaidMode.Local;
-                    tarkovApplication.transitionStatus = new(location, false, _localRaidSettings.playerSide, eraidMode, _localRaidSettings.timeVariant);
-                }
-                string profileId = player.ProfileId;
-                AlreadyTransitDataClass gclass = new()
-                {
-                    hash = hash,
-                    playersCount = playersCount,
-                    ip = "",
-                    location = location,
-                    profiles = keys,
-                    transitionRaidId = summonedTransits[profileId].raidId,
-                    raidMode = eraidMode,
-                    side = player.Side is EPlayerSide.Savage ? ESideType.Savage : ESideType.Pmc,
-                    dayTime = _localRaidSettings.timeVariant
-                };
-                alreadyTransits.Add(profileId, gclass);
+                NotificationManagerClass.DisplayWarningNotification(TransitMessagesEvent.EType.NonAllTeammates.ToString(), ENotificationDurationType.Default);
+                return false;
+            }
 
-                IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
-                if (fikaGame is not CoopGame coopGame)
-                {
-                    FikaGlobals.LogError("FikaGame was not a CoopGame!");
-                    return;
-                }
+            Dictionary<int, TransitMessagesEvent.EType> messages = [];
+            messages.Add(player.Id, TransitMessagesEvent.EType.NonAllTeammates);
 
-                if (coopGame != null)
+            TransitEventPacket messagePacket = new()
+            {
+                EventType = TransitEventPacket.ETransitEventType.Messages,
+                TransitEvent = new TransitMessagesEvent()
                 {
-                    coopGame.Extract((FikaPlayer)player, null, point);
+                    Messages = messages
                 }
+            };
 
-                _transittedPlayers.Add(player.Id);
+            _server.SendData(ref messagePacket, DeliveryMethod.ReliableOrdered);
+            return false;
+        }
+
+        return true;
+    }
+
+    public override void Transit(TransitPoint point, int playersCount, string hash, Dictionary<string, ProfileKey> keys, Player player)
+    {
+        if (player.IsYourPlayer)
+        {
+            string location = point.parameters.location;
+            ERaidMode eraidMode = ERaidMode.Local;
+            if (TarkovApplication.Exist(out TarkovApplication tarkovApplication))
+            {
+                eraidMode = ERaidMode.Local;
+                tarkovApplication.transitionStatus = new(location, false, _localRaidSettings.playerSide, eraidMode, _localRaidSettings.timeVariant);
+            }
+            string profileId = player.ProfileId;
+            AlreadyTransitDataClass gclass = new()
+            {
+                hash = hash,
+                playersCount = playersCount,
+                ip = "",
+                location = location,
+                profiles = keys,
+                transitionRaidId = summonedTransits[profileId].raidId,
+                raidMode = eraidMode,
+                side = player.Side is EPlayerSide.Savage ? ESideType.Savage : ESideType.Pmc,
+                dayTime = _localRaidSettings.timeVariant
+            };
+            alreadyTransits.Add(profileId, gclass);
+
+            IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
+            if (fikaGame is not CoopGame coopGame)
+            {
+                FikaGlobals.LogError("FikaGame was not a CoopGame!");
                 return;
             }
 
-            TransitEventPacket packet = new()
+            if (coopGame != null)
             {
-                EventType = TransitEventPacket.ETransitEventType.Extract,
-                PlayerId = player.PlayerId,
-                TransitId = point.parameters.id
-            };
+                coopGame.Extract((FikaPlayer)player, null, point);
+            }
 
             _transittedPlayers.Add(player.Id);
-
-            _server.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+            return;
         }
 
-        public override void Dispose()
+        TransitEventPacket packet = new()
         {
-            base.Dispose();
-            OnPlayerEnter -= OnHostPlayerEnter;
-            OnPlayerExit -= OnHostPlayerExit;
-        }
+            EventType = TransitEventPacket.ETransitEventType.Extract,
+            PlayerId = player.PlayerId,
+            TransitId = point.parameters.id
+        };
 
-        public void Init()
-        {
-            EnablePoints(true);
-            method_8(Dictionary_0.Values, GamePlayerOwner.MyPlayer, false);
-            method_2(Dictionary_0.Values, GamePlayerOwner.MyPlayer);
+        _transittedPlayers.Add(player.Id);
 
-            /*TransitEventPacket packet = new()
+        _server.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+    }
+
+    public override void Dispose()
+    {
+        base.Dispose();
+        OnPlayerEnter -= OnHostPlayerEnter;
+        OnPlayerExit -= OnHostPlayerExit;
+    }
+
+    public void Init()
+    {
+        EnablePoints(true);
+        method_8(Dictionary_0.Values, GamePlayerOwner.MyPlayer, false);
+        method_2(Dictionary_0.Values, GamePlayerOwner.MyPlayer);
+
+        /*TransitEventPacket packet = new()
 			{
 				EventType = TransitEventPacket.ETransitEventType.Init
 			};
 
 			server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);*/
-        }
     }
 }

@@ -5,107 +5,106 @@ using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Communication;
 
-namespace Fika.Core.Main.HostClasses
+namespace Fika.Core.Main.HostClasses;
+
+public class HostRunddansController(BackendConfigSettingsClass.GClass1583 settings, LocationSettingsClass.Location location)
+    : LocalGameRunddansControllerClass(settings, location)
 {
-    public class HostRunddansController(BackendConfigSettingsClass.GClass1583 settings, LocationSettingsClass.Location location)
-        : LocalGameRunddansControllerClass(settings, location)
+    public override void InteractWithEventObject(Player player, InteractPacketStruct packet)
     {
-        public override void InteractWithEventObject(Player player, InteractPacketStruct packet)
+        if (!IsValid(player, out LocalGameTransitControllerClass gclass, out TransitDataClass transitDataClass)
+            || !transitDataClass.events)
         {
-            if (!IsValid(player, out LocalGameTransitControllerClass gclass, out TransitDataClass transitDataClass)
-                || !transitDataClass.events)
+            return;
+        }
+        if (!Objects.TryGetValue(packet.objectId, out EventObject eventObject))
+        {
+            FikaGlobals.LogError($"EventObject with id {packet.objectId} not found)");
+            return;
+        }
+        EventObject.EInteraction interaction = packet.interaction;
+        if (interaction != EventObject.EInteraction.Run)
+        {
+            if (interaction != EventObject.EInteraction.Repair)
             {
                 return;
             }
-            if (!Objects.TryGetValue(packet.objectId, out EventObject eventObject))
+        }
+        else
+        {
+            if (!method_5(player, out Item item))
             {
-                FikaGlobals.LogError($"EventObject with id {packet.objectId} not found)");
+                NoRequiredItemNotification(player);
                 return;
             }
-            EventObject.EInteraction interaction = packet.interaction;
-            if (interaction != EventObject.EInteraction.Run)
+            if (!method_10(item))
             {
-                if (interaction != EventObject.EInteraction.Repair)
-                {
-                    return;
-                }
-            }
-            else
-            {
-                if (!method_5(player, out Item item))
-                {
-                    NoRequiredItemNotification(player);
-                    return;
-                }
-                if (!method_10(item))
-                {
-                    FikaGlobals.LogError($"Remove consumable error on {player.Profile.Info.MainProfileNickname}");
-                    return;
-                }
-            }
-            method_4(packet.objectId, EventObject.EState.Running);
-            gclass.EnablePoints(false);
-            gclass.UpdateTimers();
-        }
-
-        public override void OnTriggerStateChanged(EventObject.EState state)
-        {
-            base.OnTriggerStateChanged(state);
-            RunddansStateEvent stateEvent = new()
-            {
-                PlayerId = 0,
-                Objects = []
-            };
-            foreach ((int id, EventObject eventObject) in Objects)
-            {
-                stateEvent.Objects.Add(id, eventObject.State);
-            }
-            EventControllerEventPacket packet = new()
-            {
-                Type = EventControllerEventPacket.EEventType.StateEvent,
-                Event = stateEvent
-            };
-            Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
-        }
-
-        private void NoRequiredItemNotification(Player player)
-        {
-            if (player.IsYourPlayer)
-            {
-                method_13();
+                FikaGlobals.LogError($"Remove consumable error on {player.Profile.Info.MainProfileNickname}");
                 return;
             }
-
-            EventControllerEventPacket packet = new()
-            {
-                Type = EventControllerEventPacket.EEventType.MessageEvent,
-                Event = new RunddansMessagesEvent()
-                {
-                    PlayerId = player.Id,
-                    Type = RunddansMessagesEvent.EType.NoRequiredItem
-                }
-            };
-            Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
         }
+        method_4(packet.objectId, EventObject.EState.Running);
+        gclass.EnablePoints(false);
+        gclass.UpdateTimers();
+    }
 
-        private void NotInteractableNotification(Player player)
+    public override void OnTriggerStateChanged(EventObject.EState state)
+    {
+        base.OnTriggerStateChanged(state);
+        RunddansStateEvent stateEvent = new()
         {
-            if (player.IsYourPlayer)
-            {
-                method_14();
-                return;
-            }
-
-            EventControllerEventPacket packet = new()
-            {
-                Type = EventControllerEventPacket.EEventType.MessageEvent,
-                Event = new RunddansMessagesEvent()
-                {
-                    PlayerId = player.Id,
-                    Type = RunddansMessagesEvent.EType.NonInteractive
-                }
-            };
-            Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+            PlayerId = 0,
+            Objects = []
+        };
+        foreach ((int id, EventObject eventObject) in Objects)
+        {
+            stateEvent.Objects.Add(id, eventObject.State);
         }
+        EventControllerEventPacket packet = new()
+        {
+            Type = EventControllerEventPacket.EEventType.StateEvent,
+            Event = stateEvent
+        };
+        Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+    }
+
+    private void NoRequiredItemNotification(Player player)
+    {
+        if (player.IsYourPlayer)
+        {
+            method_13();
+            return;
+        }
+
+        EventControllerEventPacket packet = new()
+        {
+            Type = EventControllerEventPacket.EEventType.MessageEvent,
+            Event = new RunddansMessagesEvent()
+            {
+                PlayerId = player.Id,
+                Type = RunddansMessagesEvent.EType.NoRequiredItem
+            }
+        };
+        Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+    }
+
+    private void NotInteractableNotification(Player player)
+    {
+        if (player.IsYourPlayer)
+        {
+            method_14();
+            return;
+        }
+
+        EventControllerEventPacket packet = new()
+        {
+            Type = EventControllerEventPacket.EEventType.MessageEvent,
+            Event = new RunddansMessagesEvent()
+            {
+                PlayerId = player.Id,
+                Type = RunddansMessagesEvent.EType.NonInteractive
+            }
+        };
+        Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
     }
 }

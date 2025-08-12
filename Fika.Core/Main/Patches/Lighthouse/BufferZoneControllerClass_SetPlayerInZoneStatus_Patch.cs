@@ -6,30 +6,29 @@ using Fika.Core.Networking.Packets.World;
 using Fika.Core.Patching;
 using System.Reflection;
 
-namespace Fika.Core.Main.Patches
+namespace Fika.Core.Main.Patches;
+
+public class BufferZoneControllerClass_SetPlayerInZoneStatus_Patch : FikaPatch
 {
-    public class BufferZoneControllerClass_SetPlayerInZoneStatus_Patch : FikaPatch
+    protected override MethodBase GetTargetMethod()
     {
-        protected override MethodBase GetTargetMethod()
+        return typeof(BufferZoneControllerClass).GetMethod(nameof(BufferZoneControllerClass.SetPlayerInZoneStatus));
+    }
+
+    [PatchPostfix]
+    public static void Postfix(string profileID, bool inZone)
+    {
+        if (FikaBackendUtils.IsClient)
         {
-            return typeof(BufferZoneControllerClass).GetMethod(nameof(BufferZoneControllerClass.SetPlayerInZoneStatus));
+            return;
         }
 
-        [PatchPostfix]
-        public static void Postfix(string profileID, bool inZone)
+        BufferZonePacket packet = new(EBufferZoneData.PlayerInZoneStatusChange)
         {
-            if (FikaBackendUtils.IsClient)
-            {
-                return;
-            }
+            ProfileId = profileID,
+            Available = inZone
+        };
 
-            BufferZonePacket packet = new(EBufferZoneData.PlayerInZoneStatusChange)
-            {
-                ProfileId = profileID,
-                Available = inZone
-            };
-
-            Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
-        }
+        Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
     }
 }

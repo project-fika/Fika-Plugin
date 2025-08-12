@@ -4,52 +4,51 @@ using Fika.Core.Main.Players;
 using Fika.Core.Networking.Pooling;
 using LiteNetLib.Utils;
 
-namespace Fika.Core.Networking.Packets.World
+namespace Fika.Core.Networking.Packets.World;
+
+/// <summary>
+/// Packet used for many different things to reduce packet bloat
+/// </summary>
+/// <param name="packageType"></param>
+public class GenericPacket : INetReusable
 {
-    /// <summary>
-    /// Packet used for many different things to reduce packet bloat
-    /// </summary>
-    /// <param name="packageType"></param>
-    public class GenericPacket : INetReusable
+    public int NetId;
+    public EGenericSubPacketType Type;
+    public IPoolSubPacket SubPacket;
+
+    public void Execute(FikaPlayer player = null)
     {
-        public int NetId;
-        public EGenericSubPacketType Type;
-        public IPoolSubPacket SubPacket;
+        SubPacket.Execute(player);
+    }
 
-        public void Execute(FikaPlayer player = null)
-        {
-            SubPacket.Execute(player);            
-        }
+    public void Deserialize(NetDataReader reader)
+    {
+        NetId = reader.GetInt();
+        Type = reader.GetEnum<EGenericSubPacketType>();
+        SubPacket = GenericSubPacketPoolManager.Instance.GetPacket<IPoolSubPacket>(Type);
+        SubPacket.Deserialize(reader);
+    }
 
-        public void Deserialize(NetDataReader reader)
-        {
-            NetId = reader.GetInt();
-            Type = reader.GetEnum<EGenericSubPacketType>();
-            SubPacket = GenericSubPacketPoolManager.Instance.GetPacket<IPoolSubPacket>(Type);
-            SubPacket.Deserialize(reader);
-        }
+    public void Serialize(NetDataWriter writer)
+    {
+        writer.Put(NetId);
+        writer.PutEnum(Type);
+        SubPacket?.Serialize(writer);
+    }
 
-        public void Serialize(NetDataWriter writer)
-        {
-            writer.Put(NetId);
-            writer.PutEnum(Type);
-            SubPacket?.Serialize(writer);
-        }
-
-        public void Clear()
-        {
-            if (SubPacket != null)
-            {
-                GenericSubPacketPoolManager.Instance.ReturnPacket(Type, SubPacket);
-                SubPacket = null;
-                Type = default;
-            }
-        }
-
-        public void Flush()
+    public void Clear()
+    {
+        if (SubPacket != null)
         {
             GenericSubPacketPoolManager.Instance.ReturnPacket(Type, SubPacket);
             SubPacket = null;
+            Type = default;
         }
+    }
+
+    public void Flush()
+    {
+        GenericSubPacketPoolManager.Instance.ReturnPacket(Type, SubPacket);
+        SubPacket = null;
     }
 }

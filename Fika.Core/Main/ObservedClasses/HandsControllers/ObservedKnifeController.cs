@@ -3,14 +3,13 @@
 using EFT.InventoryLogic;
 using Fika.Core.Main.Players;
 
-namespace Fika.Core.Main.ObservedClasses
+namespace Fika.Core.Main.ObservedClasses;
+
+internal class ObservedKnifeController : EFT.Player.KnifeController
 {
-    internal class ObservedKnifeController : EFT.Player.KnifeController
+    public static ObservedKnifeController Create(FikaPlayer player, KnifeComponent item)
     {
-        public static ObservedKnifeController Create(FikaPlayer player, KnifeComponent item)
-        {
-            ObservedKnifeController controller = smethod_9<ObservedKnifeController>(player, item);
-            return controller;
-        }
+        ObservedKnifeController controller = smethod_9<ObservedKnifeController>(player, item);
+        return controller;
     }
 }

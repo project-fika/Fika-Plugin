@@ -2,28 +2,27 @@
 using System;
 using System.Reflection;
 
-namespace Fika.Core.Main.Patches
+namespace Fika.Core.Main.Patches;
+
+/// <summary>
+/// Fixes a live bug where there is no null check on the <see cref="AIPlaceInfo"/> during <see cref="AIPlaceLogicPartisan.Dispose"/>, causing a<see cref="NullReferenceException"/> if it is null
+/// </summary>
+public class AIPlaceLogicPartisan_Dispose_Patch : FikaPatch
 {
-    /// <summary>
-    /// Fixes a live bug where there is no null check on the <see cref="AIPlaceInfo"/> during <see cref="AIPlaceLogicPartisan.Dispose"/>, causing a<see cref="NullReferenceException"/> if it is null
-    /// </summary>
-    public class AIPlaceLogicPartisan_Dispose_Patch : FikaPatch
+    protected override MethodBase GetTargetMethod()
     {
-        protected override MethodBase GetTargetMethod()
+        return typeof(AIPlaceLogicPartisan)
+            .GetMethod(nameof(AIPlaceLogicPartisan.Dispose));
+    }
+
+    [PatchPrefix]
+    public static bool Prefix(AIPlaceInfo ___aiplaceInfo_0)
+    {
+        if (___aiplaceInfo_0 == null)
         {
-            return typeof(AIPlaceLogicPartisan)
-                .GetMethod(nameof(AIPlaceLogicPartisan.Dispose));
+            return false;
         }
 
-        [PatchPrefix]
-        public static bool Prefix(AIPlaceInfo ___aiplaceInfo_0)
-        {
-            if (___aiplaceInfo_0 == null)
-            {
-                return false;
-            }
-
-            return true;
-        }
+        return true;
     }
 }

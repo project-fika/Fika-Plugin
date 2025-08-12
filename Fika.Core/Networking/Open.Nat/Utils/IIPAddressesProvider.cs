@@ -27,12 +27,11 @@
 using System.Collections.Generic;
 using System.Net;
 
-namespace Open.Nat
+namespace Open.Nat;
+
+internal interface IIPAddressesProvider
 {
-    internal interface IIPAddressesProvider
-    {
-        IEnumerable<IPAddress> DnsAddresses();
-        IEnumerable<IPAddress> GatewayAddresses();
-        IEnumerable<IPAddress> UnicastAddresses();
-    }
+    IEnumerable<IPAddress> DnsAddresses();
+    IEnumerable<IPAddress> GatewayAddresses();
+    IEnumerable<IPAddress> UnicastAddresses();
 }

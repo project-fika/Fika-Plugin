@@ -1,40 +1,39 @@
 ﻿using Fika.Core.Modding.Events;
 using System;
 
-namespace Fika.Core.Modding
+namespace Fika.Core.Modding;
+
+public static class FikaEventDispatcher
 {
-    public static class FikaEventDispatcher
+    public delegate void FikaEventHandler(FikaEvent e);
+
+    // I'm leaving this here but consumers should definitely subscribe to individual events
+    public static event FikaEventHandler OnFikaEvent;
+
+    public static void DispatchEvent<TEvent>(TEvent e) where TEvent : FikaEvent
     {
-        public delegate void FikaEventHandler(FikaEvent e);
+        OnFikaEvent?.Invoke(e);
+    }
 
-        // I'm leaving this here but consumers should definitely subscribe to individual events
-        public static event FikaEventHandler OnFikaEvent;
-
-        public static void DispatchEvent<TEvent>(TEvent e) where TEvent : FikaEvent
+    public static void SubscribeEvent<TEvent>(Action<TEvent> callback) where TEvent : FikaEvent
+    {
+        OnFikaEvent += e =>
         {
-            OnFikaEvent?.Invoke(e);
-        }
-
-        public static void SubscribeEvent<TEvent>(Action<TEvent> callback) where TEvent : FikaEvent
-        {
-            OnFikaEvent += e =>
+            if (e is TEvent specificEvent)
             {
-                if (e is TEvent specificEvent)
-                {
-                    callback?.Invoke(specificEvent);
-                }
-            };
-        }
+                callback?.Invoke(specificEvent);
+            }
+        };
+    }
 
-        public static void UnsubscribeEvent<TEvent>(Action<TEvent> callback) where TEvent : FikaEvent
+    public static void UnsubscribeEvent<TEvent>(Action<TEvent> callback) where TEvent : FikaEvent
+    {
+        OnFikaEvent -= e =>
         {
-            OnFikaEvent -= e =>
+            if (e is TEvent specificEvent)
             {
-                if (e is TEvent specificEvent)
-                {
-                    callback?.Invoke(specificEvent);
-                }
-            };
-        }
+                callback?.Invoke(specificEvent);
+            }
+        };
     }
 }

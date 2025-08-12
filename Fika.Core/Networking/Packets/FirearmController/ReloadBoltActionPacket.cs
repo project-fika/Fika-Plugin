@@ -3,46 +3,45 @@ using Fika.Core.Main.Players;
 using Fika.Core.Networking.Pooling;
 using LiteNetLib.Utils;
 
-namespace Fika.Core.Networking.Packets.FirearmController
+namespace Fika.Core.Networking.Packets.FirearmController;
+
+public class ReloadBoltActionPacket : IPoolSubPacket
 {
-    public class ReloadBoltActionPacket : IPoolSubPacket
+    private ReloadBoltActionPacket()
     {
-        private ReloadBoltActionPacket()
-        {
 
-        }
+    }
 
-        public static ReloadBoltActionPacket FromValue()
-        {
-            return FirearmSubPacketPoolManager.Instance.GetPacket<ReloadBoltActionPacket>(EFirearmSubPacketType.ReloadBoltAction);
-        }
+    public static ReloadBoltActionPacket FromValue()
+    {
+        return FirearmSubPacketPoolManager.Instance.GetPacket<ReloadBoltActionPacket>(EFirearmSubPacketType.ReloadBoltAction);
+    }
 
-        public static ReloadBoltActionPacket CreateInstance()
-        {
-            return new();
-        }
+    public static ReloadBoltActionPacket CreateInstance()
+    {
+        return new();
+    }
 
-        public void Execute(FikaPlayer player)
+    public void Execute(FikaPlayer player)
+    {
+        if (player.HandsController is ObservedFirearmController controller)
         {
-            if (player.HandsController is ObservedFirearmController controller)
-            {
-                controller.HandleObservedBoltAction();
-            }
+            controller.HandleObservedBoltAction();
         }
+    }
 
-        public void Serialize(NetDataWriter writer)
-        {
-            // do nothing
-        }
+    public void Serialize(NetDataWriter writer)
+    {
+        // do nothing
+    }
 
-        public void Deserialize(NetDataReader reader)
-        {
-            // do nothing
-        }
+    public void Deserialize(NetDataReader reader)
+    {
+        // do nothing
+    }
 
-        public void Dispose()
-        {
-            // do nothing
-        }
+    public void Dispose()
+    {
+        // do nothing
     }
 }

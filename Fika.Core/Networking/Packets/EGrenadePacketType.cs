@@ -1,38 +1,37 @@
-﻿namespace Fika.Core.Networking.Packets
+﻿namespace Fika.Core.Networking.Packets;
+
+/// <summary>
+/// Represents types of grenade packet actions.
+/// </summary>
+public enum EGrenadePacketType : byte
 {
     /// <summary>
-    /// Represents types of grenade packet actions.
+    /// No grenade action.
     /// </summary>
-    public enum EGrenadePacketType : byte
-    {
-        /// <summary>
-        /// No grenade action.
-        /// </summary>
-        None,
+    None,
 
-        /// <summary>
-        /// Examine the weapon while holding a grenade.
-        /// </summary>
-        ExamineWeapon,
+    /// <summary>
+    /// Examine the weapon while holding a grenade.
+    /// </summary>
+    ExamineWeapon,
 
-        /// <summary>
-        /// Perform a high grenade throw.
-        /// </summary>
-        HighThrow,
+    /// <summary>
+    /// Perform a high grenade throw.
+    /// </summary>
+    HighThrow,
 
-        /// <summary>
-        /// Perform a low grenade throw.
-        /// </summary>
-        LowThrow,
+    /// <summary>
+    /// Perform a low grenade throw.
+    /// </summary>
+    LowThrow,
 
-        /// <summary>
-        /// Pull the ring in preparation for a high throw.
-        /// </summary>
-        PullRingForHighThrow,
+    /// <summary>
+    /// Pull the ring in preparation for a high throw.
+    /// </summary>
+    PullRingForHighThrow,
 
-        /// <summary>
-        /// Pull the ring in preparation for a low throw.
-        /// </summary>
-        PullRingForLowThrow
-    }
+    /// <summary>
+    /// Pull the ring in preparation for a low throw.
+    /// </summary>
+    PullRingForLowThrow
 }

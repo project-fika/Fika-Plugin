@@ -3,29 +3,28 @@ using Fika.Core.Main.Utils;
 using Fika.Core.Patching;
 using System.Reflection;
 
-namespace Fika.Core.Main.FreeCamera.Patches
+namespace Fika.Core.Main.FreeCamera.Patches;
+
+public class PlayUISound_Patch : FikaPatch
 {
-    public class PlayUISound_Patch : FikaPatch
+    protected override MethodBase GetTargetMethod()
     {
-        protected override MethodBase GetTargetMethod()
-        {
-            return typeof(GUISounds)
-                .GetMethod(nameof(GUISounds.PlayUISound), [typeof(EUISoundType)]);
-        }
+        return typeof(GUISounds)
+            .GetMethod(nameof(GUISounds.PlayUISound), [typeof(EUISoundType)]);
+    }
 
-        [PatchPrefix]
-        private static bool Prefix(ref EUISoundType soundType)
+    [PatchPrefix]
+    private static bool Prefix(ref EUISoundType soundType)
+    {
+        if (soundType == EUISoundType.PlayerIsDead)
         {
-            if (soundType == EUISoundType.PlayerIsDead)
+            // Don't play player dead sound if spectator mode
+            if (FikaBackendUtils.IsSpectator)
             {
-                // Don't play player dead sound if spectator mode
-                if (FikaBackendUtils.IsSpectator)
-                {
-                    return false;
-                }
+                return false;
             }
-
-            return true;
         }
+
+        return true;
     }
 }

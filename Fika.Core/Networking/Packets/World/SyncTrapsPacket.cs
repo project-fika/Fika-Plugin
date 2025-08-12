@@ -1,19 +1,18 @@
 ﻿using LiteNetLib.Utils;
 
-namespace Fika.Core.Networking.Packets.World
+namespace Fika.Core.Networking.Packets.World;
+
+public struct SyncTrapsPacket : INetSerializable
 {
-    public struct SyncTrapsPacket : INetSerializable
+    public byte[] Data;
+
+    public void Deserialize(NetDataReader reader)
     {
-        public byte[] Data;
+        Data = reader.GetByteArray();
+    }
 
-        public void Deserialize(NetDataReader reader)
-        {
-            Data = reader.GetByteArray();
-        }
-
-        public void Serialize(NetDataWriter writer)
-        {
-            writer.PutByteArray(Data);
-        }
+    public void Serialize(NetDataWriter writer)
+    {
+        writer.PutByteArray(Data);
     }
 }

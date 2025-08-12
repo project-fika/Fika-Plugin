@@ -1,12 +1,11 @@
 ﻿using EFT;
 
-namespace Fika.Core.Main.ObservedClasses
+namespace Fika.Core.Main.ObservedClasses;
+
+public class FikaObservedGrenade : Grenade
 {
-    public class FikaObservedGrenade : Grenade
+    public override void ApplyNetPacket(GrenadeDataPacketStruct packet)
     {
-        public override void ApplyNetPacket(GrenadeDataPacketStruct packet)
-        {
-            base.ApplyNetPacket(packet);
-        }
+        base.ApplyNetPacket(packet);
     }
 }

@@ -1,25 +1,24 @@
 ﻿using EFT;
 using System.Collections.Generic;
 
-namespace Fika.Core.Main.GameMode
+namespace Fika.Core.Main.GameMode;
+
+/// <summary>
+/// Interface for the <see cref="CoopGame"/>
+/// </summary>
+public interface IFikaGame
 {
-    /// <summary>
-    /// Interface for the <see cref="CoopGame"/>
-    /// </summary>
-    public interface IFikaGame
-    {
-        public List<int> ExtractedPlayers { get; }
+    public List<int> ExtractedPlayers { get; }
 
-        ExitStatus ExitStatus { get; set; }
+    ExitStatus ExitStatus { get; set; }
 
-        string ExitLocation { get; set; }
+    string ExitLocation { get; set; }
 
-        public void Stop(string profileId, ExitStatus exitStatus, string exitName, float delay = 0f);
+    public void Stop(string profileId, ExitStatus exitStatus, string exitName, float delay = 0f);
 
-        public ESeason Season { get; set; }
+    public ESeason Season { get; set; }
 
-        public SeasonsSettingsClass SeasonsSettings { get; set; }
+    public SeasonsSettingsClass SeasonsSettings { get; set; }
 
-        public BaseGameController GameController { get; set; }
-    }
+    public BaseGameController GameController { get; set; }
 }

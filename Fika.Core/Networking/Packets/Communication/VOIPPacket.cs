@@ -1,19 +1,18 @@
 ﻿using LiteNetLib.Utils;
 
-namespace Fika.Core.Networking.Packets.Communication
+namespace Fika.Core.Networking.Packets.Communication;
+
+public struct VOIPPacket : INetSerializable
 {
-    public struct VOIPPacket : INetSerializable
+    public byte[] Data;
+
+    public void Deserialize(NetDataReader reader)
     {
-        public byte[] Data;
+        Data = reader.GetByteArray();
+    }
 
-        public void Deserialize(NetDataReader reader)
-        {
-            Data = reader.GetByteArray();
-        }
-
-        public readonly void Serialize(NetDataWriter writer)
-        {
-            writer.PutByteArray(Data);
-        }
+    public readonly void Serialize(NetDataWriter writer)
+    {
+        writer.PutByteArray(Data);
     }
 }

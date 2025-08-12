@@ -3,46 +3,45 @@ using Fika.Core.Main.Players;
 using Fika.Core.Networking.Pooling;
 using LiteNetLib.Utils;
 
-namespace Fika.Core.Networking.Packets.FirearmController
+namespace Fika.Core.Networking.Packets.FirearmController;
+
+public class CheckChamberPacket : IPoolSubPacket
 {
-    public class CheckChamberPacket : IPoolSubPacket
+    private CheckChamberPacket()
     {
-        private CheckChamberPacket()
-        {
 
-        }
+    }
 
-        public static CheckChamberPacket FromValue()
-        {
-            return FirearmSubPacketPoolManager.Instance.GetPacket<CheckChamberPacket>(EFirearmSubPacketType.CheckChamber);
-        }
+    public static CheckChamberPacket FromValue()
+    {
+        return FirearmSubPacketPoolManager.Instance.GetPacket<CheckChamberPacket>(EFirearmSubPacketType.CheckChamber);
+    }
 
-        public static CheckChamberPacket CreateInstance()
-        {
-            return new();
-        }
+    public static CheckChamberPacket CreateInstance()
+    {
+        return new();
+    }
 
-        public void Execute(FikaPlayer player)
+    public void Execute(FikaPlayer player)
+    {
+        if (player.HandsController is ObservedFirearmController controller)
         {
-            if (player.HandsController is ObservedFirearmController controller)
-            {
-                controller.CheckChamber();
-            }
+            controller.CheckChamber();
         }
+    }
 
-        public void Serialize(NetDataWriter writer)
-        {
-            // do nothing
-        }
+    public void Serialize(NetDataWriter writer)
+    {
+        // do nothing
+    }
 
-        public void Deserialize(NetDataReader reader)
-        {
-            // do nothing
-        }
+    public void Deserialize(NetDataReader reader)
+    {
+        // do nothing
+    }
 
-        public void Dispose()
-        {
-            // do nothing
-        }
+    public void Dispose()
+    {
+        // do nothing
     }
 }

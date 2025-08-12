@@ -3,27 +3,26 @@
 using Comfort.Common;
 using Fika.Core.Networking;
 
-namespace Fika.Core.Main.PacketHandlers
+namespace Fika.Core.Main.PacketHandlers;
+
+public class ObservedPacketSender : MonoBehaviour, IPacketSender
 {
-    public class ObservedPacketSender : MonoBehaviour, IPacketSender
+    public bool SendState { get; set; }
+    public IFikaNetworkManager NetworkManager { get; set; }
+
+    protected void Awake()
     {
-        public bool SendState { get; set; }
-        public IFikaNetworkManager NetworkManager { get; set; }
+        NetworkManager = Singleton<IFikaNetworkManager>.Instance;
+    }
 
-        protected void Awake()
-        {
-            NetworkManager = Singleton<IFikaNetworkManager>.Instance;
-        }
+    public void Init()
+    {
 
-        public void Init()
-        {
+    }
 
-        }
-
-        public void DestroyThis()
-        {
-            NetworkManager = null;
-            Destroy(this);
-        }
+    public void DestroyThis()
+    {
+        NetworkManager = null;
+        Destroy(this);
     }
 }

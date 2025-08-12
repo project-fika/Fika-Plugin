@@ -6,29 +6,28 @@ using Fika.Core.Networking.Packets.World;
 using Fika.Core.Patching;
 using System.Reflection;
 
-namespace Fika.Core.Main.Patches
+namespace Fika.Core.Main.Patches;
+
+public class BTRView_SyncViewFromServer_Patch : FikaPatch
 {
-    public class BTRView_SyncViewFromServer_Patch : FikaPatch
+    protected override MethodBase GetTargetMethod()
     {
-        protected override MethodBase GetTargetMethod()
+        return typeof(BTRView).GetMethod(nameof(BTRView.SyncViewFromServer));
+    }
+
+    [PatchPrefix]
+    public static void Prefix(ref BTRDataPacketStruct packet)
+    {
+        if (FikaBackendUtils.IsClient)
         {
-            return typeof(BTRView).GetMethod(nameof(BTRView.SyncViewFromServer));
+            return;
         }
 
-        [PatchPrefix]
-        public static void Prefix(ref BTRDataPacketStruct packet)
+        BTRPacket btrPacket = new()
         {
-            if (FikaBackendUtils.IsClient)
-            {
-                return;
-            }
+            Data = packet
+        };
 
-            BTRPacket btrPacket = new()
-            {
-                Data = packet
-            };
-
-            Singleton<IFikaNetworkManager>.Instance.SendData(ref btrPacket, DeliveryMethod.Unreliable);
-        }
+        Singleton<IFikaNetworkManager>.Instance.SendData(ref btrPacket, DeliveryMethod.Unreliable);
     }
 }

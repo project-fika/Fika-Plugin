@@ -1,47 +1,46 @@
 ﻿using Fika.Core.Main.Players;
 using LiteNetLib.Utils;
 
-namespace Fika.Core.Networking.Packets.Player
+namespace Fika.Core.Networking.Packets.Player;
+
+public class InteractionPacket : IPoolSubPacket
 {
-    public class InteractionPacket : IPoolSubPacket
+    private InteractionPacket()
     {
-        private InteractionPacket()
-        {
 
-        }
+    }
 
-        public static InteractionPacket CreateInstance()
-        {
-            return new();
-        }
+    public static InteractionPacket CreateInstance()
+    {
+        return new();
+    }
 
-        public static InteractionPacket FromValue(EInteraction interaction)
-        {
-            InteractionPacket packet = CreateInstance();
-            packet.Interaction = interaction;
-            return packet;
-        }
+    public static InteractionPacket FromValue(EInteraction interaction)
+    {
+        InteractionPacket packet = CreateInstance();
+        packet.Interaction = interaction;
+        return packet;
+    }
 
-        public EInteraction Interaction;
+    public EInteraction Interaction;
 
-        public void Execute(FikaPlayer player)
-        {
-            player.SetInteractInHands(Interaction);
-        }
+    public void Execute(FikaPlayer player)
+    {
+        player.SetInteractInHands(Interaction);
+    }
 
-        public void Serialize(NetDataWriter writer)
-        {
-            writer.Put((byte)Interaction);
-        }
+    public void Serialize(NetDataWriter writer)
+    {
+        writer.Put((byte)Interaction);
+    }
 
-        public void Deserialize(NetDataReader reader)
-        {
-            Interaction = reader.GetEnum<EInteraction>();
-        }
+    public void Deserialize(NetDataReader reader)
+    {
+        Interaction = reader.GetEnum<EInteraction>();
+    }
 
-        public void Dispose()
-        {
-            Interaction = default;
-        }
+    public void Dispose()
+    {
+        Interaction = default;
     }
 }

@@ -2,20 +2,19 @@
 
 using UnityEngine.UI;
 
-namespace Fika.Core.Main.Components
+namespace Fika.Core.Main.Components;
+
+internal class FikaPing : MonoBehaviour
 {
-    internal class FikaPing : MonoBehaviour
+    Image _image;
+
+    private void Awake()
     {
-        Image _image;
+        _image = GetComponent<Image>();
+    }
 
-        private void Awake()
-        {
-            _image = GetComponent<Image>();
-        }
+    private void Update()
+    {
 
-        private void Update()
-        {
-
-        }
     }
 }

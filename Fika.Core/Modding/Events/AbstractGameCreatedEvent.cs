@@ -1,9 +1,8 @@
 ﻿using EFT;
 
-namespace Fika.Core.Modding.Events
+namespace Fika.Core.Modding.Events;
+
+public class AbstractGameCreatedEvent(AbstractGame game) : FikaEvent
 {
-    public class AbstractGameCreatedEvent(AbstractGame game) : FikaEvent
-    {
-        public AbstractGame Game { get; } = game;
-    }
+    public AbstractGame Game { get; } = game;
 }

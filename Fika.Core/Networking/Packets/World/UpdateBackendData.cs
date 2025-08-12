@@ -3,44 +3,43 @@ using Fika.Core.Main.Players;
 using Fika.Core.Networking.Pooling;
 using LiteNetLib.Utils;
 
-namespace Fika.Core.Networking.Packets.World
+namespace Fika.Core.Networking.Packets.World;
+
+public class UpdateBackendData : IPoolSubPacket
 {
-    public class UpdateBackendData : IPoolSubPacket
+    public int PlayerAmount;
+
+    private UpdateBackendData() { }
+
+    public static UpdateBackendData CreateInstance()
     {
-        public int PlayerAmount;
+        return new();
+    }
 
-        private UpdateBackendData() { }
+    public static UpdateBackendData FromValue(int playerAmount)
+    {
+        UpdateBackendData packet = GenericSubPacketPoolManager.Instance.GetPacket<UpdateBackendData>(EGenericSubPacketType.UpdateBackendData);
+        packet.PlayerAmount = playerAmount;
+        return packet;
+    }
 
-        public static UpdateBackendData CreateInstance()
-        {
-            return new();
-        }
+    public void Execute(FikaPlayer player = null)
+    {
+        Singleton<IFikaNetworkManager>.Instance.PlayerAmount = PlayerAmount;
+    }
 
-        public static UpdateBackendData FromValue(int playerAmount)
-        {
-            UpdateBackendData packet = GenericSubPacketPoolManager.Instance.GetPacket<UpdateBackendData>(EGenericSubPacketType.UpdateBackendData);
-            packet.PlayerAmount = playerAmount;
-            return packet;
-        }
+    public void Serialize(NetDataWriter writer)
+    {
+        writer.Put(PlayerAmount);
+    }
 
-        public void Execute(FikaPlayer player = null)
-        {
-            Singleton<IFikaNetworkManager>.Instance.PlayerAmount = PlayerAmount;
-        }
+    public void Deserialize(NetDataReader reader)
+    {
+        PlayerAmount = reader.GetInt();
+    }
 
-        public void Serialize(NetDataWriter writer)
-        {
-            writer.Put(PlayerAmount);
-        }
-
-        public void Deserialize(NetDataReader reader)
-        {
-            PlayerAmount = reader.GetInt();
-        }
-
-        public void Dispose()
-        {
-            PlayerAmount = 0;
-        }
+    public void Dispose()
+    {
+        PlayerAmount = 0;
     }
 }

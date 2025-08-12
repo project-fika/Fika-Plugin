@@ -1,42 +1,41 @@
 ﻿using System.Net;
 using System.Net.Sockets;
 
-namespace LiteNetLib.Utils
+namespace LiteNetLib.Utils;
+
+internal sealed class NtpRequest
 {
-    internal sealed class NtpRequest
+    private const int ResendTimer = 1000;
+    private const int KillTimer = 10000;
+    public const int DefaultPort = 123;
+    private readonly IPEndPoint _ntpEndPoint;
+    private float _resendTime = ResendTimer;
+    private float _killTime = 0;
+
+    public NtpRequest(IPEndPoint endPoint)
     {
-        private const int ResendTimer = 1000;
-        private const int KillTimer = 10000;
-        public const int DefaultPort = 123;
-        private readonly IPEndPoint _ntpEndPoint;
-        private float _resendTime = ResendTimer;
-        private float _killTime = 0;
+        _ntpEndPoint = endPoint;
+    }
 
-        public NtpRequest(IPEndPoint endPoint)
+    public bool NeedToKill => _killTime >= KillTimer;
+
+    public bool Send(Socket socket, float time)
+    {
+        _resendTime += time;
+        _killTime += time;
+        if (_resendTime < ResendTimer)
         {
-            _ntpEndPoint = endPoint;
+            return false;
         }
-
-        public bool NeedToKill => _killTime >= KillTimer;
-
-        public bool Send(Socket socket, float time)
+        var packet = new NtpPacket();
+        try
         {
-            _resendTime += time;
-            _killTime += time;
-            if (_resendTime < ResendTimer)
-            {
-                return false;
-            }
-            var packet = new NtpPacket();
-            try
-            {
-                int sendCount = socket.SendTo(packet.Bytes, 0, packet.Bytes.Length, SocketFlags.None, _ntpEndPoint);
-                return sendCount == packet.Bytes.Length;
-            }
-            catch
-            {
-                return false;
-            }
+            int sendCount = socket.SendTo(packet.Bytes, 0, packet.Bytes.Length, SocketFlags.None, _ntpEndPoint);
+            return sendCount == packet.Bytes.Length;
+        }
+        catch
+        {
+            return false;
         }
     }
 }

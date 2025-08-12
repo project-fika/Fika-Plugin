@@ -2,16 +2,15 @@
 using Fika.Core.Main.Components;
 using System.Collections.Generic;
 
-namespace Fika.Core.Main.ClientClasses
+namespace Fika.Core.Main.ClientClasses;
+
+public sealed class ClientViewFilter : ViewFilter
 {
-    public sealed class ClientViewFilter : ViewFilter
+    public override HashSet<EBodyModelPart> AllowedParts
     {
-        public override HashSet<EBodyModelPart> AllowedParts
+        get
         {
-            get
-            {
-                return [EBodyModelPart.Body, EBodyModelPart.Feet, EBodyModelPart.Head, EBodyModelPart.Hands];
-            }
+            return [EBodyModelPart.Body, EBodyModelPart.Feet, EBodyModelPart.Head, EBodyModelPart.Hands];
         }
     }
 }

@@ -2,51 +2,50 @@
 
 using EFT;
 
-namespace Fika.Core.Main.ObservedClasses.MovementStates
+namespace Fika.Core.Main.ObservedClasses.MovementStates;
+
+public class ObservedSprintState : SprintStateClass
 {
-    public class ObservedSprintState : SprintStateClass
+    public ObservedSprintState(MovementContext movementContext) : base(movementContext)
     {
-        public ObservedSprintState(MovementContext movementContext) : base(movementContext)
-        {
-            MovementContext = movementContext;
-        }
+        MovementContext = movementContext;
+    }
 
-        public override void UpdatePosition(float deltaTime)
+    public override void UpdatePosition(float deltaTime)
+    {
+        if (!MovementContext.IsGrounded)
         {
-            if (!MovementContext.IsGrounded)
-            {
-                MovementContext.PlayerAnimatorEnableFallingDown(true);
-            }
+            MovementContext.PlayerAnimatorEnableFallingDown(true);
         }
+    }
 
-        public override void EnableSprint(bool enabled, bool isToggle = false)
+    public override void EnableSprint(bool enabled, bool isToggle = false)
+    {
+        MovementContext.EnableSprint(enabled);
+    }
+
+    public override void ChangePose(float poseDelta)
+    {
+        MovementContext.SetPoseLevel(MovementContext.PoseLevel + poseDelta, false);
+    }
+
+    public override void ManualAnimatorMoveUpdate(float deltaTime)
+    {
+        if (MovementContext.IsSprintEnabled)
         {
-            MovementContext.EnableSprint(enabled);
+            MovementContext.MovementDirection = Vector2.Lerp(MovementContext.MovementDirection, Direction, deltaTime * EFTHardSettings.Instance.DIRECTION_LERP_SPEED);
+            MovementContext.SetUpDiscreteDirection(GClass1909.ConvertToMovementDirection(Direction));
+            Direction = Vector2.zero;
+            MovementContext.ApplyRotation(Quaternion.AngleAxis(MovementContext.Yaw, Vector3.up));
+            UpdateRotationAndPosition(deltaTime);
         }
-
-        public override void ChangePose(float poseDelta)
+        else
         {
-            MovementContext.SetPoseLevel(MovementContext.PoseLevel + poseDelta, false);
+            MovementContext.PlayerAnimatorEnableSprint(false, false);
         }
-
-        public override void ManualAnimatorMoveUpdate(float deltaTime)
+        if (!MovementContext.PlayerAnimator.Animator.IsInTransition(0))
         {
-            if (MovementContext.IsSprintEnabled)
-            {
-                MovementContext.MovementDirection = Vector2.Lerp(MovementContext.MovementDirection, Direction, deltaTime * EFTHardSettings.Instance.DIRECTION_LERP_SPEED);
-                MovementContext.SetUpDiscreteDirection(GClass1909.ConvertToMovementDirection(Direction));
-                Direction = Vector2.zero;
-                MovementContext.ApplyRotation(Quaternion.AngleAxis(MovementContext.Yaw, Vector3.up));
-                UpdateRotationAndPosition(deltaTime);
-            }
-            else
-            {
-                MovementContext.PlayerAnimatorEnableSprint(false, false);
-            }
-            if (!MovementContext.PlayerAnimator.Animator.IsInTransition(0))
-            {
-                MovementContext.ObstacleCollisionFacade.RecalculateCollision(velocityThreshold);
-            }
+            MovementContext.ObstacleCollisionFacade.RecalculateCollision(velocityThreshold);
         }
     }
 }

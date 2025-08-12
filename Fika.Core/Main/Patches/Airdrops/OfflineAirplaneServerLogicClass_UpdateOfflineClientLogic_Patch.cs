@@ -3,19 +3,18 @@ using Fika.Core.Main.HostClasses;
 using Fika.Core.Patching;
 using System.Reflection;
 
-namespace Fika.Core.Main.Patches
-{
-    public class OfflineAirplaneServerLogicClass_UpdateOfflineClientLogic_Patch : FikaPatch
-    {
-        protected override MethodBase GetTargetMethod()
-        {
-            return typeof(OfflineAirplaneServerLogicClass).GetMethod(nameof(OfflineAirplaneServerLogicClass.UpdateOfflineClientLogic));
-        }
+namespace Fika.Core.Main.Patches;
 
-        [PatchPostfix]
-        public static void Postfix(AirplaneDataPacketStruct ___AirplaneDataPacketStruct)
-        {
-            Singleton<FikaHostGameWorld>.Instance.FikaHostWorld.WorldPacket.SyncObjectPackets.Add(___AirplaneDataPacketStruct);
-        }
+public class OfflineAirplaneServerLogicClass_UpdateOfflineClientLogic_Patch : FikaPatch
+{
+    protected override MethodBase GetTargetMethod()
+    {
+        return typeof(OfflineAirplaneServerLogicClass).GetMethod(nameof(OfflineAirplaneServerLogicClass.UpdateOfflineClientLogic));
+    }
+
+    [PatchPostfix]
+    public static void Postfix(AirplaneDataPacketStruct ___AirplaneDataPacketStruct)
+    {
+        Singleton<FikaHostGameWorld>.Instance.FikaHostWorld.WorldPacket.SyncObjectPackets.Add(___AirplaneDataPacketStruct);
     }
 }

@@ -4,45 +4,44 @@ using Fika.Core.Utils;
 using LiteNetLib.Utils;
 using static Fika.Core.UI.FikaUIGlobals;
 
-namespace Fika.Core.Networking.Packets.World
+namespace Fika.Core.Networking.Packets.World;
+
+public class ClientConnected : IPoolSubPacket
 {
-    public class ClientConnected : IPoolSubPacket
+    public string Name;
+
+    private ClientConnected() { }
+
+    public static ClientConnected CreateInstance()
     {
-        public string Name;
+        return new ClientConnected();
+    }
 
-        private ClientConnected() { }
+    public static ClientConnected FromValue(string name)
+    {
+        ClientConnected packet = GenericSubPacketPoolManager.Instance.GetPacket<ClientConnected>(EGenericSubPacketType.ClientConnected);
+        packet.Name = name;
+        return packet;
+    }
 
-        public static ClientConnected CreateInstance()
-        {
-            return new ClientConnected();
-        }
+    public void Execute(FikaPlayer player = null)
+    {
+        string message = string.Format(LocaleUtils.UI_PLAYER_CONNECTED.Localized(), ColorizeText(EColor.BLUE, Name));
+        NotificationManagerClass.DisplayMessageNotification(message);
+    }
 
-        public static ClientConnected FromValue(string name)
-        {
-            ClientConnected packet = GenericSubPacketPoolManager.Instance.GetPacket<ClientConnected>(EGenericSubPacketType.ClientConnected);
-            packet.Name = name;
-            return packet;
-        }
+    public void Serialize(NetDataWriter writer)
+    {
+        writer.Put(Name);
+    }
 
-        public void Execute(FikaPlayer player = null)
-        {
-            string message = string.Format(LocaleUtils.UI_PLAYER_CONNECTED.Localized(), ColorizeText(EColor.BLUE, Name));
-            NotificationManagerClass.DisplayMessageNotification(message);
-        }
+    public void Deserialize(NetDataReader reader)
+    {
+        Name = reader.GetString();
+    }
 
-        public void Serialize(NetDataWriter writer)
-        {
-            writer.Put(Name);
-        }
-
-        public void Deserialize(NetDataReader reader)
-        {
-            Name = reader.GetString();
-        }
-
-        public void Dispose()
-        {
-            Name = null;
-        }
+    public void Dispose()
+    {
+        Name = null;
     }
 }

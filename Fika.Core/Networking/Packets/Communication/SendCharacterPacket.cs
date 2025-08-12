@@ -1,32 +1,31 @@
 ﻿using LiteNetLib.Utils;
 using static Fika.Core.Networking.Packets.SubPackets;
 
-namespace Fika.Core.Networking.Packets.Communication
+namespace Fika.Core.Networking.Packets.Communication;
+
+public struct SendCharacterPacket(PlayerInfoPacket playerInfoPacket, bool isAlive, bool isAi, Vector3 position, int netId) : INetSerializable
 {
-    public struct SendCharacterPacket(PlayerInfoPacket playerInfoPacket, bool isAlive, bool isAi, Vector3 position, int netId) : INetSerializable
+    public PlayerInfoPacket PlayerInfoPacket = playerInfoPacket;
+    public bool IsAlive = isAlive;
+    public bool IsAI = isAi;
+    public Vector3 Position = position;
+    public int NetId = netId;
+
+    public void Deserialize(NetDataReader reader)
     {
-        public PlayerInfoPacket PlayerInfoPacket = playerInfoPacket;
-        public bool IsAlive = isAlive;
-        public bool IsAI = isAi;
-        public Vector3 Position = position;
-        public int NetId = netId;
+        PlayerInfoPacket = reader.GetPlayerInfoPacket();
+        IsAlive = reader.GetBool();
+        IsAI = reader.GetBool();
+        Position = reader.GetUnmanaged<Vector3>();
+        NetId = reader.GetInt();
+    }
 
-        public void Deserialize(NetDataReader reader)
-        {
-            PlayerInfoPacket = reader.GetPlayerInfoPacket();
-            IsAlive = reader.GetBool();
-            IsAI = reader.GetBool();
-            Position = reader.GetUnmanaged<Vector3>();
-            NetId = reader.GetInt();
-        }
-
-        public readonly void Serialize(NetDataWriter writer)
-        {
-            writer.PutPlayerInfoPacket(PlayerInfoPacket);
-            writer.Put(IsAlive);
-            writer.Put(IsAI);
-            writer.PutUnmanaged(Position);
-            writer.Put(NetId);
-        }
+    public readonly void Serialize(NetDataWriter writer)
+    {
+        writer.PutPlayerInfoPacket(PlayerInfoPacket);
+        writer.Put(IsAlive);
+        writer.Put(IsAI);
+        writer.PutUnmanaged(Position);
+        writer.Put(NetId);
     }
 }

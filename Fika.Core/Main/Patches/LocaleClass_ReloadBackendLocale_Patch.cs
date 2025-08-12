@@ -2,26 +2,25 @@
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace Fika.Core.Main.Patches
+namespace Fika.Core.Main.Patches;
+
+internal class LocaleClass_ReloadBackendLocale_Patch : FikaPatch
 {
-    internal class LocaleClass_ReloadBackendLocale_Patch : FikaPatch
+    private static bool _hasBeenSet = false;
+
+    protected override MethodBase GetTargetMethod()
     {
-        private static bool _hasBeenSet = false;
+        return typeof(LocaleClass)
+            .GetMethod(nameof(LocaleClass.ReloadBackendLocale));
+    }
 
-        protected override MethodBase GetTargetMethod()
+    [PatchPostfix]
+    public static void Postfix(Task __result)
+    {
+        if (!_hasBeenSet)
         {
-            return typeof(LocaleClass)
-                .GetMethod(nameof(LocaleClass.ReloadBackendLocale));
-        }
-
-        [PatchPostfix]
-        public static void Postfix(Task __result)
-        {
-            if (!_hasBeenSet)
-            {
-                _ = Task.Run(() => FikaPlugin.Instance.WaitForLocales(__result));
-                _hasBeenSet = true;
-            }
+            _ = Task.Run(() => FikaPlugin.Instance.WaitForLocales(__result));
+            _hasBeenSet = true;
         }
     }
 }

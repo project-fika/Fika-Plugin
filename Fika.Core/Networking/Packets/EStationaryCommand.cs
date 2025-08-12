@@ -1,23 +1,22 @@
-﻿namespace Fika.Core.Networking.Packets
+﻿namespace Fika.Core.Networking.Packets;
+
+/// <summary>
+/// Represents commands related to stationary equipment or positions.
+/// </summary>
+public enum EStationaryCommand : byte
 {
     /// <summary>
-    /// Represents commands related to stationary equipment or positions.
+    /// Occupy the stationary turret.
     /// </summary>
-    public enum EStationaryCommand : byte
-    {
-        /// <summary>
-        /// Occupy the stationary turret.
-        /// </summary>
-        Occupy,
+    Occupy,
 
-        /// <summary>
-        /// Leave the stationary turret.
-        /// </summary>
-        Leave,
+    /// <summary>
+    /// Leave the stationary turret.
+    /// </summary>
+    Leave,
 
-        /// <summary>
-        /// Access to the turret was denied.
-        /// </summary>
-        Denied
-    }
+    /// <summary>
+    /// Access to the turret was denied.
+    /// </summary>
+    Denied
 }

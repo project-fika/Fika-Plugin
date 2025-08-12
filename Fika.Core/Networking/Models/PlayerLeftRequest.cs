@@ -1,21 +1,20 @@
 using Fika.Core.Main.Components;
 using System.Runtime.Serialization;
 
-namespace Fika.Core.Networking.Http
+namespace Fika.Core.Networking.Http;
+
+[DataContract]
+public struct PlayerLeftRequest
 {
-    [DataContract]
-    public struct PlayerLeftRequest
+    [DataMember(Name = "serverId")]
+    public string ServerId;
+
+    [DataMember(Name = "profileId")]
+    public string ProfileId;
+
+    public PlayerLeftRequest(string profileId)
     {
-        [DataMember(Name = "serverId")]
-        public string ServerId;
-
-        [DataMember(Name = "profileId")]
-        public string ProfileId;
-
-        public PlayerLeftRequest(string profileId)
-        {
-            ServerId = CoopHandler.GetServerId();
-            ProfileId = profileId;
-        }
+        ServerId = CoopHandler.GetServerId();
+        ProfileId = profileId;
     }
 }

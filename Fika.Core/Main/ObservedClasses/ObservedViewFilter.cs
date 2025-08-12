@@ -2,18 +2,17 @@
 using Fika.Core.Main.Components;
 using System.Collections.Generic;
 
-namespace Fika.Core.Main.ObservedClasses
-{
-    public sealed class ObservedViewFilter : ViewFilter
-    {
-        public static readonly ObservedViewFilter Default = new();
+namespace Fika.Core.Main.ObservedClasses;
 
-        public override HashSet<EBodyModelPart> AllowedParts
+public sealed class ObservedViewFilter : ViewFilter
+{
+    public static readonly ObservedViewFilter Default = new();
+
+    public override HashSet<EBodyModelPart> AllowedParts
+    {
+        get
         {
-            get
-            {
-                return [EBodyModelPart.Body, EBodyModelPart.Feet, EBodyModelPart.Head];
-            }
+            return [EBodyModelPart.Body, EBodyModelPart.Feet, EBodyModelPart.Head];
         }
     }
 }

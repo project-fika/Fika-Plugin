@@ -5,25 +5,24 @@ using EFT.UI.Matchmaker;
 using Fika.Core.Patching;
 using System.Reflection;
 
-namespace Fika.Core.UI
+namespace Fika.Core.UI;
+
+/// <summary>
+/// Created by: Lacyway
+/// </summary>
+public class DisableReadyButton_Patch : FikaPatch
 {
-    /// <summary>
-    /// Created by: Lacyway
-    /// </summary>
-    public class DisableReadyButton_Patch : FikaPatch
+    protected override MethodBase GetTargetMethod()
     {
-        protected override MethodBase GetTargetMethod()
-        {
-            return typeof(MatchMakerSelectionLocationScreen).GetMethod(nameof(MatchMakerSelectionLocationScreen.Awake));
-        }
+        return typeof(MatchMakerSelectionLocationScreen).GetMethod(nameof(MatchMakerSelectionLocationScreen.Awake));
+    }
 
-        [PatchPostfix]
-        static void Postfix(DefaultUIButton ____readyButton)
-        {
-            ____readyButton.SetDisabledTooltip("Disabled with Fika");
-            ____readyButton.SetEnabledTooltip("Disabled with Fika");
+    [PatchPostfix]
+    static void Postfix(DefaultUIButton ____readyButton)
+    {
+        ____readyButton.SetDisabledTooltip("Disabled with Fika");
+        ____readyButton.SetEnabledTooltip("Disabled with Fika");
 
-            ____readyButton.Interactable = false;
-        }
+        ____readyButton.Interactable = false;
     }
 }

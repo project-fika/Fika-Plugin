@@ -1,11 +1,10 @@
 ﻿using Fika.Core.Networking.Http;
 
-namespace Fika.Core.Networking.Websocket.Headless
-{
-    public class StartRaid
-    {
-        public EFikaHeadlessWSMessageType Type;
+namespace Fika.Core.Networking.Websocket.Headless;
 
-        public StartHeadlessRequest StartHeadlessRequest;
-    }
+public class StartRaid
+{
+    public EFikaHeadlessWSMessageType Type;
+
+    public StartHeadlessRequest StartHeadlessRequest;
 }

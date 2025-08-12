@@ -1,15 +1,14 @@
 ﻿using EFT;
 
-namespace Fika.Core.Main.ClientClasses
+namespace Fika.Core.Main.ClientClasses;
+
+public sealed class ClientStatisticsManager : LocationStatisticsCollectorAbstractClass
 {
-    public sealed class ClientStatisticsManager : LocationStatisticsCollectorAbstractClass
+    public override void ShowStatNotification(LocalizationKey localizationKey1, LocalizationKey localizationKey2, int value)
     {
-        public override void ShowStatNotification(LocalizationKey localizationKey1, LocalizationKey localizationKey2, int value)
+        if (value > 0)
         {
-            if (value > 0)
-            {
-                NotificationManagerClass.DisplayNotification(new StatNotificationClass(localizationKey1, localizationKey2, value));
-            }
+            NotificationManagerClass.DisplayNotification(new StatNotificationClass(localizationKey1, localizationKey2, value));
         }
     }
 }

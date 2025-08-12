@@ -13,91 +13,90 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Fika.Core.Main.Patches
+namespace Fika.Core.Main.Patches;
+
+public class BTRView_GoIn_Patch : FikaPatch
 {
-    public class BTRView_GoIn_Patch : FikaPatch
+    protected override MethodBase GetTargetMethod()
     {
-        protected override MethodBase GetTargetMethod()
+        return typeof(BTRView).GetMethod(nameof(BTRView.GoIn));
+    }
+
+    [PatchPrefix]
+    public static bool Prefix(BTRView __instance, Player player, BTRSide side, byte placeId, bool fast, ref Task __result)
+    {
+        bool isServer = FikaBackendUtils.IsServer;
+        if (player is ObservedPlayer observedPlayer)
         {
-            return typeof(BTRView).GetMethod(nameof(BTRView.GoIn));
+            __result = ObservedGoIn(__instance, observedPlayer, side, placeId, fast);
+            Singleton<IFikaNetworkManager>.Instance.ObservedCoopPlayers.Remove(observedPlayer);
+            return false;
         }
 
-        [PatchPrefix]
-        public static bool Prefix(BTRView __instance, Player player, BTRSide side, byte placeId, bool fast, ref Task __result)
+        if (player.IsYourPlayer)
         {
-            bool isServer = FikaBackendUtils.IsServer;
-            if (player is ObservedPlayer observedPlayer)
+            FikaPlayer myPlayer = (FikaPlayer)player;
+            myPlayer.PacketSender.SendState = false;
+            player.InputDirection = new(0, 0);
+            if (isServer)
             {
-                __result = ObservedGoIn(__instance, observedPlayer, side, placeId, fast);
-                Singleton<IFikaNetworkManager>.Instance.ObservedCoopPlayers.Remove(observedPlayer);
-                return false;
-            }
-
-            if (player.IsYourPlayer)
-            {
-                FikaPlayer myPlayer = (FikaPlayer)player;
-                myPlayer.PacketSender.SendState = false;
-                player.InputDirection = new(0, 0);
-                if (isServer)
+                BTRInteractionPacket packet = new(myPlayer.NetId)
                 {
-                    BTRInteractionPacket packet = new(myPlayer.NetId)
+                    Data = new()
                     {
-                        Data = new()
-                        {
-                            HasInteraction = true,
-                            InteractionType = EInteractionType.GoIn,
-                            SideId = __instance.GetSideId(side),
-                            SlotId = placeId,
-                            Fast = fast
-                        }
-                    };
+                        HasInteraction = true,
+                        InteractionType = EInteractionType.GoIn,
+                        SideId = __instance.GetSideId(side),
+                        SlotId = placeId,
+                        Fast = fast
+                    }
+                };
 
-                    Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
-                }
+                Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
             }
-
-            return true;
         }
 
-        private static async Task ObservedGoIn(BTRView view, ObservedPlayer observedPlayer, BTRSide side, byte placeId, bool fast)
+        return true;
+    }
+
+    private static async Task ObservedGoIn(BTRView view, ObservedPlayer observedPlayer, BTRSide side, byte placeId, bool fast)
+    {
+        try
         {
-            try
+            CancellationToken cancellationToken = view.method_12(observedPlayer);
+            observedPlayer.MovementContext.IsAxesIgnored = true;
+            observedPlayer.BtrState = EPlayerBtrState.Approach;
+            if (!fast)
             {
-                CancellationToken cancellationToken = view.method_12(observedPlayer);
-                observedPlayer.MovementContext.IsAxesIgnored = true;
-                observedPlayer.BtrState = EPlayerBtrState.Approach;
-                if (!fast)
+                ValueTuple<Vector3, Vector3> valueTuple = side.GoInPoints();
+                await side.ProcessApproach(observedPlayer, valueTuple.Item1, valueTuple.Item2 + Vector3.up * 1.4f);
+                if (cancellationToken.IsCancellationRequested)
                 {
-                    ValueTuple<Vector3, Vector3> valueTuple = side.GoInPoints();
-                    await side.ProcessApproach(observedPlayer, valueTuple.Item1, valueTuple.Item2 + Vector3.up * 1.4f);
-                    if (cancellationToken.IsCancellationRequested)
-                    {
-                        return;
-                    }
-                }
-                view.method_18(observedPlayer);
-                observedPlayer.CharacterController.isEnabled = false;
-                observedPlayer.BtrState = EPlayerBtrState.GoIn;
-                side.AddPassenger(observedPlayer, placeId);
-                BtrSoundController soundController = Traverse.Create(view).Field<BtrSoundController>("_soundController").Value;
-                if (soundController != null)
-                {
-                    soundController.UpdateBtrAudioRoom(EnvironmentType.Indoor, observedPlayer);
-                }
-                await view.method_15(observedPlayer.MovementContext.PlayerAnimator, fast, true, cancellationToken);
-                if (!cancellationToken.IsCancellationRequested)
-                {
-                    if (view.method_20() == 1)
-                    {
-                        GlobalEventHandlerClass.CreateEvent<GClass3409>().Invoke(observedPlayer.Side);
-                    }
-                    observedPlayer.BtrState = EPlayerBtrState.Inside;
+                    return;
                 }
             }
-            catch (Exception ex)
+            view.method_18(observedPlayer);
+            observedPlayer.CharacterController.isEnabled = false;
+            observedPlayer.BtrState = EPlayerBtrState.GoIn;
+            side.AddPassenger(observedPlayer, placeId);
+            BtrSoundController soundController = Traverse.Create(view).Field<BtrSoundController>("_soundController").Value;
+            if (soundController != null)
             {
-                FikaPlugin.Instance.FikaLogger.LogError("BTRView_GoIn_Patch: " + ex.Message);
+                soundController.UpdateBtrAudioRoom(EnvironmentType.Indoor, observedPlayer);
             }
+            await view.method_15(observedPlayer.MovementContext.PlayerAnimator, fast, true, cancellationToken);
+            if (!cancellationToken.IsCancellationRequested)
+            {
+                if (view.method_20() == 1)
+                {
+                    GlobalEventHandlerClass.CreateEvent<GClass3409>().Invoke(observedPlayer.Side);
+                }
+                observedPlayer.BtrState = EPlayerBtrState.Inside;
+            }
+        }
+        catch (Exception ex)
+        {
+            FikaPlugin.Instance.FikaLogger.LogError("BTRView_GoIn_Patch: " + ex.Message);
         }
     }
 }

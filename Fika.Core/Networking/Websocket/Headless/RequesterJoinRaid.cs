@@ -1,8 +1,7 @@
-﻿namespace Fika.Core.Networking.Websocket.Headless
+﻿namespace Fika.Core.Networking.Websocket.Headless;
+
+public class RequesterJoinRaid
 {
-    public class RequesterJoinRaid
-    {
-        public EFikaHeadlessWSMessageType Type;
-        public string MatchId;
-    }
+    public EFikaHeadlessWSMessageType Type;
+    public string MatchId;
 }

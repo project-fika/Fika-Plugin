@@ -1,11 +1,10 @@
 ﻿using System.Runtime.Serialization;
 
-namespace Fika.Core.Networking.Http
+namespace Fika.Core.Networking.Http;
+
+[DataContract]
+public struct SetSettingsResponse
 {
-    [DataContract]
-    public struct SetSettingsResponse
-    {
-        [DataMember(Name = "success")]
-        public bool Success;
-    }
+    [DataMember(Name = "success")]
+    public bool Success;
 }

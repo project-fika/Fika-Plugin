@@ -5,64 +5,63 @@ using Fika.Core.Main.Players;
 using Fika.Core.Networking.Pooling;
 using LiteNetLib.Utils;
 
-namespace Fika.Core.Networking.Packets.Player
+namespace Fika.Core.Networking.Packets.Player;
+
+public class ContainerInteractionPacket : IPoolSubPacket
 {
-    public class ContainerInteractionPacket : IPoolSubPacket
+    private ContainerInteractionPacket()
     {
-        private ContainerInteractionPacket()
+
+    }
+
+    public static ContainerInteractionPacket CreateInstance()
+    {
+        return new();
+    }
+
+    public static ContainerInteractionPacket FromValue(string interactiveId, EInteractionType interactionType)
+    {
+        ContainerInteractionPacket packet = CommonSubPacketPoolManager.Instance.GetPacket<ContainerInteractionPacket>(ECommonSubPacketType.ContainerInteraction);
+        packet.InteractiveId = interactiveId;
+        packet.InteractionType = interactionType;
+        return packet;
+    }
+
+    public string InteractiveId;
+    public EInteractionType InteractionType;
+
+    public void Execute(FikaPlayer player)
+    {
+        WorldInteractiveObject lootableContainer = Singleton<GameWorld>.Instance.FindDoor(InteractiveId);
+        if (lootableContainer != null)
         {
-
-        }
-
-        public static ContainerInteractionPacket CreateInstance()
-        {
-            return new();
-        }
-
-        public static ContainerInteractionPacket FromValue(string interactiveId, EInteractionType interactionType)
-        {
-            ContainerInteractionPacket packet = CommonSubPacketPoolManager.Instance.GetPacket<ContainerInteractionPacket>(ECommonSubPacketType.ContainerInteraction);
-            packet.InteractiveId = interactiveId;
-            packet.InteractionType = interactionType;
-            return packet;
-        }
-
-        public string InteractiveId;
-        public EInteractionType InteractionType;
-
-        public void Execute(FikaPlayer player)
-        {
-            WorldInteractiveObject lootableContainer = Singleton<GameWorld>.Instance.FindDoor(InteractiveId);
-            if (lootableContainer != null)
+            if (lootableContainer.isActiveAndEnabled)
             {
-                if (lootableContainer.isActiveAndEnabled)
-                {
-                    InteractionResult result = new(InteractionType);
-                    lootableContainer.Interact(result);
-                }
-            }
-            else
-            {
-                FikaPlugin.Instance.FikaLogger.LogError("ContainerInteractionPacket: LootableContainer was null!");
+                InteractionResult result = new(InteractionType);
+                lootableContainer.Interact(result);
             }
         }
-
-        public void Serialize(NetDataWriter writer)
+        else
         {
-            writer.Put(InteractiveId);
-            writer.PutEnum(InteractionType);
+            FikaPlugin.Instance.FikaLogger.LogError("ContainerInteractionPacket: LootableContainer was null!");
         }
+    }
 
-        public void Deserialize(NetDataReader reader)
-        {
-            InteractiveId = reader.GetString();
-            InteractionType = reader.GetEnum<EInteractionType>();
-        }
+    public void Serialize(NetDataWriter writer)
+    {
+        writer.Put(InteractiveId);
+        writer.PutEnum(InteractionType);
+    }
 
-        public void Dispose()
-        {
-            InteractiveId = null;
-            InteractionType = default;
-        }
+    public void Deserialize(NetDataReader reader)
+    {
+        InteractiveId = reader.GetString();
+        InteractionType = reader.GetEnum<EInteractionType>();
+    }
+
+    public void Dispose()
+    {
+        InteractiveId = null;
+        InteractionType = default;
     }
 }

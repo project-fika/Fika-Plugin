@@ -6,115 +6,114 @@ using Fika.Core.Networking.Pooling;
 using LiteNetLib.Utils;
 using System;
 
-namespace Fika.Core.Networking.Packets.FirearmController
+namespace Fika.Core.Networking.Packets.FirearmController;
+
+public class ReloadMagPacket : IPoolSubPacket
 {
-    public class ReloadMagPacket : IPoolSubPacket
+    private ReloadMagPacket()
     {
-        private ReloadMagPacket()
+
+    }
+
+    public static ReloadMagPacket FromValue(MongoID magId, byte[] locationDescription, bool reload)
+    {
+        ReloadMagPacket packet = FirearmSubPacketPoolManager.Instance.GetPacket<ReloadMagPacket>(EFirearmSubPacketType.ReloadMag);
+        packet.MagId = magId;
+        packet.LocationDescription = locationDescription;
+        packet.Reload = reload;
+        return packet;
+    }
+
+    public static ReloadMagPacket CreateInstance()
+    {
+        return new();
+    }
+
+    public MongoID MagId;
+    public byte[] LocationDescription;
+    public bool Reload;
+
+    public void Execute(FikaPlayer player)
+    {
+        if (player.HandsController is ObservedFirearmController controller)
         {
-
-        }
-
-        public static ReloadMagPacket FromValue(MongoID magId, byte[] locationDescription, bool reload)
-        {
-            ReloadMagPacket packet = FirearmSubPacketPoolManager.Instance.GetPacket<ReloadMagPacket>(EFirearmSubPacketType.ReloadMag);
-            packet.MagId = magId;
-            packet.LocationDescription = locationDescription;
-            packet.Reload = reload;
-            return packet;
-        }
-
-        public static ReloadMagPacket CreateInstance()
-        {
-            return new();
-        }
-
-        public MongoID MagId;
-        public byte[] LocationDescription;
-        public bool Reload;
-
-        public void Execute(FikaPlayer player)
-        {
-            if (player.HandsController is ObservedFirearmController controller)
+            MagazineItemClass magazine = null;
+            try
             {
-                MagazineItemClass magazine = null;
-                try
+                GStruct461<Item> result = player.FindItemById(MagId);
+                if (!result.Succeeded)
                 {
-                    GStruct461<Item> result = player.FindItemById(MagId);
-                    if (!result.Succeeded)
-                    {
-                        FikaPlugin.Instance.FikaLogger.LogError(result.Error);
-                        return;
-                    }
-                    if (result.Value is MagazineItemClass magazineClass)
-                    {
-                        magazine = magazineClass;
-                    }
-                    else
-                    {
-                        FikaPlugin.Instance.FikaLogger.LogError($"ReloadMagPacket: Item was not MagazineClass, it was {result.Value.GetType()}");
-                    }
+                    FikaPlugin.Instance.FikaLogger.LogError(result.Error);
+                    return;
                 }
-                catch (Exception ex)
+                if (result.Value is MagazineItemClass magazineClass)
                 {
-                    FikaPlugin.Instance.FikaLogger.LogError(ex);
-                    FikaPlugin.Instance.FikaLogger.LogError($"ReloadMagPacket: There is no item {MagId} in profile {player.ProfileId}");
-                    throw;
-                }
-                ItemAddress gridItemAddress = null;
-                if (LocationDescription != null)
-                {
-                    try
-                    {
-                        using GClass1278 eftReader = PacketToEFTReaderAbstractClass.Get(LocationDescription);
-                        if (LocationDescription.Length != 0)
-                        {
-                            GClass1785 descriptor = eftReader.ReadPolymorph<GClass1785>();
-                            gridItemAddress = player.InventoryController.ToItemAddress(descriptor);
-                        }
-                    }
-                    catch (GException4 exception2)
-                    {
-                        FikaPlugin.Instance.FikaLogger.LogError(exception2);
-                    }
-                }
-                if (magazine != null)
-                {
-                    controller.FastForwardCurrentState();
-                    controller.ReloadMag(magazine, gridItemAddress, null);
+                    magazine = magazineClass;
                 }
                 else
                 {
-                    FikaPlugin.Instance.FikaLogger.LogError($"ReloadMagPacket: final variables were null! Mag: {magazine}, Address: {gridItemAddress}");
+                    FikaPlugin.Instance.FikaLogger.LogError($"ReloadMagPacket: Item was not MagazineClass, it was {result.Value.GetType()}");
                 }
             }
-        }
-
-        public void Serialize(NetDataWriter writer)
-        {
-            writer.Put(Reload);
-            if (Reload)
+            catch (Exception ex)
             {
-                writer.PutMongoID(MagId);
-                writer.PutByteArray(LocationDescription);
+                FikaPlugin.Instance.FikaLogger.LogError(ex);
+                FikaPlugin.Instance.FikaLogger.LogError($"ReloadMagPacket: There is no item {MagId} in profile {player.ProfileId}");
+                throw;
+            }
+            ItemAddress gridItemAddress = null;
+            if (LocationDescription != null)
+            {
+                try
+                {
+                    using GClass1278 eftReader = PacketToEFTReaderAbstractClass.Get(LocationDescription);
+                    if (LocationDescription.Length != 0)
+                    {
+                        GClass1785 descriptor = eftReader.ReadPolymorph<GClass1785>();
+                        gridItemAddress = player.InventoryController.ToItemAddress(descriptor);
+                    }
+                }
+                catch (GException4 exception2)
+                {
+                    FikaPlugin.Instance.FikaLogger.LogError(exception2);
+                }
+            }
+            if (magazine != null)
+            {
+                controller.FastForwardCurrentState();
+                controller.ReloadMag(magazine, gridItemAddress, null);
+            }
+            else
+            {
+                FikaPlugin.Instance.FikaLogger.LogError($"ReloadMagPacket: final variables were null! Mag: {magazine}, Address: {gridItemAddress}");
             }
         }
+    }
 
-        public void Deserialize(NetDataReader reader)
+    public void Serialize(NetDataWriter writer)
+    {
+        writer.Put(Reload);
+        if (Reload)
         {
-            Reload = reader.GetBool();
-            if (Reload)
-            {
-                MagId = reader.GetMongoID();
-                LocationDescription = reader.GetByteArray();
-            }
+            writer.PutMongoID(MagId);
+            writer.PutByteArray(LocationDescription);
         }
+    }
 
-        public void Dispose()
+    public void Deserialize(NetDataReader reader)
+    {
+        Reload = reader.GetBool();
+        if (Reload)
         {
-            MagId = default;
-            LocationDescription = null;
-            Reload = false;
+            MagId = reader.GetMongoID();
+            LocationDescription = reader.GetByteArray();
         }
+    }
+
+    public void Dispose()
+    {
+        MagId = default;
+        LocationDescription = null;
+        Reload = false;
     }
 }

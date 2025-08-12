@@ -6,40 +6,39 @@ using Fika.Core.Main.Utils;
 using Fika.Core.Patching;
 using System.Reflection;
 
-namespace Fika.Core.Main.Patches.PlayerPatches
+namespace Fika.Core.Main.Patches.PlayerPatches;
+
+public class BodyPartCollider_SetUpPlayer_Patch : FikaPatch
 {
-    public class BodyPartCollider_SetUpPlayer_Patch : FikaPatch
+    protected override MethodBase GetTargetMethod()
     {
-        protected override MethodBase GetTargetMethod()
-        {
-            return typeof(BodyPartCollider).GetMethod(nameof(BodyPartCollider.SetUpPlayer));
-        }
+        return typeof(BodyPartCollider).GetMethod(nameof(BodyPartCollider.SetUpPlayer));
+    }
 
-        [PatchPrefix]
-        public static bool Prefix(BodyPartCollider __instance, IPlayer iPlayer)
+    [PatchPrefix]
+    public static bool Prefix(BodyPartCollider __instance, IPlayer iPlayer)
+    {
+        if (iPlayer != null)
         {
-            if (iPlayer != null)
+            if (iPlayer is FikaBot fikaBot)
             {
-                if (iPlayer is FikaBot fikaBot)
-                {
-                    __instance.InitColliderSettings();
-                    __instance.playerBridge = new BotPlayerBridge(fikaBot);
-                    return false;
-                }
-
-                if (iPlayer is ObservedPlayer observedPlayer)
-                {
-                    __instance.InitColliderSettings();
-                    if (FikaBackendUtils.IsServer)
-                    {
-                        __instance.playerBridge = new ObservedHostBridge(observedPlayer);
-                        return false;
-                    }
-                    __instance.playerBridge = new ObservedClientBridge(observedPlayer);
-                    return false;
-                }
+                __instance.InitColliderSettings();
+                __instance.playerBridge = new BotPlayerBridge(fikaBot);
+                return false;
             }
-            return true;
+
+            if (iPlayer is ObservedPlayer observedPlayer)
+            {
+                __instance.InitColliderSettings();
+                if (FikaBackendUtils.IsServer)
+                {
+                    __instance.playerBridge = new ObservedHostBridge(observedPlayer);
+                    return false;
+                }
+                __instance.playerBridge = new ObservedClientBridge(observedPlayer);
+                return false;
+            }
         }
+        return true;
     }
 }

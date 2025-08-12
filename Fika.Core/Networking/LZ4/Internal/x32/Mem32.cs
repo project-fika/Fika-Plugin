@@ -7,15 +7,15 @@
 
 using System.Runtime.CompilerServices;
 
-namespace K4os.Compression.LZ4.Internal
-{
-    /// <summary>Unsafe memory operations.</summary>
+namespace K4os.Compression.LZ4.Internal;
+
+/// <summary>Unsafe memory operations.</summary>
 #if BIT32
-    public unsafe class Mem32 : Mem
+public unsafe class Mem32 : Mem
 #else
 	public unsafe class Mem64: Mem
 #endif
-    {
+{
 #if !BIT32
 		
 		/// <summary>Reads exactly 2 bytes from given address.</summary>
@@ -86,17 +86,17 @@ namespace K4os.Compression.LZ4.Internal
 
 #if BIT32
 
-        /// <summary>Reads 4 bytes from given address.</summary>
-        /// <param name="p">Address.</param>
-        /// <returns>4 bytes at given address.</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static uint PeekW(void* p) => Peek4(p);
+    /// <summary>Reads 4 bytes from given address.</summary>
+    /// <param name="p">Address.</param>
+    /// <returns>4 bytes at given address.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static uint PeekW(void* p) => Peek4(p);
 
-        /// <summary>Writes 4 or 8 bytes to given address.</summary>
-        /// <param name="p">Address.</param>
-        /// <param name="v">Value.</param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void PokeW(void* p, uint v) => Poke4(p, v);
+    /// <summary>Writes 4 or 8 bytes to given address.</summary>
+    /// <param name="p">Address.</param>
+    /// <param name="v">Value.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void PokeW(void* p, uint v) => Poke4(p, v);
 
 #else
 
@@ -114,68 +114,67 @@ namespace K4os.Compression.LZ4.Internal
 
 #endif
 
-        /// <summary>Copies exactly 16 bytes from source to target.</summary>
-        /// <param name="target">Target address.</param>
-        /// <param name="source">Source address.</param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Copy16(byte* target, byte* source)
-        {
-            Copy8(target + 0, source + 0);
-            Copy8(target + 8, source + 8);
-        }
+    /// <summary>Copies exactly 16 bytes from source to target.</summary>
+    /// <param name="target">Target address.</param>
+    /// <param name="source">Source address.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void Copy16(byte* target, byte* source)
+    {
+        Copy8(target + 0, source + 0);
+        Copy8(target + 8, source + 8);
+    }
 
-        /// <summary>Copies exactly 18 bytes from source to target.</summary>
-        /// <param name="target">Target address.</param>
-        /// <param name="source">Source address.</param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Copy18(byte* target, byte* source)
-        {
-            Copy8(target + 0, source + 0);
-            Copy8(target + 8, source + 8);
-            Copy2(target + 16, source + 16);
-        }
+    /// <summary>Copies exactly 18 bytes from source to target.</summary>
+    /// <param name="target">Target address.</param>
+    /// <param name="source">Source address.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void Copy18(byte* target, byte* source)
+    {
+        Copy8(target + 0, source + 0);
+        Copy8(target + 8, source + 8);
+        Copy2(target + 16, source + 16);
+    }
 
-        /// <summary>
-        /// Copies memory block for <paramref name="source"/> to <paramref name="target"/>
-        /// up to (around) <paramref name="limit"/>.
-        /// It does not handle overlapping blocks and may copy up to 8 bytes more than expected.
-        /// </summary>
-        /// <param name="target">The target block address.</param>
-        /// <param name="source">The source block address.</param>
-        /// <param name="limit">The limit (in target block).</param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void WildCopy8(byte* target, byte* source, void* limit)
+    /// <summary>
+    /// Copies memory block for <paramref name="source"/> to <paramref name="target"/>
+    /// up to (around) <paramref name="limit"/>.
+    /// It does not handle overlapping blocks and may copy up to 8 bytes more than expected.
+    /// </summary>
+    /// <param name="target">The target block address.</param>
+    /// <param name="source">The source block address.</param>
+    /// <param name="limit">The limit (in target block).</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void WildCopy8(byte* target, byte* source, void* limit)
+    {
+        do
         {
-            do
-            {
-                Copy8(target, source);
-                target += sizeof(ulong);
-                source += sizeof(ulong);
-            }
-            while (target < limit);
+            Copy8(target, source);
+            target += sizeof(ulong);
+            source += sizeof(ulong);
         }
+        while (target < limit);
+    }
 
-        /// <summary>
-        /// Copies memory block for <paramref name="source"/> to <paramref name="target"/>
-        /// up to (around) <paramref name="limit"/>.
-        /// It does not handle overlapping blocks and may copy up to 32 bytes more than expected.
-        /// This version copies two times 16 bytes (instead of one time 32 bytes)
-        /// because it must be compatible with offsets >= 16.
-        /// </summary>
-        /// <param name="target">The target block address.</param>
-        /// <param name="source">The source block address.</param>
-        /// <param name="limit">The limit (in target block).</param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void WildCopy32(byte* target, byte* source, void* limit)
+    /// <summary>
+    /// Copies memory block for <paramref name="source"/> to <paramref name="target"/>
+    /// up to (around) <paramref name="limit"/>.
+    /// It does not handle overlapping blocks and may copy up to 32 bytes more than expected.
+    /// This version copies two times 16 bytes (instead of one time 32 bytes)
+    /// because it must be compatible with offsets >= 16.
+    /// </summary>
+    /// <param name="target">The target block address.</param>
+    /// <param name="source">The source block address.</param>
+    /// <param name="limit">The limit (in target block).</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void WildCopy32(byte* target, byte* source, void* limit)
+    {
+        do
         {
-            do
-            {
-                Copy16(target + 0, source + 0);
-                Copy16(target + 16, source + 16);
-                target += 32;
-                source += 32;
-            }
-            while (target < limit);
+            Copy16(target + 0, source + 0);
+            Copy16(target + 16, source + 16);
+            target += 32;
+            source += 32;
         }
+        while (target < limit);
     }
 }

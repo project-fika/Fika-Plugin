@@ -1,162 +1,159 @@
-﻿using Comfort.Common;
-using EFT;
+﻿using EFT;
 using EFT.Ballistics;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Pooling;
 using LiteNetLib.Utils;
-using static UnityEngine.Tilemaps.Tile;
 
-namespace Fika.Core.Networking.Packets.Player
+namespace Fika.Core.Networking.Packets.Player;
+
+public class DamagePacket : IPoolSubPacket
 {
-    public class DamagePacket : IPoolSubPacket
+    private DamagePacket() { }
+
+    public static DamagePacket CreateInstance()
     {
-        private DamagePacket() { }
+        return new();
+    }
 
-        public static DamagePacket CreateInstance()
+    public int NetId;
+    public float Damage;
+    public float Absorbed;
+    public float PenetrationPower;
+    public float ArmorDamage;
+
+    public Vector3 Direction;
+    public Vector3 Point;
+    public Vector3 HitNormal;
+
+    public EDamageType DamageType;
+    public EBodyPart BodyPartType;
+    public EBodyPartColliderType ColliderType;
+    public EArmorPlateCollider ArmorPlateCollider;
+    public MaterialType Material;
+
+    public MongoID? BlockedBy;
+    public MongoID? DeflectedBy;
+    public MongoID? ProfileId;
+    public MongoID? WeaponId;
+
+    public string SourceId;
+
+    public static DamagePacket FromValue(int netId, in DamageInfoStruct damageInfo, EBodyPart bodyPartType,
+        EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider = default, MaterialType materialType = default, float absorbed = default)
+    {
+        DamagePacket packet = CommonSubPacketPoolManager.Instance.GetPacket<DamagePacket>(ECommonSubPacketType.Damage);
+
+        packet.NetId = netId;
+        packet.Damage = damageInfo.Damage;
+        packet.Absorbed = absorbed;
+        packet.PenetrationPower = damageInfo.PenetrationPower;
+        packet.ArmorDamage = damageInfo.ArmorDamage;
+
+        packet.Direction = damageInfo.Direction;
+        packet.Point = damageInfo.HitPoint;
+        packet.HitNormal = damageInfo.HitNormal;
+
+        packet.DamageType = damageInfo.DamageType;
+        packet.BodyPartType = bodyPartType;
+        packet.ColliderType = colliderType;
+        packet.ArmorPlateCollider = armorPlateCollider;
+        packet.Material = materialType;
+
+        packet.BlockedBy = damageInfo.BlockedBy;
+        packet.DeflectedBy = damageInfo.DeflectedBy;
+        packet.ProfileId = damageInfo.Player?.iPlayer.ProfileId;
+        packet.WeaponId = damageInfo.Weapon?.Id;
+
+        packet.SourceId = damageInfo.SourceId;
+
+        return packet;
+    }
+
+    public void Execute(FikaPlayer player = null)
+    {
+        if (player.IsAI || player.IsYourPlayer)
         {
-            return new();
+            player.HandleDamagePacket(this);
         }
+    }
 
-        public int NetId;
-        public float Damage;
-        public float Absorbed;
-        public float PenetrationPower;
-        public float ArmorDamage;
+    public void Deserialize(NetDataReader reader)
+    {
+        NetId = reader.GetInt();
 
-        public Vector3 Direction;
-        public Vector3 Point;
-        public Vector3 HitNormal;
+        Damage = reader.GetFloat();
+        Absorbed = reader.GetFloat();
+        PenetrationPower = reader.GetFloat();
+        ArmorDamage = reader.GetFloat();
 
-        public EDamageType DamageType;
-        public EBodyPart BodyPartType;
-        public EBodyPartColliderType ColliderType;
-        public EArmorPlateCollider ArmorPlateCollider;
-        public MaterialType Material;
+        Direction = reader.GetUnmanaged<Vector3>();
+        Point = reader.GetUnmanaged<Vector3>();
+        HitNormal = reader.GetUnmanaged<Vector3>();
 
-        public MongoID? BlockedBy;
-        public MongoID? DeflectedBy;
-        public MongoID? ProfileId;
-        public MongoID? WeaponId;
+        DamageType = reader.GetEnum<EDamageType>();
+        BodyPartType = reader.GetEnum<EBodyPart>();
+        ColliderType = reader.GetEnum<EBodyPartColliderType>();
+        ArmorPlateCollider = reader.GetEnum<EArmorPlateCollider>();
+        Material = reader.GetEnum<MaterialType>();
 
-        public string SourceId;
+        BlockedBy = reader.GetNullableMongoID();
+        DeflectedBy = reader.GetNullableMongoID();
+        ProfileId = reader.GetNullableMongoID();
+        WeaponId = reader.GetNullableMongoID();
 
-        public static DamagePacket FromValue(int netId, in DamageInfoStruct damageInfo, EBodyPart bodyPartType,
-            EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider = default, MaterialType materialType = default, float absorbed = default)
-        {
-            DamagePacket packet = CommonSubPacketPoolManager.Instance.GetPacket<DamagePacket>(ECommonSubPacketType.Damage);
+        SourceId = reader.GetString();
+    }
 
-            packet.NetId = netId;
-            packet.Damage = damageInfo.Damage;
-            packet.Absorbed = absorbed;
-            packet.PenetrationPower = damageInfo.PenetrationPower;
-            packet.ArmorDamage = damageInfo.ArmorDamage;
+    public void Serialize(NetDataWriter writer)
+    {
+        writer.Put(NetId);
 
-            packet.Direction = damageInfo.Direction;
-            packet.Point = damageInfo.HitPoint;
-            packet.HitNormal = damageInfo.HitNormal;
+        writer.Put(Damage);
+        writer.Put(Absorbed);
+        writer.Put(PenetrationPower);
+        writer.Put(ArmorDamage);
 
-            packet.DamageType = damageInfo.DamageType;
-            packet.BodyPartType = bodyPartType;
-            packet.ColliderType = colliderType;
-            packet.ArmorPlateCollider = armorPlateCollider;
-            packet.Material = materialType;
+        writer.PutUnmanaged(Direction);
+        writer.PutUnmanaged(Point);
+        writer.PutUnmanaged(HitNormal);
 
-            packet.BlockedBy = damageInfo.BlockedBy;
-            packet.DeflectedBy = damageInfo.DeflectedBy;
-            packet.ProfileId = damageInfo.Player?.iPlayer.ProfileId;
-            packet.WeaponId = damageInfo.Weapon?.Id;
+        writer.PutEnum(DamageType);
+        writer.PutEnum(BodyPartType);
+        writer.PutEnum(ColliderType);
+        writer.PutEnum(ArmorPlateCollider);
+        writer.PutEnum(Material);
 
-            packet.SourceId = damageInfo.SourceId;
+        writer.PutNullableMongoID(BlockedBy);
+        writer.PutNullableMongoID(DeflectedBy);
+        writer.PutNullableMongoID(ProfileId);
+        writer.PutNullableMongoID(WeaponId);
 
-            return packet;
-        }
+        writer.Put(SourceId);
+    }
 
-        public void Execute(FikaPlayer player = null)
-        {
-            if (player.IsAI || player.IsYourPlayer)
-            {
-                player.HandleDamagePacket(this); 
-            }
-        }
+    public void Dispose()
+    {
+        NetId = default;
+        Damage = default;
+        Absorbed = default;
+        PenetrationPower = default;
+        ArmorDamage = default;
 
-        public void Deserialize(NetDataReader reader)
-        {
-            NetId = reader.GetInt();
+        Direction = default;
+        Point = default;
+        HitNormal = default;
 
-            Damage = reader.GetFloat();
-            Absorbed = reader.GetFloat();
-            PenetrationPower = reader.GetFloat();
-            ArmorDamage = reader.GetFloat();
+        DamageType = default;
+        BodyPartType = default;
+        ColliderType = default;
+        ArmorPlateCollider = default;
+        Material = default;
 
-            Direction = reader.GetUnmanaged<Vector3>();
-            Point = reader.GetUnmanaged<Vector3>();
-            HitNormal = reader.GetUnmanaged<Vector3>();
+        BlockedBy = null;
+        DeflectedBy = null;
+        ProfileId = null;
+        WeaponId = null;
 
-            DamageType = reader.GetEnum<EDamageType>();
-            BodyPartType = reader.GetEnum<EBodyPart>();
-            ColliderType = reader.GetEnum<EBodyPartColliderType>();
-            ArmorPlateCollider = reader.GetEnum<EArmorPlateCollider>();
-            Material = reader.GetEnum<MaterialType>();
-
-            BlockedBy = reader.GetNullableMongoID();
-            DeflectedBy = reader.GetNullableMongoID();
-            ProfileId = reader.GetNullableMongoID();
-            WeaponId = reader.GetNullableMongoID();
-
-            SourceId = reader.GetString();
-        }
-
-        public void Serialize(NetDataWriter writer)
-        {
-            writer.Put(NetId);
-
-            writer.Put(Damage);
-            writer.Put(Absorbed);
-            writer.Put(PenetrationPower);
-            writer.Put(ArmorDamage);
-
-            writer.PutUnmanaged(Direction);
-            writer.PutUnmanaged(Point);
-            writer.PutUnmanaged(HitNormal);
-
-            writer.PutEnum(DamageType);
-            writer.PutEnum(BodyPartType);
-            writer.PutEnum(ColliderType);
-            writer.PutEnum(ArmorPlateCollider);
-            writer.PutEnum(Material);
-
-            writer.PutNullableMongoID(BlockedBy);
-            writer.PutNullableMongoID(DeflectedBy);
-            writer.PutNullableMongoID(ProfileId);
-            writer.PutNullableMongoID(WeaponId);
-
-            writer.Put(SourceId);
-        }
-
-        public void Dispose()
-        {
-            NetId = default;
-            Damage = default;
-            Absorbed = default;
-            PenetrationPower = default;
-            ArmorDamage = default;
-
-            Direction = default;
-            Point = default;
-            HitNormal = default;
-
-            DamageType = default;
-            BodyPartType = default;
-            ColliderType = default;
-            ArmorPlateCollider = default;
-            Material = default;
-
-            BlockedBy = null;
-            DeflectedBy = null;
-            ProfileId = null;
-            WeaponId = null;
-
-            SourceId = null;
-        }
+        SourceId = null;
     }
 }

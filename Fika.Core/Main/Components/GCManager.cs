@@ -1,28 +1,27 @@
 ﻿using UnityEngine.Scripting;
 
-namespace Fika.Core.Main.Components
+namespace Fika.Core.Main.Components;
+
+public class GCManager : MonoBehaviour
 {
-    public class GCManager : MonoBehaviour
+    private float _counter;
+    private float _threshold;
+
+    protected void Awake()
     {
-        private float _counter;
-        private float _threshold;
+        _counter = 0f;
+        _threshold = 20f;
+    }
 
-        protected void Awake()
+    protected void Update()
+    {
+        _counter += Time.unscaledDeltaTime;
+        if (_counter > _threshold)
         {
-            _counter = 0f;
-            _threshold = 20f;
-        }
-
-        protected void Update()
-        {
-            _counter += Time.unscaledDeltaTime;
-            if (_counter > _threshold)
-            {
-                _counter -= _threshold;
-                GarbageCollector.GCMode = GarbageCollector.Mode.Enabled;
-                GarbageCollector.CollectIncremental(1000000);
-                GarbageCollector.GCMode = GarbageCollector.Mode.Disabled;
-            }
+            _counter -= _threshold;
+            GarbageCollector.GCMode = GarbageCollector.Mode.Enabled;
+            GarbageCollector.CollectIncremental(1000000);
+            GarbageCollector.GCMode = GarbageCollector.Mode.Disabled;
         }
     }
 }
