@@ -13,7 +13,7 @@ public struct OperationCallbackPacket(int netId, uint callbackId, EOperationStat
     {
         NetId = reader.GetInt();
         CallbackId = reader.GetUInt();
-        OperationStatus = (EOperationStatus)reader.GetInt();
+        OperationStatus = reader.GetEnum<EOperationStatus>();
         if (OperationStatus == EOperationStatus.Failed)
         {
             Error = reader.GetString();
@@ -24,7 +24,7 @@ public struct OperationCallbackPacket(int netId, uint callbackId, EOperationStat
     {
         writer.Put(NetId);
         writer.Put(CallbackId);
-        writer.Put((int)OperationStatus);
+        writer.PutEnum(OperationStatus);
         if (OperationStatus == EOperationStatus.Failed)
         {
             writer.Put(Error);
