@@ -15,9 +15,9 @@ public class GenericPacket : INetReusable
     public EGenericSubPacketType Type;
     public IPoolSubPacket SubPacket;
 
-    public void Execute(FikaPlayer player = null)
+    public void Execute()
     {
-        SubPacket.Execute(player);
+        SubPacket.Execute();
     }
 
     public void Deserialize(NetDataReader reader)
