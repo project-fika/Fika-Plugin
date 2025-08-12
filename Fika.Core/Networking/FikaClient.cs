@@ -391,7 +391,7 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
         }
     }
 
-    public void SendPlayerState(ref PlayerStatePacket2 packet)
+    public void SendPlayerState(ref PlayerStatePacket packet)
     {
         _dataWriter.Reset();
         _dataWriter.Put(true);

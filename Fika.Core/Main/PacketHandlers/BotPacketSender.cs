@@ -15,7 +15,7 @@ public class BotPacketSender : MonoBehaviour, IPacketSender
 
     private FikaPlayer _player;
     private bool _sendPackets;
-    private PlayerStatePacket2 _state;
+    private PlayerStatePacket _state;
     private int _animHash;
     private bool IsMoving
     {

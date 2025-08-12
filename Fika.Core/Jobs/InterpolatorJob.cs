@@ -25,7 +25,7 @@ internal readonly struct InterpolatorJob(float unscaledDeltaTime, double network
         for (int i = 0; i < _amount; i++)
         {
             ArraySegment<byte> buffer = _snapshots[i];
-            PlayerStatePacket2 packet = PlayerStatePacket2.FromBuffer(in buffer);
+            PlayerStatePacket packet = PlayerStatePacket.FromBuffer(in buffer);
             if (netManager.CoopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer player))
             {
                 player.Snapshotter.Insert(ref packet, _networkTime);

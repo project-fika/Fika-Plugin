@@ -19,7 +19,7 @@ internal readonly struct HandlePlayerStates(double networkTime, NativeArray<Arra
     {
         IFikaNetworkManager manager = Singleton<IFikaNetworkManager>.Instance;
         ArraySegment<byte> buffer = _snapshots[index];
-        PlayerStatePacket2 packet = PlayerStatePacket2.FromBuffer(in buffer);
+        PlayerStatePacket packet = PlayerStatePacket.FromBuffer(in buffer);
         if (manager.CoopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer player))
         {
             player.Snapshotter.Insert(ref packet, _networkTime);

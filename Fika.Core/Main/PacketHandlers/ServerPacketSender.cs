@@ -28,7 +28,7 @@ public class ServerPacketSender : MonoBehaviour, IPacketSender
     public IFikaNetworkManager NetworkManager { get; set; }
 
     private FikaPlayer _player;
-    private PlayerStatePacket2 _state;
+    private PlayerStatePacket _state;
     private int _animHash;
     private bool IsMoving
     {

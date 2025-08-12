@@ -45,7 +45,7 @@ public static class SnapshotInterpolation
         return Mathd.Clamp(safezone, 0, 5);
     }
 
-    public static bool InsertIfNotExists(SortedList<double, PlayerStatePacket2> buffer, int bufferLimit, in PlayerStatePacket2 snapshot)
+    public static bool InsertIfNotExists(SortedList<double, PlayerStatePacket> buffer, int bufferLimit, in PlayerStatePacket snapshot)
     {
         if (buffer.Count >= bufferLimit)
         {
@@ -65,7 +65,7 @@ public static class SnapshotInterpolation
         return Mathd.Clamp(localTimeline, lowerBound, upperBound);
     }
 
-    public static void InsertAndAdjust(SortedList<double, PlayerStatePacket2> buffer, int bufferLimit, in PlayerStatePacket2 snapshot,
+    public static void InsertAndAdjust(SortedList<double, PlayerStatePacket> buffer, int bufferLimit, in PlayerStatePacket snapshot,
         ref double localTimeline, ref double localTimescale, float sendInterval, double bufferTime,
         double catchupSpeed, double slowdownSpeed, ref ExponentialMovingAverage driftEma,
         float catchupNegativeThreshold, float catchupPositiveThreshold, ref ExponentialMovingAverage deliveryTimeEma)
@@ -104,15 +104,15 @@ public static class SnapshotInterpolation
         }
     }
 
-    public static void Sample(SortedList<double, PlayerStatePacket2> buffer, double localTimeline, out int from, out int to, out double t)
+    public static void Sample(SortedList<double, PlayerStatePacket> buffer, double localTimeline, out int from, out int to, out double t)
     {
         // this is a wrapper, so we cache it
-        IList<PlayerStatePacket2> values = buffer.Values;
+        IList<PlayerStatePacket> values = buffer.Values;
 
         for (int i = 0; i < buffer.Count - 1; ++i)
         {
-            PlayerStatePacket2 first = values[i];
-            PlayerStatePacket2 second = values[i + 1];
+            PlayerStatePacket first = values[i];
+            PlayerStatePacket second = values[i + 1];
             if (localTimeline >= first.RemoteTime && localTimeline <= second.RemoteTime)
             {
                 from = i;
@@ -139,8 +139,8 @@ public static class SnapshotInterpolation
         localTimeline += deltaTime * localTimescale;
     }
 
-    public static void StepInterpolation(SortedList<double, PlayerStatePacket2> buffer, double localTimeline,
-        out PlayerStatePacket2 fromSnapshot, out PlayerStatePacket2 toSnapshot, out double t)
+    public static void StepInterpolation(SortedList<double, PlayerStatePacket> buffer, double localTimeline,
+        out PlayerStatePacket fromSnapshot, out PlayerStatePacket toSnapshot, out double t)
     {
         Sample(buffer, localTimeline, out int from, out int to, out t);
 
@@ -150,8 +150,8 @@ public static class SnapshotInterpolation
         buffer.RemoveRange(from);
     }
 
-    public static void Step(SortedList<double, PlayerStatePacket2> buffer, double deltaTime, ref double localTimeline,
-        double localTimescale, out PlayerStatePacket2 fromSnapshot, out PlayerStatePacket2 toSnapshot, out double t)
+    public static void Step(SortedList<double, PlayerStatePacket> buffer, double deltaTime, ref double localTimeline,
+        double localTimescale, out PlayerStatePacket fromSnapshot, out PlayerStatePacket toSnapshot, out double t)
     {
         StepTime(deltaTime, ref localTimeline, localTimescale);
         StepInterpolation(buffer, localTimeline, out fromSnapshot, out toSnapshot, out t);

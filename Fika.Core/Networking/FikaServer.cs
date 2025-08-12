@@ -672,7 +672,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         _netServer.SendToAll(_dataWriter.AsReadOnlySpan, deliveryMethod, peerToIgnore);
     }
 
-    public void SendPlayerState(ref PlayerStatePacket2 packet)
+    public void SendPlayerState(ref PlayerStatePacket packet)
     {
         _dataWriter.Reset();
         _dataWriter.PutEnum(EPacketType.PlayerState);
