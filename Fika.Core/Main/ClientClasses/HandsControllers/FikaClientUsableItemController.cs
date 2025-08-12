@@ -1,5 +1,6 @@
 ﻿using EFT.InventoryLogic;
 using Fika.Core.Main.Players;
+using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.Player;
 using static EFT.Player;
 
@@ -19,12 +20,9 @@ public class FikaClientUsableItemController : UsableItemController
     public override void CompassStateHandler(bool isActive)
     {
         base.CompassStateHandler(isActive);
-        UsableItemPacket packet = new(_fikaPlayer.NetId)
-        {
-            HasCompassState = true,
-            CompassState = isActive
-        };
-        _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+        _fikaPlayer.CommonPacket.Type = ECommonSubPacketType.UsableItem;
+        _fikaPlayer.CommonPacket.SubPacket = UsableItemPacket.FromValue(true, isActive, false, false, false);
+        _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _fikaPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
     }
 
     public override bool ExamineWeapon()
@@ -32,11 +30,9 @@ public class FikaClientUsableItemController : UsableItemController
         bool flag = base.ExamineWeapon();
         if (flag)
         {
-            UsableItemPacket packet = new(_fikaPlayer.NetId)
-            {
-                ExamineWeapon = true
-            };
-            _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+            _fikaPlayer.CommonPacket.Type = ECommonSubPacketType.UsableItem;
+            _fikaPlayer.CommonPacket.SubPacket = UsableItemPacket.FromValue(false, false, true, false, false);
+            _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _fikaPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
         }
         return flag;
     }
@@ -47,12 +43,9 @@ public class FikaClientUsableItemController : UsableItemController
         base.SetAim(value);
         if (IsAiming != isAiming)
         {
-            UsableItemPacket packet = new(_fikaPlayer.NetId)
-            {
-                HasAim = value,
-                AimState = isAiming
-            };
-            _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+            _fikaPlayer.CommonPacket.Type = ECommonSubPacketType.UsableItem;
+            _fikaPlayer.CommonPacket.SubPacket = UsableItemPacket.FromValue(false, false, false, true, isAiming);
+            _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _fikaPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
         }
     }
 }

@@ -412,7 +412,6 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         RegisterPacket<ReconnectPacket, NetPeer>(OnReconnectPacketReceived);
         RegisterPacket<BTRInteractionPacket, NetPeer>(OnBTRInteractionPacketReceived);
         RegisterPacket<ResyncInventoryIdPacket, NetPeer>(OnResyncInventoryIdPacketReceived);
-        RegisterPacket<UsableItemPacket, NetPeer>(OnUsableItemPacketReceived);
         RegisterPacket<SyncTransitControllersPacket, NetPeer>(OnSyncTransitControllersPacketReceived);
         RegisterPacket<TransitInteractPacket, NetPeer>(OnTransitInteractPacketReceived);
         RegisterPacket<BotStatePacket, NetPeer>(OnBotStatePacketReceived);

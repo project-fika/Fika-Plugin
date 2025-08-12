@@ -33,7 +33,7 @@ public abstract class BasePacketPoolManager<TEnum, TType>
             _pool = [];
             foreach ((TEnum key, Func<TType> value) in _subPacketFactories)
             {
-                _pool[key] = new PacketPool<TType>(4, value);
+                _pool[key] = new PacketPool<TType>(2, value);
             }
         }
 

@@ -244,14 +244,6 @@ public partial class FikaServer
         _logger.LogError("OnSyncTransitControllersPacketReceived: TransitController was null!");
     }
 
-    private void OnUsableItemPacketReceived(UsableItemPacket packet, NetPeer peer)
-    {
-        if (_coopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer playerToApply))
-        {
-            playerToApply.HandleUsableItemPacket(packet);
-        }
-    }
-
     private void OnBTRInteractionPacketReceived(BTRInteractionPacket packet, NetPeer peer)
     {
         if (_coopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer playerToApply))

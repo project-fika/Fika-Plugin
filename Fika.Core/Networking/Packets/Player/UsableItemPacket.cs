@@ -1,17 +1,41 @@
-﻿namespace Fika.Core.Networking.Packets.Player;
+﻿using Fika.Core.Main.Players;
+using Fika.Core.Networking.Pooling;
 
-public struct UsableItemPacket(int netId) : INetSerializable
+namespace Fika.Core.Networking.Packets.Player;
+
+public class UsableItemPacket : IPoolSubPacket
 {
-    public int NetId = netId;
+    private UsableItemPacket() { }
+
+    public static UsableItemPacket CreateInstance()
+    {
+        return new();
+    }
+
+    public static UsableItemPacket FromValue(bool hasCompassState, bool compassState, bool examineWeapon, bool hasAim, bool aimState)
+    {
+        UsableItemPacket packet = CommonSubPacketPoolManager.Instance.GetPacket<UsableItemPacket>(ECommonSubPacketType.UsableItem);
+        packet.HasCompassState = hasCompassState;
+        packet.CompassState = compassState;
+        packet.ExamineWeapon = examineWeapon;
+        packet.HasAim = hasAim;
+        packet.AimState = aimState;
+        return packet;
+    }
+
     public bool HasCompassState;
     public bool CompassState;
     public bool ExamineWeapon;
     public bool HasAim;
     public bool AimState;
 
+    public void Execute(FikaPlayer player = null)
+    {
+        player.HandleUsableItemPacket(this);
+    }
+
     public void Deserialize(NetDataReader reader)
     {
-        NetId = reader.GetInt();
         HasCompassState = reader.GetBool();
         if (HasCompassState)
         {
@@ -25,9 +49,8 @@ public struct UsableItemPacket(int netId) : INetSerializable
         }
     }
 
-    public readonly void Serialize(NetDataWriter writer)
+    public void Serialize(NetDataWriter writer)
     {
-        writer.Put(NetId);
         writer.Put(HasCompassState);
         if (HasCompassState)
         {
@@ -39,5 +62,14 @@ public struct UsableItemPacket(int netId) : INetSerializable
         {
             writer.Put(AimState);
         }
+    }
+
+    public void Dispose()
+    {
+        HasCompassState = false;
+        CompassState = false;
+        ExamineWeapon = false;
+        HasAim = false;
+        AimState = false;
     }
 }

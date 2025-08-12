@@ -73,5 +73,10 @@ public enum ECommonSubPacketType : byte
     /// <summary>
     /// Syncing health
     /// </summary>
-    HealthSync
+    HealthSync,
+
+    /// <summary>
+    /// Usable item being used
+    /// </summary>
+    UsableItem
 }

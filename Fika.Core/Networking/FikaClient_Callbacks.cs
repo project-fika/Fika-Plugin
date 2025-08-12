@@ -331,14 +331,6 @@ public partial class FikaClient
         _genericPacket.NetId = packet.NetId;
     }
 
-    private void OnUsableItemPacketReceived(UsableItemPacket packet)
-    {
-        if (_coopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer playerToApply))
-        {
-            playerToApply.HandleUsableItemPacket(packet);
-        }
-    }
-
     private void OnResyncInventoryIdPacketReceived(ResyncInventoryIdPacket packet)
     {
         if (_coopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer playerToApply))

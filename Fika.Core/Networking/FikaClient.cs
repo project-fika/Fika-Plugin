@@ -268,7 +268,6 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
         RegisterPacket<FlareSuccessPacket>(OnFlareSuccessPacketReceived);
         RegisterPacket<BufferZonePacket>(OnBufferZonePacketReceived);
         RegisterPacket<ResyncInventoryIdPacket>(OnResyncInventoryIdPacketReceived);
-        RegisterPacket<UsableItemPacket>(OnUsableItemPacketReceived);
         RegisterPacket<NetworkSettingsPacket>(OnNetworkSettingsPacketReceived);
         RegisterPacket<SyncTransitControllersPacket>(OnSyncTransitControllersPacketReceived);
         RegisterPacket<TransitEventPacket>(OnTransitEventPacketReceived);
