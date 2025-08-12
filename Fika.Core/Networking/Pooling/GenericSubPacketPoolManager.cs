@@ -8,18 +8,18 @@ namespace Fika.Core.Networking.Pooling;
 
 internal sealed class GenericSubPacketPoolManager : BasePacketPoolManager<EGenericSubPacketType, IPoolSubPacket>
 {
-    private static readonly Lazy<GenericSubPacketPoolManager> _instance = new(() => new GenericSubPacketPoolManager(), LazyThreadSafetyMode.None);
+    private static readonly GenericSubPacketPoolManager _instance = new();
     public static GenericSubPacketPoolManager Instance
     {
         get
         {
-            return _instance.Value;
+            return _instance;
         }
     }
 
     public static void Release()
     {
-        _instance.Value.ClearPool();
+        _instance.ClearPool();
     }
 
     private GenericSubPacketPoolManager()
