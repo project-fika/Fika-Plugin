@@ -487,7 +487,7 @@ public class MatchMakerUIScript : MonoBehaviour
                 LocaleUtils.UI_ERROR_CONNECTING.Localized(),
                 LocaleUtils.UI_PINGER_START_FAIL.Localized(),
                 ErrorScreen.EButtonType.OkButton, 10f);
-            callback.Invoke(false);
+            callback(false);
             yield break;
         }
 
