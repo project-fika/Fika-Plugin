@@ -3,7 +3,6 @@ using Fika.Core.Networking.Packets.Communication;
 using Fika.Core.Networking.Packets.Player;
 using Fika.Core.Networking.Packets.World;
 using System;
-using System.Collections.Generic;
 using System.Threading;
 
 namespace Fika.Core.Networking.Pooling;
@@ -27,23 +26,23 @@ internal sealed class GenericSubPacketPoolManager : BasePacketPoolManager<EGener
 
     private GenericSubPacketPoolManager()
     {
-        _subPacketFactories = new Dictionary<EGenericSubPacketType, Func<IPoolSubPacket>>()
-        {
-            { EGenericSubPacketType.ClientExtract, ClientExtract.CreateInstance },
-            { EGenericSubPacketType.ClientConnected, ClientConnected.CreateInstance },
-            { EGenericSubPacketType.ClientDisconnected, ClientDisconnected.CreateInstance },
-            { EGenericSubPacketType.ExfilCountdown, ExfilCountdown.CreateInstance },
-            { EGenericSubPacketType.ClearEffects, ClearEffects.CreateInstance },
-            { EGenericSubPacketType.UpdateBackendData, UpdateBackendData.CreateInstance },
-            { EGenericSubPacketType.SecretExfilFound, SecretExfilFound.CreateInstance },
-            { EGenericSubPacketType.BorderZone, BorderZoneEvent.CreateInstance },
-            { EGenericSubPacketType.Mine, MineEvent.CreateInstance },
-            { EGenericSubPacketType.DisarmTripwire, DisarmTripwire.CreateInstance },
-            { EGenericSubPacketType.MuffledState, MuffledState.CreateInstance },
-            { EGenericSubPacketType.SpawnBTR, BtrSpawn.CreateInstance },
-            { EGenericSubPacketType.CharacterSync, CharacterSyncPacket.CreateInstance },
-            { EGenericSubPacketType.InventoryOperation, InventoryPacket.CreateInstance },
-            { EGenericSubPacketType.OperationCallback, OperationCallbackPacket.CreateInstance }
-        };
+        _subPacketFactories =
+        [
+            ClientExtract.CreateInstance,          // EGenericSubPacketType.ClientExtract = 0
+            ClientConnected.CreateInstance,        // EGenericSubPacketType.ClientConnected = 1
+            ClientDisconnected.CreateInstance,     // EGenericSubPacketType.ClientDisconnected = 2
+            ExfilCountdown.CreateInstance,         // EGenericSubPacketType.ExfilCountdown = 3
+            ClearEffects.CreateInstance,            // EGenericSubPacketType.ClearEffects = 4
+            UpdateBackendData.CreateInstance,       // EGenericSubPacketType.UpdateBackendData = 5
+            SecretExfilFound.CreateInstance,        // EGenericSubPacketType.SecretExfilFound = 6
+            BorderZoneEvent.CreateInstance,         // EGenericSubPacketType.BorderZone = 7
+            MineEvent.CreateInstance,                // EGenericSubPacketType.Mine = 8
+            DisarmTripwire.CreateInstance,           // EGenericSubPacketType.DisarmTripwire = 9
+            MuffledState.CreateInstance,              // EGenericSubPacketType.MuffledState = 10
+            BtrSpawn.CreateInstance,                   // EGenericSubPacketType.SpawnBTR = 11
+            CharacterSyncPacket.CreateInstance,        // EGenericSubPacketType.CharacterSync = 12
+            InventoryPacket.CreateInstance,            // EGenericSubPacketType.InventoryOperation = 13
+            OperationCallbackPacket.CreateInstance     // EGenericSubPacketType.OperationCallback = 14
+        ];
     }
 }

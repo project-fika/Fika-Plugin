@@ -25,23 +25,23 @@ internal sealed class CommonSubPacketPoolManager : BasePacketPoolManager<ECommon
 
     private CommonSubPacketPoolManager()
     {
-        _subPacketFactories = new Dictionary<ECommonSubPacketType, Func<IPoolSubPacket>>()
-        {
-            { ECommonSubPacketType.Phrase, PhrasePacket.CreateInstance },
-            { ECommonSubPacketType.WorldInteraction, WorldInteractionPacket.CreateInstance },
-            { ECommonSubPacketType.ContainerInteraction, ContainerInteractionPacket.CreateInstance },
-            { ECommonSubPacketType.Proceed, ProceedPacket.CreateInstance },
-            { ECommonSubPacketType.HeadLights, HeadLightsPacket.CreateInstance },
-            { ECommonSubPacketType.InventoryChanged, InventoryChangedPacket.CreateInstance },
-            { ECommonSubPacketType.Drop, DropPacket.CreateInstance },
-            { ECommonSubPacketType.Stationary, StationaryPacket.CreateInstance },
-            { ECommonSubPacketType.Vault, VaultPacket.CreateInstance },
-            { ECommonSubPacketType.Interaction, InteractionPacket.CreateInstance },
-            { ECommonSubPacketType.Mounting, MountingPacket.CreateInstance },
-            { ECommonSubPacketType.Damage, DamagePacket.CreateInstance },
-            { ECommonSubPacketType.ArmorDamage, ArmorDamagePacket.CreateInstance },
-            { ECommonSubPacketType.HealthSync, HealthSyncPacket.CreateInstance },
-            { ECommonSubPacketType.UsableItem, UsableItemPacket.CreateInstance }
-        };
+        _subPacketFactories =
+        [
+            PhrasePacket.CreateInstance,           // ECommonSubPacketType.Phrase = 0
+            WorldInteractionPacket.CreateInstance, // ECommonSubPacketType.WorldInteraction = 1
+            ContainerInteractionPacket.CreateInstance, // ECommonSubPacketType.ContainerInteraction = 2
+            ProceedPacket.CreateInstance,           // ECommonSubPacketType.Proceed = 3
+            HeadLightsPacket.CreateInstance,        // ECommonSubPacketType.HeadLights = 4
+            InventoryChangedPacket.CreateInstance,  // ECommonSubPacketType.InventoryChanged = 5
+            DropPacket.CreateInstance,               // ECommonSubPacketType.Drop = 6
+            StationaryPacket.CreateInstance,         // ECommonSubPacketType.Stationary = 7
+            VaultPacket.CreateInstance,               // ECommonSubPacketType.Vault = 8
+            InteractionPacket.CreateInstance,         // ECommonSubPacketType.Interaction = 9
+            MountingPacket.CreateInstance,            // ECommonSubPacketType.Mounting = 10
+            DamagePacket.CreateInstance,              // ECommonSubPacketType.Damage = 11
+            ArmorDamagePacket.CreateInstance,         // ECommonSubPacketType.ArmorDamage = 12
+            HealthSyncPacket.CreateInstance,          // ECommonSubPacketType.HealthSync = 13
+            UsableItemPacket.CreateInstance           // ECommonSubPacketType.UsableItem = 14
+        ];
     }
 }

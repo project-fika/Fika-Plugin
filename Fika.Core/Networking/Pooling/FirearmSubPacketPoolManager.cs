@@ -24,38 +24,38 @@ internal sealed class FirearmSubPacketPoolManager : BasePacketPoolManager<EFirea
 
     private FirearmSubPacketPoolManager()
     {
-        _subPacketFactories = new()
-        {
-            { EFirearmSubPacketType.ShotInfo, ShotInfoPacket.CreateInstance },
-            { EFirearmSubPacketType.ChangeFireMode, ChangeFireModePacket.CreateInstance },
-            { EFirearmSubPacketType.ToggleAim, ToggleAimPacket.CreateInstance },
-            { EFirearmSubPacketType.ExamineWeapon, ExamineWeaponPacket.CreateInstance },
-            { EFirearmSubPacketType.CheckAmmo, CheckAmmoPacket.CreateInstance },
-            { EFirearmSubPacketType.CheckChamber, CheckChamberPacket.CreateInstance },
-            { EFirearmSubPacketType.CheckFireMode, CheckFireModePacket.CreateInstance },
-            { EFirearmSubPacketType.ToggleLightStates, LightStatesPacket.CreateInstance },
-            { EFirearmSubPacketType.ToggleScopeStates, ScopeStatesPacket.CreateInstance },
-            { EFirearmSubPacketType.ToggleLauncher, ToggleLauncherPacket.CreateInstance },
-            { EFirearmSubPacketType.ToggleInventory, ToggleInventoryPacket.CreateInstance },
-            { EFirearmSubPacketType.Loot, FirearmLootPacket.CreateInstance },
-            { EFirearmSubPacketType.ReloadMag, ReloadMagPacket.CreateInstance },
-            { EFirearmSubPacketType.QuickReloadMag, QuickReloadMagPacket.CreateInstance },
-            { EFirearmSubPacketType.ReloadWithAmmo, ReloadWithAmmoPacket.CreateInstance },
-            { EFirearmSubPacketType.CylinderMag, CylinderMagPacket.CreateInstance },
-            { EFirearmSubPacketType.ReloadLauncher, ReloadLauncherPacket.CreateInstance },
-            { EFirearmSubPacketType.ReloadBarrels, ReloadBarrelsPacket.CreateInstance },
-            { EFirearmSubPacketType.Grenade, GrenadePacket.CreateInstance },
-            { EFirearmSubPacketType.CancelGrenade, CancelGrenadePacket.CreateInstance },
-            { EFirearmSubPacketType.CompassChange, CompassChangePacket.CreateInstance },
-            { EFirearmSubPacketType.Knife, KnifePacket.CreateInstance },
-            { EFirearmSubPacketType.FlareShot, FlareShotPacket.CreateInstance },
-            { EFirearmSubPacketType.RocketShot, RocketShotPacket.CreateInstance },
-            { EFirearmSubPacketType.ReloadBoltAction, ReloadBoltActionPacket.CreateInstance },
-            { EFirearmSubPacketType.RollCylinder, RollCylinderPacket.CreateInstance },
-            { EFirearmSubPacketType.UnderbarrelSightingRangeUp, UnderbarrelSightingRangeUpPacket.CreateInstance },
-            { EFirearmSubPacketType.UnderbarrelSightingRangeDown, UnderbarrelSightingRangeDownPacket.CreateInstance },
-            { EFirearmSubPacketType.ToggleBipod, ToggleBipodPacket.CreateInstance },
-            { EFirearmSubPacketType.LeftStanceChange, LeftStanceChangePacket.CreateInstance },
-        };
+        _subPacketFactories =
+        [
+            ShotInfoPacket.CreateInstance,               // EFirearmSubPacketType.ShotInfo = 0
+            ChangeFireModePacket.CreateInstance,          // EFirearmSubPacketType.ChangeFireMode = 1
+            ToggleAimPacket.CreateInstance,                // EFirearmSubPacketType.ToggleAim = 2
+            ExamineWeaponPacket.CreateInstance,            // EFirearmSubPacketType.ExamineWeapon = 3
+            CheckAmmoPacket.CreateInstance,                 // EFirearmSubPacketType.CheckAmmo = 4
+            CheckChamberPacket.CreateInstance,              // EFirearmSubPacketType.CheckChamber = 5
+            CheckFireModePacket.CreateInstance,             // EFirearmSubPacketType.CheckFireMode = 6
+            LightStatesPacket.CreateInstance,               // EFirearmSubPacketType.ToggleLightStates = 7
+            ScopeStatesPacket.CreateInstance,               // EFirearmSubPacketType.ToggleScopeStates = 8
+            ToggleLauncherPacket.CreateInstance,            // EFirearmSubPacketType.ToggleLauncher = 9
+            ToggleInventoryPacket.CreateInstance,           // EFirearmSubPacketType.ToggleInventory = 10
+            FirearmLootPacket.CreateInstance,               // EFirearmSubPacketType.Loot = 11
+            ReloadMagPacket.CreateInstance,                  // EFirearmSubPacketType.ReloadMag = 12
+            QuickReloadMagPacket.CreateInstance,             // EFirearmSubPacketType.QuickReloadMag = 13
+            ReloadWithAmmoPacket.CreateInstance,             // EFirearmSubPacketType.ReloadWithAmmo = 14
+            CylinderMagPacket.CreateInstance,                 // EFirearmSubPacketType.CylinderMag = 15
+            ReloadLauncherPacket.CreateInstance,             // EFirearmSubPacketType.ReloadLauncher = 16
+            ReloadBarrelsPacket.CreateInstance,              // EFirearmSubPacketType.ReloadBarrels = 17
+            GrenadePacket.CreateInstance,                     // EFirearmSubPacketType.Grenade = 18
+            CancelGrenadePacket.CreateInstance,               // EFirearmSubPacketType.CancelGrenade = 19
+            CompassChangePacket.CreateInstance,               // EFirearmSubPacketType.CompassChange = 20
+            KnifePacket.CreateInstance,                        // EFirearmSubPacketType.Knife = 21
+            FlareShotPacket.CreateInstance,                    // EFirearmSubPacketType.FlareShot = 22
+            RocketShotPacket.CreateInstance,                   // EFirearmSubPacketType.RocketShot = 23
+            ReloadBoltActionPacket.CreateInstance,             // EFirearmSubPacketType.ReloadBoltAction = 24
+            RollCylinderPacket.CreateInstance,                  // EFirearmSubPacketType.RollCylinder = 25
+            UnderbarrelSightingRangeUpPacket.CreateInstance,    // EFirearmSubPacketType.UnderbarrelSightingRangeUp = 26
+            UnderbarrelSightingRangeDownPacket.CreateInstance,  // EFirearmSubPacketType.UnderbarrelSightingRangeDown = 27
+            ToggleBipodPacket.CreateInstance,                    // EFirearmSubPacketType.ToggleBipod = 28
+            LeftStanceChangePacket.CreateInstance                // EFirearmSubPacketType.LeftStanceChange = 29
+        ];
     }
 }

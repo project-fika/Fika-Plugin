@@ -1,5 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Fika.Core.Main.Utils;
+using System;
+using System.Runtime.CompilerServices;
 
 namespace Fika.Core.Networking.Pooling;
 
@@ -14,13 +15,13 @@ public abstract class BasePacketPoolManager<TEnum, TType>
     where TType : class, IDisposable
 {
     /// <summary>
-    /// A dictionary mapping each packet type to a factory function that creates new packet instances.
+    /// Array containing the constructing method for every packet type
     /// </summary>
-    protected Dictionary<TEnum, Func<TType>> _subPacketFactories;
+    protected Func<TType>[] _subPacketFactories;
 
     private bool _poolExists;
 
-    private Dictionary<TEnum, PacketPool<TType>> _pool;
+    private PacketPool<TType>[] _pool;
 
     /// <summary>
     /// Creates a pool of packets for each packet type based on the registered factory functions.
@@ -30,10 +31,10 @@ public abstract class BasePacketPoolManager<TEnum, TType>
     {
         if (_pool == null)
         {
-            _pool = [];
-            foreach ((TEnum key, Func<TType> value) in _subPacketFactories)
+            _pool = new PacketPool<TType>[_subPacketFactories.Length];
+            for (int i = 0; i < _subPacketFactories.Length; i++)
             {
-                _pool[key] = new PacketPool<TType>(2, value);
+                _pool[i] = new(2, _subPacketFactories[i]);
             }
         }
 
@@ -47,9 +48,9 @@ public abstract class BasePacketPoolManager<TEnum, TType>
     {
         if (_pool != null)
         {
-            foreach ((TEnum _, PacketPool<TType> value) in _pool)
+            for (int i = 0; i < _pool.Length; i++)
             {
-                value.Dispose();
+                _pool[i].Dispose();
             }
         }
 
@@ -69,6 +70,9 @@ public abstract class BasePacketPoolManager<TEnum, TType>
     {
         if (!_poolExists)
         {
+#if DEBUG
+            FikaGlobals.LogError($"Pool did not exist when retrieving [{type.GetType().Name}]"); 
+#endif
             CreatePool();
         }
 
@@ -85,6 +89,9 @@ public abstract class BasePacketPoolManager<TEnum, TType>
     {
         if (!_poolExists)
         {
+#if DEBUG
+            FikaGlobals.LogError($"Pool did not exist when returning [{type.GetType().Name}] - [{packet.GetType().Name}]"); 
+#endif
             return;
         }
 
@@ -101,15 +108,25 @@ public abstract class BasePacketPoolManager<TEnum, TType>
     private PacketPool<TType> WithdrawPacket(TEnum type)
     {
 #if DEBUG
-        if (!_pool.TryGetValue(type, out PacketPool<TType> packet))
-        {
-            throw new ArgumentException("Could not find given type in the packet pool manager!", nameof(type));
-        }
+        PacketPool<TType> instance = _pool[ToInt(type)]
+            ?? throw new ArgumentException("Could not find given type in the packet pool manager!", nameof(type));
 
-        return packet;
+        return instance;
 #else
-        return _pool[type];
+        return _pool[ToInt(type)];
 #endif
 
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int ToInt(TEnum value)
+    {
+#if DEBUG
+        if (Unsafe.SizeOf<TEnum>() != 1)
+        {
+            throw new InvalidOperationException("TEnum must be backed by byte for this method.");
+        }
+#endif
+        return Unsafe.As<TEnum, byte>(ref value);
     }
 }
