@@ -124,7 +124,7 @@ public abstract class BasePacketPoolManager<TEnum, TType>
 #if DEBUG
         if (Unsafe.SizeOf<TEnum>() != 1)
         {
-            throw new InvalidOperationException("TEnum must be backed by byte for this method.");
+            throw new InvalidOperationException($"{value.GetType().Name} must be backed by byte for this method.");
         }
 #endif
         return Unsafe.As<TEnum, byte>(ref value);
