@@ -87,7 +87,14 @@ public static class NetworkUtils
         /// A packet that implements <see cref="INetSerializable"/>
         /// </summary>
         Serializable,
+        /// <summary>
+        /// A raw <see cref="Packets.Player.PlayerStatePacket"/>
+        /// </summary>
         PlayerState,
+        /// <summary>
+        /// A raw <see cref="BTRDataPacketStruct"/>
+        /// </summary>
+        BTR,
         /// <summary>
         /// A voip packet that contains a raw byte array
         /// </summary>

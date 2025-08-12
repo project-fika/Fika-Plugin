@@ -764,13 +764,4 @@ public partial class FikaClient
 
         packet.SyncEvent.Invoke();
     }
-
-    private void OnBTRPacketReceived(BTRPacket packet)
-    {
-        GameWorld gameWorld = Singleton<GameWorld>.Instance;
-        if (gameWorld != null)
-        {
-            gameWorld.BtrController?.SyncBTRVehicleFromServer(packet.Data);
-        }
-    }
 }

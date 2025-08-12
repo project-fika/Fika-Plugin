@@ -23,11 +23,6 @@ public class BTRView_SyncViewFromServer_Patch : FikaPatch
             return;
         }
 
-        BTRPacket btrPacket = new()
-        {
-            Data = packet
-        };
-
-        Singleton<IFikaNetworkManager>.Instance.SendData(ref btrPacket, DeliveryMethod.Unreliable);
+        Singleton<FikaServer>.Instance.SendBTRPacket(ref packet);
     }
 }

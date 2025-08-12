@@ -742,6 +742,15 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         peer.Send(_dataWriter.AsReadOnlySpan, deliveryMethod);
     }
 
+    public void SendBTRPacket(ref BTRDataPacketStruct data)
+    {
+        _dataWriter.Reset();
+        _dataWriter.PutEnum(EPacketType.BTR);
+        _dataWriter.PutUnmanaged(data);
+
+        _netServer.SendToAll(_dataWriter.AsReadOnlySpan, DeliveryMethod.Unreliable);
+    }
+
     public void OnPeerConnected(NetPeer peer)
     {
         NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.PEER_CONNECTED.Localized(), peer.Port),

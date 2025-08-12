@@ -255,7 +255,6 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
         RegisterPacket<WorldLootPacket>(OnWorldLootPacketReceived);
         RegisterPacket<ReconnectPacket>(OnReconnectPacketReceived);
         RegisterPacket<SpawnSyncObjectPacket>(OnSpawnSyncObjectPacketReceived);
-        RegisterPacket<BTRPacket>(OnBTRPacketReceived);
         RegisterPacket<BTRInteractionPacket>(OnBTRInteractionPacketReceived);
         RegisterPacket<FlareSuccessPacket>(OnFlareSuccessPacketReceived);
         RegisterPacket<BufferZonePacket>(OnBufferZonePacketReceived);
@@ -510,10 +509,13 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
                     _snapshots[_snapshotCount++] = ArraySegmentPooling.Get(reader.GetRemainingBytesSpan());
                 }
                 break;
+            case EPacketType.BTR:
+                BTRDataPacketStruct data = reader.GetUnmanaged<BTRDataPacketStruct>();
+                BTRControllerClass.Instance?.SyncBTRVehicleFromServer(data);
+                break;
             case EPacketType.VOIP:
                 VOIPClient.NetworkReceivedPacket(reader.GetRemainingBytesSegment());
                 break;
-
         }
     }
 
