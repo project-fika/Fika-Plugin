@@ -24,10 +24,26 @@ public interface IFikaNetworkManager
     /// Sends a packet
     /// </summary>
     /// <typeparam name="T">The type of packet to send, which must implement <see cref="INetSerializable"/></typeparam>
-    /// <param name="data">The packet instance to send, passed by reference</param>
+    /// <param name="packet">The packet instance to send, passed by reference</param>
+    /// <param name="deliveryMethod">The delivery method (reliable, unreliable, etc.) to use for sending the packet.</param>
     /// <param name="multicast">If <see langword="true"/>, the packet will be sent to multiple recipients; otherwise, it will be sent to a single target (server is always multicast)</param>
     public void SendData<T>(ref T packet, DeliveryMethod deliveryMethod, bool multicast = false) where T : INetSerializable;
+    /// <summary>
+    /// Sends a generic network packet to one or more peers.
+    /// </summary>
+    /// <param name="type">The generic sub-packet type identifier used to determine how the packet will be processed.</param>
+    /// <param name="subpacket">The sub-packet payload to send. Must implement <see cref="IPoolSubPacket"/>.</param>
+    /// <param name="multicast">If <see langword="true"/>, the packet will be sent to multiple recipients; otherwise, it will be sent to a single target (server is always multicast)</param>
+    /// <param name="peerToIgnore">An optional peer to exclude from receiving the packet, typically the sender.</param>
     public void SendGenericPacket(EGenericSubPacketType type, IPoolSubPacket subpacket, bool multicast = false, NetPeer peerToIgnore = null);
+    /// <summary>
+    /// Sends a packet implementing <see cref="INetReusable"/> with manual serialization control.
+    /// </summary>
+    /// <typeparam name="T">The packet type, which must implement <see cref="INetReusable"/>.</typeparam>
+    /// <param name="packet">A reference to the packet instance to send.</param>
+    /// <param name="deliveryMethod">The delivery method (reliable, unreliable, etc.) to use for sending the packet.</param>
+    /// <param name="multicast">If <see langword="true"/>, the packet will be sent to multiple recipients; otherwise, it will be sent to a single target (server is always multicast)</param>
+    /// <param name="peerToIgnore">An optional peer to exclude from receiving the packet, typically the sender.</param>
     public void SendNetReusable<T>(ref T packet, DeliveryMethod deliveryMethod, bool multicast = false, NetPeer peerToIgnore = null) where T : INetReusable;
     /// <summary>
     /// Sends a packet of data directly to a specific peer
@@ -39,7 +55,17 @@ public interface IFikaNetworkManager
     /// Should only be used as a <see cref="FikaServer"/>, since a <see cref="FikaClient"/> only has one <see cref="NetPeer"/>
     /// </remarks>
     public void SendDataToPeer<T>(ref T packet, DeliveryMethod deliveryMethod, NetPeer peer) where T : INetSerializable;
+    /// <summary>
+    /// Sends a player state using fast serialization
+    /// </summary>
+    /// <param name="packet">The player state</param>
     public void SendPlayerState(ref PlayerStatePacket packet);
+    /// <summary>
+    /// Sends raw VOIP audio data to a specific peer or multiple recipients.
+    /// </summary>
+    /// <param name="data">The audio data to send, provided as an <see cref="ArraySegment{T}"/> of bytes.</param>
+    /// <param name="deliveryMethod">The delivery method (reliable, unreliable, etc.) to use for sending the packet.</param>
+    /// <param name="peer">The target peer to receive the audio data (only used by server)</param>
     public void SendVOIPData(ArraySegment<byte> data, DeliveryMethod deliveryMethod, NetPeer peer = null);
     /// <summary>
     /// Registers a packet to the <see cref="NetPacketProcessor"/>
