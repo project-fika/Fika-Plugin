@@ -23,6 +23,7 @@ using Fika.Core.Networking;
 using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.Communication;
 using Fika.Core.Networking.Packets.Player;
+using Fika.Core.Networking.Packets.Player.Common.SubPackets;
 using HarmonyLib;
 using JsonType;
 using RootMotion.FinalIK;

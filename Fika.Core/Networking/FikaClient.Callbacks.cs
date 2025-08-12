@@ -7,7 +7,6 @@ using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.Vehicle;
 using Fika.Core.Main.ClientClasses;
-using Fika.Core.Main.Components;
 using Fika.Core.Main.Factories;
 using Fika.Core.Main.GameMode;
 using Fika.Core.Main.ObservedClasses;
@@ -24,8 +23,6 @@ using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using static Fika.Core.FikaPlugin;
 
 namespace Fika.Core.Networking;
 public partial class FikaClient

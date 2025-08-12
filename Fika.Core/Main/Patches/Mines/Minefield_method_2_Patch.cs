@@ -5,7 +5,6 @@ using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets;
-using Fika.Core.Networking.Packets.Player;
 using Fika.Core.Patching;
 using System.Collections.Generic;
 using System.Linq;

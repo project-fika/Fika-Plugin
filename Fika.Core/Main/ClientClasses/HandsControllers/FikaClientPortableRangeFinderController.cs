@@ -2,7 +2,6 @@
 using EFT.InventoryLogic;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Packets;
-using Fika.Core.Networking.Packets.Player;
 
 namespace Fika.Core.Main.ClientClasses.HandsControllers;
 
@@ -41,7 +40,7 @@ public class FikaClientPortableRangeFinderController : PortableRangeFinderContro
     {
         bool isAiming = IsAiming;
         base.SetAim(value);
-        
+
         if (IsAiming != isAiming)
         {
             _fikaPlayer.CommonPacket.Type = ECommonSubPacketType.UsableItem;

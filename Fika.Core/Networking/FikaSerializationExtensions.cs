@@ -6,7 +6,6 @@ using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Packets;
-using Fika.Core.Networking.Packets.Player;
 using System;
 using System.Collections.Generic;
 using System.IO;

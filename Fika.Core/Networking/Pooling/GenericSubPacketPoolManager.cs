@@ -1,6 +1,4 @@
 ﻿using Fika.Core.Networking.Packets;
-using Fika.Core.Networking.Packets.Communication;
-using Fika.Core.Networking.Packets.Player;
 using Fika.Core.Networking.Packets.World;
 using System;
 using System.Threading;

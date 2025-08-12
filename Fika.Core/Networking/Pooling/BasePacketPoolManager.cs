@@ -71,7 +71,7 @@ public abstract class BasePacketPoolManager<TEnum, TType>
         if (!_poolExists)
         {
 #if DEBUG
-            FikaGlobals.LogError($"Pool did not exist when retrieving [{type.GetType().Name}]"); 
+            FikaGlobals.LogError($"Pool did not exist when retrieving [{type.GetType().Name}]");
 #endif
             CreatePool();
         }
@@ -90,7 +90,7 @@ public abstract class BasePacketPoolManager<TEnum, TType>
         if (!_poolExists)
         {
 #if DEBUG
-            FikaGlobals.LogError($"Pool did not exist when returning [{type.GetType().Name}] - [{packet.GetType().Name}]"); 
+            FikaGlobals.LogError($"Pool did not exist when returning [{type.GetType().Name}] - [{packet.GetType().Name}]");
 #endif
             return;
         }
