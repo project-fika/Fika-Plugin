@@ -39,6 +39,7 @@ internal sealed class CommonSubPacketPoolManager : BasePacketPoolManager<ECommon
             { ECommonSubPacketType.Interaction, InteractionPacket.CreateInstance },
             { ECommonSubPacketType.Mounting, MountingPacket.CreateInstance },
             { ECommonSubPacketType.Damage, DamagePacket.CreateInstance },
+            { ECommonSubPacketType.ArmorDamage, ArmorDamagePacket.CreateInstance },
             { ECommonSubPacketType.HealthSync, HealthSyncPacket.CreateInstance },
             { ECommonSubPacketType.UsableItem, UsableItemPacket.CreateInstance }
         };
