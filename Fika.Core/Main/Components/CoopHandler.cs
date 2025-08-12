@@ -192,8 +192,8 @@ public class CoopHandler : MonoBehaviour
 
     private void SyncPlayersWithClients()
     {
-        CharacterSyncPacket characterSyncPacket = new(Players);
-        Singleton<IFikaNetworkManager>.Instance.SendData(ref characterSyncPacket, DeliveryMethod.ReliableOrdered);
+        Singleton<IFikaNetworkManager>.Instance.SendGenericPacket(Networking.Packets.EGenericSubPacketType.CharacterSync,
+            CharacterSyncPacket.FromValue(Players), true);
     }
 
     protected void OnDestroy()

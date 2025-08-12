@@ -63,7 +63,12 @@ public enum EGenericSubPacketType : byte
     /// <summary>
     /// Spawns the BTR vehicle.
     /// </summary>
-    SpawnBTR
+    SpawnBTR,
+
+    /// <summary>
+    /// Sync characters with server
+    /// </summary>
+    CharacterSync
 
     /// <summary>
     /// Train synchronization event (commented out).

@@ -1,32 +1,40 @@
-﻿using Fika.Core.Main.Players;
+﻿using Comfort.Common;
+using Fika.Core.Main.Players;
+using Fika.Core.Main.Utils;
+using Fika.Core.Networking.Pooling;
 using System.Collections.Generic;
 
 namespace Fika.Core.Networking.Packets.Communication;
 
-public class CharacterSyncPacket : INetSerializable
+public class CharacterSyncPacket : IPoolSubPacket
 {
-    public CharacterSyncPacket()
+    private CharacterSyncPacket()
     {
 
     }
 
-    public CharacterSyncPacket(Dictionary<int, FikaPlayer> players)
+    public static CharacterSyncPacket CreateInstance()
     {
-        PlayerIds = new(players.Count);
+        return new();
+    }
+
+    public static CharacterSyncPacket FromValue(Dictionary<int, FikaPlayer> players)
+    {
+        CharacterSyncPacket packet = GenericSubPacketPoolManager.Instance.GetPacket<CharacterSyncPacket>(EGenericSubPacketType.CharacterSync);
         foreach ((int netid, _) in players)
         {
-            PlayerIds.Add(netid);
+            packet.PlayerIds.Add(netid);
         }
+        return packet;
     }
 
-    public List<int> PlayerIds;
+    public List<int> PlayerIds = new(32);
 
     public void Deserialize(NetDataReader reader)
     {
         ushort amount = reader.GetUShort();
         if (amount > 0)
         {
-            PlayerIds = new(amount);
             for (int i = 0; i < amount; i++)
             {
                 PlayerIds.Add(reader.GetInt());
@@ -41,5 +49,24 @@ public class CharacterSyncPacket : INetSerializable
         {
             writer.Put(netId);
         }
+    }
+
+    public void Execute(FikaPlayer player = null)
+    {
+        if (!FikaBackendUtils.IsClient)
+        {
+            FikaGlobals.LogError("Received CharacterSyncPacket as server");
+            return;
+        }
+
+        if (Singleton<FikaClient>.Instantiated)
+        {
+            Singleton<FikaClient>.Instance.OnCharacterSyncPacketReceived(this);
+        }
+    }
+
+    public void Dispose()
+    {
+        PlayerIds.Clear();
     }
 }

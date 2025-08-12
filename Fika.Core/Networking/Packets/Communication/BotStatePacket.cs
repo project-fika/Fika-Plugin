@@ -8,13 +8,13 @@ public struct BotStatePacket : INetSerializable
     public void Deserialize(NetDataReader reader)
     {
         NetId = reader.GetInt();
-        Type = (EStateType)reader.GetByte();
+        Type = reader.GetEnum<EStateType>();
     }
 
     public readonly void Serialize(NetDataWriter writer)
     {
         writer.Put(NetId);
-        writer.Put((byte)Type);
+        writer.PutEnum(Type);
     }
 
     public enum EStateType
