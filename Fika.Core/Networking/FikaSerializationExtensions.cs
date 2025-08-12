@@ -6,6 +6,7 @@ using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Packets;
+using Fika.Core.Networking.Packets.Player.Common.SubPackets;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -860,11 +861,11 @@ public static class FikaSerializationExtensions
     }
 
     /// <summary>
-    /// Serializes a <see cref="CorpseSyncPacketS"/>
+    /// Serializes a <see cref="CorpseSyncPackets"/>
     /// </summary>
     /// <param name="writer"></param>
     /// <param name="packet"></param>
-    public static void PutCorpseSyncPacket(this NetDataWriter writer, CorpseSyncPacketS packet)
+    public static void PutCorpseSyncPacket(this NetDataWriter writer, CorpseSyncPackets packet)
     {
         writer.PutItemDescriptor(packet.InventoryDescriptor);
 
@@ -878,13 +879,13 @@ public static class FikaSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes a <see cref="CorpseSyncPacketS"/>
+    /// Deserializes a <see cref="CorpseSyncPackets"/>
     /// </summary>
     /// <param name="reader"></param>
-    /// <returns>A <see cref="CorpseSyncPacketS"/> with data</returns>
-    public static CorpseSyncPacketS GetCorpseSyncPacket(this NetDataReader reader)
+    /// <returns>A <see cref="CorpseSyncPackets"/> with data</returns>
+    public static CorpseSyncPackets GetCorpseSyncPacket(this NetDataReader reader)
     {
-        return new CorpseSyncPacketS()
+        return new CorpseSyncPackets()
         {
             InventoryDescriptor = reader.GetItemDescriptor(),
 

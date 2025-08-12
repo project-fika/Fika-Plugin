@@ -51,6 +51,9 @@ using Fika.Core.Networking.Open.Nat;
 using Fika.Core.Networking.Open.Nat.Enums;
 using Fika.Core.Networking.Open.Nat.Exceptions;
 using Fika.Core.Networking.Models;
+using Fika.Core.Networking.Packets.Generic;
+using Fika.Core.Networking.Packets.Player.Common;
+using Fika.Core.Networking.Packets.Generic.SubPackets;
 
 namespace Fika.Core.Networking;
 

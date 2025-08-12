@@ -22,7 +22,7 @@ public class HealthSyncPacket : IPoolSubPacket
     public MongoID? KillerId;
     public MongoID? WeaponId;
     public EBodyPart BodyPart;
-    public CorpseSyncPacketS CorpseSyncPacket;
+    public CorpseSyncPackets CorpseSyncPacket;
     public List<string> TriggerZones = new(4);
 
     public static HealthSyncPacket FromValue(NetworkHealthSyncPacketStruct value)
@@ -441,7 +441,7 @@ public class HealthSyncPacket : IPoolSubPacket
     }
 }
 
-public struct CorpseSyncPacketS
+public struct CorpseSyncPackets
 {
     public InventoryDescriptorClass InventoryDescriptor;
     public Item ItemInHands;

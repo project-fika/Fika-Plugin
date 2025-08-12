@@ -22,7 +22,9 @@ using Fika.Core.Networking.Models;
 using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.Communication;
 using Fika.Core.Networking.Packets.FirearmController;
+using Fika.Core.Networking.Packets.Generic.SubPackets;
 using Fika.Core.Networking.Packets.Player;
+using Fika.Core.Networking.Packets.Player.Common;
 using Fika.Core.Networking.Packets.Player.Common.SubPackets;
 using Fika.Core.Networking.Packets.World;
 using Fika.Core.Networking.VOIP;
@@ -45,7 +47,7 @@ public class FikaPlayer : LocalPlayer
     #region Fields and Properties
     public IPacketSender PacketSender;
     public float ObservedOverlap = 0f;
-    public CorpseSyncPacketS CorpseSyncPacket = default;
+    public CorpseSyncPackets CorpseSyncPacket = default;
     public int NetId;
     public bool IsObservedAI;
     public Dictionary<uint, Action<ServerOperationStatus>> OperationCallbacks = [];
