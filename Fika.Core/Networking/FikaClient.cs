@@ -24,7 +24,6 @@ using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
-using Fika.Core.Networking.LiteNetLib.Utils;
 using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.Backend;
 using Fika.Core.Networking.Packets.Communication;

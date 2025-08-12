@@ -1,6 +1,4 @@
-﻿using Fika.Core.Networking.LiteNetLib.Utils;
-
-namespace Fika.Core.Networking.Packets.Player;
+﻿namespace Fika.Core.Networking.Packets.Player;
 
 public struct UsableItemPacket(int netId) : INetSerializable
 {

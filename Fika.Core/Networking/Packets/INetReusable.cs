@@ -1,6 +1,4 @@
-﻿using Fika.Core.Networking.LiteNetLib.Utils;
-
-namespace Fika.Core.Networking.Packets;
+﻿namespace Fika.Core.Networking.Packets;
 
 /// <summary>
 /// Packet that can be used with <see cref="IFikaNetworkManager.RegisterNetReusable{T}(System.Action{T}){T}(System.Action{T})"/> <br/>

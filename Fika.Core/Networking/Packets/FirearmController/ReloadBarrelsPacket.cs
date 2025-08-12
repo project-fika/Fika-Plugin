@@ -1,7 +1,6 @@
 ﻿using EFT.InventoryLogic;
 using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
-using Fika.Core.Networking.LiteNetLib.Utils;
 using Fika.Core.Networking.Pooling;
 using System.Collections.Generic;
 

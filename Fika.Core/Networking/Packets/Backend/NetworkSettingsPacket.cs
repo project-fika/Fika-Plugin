@@ -1,6 +1,4 @@
-﻿using Fika.Core.Networking.LiteNetLib.Utils;
-
-namespace Fika.Core.Networking.Packets.Backend;
+﻿namespace Fika.Core.Networking.Packets.Backend;
 
 public struct NetworkSettingsPacket : INetSerializable
 {

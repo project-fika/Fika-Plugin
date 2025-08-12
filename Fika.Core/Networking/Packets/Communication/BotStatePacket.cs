@@ -1,6 +1,4 @@
-﻿using Fika.Core.Networking.LiteNetLib.Utils;
-
-namespace Fika.Core.Networking.Packets.Communication;
+﻿namespace Fika.Core.Networking.Packets.Communication;
 
 public struct BotStatePacket : INetSerializable
 {

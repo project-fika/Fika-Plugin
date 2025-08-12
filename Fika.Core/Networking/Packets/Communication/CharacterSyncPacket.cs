@@ -1,5 +1,4 @@
 ﻿using Fika.Core.Main.Players;
-using Fika.Core.Networking.LiteNetLib.Utils;
 using System.Collections.Generic;
 
 namespace Fika.Core.Networking.Packets.Communication;

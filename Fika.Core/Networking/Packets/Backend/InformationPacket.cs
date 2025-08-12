@@ -1,6 +1,5 @@
 ﻿// © 2025 Lacyway All Rights Reserved
 
-using Fika.Core.Networking.LiteNetLib.Utils;
 using System;
 
 namespace Fika.Core.Networking.Packets.Backend;

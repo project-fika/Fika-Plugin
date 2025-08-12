@@ -56,7 +56,6 @@ using Fika.Core.Networking.Packets.World;
 using Fika.Core.Networking.Packets.FirearmController;
 using Fika.Core.Networking.Packets.Communication;
 using Fika.Core.Networking.Pooling;
-using Fika.Core.Networking.LiteNetLib.Utils;
 using Fika.Core.Networking.Open.Nat;
 using Fika.Core.Networking.Open.Nat.Enums;
 using Fika.Core.Networking.Open.Nat.Exceptions;
