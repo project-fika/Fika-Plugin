@@ -150,7 +150,6 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
     internal FikaVOIPServer VOIPServer { get; set; }
     internal FikaVOIPClient VOIPClient { get; set; }
 
-
     public async void Init()
     {
         _netServer = new(this)
@@ -324,7 +323,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         _raidAdminUIScript = RaidAdminUIScript.Create(this, _netServer);
     }
 
-    async Task IFikaNetworkManager.InitializeVOIP()
+    public async Task InitializeVOIP()
     {
         VoipSettingsClass voipHandler = FikaGlobals.VOIPHandler;
         GClass1069 controller = Singleton<SharedGameSettingsClass>.Instance.Sound.Controller;

@@ -194,7 +194,7 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
         }
     }
 
-    async Task IFikaNetworkManager.InitializeVOIP()
+    public async Task InitializeVOIP()
     {
         VoipSettingsClass voipHandler = FikaGlobals.VOIPHandler;
 
@@ -298,8 +298,6 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
             _fikaChat = FikaChatUIScript.Create();
         }
     }
-
-
 
     protected void Update()
     {
