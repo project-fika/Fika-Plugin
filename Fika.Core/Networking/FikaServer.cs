@@ -779,35 +779,29 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
 
         if (reader.TryGetString(out string data))
         {
-            NetDataWriter resp;
-            switch (data)
+            NetDataWriter resp = new();
+            string guid = FikaBackendUtils.ServerGuid.ToString();
+            if (data == guid)
             {
-                case "fika.hello":
-                    resp = new();
-                    resp.Put(started ? "fika.reject" : data);
-                    _netServer.SendUnconnectedMessage(resp.AsReadOnlySpan, remoteEndPoint);
-                    break;
+                bool reconnect = reader.GetBool();
+                resp.Put(started && reconnect ? "fika.inprogress" : "fika.hello");
+                _netServer.SendUnconnectedMessage(resp.AsReadOnlySpan, remoteEndPoint);
+            }
+            else if (data == "fika.keepalive")
+            {
+                resp.Put(data);
+                _netServer.SendUnconnectedMessage(resp.AsReadOnlySpan, remoteEndPoint);
 
-                case "fika.keepalive":
-                    resp = new();
-                    resp.Put(data);
-                    _netServer.SendUnconnectedMessage(resp.AsReadOnlySpan, remoteEndPoint);
-
-                    if (!_natIntroduceRoutineCts.IsCancellationRequested)
-                    {
-                        _natIntroduceRoutineCts.Cancel();
-                    }
-                    break;
-
-                case "fika.reconnect":
-                    resp = new();
-                    resp.Put("fika.hello");
-                    _netServer.SendUnconnectedMessage(resp.AsReadOnlySpan, remoteEndPoint);
-                    break;
-
-                default:
-                    _logger.LogError("PingingRequest: Data was not as expected");
-                    break;
+                if (!_natIntroduceRoutineCts.IsCancellationRequested)
+                {
+                    _natIntroduceRoutineCts.Cancel();
+                }
+            }
+            else
+            {
+                _logger.LogError($"PingingRequest::Data was not as expected: {data}");
+                resp.Put("fika.reject");
+                _netServer.SendUnconnectedMessage(resp.AsReadOnlySpan, remoteEndPoint);
             }
         }
         else

@@ -437,18 +437,20 @@ public class MatchMakerUIScript : MonoBehaviour
             int attempts = 0;
             bool success;
             bool rejected;
+            bool inProgress;
 
             FikaPlugin.Instance.FikaLogger.LogInfo("Attempting to connect to host session...");
-            string knockMessage = reconnect ? "fika.reconnect" : "fika.hello";
+            string knockMessage = FikaBackendUtils.ServerGuid.ToString();
 
             do
             {
                 attempts++;
 
-                pingingClient.PingEndPoint(knockMessage);
+                pingingClient.PingEndPoint(knockMessage, reconnect);
                 pingingClient.NetClient.PollEvents();
                 success = pingingClient.Received;
                 rejected = pingingClient.Rejected;
+                inProgress = pingingClient.InProgress;
 
                 yield return waitForSeconds;
             } while (!rejected && !success && attempts < 50);
@@ -463,7 +465,11 @@ public class MatchMakerUIScript : MonoBehaviour
                 string logError = "Unable to connect to the session!";
                 if (rejected)
                 {
-                    logError += " Connection was rejected!";
+                    logError += $" Connection was rejected! [{FikaBackendUtils.ServerGuid}] did not match the server's Guid or data was malformed.";
+                }
+                if (inProgress)
+                {
+                    logError += " Session already in progress and you are not active in the session!";
                 }
                 FikaPlugin.Instance.FikaLogger.LogError(logError);
 

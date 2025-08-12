@@ -1,53 +1,44 @@
 using EFT;
 using JsonType;
+using System;
 using System.Runtime.Serialization;
 
 namespace Fika.Core.Networking.Models;
 
 [DataContract]
-public struct CreateMatch
+public struct CreateMatch(string raidCode, MongoID serverId, Guid serverGuid, string hostUsername, bool isSpectator,
+    long timestamp, RaidSettings settings, uint crc32, ESideType side, EDateTime time)
 {
     [DataMember(Name = "raidCode")]
-    public string RaidCode;
+    public string RaidCode = raidCode;
 
     [DataMember(Name = "serverId")]
-    public MongoID ServerId;
+    public MongoID ServerId = serverId;
+
+    [DataMember(Name = "serverGuid")]
+    public Guid ServerGuid = serverGuid;
 
     [DataMember(Name = "hostUsername")]
-    public string HostUsername;
+    public string HostUsername = hostUsername;
 
     [DataMember(Name = "timestamp")]
-    public long Timestamp;
+    public long Timestamp = timestamp;
 
     [DataMember(Name = "settings")]
-    public RaidSettings Settings;
+    public RaidSettings Settings = settings;
 
     [DataMember(Name = "gameVersion")]
-    public string GameVersion;
+    public string GameVersion = FikaPlugin.EFTVersionMajor;
 
     [DataMember(Name = "crc32")]
-    public uint Crc32;
+    public uint Crc32 = crc32;
 
     [DataMember(Name = "side")]
-    public ESideType Side;
+    public ESideType Side = side;
 
     [DataMember(Name = "time")]
-    public EDateTime Time;
+    public EDateTime Time = time;
 
     [DataMember(Name = "isSpectator")]
-    public bool IsSpectator;
-
-    public CreateMatch(string raidCode, MongoID serverId, string hostUsername, bool isSpectator, long timestamp, RaidSettings settings, uint crc32, ESideType side, EDateTime time)
-    {
-        RaidCode = raidCode;
-        ServerId = serverId;
-        HostUsername = hostUsername;
-        Timestamp = timestamp;
-        Settings = settings;
-        GameVersion = FikaPlugin.EFTVersionMajor;
-        Crc32 = crc32;
-        Side = side;
-        Time = time;
-        IsSpectator = isSpectator;
-    }
+    public bool IsSpectator = isSpectator;
 }

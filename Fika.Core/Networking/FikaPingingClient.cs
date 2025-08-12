@@ -18,6 +18,7 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
     public NetManager NetClient;
     public bool Received;
     public bool Rejected;
+    public bool InProgress;
 
     private ManualLogSource _logger;
     private IPEndPoint _remoteEndPoint;
@@ -26,7 +27,7 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
 
     public void Awake()
     {
-        _logger = BepInEx.Logging.Logger.CreateLogSource("Fika.PingingClient");
+        _logger = Logger.CreateLogSource("Fika.PingingClient");
     }
 
     public bool Init(string serverId)
@@ -39,6 +40,7 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
 
         GetHostRequest body = new(serverId);
         GetHostResponse result = FikaRequestHandler.GetHost(body);
+        FikaBackendUtils.ServerGuid = result.ServerGuid;
         _logger.LogInfo(result.ToString());
 
         FikaBackendUtils.IsHostNatPunch = result.NatPunch;
@@ -106,11 +108,11 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
         throw new ParseException($"ResolveRemoteAddress::Could not parse the address {ip}");
     }
 
-    public void PingEndPoint(string message)
+    public void PingEndPoint(string message, bool reconnect = false)
     {
         NetDataWriter writer = new();
         writer.Put(message);
-
+        writer.Put(reconnect);
 
         if (_localEndPoint != null)
         {
@@ -187,6 +189,9 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
                     break;
                 case "fika.keepalive":
                     // Do nothing
+                    break;
+                case "fika.inprogress":
+                    InProgress = true;
                     break;
                 case "fika.reject":
                     Rejected = true;

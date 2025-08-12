@@ -107,6 +107,7 @@ public static class FikaBackendUtils
     }
     public static string GroupId { get; internal set; }
     public static string RaidCode { get; internal set; }
+    public static Guid ServerGuid { get; internal set; }
     public static RaidTransitionInfoClass TransitData
     {
         get
@@ -172,7 +173,8 @@ public static class FikaBackendUtils
         NotificationManagerClass.DisplayWarningNotification(LocaleUtils.STARTING_RAID.Localized());
         long timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
         string raidCode = GenerateRaidCode(6);
-        CreateMatch body = new(raidCode, profileId, hostUsername, IsSpectator, timestamp, raidSettings, FikaPlugin.Crc32,
+        Guid serverGuid = Guid.NewGuid();
+        CreateMatch body = new(raidCode, profileId, serverGuid, hostUsername, IsSpectator, timestamp, raidSettings, FikaPlugin.Crc32,
             raidSettings.Side, raidSettings.SelectedDateTime);
 
         await FikaRequestHandler.RaidCreate(body);
@@ -181,6 +183,7 @@ public static class FikaBackendUtils
         ClientType = EClientType.Host;
 
         RaidCode = raidCode;
+        ServerGuid = serverGuid;
     }
 
     internal static string GenerateRaidCode(int length)
