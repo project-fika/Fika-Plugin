@@ -5,6 +5,7 @@ using EFT;
 using EFT.InventoryLogic;
 using EFT.InventoryLogic.Operations;
 using Fika.Core.Main.Players;
+using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.Player;
 using JetBrains.Annotations;
 using System.Threading.Tasks;
@@ -54,16 +55,8 @@ public class BotInventoryController : PlayerInventoryController
 #if DEBUG
             FikaPlugin.Instance.FikaLogger.LogInfo($"Sending bot operation {operation.GetType()} from {_fikaBot.Profile.Nickname}");
 #endif
-            EFTWriterClass eftWriter = new();
-            eftWriter.WritePolymorph(operation.ToDescriptor());
-            InventoryPacket packet = new()
-            {
-                NetId = _fikaBot.NetId,
-                CallbackId = operation.Id,
-                OperationBytes = eftWriter.ToArray()
-            };
-
-            _fikaBot.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+            _fikaBot.PacketSender.NetworkManager.SendGenericPacket(EGenericSubPacketType.InventoryOperation,
+                InventoryPacket.FromValue(_fikaBot.NetId, operation), true);
         }
         HandleOperation(operation, callback).HandleExceptions();
     }

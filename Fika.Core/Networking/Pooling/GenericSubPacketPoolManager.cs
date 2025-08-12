@@ -1,5 +1,6 @@
 ﻿using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.Communication;
+using Fika.Core.Networking.Packets.Player;
 using Fika.Core.Networking.Packets.World;
 using System;
 using System.Collections.Generic;
@@ -40,7 +41,9 @@ internal sealed class GenericSubPacketPoolManager : BasePacketPoolManager<EGener
             { EGenericSubPacketType.DisarmTripwire, DisarmTripwire.CreateInstance },
             { EGenericSubPacketType.MuffledState, MuffledState.CreateInstance },
             { EGenericSubPacketType.SpawnBTR, BtrSpawn.CreateInstance },
-            { EGenericSubPacketType.CharacterSync, CharacterSyncPacket.CreateInstance }
+            { EGenericSubPacketType.CharacterSync, CharacterSyncPacket.CreateInstance },
+            { EGenericSubPacketType.InventoryOperation, InventoryPacket.CreateInstance },
+            { EGenericSubPacketType.OperationCallback, OperationCallbackPacket.CreateInstance }
         };
     }
 }

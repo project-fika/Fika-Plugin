@@ -150,17 +150,8 @@ public sealed class FikaHostInventoryController : Player.PlayerOwnerInventoryCon
         if (vmethod_0(handler.operation))
         {
             handler.operation.method_1(handler.HandleResult);
-
-            EFTWriterClass eftWriter = new();
-            eftWriter.WritePolymorph(operation.ToDescriptor());
-            InventoryPacket packet = new()
-            {
-                NetId = _fikaPlayer.NetId,
-                CallbackId = operation.Id,
-                OperationBytes = eftWriter.ToArray()
-            };
-
-            _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+            _fikaPlayer.PacketSender.NetworkManager.SendGenericPacket(EGenericSubPacketType.InventoryOperation,
+                InventoryPacket.FromValue(_fikaPlayer.NetId, operation), true);
             return;
         }
         handler.operation.Dispose();

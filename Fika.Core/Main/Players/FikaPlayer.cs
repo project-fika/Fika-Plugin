@@ -1145,11 +1145,11 @@ public class FikaPlayer : LocalPlayer
     {
         if (OperationCallbacks.TryGetValue(operationCallbackPacket.CallbackId, out Action<ServerOperationStatus> callback))
         {
-            if (operationCallbackPacket.OperationStatus != EOperationStatus.Started)
+            if (operationCallbackPacket.Status != EOperationStatus.Started)
             {
                 OperationCallbacks.Remove(operationCallbackPacket.CallbackId);
             }
-            ServerOperationStatus status = new(operationCallbackPacket.OperationStatus, operationCallbackPacket.Error);
+            ServerOperationStatus status = new(operationCallbackPacket.Status, operationCallbackPacket.Error);
             callback(status);
         }
         else
@@ -1581,7 +1581,7 @@ public class FikaPlayer : LocalPlayer
         internal void SendPacket()
         {
             _fikaPlayer.CommonPacket.Type = ECommonSubPacketType.Proceed;
-            _fikaPlayer.CommonPacket.SubPacket = ProceedPacket.FromValue(_bodyParts, _meds.Id, 0f, _animationVariant,
+            _fikaPlayer.CommonPacket.SubPacket = ProceedPacket.FromValue(_bodyParts, _meds.Id, 1f, _animationVariant,
                 EProceedType.MedsClass, false);
             _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _fikaPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
         }

@@ -49,5 +49,6 @@ public class GenericPacket : INetReusable
     {
         GenericSubPacketPoolManager.Instance.ReturnPacket(Type, SubPacket);
         SubPacket = null;
+        Type = default;
     }
 }

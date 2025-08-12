@@ -22,6 +22,7 @@ using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using static Fika.Core.Networking.Packets.Debug.CommandPacket;
 using static Fika.Core.Networking.Packets.World.ReconnectPacket;
@@ -548,6 +549,11 @@ public partial class FikaServer
 
     private void OnGenericPacketReceived(GenericPacket packet, NetPeer peer)
     {
+        if (packet.Type is EGenericSubPacketType.InventoryOperation)
+        {
+            OnInventoryPacketReceived((InventoryPacket)packet.SubPacket, peer);
+            return;
+        }
         packet.Execute();
     }
 
@@ -596,7 +602,6 @@ public partial class FikaServer
             using GClass1278 eftReader = PacketToEFTReaderAbstractClass.Get(packet.OperationBytes);
             try
             {
-                OperationCallbackPacket operationCallbackPacket;
                 if (playerToApply.InventoryController is Interface16 inventoryController)
                 {
                     BaseDescriptorClass descriptor = eftReader.ReadPolymorph<BaseDescriptorClass>();
@@ -608,11 +613,8 @@ public partial class FikaServer
                     if (result.Failed)
                     {
                         _logger.LogError($"ItemControllerExecutePacket::Operation conversion failed: {result.Error}");
-                        OperationCallbackPacket callbackPacket = new(playerToApply.NetId, packet.CallbackId, EOperationStatus.Failed)
-                        {
-                            Error = result.Error.ToString()
-                        };
-                        SendDataToPeer(ref callbackPacket, DeliveryMethod.ReliableOrdered, peer);
+                        SendGenericPacketToPeer(EGenericSubPacketType.OperationCallback,
+                            OperationCallbackPacket.FromValue(packet.NetId, packet.CallbackId, EOperationStatus.Failed, result.Error.ToString()), peer);
 
                         ResyncInventoryIdPacket resyncPacket = new(playerToApply.NetId);
                         SendDataToPeer(ref resyncPacket, DeliveryMethod.ReliableOrdered, peer);
@@ -620,10 +622,11 @@ public partial class FikaServer
                     }
 
                     InventoryOperationHandler handler = new(result, packet.CallbackId, packet.NetId, peer, this);
-                    operationCallbackPacket = new(playerToApply.NetId, packet.CallbackId, EOperationStatus.Started);
-                    SendDataToPeer(ref operationCallbackPacket, DeliveryMethod.ReliableOrdered, peer);
+                    SendGenericPacketToPeer(EGenericSubPacketType.OperationCallback,
+                            OperationCallbackPacket.FromValue(packet.NetId, packet.CallbackId, EOperationStatus.Started), peer);
 
-                    SendData(ref packet, DeliveryMethod.ReliableOrdered, peer);
+                    SendGenericPacket(EGenericSubPacketType.InventoryOperation, packet,
+                        true, peer);
                     handler.OperationResult.Value.method_1(handler.HandleResult);
                 }
                 else
@@ -634,11 +637,8 @@ public partial class FikaServer
             catch (Exception exception)
             {
                 _logger.LogError($"ItemControllerExecutePacket::Exception thrown: {exception}");
-                OperationCallbackPacket callbackPacket = new(playerToApply.NetId, packet.CallbackId, EOperationStatus.Failed)
-                {
-                    Error = exception.Message
-                };
-                SendDataToPeer(ref callbackPacket, DeliveryMethod.ReliableOrdered, peer);
+                SendGenericPacketToPeer(EGenericSubPacketType.OperationCallback,
+                            OperationCallbackPacket.FromValue(packet.NetId, packet.CallbackId, EOperationStatus.Failed, exception.Message), peer);
 
                 ResyncInventoryIdPacket resyncPacket = new(playerToApply.NetId);
                 SendDataToPeer(ref resyncPacket, DeliveryMethod.ReliableOrdered, peer);
@@ -654,23 +654,22 @@ public partial class FikaServer
         }
     }
 
-    private class InventoryOperationHandler(OperationDataStruct operationResult, uint operationId, int netId, NetPeer peer, FikaServer server)
+    private class InventoryOperationHandler(OperationDataStruct operationResult, ushort operationId, int netId, NetPeer peer, FikaServer server)
     {
         public OperationDataStruct OperationResult = operationResult;
-        private readonly uint _operationId = operationId;
+        private readonly ushort _operationId = operationId;
         private readonly int _netId = netId;
         private readonly NetPeer _peer = peer;
         private readonly FikaServer _server = server;
 
         internal void HandleResult(IResult result)
         {
-            OperationCallbackPacket operationCallbackPacket;
-
             if (!result.Succeed)
             {
                 _server._logger.LogError($"Error in operation: {result.Error ?? "An unknown error has occured"}");
-                operationCallbackPacket = new(_netId, _operationId, EOperationStatus.Failed, result.Error ?? "An unknown error has occured");
-                _server.SendDataToPeer(ref operationCallbackPacket, DeliveryMethod.ReliableOrdered, _peer);
+                _server.SendGenericPacketToPeer(EGenericSubPacketType.OperationCallback,
+                            OperationCallbackPacket.FromValue(_netId, _operationId, EOperationStatus.Failed,
+                            result.Error ?? "An unknown error has occured"), _peer);
 
                 ResyncInventoryIdPacket resyncPacket = new(_netId);
                 _server.SendDataToPeer(ref resyncPacket, DeliveryMethod.ReliableOrdered, _peer);
@@ -678,8 +677,8 @@ public partial class FikaServer
                 return;
             }
 
-            operationCallbackPacket = new(_netId, _operationId, EOperationStatus.Succeeded);
-            _server.SendDataToPeer(ref operationCallbackPacket, DeliveryMethod.ReliableOrdered, _peer);
+            _server.SendGenericPacketToPeer(EGenericSubPacketType.OperationCallback,
+                            OperationCallbackPacket.FromValue(_netId, _operationId, EOperationStatus.Succeeded), _peer);
         }
     }
 }

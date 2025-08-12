@@ -68,7 +68,17 @@ public enum EGenericSubPacketType : byte
     /// <summary>
     /// Sync characters with server
     /// </summary>
-    CharacterSync
+    CharacterSync,
+
+    /// <summary>
+    /// Inventory operation
+    /// </summary>
+    InventoryOperation,
+
+    /// <summary>
+    /// Callback status for operation
+    /// </summary>
+    OperationCallback
 
     /// <summary>
     /// Train synchronization event (commented out).

@@ -686,6 +686,16 @@ public partial class FikaClient
 
     private void OnGenericPacketReceived(GenericPacket packet)
     {
+        if (packet.Type is EGenericSubPacketType.InventoryOperation)
+        {
+            OnInventoryPacketReceived((InventoryPacket)packet.SubPacket);
+            return;
+        }
+        if (packet.Type is EGenericSubPacketType.OperationCallback)
+        {
+            OnOperationCallbackPacketReceived((OperationCallbackPacket)packet.SubPacket);
+            return;
+        }
         packet.Execute();
     }
 
@@ -724,7 +734,7 @@ public partial class FikaClient
     {
         if (_coopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer playerToApply))
         {
-            HandleInventoryPacket(ref packet, playerToApply);
+            HandleInventoryPacket(packet, playerToApply);
         }
     }
 

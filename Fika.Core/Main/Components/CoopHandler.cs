@@ -8,6 +8,7 @@ using Fika.Core.Main.ObservedClasses;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
+using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.Communication;
 using System;
 using System.Collections;
@@ -192,7 +193,7 @@ public class CoopHandler : MonoBehaviour
 
     private void SyncPlayersWithClients()
     {
-        Singleton<IFikaNetworkManager>.Instance.SendGenericPacket(Networking.Packets.EGenericSubPacketType.CharacterSync,
+        Singleton<IFikaNetworkManager>.Instance.SendGenericPacket(EGenericSubPacketType.CharacterSync,
             CharacterSyncPacket.FromValue(Players), true);
     }
 

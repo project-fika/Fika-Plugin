@@ -249,10 +249,8 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
         RegisterCustomType(FikaSerializationExtensions.PutAirplaneDataPacketStruct, FikaSerializationExtensions.GetAirplaneDataPacketStruct);
         RegisterCustomType(FikaSerializationExtensions.PutLootSyncStruct, FikaSerializationExtensions.GetLootSyncStruct);
 
-        RegisterPacket<InventoryPacket>(OnInventoryPacketReceived);
         RegisterPacket<InformationPacket>(OnInformationPacketReceived);
         RegisterPacket<SendCharacterPacket>(OnSendCharacterPacketReceived);
-        RegisterPacket<OperationCallbackPacket>(OnOperationCallbackPacketReceived);
         RegisterPacket<TextMessagePacket>(OnTextMessagePacketReceived);
         RegisterPacket<QuestConditionPacket>(OnQuestConditionPacketReceived);
         RegisterPacket<QuestItemPacket>(OnQuestItemPacketReceived);
@@ -615,7 +613,7 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
         _logger.LogInfo($"Packet loss: {_netClient.Statistics.PacketLossPercent}%");
     }
 
-    private void HandleInventoryPacket(ref InventoryPacket packet, FikaPlayer player)
+    private void HandleInventoryPacket(InventoryPacket packet, FikaPlayer player)
     {
         if (packet.OperationBytes.Length == 0)
         {

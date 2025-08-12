@@ -400,7 +400,6 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         RegisterCustomType(FikaSerializationExtensions.PutAirplaneDataPacketStruct, FikaSerializationExtensions.GetAirplaneDataPacketStruct);
         RegisterCustomType(FikaSerializationExtensions.PutLootSyncStruct, FikaSerializationExtensions.GetLootSyncStruct);
 
-        RegisterPacket<InventoryPacket, NetPeer>(OnInventoryPacketReceived);
         RegisterPacket<InformationPacket, NetPeer>(OnInformationPacketReceived);
         RegisterPacket<SendCharacterPacket, NetPeer>(OnSendCharacterPacketReceived);
         RegisterPacket<TextMessagePacket, NetPeer>(OnTextMessagePacketReceived);
@@ -651,6 +650,14 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         SendNetReusable(ref packet, DeliveryMethod.ReliableOrdered, multicast, peerToIgnore);
     }
 
+    public void SendGenericPacketToPeer(EGenericSubPacketType type, IPoolSubPacket subpacket, NetPeer peer)
+    {
+        GenericPacket packet = _genericPacket;
+        packet.Type = type;
+        packet.SubPacket = subpacket;
+        SendNetReusableToPeer(ref packet, DeliveryMethod.ReliableOrdered, peer);
+    }
+
     public void SendNetReusable<T>(ref T packet, DeliveryMethod deliveryMethod, bool multicast = false, NetPeer peerToIgnore = null) where T : INetReusable
     {
         _dataWriter.Reset();
@@ -658,6 +665,17 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
 
         _packetProcessor.WriteNetReusable(_dataWriter, ref packet);
         _netServer.SendToAll(_dataWriter.AsReadOnlySpan, deliveryMethod, peerToIgnore);
+
+        packet.Clear();
+    }
+
+    public void SendNetReusableToPeer<T>(ref T packet, DeliveryMethod deliveryMethod, NetPeer peer) where T : INetReusable
+    {
+        _dataWriter.Reset();
+        _dataWriter.PutEnum(EPacketType.Serializable);
+
+        _packetProcessor.WriteNetReusable(_dataWriter, ref packet);
+        peer.Send(_dataWriter.AsReadOnlySpan, deliveryMethod);
 
         packet.Clear();
     }

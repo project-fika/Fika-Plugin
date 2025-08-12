@@ -143,7 +143,6 @@ public sealed class ClientInventoryController : Player.PlayerOwnerInventoryContr
             return;
         }
 
-        EFTWriterClass eftWriter = new();
         ClientInventoryOperationHandler handler = new()
         {
             Operation = operation,
@@ -151,20 +150,12 @@ public sealed class ClientInventoryController : Player.PlayerOwnerInventoryContr
             InventoryController = this
         };
 
-        uint operationNum = AddOperationCallback(operation, handler.ReceiveStatusFromServer);
-        eftWriter.WritePolymorph(operation.ToDescriptor());
-        InventoryPacket packet = new()
-        {
-            NetId = _fikaPlayer.NetId,
-            CallbackId = operationNum,
-            OperationBytes = eftWriter.ToArray()
-        };
-
+        ushort operationNum = AddOperationCallback(operation, handler.ReceiveStatusFromServer);
+        _fikaPlayer.PacketSender.NetworkManager.SendGenericPacket(EGenericSubPacketType.InventoryOperation,
+                InventoryPacket.FromValue(_fikaPlayer.NetId, operation));
 #if DEBUG
         ConsoleScreen.Log($"InvOperation: {operation.GetType().Name}, Id: {operation.Id}");
 #endif
-
-        _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered);
     }
 
     public override bool HasCultistAmulet(out CultistAmuletItemClass amulet)
@@ -182,7 +173,7 @@ public sealed class ClientInventoryController : Player.PlayerOwnerInventoryContr
         return false;
     }
 
-    private uint AddOperationCallback(BaseInventoryOperationClass operation, Action<ServerOperationStatus> callback)
+    private ushort AddOperationCallback(BaseInventoryOperationClass operation, Action<ServerOperationStatus> callback)
     {
         ushort id = operation.Id;
         _fikaPlayer.OperationCallbacks.Add(id, callback);

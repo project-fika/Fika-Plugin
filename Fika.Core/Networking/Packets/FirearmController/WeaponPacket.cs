@@ -43,5 +43,6 @@ public class WeaponPacket : INetReusable
     {
         FirearmSubPacketPoolManager.Instance.ReturnPacket(Type, SubPacket);
         SubPacket = null;
+        Type = default;
     }
 }

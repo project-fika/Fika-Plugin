@@ -43,5 +43,6 @@ public class CommonPlayerPacket : INetReusable
     {
         CommonSubPacketPoolManager.Instance.ReturnPacket(Type, SubPacket);
         SubPacket = null;
+        Type = default;
     }
 }
