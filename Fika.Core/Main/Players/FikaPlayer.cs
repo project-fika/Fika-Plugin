@@ -1192,13 +1192,9 @@ public class FikaPlayer : LocalPlayer
     {
         if (!children)
         {
-            ArmorDamagePacket packet = new()
-            {
-                NetId = NetId,
-                ItemId = armor.Item.Id,
-                Durability = armor.Repairable.Durability
-            };
-            PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+            CommonPacket.Type = ECommonSubPacketType.ArmorDamage;
+            CommonPacket.SubPacket = ArmorDamagePacket.FromValue(armor.Item.Id, armor.Repairable.Durability);
+            Singleton<IFikaNetworkManager>.Instance.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
         }
     }
 

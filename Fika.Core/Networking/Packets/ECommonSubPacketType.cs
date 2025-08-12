@@ -66,6 +66,11 @@ public enum ECommonSubPacketType : byte
     Damage,
 
     /// <summary>
+    /// Armor durability update
+    /// </summary>
+    ArmorDamage,
+
+    /// <summary>
     /// Syncing health
     /// </summary>
     HealthSync

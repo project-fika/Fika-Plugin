@@ -249,7 +249,6 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
         RegisterCustomType(FikaSerializationExtensions.PutAirplaneDataPacketStruct, FikaSerializationExtensions.GetAirplaneDataPacketStruct);
         RegisterCustomType(FikaSerializationExtensions.PutLootSyncStruct, FikaSerializationExtensions.GetLootSyncStruct);
 
-        RegisterPacket<ArmorDamagePacket>(OnArmorDamagePacketReceived);
         RegisterPacket<InventoryPacket>(OnInventoryPacketReceived);
         RegisterPacket<InformationPacket>(OnInformationPacketReceived);
         RegisterPacket<SendCharacterPacket>(OnSendCharacterPacketReceived);

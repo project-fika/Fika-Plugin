@@ -736,14 +736,6 @@ public partial class FikaClient
         }
     }
 
-    private void OnArmorDamagePacketReceived(ArmorDamagePacket packet)
-    {
-        if (_coopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer playerToApply))
-        {
-            playerToApply.HandleArmorDamagePacket(packet);
-        }
-    }
-
     private void OnWeaponPacketReceived(WeaponPacket packet)
     {
         if (_coopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer playerToApply))

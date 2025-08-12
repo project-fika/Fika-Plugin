@@ -1,24 +1,49 @@
 ﻿using EFT;
+using Fika.Core.Main.Players;
+using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.Player;
 
-public struct ArmorDamagePacket : INetSerializable
+public class ArmorDamagePacket : IPoolSubPacket
 {
-    public int NetId;
+    private ArmorDamagePacket() { }
+
+    public static ArmorDamagePacket CreateInstance()
+    {
+        return new();
+    }
+
+    public static ArmorDamagePacket FromValue(MongoID itemId, float amount)
+    {
+        ArmorDamagePacket packet = CommonSubPacketPoolManager.Instance.GetPacket<ArmorDamagePacket>(ECommonSubPacketType.ArmorDamage);
+        packet.ItemId = itemId;
+        packet.Durability = amount;
+        return packet;
+    }
+
     public MongoID ItemId;
     public float Durability;
 
-    public void Deserialize(NetDataReader reader)
+    public void Execute(FikaPlayer player = null)
     {
-        NetId = reader.GetInt();
-        ItemId = reader.GetMongoID();
-        Durability = reader.GetFloat();
+        player.HandleArmorDamagePacket(this);
     }
 
-    public readonly void Serialize(NetDataWriter writer)
+    public void Deserialize(NetDataReader reader)
     {
-        writer.Put(NetId);
+        ItemId = reader.GetMongoID();
+        Durability = reader.GetFloat();
+    }    
+
+    public void Serialize(NetDataWriter writer)
+    {
         writer.PutMongoID(ItemId);
         writer.Put(Durability);
+    }
+
+    public void Dispose()
+    {
+        ItemId = default;
+        Durability = 0f;
     }
 }

@@ -654,14 +654,6 @@ public partial class FikaServer
         }
     }
 
-    private void OnArmorDamagePacketReceived(ArmorDamagePacket packet, NetPeer peer)
-    {
-        if (_coopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer playerToApply))
-        {
-            playerToApply.HandleArmorDamagePacket(packet);
-        }
-    }
-
     private void OnWeaponPacketReceived(WeaponPacket packet, NetPeer peer)
     {
         if (_coopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer playerToApply))

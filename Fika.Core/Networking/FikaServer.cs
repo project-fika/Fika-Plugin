@@ -400,7 +400,6 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         RegisterCustomType(FikaSerializationExtensions.PutAirplaneDataPacketStruct, FikaSerializationExtensions.GetAirplaneDataPacketStruct);
         RegisterCustomType(FikaSerializationExtensions.PutLootSyncStruct, FikaSerializationExtensions.GetLootSyncStruct);
 
-        RegisterPacket<ArmorDamagePacket, NetPeer>(OnArmorDamagePacketReceived);
         RegisterPacket<InventoryPacket, NetPeer>(OnInventoryPacketReceived);
         RegisterPacket<InformationPacket, NetPeer>(OnInformationPacketReceived);
         RegisterPacket<SendCharacterPacket, NetPeer>(OnSendCharacterPacketReceived);
