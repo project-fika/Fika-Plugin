@@ -236,8 +236,6 @@ public class FikaClient : MonoBehaviour, INetEventListener, IFikaNetworkManager
             await Task.Yield();
         } while (VOIPClient == null);
 
-        RegisterPacket<VOIPPacket>(OnVOIPPacketReceived);
-
         return;
     }
 
@@ -367,11 +365,6 @@ public class FikaClient : MonoBehaviour, INetEventListener, IFikaNetworkManager
 
             SendData(ref request, DeliveryMethod.ReliableOrdered);
         }
-    }
-
-    private void OnVOIPPacketReceived(VOIPPacket packet)
-    {
-        VOIPClient.NetworkReceivedPacket(new(packet.Data));
     }
 
     private void OnRequestPacketReceived(RequestPacket packet)

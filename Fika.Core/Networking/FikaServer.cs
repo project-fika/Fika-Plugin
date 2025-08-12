@@ -396,8 +396,6 @@ public class FikaServer : MonoBehaviour, INetEventListener, INatPunchListener, G
             } while (VOIPServer == null);
         }
 
-        RegisterPacket<VOIPPacket, NetPeer>(OnVOIPPacketReceived);
-
         return;
     }
 
@@ -498,11 +496,6 @@ public class FikaServer : MonoBehaviour, INetEventListener, INatPunchListener, G
 
         FikaHostWorld.LootSyncPackets.AddRange(packet.LootSyncStructs);
         SendReusableToAll(packet, DeliveryMethod.ReliableOrdered, peer);
-    }
-
-    private void OnVOIPPacketReceived(VOIPPacket packet, NetPeer peer)
-    {
-        VOIPServer.NetworkReceivedPacket(new(new RemotePeer(peer)), new(packet.Data));
     }
 
     private void OnRequestPacketReceived(RequestPacket packet, NetPeer peer)
@@ -1385,23 +1378,6 @@ public class FikaServer : MonoBehaviour, INetEventListener, INatPunchListener, G
         _dataWriter.PutEnum(EPacketType.VOIP);
         _dataWriter.Put(data.AsSpan());
         peer.Send(_dataWriter.AsReadOnlySpan, deliveryMethod);
-    }
-
-    public void SendVOIPPacket(ref VOIPPacket packet, NetPeer peer = null)
-    {
-        if (peer == null)
-        {
-            _logger.LogError("SendVOIPPacket: peer was null!");
-            return;
-        }
-
-        if (packet.Data == null)
-        {
-            _logger.LogError("SendVOIPPacket: data was null");
-            return;
-        }
-
-        SendDataToPeer(ref packet, DeliveryMethod.ReliableOrdered, peer);
     }
 
     public void OnPeerConnected(NetPeer peer)

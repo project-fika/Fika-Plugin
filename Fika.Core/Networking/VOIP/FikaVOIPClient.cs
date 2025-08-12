@@ -21,16 +21,7 @@ public class FikaVOIPClient(ICommsNetworkState network) : BaseClient<FikaVOIPSer
 
     public override void Disconnect()
     {
-        if (!_commsNet.Mode.IsServerEnabled())
-        {
-            Singleton<IFikaNetworkManager>.Instance.RegisterPacket<VOIPPacket>(OnVoicePacketReceived);
-        }
         base.Disconnect();
-    }
-
-    private void OnVoicePacketReceived(VOIPPacket packet)
-    {
-        // Do nothing
     }
 
     public override void SendVoiceData(ArraySegment<byte> encodedAudio)

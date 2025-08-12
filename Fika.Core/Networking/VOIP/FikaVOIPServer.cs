@@ -49,13 +49,7 @@ public class FikaVOIPServer(FikaCommsNetwork commsNetwork) : BaseServer<FikaVOIP
 
     public override void Disconnect()
     {
-        Singleton<IFikaNetworkManager>.Instance.RegisterPacket<VOIPPacket>(OnVoicePacketReceived);
         base.Disconnect();
-    }
-
-    private void OnVoicePacketReceived(VOIPPacket packet)
-    {
-        // Do nothing
     }
 
     protected override void SendReliable(FikaVOIPPeer connection, ArraySegment<byte> packet)
