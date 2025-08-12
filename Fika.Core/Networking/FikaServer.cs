@@ -11,16 +11,11 @@ using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
 using EFT.UI;
-using EFT.Vehicle;
 #if DEBUG
-using Fika.Core.ConsoleCommands;
 #endif
-using Fika.Core.Main.ClientClasses;
 using Fika.Core.Main.Components;
-using Fika.Core.Main.Factories;
 using Fika.Core.Main.GameMode;
 using Fika.Core.Main.HostClasses;
-using Fika.Core.Main.ObservedClasses;
 using Fika.Core.Main.ObservedClasses.Snapshotting;
 using Fika.Core.Main.Patches.VOIP;
 using Fika.Core.Main.Players;
@@ -33,11 +28,9 @@ using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.Backend;
 using Fika.Core.Networking.VOIP;
 using Fika.Core.UI.Custom;
-using HarmonyLib;
 using SPT.Common.Http;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -46,11 +39,9 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 #if DEBUG
-using static Fika.Core.Networking.Packets.Debug.CommandPacket;
 using Fika.Core.Networking.Packets.Debug;
 # endif
 using static Fika.Core.Networking.NetworkUtils;
-using static Fika.Core.Networking.Packets.World.ReconnectPacket;
 using Fika.Core.Networking.Packets.Player;
 using Fika.Core.Networking.Packets.World;
 using Fika.Core.Networking.Packets.FirearmController;
@@ -439,15 +430,15 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         RegisterNetReusable<WeaponPacket, NetPeer>(OnWeaponPacketReceived);
         RegisterNetReusable<CommonPlayerPacket, NetPeer>(OnCommonPlayerPacketReceived);
         RegisterNetReusable<GenericPacket, NetPeer>(OnGenericPacketReceived);
-    }    
+    }
 
 #if DEBUG
     private void AddDebugPackets()
     {
         RegisterPacket<SpawnItemPacket, NetPeer>(OnSpawnItemPacketReceived);
         RegisterPacket<CommandPacket, NetPeer>(OnCommandPacketReceived);
-    }    
-#endif    
+    }
+#endif
 
     public void SendAirdropContainerData(EAirdropType containerType, Item item, int ObjectId)
     {
@@ -499,32 +490,32 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
     {
         FlareSuccessPacket packet = new(profileId, canSendAirdrop);
         SendData(ref packet, DeliveryMethod.ReliableOrdered);
-    }    
+    }
 
-    private bool ValidateLocalIP(string LocalIP)
+    private bool ValidateLocalIP(string localIP)
     {
-        try
+        if (string.IsNullOrWhiteSpace(localIP))
         {
-            if (LocalIP.StartsWith("192.168") || LocalIP.StartsWith("10"))
-            {
-                return true;
-            }
-
-            //Check for RFC1918's 20 bit block.
-            int[] ip = Array.ConvertAll(LocalIP.Split('.'), int.Parse);
-
-            if (ip[0] == 172 && (ip[1] >= 16 && ip[1] <= 31))
-            {
-                return true;
-            }
-
             return false;
         }
-        catch (Exception ex)
+
+        if (!IPAddress.TryParse(localIP, out IPAddress address))
         {
-            _logger.LogError($"Error parsing {LocalIP}, exception: {ex}");
             return false;
         }
+
+        // Only check IPv4
+        if (address.AddressFamily != AddressFamily.InterNetwork)
+        {
+            return false;
+        }
+
+        byte[] bytes = address.GetAddressBytes();
+
+        return
+            bytes[0] == 10 ||                                       // 10.0.0.0/8
+            (bytes[0] == 192 && bytes[1] == 168) ||                 // 192.168.0.0/16
+            (bytes[0] == 172 && bytes[1] >= 16 && bytes[1] <= 31);  // 172.16.0.0/12
     }
 
     private async void NatIntroduceRoutine(string natPunchServerIP, int natPunchServerPort, string token, CancellationToken ct)
@@ -541,7 +532,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         }
 
         _logger.LogInfo("NatIntroduceRoutine ended.");
-    }    
+    }
 
     public int PopNetId()
     {
@@ -562,7 +553,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         {
             _fikaChat = FikaChatUIScript.Create();
         }
-    }    
+    }
 
     protected void Update()
     {
