@@ -24,10 +24,11 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+using Fika.Core.Networking.Open.Nat.Utils;
 using System;
 using System.Net;
 
-namespace Open.Nat;
+namespace Fika.Core.Networking.Open.Nat.Upnp;
 
 internal class UpnpNatDeviceInfo
 {

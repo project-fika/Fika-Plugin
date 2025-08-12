@@ -7,6 +7,7 @@ using Fika.Core.Main.Utils;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Http;
+using Fika.Core.Networking.Models;
 using Fika.Core.UI.Custom;
 using System;
 using System.Threading;

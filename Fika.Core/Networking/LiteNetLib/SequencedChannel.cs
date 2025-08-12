@@ -1,6 +1,6 @@
 using System;
 
-namespace LiteNetLib;
+namespace Fika.Core.Networking.LiteNetLib;
 
 internal sealed class SequencedChannel : BaseChannel
 {

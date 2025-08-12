@@ -1,7 +1,6 @@
-﻿using LiteNetLib.Utils;
-using System;
+﻿using System;
 
-namespace LiteNetLib;
+namespace Fika.Core.Networking.LiteNetLib;
 
 internal enum PacketProperty : byte
 {
@@ -67,13 +66,13 @@ internal sealed class NetPacket
     public PacketProperty Property
     {
         get => (PacketProperty)(RawData[0] & 0x1F);
-        set => RawData[0] = (byte)((RawData[0] & 0xE0) | (byte)value);
+        set => RawData[0] = (byte)(RawData[0] & 0xE0 | (byte)value);
     }
 
     public byte ConnectionNumber
     {
         get => (byte)((RawData[0] & 0x60) >> 5);
-        set => RawData[0] = (byte)((RawData[0] & 0x9F) | (value << 5));
+        set => RawData[0] = (byte)(RawData[0] & 0x9F | value << 5);
     }
 
     public ushort Sequence

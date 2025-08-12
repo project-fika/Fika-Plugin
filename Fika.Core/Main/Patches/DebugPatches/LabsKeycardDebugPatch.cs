@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace Fika.Core.Main.Patches.Debug;
+namespace Fika.Core.Main.Patches.DebugPatches;
 
 /// <summary>
 /// Removes the need for a Lab Keycard on debug builds

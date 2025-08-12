@@ -1,5 +1,5 @@
 ﻿using EFT.Communications;
-using Fika.Core.Utils;
+using Fika.Core.Main.Utils;
 using JsonType;
 using Newtonsoft.Json;
 using static Fika.Core.UI.FikaUIGlobals;

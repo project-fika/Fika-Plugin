@@ -11,7 +11,7 @@ using System.Collections;
 using System.Collections.Generic;
 using static EFT.Player;
 
-namespace Fika.Core.Main.ObservedClasses;
+namespace Fika.Core.Main.ObservedClasses.HandsControllers;
 
 public class ObservedFirearmController : FirearmController
 {

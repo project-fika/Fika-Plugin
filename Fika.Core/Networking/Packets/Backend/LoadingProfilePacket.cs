@@ -1,5 +1,5 @@
 ﻿using EFT;
-using LiteNetLib.Utils;
+using Fika.Core.Networking.LiteNetLib.Utils;
 using System.Collections.Generic;
 
 namespace Fika.Core.Networking.Packets.Backend;

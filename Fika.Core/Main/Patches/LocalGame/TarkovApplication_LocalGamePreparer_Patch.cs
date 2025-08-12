@@ -3,12 +3,13 @@ using EFT.Communications;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
+using Fika.Core.Networking.Models;
 using Fika.Core.Patching;
 using Fika.Core.UI.Models;
 using System.Linq;
 using System.Reflection;
 
-namespace Fika.Core.Main.Patches;
+namespace Fika.Core.Main.Patches.LocalGame;
 
 /// <summary>
 /// Created by: Lacyway

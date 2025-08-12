@@ -1,8 +1,9 @@
-﻿using K4os.Compression.LZ4.Engine;
-using K4os.Compression.LZ4.Internal;
+﻿using Fika.Core.Networking.LZ4.Engine;
+using Fika.Core.Networking.LZ4.Internal;
+using K4os.Compression.LZ4.Engine;
 using System;
 
-namespace K4os.Compression.LZ4.Encoders;
+namespace Fika.Core.Networking.LZ4.Encoders;
 
 // fast decoder context
 using LZ4Context = LL.LZ4_streamDecode_t;

@@ -6,7 +6,7 @@ using Fika.Core.Networking.Packets.World;
 using Fika.Core.Patching;
 using System.Reflection;
 
-namespace Fika.Core.Main.Patches;
+namespace Fika.Core.Main.Patches.BTR;
 
 public class BTRView_SyncViewFromServer_Patch : FikaPatch
 {

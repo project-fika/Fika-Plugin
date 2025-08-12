@@ -4,7 +4,7 @@ using EFT.UI.Matchmaker;
 using Fika.Core.Patching;
 using System.Reflection;
 
-namespace Fika.Core.Main.Patches;
+namespace Fika.Core.Main.Patches.Bugfixes;
 
 /// <summary>
 /// Borrowed from Tyfon's UI Fixes with permission, a patch that fixes a bug if you inspect a player during loading when the controller is instantiated <br/><br/>

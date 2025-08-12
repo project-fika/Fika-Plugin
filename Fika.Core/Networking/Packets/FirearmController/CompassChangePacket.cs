@@ -1,6 +1,5 @@
 ﻿using Fika.Core.Main.Players;
 using Fika.Core.Networking.Pooling;
-using LiteNetLib.Utils;
 using static EFT.Player;
 
 namespace Fika.Core.Networking.Packets.FirearmController;

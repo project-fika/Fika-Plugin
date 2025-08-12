@@ -1,7 +1,6 @@
-﻿using Fika.Core.Main.ObservedClasses;
+﻿using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Pooling;
-using LiteNetLib.Utils;
 
 namespace Fika.Core.Networking.Packets.FirearmController;
 

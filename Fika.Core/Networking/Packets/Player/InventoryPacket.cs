@@ -1,6 +1,4 @@
-﻿using LiteNetLib.Utils;
-
-namespace Fika.Core.Networking.Packets.Player;
+﻿namespace Fika.Core.Networking.Packets.Player;
 
 public struct InventoryPacket : INetSerializable
 {

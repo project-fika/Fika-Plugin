@@ -27,7 +27,7 @@
 using System;
 using System.Xml;
 
-namespace Open.Nat;
+namespace Fika.Core.Networking.Open.Nat.Upnp;
 
 internal abstract class ResponseMessageBase
 {

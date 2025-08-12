@@ -26,6 +26,8 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+using Fika.Core.Networking.Open.Nat.Discovery;
+using Fika.Core.Networking.Open.Nat.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,7 +35,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 
-namespace Open.Nat;
+namespace Fika.Core.Networking.Open.Nat.Pmp;
 
 internal class PmpSearcher : Searcher
 {

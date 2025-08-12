@@ -1,4 +1,4 @@
-﻿namespace LiteNetLib.Utils;
+﻿namespace Fika.Core.Networking.LiteNetLib.Utils;
 
 public interface INetSerializable
 {

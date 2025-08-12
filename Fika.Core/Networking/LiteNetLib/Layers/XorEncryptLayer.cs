@@ -2,7 +2,7 @@
 using System.Net;
 using System.Text;
 
-namespace LiteNetLib.Layers;
+namespace Fika.Core.Networking.LiteNetLib.Layers;
 
 public class XorEncryptLayer : PacketLayerBase
 {

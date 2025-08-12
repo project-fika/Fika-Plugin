@@ -2,7 +2,7 @@
 using Fika.Core.Main.GameMode;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Http;
-using LiteNetLib.Utils;
+using Fika.Core.Networking.Models;
 using System.Collections;
 using System.Net;
 using System.Net.Sockets;

@@ -1,4 +1,4 @@
-﻿using Fika.Core.Networking.Http;
+﻿using Fika.Core.Networking.Models.Headless;
 
 namespace Fika.Core.Networking.Websocket.Headless;
 

@@ -27,7 +27,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Open.Nat;
+namespace Fika.Core.Networking.Open.Nat.Upnp;
 
 class DiscoveryResponseMessage
 {

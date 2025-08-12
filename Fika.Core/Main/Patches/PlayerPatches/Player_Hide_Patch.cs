@@ -2,7 +2,7 @@
 using Fika.Core.Patching;
 using System.Reflection;
 
-namespace Fika.Core.Main.Patches;
+namespace Fika.Core.Main.Patches.PlayerPatches;
 
 public class Player_Hide_Patch : FikaPatch
 {

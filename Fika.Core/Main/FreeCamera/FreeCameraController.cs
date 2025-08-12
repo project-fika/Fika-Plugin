@@ -7,7 +7,6 @@ using Fika.Core.Main.GameMode;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.UI;
-using Fika.Core.Utils;
 using HarmonyLib;
 using Koenigz.PerfectCulling;
 using Koenigz.PerfectCulling.EFT;

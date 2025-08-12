@@ -4,6 +4,7 @@ using EFT.UI;
 using Fika.Core.Bundles;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
+using Fika.Core.Networking.Packets.Communication;
 using System;
 using System.Collections.Generic;
 using System.Text;

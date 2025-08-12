@@ -3,7 +3,7 @@ using Fika.Core.Main.Utils;
 using Fika.Core.Patching;
 using System.Reflection;
 
-namespace Fika.Core.Main.Patches;
+namespace Fika.Core.Main.Patches.LocalGame;
 
 internal class WaveSpawnScenario_Patch : FikaPatch
 {

@@ -1,8 +1,8 @@
-using LiteNetLib.Utils;
+using Fika.Core.Networking.LiteNetLib.Utils;
 using System;
 using System.Net;
 
-namespace LiteNetLib;
+namespace Fika.Core.Networking.LiteNetLib;
 
 internal sealed class NetConnectRequestPacket
 {

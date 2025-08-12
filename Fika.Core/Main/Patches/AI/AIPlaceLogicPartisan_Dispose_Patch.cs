@@ -2,7 +2,7 @@
 using System;
 using System.Reflection;
 
-namespace Fika.Core.Main.Patches;
+namespace Fika.Core.Main.Patches.AI;
 
 /// <summary>
 /// Fixes a live bug where there is no null check on the <see cref="AIPlaceInfo"/> during <see cref="AIPlaceLogicPartisan.Dispose"/>, causing a<see cref="NullReferenceException"/> if it is null

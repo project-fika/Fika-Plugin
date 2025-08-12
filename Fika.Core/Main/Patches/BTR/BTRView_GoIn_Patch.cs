@@ -13,7 +13,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Fika.Core.Main.Patches;
+namespace Fika.Core.Main.Patches.BTR;
 
 public class BTRView_GoIn_Patch : FikaPatch
 {

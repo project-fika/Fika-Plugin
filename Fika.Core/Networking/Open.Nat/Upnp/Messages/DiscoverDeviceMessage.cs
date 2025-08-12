@@ -28,7 +28,7 @@ using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
 
-namespace Open.Nat;
+namespace Fika.Core.Networking.Open.Nat.Upnp.Messages;
 
 internal static class DiscoverDeviceMessage
 {

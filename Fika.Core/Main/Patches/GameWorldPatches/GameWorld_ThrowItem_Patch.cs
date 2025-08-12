@@ -6,7 +6,7 @@ using Fika.Core.Patching;
 using System.Linq;
 using System.Reflection;
 
-namespace Fika.Core.Main.Patches;
+namespace Fika.Core.Main.Patches.GameWorldPatches;
 
 public class GameWorld_ThrowItem_Patch : FikaPatch
 {

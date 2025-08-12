@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace Fika.Core.Networking.Http;
+namespace Fika.Core.Networking.Models;
 
 [DataContract]
 public struct GetHostStunRequest

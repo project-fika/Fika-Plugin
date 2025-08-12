@@ -3,7 +3,7 @@ using HarmonyLib;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace Fika.Core.Main.Patches;
+namespace Fika.Core.Main.Patches.DebugPatches;
 
 class TasksExtensions_HandleFinishedTask_Patches
 {

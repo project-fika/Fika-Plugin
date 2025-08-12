@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace LiteNetLib;
+namespace Fika.Core.Networking.LiteNetLib;
 
 internal sealed class ReliableChannel : BaseChannel
 {
@@ -139,7 +139,7 @@ internal sealed class ReliableChannel : BaseChannel
                 int pendingIdx = pendingSeq % _windowSize;
                 int currentByte = NetConstants.ChanneledHeaderSize + pendingIdx / BitsInByte;
                 int currentBit = pendingIdx % BitsInByte;
-                if ((acksData[currentByte] & (1 << currentBit)) == 0)
+                if ((acksData[currentByte] & 1 << currentBit) == 0)
                 {
                     if (Peer.NetManager.EnableStatistics)
                     {
@@ -277,7 +277,7 @@ internal sealed class ReliableChannel : BaseChannel
             ackIdx = seq % _windowSize;
             ackByte = NetConstants.ChanneledHeaderSize + ackIdx / BitsInByte;
             ackBit = ackIdx % BitsInByte;
-            if ((_outgoingAcks.RawData[ackByte] & (1 << ackBit)) != 0)
+            if ((_outgoingAcks.RawData[ackByte] & 1 << ackBit) != 0)
             {
                 NetDebug.Write("[RR]ReliableInOrder duplicate");
                 //because _mustSendAcks == true

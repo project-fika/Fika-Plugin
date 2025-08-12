@@ -6,7 +6,6 @@ using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
-using LiteNetLib.Utils;
 using System;
 
 namespace Fika.Core.Networking.Packets.World;

@@ -26,7 +26,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-namespace Open.Nat;
+namespace Fika.Core.Networking.Open.Nat.EventArgs;
 
 internal class DeviceEventArgs : System.EventArgs
 {

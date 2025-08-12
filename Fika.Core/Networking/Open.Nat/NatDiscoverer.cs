@@ -1,10 +1,14 @@
+using Fika.Core.Networking.Open.Nat.Exceptions;
+using Fika.Core.Networking.Open.Nat.Pmp;
+using Fika.Core.Networking.Open.Nat.Upnp;
+using Fika.Core.Networking.Open.Nat.Utils;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Open.Nat;
+namespace Fika.Core.Networking.Open.Nat;
 
 /// <summary>
 /// 

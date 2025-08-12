@@ -8,7 +8,7 @@ using Fika.Core.Networking.Packets.World;
 using Fika.Core.Patching;
 using System.Reflection;
 
-namespace Fika.Core.Main.Patches;
+namespace Fika.Core.Main.Patches.BTR;
 
 internal class BTRVehicle_method_38_Patch : FikaPatch
 {

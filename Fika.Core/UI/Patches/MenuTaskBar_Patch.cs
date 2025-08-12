@@ -1,9 +1,9 @@
 ﻿using Comfort.Common;
 using EFT;
 using EFT.UI;
+using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Http;
 using Fika.Core.Patching;
-using Fika.Core.Utils;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;

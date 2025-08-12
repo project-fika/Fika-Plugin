@@ -28,13 +28,15 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+using Fika.Core.Networking.Open.Nat.Enums;
+using Fika.Core.Networking.Open.Nat.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace Open.Nat;
+namespace Fika.Core.Networking.Open.Nat;
 
 /// <summary>
 /// Represents a NAT device and provides access to the operation set that allows

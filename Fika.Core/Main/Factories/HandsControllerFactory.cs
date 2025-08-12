@@ -2,7 +2,7 @@
 
 using EFT;
 using EFT.InventoryLogic;
-using Fika.Core.Main.ObservedClasses;
+using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
 
 namespace Fika.Core.Main.Factories;

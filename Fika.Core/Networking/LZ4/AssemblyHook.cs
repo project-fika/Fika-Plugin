@@ -1,4 +1,4 @@
-namespace K4os.Compression.LZ4;
+namespace Fika.Core.Networking.LZ4;
 
 internal class AssemblyHook
 {

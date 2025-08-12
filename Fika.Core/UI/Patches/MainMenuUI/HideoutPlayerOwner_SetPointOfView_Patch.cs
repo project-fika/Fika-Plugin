@@ -3,7 +3,7 @@ using Fika.Core.Patching;
 using Fika.Core.UI.Custom;
 using System.Reflection;
 
-namespace Fika.Core.UI.Patches;
+namespace Fika.Core.UI.Patches.MainMenuUI;
 
 public class HideoutPlayerOwner_SetPointOfView_Patch : FikaPatch
 {

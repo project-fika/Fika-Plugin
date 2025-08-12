@@ -65,7 +65,7 @@ public class HostRunddansController(BackendConfigSettingsClass.GClass1583 settin
             Type = EventControllerEventPacket.EEventType.StateEvent,
             Event = stateEvent
         };
-        Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+        Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
     }
 
     private void NoRequiredItemNotification(Player player)
@@ -85,7 +85,7 @@ public class HostRunddansController(BackendConfigSettingsClass.GClass1583 settin
                 Type = RunddansMessagesEvent.EType.NoRequiredItem
             }
         };
-        Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+        Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
     }
 
     private void NotInteractableNotification(Player player)
@@ -105,6 +105,6 @@ public class HostRunddansController(BackendConfigSettingsClass.GClass1583 settin
                 Type = RunddansMessagesEvent.EType.NonInteractive
             }
         };
-        Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered);
+        Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
     }
 }

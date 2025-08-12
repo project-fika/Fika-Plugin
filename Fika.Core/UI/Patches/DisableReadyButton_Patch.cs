@@ -5,7 +5,7 @@ using EFT.UI.Matchmaker;
 using Fika.Core.Patching;
 using System.Reflection;
 
-namespace Fika.Core.UI;
+namespace Fika.Core.UI.Patches;
 
 /// <summary>
 /// Created by: Lacyway

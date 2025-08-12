@@ -1,4 +1,4 @@
-﻿namespace LiteNetLib;
+﻿namespace Fika.Core.Networking.LiteNetLib;
 
 public readonly ref struct PooledPacket
 {

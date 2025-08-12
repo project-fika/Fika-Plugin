@@ -6,7 +6,7 @@ using Fika.Core.Patching;
 using RootMotion.FinalIK;
 using System.Reflection;
 
-namespace Fika.Core.Main.Patches;
+namespace Fika.Core.Main.Patches.PlayerPatches;
 
 /// <summary>
 /// Fixes a bug with BSG's <see cref="SpatialAudioSystem"/> causing and endless spam of nullrefs, reducing the framerate for every player

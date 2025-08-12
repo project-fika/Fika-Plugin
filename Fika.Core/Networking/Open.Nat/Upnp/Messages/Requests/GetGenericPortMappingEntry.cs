@@ -28,7 +28,7 @@
 
 using System.Collections.Generic;
 
-namespace Open.Nat;
+namespace Fika.Core.Networking.Open.Nat.Upnp.Messages.Requests;
 
 internal class GetGenericPortMappingEntry : RequestMessageBase
 {

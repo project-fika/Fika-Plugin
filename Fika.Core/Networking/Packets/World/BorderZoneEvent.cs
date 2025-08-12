@@ -3,7 +3,6 @@ using EFT;
 using EFT.Interactive;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Pooling;
-using LiteNetLib.Utils;
 using System.Collections.Generic;
 
 namespace Fika.Core.Networking.Packets.World;

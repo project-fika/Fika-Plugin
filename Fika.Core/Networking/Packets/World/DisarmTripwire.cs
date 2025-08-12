@@ -4,7 +4,6 @@ using EFT.SynchronizableObjects;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Pooling;
-using LiteNetLib.Utils;
 
 namespace Fika.Core.Networking.Packets.World;
 

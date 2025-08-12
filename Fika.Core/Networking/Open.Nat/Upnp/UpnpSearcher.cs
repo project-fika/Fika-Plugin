@@ -26,6 +26,9 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+using Fika.Core.Networking.Open.Nat.Discovery;
+using Fika.Core.Networking.Open.Nat.Upnp.Messages;
+using Fika.Core.Networking.Open.Nat.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -36,7 +39,7 @@ using System.Text;
 using System.Threading;
 using System.Xml;
 
-namespace Open.Nat;
+namespace Fika.Core.Networking.Open.Nat.Upnp;
 
 internal class UpnpSearcher : Searcher
 {
@@ -177,7 +180,7 @@ internal class UpnpSearcher : Searcher
             if (_lastFetched.ContainsKey(endpoint.Address))
             {
                 var last = _lastFetched[endpoint.Address];
-                if ((DateTime.Now - last) < TimeSpan.FromSeconds(20))
+                if (DateTime.Now - last < TimeSpan.FromSeconds(20))
                     return null;
             }
             _lastFetched[endpoint.Address] = DateTime.Now;

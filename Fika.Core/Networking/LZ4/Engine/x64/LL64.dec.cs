@@ -11,9 +11,9 @@ using System.Runtime.CompilerServices;
 
 #if BIT32
 using reg_t = System.UInt32;
-using Mem = K4os.Compression.LZ4.Internal.Mem32;
+using Mem = Fika.Core.Networking.LZ4.Internal.x32.Mem32;
 #else
-using Mem = K4os.Compression.LZ4.Internal.Mem64;
+using Mem = Fika.Core.Networking.LZ4.Internal.x64.Mem64;
 #endif
 
 using size_t = System.UInt32;

@@ -1,6 +1,4 @@
-﻿using LiteNetLib.Utils;
-
-namespace Fika.Core.Networking.Packets.Backend;
+﻿namespace Fika.Core.Networking.Packets.Backend;
 
 public struct StatisticsPacket(int serverFps) : INetSerializable
 {

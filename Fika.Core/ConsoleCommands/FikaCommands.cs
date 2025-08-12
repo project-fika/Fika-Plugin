@@ -15,7 +15,7 @@ using System;
 using System.Collections.Generic;
 using static Fika.Core.Networking.Packets.Debug.CommandPacket;
 
-namespace Fika.Core.Console;
+namespace Fika.Core.ConsoleCommands;
 
 public class FikaCommands
 {

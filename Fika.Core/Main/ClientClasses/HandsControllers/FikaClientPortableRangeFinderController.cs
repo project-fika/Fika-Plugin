@@ -24,7 +24,7 @@ public class FikaClientPortableRangeFinderController : PortableRangeFinderContro
             HasCompassState = true,
             CompassState = isActive
         };
-        _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered, true);
+        _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
     }
 
     public override bool ExamineWeapon()
@@ -36,7 +36,7 @@ public class FikaClientPortableRangeFinderController : PortableRangeFinderContro
             {
                 ExamineWeapon = true
             };
-            _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered, true);
+            _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
         }
         return flag;
     }
@@ -52,7 +52,7 @@ public class FikaClientPortableRangeFinderController : PortableRangeFinderContro
                 HasAim = value,
                 AimState = isAiming
             };
-            _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, LiteNetLib.DeliveryMethod.ReliableOrdered, true);
+            _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace K4os.Compression.LZ4.Encoders;
+﻿namespace Fika.Core.Networking.LZ4.Encoders;
 
 /// <summary>
 /// Static class with factory method to create LZ4 encoders.

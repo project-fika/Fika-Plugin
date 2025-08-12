@@ -11,7 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace Fika.Core.Main.Patches;
+namespace Fika.Core.Main.Patches.Mines;
 
 /// <summary>
 /// This patch prevents a null exception when an <see cref="ObservedPlayer"/> is hit by a mine explosion
@@ -69,8 +69,8 @@ internal class Minefield_method_2_Patch : FikaPatch
             enumerable = enumerable.DistinctBy(FikaGlobals.GetBodyPartFromCollider).ToArray();
             enumerable = enumerable.Randomize();
 
-            int num3 = (isCollateral || first) ? UnityEngine.Random.Range(2, enumerable.Count()) : int.MaxValue;
-            float num4 = (isCollateral || first) ? firstExplosionDamage : secondExplosionDamage;
+            int num3 = isCollateral || first ? Random.Range(2, enumerable.Count()) : int.MaxValue;
+            float num4 = isCollateral || first ? firstExplosionDamage : secondExplosionDamage;
             int num5 = 0;
 
             foreach (BodyPartCollider bodyPartCollider in enumerable)

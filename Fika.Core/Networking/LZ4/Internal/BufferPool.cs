@@ -4,7 +4,7 @@ using System;
 using System.Buffers;
 using System.Runtime.CompilerServices;
 
-namespace K4os.Compression.LZ4.Internal;
+namespace Fika.Core.Networking.LZ4.Internal;
 
 /// <summary>
 /// Naive wrapper around ArrayPool. Makes calls if something should be pooled. 

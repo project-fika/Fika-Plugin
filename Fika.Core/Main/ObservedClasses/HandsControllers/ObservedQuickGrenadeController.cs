@@ -4,7 +4,7 @@ using EFT;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Packets;
 
-namespace Fika.Core.Main.ObservedClasses;
+namespace Fika.Core.Main.ObservedClasses.HandsControllers;
 
 /// <summary>
 /// This is only used by AI

@@ -4,7 +4,7 @@ using HarmonyLib;
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace Fika.Core.Main.Patches;
+namespace Fika.Core.Main.Patches.MovementContextPatches;
 
 /// <summary>
 /// Stops unnecessary static lookups to <see cref="BackendConfigAbstractClass.Config"/>

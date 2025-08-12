@@ -1,4 +1,4 @@
-namespace K4os.Compression.LZ4.Engine;
+namespace Fika.Core.Networking.LZ4.Engine;
 
 /// <summary>Algorithm selection.</summary>
 public enum Algorithm

@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace Fika.Core.Main.Patches;
+namespace Fika.Core.Main.Patches.Lighthouse;
 
 public class LighthouseTraderZone_Patches
 {
@@ -132,7 +132,7 @@ public class LighthouseTraderZone_Patches
         {
             if (FikaBackendUtils.IsClient)
             {
-                GameObject.Destroy(__instance);
+                UnityEngine.Object.Destroy(__instance);
                 return false;
             }
             return true;

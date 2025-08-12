@@ -7,7 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Fika.Core.Main.ObservedClasses;
+namespace Fika.Core.Main.ObservedClasses.HandsControllers;
 
 internal class ObservedMedsController : Player.MedsController
 {
@@ -187,7 +187,7 @@ internal class ObservedMedsController : Player.MedsController
                 {
                     variant = animationVariantsComponent.VariantsNumber;
                 }
-                int newAnim = (int)Mathf.Repeat((float)_animation, (float)variant);
+                int newAnim = (int)Mathf.Repeat(_animation, variant);
 
                 animator.SetAnimationVariant(newAnim);
             }

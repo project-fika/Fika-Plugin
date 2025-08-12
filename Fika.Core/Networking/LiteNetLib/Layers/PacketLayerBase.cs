@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace LiteNetLib.Layers;
+namespace Fika.Core.Networking.LiteNetLib.Layers;
 
 public abstract class PacketLayerBase
 {

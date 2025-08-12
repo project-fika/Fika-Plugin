@@ -1,6 +1,6 @@
 ﻿using EFT;
 using EFT.GlobalEvents;
-using LiteNetLib.Utils;
+using Fika.Core.Networking.LiteNetLib.Utils;
 
 namespace Fika.Core.Networking.Packets.Communication;
 

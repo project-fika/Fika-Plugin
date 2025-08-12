@@ -4,7 +4,7 @@ using System.Reflection;
 using static EFT.UI.InventoryScreen;
 using static Fika.Core.UI.FikaUIGlobals;
 
-namespace Fika.Core.UI.Patches;
+namespace Fika.Core.UI.Patches.MainMenuUI;
 
 public class GClass3664_ShowAction_Patch : FikaPatch
 {

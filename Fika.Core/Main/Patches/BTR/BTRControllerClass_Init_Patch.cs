@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Fika.Core.Main.Patches;
+namespace Fika.Core.Main.Patches.BTR;
 
 internal class BTRControllerClass_Init_Patch : FikaPatch
 {

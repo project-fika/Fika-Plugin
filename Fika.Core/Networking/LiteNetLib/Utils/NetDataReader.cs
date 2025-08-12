@@ -3,7 +3,7 @@ using System.Net;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace LiteNetLib.Utils;
+namespace Fika.Core.Networking.LiteNetLib.Utils;
 
 public class NetDataReader
 {
@@ -111,7 +111,7 @@ public class NetDataReader
 
     public void Get<T>(out T result) where T : struct, INetSerializable
     {
-        result = default(T);
+        result = default;
         result.Deserialize(this);
     }
 
@@ -750,7 +750,7 @@ public class NetDataReader
             return string.Empty;
 
         int actualSize = size - 1;
-        return (maxLength > 0 && NetDataWriter.UTF8Encoding.Value.GetCharCount(_data, _position + 2, actualSize) > maxLength) ?
+        return maxLength > 0 && NetDataWriter.UTF8Encoding.Value.GetCharCount(_data, _position + 2, actualSize) > maxLength ?
             string.Empty :
             NetDataWriter.UTF8Encoding.Value.GetString(_data, _position + 2, actualSize);
     }

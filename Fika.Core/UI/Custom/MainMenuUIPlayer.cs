@@ -1,4 +1,4 @@
-﻿using Fika.Core.Utils;
+﻿using Fika.Core.Main.Utils;
 using TMPro;
 using UnityEngine.UI;
 using static Fika.Core.UI.FikaUIGlobals;

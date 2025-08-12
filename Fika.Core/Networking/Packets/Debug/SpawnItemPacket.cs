@@ -1,5 +1,4 @@
 ﻿using EFT.InventoryLogic;
-using LiteNetLib.Utils;
 
 namespace Fika.Core.Networking.Packets.Debug;
 

@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace LiteNetLib.Utils;
+namespace Fika.Core.Networking.LiteNetLib.Utils;
 
 public class NetPacketProcessor
 {
@@ -44,7 +44,7 @@ public class NetPacketProcessor
                 {
                     if ((crc & 0x8000) != 0)
                     {
-                        crc = (ushort)((crc << 1) ^ poly);
+                        crc = (ushort)(crc << 1 ^ poly);
                     }
                     else
                     {

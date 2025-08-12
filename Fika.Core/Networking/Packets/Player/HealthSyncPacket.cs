@@ -3,7 +3,6 @@ using EFT.InventoryLogic;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Pooling;
-using LiteNetLib.Utils;
 using System.Collections.Generic;
 using static NetworkHealthSyncPacketStruct;
 using static NetworkHealthSyncPacketStruct.NetworkHealthExtraDataTypeStruct;

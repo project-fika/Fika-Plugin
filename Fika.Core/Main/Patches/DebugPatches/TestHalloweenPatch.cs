@@ -2,7 +2,7 @@
 using Fika.Core.Patching;
 using System.Reflection;
 
-namespace Fika.Core.Main.Patches;
+namespace Fika.Core.Main.Patches.DebugPatches;
 
 [DebugPatch]
 public class TestHalloweenPatch : FikaPatch

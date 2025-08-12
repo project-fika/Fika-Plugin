@@ -1,5 +1,4 @@
-﻿using LiteNetLib.Utils;
-using static Fika.Core.Networking.Packets.SubPackets;
+﻿using static Fika.Core.Networking.Packets.SubPackets;
 
 namespace Fika.Core.Networking.Packets.Communication;
 

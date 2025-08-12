@@ -2,6 +2,8 @@ using EFT;
 using Fika.Core.Main.Custom;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Models;
+using Fika.Core.Networking.Models.Admin;
+using Fika.Core.Networking.Models.Headless;
 using Fika.Core.Networking.Models.Presence;
 using Fika.Core.UI.Models;
 using Newtonsoft.Json;

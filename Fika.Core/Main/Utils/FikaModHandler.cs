@@ -4,10 +4,9 @@ using BepInEx.Logging;
 using Comfort.Common;
 using Diz.Utils;
 using EFT.UI;
-using Fika.Core.Main.Patches;
-using Fika.Core.Networking.Http;
+using Fika.Core.Main.Patches.Bugfixes;
+using Fika.Core.Networking.Models;
 using Fika.Core.Patching;
-using LiteNetLib.Utils;
 using Newtonsoft.Json;
 using SPT.Common.Http;
 using SPT.Custom.Utils;
@@ -16,7 +15,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace Fika.Core.Utils;
+namespace Fika.Core.Main.Utils;
 
 /// <summary>
 /// Class used to verify and handle other SPT mods

@@ -1,4 +1,4 @@
-﻿namespace K4os.Compression.LZ4.Encoders;
+﻿namespace Fika.Core.Networking.LZ4.Encoders;
 
 /// <summary>
 /// Independent block encoder. Produces larger files but uses less memory and

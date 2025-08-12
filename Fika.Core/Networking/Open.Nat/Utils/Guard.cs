@@ -1,6 +1,6 @@
 using System;
 
-namespace Open.Nat;
+namespace Fika.Core.Networking.Open.Nat.Utils;
 
 internal class Guard
 {

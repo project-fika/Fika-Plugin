@@ -8,6 +8,7 @@ using Fika.Core.Main.Utils;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Http;
+using Fika.Core.Networking.Models;
 using Fika.Core.Patching;
 using Fika.Core.UI.Custom;
 using HarmonyLib;
@@ -17,7 +18,7 @@ using System;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace Fika.Core.Main.Patches;
+namespace Fika.Core.Main.Patches.LocalGame;
 
 /// <summary>
 /// Created by: Paulov
@@ -173,7 +174,7 @@ public class TarkovApplication_LocalGameCreator_Patch : FikaPatch
         }
 
         await coopGame.InitPlayer(raidSettings.BotSettings, backendUrl);
-        GameObject.DestroyImmediate(MonoBehaviourSingleton<MenuUI>.Instance.gameObject);
+        UnityEngine.Object.DestroyImmediate(MonoBehaviourSingleton<MenuUI>.Instance.gameObject);
         ___mainMenuController?.Unsubscribe();
         bundleLock.MaxConcurrentOperations = 1;
         gameWorld.OnGameStarted();
@@ -188,7 +189,7 @@ public class TarkovApplication_LocalGameCreator_Patch : FikaPatch
 
     private static TimeSpan GetRaidMinutes(int defaultMinutes)
     {
-        return TimeSpan.FromSeconds((double)(60 * defaultMinutes));
+        return TimeSpan.FromSeconds(60 * defaultMinutes);
     }
 
     private class StartHandler(TarkovApplication tarkovApplication, Profile pmcProfile, Profile scavProfile,

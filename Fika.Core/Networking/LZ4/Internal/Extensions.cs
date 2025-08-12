@@ -1,11 +1,12 @@
 #nullable enable
 
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
 // ReSharper disable once CheckNamespace
 
-namespace System;
+namespace Fika.Core.Networking.LZ4.Internal;
 
 internal static class Extensions
 {

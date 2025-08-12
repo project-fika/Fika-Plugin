@@ -1,8 +1,7 @@
-﻿using LiteNetLib.Utils;
-using System.Net;
+﻿using System.Net;
 using System.Threading;
 
-namespace LiteNetLib;
+namespace Fika.Core.Networking.LiteNetLib;
 
 internal enum ConnectionRequestResult
 {

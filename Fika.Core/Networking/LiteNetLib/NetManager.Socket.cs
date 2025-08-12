@@ -1,7 +1,7 @@
 ﻿#if UNITY_2018_3_OR_NEWER
 #define UNITY_SOCKET_FIX
 #endif
-using LiteNetLib.Utils;
+using Fika.Core.Networking.LiteNetLib.Utils;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -9,7 +9,7 @@ using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Threading;
 
-namespace LiteNetLib;
+namespace Fika.Core.Networking.LiteNetLib;
 
 public partial class NetManager
 {

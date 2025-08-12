@@ -1,7 +1,7 @@
 using Fika.Core.Main.Components;
 using System.Runtime.Serialization;
 
-namespace Fika.Core.Networking.Http;
+namespace Fika.Core.Networking.Models;
 
 [DataContract]
 public struct PlayerSpawnRequest

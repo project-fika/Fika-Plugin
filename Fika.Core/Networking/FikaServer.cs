@@ -13,7 +13,7 @@ using EFT.SynchronizableObjects;
 using EFT.UI;
 using EFT.Vehicle;
 #if DEBUG
-using Fika.Core.Console;
+using Fika.Core.ConsoleCommands;
 #endif
 using Fika.Core.Main.ClientClasses;
 using Fika.Core.Main.Components;
@@ -33,10 +33,7 @@ using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.Backend;
 using Fika.Core.Networking.VOIP;
 using Fika.Core.UI.Custom;
-using Fika.Core.Utils;
 using HarmonyLib;
-using LiteNetLib.Utils;
-using Open.Nat;
 using SPT.Common.Http;
 using System;
 using System.Collections.Generic;
@@ -59,6 +56,11 @@ using Fika.Core.Networking.Packets.World;
 using Fika.Core.Networking.Packets.FirearmController;
 using Fika.Core.Networking.Packets.Communication;
 using Fika.Core.Networking.Pooling;
+using Fika.Core.Networking.LiteNetLib.Utils;
+using Fika.Core.Networking.Open.Nat;
+using Fika.Core.Networking.Open.Nat.Enums;
+using Fika.Core.Networking.Open.Nat.Exceptions;
+using Fika.Core.Networking.Models;
 
 namespace Fika.Core.Networking;
 

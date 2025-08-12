@@ -1,7 +1,7 @@
 ﻿using EFT;
 using System.Collections.Generic;
 
-namespace Fika.Core.Utils;
+namespace Fika.Core.Main.Utils;
 
 /// <summary>
 /// Utilities for locales/language

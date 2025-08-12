@@ -1,7 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-namespace LiteNetLib.Utils;
+namespace Fika.Core.Networking.LiteNetLib.Utils;
 
 public static class FastBitConverter
 {
@@ -81,7 +81,7 @@ public static class FastBitConverter
         buffer[offset + 1] = (byte)(data >> 48);
         buffer[offset    ] = (byte)(data >> 56);
 #else
-        buffer[offset] = (byte)(data);
+        buffer[offset] = (byte)data;
         buffer[offset + 1] = (byte)(data >> 8);
         buffer[offset + 2] = (byte)(data >> 16);
         buffer[offset + 3] = (byte)(data >> 24);
@@ -101,7 +101,7 @@ public static class FastBitConverter
         buffer[offset + 1] = (byte)(data >> 16);
         buffer[offset    ] = (byte)(data >> 24);
 #else
-        buffer[offset] = (byte)(data);
+        buffer[offset] = (byte)data;
         buffer[offset + 1] = (byte)(data >> 8);
         buffer[offset + 2] = (byte)(data >> 16);
         buffer[offset + 3] = (byte)(data >> 24);
@@ -115,7 +115,7 @@ public static class FastBitConverter
         buffer[offset + 1] = (byte)(data);
         buffer[offset    ] = (byte)(data >> 8);
 #else
-        buffer[offset] = (byte)(data);
+        buffer[offset] = (byte)data;
         buffer[offset + 1] = (byte)(data >> 8);
 #endif
     }

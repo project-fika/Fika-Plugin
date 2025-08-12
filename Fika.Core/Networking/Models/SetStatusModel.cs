@@ -1,7 +1,7 @@
 ﻿using System.Runtime.Serialization;
 using static Fika.Core.UI.Models.LobbyEntry;
 
-namespace Fika.Core.UI.Models;
+namespace Fika.Core.Networking.Models;
 
 [DataContract]
 public struct SetStatusModel

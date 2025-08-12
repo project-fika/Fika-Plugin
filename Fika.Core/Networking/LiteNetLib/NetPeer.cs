@@ -1,7 +1,7 @@
 ﻿#if DEBUG
 #define STATS_ENABLED
 #endif
-using LiteNetLib.Utils;
+using Fika.Core.Networking.LiteNetLib.Utils;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -10,7 +10,7 @@ using System.Net;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
-namespace LiteNetLib;
+namespace Fika.Core.Networking.LiteNetLib;
 
 /// <summary>
 /// Peer connection state
@@ -1245,7 +1245,7 @@ public class NetPeer : IPEndPoint
                 {
                     _pingTimer.Stop();
                     int elapsedMs = (int)_pingTimer.ElapsedMilliseconds;
-                    _remoteDelta = BitConverter.ToInt64(packet.RawData, 3) + (elapsedMs * TimeSpan.TicksPerMillisecond) / 2 - DateTime.UtcNow.Ticks;
+                    _remoteDelta = BitConverter.ToInt64(packet.RawData, 3) + elapsedMs * TimeSpan.TicksPerMillisecond / 2 - DateTime.UtcNow.Ticks;
                     UpdateRoundTripTime(elapsedMs);
                     NetManager.ConnectionLatencyUpdated(this, elapsedMs / 2);
                     NetDebug.Write($"[PP]Ping: {packet.Sequence} - {elapsedMs} - {_remoteDelta}");

@@ -30,7 +30,7 @@ using System;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
 
-namespace Open.Nat;
+namespace Fika.Core.Networking.Open.Nat.Exceptions;
 
 /// <summary>
 /// 

@@ -1,6 +1,6 @@
 ﻿using EFT.Airdrop;
 using EFT.SynchronizableObjects;
-using LiteNetLib.Utils;
+using Fika.Core.Networking.LiteNetLib.Utils;
 
 namespace Fika.Core.Networking.Packets.World;
 

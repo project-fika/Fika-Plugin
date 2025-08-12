@@ -9,7 +9,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Fika.Core.Main.Patches;
+namespace Fika.Core.Main.Patches.Artillery;
 
 public class ServerShellingControllerClass_method_0_Patch : FikaPatch
 {

@@ -5,7 +5,7 @@ using EFT.UI.Matchmaker;
 using Fika.Core.Main.Patches.VOIP;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
-using Fika.Core.Utils;
+using Fika.Core.Networking.Models;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;

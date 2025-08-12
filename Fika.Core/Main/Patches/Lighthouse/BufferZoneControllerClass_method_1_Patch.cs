@@ -5,7 +5,7 @@ using Fika.Core.Patching;
 using System;
 using System.Reflection;
 
-namespace Fika.Core.Main.Patches;
+namespace Fika.Core.Main.Patches.Lighthouse;
 
 internal class BufferZoneControllerClass_method_1_Patch : FikaPatch
 {

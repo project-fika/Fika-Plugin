@@ -3,7 +3,7 @@
 using EFT;
 using Fika.Core.Main.Players;
 
-namespace Fika.Core.Main.ObservedClasses;
+namespace Fika.Core.Main.ObservedClasses.HandsControllers;
 
 internal class ObservedEmptyHandsController : Player.EmptyHandsController
 {

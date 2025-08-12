@@ -2,9 +2,9 @@
 using EFT;
 using EFT.UI;
 using Fika.Core.Bundles;
+using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Models.Presence;
-using Fika.Core.Utils;
 using JsonType;
 using System;
 using System.Collections;

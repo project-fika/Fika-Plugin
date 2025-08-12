@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Reflection;
 
-namespace Fika.Core.Main.Patches;
+namespace Fika.Core.Main.Patches.Camera;
 
 public class WeaponManagerClass_method_12_Patch : FikaPatch
 {

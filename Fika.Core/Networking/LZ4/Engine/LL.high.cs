@@ -6,7 +6,7 @@
 // ReSharper disable RedundantCast
 // ReSharper disable CommentTypo
 
-using K4os.Compression.LZ4.Internal;
+using Fika.Core.Networking.LZ4.Internal;
 using System.Runtime.CompilerServices;
 using size_t = System.UInt32;
 

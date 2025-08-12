@@ -3,7 +3,7 @@
 using System;
 using System.Threading;
 
-namespace K4os.Compression.LZ4.Internal;
+namespace Fika.Core.Networking.LZ4.Internal;
 
 /// <summary>
 /// Skeleton for class with unmanaged resources.

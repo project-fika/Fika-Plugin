@@ -27,7 +27,7 @@
 using System.Collections.Generic;
 using System.Net;
 
-namespace Open.Nat;
+namespace Fika.Core.Networking.Open.Nat.Utils;
 
 internal interface IIPAddressesProvider
 {

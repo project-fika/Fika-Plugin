@@ -1,7 +1,7 @@
 using EFT;
 using System.Runtime.Serialization;
 
-namespace Fika.Core.Networking.Http;
+namespace Fika.Core.Networking.Models;
 
 [DataContract]
 public struct RaidSettingsResponse(bool metabolismDisabled, int playersSpawnPlace, int hourOfDay, int timeFlowType)

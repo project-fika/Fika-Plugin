@@ -1,8 +1,7 @@
 ﻿#if UNITY_2018_3_OR_NEWER
 #define UNITY_SOCKET_FIX
 #endif
-using LiteNetLib.Layers;
-using LiteNetLib.Utils;
+using Fika.Core.Networking.LiteNetLib.Utils;
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
@@ -12,7 +11,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 
-namespace LiteNetLib;
+namespace Fika.Core.Networking.LiteNetLib;
 
 public sealed class NetPacketReader : NetDataReader
 {

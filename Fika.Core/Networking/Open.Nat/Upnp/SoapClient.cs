@@ -24,6 +24,8 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+using Fika.Core.Networking.Open.Nat.Exceptions;
+using Fika.Core.Networking.Open.Nat.Utils;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -34,7 +36,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 
-namespace Open.Nat;
+namespace Fika.Core.Networking.Open.Nat.Upnp;
 
 internal class SoapClient
 {

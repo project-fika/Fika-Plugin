@@ -2,7 +2,7 @@
 using System.Net;
 using System.Threading;
 
-namespace LiteNetLib;
+namespace Fika.Core.Networking.LiteNetLib;
 
 //minimal hashset class from dotnet with some optimizations
 public partial class NetManager

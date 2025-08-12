@@ -3,7 +3,7 @@ using Fika.Core.Main.HostClasses;
 using Fika.Core.Patching;
 using System.Reflection;
 
-namespace Fika.Core.Main.Patches;
+namespace Fika.Core.Main.Patches.Airdrops;
 
 public class OfflineAirplaneServerLogicClass_UpdateOfflineClientLogic_Patch : FikaPatch
 {

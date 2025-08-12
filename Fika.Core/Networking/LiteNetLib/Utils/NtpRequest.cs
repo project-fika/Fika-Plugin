@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using System.Net.Sockets;
 
-namespace LiteNetLib.Utils;
+namespace Fika.Core.Networking.LiteNetLib.Utils;
 
 internal sealed class NtpRequest
 {

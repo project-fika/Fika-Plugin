@@ -1,7 +1,7 @@
-﻿using K4os.Compression.LZ4.Internal;
+﻿using Fika.Core.Networking.LZ4.Internal;
 using System;
 
-namespace K4os.Compression.LZ4.Encoders;
+namespace Fika.Core.Networking.LZ4.Encoders;
 
 /// <summary>
 /// Base class for LZ4 encoders. Provides basic functionality shared by

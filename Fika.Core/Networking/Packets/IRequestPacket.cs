@@ -1,6 +1,4 @@
-﻿using LiteNetLib.Utils;
-
-namespace Fika.Core.Networking.Packets;
+﻿namespace Fika.Core.Networking.Packets;
 
 /// <summary>
 /// Represents a request packet with handling for requests, responses, and serialization.

@@ -26,10 +26,11 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+using Fika.Core.Networking.Open.Nat.Enums;
 using System.Collections.Generic;
 using System.Net;
 
-namespace Open.Nat;
+namespace Fika.Core.Networking.Open.Nat.Upnp.Messages.Requests;
 
 internal class CreatePortMappingRequestMessage : RequestMessageBase
 {

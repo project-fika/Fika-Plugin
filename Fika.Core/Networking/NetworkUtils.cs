@@ -1,8 +1,8 @@
 ﻿#if DEBUG
 using Fika.Core.Main.Utils;
-# endif
-using K4os.Compression.LZ4;
-using LiteNetLib.Utils;
+using Fika.Core.Networking.LZ4;
+
+#endif
 using System;
 using System.Diagnostics;
 

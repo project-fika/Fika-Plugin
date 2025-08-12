@@ -2,7 +2,7 @@
 using Fika.Core.Patching;
 using System.Reflection;
 
-namespace Fika.Core.Main.Patches;
+namespace Fika.Core.Main.Patches.Mines;
 
 public class MineDirectional_OnTriggerEnter_Patch : FikaPatch
 {

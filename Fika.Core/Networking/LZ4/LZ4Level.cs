@@ -1,6 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
-namespace K4os.Compression.LZ4;
+namespace Fika.Core.Networking.LZ4;
 
 /// <summary>Compression level.</summary>
 public enum LZ4Level

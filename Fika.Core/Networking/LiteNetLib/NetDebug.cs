@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace LiteNetLib;
+namespace Fika.Core.Networking.LiteNetLib;
 
 public class InvalidPacketException : ArgumentException
 {

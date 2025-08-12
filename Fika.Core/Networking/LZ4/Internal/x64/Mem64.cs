@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 
-namespace K4os.Compression.LZ4.Internal;
+namespace Fika.Core.Networking.LZ4.Internal.x64;
 
 /// <summary>Unsafe memory operations.</summary>
 #if BIT32

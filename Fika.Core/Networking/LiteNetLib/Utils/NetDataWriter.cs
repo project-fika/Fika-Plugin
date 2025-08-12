@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 
-namespace LiteNetLib.Utils;
+namespace Fika.Core.Networking.LiteNetLib.Utils;
 
 public class NetDataWriter
 {

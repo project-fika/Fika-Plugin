@@ -1,10 +1,10 @@
-﻿using LiteNetLib.Utils;
+﻿using Fika.Core.Networking.LiteNetLib.Utils;
 using System;
 using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 
-namespace LiteNetLib;
+namespace Fika.Core.Networking.LiteNetLib;
 
 public enum NatAddressType
 {
@@ -169,7 +169,7 @@ public sealed class NatPunchModule
         if (UnsyncedEvents)
             return;
 
-        if (_natPunchListener == null || (_successEvents.IsEmpty && _requestEvents.IsEmpty && _responseEvents.IsEmpty))
+        if (_natPunchListener == null || _successEvents.IsEmpty && _requestEvents.IsEmpty && _responseEvents.IsEmpty)
             return;
 
         while (_successEvents.TryDequeue(out var evt))

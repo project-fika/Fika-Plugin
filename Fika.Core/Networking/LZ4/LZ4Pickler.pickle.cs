@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
-using K4os.Compression.LZ4.Internal;
+using Fika.Core.Networking.LZ4;
+using Fika.Core.Networking.LZ4.Internal;
 using System;
 using System.Buffers;
 using System.Runtime.CompilerServices;

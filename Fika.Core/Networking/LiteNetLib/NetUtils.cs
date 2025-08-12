@@ -5,7 +5,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 
-namespace LiteNetLib;
+namespace Fika.Core.Networking.LiteNetLib;
 
 /// <summary>
 /// Address type that you want to receive from NetUtils.GetLocalIp method
@@ -105,8 +105,8 @@ public static class NetUtils
                 foreach (UnicastIPAddressInformation ip in ipProps.UnicastAddresses)
                 {
                     var address = ip.Address;
-                    if ((ipv4 && address.AddressFamily == AddressFamily.InterNetwork) ||
-                        (ipv6 && address.AddressFamily == AddressFamily.InterNetworkV6))
+                    if (ipv4 && address.AddressFamily == AddressFamily.InterNetwork ||
+                        ipv6 && address.AddressFamily == AddressFamily.InterNetworkV6)
                         targetList.Add(address.ToString());
                 }
             }
@@ -117,8 +117,8 @@ public static class NetUtils
                 IPAddress[] addresses = Dns.GetHostEntry(Dns.GetHostName()).AddressList;
                 foreach (IPAddress ip in addresses)
                 {
-                    if ((ipv4 && ip.AddressFamily == AddressFamily.InterNetwork) ||
-                       (ipv6 && ip.AddressFamily == AddressFamily.InterNetworkV6))
+                    if (ipv4 && ip.AddressFamily == AddressFamily.InterNetwork ||
+                       ipv6 && ip.AddressFamily == AddressFamily.InterNetworkV6)
                         targetList.Add(ip.ToString());
                 }
             }

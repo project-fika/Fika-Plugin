@@ -1,6 +1,4 @@
-﻿using LiteNetLib.Utils;
-
-namespace Fika.Core.Networking.Packets.World;
+﻿namespace Fika.Core.Networking.Packets.World;
 
 public struct LootSyncPacket : INetSerializable
 {

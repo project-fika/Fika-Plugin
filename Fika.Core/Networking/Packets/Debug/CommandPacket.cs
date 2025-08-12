@@ -1,6 +1,4 @@
-﻿using LiteNetLib.Utils;
-
-namespace Fika.Core.Networking.Packets.Debug;
+﻿namespace Fika.Core.Networking.Packets.Debug;
 
 public class CommandPacket : INetSerializable
 {

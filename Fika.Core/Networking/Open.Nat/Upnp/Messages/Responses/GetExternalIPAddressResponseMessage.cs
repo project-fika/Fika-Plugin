@@ -26,10 +26,11 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+using Fika.Core.Networking.Open.Nat.Utils;
 using System.Net;
 using System.Xml;
 
-namespace Open.Nat;
+namespace Fika.Core.Networking.Open.Nat.Upnp.Messages.Responses;
 
 internal class GetExternalIPAddressResponseMessage : ResponseMessageBase
 {

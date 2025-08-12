@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace Fika.Core.Main.Patches;
+namespace Fika.Core.Main.Patches.PlayerPatches;
 
 /// <summary>
 /// This patch stops BSGs dogtag handling as it is poorly executed

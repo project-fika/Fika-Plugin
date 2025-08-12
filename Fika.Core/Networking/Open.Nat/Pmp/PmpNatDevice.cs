@@ -26,6 +26,9 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+using Fika.Core.Networking.Open.Nat.Enums;
+using Fika.Core.Networking.Open.Nat.Exceptions;
+using Fika.Core.Networking.Open.Nat.Utils;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -33,7 +36,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Open.Nat;
+namespace Fika.Core.Networking.Open.Nat.Pmp;
 
 internal sealed class PmpNatDevice : NatDevice
 {
@@ -209,7 +212,7 @@ internal sealed class PmpNatDevice : NatDevice
         catch (Exception e)
         {
             string type = create ? "create" : "delete";
-            string message = String.Format("Failed to {0} portmap (protocol={1}, private port={2})",
+            string message = string.Format("Failed to {0} portmap (protocol={1}, private port={2})",
                                            type,
                                            mapping.Protocol,
                                            mapping.PrivatePort);
@@ -279,7 +282,7 @@ internal sealed class PmpNatDevice : NatDevice
 
     public override string ToString()
     {
-        return String.Format("Local Address: {0}\nPublic IP: {1}\nLast Seen: {2}",
+        return string.Format("Local Address: {0}\nPublic IP: {1}\nLast Seen: {2}",
                              HostEndPoint.Address, _publicAddress, LastSeen);
     }
 }

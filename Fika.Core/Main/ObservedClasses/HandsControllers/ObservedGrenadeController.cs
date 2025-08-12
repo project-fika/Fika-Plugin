@@ -8,7 +8,7 @@ using Fika.Core.Networking.Packets;
 using System;
 using System.Collections.Generic;
 
-namespace Fika.Core.Main.ObservedClasses;
+namespace Fika.Core.Main.ObservedClasses.HandsControllers;
 
 internal class ObservedGrenadeController : Player.GrenadeHandsController
 {

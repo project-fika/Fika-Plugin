@@ -28,10 +28,12 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+using Fika.Core.Networking.Open.Nat.Enums;
+using Fika.Core.Networking.Open.Nat.Utils;
 using System;
 using System.Net;
 
-namespace Open.Nat;
+namespace Fika.Core.Networking.Open.Nat;
 
 enum MappingLifetime
 {
@@ -249,17 +251,17 @@ public class Mapping
         unchecked
         {
             var hashCode = PublicPort;
-            hashCode = (hashCode * 397) ^ (PrivateIP != null ? PrivateIP.GetHashCode() : 0);
-            hashCode = (hashCode * 397) ^ PrivatePort;
+            hashCode = hashCode * 397 ^ (PrivateIP != null ? PrivateIP.GetHashCode() : 0);
+            hashCode = hashCode * 397 ^ PrivatePort;
             return hashCode;
         }
     }
 
     /// <summary>
-    /// Returns a <see cref="System.String" /> that represents this instance.
+    /// Returns a <see cref="string" /> that represents this instance.
     /// </summary>
     /// <returns>
-    /// A <see cref="System.String" /> that represents this instance.
+    /// A <see cref="string" /> that represents this instance.
     /// </returns>
     public override string ToString()
     {

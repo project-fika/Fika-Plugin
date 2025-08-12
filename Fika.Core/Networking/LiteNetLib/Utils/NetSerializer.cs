@@ -4,7 +4,7 @@ using System.Net;
 using System.Reflection;
 using System.Runtime.Serialization;
 
-namespace LiteNetLib.Utils;
+namespace Fika.Core.Networking.LiteNetLib.Utils;
 
 public class InvalidTypeException : ArgumentException
 {

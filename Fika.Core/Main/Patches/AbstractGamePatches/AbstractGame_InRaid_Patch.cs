@@ -3,10 +3,10 @@ using Fika.Core.Main.GameMode;
 using Fika.Core.Patching;
 using System.Reflection;
 
-namespace Fika.Core.Main.Patches;
+namespace Fika.Core.Main.Patches.AbstractGamePatches;
 
 /// <summary>
-/// Used to support mods that rely on the <see cref="AbstractGame.InRaid"/> property, which normally casts to <see cref="EFT.LocalGame"/>
+/// Used to support mods that rely on the <see cref="AbstractGame.InRaid"/> property, which normally casts to <see cref="LocalGame"/>
 /// </summary>
 internal class AbstractGame_InRaid_Patch : FikaPatch
 {

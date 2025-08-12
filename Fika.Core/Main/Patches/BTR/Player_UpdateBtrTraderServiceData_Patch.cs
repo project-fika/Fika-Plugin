@@ -4,7 +4,7 @@ using Fika.Core.Patching;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace Fika.Core.Main.Patches;
+namespace Fika.Core.Main.Patches.BTR;
 
 public class Player_UpdateBtrTraderServiceData_Patch : FikaPatch
 {

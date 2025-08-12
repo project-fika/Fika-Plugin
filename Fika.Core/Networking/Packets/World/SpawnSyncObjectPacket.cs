@@ -1,5 +1,4 @@
 ﻿using EFT.SynchronizableObjects;
-using LiteNetLib.Utils;
 using System;
 using static Fika.Core.Networking.Packets.World.SpawnSyncObjectSubPackets;
 

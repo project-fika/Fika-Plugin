@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace LiteNetLib.Utils;
+namespace Fika.Core.Networking.LiteNetLib.Utils;
 
 /// <summary>
 ///   <para>PreserveAttribute prevents byte code stripping from removing a class, method, field, or property.</para>

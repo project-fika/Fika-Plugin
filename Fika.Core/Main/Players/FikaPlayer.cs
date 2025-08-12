@@ -18,6 +18,7 @@ using Fika.Core.Main.PacketHandlers;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
+using Fika.Core.Networking.Models;
 using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.Communication;
 using Fika.Core.Networking.Packets.FirearmController;
@@ -802,7 +803,7 @@ public class FikaPlayer : LocalPlayer
                 NetId = NetId,
                 Data = packet
             };
-            Singleton<FikaClient>.Instance.SendData(ref interactPacket, LiteNetLib.DeliveryMethod.ReliableOrdered);
+            Singleton<FikaClient>.Instance.SendData(ref interactPacket, DeliveryMethod.ReliableOrdered);
             if (Singleton<GameWorld>.Instance.TransitController is ClientTransitController transitController)
             {
                 transitController.InteractPacket = packet;

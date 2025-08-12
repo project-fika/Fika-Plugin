@@ -1,7 +1,7 @@
 ﻿using Fika.Core.Patching;
 using System.Reflection;
 
-namespace Fika.Core.Main.Patches;
+namespace Fika.Core.Main.Patches.Camera;
 
 public class WeaponManagerClass_ValidateScopeSmoothZoomUpdate_Patch : FikaPatch
 {

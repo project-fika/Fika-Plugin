@@ -1,6 +1,6 @@
 ﻿using System.Threading;
 
-namespace LiteNetLib;
+namespace Fika.Core.Networking.LiteNetLib;
 
 public sealed class NetStatistics
 {

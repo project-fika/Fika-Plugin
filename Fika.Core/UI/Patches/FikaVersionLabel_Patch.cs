@@ -6,7 +6,7 @@ using SPT.Common.Utils;
 using SPT.Custom.Models;
 using System.Reflection;
 
-namespace Fika.Core.EssentialPatches;
+namespace Fika.Core.UI.Patches;
 
 /// <summary>
 /// Originally developed by SPT team

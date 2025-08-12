@@ -32,7 +32,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 
-namespace Open.Nat;
+namespace Fika.Core.Networking.Open.Nat.Utils;
 
 internal static class StreamExtensions
 {

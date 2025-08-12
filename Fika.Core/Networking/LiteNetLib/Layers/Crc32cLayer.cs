@@ -1,8 +1,7 @@
-﻿using LiteNetLib.Utils;
-using System;
+﻿using System;
 using System.Net;
 
-namespace LiteNetLib.Layers;
+namespace Fika.Core.Networking.LiteNetLib.Layers;
 
 public sealed class Crc32cLayer : PacketLayerBase
 {

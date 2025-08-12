@@ -1,8 +1,9 @@
 #nullable enable
 
-using K4os.Compression.LZ4.Internal;
+using Fika.Core.Networking.LZ4.Internal;
+using K4os.Compression.LZ4.Engine;
 
-namespace K4os.Compression.LZ4.Engine;
+namespace Fika.Core.Networking.LZ4.Engine;
 
 /// <summary>
 /// Existence of this class is an admission of failure.

@@ -2,6 +2,7 @@
 
 using Diz.LanguageExtensions;
 using EFT;
+using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.ObservedClasses.MovementStates;
 using System;
 

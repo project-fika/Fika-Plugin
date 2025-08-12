@@ -28,7 +28,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Threading;
 
-namespace Open.Nat;
+namespace Fika.Core.Networking.Open.Nat.Discovery;
 
 internal interface ISearcher
 {

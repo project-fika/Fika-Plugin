@@ -1,9 +1,11 @@
 #nullable enable
 
+using Fika.Core.Networking.LZ4.Engine;
+using Fika.Core.Networking.LZ4.Internal;
 using K4os.Compression.LZ4.Engine;
 using System;
 
-namespace K4os.Compression.LZ4;
+namespace Fika.Core.Networking.LZ4;
 
 /// <summary>
 /// Static class exposing LZ4 block compression methods.

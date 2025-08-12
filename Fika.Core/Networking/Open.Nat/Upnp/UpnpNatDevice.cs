@@ -28,12 +28,17 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+using Fika.Core.Networking.Open.Nat.Enums;
+using Fika.Core.Networking.Open.Nat.Exceptions;
+using Fika.Core.Networking.Open.Nat.Upnp.Messages.Requests;
+using Fika.Core.Networking.Open.Nat.Upnp.Messages.Responses;
+using Fika.Core.Networking.Open.Nat.Utils;
 using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace Open.Nat;
+namespace Fika.Core.Networking.Open.Nat.Upnp;
 
 internal sealed class UpnpNatDevice : NatDevice
 {
@@ -470,7 +475,7 @@ internal sealed class UpnpNatDevice : NatDevice
     public override string ToString()
     {
         //GetExternalIP is blocking and can throw exceptions, can't use it here.
-        return String.Format(
+        return string.Format(
             "EndPoint: {0}\nControl Url: {1}\nService Type: {2}\nLast Seen: {3}",
             DeviceInfo.HostEndPoint, DeviceInfo.ServiceControlUri, DeviceInfo.ServiceType, LastSeen);
     }

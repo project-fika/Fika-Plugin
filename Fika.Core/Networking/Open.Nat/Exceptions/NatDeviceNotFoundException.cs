@@ -27,7 +27,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace Open.Nat;
+namespace Fika.Core.Networking.Open.Nat.Exceptions;
 
 /// <summary>
 /// 
