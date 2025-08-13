@@ -634,7 +634,10 @@ public partial class FikaServer
                     BaseDescriptorClass descriptor = eftReader.ReadPolymorph<BaseDescriptorClass>();
                     OperationDataStruct result = inventoryController.CreateOperationFromDescriptor(descriptor);
 #if DEBUG
-                    //ConsoleScreen.Log($"Received InvOperation: {result.Value.GetType().Name}, Id: {result.Value.Id}");
+                    if (result.Succeeded)
+                    {
+                        ConsoleScreen.Log($"Received InvOperation: {result.Value.GetType().Name}, Id: {result.Value.Id}"); 
+                    }
 #endif
 
                     if (result.Failed)

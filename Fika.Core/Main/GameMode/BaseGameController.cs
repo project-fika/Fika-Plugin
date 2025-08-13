@@ -240,18 +240,19 @@ public abstract class BaseGameController
         }
     }
 
-    public async Task CreateStashes()
+    public IEnumerator CreateStashes()
     {
+        WaitForSeconds waitForSeconds = new(0.5f);
         if (_gameWorld.TransitController != null)
         {
             while (_gameWorld.TransitController.TransferItemsController == null)
             {
-                await Task.Delay(100);
+                yield return waitForSeconds;
             }
 
             while (_gameWorld.TransitController.TransferItemsController.Stash == null)
             {
-                await Task.Delay(100);
+                yield return waitForSeconds;
             }
         }
 
@@ -259,12 +260,12 @@ public abstract class BaseGameController
         {
             while (_gameWorld.BtrController.TransferItemsController == null)
             {
-                await Task.Delay(100);
+                yield return waitForSeconds;
             }
 
             while (_gameWorld.BtrController.TransferItemsController.Stash == null)
             {
-                await Task.Delay(100);
+                yield return waitForSeconds;
             }
         }
 
@@ -291,7 +292,7 @@ public abstract class BaseGameController
                 }
             }
 
-            AsyncWorker.RunInMainTread(Singleton<FikaServer>.Instance.SendStashes);
+            Singleton<FikaServer>.Instance.SendStashes();
         }
         else
         {

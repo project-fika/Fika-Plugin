@@ -607,7 +607,7 @@ public class HostGameController : BaseGameController, IBotGame
         _localPlayer.PacketSender.Init();
 
         SyncTraps();
-        _ = Task.Run(CreateStashes);
+        _gameWorld.StartCoroutine(CreateStashes());
     }
 
     public override void CreateSpawnSystem(Profile profile)
