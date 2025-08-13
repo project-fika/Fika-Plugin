@@ -275,14 +275,14 @@ public abstract class BaseGameController
                 FikaPlayer player = _coopHandler.HumanPlayers[i];
                 try
                 {
-                    if (_gameWorld.TransitController != null)
-                    {
-                        _gameWorld.TransitController.TransferItemsController.InitPlayerStash(player);
-                    }
-
                     if (_gameWorld.BtrController != null)
                     {
                         _gameWorld.BtrController.TransferItemsController.InitPlayerStash(player);
+                    }
+
+                    if (_gameWorld.TransitController != null)
+                    {
+                        _gameWorld.TransitController.TransferItemsController.InitPlayerStash(player);
                     }
                 }
                 catch (Exception ex)
@@ -509,6 +509,7 @@ public abstract class BaseGameController
             GStruct137 btrSettings = mapSettings.Value;
             btrSettings.ChanceSpawn = 100;
             btrSettings.SpawnPeriod = new(5, 10);
+            btrSettings.MoveSpeed = 32f;
             settings.ServerMapBTRSettings[mapSettings.Key] = btrSettings;
 #endif
             gameWorld.BtrController = new BTRControllerClass(gameWorld);

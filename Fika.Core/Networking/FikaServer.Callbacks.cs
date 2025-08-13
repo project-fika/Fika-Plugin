@@ -437,11 +437,10 @@ public partial class FikaServer
             {
                 stashesPacket.HasBTR = true;
                 int length = gameWorld.BtrController.TransferItemsController.List_0.Count;
-                stashesPacket.BTRStashes = new StashItemClass[length + 1];
-                stashesPacket.BTRStashes[0] = gameWorld.BtrController.TransferItemsController.Stash;
+                stashesPacket.BTRStashes = new StashItemClass[length];
                 for (int i = 0; i < length; i++)
                 {
-                    stashesPacket.BTRStashes[i + 1] = gameWorld.BtrController.TransferItemsController.List_0[i];
+                    stashesPacket.BTRStashes[i] = gameWorld.BtrController.TransferItemsController.List_0[i];
                 }
             }
 
@@ -449,11 +448,10 @@ public partial class FikaServer
             {
                 stashesPacket.HasTransit = true;
                 int length = gameWorld.TransitController.TransferItemsController.List_0.Count;
-                stashesPacket.TransitStashes = new StashItemClass[length + 1];
-                stashesPacket.TransitStashes[0] = gameWorld.TransitController.TransferItemsController.Stash;
+                stashesPacket.TransitStashes = new StashItemClass[length];
                 for (int i = 0; i < length; i++)
                 {
-                    stashesPacket.TransitStashes[i + 1] = gameWorld.TransitController.TransferItemsController.List_0[i];
+                    stashesPacket.TransitStashes[i] = gameWorld.TransitController.TransferItemsController.List_0[i];
                 }
             }
 
@@ -636,7 +634,7 @@ public partial class FikaServer
                     BaseDescriptorClass descriptor = eftReader.ReadPolymorph<BaseDescriptorClass>();
                     OperationDataStruct result = inventoryController.CreateOperationFromDescriptor(descriptor);
 #if DEBUG
-                    ConsoleScreen.Log($"Received InvOperation: {result.Value.GetType().Name}, Id: {result.Value.Id}");
+                    //ConsoleScreen.Log($"Received InvOperation: {result.Value.GetType().Name}, Id: {result.Value.Id}");
 #endif
 
                     if (result.Failed)

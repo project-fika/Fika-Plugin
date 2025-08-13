@@ -36,10 +36,10 @@ internal class BTRControllerClass_Init_Patch : FikaPatch
 
         __result = __instance.method_5();
         __instance.TransferItemsController = new BTRTransferItemsControllerClass(___GameWorld_0, ___BtrglobalSettings_0, true);
-        /*if (FikaBackendUtils.IsClient)
+        if (FikaBackendUtils.IsClient)
         {
             __instance.TransferItemsController.InitItemControllerServer("656f0f98d80a697f855d34b1", "BTR");
-        }*/
+        }
         return false;
 
         /*if (FikaBackendUtils.IsServer)

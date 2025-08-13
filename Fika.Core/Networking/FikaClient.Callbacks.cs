@@ -44,13 +44,14 @@ public partial class FikaClient
                 if (gameWorld.BtrController != null)
                 {
                     for (int i = 0; i < packet.BTRStashes.Length; i++)
-                    {
-                        if (i == 0)
-                        {
-                            gameWorld.BtrController.TransferItemsController.Stash = packet.BTRStashes[i];
-                            continue;
-                        }
+                    {                        
                         gameWorld.BtrController.TransferItemsController.InitTransferContainer(packet.BTRStashes[i], "BTR");
+                        StashGridClass[] array = new StashGridClass[gameWorld.BtrController.TransferItemsController.Stash.Grids.Length + 1];
+                        gameWorld.BtrController.TransferItemsController.Stash.Grids.CopyTo(array, 0);
+                        array[^1] = new StashGridClass(packet.BTRStashes[i].Id,
+                            10, 10, true, false, [],
+                            gameWorld.BtrController.TransferItemsController.Stash, -1);
+                        gameWorld.BtrController.TransferItemsController.Stash.Grids = array;
                     }
                 }
                 else
@@ -64,13 +65,14 @@ public partial class FikaClient
                 if (gameWorld.TransitController != null)
                 {
                     for (int i = 0; i < packet.TransitStashes.Length; i++)
-                    {
-                        if (i == 0)
-                        {
-                            gameWorld.TransitController.TransferItemsController.Stash = packet.TransitStashes[i];
-                            continue;
-                        }
-                        gameWorld.TransitController.TransferItemsController.InitTransferContainer(packet.TransitStashes[i], "BTR"); 
+                    {                        
+                        gameWorld.TransitController.TransferItemsController.InitTransferContainer(packet.TransitStashes[i], "BTR");
+                        StashGridClass[] array = new StashGridClass[gameWorld.TransitController.TransferItemsController.Stash.Grids.Length + 1];
+                        gameWorld.TransitController.TransferItemsController.Stash.Grids.CopyTo(array, 0);
+                        array[^1] = new StashGridClass(packet.TransitStashes[i].Id,
+                            10, 10, true, false, [],
+                            gameWorld.TransitController.TransferItemsController.Stash, -1);
+                        gameWorld.TransitController.TransferItemsController.Stash.Grids = array;
                     }
                 }
                 else
