@@ -16,12 +16,12 @@ public struct BTRInteractionPacket(int netId) : INetSerializable
         IsResponse = reader.GetBool();
         if (IsResponse)
         {
-            Status = (EBtrInteractionStatus)reader.GetByte();
+            Status = reader.GetEnum<EBtrInteractionStatus>();
         }
         Data = new()
         {
             HasInteraction = reader.GetBool(),
-            InteractionType = (EInteractionType)reader.GetByte(),
+            InteractionType = reader.GetEnum<EInteractionType>(),
             SideId = reader.GetByte(),
             SlotId = reader.GetByte(),
             Fast = reader.GetBool()
@@ -34,10 +34,10 @@ public struct BTRInteractionPacket(int netId) : INetSerializable
         writer.Put(IsResponse);
         if (IsResponse)
         {
-            writer.Put((byte)Status);
+            writer.PutEnum(Status);
         }
         writer.Put(Data.HasInteraction);
-        writer.Put((byte)Data.InteractionType);
+        writer.PutEnum(Data.InteractionType);
         writer.Put(Data.SideId);
         writer.Put(Data.SlotId);
         writer.Put(Data.Fast);

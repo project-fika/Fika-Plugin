@@ -4,6 +4,7 @@ using EFT.Interactive;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.Generic;
+using Fika.Core.Networking.Packets.Generic.SubPackets;
 using Fika.Core.Networking.Packets.World;
 using System.Collections.Generic;
 
@@ -35,7 +36,20 @@ public class FikaHostWorld : World
             LootSyncStructs = new(8),
             RagdollPackets = new(8)
         };
+        WindowBreaker.OnWindowHitAction += hostWorld.WindowBreaker_OnWindowHitAction;
         return hostWorld;
+    }
+
+    public override void OnDestroy()
+    {
+        WindowBreaker.OnWindowHitAction -= WindowBreaker_OnWindowHitAction;
+        base.OnDestroy();
+    }
+
+    private void WindowBreaker_OnWindowHitAction(WindowBreaker windowBreaker, DamageInfoStruct damageInfo, WindowBreakingConfig.Crack crack, float angle)
+    {
+        _server.SendGenericPacket(EGenericSubPacketType.SyncableItem,
+            SyncableItemPacket.FromValue(windowBreaker.NetId, damageInfo.HitPoint), true);
     }
 
     protected void Update()

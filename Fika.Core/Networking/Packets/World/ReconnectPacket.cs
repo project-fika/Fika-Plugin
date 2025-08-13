@@ -28,7 +28,7 @@ public class ReconnectPacket : INetSerializable
         ProfileId = reader.GetString();
         if (!IsRequest)
         {
-            Type = (EReconnectDataType)reader.GetByte();
+            Type = reader.GetEnum<EReconnectDataType>();
             switch (Type)
             {
                 case EReconnectDataType.Throwable:
@@ -62,7 +62,7 @@ public class ReconnectPacket : INetSerializable
         writer.Put(ProfileId);
         if (!IsRequest)
         {
-            writer.Put((byte)Type);
+            writer.PutEnum(Type);
             switch (Type)
             {
                 case EReconnectDataType.Throwable:

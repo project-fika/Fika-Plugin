@@ -88,7 +88,12 @@ public enum EGenericSubPacketType : byte
     /// <summary>
     /// Sending character data
     /// </summary>
-    SendCharacter
+    SendCharacter,
+
+    /// <summary>
+    /// Syncable item, e.g. window or lamp
+    /// </summary>
+    SyncableItem
 
     /// <summary>
     /// Train synchronization event (commented out).

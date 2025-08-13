@@ -2,11 +2,10 @@
 using EFT;
 using EFT.Interactive;
 using Fika.Core.Main.Players;
-using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Pooling;
 using System.Collections.Generic;
 
-namespace Fika.Core.Networking.Packets.World;
+namespace Fika.Core.Networking.Packets.Generic.SubPackets;
 
 public class BorderZoneEvent : IPoolSubPacket
 {

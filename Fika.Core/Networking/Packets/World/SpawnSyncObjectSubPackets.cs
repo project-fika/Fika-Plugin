@@ -139,7 +139,7 @@ public class SpawnSyncObjectSubPackets
             IsStatic = reader.GetBool();
             Position = reader.GetUnmanaged<Vector3>();
             Rotation = reader.GetUnmanaged<Quaternion>();
-            AirdropType = (EAirdropType)reader.GetByte();
+            AirdropType = reader.GetEnum<EAirdropType>();
             AirdropItem = reader.GetAirdropItem();
             ContainerId = reader.GetMongoID();
             NetId = reader.GetInt();
@@ -194,7 +194,7 @@ public class SpawnSyncObjectSubPackets
             writer.Put(IsStatic);
             writer.PutUnmanaged(Position);
             writer.PutUnmanaged(Rotation);
-            writer.Put((byte)AirdropType);
+            writer.PutEnum(AirdropType);
             writer.PutItem(AirdropItem);
             writer.PutMongoID(ContainerId);
             writer.Put(NetId);

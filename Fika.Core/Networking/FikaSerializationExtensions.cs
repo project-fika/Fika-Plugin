@@ -15,7 +15,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using static BasePhysicalClass;
-using static Fika.Core.Networking.Packets.SubPackets;
 using static Fika.Core.Networking.Packets.World.RequestSubPackets;
 
 namespace Fika.Core.Networking;
@@ -906,53 +905,6 @@ public static class FikaSerializationExtensions
     }
 
     /// <summary>
-    /// Serializes a <see cref="DeathInfoPacket"/>
-    /// </summary>
-    /// <param name="writer"></param>
-    /// <param name="packet"></param>
-    public static void PutDeathInfoPacket(this NetDataWriter writer, DeathInfoPacket packet)
-    {
-        writer.Put(packet.AccountId);
-        writer.Put(packet.ProfileId);
-        writer.Put(packet.Nickname);
-        writer.Put(packet.KillerAccountId);
-        writer.Put(packet.KillerProfileId);
-        writer.Put(packet.KillerName);
-        writer.Put(packet.Status);
-        writer.Put(packet.WeaponName);
-        writer.Put(packet.GroupId);
-
-        writer.PutDateTime(packet.Time);
-        writer.Put(packet.Level);
-        writer.PutEnum(packet.Side);
-    }
-
-    /// <summary>
-    /// Deserializes a <see cref="DeathInfoPacket"/>
-    /// </summary>
-    /// <param name="reader"></param>
-    /// <returns>A <see cref="DeathInfoPacket"/> with data</returns>
-    public static DeathInfoPacket GetDeathInfoPacket(this NetDataReader reader)
-    {
-        return new()
-        {
-            AccountId = reader.GetString(),
-            ProfileId = reader.GetString(),
-            Nickname = reader.GetString(),
-            KillerAccountId = reader.GetString(),
-            KillerProfileId = reader.GetString(),
-            KillerName = reader.GetString(),
-            Status = reader.GetString(),
-            WeaponName = reader.GetString(),
-            GroupId = reader.GetString(),
-
-            Time = reader.GetDateTime(),
-            Level = reader.GetInt(),
-            Side = reader.GetEnum<EPlayerSide>()
-        };
-    }
-
-    /// <summary>
     /// Writes a <see cref="RagdollPacketStruct"/>
     /// </summary>
     /// <param name="writer">The writer to write data to</param>
@@ -1278,7 +1230,7 @@ public static class FikaSerializationExtensions
                 FikaPlugin.Instance.FikaLogger.LogError("PutFirearmSubPacket: type was outside of bounds!");
                 break;
         }
-    }    
+    }
     public static IRequestPacket GetRequestSubPacket(this NetDataReader reader, ERequestSubPacketType type)
     {
         switch (type)

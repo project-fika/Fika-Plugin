@@ -1,7 +1,6 @@
 ﻿using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
-using Fika.Core.Networking.Packets.World;
 
 namespace Fika.Core.Networking.Pooling;
 
@@ -40,8 +39,9 @@ internal sealed class GenericSubPacketPoolManager : BasePacketPoolManager<EGener
             CharacterSyncPacket.CreateInstance,        // EGenericSubPacketType.CharacterSync = 12
             InventoryPacket.CreateInstance,            // EGenericSubPacketType.InventoryOperation = 13
             OperationCallbackPacket.CreateInstance,     // EGenericSubPacketType.OperationCallback = 14
-            PingPacket.CreateInstance,                   // EGenericSubPacketType.Ping = 15
-            SendCharacterPacket.CreateInstance           // EGenericSubPacketType.SendCharacterPacket = 16
+            PingPacket.CreateInstance,                  // EGenericSubPacketType.Ping = 15
+            SendCharacterPacket.CreateInstance,         // EGenericSubPacketType.SendCharacterPacket = 16
+            SyncableItemPacket.CreateInstance,          // EGenericSubPacketType.SyncableItem = 17
         ];
     }
 }

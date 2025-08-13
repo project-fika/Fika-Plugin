@@ -22,7 +22,7 @@ public struct HalloweenEventPacket : INetSerializable
             case EHalloweenPacketType.Sync:
                 SyncEvent = new HalloweenSyncStateEvent()
                 {
-                    EventState = (EEventState)reader.GetByte()
+                    EventState = reader.GetEnum<EEventState>()
                 };
                 break;
             case EHalloweenPacketType.Exit:
@@ -48,7 +48,7 @@ public struct HalloweenEventPacket : INetSerializable
             case EHalloweenPacketType.Sync:
                 if (SyncEvent is HalloweenSyncStateEvent stateEvent)
                 {
-                    writer.Put((byte)stateEvent.EventState);
+                    writer.PutEnum(stateEvent.EventState);
                 }
                 break;
             case EHalloweenPacketType.Exit:

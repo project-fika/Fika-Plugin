@@ -11,13 +11,13 @@ public class SpawnSyncObjectPacket : INetSerializable
 
     public void Deserialize(NetDataReader reader)
     {
-        ObjectType = (SynchronizableObjectType)reader.GetByte();
+        ObjectType = reader.GetEnum<SynchronizableObjectType>();
         SubPacket = GetSpawnSyncObjectSubPacket(reader);
     }
 
     public void Serialize(NetDataWriter writer)
     {
-        writer.Put((byte)ObjectType);
+        writer.PutEnum(ObjectType);
         SubPacket.Serialize(writer);
     }
 
