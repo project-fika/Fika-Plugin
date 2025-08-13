@@ -26,7 +26,6 @@ public class InventoryPacket : IPoolSubPacket
     public ushort CallbackId;
     public byte[] OperationBytes;
 
-    private readonly EFTWriterClass _writer = new();
 
     [Obsolete("Not used for inventory packets", true)]
     public void Execute(FikaPlayer player = null)
@@ -36,9 +35,10 @@ public class InventoryPacket : IPoolSubPacket
 
     public void WriteOperation(BaseInventoryOperationClass operation)
     {
-        _writer.Reset();
-        _writer.WritePolymorph(operation.ToDescriptor());
-        OperationBytes = _writer.ToArray();
+        EFTWriterClass eftWriter = WriterPoolManager.GetWriter();
+        eftWriter.WritePolymorph(operation.ToDescriptor());
+        OperationBytes = eftWriter.ToArray();
+        WriterPoolManager.ReturnWriter(eftWriter);
     }
 
     public void Serialize(NetDataWriter writer)

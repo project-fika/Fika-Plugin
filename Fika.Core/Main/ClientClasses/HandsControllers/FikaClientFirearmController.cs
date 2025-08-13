@@ -690,7 +690,7 @@ public class FikaClientFirearmController : Player.FirearmController
         {
             ItemAddress itemAddress = _gridItemAddress;
             GClass1785 descriptor = itemAddress?.ToDescriptor();
-            EFTWriterClass eftWriter = new();
+            EFTWriterClass eftWriter = WriterPoolManager.GetWriter();
 
             byte[] locationDescription;
             if (descriptor != null)
@@ -702,6 +702,8 @@ public class FikaClientFirearmController : Player.FirearmController
             {
                 locationDescription = [];
             }
+
+            WriterPoolManager.ReturnWriter(eftWriter);
 
             if (_fikaPlayer.HealthController.IsAlive)
             {
@@ -745,7 +747,7 @@ public class FikaClientFirearmController : Player.FirearmController
         {
             ItemAddress itemAddress = _placeToPutContainedAmmoMagazine;
             GClass1785 descriptor = itemAddress?.ToDescriptor();
-            EFTWriterClass eftWriter = new();
+            EFTWriterClass eftWriter = WriterPoolManager.GetWriter();
             string[] ammoIds = _ammoPack.GetReloadingAmmoIds();
 
             byte[] locationDescription;
@@ -758,6 +760,8 @@ public class FikaClientFirearmController : Player.FirearmController
             {
                 locationDescription = [];
             }
+
+            WriterPoolManager.ReturnWriter(eftWriter);
 
             if (_fikaPlayer.HealthController.IsAlive)
             {

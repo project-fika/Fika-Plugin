@@ -26,6 +26,7 @@ using Fika.Core.Networking.Packets.Backend;
 using Fika.Core.Networking.Packets.Communication;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
 using Fika.Core.Networking.Packets.World;
+using Fika.Core.Networking.Pooling;
 using Fika.Core.UI.Models;
 using System;
 using System.Collections;
@@ -988,10 +989,11 @@ public class HostGameController : BaseGameController, IBotGame
         }
 
         GClass1782 lootDescriptor = EFTItemSerializerClass.SerializeLootData(location.Loot, FikaGlobals.SearchControllerSerializer);
-        EFTWriterClass eftWriter = new();
+        EFTWriterClass eftWriter = WriterPoolManager.GetWriter();
         eftWriter.WriteEFTLootDataDescriptor(lootDescriptor);
         byte[] lootData = eftWriter.ToArray();
         LootData = lootData;
+        WriterPoolManager.ReturnWriter(eftWriter);
         return Task.CompletedTask;
     }
 
@@ -1042,10 +1044,12 @@ public class HostGameController : BaseGameController, IBotGame
             list.Sort(LootCompare);
 
             GClass1782 lootDescriptor = EFTItemSerializerClass.SerializeLootData(list, FikaGlobals.SearchControllerSerializer);
-            EFTWriterClass eftWriter = new();
+            EFTWriterClass eftWriter = WriterPoolManager.GetWriter();
             eftWriter.WriteEFTLootDataDescriptor(lootDescriptor);
 
-            return eftWriter.ToArray();
+            byte[] data = eftWriter.ToArray();
+            WriterPoolManager.ReturnWriter(eftWriter);
+            return data;
         }
 
         return LootData;

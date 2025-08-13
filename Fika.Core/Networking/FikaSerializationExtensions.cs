@@ -7,6 +7,7 @@ using EFT.SynchronizableObjects;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.Player.Common.SubPackets;
+using Fika.Core.Networking.Pooling;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -151,10 +152,11 @@ public static class FikaSerializationExtensions
     /// <param name="item">The <see cref="Item"/> to serialize</param>
     public static void PutItem(this NetDataWriter writer, Item item)
     {
-        EFTWriterClass eftWriter = new();
+        EFTWriterClass eftWriter = WriterPoolManager.GetWriter();
         InventoryDescriptorClass descriptor = EFTItemSerializerClass.SerializeItem(item, FikaGlobals.SearchControllerSerializer);
         eftWriter.WriteEFTItemDescriptor(descriptor);
         writer.PutByteArray(eftWriter.ToArray());
+        WriterPoolManager.ReturnWriter(eftWriter);
     }
 
     /// <summary>
@@ -191,9 +193,10 @@ public static class FikaSerializationExtensions
     /// <param name="descriptor">The <see cref="InventoryDescriptorClass"/> instance to serialize</param>
     public static void PutItemDescriptor(this NetDataWriter writer, InventoryDescriptorClass descriptor)
     {
-        EFTWriterClass eftWriter = new();
+        EFTWriterClass eftWriter = WriterPoolManager.GetWriter();
         eftWriter.WriteEFTItemDescriptor(descriptor);
         writer.CompressAndPutByteArray(eftWriter.ToArray());
+        WriterPoolManager.ReturnWriter(eftWriter);
     }
 
     /// <summary>
@@ -281,9 +284,10 @@ public static class FikaSerializationExtensions
     /// <param name="profile">The <see cref="Profile"/> to serialize</param>
     public static void PutProfile(this NetDataWriter writer, Profile profile)
     {
-        EFTWriterClass eftWriter = new();
+        EFTWriterClass eftWriter = WriterPoolManager.GetWriter();
         eftWriter.WriteEFTProfileDescriptor(new(profile, FikaGlobals.SearchControllerSerializer));
         writer.CompressAndPutByteArray(eftWriter.ToArray());
+        WriterPoolManager.ReturnWriter(eftWriter);
     }
 
     /// <summary>
