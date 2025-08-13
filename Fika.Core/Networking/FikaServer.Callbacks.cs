@@ -432,6 +432,33 @@ public partial class FikaServer
                 SendGenericPacketToPeer(EGenericSubPacketType.SendCharacter, characterPacket, peer);
             }
 
+            StashesPacket stashesPacket = new();
+            if (gameWorld.BtrController != null)
+            {
+                stashesPacket.HasBTR = true;
+                int length = gameWorld.BtrController.TransferItemsController.List_0.Count;
+                stashesPacket.BTRStashes = new StashItemClass[length + 1];
+                stashesPacket.BTRStashes[0] = gameWorld.BtrController.TransferItemsController.Stash;
+                for (int i = 0; i < length; i++)
+                {
+                    stashesPacket.BTRStashes[i + 1] = gameWorld.BtrController.TransferItemsController.List_0[i];
+                }
+            }
+
+            if (gameWorld.TransitController != null)
+            {
+                stashesPacket.HasTransit = true;
+                int length = gameWorld.TransitController.TransferItemsController.List_0.Count;
+                stashesPacket.TransitStashes = new StashItemClass[length + 1];
+                stashesPacket.TransitStashes[0] = gameWorld.TransitController.TransferItemsController.Stash;
+                for (int i = 0; i < length; i++)
+                {
+                    stashesPacket.TransitStashes[i + 1] = gameWorld.TransitController.TransferItemsController.List_0[i];
+                }
+            }
+
+            SendDataToPeer(ref stashesPacket, DeliveryMethod.ReliableOrdered, peer);
+
             ReconnectPacket finishPacket = new()
             {
                 Type = EReconnectDataType.Finished

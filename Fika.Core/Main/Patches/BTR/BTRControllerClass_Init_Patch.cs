@@ -12,11 +12,13 @@ internal class BTRControllerClass_Init_Patch : FikaPatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(BTRControllerClass).GetMethod(nameof(BTRControllerClass.method_0));
+        return typeof(BTRControllerClass)
+            .GetMethod(nameof(BTRControllerClass.method_0));
     }
 
     [PatchPrefix]
-    public static bool Prefix(BTRControllerClass __instance, ref CancellationToken cancellationToken, ref Task __result, ref GameWorld ___GameWorld_0, ref BackendConfigSettingsClass.BTRGlobalSettings ___BtrglobalSettings_0, ref bool ___Bool_1)
+    public static bool Prefix(BTRControllerClass __instance, ref CancellationToken cancellationToken, ref Task __result,
+        ref GameWorld ___GameWorld_0, ref BackendConfigSettingsClass.BTRGlobalSettings ___BtrglobalSettings_0, ref bool ___Bool_1)
     {
         if (FikaBackendUtils.IsServer)
         {

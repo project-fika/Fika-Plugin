@@ -30,6 +30,61 @@ using System.Linq;
 namespace Fika.Core.Networking;
 public partial class FikaClient
 {
+    private void OnStashesPacketReceived(StashesPacket packet)
+    {
+#if DEBUG
+        _logger.LogWarning($"Received [StashesPacket] from server! BTR: {packet.HasBTR}, Transit: {packet.HasTransit}");
+#endif
+        if (Singleton<GameWorld>.Instantiated)
+        {
+            GameWorld gameWorld = Singleton<GameWorld>.Instance;
+
+            if (packet.HasBTR)
+            {
+                if (gameWorld.BtrController != null)
+                {
+                    for (int i = 0; i < packet.BTRStashes.Length; i++)
+                    {
+                        if (i == 0)
+                        {
+                            gameWorld.BtrController.TransferItemsController.Stash = packet.BTRStashes[i];
+                            continue;
+                        }
+                        gameWorld.BtrController.TransferItemsController.InitTransferContainer(packet.BTRStashes[i], "BTR");
+                    }
+                }
+                else
+                {
+                    _logger.LogError("Received 'StashesPacket' with BTRData but BTRController was null!");
+                }
+            }
+
+            if (packet.HasTransit)
+            {
+                if (gameWorld.TransitController != null)
+                {
+                    for (int i = 0; i < packet.TransitStashes.Length; i++)
+                    {
+                        if (i == 0)
+                        {
+                            gameWorld.TransitController.TransferItemsController.Stash = packet.TransitStashes[i];
+                            continue;
+                        }
+                        gameWorld.TransitController.TransferItemsController.InitTransferContainer(packet.TransitStashes[i], "BTR"); 
+                    }
+                }
+                else
+                {
+                    _logger.LogError("Received 'StashesPacket' with TransitData but TransitController was null!");
+                }
+            }
+        }
+        else
+        {
+            _logger.LogError("Received 'StashesPacket' but GameWorld was null!");
+        }
+    }
+
     private void OnSyncTrapsPacketReceived(SyncTrapsPacket packet)
     {
         GClass1359 reader = new(packet.Data);

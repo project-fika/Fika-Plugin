@@ -3,6 +3,7 @@ using BepInEx.Logging;
 using Comfort.Common;
 using CommonAssets.Scripts.Audio.RadioSystem;
 using Dissonance;
+using Diz.Utils;
 using EFT;
 using EFT.Bots;
 using EFT.Game.Spawning;
@@ -26,6 +27,7 @@ using Fika.Core.Networking.Packets.Backend;
 using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
 using Fika.Core.Networking.Packets.World;
+using Fika.Core.Networking.Pooling;
 using HarmonyLib;
 using System;
 using System.Collections;
@@ -288,6 +290,8 @@ public abstract class BaseGameController
                     Logger.LogError($"Could not initialize transfer stash on {player.Profile.Nickname}: {ex.Message}");
                 }
             }
+
+            AsyncWorker.RunInMainTread(Singleton<FikaServer>.Instance.SendStashes);
         }
         else
         {
@@ -375,8 +379,7 @@ public abstract class BaseGameController
         if (Singleton<IFikaNetworkManager>.Instance.AllowVOIP && !FikaBackendUtils.IsHeadless)
         {
             _abstractGame.StartCoroutine(FixVOIPAudioDevice());
-        }
-        _ = Task.Run(CreateStashes);
+        }        
 
         if (FikaPlugin.UseFikaGC.Value)
         {

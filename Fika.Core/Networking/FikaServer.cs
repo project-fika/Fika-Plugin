@@ -748,6 +748,41 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         _netServer.SendToAll(_dataWriter.AsReadOnlySpan, DeliveryMethod.Unreliable);
     }
 
+    public void SendStashes()
+    {
+        if (Singleton<GameWorld>.Instantiated)
+        {
+            StashesPacket stashesPacket = new();
+            GameWorld gameWorld = Singleton<GameWorld>.Instance;
+
+            if (gameWorld.BtrController != null)
+            {
+                stashesPacket.HasBTR = true;
+                int length = gameWorld.BtrController.TransferItemsController.List_0.Count;
+                stashesPacket.BTRStashes = new StashItemClass[length + 1];
+                stashesPacket.BTRStashes[0] = gameWorld.BtrController.TransferItemsController.Stash;
+                for (int i = 0; i < length; i++)
+                {
+                    stashesPacket.BTRStashes[i + 1] = gameWorld.BtrController.TransferItemsController.List_0[i];
+                }
+            }
+
+            if (gameWorld.TransitController != null)
+            {
+                stashesPacket.HasTransit = true;
+                int length = gameWorld.TransitController.TransferItemsController.List_0.Count;
+                stashesPacket.TransitStashes = new StashItemClass[length + 1];
+                stashesPacket.TransitStashes[0] = gameWorld.TransitController.TransferItemsController.Stash;
+                for (int i = 0; i < length; i++)
+                {
+                    stashesPacket.TransitStashes[i + 1] = gameWorld.TransitController.TransferItemsController.List_0[i];
+                }
+            }
+
+            SendData(ref stashesPacket, DeliveryMethod.ReliableOrdered, true);
+        }
+    }
+
     public void OnPeerConnected(NetPeer peer)
     {
         NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.PEER_CONNECTED.Localized(), peer.Port),

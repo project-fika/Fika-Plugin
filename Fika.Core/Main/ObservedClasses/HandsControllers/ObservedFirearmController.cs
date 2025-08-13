@@ -397,6 +397,9 @@ public class ObservedFirearmController : FirearmController
 
     public void HandleShotInfoPacket(ShotInfoPacket packet, InventoryController inventoryController)
     {
+        /*SetTriggerPressed(true);
+        return;*/
+
         if (packet.ShotType == EShotType.DryFire)
         {
             if (IsRevolver)
@@ -509,7 +512,7 @@ public class ObservedFirearmController : FirearmController
             }
         }
 
-        HandleObservedShot(in packet, inventoryController);
+        HandleObservedShot(packet, inventoryController);
     }
 
     // Leave here for now - Lacyway
@@ -528,7 +531,7 @@ public class ObservedFirearmController : FirearmController
         return (AmmoItemClass)currentMagazine.Cartridges.PopTo(fikaPlayer.InventoryController, chamberSlot.CreateItemAddress()).Value.ResultItem;
     }*/
 
-    private void HandleObservedShot(in ShotInfoPacket packet, InventoryController inventoryController)
+    private void HandleObservedShot(ShotInfoPacket packet, InventoryController inventoryController)
     {
         AmmoItemClass ammo = (AmmoItemClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), packet.AmmoTemplate, null);
         _fikaPlayer.TurnOffFbbikAt = Time.time + 0.6f;

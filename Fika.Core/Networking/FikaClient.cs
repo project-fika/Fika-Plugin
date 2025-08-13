@@ -271,13 +271,14 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
         RegisterPacket<EventControllerEventPacket>(OnEventControllerEventPacketReceived);
         RegisterPacket<EventControllerInteractPacket>(OnEventControllerInteractPacketReceived);
         RegisterPacket<SyncTrapsPacket>(OnSyncTrapsPacketReceived);
+        RegisterPacket<StashesPacket>(OnStashesPacketReceived);
 
         RegisterReusable<WorldPacket>(OnWorldPacketReceived);
 
         RegisterNetReusable<WeaponPacket>(OnWeaponPacketReceived);
         RegisterNetReusable<CommonPlayerPacket>(OnCommonPlayerPacketReceived);
         RegisterNetReusable<GenericPacket>(OnGenericPacketReceived);
-    }
+    }    
 
 #if DEBUG
     private void AddDebugPackets()
