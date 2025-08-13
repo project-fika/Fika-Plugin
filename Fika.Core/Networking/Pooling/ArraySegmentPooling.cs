@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Buffers;
+using System.Runtime.CompilerServices;
 
 namespace Fika.Core.Networking.Pooling;
 
@@ -17,6 +18,7 @@ internal static class ArraySegmentPooling
     /// <returns>
     /// An <see cref="ArraySegment{Byte}"/> wrapping the rented array with length zero.
     /// </returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ArraySegment<byte> Get(int bufferCount)
     {
         return new(ArrayPool<byte>.Shared.Rent(bufferCount), 0, 0);
@@ -29,6 +31,7 @@ internal static class ArraySegmentPooling
     /// <returns>
     /// An <see cref="ArraySegment{Byte}"/> wrapping the rented array containing the copied data.
     /// </returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ArraySegment<byte> Get(byte[] buffer)
     {
         return Get(buffer, 0, buffer.Length);
@@ -42,6 +45,7 @@ internal static class ArraySegmentPooling
     /// <returns>
     /// An <see cref="ArraySegment{Byte}"/> wrapping the rented array containing the copied data.
     /// </returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ArraySegment<byte> Get(ArraySegment<byte> buffer)
     {
         return Get(buffer.Array, buffer.Offset, buffer.Count);
@@ -55,6 +59,7 @@ internal static class ArraySegmentPooling
     /// <returns>
     /// An <see cref="ArraySegment{Byte}"/> wrapping the rented array containing the copied data.
     /// </returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ArraySegment<byte> Get(ReadOnlySpan<byte> source)
     {
         byte[] array = ArrayPool<byte>.Shared.Rent(source.Length);
@@ -71,6 +76,7 @@ internal static class ArraySegmentPooling
     /// <returns>
     /// An <see cref="ArraySegment{Byte}"/> wrapping the rented array containing the copied data.
     /// </returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ArraySegment<byte> Get(byte[] buffer, int bufferOffset, int bufferCount)
     {
         byte[] array = ArrayPool<byte>.Shared.Rent(bufferCount);
@@ -82,6 +88,7 @@ internal static class ArraySegmentPooling
     /// Returns a rented array back to the shared pool.
     /// </summary>
     /// <param name="buffer">The <see cref="ArraySegment{Byte}"/> whose underlying array should be returned.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Return(ArraySegment<byte> buffer)
     {
         ArrayPool<byte>.Shared.Return(buffer.Array, false);
