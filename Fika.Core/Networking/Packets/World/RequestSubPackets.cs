@@ -3,7 +3,8 @@ using EFT.Interactive;
 using Fika.Core.Main.GameMode;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
-using Fika.Core.Networking.Packets.Communication;
+using Fika.Core.Networking.Packets.Generic;
+using Fika.Core.Networking.Packets.Generic.SubPackets;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -396,7 +397,7 @@ public class RequestSubPackets
 #if DEBUG
                         FikaGlobals.LogWarning($"Found {fikaPlayer.Profile.Nickname} that was missing from client, sending...");
 #endif
-                        SendCharacterPacket packet = new(new()
+                        SendCharacterPacket packet = SendCharacterPacket.FromValue(new()
                         {
                             Profile = fikaPlayer.Profile,
                             ControllerId = fikaPlayer.InventoryController.CurrentId,
@@ -419,7 +420,7 @@ public class RequestSubPackets
                             packet.PlayerInfoPacket.IsStationary = fikaPlayer.MovementContext.IsStationaryWeaponInHands;
                         }
 
-                        server.SendDataToPeer(ref packet, DeliveryMethod.ReliableOrdered, peer);
+                        server.SendGenericPacketToPeer(EGenericSubPacketType.SendCharacter, packet, peer);
                     }
                 }
             }

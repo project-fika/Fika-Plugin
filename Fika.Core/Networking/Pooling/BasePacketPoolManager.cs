@@ -1,4 +1,7 @@
-﻿using System;
+﻿#if DEBUG
+using Fika.Core.Main.Utils; 
+#endif
+using System;
 using System.Runtime.CompilerServices;
 
 namespace Fika.Core.Networking.Pooling;

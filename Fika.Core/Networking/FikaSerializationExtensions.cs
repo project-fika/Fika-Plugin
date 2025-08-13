@@ -7,6 +7,7 @@ using EFT.SynchronizableObjects;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.FirearmController;
+using Fika.Core.Networking.Packets.Generic.SubPackets;
 using Fika.Core.Networking.Packets.Player.Common.SubPackets;
 using Fika.Core.Networking.Pooling;
 using System;

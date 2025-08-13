@@ -1,5 +1,6 @@
 ﻿#if DEBUG
 using Fika.Core.Main.Utils;
+using System.Diagnostics;
 #endif
 using Fika.Core.Networking.LZ4;
 using System;

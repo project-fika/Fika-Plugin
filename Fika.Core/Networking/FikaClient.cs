@@ -20,6 +20,9 @@ using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.Backend;
 using Fika.Core.Networking.Packets.Communication;
+#if DEBUG
+using Fika.Core.Networking.Packets.Debug; 
+#endif
 using Fika.Core.Networking.Packets.FirearmController;
 using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
@@ -243,7 +246,6 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
         RegisterCustomType(FikaSerializationExtensions.PutLootSyncStruct, FikaSerializationExtensions.GetLootSyncStruct);
 
         RegisterPacket<InformationPacket>(OnInformationPacketReceived);
-        RegisterPacket<SendCharacterPacket>(OnSendCharacterPacketReceived);
         RegisterPacket<TextMessagePacket>(OnTextMessagePacketReceived);
         RegisterPacket<QuestConditionPacket>(OnQuestConditionPacketReceived);
         RegisterPacket<QuestItemPacket>(OnQuestItemPacketReceived);
@@ -262,7 +264,6 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
         RegisterPacket<SyncTransitControllersPacket>(OnSyncTransitControllersPacketReceived);
         RegisterPacket<TransitEventPacket>(OnTransitEventPacketReceived);
         RegisterPacket<BotStatePacket>(OnBotStatePacketReceived);
-        RegisterPacket<PingPacket>(OnPingPacketReceived);
         RegisterPacket<LoadingProfilePacket>(OnLoadingProfilePacketReceived);
         RegisterPacket<SideEffectPacket>(OnSideEffectPacketReceived);
         RegisterPacket<RequestPacket>(OnRequestPacketReceived);

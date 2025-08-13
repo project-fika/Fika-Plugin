@@ -23,8 +23,10 @@ using Fika.Core.Modding.Events;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Models;
-using Fika.Core.Networking.Packets.Communication;
+using Fika.Core.Networking.Packets.Generic;
+using Fika.Core.Networking.Packets.Generic.SubPackets;
 using Fika.Core.Networking.Packets.World;
+using Fika.Core.Networking.Pooling;
 using Fika.Core.UI.Models;
 using HarmonyLib;
 using JsonType;
@@ -296,7 +298,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
 
         if (!GameController.IsServer && !FikaBackendUtils.IsReconnect)
         {
-            SendCharacterPacket packet = new(new()
+            SendCharacterPacket packet = SendCharacterPacket.FromValue(new PlayerInfoPacket()
             {
                 Profile = fikaPlayer.Profile,
                 ControllerId = fikaPlayer.InventoryController.CurrentId,
@@ -316,7 +318,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
                 packet.PlayerInfoPacket.IsStationary = fikaPlayer.MovementContext.IsStationaryWeaponInHands;
             }
 
-            client.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+            client.SendGenericPacket(EGenericSubPacketType.SendCharacter, packet, true);
         }
 
         _logger.LogInfo("Adding debug component...");

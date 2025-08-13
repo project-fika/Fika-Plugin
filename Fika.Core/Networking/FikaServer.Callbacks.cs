@@ -9,9 +9,12 @@ using Fika.Core.Main.GameMode;
 using Fika.Core.Main.ObservedClasses;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
-using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.Backend;
 using Fika.Core.Networking.Packets.Communication;
+#if DEBUG
+using Fika.Core.Networking.Packets.Debug;
+using EFT.UI;
+#endif
 using Fika.Core.Networking.Packets.FirearmController;
 using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
@@ -23,6 +26,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using static Fika.Core.Networking.Packets.World.ReconnectPacket;
+using Fika.Core.ConsoleCommands;
+using static Fika.Core.Networking.Packets.Debug.CommandPacket;
 
 namespace Fika.Core.Networking;
 
@@ -400,7 +405,7 @@ public partial class FikaServer
                     continue;
                 }
 
-                SendCharacterPacket characterPacket = new(new()
+                SendCharacterPacket characterPacket = SendCharacterPacket.FromValue(new()
                 {
                     Profile = player.Profile,
                     ControllerId = player.InventoryController.CurrentId,
@@ -424,7 +429,7 @@ public partial class FikaServer
                     characterPacket.PlayerInfoPacket.IsStationary = player.MovementContext.IsStationaryWeaponInHands;
                 }
 
-                SendDataToPeer(ref characterPacket, DeliveryMethod.ReliableOrdered, peer);
+                SendGenericPacketToPeer(EGenericSubPacketType.SendCharacter, characterPacket, peer);
             }
 
             ReconnectPacket finishPacket = new()

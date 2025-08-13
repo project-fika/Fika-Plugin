@@ -403,7 +403,6 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         RegisterCustomType(FikaSerializationExtensions.PutLootSyncStruct, FikaSerializationExtensions.GetLootSyncStruct);
 
         RegisterPacket<InformationPacket, NetPeer>(OnInformationPacketReceived);
-        RegisterPacket<SendCharacterPacket, NetPeer>(OnSendCharacterPacketReceived);
         RegisterPacket<TextMessagePacket, NetPeer>(OnTextMessagePacketReceived);
         RegisterPacket<QuestConditionPacket, NetPeer>(OnQuestConditionPacketReceived);
         RegisterPacket<QuestItemPacket, NetPeer>(OnQuestItemPacketReceived);
@@ -416,7 +415,6 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         RegisterPacket<SyncTransitControllersPacket, NetPeer>(OnSyncTransitControllersPacketReceived);
         RegisterPacket<TransitInteractPacket, NetPeer>(OnTransitInteractPacketReceived);
         RegisterPacket<BotStatePacket, NetPeer>(OnBotStatePacketReceived);
-        RegisterPacket<PingPacket, NetPeer>(OnPingPacketReceived);
         RegisterPacket<LoadingProfilePacket, NetPeer>(OnLoadingProfilePacketReceived);
         RegisterPacket<SideEffectPacket, NetPeer>(OnSideEffectPacketReceived);
         RegisterPacket<RequestPacket, NetPeer>(OnRequestPacketReceived);

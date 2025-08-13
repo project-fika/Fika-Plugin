@@ -10,20 +10,7 @@ namespace Fika.Core.Networking.Packets;
 /// </summary>
 public class SubPackets
 {
-    public struct PlayerInfoPacket
-    {
-        public Profile Profile;
-        public MongoID ControllerId;
-        public string ItemId;
-
-        public byte[] HealthByteArray;
-
-        public ushort FirstOperationId;
-        public EHandsControllerType ControllerType;
-
-        public bool IsStationary;
-        public bool IsZombie;
-    }
+    
 
     public struct DeathInfoPacket
     {

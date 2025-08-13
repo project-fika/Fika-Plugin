@@ -39,7 +39,9 @@ internal sealed class GenericSubPacketPoolManager : BasePacketPoolManager<EGener
             BtrSpawn.CreateInstance,                   // EGenericSubPacketType.SpawnBTR = 11
             CharacterSyncPacket.CreateInstance,        // EGenericSubPacketType.CharacterSync = 12
             InventoryPacket.CreateInstance,            // EGenericSubPacketType.InventoryOperation = 13
-            OperationCallbackPacket.CreateInstance     // EGenericSubPacketType.OperationCallback = 14
+            OperationCallbackPacket.CreateInstance,     // EGenericSubPacketType.OperationCallback = 14
+            PingPacket.CreateInstance,                   // EGenericSubPacketType.Ping = 15
+            SendCharacterPacket.CreateInstance           // EGenericSubPacketType.SendCharacterPacket = 16
         ];
     }
 }

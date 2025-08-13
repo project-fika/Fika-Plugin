@@ -78,7 +78,17 @@ public enum EGenericSubPacketType : byte
     /// <summary>
     /// Callback status for operation
     /// </summary>
-    OperationCallback
+    OperationCallback,
+    
+    /// <summary>
+    /// Pinging
+    /// </summary>
+    Ping,
+
+    /// <summary>
+    /// Sending character data
+    /// </summary>
+    SendCharacter
 
     /// <summary>
     /// Train synchronization event (commented out).

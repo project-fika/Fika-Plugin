@@ -23,7 +23,6 @@ using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Models;
 using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.Backend;
-using Fika.Core.Networking.Packets.Communication;
 using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
 using Fika.Core.Networking.Packets.World;
@@ -237,7 +236,7 @@ public class HostGameController : BaseGameController, IBotGame
 
         MongoID mongoId = MongoID.Generate(true);
         ushort nextOperationId = 0;
-        SendCharacterPacket packet = new(new()
+        SendCharacterPacket packet = SendCharacterPacket.FromValue(new()
         {
             Profile = profile,
             ControllerId = mongoId,
@@ -245,7 +244,7 @@ public class HostGameController : BaseGameController, IBotGame
             IsZombie = profile.Info.Settings.UseSimpleAnimator
         }, true, true, position, netId);
         packet.PlayerInfoPacket.HealthByteArray = profile.Health.SerializeHealthInfo();
-        Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+        Singleton<IFikaNetworkManager>.Instance.SendGenericPacket(EGenericSubPacketType.SendCharacter, packet, true);
 
         if (server.NetServer.ConnectedPeersCount > 0)
         {
