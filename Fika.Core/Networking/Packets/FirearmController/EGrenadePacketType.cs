@@ -1,4 +1,4 @@
-﻿namespace Fika.Core.Networking.Packets;
+﻿namespace Fika.Core.Networking.Packets.FirearmController;
 
 /// <summary>
 /// Represents types of grenade packet actions.

@@ -1,4 +1,4 @@
-﻿namespace Fika.Core.Networking.Packets;
+﻿namespace Fika.Core.Networking.Packets.Player.Common;
 
 /// <summary>
 /// Represents the type of context-sensitive interaction (proceed action).

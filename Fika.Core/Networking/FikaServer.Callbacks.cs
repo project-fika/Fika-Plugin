@@ -2,9 +2,7 @@
 using EFT;
 using EFT.Interactive;
 using EFT.InventoryLogic;
-using EFT.UI;
 using EFT.Vehicle;
-using Fika.Core.ConsoleCommands;
 using Fika.Core.Main.ClientClasses;
 using Fika.Core.Main.Factories;
 using Fika.Core.Main.GameMode;
@@ -14,7 +12,6 @@ using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.Backend;
 using Fika.Core.Networking.Packets.Communication;
-using Fika.Core.Networking.Packets.Debug;
 using Fika.Core.Networking.Packets.FirearmController;
 using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
@@ -25,7 +22,6 @@ using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using static Fika.Core.Networking.Packets.Debug.CommandPacket;
 using static Fika.Core.Networking.Packets.World.ReconnectPacket;
 
 namespace Fika.Core.Networking;

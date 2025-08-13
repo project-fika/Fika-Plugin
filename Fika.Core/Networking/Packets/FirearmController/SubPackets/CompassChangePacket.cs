@@ -2,7 +2,7 @@
 using Fika.Core.Networking.Pooling;
 using static EFT.Player;
 
-namespace Fika.Core.Networking.Packets.FirearmController;
+namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
 public class CompassChangePacket : IPoolSubPacket
 {

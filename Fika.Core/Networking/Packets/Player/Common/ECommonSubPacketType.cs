@@ -1,4 +1,4 @@
-﻿namespace Fika.Core.Networking.Packets;
+﻿namespace Fika.Core.Networking.Packets.Player.Common;
 
 /// <summary>
 /// Represents common sub-packet types for general player actions.

@@ -7,7 +7,6 @@ using Fika.Core.Networking.Websocket.Notifications;
 using Newtonsoft.Json.Linq;
 using SPT.Common.Http;
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using WebSocketSharp;
 

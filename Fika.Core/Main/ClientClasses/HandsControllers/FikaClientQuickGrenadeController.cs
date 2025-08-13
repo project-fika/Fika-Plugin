@@ -3,6 +3,7 @@
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.FirearmController;
+using Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
 namespace Fika.Core.Main.ClientClasses.HandsControllers;
 

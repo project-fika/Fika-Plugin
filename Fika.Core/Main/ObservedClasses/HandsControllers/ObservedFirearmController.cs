@@ -5,6 +5,7 @@ using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Packets.FirearmController;
+using Fika.Core.Networking.Packets.FirearmController.SubPackets;
 using HarmonyLib;
 using System;
 using System.Collections;
@@ -394,7 +395,7 @@ public class ObservedFirearmController : FirearmController
         FirearmsAnimator.SetFire(false);
     }
 
-    public void HandleShotInfoPacket(in ShotInfoPacket packet, InventoryController inventoryController)
+    public void HandleShotInfoPacket(ShotInfoPacket packet, InventoryController inventoryController)
     {
         if (packet.ShotType == EShotType.DryFire)
         {

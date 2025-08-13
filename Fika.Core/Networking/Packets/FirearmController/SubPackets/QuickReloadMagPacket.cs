@@ -5,7 +5,7 @@ using Fika.Core.Main.Players;
 using Fika.Core.Networking.Pooling;
 using System;
 
-namespace Fika.Core.Networking.Packets.FirearmController;
+namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
 public class QuickReloadMagPacket : IPoolSubPacket
 {

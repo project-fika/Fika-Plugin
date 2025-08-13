@@ -2,7 +2,7 @@
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Pooling;
 
-namespace Fika.Core.Networking.Packets.FirearmController;
+namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
 public class ExamineWeaponPacket : IPoolSubPacket
 {

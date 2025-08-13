@@ -1,4 +1,4 @@
-﻿namespace Fika.Core.Networking.Packets;
+﻿namespace Fika.Core.Networking.Packets.Generic;
 
 /// <summary>
 /// Represents generic game-level packet events unrelated to specific systems.

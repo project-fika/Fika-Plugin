@@ -3,7 +3,7 @@ using Fika.Core.Main.Players;
 using Fika.Core.Networking.Pooling;
 using System.Collections.Generic;
 
-namespace Fika.Core.Networking.Packets.FirearmController;
+namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
 public class CylinderMagPacket : IPoolSubPacket
 {

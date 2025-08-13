@@ -573,7 +573,7 @@ public partial class FikaClient
             if (lootItems.Count < 1)
             {
                 throw new NullReferenceException("LootItems length was less than 1! Something probably went very wrong");
-            } 
+            }
 #endif
             fikaGame.GameController.LootItems = lootItems;
             (fikaGame.GameController as ClientGameController).HasReceivedLoot = true;

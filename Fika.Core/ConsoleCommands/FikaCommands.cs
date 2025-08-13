@@ -1,19 +1,10 @@
 ﻿using Comfort.Common;
 using EFT;
 using EFT.Console.Core;
-using EFT.InventoryLogic;
 using EFT.UI;
-using Fika.Core.Main.Components;
 using Fika.Core.Main.GameMode;
-using Fika.Core.Main.HostClasses;
-using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
-using Fika.Core.Networking.Packets.Debug;
-using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using static Fika.Core.Networking.Packets.Debug.CommandPacket;
 
 namespace Fika.Core.ConsoleCommands;
 

@@ -6,6 +6,7 @@ using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Packets;
+using Fika.Core.Networking.Packets.FirearmController;
 using Fika.Core.Networking.Packets.Player.Common.SubPackets;
 using Fika.Core.Networking.Pooling;
 using System;
@@ -1276,144 +1277,7 @@ public static class FikaSerializationExtensions
                 FikaPlugin.Instance.FikaLogger.LogError("PutFirearmSubPacket: type was outside of bounds!");
                 break;
         }
-    }
-
-    /*public static ISubPacket GetFirearmSubPacket(this NetDataReader reader, EFirearmSubPacketType type)
-    {
-        switch (type)
-        {
-            case EFirearmSubPacketType.ShotInfo:
-                return new ShotInfoPacket(reader);
-            case EFirearmSubPacketType.ChangeFireMode:
-                return new ChangeFireModePacket(reader);
-            case EFirearmSubPacketType.ToggleAim:
-                return new ToggleAimPacket(reader);
-            case EFirearmSubPacketType.ExamineWeapon:
-                return new ExamineWeaponPacket();
-            case EFirearmSubPacketType.CheckAmmo:
-                return new CheckAmmoPacket();
-            case EFirearmSubPacketType.CheckChamber:
-                return new CheckChamberPacket();
-            case EFirearmSubPacketType.CheckFireMode:
-                return new CheckFireModePacket();
-            case EFirearmSubPacketType.ToggleLightStates:
-                return new LightStatesPacket(reader);
-            case EFirearmSubPacketType.ToggleScopeStates:
-                return new ScopeStatesPacket(reader);
-            case EFirearmSubPacketType.ToggleLauncher:
-                return new ToggleLauncherPacket();
-            case EFirearmSubPacketType.ToggleInventory:
-                return new ToggleInventoryPacket(reader);
-            case EFirearmSubPacketType.Loot:
-                return new FirearmLootPacket();
-            case EFirearmSubPacketType.ReloadMag:
-                return new ReloadMagPacket(reader);
-            case EFirearmSubPacketType.QuickReloadMag:
-                return new QuickReloadMagPacket(reader);
-            case EFirearmSubPacketType.ReloadWithAmmo:
-                return new ReloadWithAmmoPacket(reader);
-            case EFirearmSubPacketType.CylinderMag:
-                return new CylinderMagPacket(reader);
-            case EFirearmSubPacketType.ReloadLauncher:
-                return new ReloadLauncherPacket(reader);
-            case EFirearmSubPacketType.ReloadBarrels:
-                return new ReloadBarrelsPacket(reader);
-            case EFirearmSubPacketType.Grenade:
-                return new GrenadePacket(reader);
-            case EFirearmSubPacketType.CancelGrenade:
-                return new CancelGrenadePacket();
-            case EFirearmSubPacketType.CompassChange:
-                return new CompassChangePacket(reader);
-            case EFirearmSubPacketType.Knife:
-                return new KnifePacket(reader);
-            case EFirearmSubPacketType.FlareShot:
-                return new FlareShotPacket(reader);
-            case EFirearmSubPacketType.RocketShot:
-                return new RocketShotPacket(reader);
-            case EFirearmSubPacketType.ReloadBoltAction:
-                return new ReloadBoltActionPacket();
-            case EFirearmSubPacketType.RollCylinder:
-                return new RollCylinderPacket(reader);
-            case EFirearmSubPacketType.UnderbarrelSightingRangeUp:
-                return new UnderbarrelSightingRangeUpPacket();
-            case EFirearmSubPacketType.UnderbarrelSightingRangeDown:
-                return new UnderbarrelSightingRangeDownPacket();
-            case EFirearmSubPacketType.ToggleBipod:
-                return new ToggleBipodPacket();
-            case EFirearmSubPacketType.LeftStanceChange:
-                return new LeftStanceChangePacket(reader);
-            default:
-                FikaPlugin.Instance.FikaLogger.LogError("GetFirearmSubPacket: type was outside of bounds!");
-                return null;
-        }
-    }*/
-
-    /*public static ISubPacket GetCommonSubPacket(this NetDataReader reader, ECommonSubPacketType type)
-    {
-        switch (type)
-        {
-            case ECommonSubPacketType.Phrase:
-                return new PhrasePacket(reader);
-            case ECommonSubPacketType.WorldInteraction:
-                return new WorldInteractionPacket(reader);
-            case ECommonSubPacketType.ContainerInteraction:
-                return new ContainerInteractionPacket(reader);
-            case ECommonSubPacketType.Proceed:
-                return new ProceedPacket(reader);
-            case ECommonSubPacketType.HeadLights:
-                return new HeadLightsPacket(reader);
-            case ECommonSubPacketType.InventoryChanged:
-                return new InventoryChangedPacket(reader);
-            case ECommonSubPacketType.Drop:
-                return new DropPacket(reader);
-            case ECommonSubPacketType.Stationary:
-                return new StationaryPacket(reader);
-            case ECommonSubPacketType.Vault:
-                return new VaultPacket(reader);
-            case ECommonSubPacketType.Interaction:
-                return new InteractionPacket(reader);
-            case ECommonSubPacketType.Mounting:
-                return new MountingPacket(reader);
-            default:
-                FikaPlugin.Instance.FikaLogger.LogError("GetCommonSubPacket: type was outside of bounds!");
-                return null;
-        }
-    }*/
-
-    /*public static ISubPacket GetGenericSubPacket(this NetDataReader reader, EGenericSubPacketType type, int netId)
-    {
-        switch (type)
-        {
-            case EGenericSubPacketType.ClientExtract:
-                return new ClientExtract(netId);
-            case EGenericSubPacketType.ClientConnected:
-                return new ClientConnected(reader);
-            case EGenericSubPacketType.ClientDisconnected:
-                return new ClientDisconnected(reader);
-            case EGenericSubPacketType.ExfilCountdown:
-                return new ExfilCountdown(reader);
-            case EGenericSubPacketType.ClearEffects:
-                return new ClearEffects(netId);
-            case EGenericSubPacketType.UpdateBackendData:
-                return new UpdateBackendData(reader);
-            case EGenericSubPacketType.SecretExfilFound:
-                return new SecretExfilFound(reader);
-            case EGenericSubPacketType.BorderZone:
-                return new BorderZoneEvent(reader);
-            case EGenericSubPacketType.Mine:
-                return new MineEvent(reader);
-            case EGenericSubPacketType.DisarmTripwire:
-                return new DisarmTripwire(reader);
-            case EGenericSubPacketType.MuffledState:
-                return new MuffledState(reader);
-            case EGenericSubPacketType.SpawnBTR:
-                return new BtrSpawn(reader);
-            default:
-                FikaPlugin.Instance.FikaLogger.LogError("GetGenericSubPacket: type was outside of bounds!");
-                return null;
-        }
-    }*/
-
+    }    
     public static IRequestPacket GetRequestSubPacket(this NetDataReader reader, ERequestSubPacketType type)
     {
         switch (type)

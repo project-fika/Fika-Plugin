@@ -3,7 +3,6 @@ using Fika.Core.Main.Utils;
 #endif
 using Fika.Core.Networking.LZ4;
 using System;
-using System.Diagnostics;
 
 namespace Fika.Core.Networking;
 

@@ -3,6 +3,7 @@ using EFT;
 using EFT.Interactive;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets;
+using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.World;
 using System.Collections.Generic;
 

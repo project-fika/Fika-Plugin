@@ -1,4 +1,4 @@
-﻿namespace Fika.Core.Networking.Packets;
+﻿namespace Fika.Core.Networking.Packets.FirearmController;
 
 /// <summary>
 /// Describes the state of a reload operation with ammunition.

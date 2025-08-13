@@ -1,4 +1,4 @@
-﻿namespace Fika.Core.Networking.Packets;
+﻿namespace Fika.Core.Networking.Packets.FirearmController;
 
 /// <summary>
 /// Describes sub-packet types related to firearms and combat actions.

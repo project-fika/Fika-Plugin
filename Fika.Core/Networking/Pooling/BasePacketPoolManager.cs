@@ -1,5 +1,4 @@
-﻿using Fika.Core.Main.Utils;
-using System;
+﻿using System;
 using System.Runtime.CompilerServices;
 
 namespace Fika.Core.Networking.Pooling;
