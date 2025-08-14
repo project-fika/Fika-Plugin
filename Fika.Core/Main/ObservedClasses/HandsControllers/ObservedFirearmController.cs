@@ -397,9 +397,6 @@ public class ObservedFirearmController : FirearmController
 
     public void HandleShotInfoPacket(ShotInfoPacket packet, InventoryController inventoryController)
     {
-        /*SetTriggerPressed(true);
-        return;*/
-
         if (packet.ShotType == EShotType.DryFire)
         {
             if (IsRevolver)
