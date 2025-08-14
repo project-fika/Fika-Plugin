@@ -108,18 +108,18 @@ public class FikaClientFirearmController : Player.FirearmController
     {
         if (Item.ReloadMode is Weapon.EReloadMode.InternalMagazine && Item.Chambers.Length == 0)
         {
-            return new FirearmClass2(this);
+            return new AmmoPackReloadInternalOneChamberOperation(this);
         }
         if (Item.MustBoltBeOpennedForInternalReload)
         {
-            return new FirearmClass3(this);
+            return new AmmoPackReloadInternalBoltOpenOperation(this);
         }
-        return new FirearmClass2(this);
+        return new AmmoPackReloadInternalOneChamberOperation(this);
     }
 
     public Player.BaseAnimationOperationClass Weapon2()
     {
-        return new FirearmClass1(this);
+        return new CylinderReloadOperation(this);
     }
 
     public Player.BaseAnimationOperationClass Weapon3()
@@ -140,7 +140,7 @@ public class FikaClientFirearmController : Player.FirearmController
         {
             return new FireOnlyBarrelFireOperation(this);
         }
-        if (Item is RevolverItemClass) // This is a revolver
+        if (Item is RevolverItemClass)
         {
             return new RevolverFireOperationClass(this);
         }
@@ -148,7 +148,7 @@ public class FikaClientFirearmController : Player.FirearmController
         {
             return new GenericFireOperationClass(this);
         }
-        return new FirearmClass4(this);
+        return new DefaultFireOperation(this);
     }
 
     public override bool ToggleBipod()
@@ -559,7 +559,7 @@ public class FikaClientFirearmController : Player.FirearmController
         _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
     }
 
-    private class FirearmClass1(Player.FirearmController controller) : CylinderReloadOperationClass(controller)
+    private class CylinderReloadOperation(Player.FirearmController controller) : CylinderReloadOperationClass(controller)
     {
         public override void SetTriggerPressed(bool pressed)
         {
@@ -581,7 +581,7 @@ public class FikaClientFirearmController : Player.FirearmController
         private FikaClientFirearmController coopClientFirearmController = (FikaClientFirearmController)controller;
     }
 
-    private class FirearmClass2(Player.FirearmController controller) : AmmoPackReloadInternalOneChamberOperationClass(controller)
+    private class AmmoPackReloadInternalOneChamberOperation(Player.FirearmController controller) : AmmoPackReloadInternalOneChamberOperationClass(controller)
     {
         public override void SetTriggerPressed(bool pressed)
         {
@@ -602,7 +602,7 @@ public class FikaClientFirearmController : Player.FirearmController
         private readonly FikaClientFirearmController _coopClientFirearmController = (FikaClientFirearmController)controller;
     }
 
-    private class FirearmClass3(Player.FirearmController controller) : AmmoPackReloadInternalBoltOpenOperationClass(controller)
+    private class AmmoPackReloadInternalBoltOpenOperation(Player.FirearmController controller) : AmmoPackReloadInternalBoltOpenOperationClass(controller)
     {
         public override void SetTriggerPressed(bool pressed)
         {
@@ -623,7 +623,7 @@ public class FikaClientFirearmController : Player.FirearmController
         private readonly FikaClientFirearmController _coopClientFirearmController = (FikaClientFirearmController)controller;
     }
 
-    private class FirearmClass4(Player.FirearmController controller) : DefaultWeaponOperationClass(controller)
+    private class DefaultFireOperation(Player.FirearmController controller) : DefaultWeaponOperationClass(controller)
     {
         public override void Start()
         {
