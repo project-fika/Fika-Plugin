@@ -280,9 +280,9 @@ public class ObservedPlayer : FikaPlayer
             if (DissonanceComms != null)
             {
                 DissonanceComms.TrackPlayerPosition(this);
+                StartCoroutine(SourceBindingCreated());
                 if (VoipAudioSource != null)
                 {
-                    SourceBindingCreated();
                 }
                 else
                 {
@@ -296,18 +296,35 @@ public class ObservedPlayer : FikaPlayer
         }
     }
 
-    private void SourceBindingCreated()
+    private IEnumerator SourceBindingCreated()
     {
         if (_voipAssigned)
         {
-            return;
+            yield break;
         }
+
+        if (VoipAudioSource == null)
+        {
+            int attempts = 0;
+            WaitForSeconds waitForSeconds = new(1);
+            while (VoipAudioSource == null)
+            {
+                FikaGlobals.LogInfo($"VoipAudioSource is null, waiting 1 second... [{attempts/5}]");
+                if (attempts++ > 5)
+                {
+                    FikaGlobals.LogError("VoipAudioSource was null after 5 attempts! Cancelling.");
+                    yield break;
+                }
+                yield return waitForSeconds;
+            } 
+        }
+
         VoipEftSource = MonoBehaviourSingleton<BetterAudio>.Instance.CreateBetterSource<SimpleSource>(
             VoipAudioSource, BetterAudio.AudioSourceGroupType.Voip, true, true);
         if (VoipEftSource == null)
         {
             FikaGlobals.LogError($"Could not initialize VoipEftSource for {Profile.Nickname}");
-            return;
+            yield break;
         }
         VoipEftSource.SetMixerGroup(MonoBehaviourSingleton<BetterAudio>.Instance.ObservedPlayerSpeechMixer);
         VoipEftSource.SetRolloff(60f);
