@@ -63,7 +63,7 @@ public class FikaPlayer : LocalPlayer
         }
     }
 
-    protected string _lastWeaponId;
+    protected MongoID? _lastWeaponId;
     private bool _hasSkilledScav;
     private bool _shouldSendSideEffect;
     private VoipSettingsClass _voipHandler;
@@ -476,7 +476,7 @@ public class FikaPlayer : LocalPlayer
 #if DEBUG
         FikaPlugin.Instance.FikaLogger.LogWarning($"Finding weapon '{_lastWeaponId}'!");
 #endif
-        GStruct461<Item> itemResult = FindItemById(_lastWeaponId, false, false);
+        GStruct461<Item> itemResult = FindItemById(_lastWeaponId.Value, false, false);
         Item item = itemResult.Value;
         if (!itemResult.Succeeded)
         {
@@ -904,7 +904,7 @@ public class FikaPlayer : LocalPlayer
             packets.KillerId = LastAggressor.ProfileId;
         }
 
-        if (!string.IsNullOrEmpty(_lastWeaponId))
+        if (_lastWeaponId != null)
         {
             packets.WeaponId = _lastWeaponId;
         }
@@ -930,7 +930,7 @@ public class FikaPlayer : LocalPlayer
 
     public override void OnDead(EDamageType damageType)
     {
-        if (LastDamageInfo.Weapon == null && !string.IsNullOrEmpty(_lastWeaponId))
+        if (LastDamageInfo.Weapon == null && _lastWeaponId != null)
         {
             FindKillerWeapon();
 #if DEBUG
@@ -960,7 +960,7 @@ public class FikaPlayer : LocalPlayer
 
     private void GenerateDogtagDetails()
     {
-        if (LastDamageInfo.Weapon == null && !string.IsNullOrEmpty(_lastWeaponId))
+        if (LastDamageInfo.Weapon == null && _lastWeaponId != null)
         {
             FindKillerWeapon();
 #if DEBUG
@@ -1262,7 +1262,7 @@ public class FikaPlayer : LocalPlayer
             _lastWeaponId = packet.WeaponId;
         }
 
-        if (damageInfo.DamageType == EDamageType.Melee && !string.IsNullOrEmpty(_lastWeaponId))
+        if (damageInfo.DamageType == EDamageType.Melee && _lastWeaponId != null)
         {
             Item item = FindWeapon();
             if (item != null)
@@ -1352,6 +1352,7 @@ public class FikaPlayer : LocalPlayer
             PacketSender = null;
         }
         _voipController?.Dispose();
+        _lastWeaponId = null;
         base.Dispose();
     }
 

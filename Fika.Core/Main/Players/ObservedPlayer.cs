@@ -1879,7 +1879,7 @@ public class ObservedPlayer : FikaPlayer
         LastBodyPart = bodyPart;
         _lastWeaponId = weaponId;
 
-        if (LastDamageInfo.Weapon == null && !string.IsNullOrEmpty(_lastWeaponId))
+        if (LastDamageInfo.Weapon == null && _lastWeaponId != null)
         {
             FindKillerWeapon();
         }
