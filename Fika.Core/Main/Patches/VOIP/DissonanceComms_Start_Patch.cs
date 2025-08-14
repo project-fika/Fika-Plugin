@@ -11,7 +11,8 @@ public class DissonanceComms_Start_Patch : FikaPatch
 
     protected override MethodBase GetTargetMethod()
     {
-        return AccessTools.Method(typeof(DissonanceComms), "Start");
+        return AccessTools
+            .Method(typeof(DissonanceComms), "Start");
     }
 
     [PatchPrefix]

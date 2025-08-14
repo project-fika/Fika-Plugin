@@ -14,7 +14,8 @@ public class BasicMicrophoneCapture_UpdateSubscribers_Transpiler : FikaPatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(BasicMicrophoneCapture).GetMethod(nameof(BasicMicrophoneCapture.UpdateSubscribers));
+        return typeof(BasicMicrophoneCapture)
+            .GetMethod(nameof(BasicMicrophoneCapture.UpdateSubscribers));
     }
 
     [PatchTranspiler]

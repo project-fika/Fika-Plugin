@@ -511,6 +511,7 @@ public abstract class BaseGameController
             btrSettings.ChanceSpawn = 100;
             btrSettings.SpawnPeriod = new(5, 10);
             btrSettings.MoveSpeed = 32f;
+            btrSettings.PauseDurationRange = new(595, 600);
             settings.ServerMapBTRSettings[mapSettings.Key] = btrSettings;
 #endif
             gameWorld.BtrController = new BTRControllerClass(gameWorld);

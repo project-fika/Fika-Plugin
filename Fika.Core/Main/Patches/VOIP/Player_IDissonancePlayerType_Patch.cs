@@ -10,7 +10,8 @@ class Player_IDissonancePlayerType_Patch : FikaPatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return AccessTools.PropertyGetter(typeof(Player), "Dissonance.IDissonancePlayer.Type");
+        return AccessTools
+            .PropertyGetter(typeof(Player), "Dissonance.IDissonancePlayer.Type");
     }
 
     [PatchPrefix]
