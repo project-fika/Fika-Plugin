@@ -34,8 +34,7 @@ public class DamagePacket : IPoolSubPacket
     public MongoID? DeflectedBy;
     public MongoID? ProfileId;
     public MongoID? WeaponId;
-
-    public string SourceId;
+    public MongoID? SourceId;
 
     public static DamagePacket FromValue(int netId, in DamageInfoStruct damageInfo, EBodyPart bodyPartType,
         EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider = default, MaterialType materialType = default, float absorbed = default)
@@ -63,7 +62,10 @@ public class DamagePacket : IPoolSubPacket
         packet.ProfileId = damageInfo.Player?.iPlayer.ProfileId;
         packet.WeaponId = damageInfo.Weapon?.Id;
 
-        packet.SourceId = damageInfo.SourceId;
+        if (!string.IsNullOrEmpty(damageInfo.SourceId))
+        {
+            packet.SourceId = damageInfo.SourceId; 
+        }
 
         return packet;
     }
@@ -99,8 +101,7 @@ public class DamagePacket : IPoolSubPacket
         DeflectedBy = reader.GetNullableMongoID();
         ProfileId = reader.GetNullableMongoID();
         WeaponId = reader.GetNullableMongoID();
-
-        SourceId = reader.GetString();
+        SourceId = reader.GetNullableMongoID();
     }
 
     public void Serialize(NetDataWriter writer)
@@ -126,8 +127,7 @@ public class DamagePacket : IPoolSubPacket
         writer.PutNullableMongoID(DeflectedBy);
         writer.PutNullableMongoID(ProfileId);
         writer.PutNullableMongoID(WeaponId);
-
-        writer.Put(SourceId);
+        writer.PutNullableMongoID(SourceId);
     }
 
     public void Dispose()
@@ -152,7 +152,6 @@ public class DamagePacket : IPoolSubPacket
         DeflectedBy = null;
         ProfileId = null;
         WeaponId = null;
-
         SourceId = null;
     }
 }

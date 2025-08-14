@@ -1240,9 +1240,13 @@ public class FikaPlayer : LocalPlayer
             PenetrationPower = packet.PenetrationPower,
             BlockedBy = packet.BlockedBy,
             DeflectedBy = packet.DeflectedBy,
-            SourceId = packet.SourceId,
             ArmorDamage = packet.ArmorDamage
         };
+
+        if (packet.SourceId.HasValue)
+        {
+            damageInfo.SourceId = packet.SourceId.Value;
+        }
 
         if (packet.ProfileId.HasValue)
         {

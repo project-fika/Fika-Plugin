@@ -1014,7 +1014,7 @@ public class ObservedPlayer : FikaPlayer
 
     public override void HandleDamagePacket(DamagePacket packet)
     {
-        DamageInfoStruct DamageInfo = new()
+        DamageInfoStruct damageInfo = new()
         {
             Damage = packet.Damage,
             DamageType = packet.DamageType,
@@ -1025,9 +1025,13 @@ public class ObservedPlayer : FikaPlayer
             PenetrationPower = packet.PenetrationPower,
             BlockedBy = packet.BlockedBy,
             DeflectedBy = packet.DeflectedBy,
-            SourceId = packet.SourceId,
             ArmorDamage = packet.ArmorDamage
         };
+
+        if (packet.SourceId.HasValue)
+        {
+            damageInfo.SourceId = packet.SourceId.Value;
+        }
 
         if (packet.ProfileId.HasValue)
         {
@@ -1035,11 +1039,11 @@ public class ObservedPlayer : FikaPlayer
 
             if (player != null)
             {
-                DamageInfo.Player = player;
+                damageInfo.Player = player;
                 LastAggressor = player.iPlayer;
                 if (IsYourPlayer)
                 {
-                    if (!FikaPlugin.Instance.FriendlyFire && DamageInfo.Player.iPlayer.GroupId == GroupId)
+                    if (!FikaPlugin.Instance.FriendlyFire && damageInfo.Player.iPlayer.GroupId == GroupId)
                     {
                         return;
                     }
@@ -1049,10 +1053,10 @@ public class ObservedPlayer : FikaPlayer
             _lastWeaponId = packet.WeaponId;
         }
 
-        ShotReactions(DamageInfo, packet.BodyPartType);
-        ReceiveDamage(DamageInfo.Damage, packet.BodyPartType, DamageInfo.DamageType, packet.Absorbed, packet.Material);
+        ShotReactions(damageInfo, packet.BodyPartType);
+        ReceiveDamage(damageInfo.Damage, packet.BodyPartType, damageInfo.DamageType, packet.Absorbed, packet.Material);
 
-        LastDamageInfo = DamageInfo;
+        LastDamageInfo = damageInfo;
         LastBodyPart = packet.BodyPartType;
         LastDamagedBodyPart = packet.BodyPartType;
     }
