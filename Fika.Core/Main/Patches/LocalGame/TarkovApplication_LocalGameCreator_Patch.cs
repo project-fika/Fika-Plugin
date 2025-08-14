@@ -15,6 +15,7 @@ using HarmonyLib;
 using JsonType;
 using SPT.SinglePlayer.Utils.InRaid;
 using System;
+using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -128,6 +129,11 @@ public class TarkovApplication_LocalGameCreator_Patch : FikaPatch
 
             RaidSettingsRequest data = new();
             RaidSettingsResponse raidSettingsResponse = await FikaRequestHandler.GetRaidSettings(data);
+
+            if (!raidSettingsResponse.Received)
+            {
+                throw new InvalidDataException("Failed to retrieve raid settings");
+            }
 
             raidSettings.MetabolismDisabled = raidSettingsResponse.MetabolismDisabled;
             raidSettings.PlayersSpawnPlace = raidSettingsResponse.PlayersSpawnPlace;
