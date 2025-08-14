@@ -18,11 +18,6 @@ public class FikaVOIPClient(ICommsNetworkState network) : BaseClient<FikaVOIPSer
 
     }
 
-    public override void Disconnect()
-    {
-        base.Disconnect();
-    }
-
     public override void SendVoiceData(ArraySegment<byte> encodedAudio)
     {
         TalkClass.SetTalkDateTime();

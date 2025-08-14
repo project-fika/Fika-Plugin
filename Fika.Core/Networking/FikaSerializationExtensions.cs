@@ -1053,7 +1053,7 @@ public static class FikaSerializationExtensions
         }
 
         float normalized = (float)quantized / maxInt;
-        return min + normalized * (max - min);
+        return min + (normalized * (max - min));
     }
 
     /// <summary>
@@ -1065,15 +1065,15 @@ public static class FikaSerializationExtensions
     /// <param name="maxValue">The maximum value of the input integer range</param>
     public static void PutPackedInt(this NetDataWriter writer, int value, int minValue, int maxValue)
     {
-        int minTarget = 0;
-        int maxTarget = byte.MaxValue;
+        const int minTarget = 0;
+        const int maxTarget = byte.MaxValue;
 
         int clampedValue = Mathf.Clamp(value, minValue, maxValue) - minValue;
         int rangeInput = maxValue - minValue;
-        int rangeTarget = maxTarget - minTarget;
+        const int rangeTarget = maxTarget - minTarget;
 
         float normalized = (float)clampedValue / rangeInput;
-        int scaled = (int)(minTarget + normalized * rangeTarget);
+        int scaled = (int)(minTarget + (normalized * rangeTarget));
 
         byte result = (byte)Mathf.Clamp(scaled, minTarget, maxTarget);
         writer.Put(result);
@@ -1088,17 +1088,17 @@ public static class FikaSerializationExtensions
     /// <returns>The scaled integer value within the target range</returns>
     public static int GetPackedInt(this NetDataReader reader, int minTarget, int maxTarget)
     {
-        int minValue = 0;
-        int maxValue = byte.MaxValue;
+        const int minValue = 0;
+        const int maxValue = byte.MaxValue;
 
         byte value = reader.GetByte();
 
-        int rangeInput = maxValue - minValue;
+        const int rangeInput = maxValue - minValue;
         int clampedValue = Mathf.Clamp(value, minValue, maxValue) - minValue;
         float rangeTarget = maxTarget - minTarget;
 
         float normalized = (float)clampedValue / rangeInput;
-        return (int)(minTarget + normalized * rangeTarget);
+        return (int)(minTarget + (normalized * rangeTarget));
     }
 
     /// <summary>

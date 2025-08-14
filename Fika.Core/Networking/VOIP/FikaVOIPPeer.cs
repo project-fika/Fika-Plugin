@@ -56,20 +56,12 @@ public class LocalPeer : IPeer
 
 public struct RemotePeer(NetPeer peer) : IPeer
 {
-    public bool IsLocal { get; set; } = false;
+    public bool IsLocal { get; set; }
 
-    public readonly NetPeer Peer
-    {
-        get
-        {
-            return _peer;
-        }
-    }
-
-    private readonly NetPeer _peer = peer;
+    public readonly NetPeer Peer { get; } = peer;
 
     public readonly void SendData(ArraySegment<byte> data, DeliveryMethod deliveryMethod)
     {
-        Singleton<IFikaNetworkManager>.Instance.SendVOIPData(data, deliveryMethod, _peer);
+        Singleton<IFikaNetworkManager>.Instance.SendVOIPData(data, deliveryMethod, Peer);
     }
 }

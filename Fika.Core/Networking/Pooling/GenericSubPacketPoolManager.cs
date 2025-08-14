@@ -6,18 +6,11 @@ namespace Fika.Core.Networking.Pooling;
 
 internal sealed class GenericSubPacketPoolManager : BasePacketPoolManager<EGenericSubPacketType, IPoolSubPacket>
 {
-    private static readonly GenericSubPacketPoolManager _instance = new();
-    public static GenericSubPacketPoolManager Instance
-    {
-        get
-        {
-            return _instance;
-        }
-    }
+    public static GenericSubPacketPoolManager Instance { get; } = new();
 
     public static void Release()
     {
-        _instance.ClearPool();
+        Instance.ClearPool();
     }
 
     private GenericSubPacketPoolManager()

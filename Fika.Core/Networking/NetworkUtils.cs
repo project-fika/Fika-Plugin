@@ -12,7 +12,7 @@ public static class NetworkUtils
     /// <summary>
     /// Compresses the given byte array using LZ4 compression
     /// </summary>
-    /// <param name="data">The original uncompressed byte array</param>
+    /// <param name="input">The original uncompressed byte array</param>
     /// <returns>The compressed byte array</returns>
     public static ReadOnlySpan<byte> CompressBytes(byte[] input)
     {

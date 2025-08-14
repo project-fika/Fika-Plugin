@@ -6,18 +6,11 @@ namespace Fika.Core.Networking.Pooling;
 
 internal sealed class FirearmSubPacketPoolManager : BasePacketPoolManager<EFirearmSubPacketType, IPoolSubPacket>
 {
-    private static readonly FirearmSubPacketPoolManager _instance = new();
-    public static FirearmSubPacketPoolManager Instance
-    {
-        get
-        {
-            return _instance;
-        }
-    }
+    public static FirearmSubPacketPoolManager Instance { get; } = new();
 
     public static void Release()
     {
-        _instance.ClearPool();
+        Instance.ClearPool();
     }
 
     private FirearmSubPacketPoolManager()

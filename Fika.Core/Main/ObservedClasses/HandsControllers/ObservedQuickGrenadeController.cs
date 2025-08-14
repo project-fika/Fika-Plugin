@@ -2,7 +2,6 @@
 
 using EFT;
 using Fika.Core.Main.Players;
-using Fika.Core.Networking.Packets;
 
 namespace Fika.Core.Main.ObservedClasses.HandsControllers;
 

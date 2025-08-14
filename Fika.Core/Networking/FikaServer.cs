@@ -11,8 +11,6 @@ using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
 using EFT.UI;
-#if DEBUG
-#endif
 using Fika.Core.Main.Components;
 using Fika.Core.Main.GameMode;
 using Fika.Core.Main.HostClasses;

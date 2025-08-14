@@ -31,8 +31,8 @@ internal class InternalBundleLoader
         Assembly assembly = Assembly.GetExecutingAssembly();
         foreach (string name in assembly.GetManifestResourceNames())
         {
-            using Stream stream = assembly.GetManifestResourceStream(name);
-            using MemoryStream memoryStream = new();
+            await using Stream stream = assembly.GetManifestResourceStream(name);
+            await using MemoryStream memoryStream = new();
 
             string bundleName = name.Replace("Fika.Core.Bundles.Files.", "")
                 .Replace(".bundle", "");

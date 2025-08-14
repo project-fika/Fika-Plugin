@@ -267,7 +267,6 @@ public class FikaPlugin : BaseUnityPlugin
     /// <summary>
     /// Gets the <see cref="TarkovApplication"/>
     /// </summary>
-    /// <returns></returns>
     private async Task GetTarkovApp()
     {
         TarkovApplication app;
@@ -322,7 +321,6 @@ public class FikaPlugin : BaseUnityPlugin
     /// <summary>
     /// Coroutine to ensure all mods are loaded by waiting 5 seconds
     /// </summary>
-    /// <returns></returns>
     private async Task RunChecks()
     {
         try
@@ -385,7 +383,6 @@ public class FikaPlugin : BaseUnityPlugin
     /// This is required for the locales to be properly loaded, for some reason they are still unavailable for a few seconds after getting populated
     /// </summary>
     /// <param name="localesTask">The <see cref="Task"/> that populates the locales</param>
-    /// <returns></returns>
     public async void WaitForLocales(Task localesTask)
     {
         Logger.LogInfo("Waiting for locales to be ready...");

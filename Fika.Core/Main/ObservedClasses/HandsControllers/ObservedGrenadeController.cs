@@ -4,7 +4,6 @@ using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Main.Players;
-using Fika.Core.Networking.Packets;
 using System;
 using System.Collections.Generic;
 

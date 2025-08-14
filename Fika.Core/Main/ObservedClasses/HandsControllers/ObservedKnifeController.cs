@@ -9,7 +9,6 @@ internal class ObservedKnifeController : EFT.Player.KnifeController
 {
     public static ObservedKnifeController Create(FikaPlayer player, KnifeComponent item)
     {
-        ObservedKnifeController controller = smethod_9<ObservedKnifeController>(player, item);
-        return controller;
+        return smethod_9<ObservedKnifeController>(player, item);
     }
 }

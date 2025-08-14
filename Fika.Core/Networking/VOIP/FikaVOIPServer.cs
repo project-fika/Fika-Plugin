@@ -45,14 +45,9 @@ public class FikaVOIPServer(FikaCommsNetwork commsNetwork) : BaseServer<FikaVOIP
 
     }
 
-    public override void Disconnect()
-    {
-        base.Disconnect();
-    }
-
     protected override void SendReliable(FikaVOIPPeer connection, ArraySegment<byte> packet)
     {
-        if (packet.Array != null && packet.Array.Length == 0)
+        if (packet.Array?.Length == 0)
         {
             FikaGlobals.LogError("Packet length was 0!");
             return;
@@ -63,7 +58,7 @@ public class FikaVOIPServer(FikaCommsNetwork commsNetwork) : BaseServer<FikaVOIP
 
     protected override void SendUnreliable(FikaVOIPPeer connection, ArraySegment<byte> packet)
     {
-        if (packet.Array != null && packet.Array.Length == 0)
+        if (packet.Array?.Length == 0)
         {
             FikaGlobals.LogError("Packet length was 0!");
             return;
@@ -89,7 +84,7 @@ public class FikaVOIPServer(FikaCommsNetwork commsNetwork) : BaseServer<FikaVOIP
     {
         if (connections == null)
         {
-            throw new ArgumentNullException("connections");
+            throw new ArgumentNullException(nameof(connections));
         }
 
         for (int i = 0; i < connections.Count; i++)

@@ -4,13 +4,11 @@ using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Main.Players;
-using Fika.Core.Networking.Packets.FirearmController;
 using Fika.Core.Networking.Packets.FirearmController.SubPackets;
 using HarmonyLib;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Net.Sockets;
 using static EFT.Player;
 
 namespace Fika.Core.Main.ObservedClasses.HandsControllers;
@@ -37,9 +35,9 @@ public class ObservedFirearmController : FirearmController
     private ObservedPlayer _fikaPlayer;
     private bool _triggerPressed;
     private bool _needsReset;
-    private float _lastFireTime = 0f;
-    private float _overlapCounter = 0f;
-    private bool _hasFired = false;
+    private float _lastFireTime;
+    private float _overlapCounter;
+    private bool _hasFired;
     private WeaponPrefab _weaponPrefab;
     private WeaponManagerClass _weaponManager;
     private UnderbarrelManagerClass _underBarrelManager;
@@ -118,8 +116,7 @@ public class ObservedFirearmController : FirearmController
     protected void Start()
     {
         _objectInHandsAnimator.SetAiming(false);
-        WeaponPrefab prefab = ControllerGameObject.GetComponent<WeaponPrefab>();
-        _weaponPrefab = prefab;
+        _weaponPrefab = ControllerGameObject.GetComponent<WeaponPrefab>();
         _weaponManager = _weaponPrefab.ObjectInHands as WeaponManagerClass;
         if (UnderbarrelWeapon != null)
         {
@@ -710,7 +707,8 @@ public class ObservedFirearmController : FirearmController
 
         ammo.IsUsed = true;
 
-        if (magazine != null && /*magazine is not CylinderMagazineItemClass &&*/ magazine.Count > 0 && !weapon.BoltAction)
+        /*magazine is not CylinderMagazineItemClass &&*/
+        if (magazine?.Count > 0 && !weapon.BoltAction)
         {
             if (hasChambers && magazine.IsAmmoCompatible(Item.Chambers) && Item.Chambers[0].ContainedItem == null)
             {

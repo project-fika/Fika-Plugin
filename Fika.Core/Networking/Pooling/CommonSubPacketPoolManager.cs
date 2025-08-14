@@ -6,18 +6,11 @@ namespace Fika.Core.Networking.Pooling;
 
 internal sealed class CommonSubPacketPoolManager : BasePacketPoolManager<ECommonSubPacketType, IPoolSubPacket>
 {
-    private static readonly CommonSubPacketPoolManager _instance = new();
-    public static CommonSubPacketPoolManager Instance
-    {
-        get
-        {
-            return _instance;
-        }
-    }
+    public static CommonSubPacketPoolManager Instance { get; } = new();
 
     public static void Release()
     {
-        _instance.ClearPool();
+        Instance.ClearPool();
     }
 
     private CommonSubPacketPoolManager()
