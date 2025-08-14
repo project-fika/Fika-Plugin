@@ -661,6 +661,12 @@ public class FikaClientFirearmController : Player.FirearmController
             SendBoltActionReloadPacket(true);
         }
 
+        public override void ReloadCylinderMagazine(AmmoPackReloadingClass ammoPack, Callback finishCallback, Callback startCallback, bool quickReload = false)
+        {
+            base.ReloadCylinderMagazine(ammoPack, finishCallback, startCallback, quickReload);
+            SendBoltActionReloadPacket(true);
+        }
+
         private void SendBoltActionReloadPacket(bool value)
         {
             if (!_hasSent && value)
