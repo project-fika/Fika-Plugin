@@ -995,7 +995,7 @@ public class ObservedPlayer : FikaPlayer
         // Do nothing
     }
 
-    public override void HandleDamagePacket(in DamagePacket packet)
+    public override void HandleDamagePacket(DamagePacket packet)
     {
         DamageInfoStruct DamageInfo = new()
         {
@@ -1507,7 +1507,7 @@ public class ObservedPlayer : FikaPlayer
         }
     }
 
-    public void HandleProceedPacket(in ProceedPacket packet)
+    public void HandleProceedPacket(ProceedPacket packet)
     {
         switch (packet.ProceedType)
         {

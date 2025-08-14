@@ -1227,7 +1227,7 @@ public class FikaPlayer : LocalPlayer
         }
     }*/
 
-    public virtual void HandleDamagePacket(in DamagePacket packet)
+    public virtual void HandleDamagePacket(DamagePacket packet)
     {
         DamageInfoStruct damageInfo = new()
         {
