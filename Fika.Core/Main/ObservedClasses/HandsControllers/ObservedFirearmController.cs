@@ -10,6 +10,7 @@ using HarmonyLib;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Net.Sockets;
 using static EFT.Player;
 
 namespace Fika.Core.Main.ObservedClasses.HandsControllers;
@@ -381,7 +382,7 @@ public class ObservedFirearmController : FirearmController
     /// <param name="rocketClass">The ammo to shoot</param>
     /// <param name="shotPosition">Start position</param>
     /// <param name="shotForward">The forward velocity</param>
-    public void HandleRocketShot(AmmoItemClass rocketClass, in Vector3 shotPosition, in Vector3 shotForward)
+    public void HandleRocketShot(AmmoItemClass rocketClass, Vector3 shotPosition, Vector3 shotForward)
     {
         FirearmsAnimator.SetFire(true);
 
@@ -399,14 +400,7 @@ public class ObservedFirearmController : FirearmController
     {
         if (packet.ShotType == EShotType.DryFire)
         {
-            if (IsRevolver)
-            {
-                Weapon.CylinderHammerClosed = Weapon.FireMode.FireMode == Weapon.EFireMode.doubleaction;
-            }
-            FirearmsAnimator.SetFire(true);
-            DryShot();
-            _hasFired = true;
-            _lastFireTime = 0f;
+            HandleObservedDryShot();
             return;
         }
 
@@ -509,24 +503,105 @@ public class ObservedFirearmController : FirearmController
             }
         }
 
+        if (IsRevolver)
+        {
+            HandleRevolverShot(packet, inventoryController);
+            return;
+        }
         HandleObservedShot(packet, inventoryController);
     }
 
-    // Leave here for now - Lacyway
-    /*private AmmoItemClass GetFedAmmoFromMalfunction(MagazineItemClass currentMagazine)
+    private void HandleObservedDryShot()
     {
-        if (!Weapon.HasChambers)
+        if (IsRevolver)
         {
-            return (AmmoItemClass)currentMagazine.Cartridges.PopToNowhere(fikaPlayer.InventoryController).Value.ResultItem;
+            Weapon revolver = Weapon;
+            CylinderMagazineItemClass cylinderMagazine = (CylinderMagazineItemClass)revolver.GetCurrentMagazine();
+
+            revolver.CylinderHammerClosed = revolver.FireMode.FireMode == Weapon.EFireMode.doubleaction;
+            FirearmsAnimator.SetCamoraFireIndex(cylinderMagazine.CurrentCamoraIndex);
+            if ((revolver.CylinderHammerClosed && revolver.FireMode.FireMode == Weapon.EFireMode.doubleaction)
+                || (!revolver.CylinderHammerClosed && revolver.FireMode.FireMode == Weapon.EFireMode.single))
+            {
+                cylinderMagazine.DryFireIncrementCamoraIndex();
+            }
+            FirearmsAnimator.SetDoubleAction(Convert.ToSingle(revolver.CylinderHammerClosed));
+            FirearmsAnimator.SetCamoraIndex(cylinderMagazine.CurrentCamoraIndex);
+
+            FirearmsAnimator.SetFire(true);
+            DryShot();
+            _hasFired = true;
+            _lastFireTime = 0f;
+            return;
+        }
+        FirearmsAnimator.SetFire(true);
+        DryShot();
+        _hasFired = true;
+        _lastFireTime = 0f;
+    }
+
+    private void HandleRevolverShot(ShotInfoPacket packet, InventoryController inventoryController)
+    {
+        Weapon revolver = Weapon;
+        CylinderMagazineItemClass cylinderMagazine = (CylinderMagazineItemClass)revolver.GetCurrentMagazine();
+
+        AmmoItemClass ammo = (AmmoItemClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), packet.AmmoTemplate, null);
+        _fikaPlayer.TurnOffFbbikAt = Time.time + 0.6f;
+        InitiateShot(Item, ammo, packet.ShotPosition, packet.ShotDirection,
+            CurrentFireport.position, packet.ChamberIndex, packet.Overheat);
+
+        float pitchMult = method_61();
+        WeaponSoundPlayer.FireBullet(ammo, packet.ShotPosition, packet.ShotDirection,
+            pitchMult, Malfunction, false, IsBirstOf2Start);
+
+        SetMalfAndDurability(packet, revolver);
+
+        revolver.CylinderHammerClosed = revolver.FireMode.FireMode == Weapon.EFireMode.doubleaction;
+        FirearmsAnimator.SetCamoraFireIndex(cylinderMagazine.CurrentCamoraIndex);
+        int firstIndex = cylinderMagazine.GetCamoraFireOrLoadStartIndex(!revolver.CylinderHammerClosed);
+        AmmoItemClass cylinderAmmo = cylinderMagazine.GetFirstAmmo(!revolver.CylinderHammerClosed);
+        if (cylinderAmmo != null)
+        {
+            GStruct459<GInterface407> removeOperation = cylinderMagazine.RemoveAmmoInCamora(cylinderAmmo, inventoryController);
+            if (removeOperation.Failed)
+            {
+                FikaPlugin.Instance.FikaLogger.LogError($"Error removing ammo from cylinderMagazine on netId [{_fikaPlayer.NetId}], error: {removeOperation.Error}");
+            }
+            inventoryController.CheckChamber(revolver, false);
+            cylinderAmmo.IsUsed = true;
+            revolver.ShellsInChambers[firstIndex] = cylinderAmmo.AmmoTemplate;
+        }
+        if (revolver.CylinderHammerClosed || revolver.FireMode.FireMode != Weapon.EFireMode.doubleaction)
+        {
+            cylinderMagazine.IncrementCamoraIndex(false);
+        }
+        FirearmsAnimator.SetCamoraIndex(cylinderMagazine.CurrentCamoraIndex);
+        if (cylinderMagazine.Count > 0)
+        {
+            revolver.CylinderHammerClosed = revolver.FireMode.FireMode == Weapon.EFireMode.doubleaction;
+        }
+        FirearmsAnimator.SetDoubleAction(Convert.ToSingle(revolver.CylinderHammerClosed));
+        FirearmsAnimator.SetHammerArmed(!revolver.CylinderHammerClosed);
+        _weaponManager.MoveAmmoFromChamberToShellPort(true, firstIndex);
+
+        FirearmsAnimator.SetAmmoOnMag(cylinderMagazine.Count);
+
+        FirearmsAnimator.SetFire(true);
+
+        if (revolver.MalfState.State == Weapon.EMalfunctionState.None)
+        {
+            if (IsRevolver && Weapon.CylinderHammerClosed)
+            {
+                FirearmsAnimator.Animator.Play(FirearmsAnimator.FullDoubleActionFireStateName, 1, 0.2f);
+            }
+            else
+            {
+                FirearmsAnimator.Animator.Play(FirearmsAnimator.FullFireStateName, 1, 0.2f);
+            }
         }
 
-        Slot chamberSlot = Weapon.Chambers[0];
-        if (chamberSlot.ContainedItem != null)
-        {
-            chamberSlot.RemoveItemWithoutRestrictions();
-        }
-        return (AmmoItemClass)currentMagazine.Cartridges.PopTo(fikaPlayer.InventoryController, chamberSlot.CreateItemAddress()).Value.ResultItem;
-    }*/
+        FirearmsAnimator.SetFire(false);
+    }
 
     private void HandleObservedShot(ShotInfoPacket packet, InventoryController inventoryController)
     {
@@ -536,8 +611,7 @@ public class ObservedFirearmController : FirearmController
             CurrentFireport.position, packet.ChamberIndex, packet.Overheat);
 
         Weapon weapon = Weapon;
-
-        weapon.Repairable.Durability = Mathf.Clamp(packet.Durability, 0f, weapon.Repairable.MaxDurability);
+        SetMalfAndDurability(packet, weapon);
 
         if (_stationaryWeapon)
         {
@@ -553,10 +627,6 @@ public class ObservedFirearmController : FirearmController
         WeaponSoundPlayer.FireBullet(ammo, packet.ShotPosition, packet.ShotDirection,
             pitchMult, Malfunction, false, IsBirstOf2Start);
 
-        weapon.MalfState.LastShotOverheat = packet.LastShotOverheat;
-        weapon.MalfState.LastShotTime = packet.LastShotTime;
-        weapon.MalfState.SlideOnOverheatReached = packet.SlideOnOverheatReached;
-
         _triggerPressed = false;
         _hasFired = true;
         _lastFireTime = 0f;
@@ -571,11 +641,7 @@ public class ObservedFirearmController : FirearmController
 
         if (weapon.MalfState.State == Weapon.EMalfunctionState.None)
         {
-            if (IsRevolver && Weapon.CylinderHammerClosed)
-            {
-                FirearmsAnimator.Animator.Play(FirearmsAnimator.FullDoubleActionFireStateName, 1, 0.2f);
-            }
-            else if (weapon.FireMode.FireMode == Weapon.EFireMode.semiauto)
+            if (weapon.FireMode.FireMode == Weapon.EFireMode.semiauto)
             {
                 FirearmsAnimator.Animator.Play(FirearmsAnimator.FullSemiFireStateName, 1, 0.2f);
             }
@@ -642,45 +708,9 @@ public class ObservedFirearmController : FirearmController
             FirearmsAnimator.SetAmmoInChamber(weapon.ChamberAmmoCount);
         }
 
-        if (IsRevolver)
-        {
-            if (magazine is CylinderMagazineItemClass cylinderMagazine)
-            {
-                FirearmsAnimator.SetCamoraFireIndex(cylinderMagazine.CurrentCamoraIndex);
-                int firstIndex = cylinderMagazine.GetCamoraFireOrLoadStartIndex(!weapon.CylinderHammerClosed);
-                AmmoItemClass cylinderAmmo = cylinderMagazine.GetFirstAmmo(!weapon.CylinderHammerClosed);
-                if (cylinderAmmo != null)
-                {
-                    GStruct459<GInterface407> removeOperation = cylinderMagazine.RemoveAmmoInCamora(cylinderAmmo, inventoryController);
-                    if (removeOperation.Failed)
-                    {
-                        FikaPlugin.Instance.FikaLogger.LogError($"Error removing ammo from cylinderMagazine on netId {_fikaPlayer.NetId}, error: {removeOperation.Error}");
-                    }
-                    inventoryController.CheckChamber(weapon, false);
-                    cylinderAmmo.IsUsed = true;
-                    weapon.ShellsInChambers[firstIndex] = cylinderAmmo.AmmoTemplate;
-                }
-                if (weapon.CylinderHammerClosed || weapon.FireMode.FireMode != Weapon.EFireMode.doubleaction)
-                {
-                    cylinderMagazine.IncrementCamoraIndex(false);
-                }
-                FirearmsAnimator.SetCamoraIndex(cylinderMagazine.CurrentCamoraIndex);
-                FirearmsAnimator.SetDoubleAction(Convert.ToSingle(weapon.CylinderHammerClosed));
-                FirearmsAnimator.SetHammerArmed(!weapon.CylinderHammerClosed);
-                _weaponManager.MoveAmmoFromChamberToShellPort(true, firstIndex);
-
-                FirearmsAnimator.SetAmmoOnMag(cylinderMagazine.Count);
-
-                if (cylinderMagazine.Count > 0)
-                {
-                    weapon.CylinderHammerClosed = weapon.FireMode.FireMode == Weapon.EFireMode.doubleaction;
-                }
-            }
-        }
-
         ammo.IsUsed = true;
 
-        if (magazine != null && magazine is not CylinderMagazineItemClass && magazine.Count > 0 && !weapon.BoltAction)
+        if (magazine != null && /*magazine is not CylinderMagazineItemClass &&*/ magazine.Count > 0 && !weapon.BoltAction)
         {
             if (hasChambers && magazine.IsAmmoCompatible(Item.Chambers) && Item.Chambers[0].ContainedItem == null)
             {
@@ -703,6 +733,15 @@ public class ObservedFirearmController : FirearmController
             method_62(packet.ShotPosition, packet.ShotDirection);
             LightAndSoundShot(packet.ShotPosition, packet.ShotDirection, ammo.AmmoTemplate);
         }
+    }
+
+    private void SetMalfAndDurability(ShotInfoPacket packet, Weapon weapon)
+    {
+        weapon.Repairable.Durability = Mathf.Clamp(packet.Durability, 0f, weapon.Repairable.MaxDurability);
+
+        weapon.MalfState.LastShotOverheat = packet.LastShotOverheat;
+        weapon.MalfState.LastShotTime = packet.LastShotTime;
+        weapon.MalfState.SlideOnOverheatReached = packet.SlideOnOverheatReached;
     }
 
     /// <summary>

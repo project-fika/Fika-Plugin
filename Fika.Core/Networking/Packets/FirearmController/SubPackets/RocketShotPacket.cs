@@ -36,7 +36,7 @@ public class RocketShotPacket : IPoolSubPacket
         if (player.HandsController is ObservedFirearmController controller)
         {
             AmmoItemClass rocketClass = (AmmoItemClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), AmmoTemplateId, null);
-            controller.HandleRocketShot(rocketClass, in ShotPosition, in ShotForward);
+            controller.HandleRocketShot(rocketClass, ShotPosition, ShotForward);
         }
     }
 
