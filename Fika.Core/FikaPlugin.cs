@@ -195,7 +195,6 @@ public class FikaPlugin : BaseUnityPlugin
     public static ConfigEntry<int> MaxBotsLighthouse { get; set; }
 
     // Network
-    public static ConfigEntry<bool> NativeSockets { get; set; }
     public static ConfigEntry<string> ForceIP { get; set; }
     public static ConfigEntry<string> ForceBindIP { get; set; }
     public static ConfigEntry<ushort> UDPPort { get; set; }
@@ -1185,15 +1184,6 @@ public class FikaPlugin : BaseUnityPlugin
 
         string networkHeader = CleanConfigString(LocaleUtils.BEPINEX_H_NETWORK.Localized());
         string networkDefaultHeader = "Network";
-
-        NativeSockets = SetupSetting(networkDefaultHeader, "Native Sockets", true,
-            new ConfigDescription(LocaleUtils.BEPINEX_NATIVE_SOCKETS_D.Localized(), tags: new ConfigurationManagerAttributes()
-            {
-                Category = networkHeader,
-                DispName = LocaleUtils.BEPINEX_NATIVE_SOCKETS_T.Localized(),
-                Order = 9
-            }),
-            "Native Sockets", ref failed, headers);
 
         ForceIP = SetupSetting(networkDefaultHeader, "Force IP", "",
             new ConfigDescription(LocaleUtils.BEPINEX_FORCE_IP_D.Localized(), tags: new ConfigurationManagerAttributes()
