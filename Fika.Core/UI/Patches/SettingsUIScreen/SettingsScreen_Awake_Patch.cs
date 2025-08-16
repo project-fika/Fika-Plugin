@@ -36,7 +36,10 @@ internal class SettingsScreen_Awake_Patch : FikaPatch
     public static IEnumerator CreateScreen(SettingsScreen instance, GraphicsSettingsTab graphicsSettingsTab,
         SoundSettingsTab soundSettingsScreen, GameSettingsTab gameSettingsScreen)
     {
-        GameObject gameObject = new("FikaSettingsScreen");
+        GameObject gameObject = new("FikaSettingsScreen")
+        {
+            layer = graphicsSettingsTab.gameObject.layer
+        };
         GameObject.DontDestroyOnLoad(gameObject);
 
         yield return new WaitUntil(() => gameObject != null);
@@ -70,14 +73,16 @@ internal class SettingsScreen_Awake_Patch : FikaPatch
 
         GameObject toCopy = graphicsSettingsTab.gameObject.transform.GetChild(2).gameObject;
         GameObject newLayout = GameObject.Instantiate(toCopy, gameObject.transform, gameSettingsScreen);
-        newLayout.name = newLayout.name.Replace("(Clone)", "");
+        newLayout.name = "FikaSettings";
+        newLayout.layer = gameSettingsScreen.gameObject.layer;
+        newLayout.RectTransform().localScale = Vector3.one;
 
         Transform content = newLayout.transform.GetChild(0)
             .GetChild(0)
             .GetChild(0);
 
         yield return new WaitUntil(() => content.childCount > 20);
-        SetupFikaMenu(gameObject, content);
+        SetupFikaMenu(gameObject, content, graphicsSettingsTab.gameObject.RectTransform());
 
         yield return new WaitUntil(() => instance.gameObject.activeSelf);
         SetupToggle(instance);
@@ -104,9 +109,8 @@ internal class SettingsScreen_Awake_Patch : FikaPatch
         });
     }
 
-    private static void SetupFikaMenu(GameObject gameObject, Transform content)
+    private static void SetupFikaMenu(GameObject gameObject, Transform content, RectTransform rectTransform)
     {
-        Logger.LogInfo($"Iterating over {content.childCount} children");
         List<GameObject> children = [];
         for (int i = content.childCount - 1; i >= 0; i--)
         {
@@ -124,13 +128,33 @@ internal class SettingsScreen_Awake_Patch : FikaPatch
 
         RectTransform rect = (RectTransform)gameObject.transform;
 
-        rect.anchorMax = new(0.5f, 1f);
+        /*rect.anchorMax = new(0.5f, 1f);
         rect.anchorMin = new(0.5f, 1f);
 
         rect.offsetMax = new(500f, -135f);
         rect.offsetMin = new(-500f, -935f);
 
         rect.sizeDelta = new(1000f, 800f);
+        rect.localScale = Vector3.one;
+
+        rect.pivot = new(0.5f, 0f);
+
+        rect.anchoredPosition = new(0f, 935f);*/
+
+        // copy data from graphics settings recttransform
+        rect.anchorMax = rectTransform.anchorMax;
+        rect.anchorMin = rectTransform.anchorMin;
+
+        rect.offsetMax = rectTransform.offsetMax;
+        rect.offsetMin = rectTransform.offsetMin;
+
+        rect.sizeDelta = rectTransform.sizeDelta;
+        rect.localScale = rectTransform.localScale;
+
+        rect.pivot = rectTransform.pivot;
+
+        rect.anchoredPosition = rectTransform.anchoredPosition;
+        rect.localPosition = rectTransform.localPosition;
 
         content.GetComponent<VerticalLayoutGroup>().spacing = 15f;
         FikaSettings.Instance.Init(content);

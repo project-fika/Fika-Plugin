@@ -513,7 +513,10 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
                 BTRControllerClass.Instance?.SyncBTRVehicleFromServer(data);
                 break;
             case EPacketType.VOIP:
-                VOIPClient.NetworkReceivedPacket(reader.GetRemainingBytesSegment());
+                if (VOIPClient)
+                {
+                    VOIPClient.NetworkReceivedPacket(reader.GetRemainingBytesSegment()); 
+                }
                 break;
         }
     }

@@ -103,6 +103,6 @@ public interface IFikaNetworkManager
     /// <param name="writeDelegate">The serialize method</param>
     /// <param name="readDelegate">The deserialize method</param>
     public void RegisterCustomType<T>(Action<NetDataWriter, T> writeDelegate, Func<NetDataReader, T> readDelegate);
-    internal Task InitializeVOIP();
+    public Task InitializeVOIP();
     internal void PrintStatistics();
 }

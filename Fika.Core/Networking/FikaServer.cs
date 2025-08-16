@@ -959,8 +959,11 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
                 }
                 break;
             case EPacketType.VOIP:
-                VOIPServer.NetworkReceivedPacket(new(new RemotePeer(peer)),
-                    reader.GetRemainingBytesSegment());
+                if (VOIPServer != null)
+                {
+                    VOIPServer.NetworkReceivedPacket(new(new RemotePeer(peer)),
+                                reader.GetRemainingBytesSegment()); 
+                }
                 break;
         }
     }

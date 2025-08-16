@@ -572,7 +572,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
 
         GameController.ExfilManager = gameObject.AddComponent<FikaExfilManager>();
 
-        if (Location_0.AccessKeys != null && Location_0.AccessKeys.Length > 0)
+        if (Location_0.AccessKeys?.Length > 0)
         {
             IEnumerable<Item> items = Profile_0.Inventory.GetPlayerItems(EPlayerItems.Equipment);
             if (items != null)
