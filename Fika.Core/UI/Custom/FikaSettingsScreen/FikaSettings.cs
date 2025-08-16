@@ -48,6 +48,9 @@ public class FikaSettings : SettingsTab
     private SettingFloatSlider _minimumOpacity;
     private SettingFloatSlider _minimumNamePlateScale;
     private SettingToggle _useOcclusion;
+    private GameObject _fullHealthColor;
+    private GameObject _lowHealthColor;
+    private GameObject _namePlateTextColor;
 
     private SettingToggle _questSharingKills;
     private SettingToggle _questSharingItem;
@@ -121,16 +124,16 @@ public class FikaSettings : SettingsTab
         _onlinePlayers = CreateToggle(section3);
         _onlinePlayersScale = CreateFloatSlider(content);
 
-        var section4 = CreateSubSection(content);
+        RectTransform section4 = CreateSubSection(content);
         _useNamePlates = CreateToggle(section4);
         _hideHealthBar = CreateToggle(section4);
-        var section5 = CreateSubSection(content);
+        RectTransform section5 = CreateSubSection(content);
         _useHealthNumber = CreateToggle(section5);
         _showEffects = CreateToggle(section5);
-        var section6 = CreateSubSection(content);
+        RectTransform section6 = CreateSubSection(content);
         _usePlateFactionSide = CreateToggle(section6);
         _hideNamePlateInOptic = CreateToggle(section6);
-        var section7 = CreateSubSection(content);
+        RectTransform section7 = CreateSubSection(content);
         _namePlateUseOpticZoom = CreateToggle(section7);
         _decreaseOpacityNotLookingAt = CreateToggle(section7);
         _namePlateScale = CreateFloatSlider(content);
@@ -139,21 +142,21 @@ public class FikaSettings : SettingsTab
         _minimumOpacity = CreateFloatSlider(content);
         _minimumNamePlateScale = CreateFloatSlider(content);
         _useOcclusion = CreateToggle(content);
-        //color1
+        _fullHealthColor = CreateColor(content);
         //color2
         //color3
 
-        var section8 = CreateSubSection(content);
+        RectTransform section8 = CreateSubSection(content);
         _questSharingKills = CreateToggle(section8);
         _questSharingItem = CreateToggle(section8);
-        var section9 = CreateSubSection(content);
+        RectTransform section9 = CreateSubSection(content);
         _questSharingLocation = CreateToggle(section9);
         _questSharingPlaceBeacon = CreateToggle(section9);
-        var section10 = CreateSubSection(content);
+        RectTransform section10 = CreateSubSection(content);
         //_questSharingAll = CreateToggle(content);
         _questSharingNotifications = CreateToggle(section10);
         _easyKillConditions = CreateToggle(section10);
-        var section11 = CreateSubSection(content);
+        RectTransform section11 = CreateSubSection(content);
         _sharedKillExperience = CreateToggle(section11);
         _sharedBossExperience = CreateToggle(section11);
 
@@ -162,10 +165,10 @@ public class FikaSettings : SettingsTab
         //pingColor
         _pingSize = CreateFloatSlider(content);
         _pingTime = CreateFloatSlider(content);
-        var section12 = CreateSubSection(content);
+        RectTransform section12 = CreateSubSection(content);
         _playPingAnimation = CreateToggle(section12);
         _showPingDuringOptics = CreateToggle(section12);
-        var section13 = CreateSubSection(content);
+        RectTransform section13 = CreateSubSection(content);
         _pingUseOpticZoom = CreateToggle(section13);
         _pingScaleWithDistance = CreateToggle(section13);
         _pingMinimumOpacity = CreateFloatSlider(content);
@@ -173,10 +176,10 @@ public class FikaSettings : SettingsTab
         _pingSound = CreateDropDown(content);
 
         //freecamButton
-        var section14 = CreateSubSection(content);
+        RectTransform section14 = CreateSubSection(content);
         _allowSpectateBots = CreateToggle(section14);
         _azertyMode = CreateToggle(section14);
-        var section15 = CreateSubSection(content);
+        RectTransform section15 = CreateSubSection(content);
         _droneMode = CreateToggle(section15);
         _keybindOverlay = CreateToggle(section15);
 
@@ -191,21 +194,26 @@ public class FikaSettings : SettingsTab
 
         _disableBotMetabolism = CreateToggle(content);
 
-        var root = transform.GetChild(0);
+        Transform root = transform.GetChild(0);
         _scrollRect = root.GetChild(0).GetComponent<ScrollRect>();
 
         GameObject.Destroy(root.GetChild(2).gameObject);
         GameObject.Destroy(root.GetChild(3).gameObject);
     }
 
-    private RectTransform CreateSubSection(Transform content)
+
+
+    private RectTransform CreateSubSection(Transform parent, bool createLayout = true)
     {
-        GameObject newSection = new("SubSection");
-        HorizontalLayoutGroup horizontalGroup = newSection.AddComponent<HorizontalLayoutGroup>();
-        horizontalGroup.childAlignment = TextAnchor.MiddleCenter;
-        horizontalGroup.spacing = 5f;
+        GameObject newSection = new("SubSection", typeof(RectTransform));
+        if (createLayout)
+        {
+            HorizontalLayoutGroup horizontalGroup = newSection.AddComponent<HorizontalLayoutGroup>();
+            horizontalGroup.childAlignment = TextAnchor.MiddleCenter;
+            horizontalGroup.spacing = 5f;
+        }
         RectTransform rectTransform = (RectTransform)newSection.transform;
-        rectTransform.SetParent(content);
+        rectTransform.SetParent(parent);
         return rectTransform;
     }
 
@@ -386,31 +394,60 @@ public class FikaSettings : SettingsTab
     }
 
 
-    public SettingDropDown CreateDropDown(Transform transform)
+    public SettingDropDown CreateDropDown(Transform parent)
     {
-        return CreateControl(_dropDownPrefab, transform);
+        return CreateControl(_dropDownPrefab, parent);
     }
 
-    public SettingSelectSlider CreateSelectSlider(Transform transform)
+    public SettingSelectSlider CreateSelectSlider(Transform parent)
     {
-        return CreateControl(_intSliderPrefab, transform);
+        return CreateControl(_intSliderPrefab, parent);
     }
 
-    public SettingFloatSlider CreateFloatSlider(Transform transform)
+    public SettingFloatSlider CreateFloatSlider(Transform parent)
     {
-        return CreateControl(_floatSliderPrefab, transform);
+        return CreateControl(_floatSliderPrefab, parent);
     }
 
-    public SettingToggle CreateToggle(Transform transform)
+    public SettingToggle CreateToggle(Transform parent)
     {
-        return CreateControl(_togglePrefab, transform);
+        return CreateControl(_togglePrefab, parent);
     }
 
-    public GameObject CreateTextField(Transform transform)
+    public GameObject CreateTextField(Transform parent)
     {
-        var textField = GameObject.Instantiate(_textInputPrefab, transform);
+        GameObject textField = GameObject.Instantiate(_textInputPrefab, parent);
         textField.AddComponent<LayoutElement>().minHeight = 50f;
         return textField;
+    }
+
+    private GameObject CreateColor(Transform parent)
+    {
+        RectTransform subSection = CreateSubSection(parent);
+        HorizontalLayoutGroup horizontalGroup = subSection.GetComponent<HorizontalLayoutGroup>();
+        horizontalGroup.childForceExpandHeight = false;
+        horizontalGroup.childForceExpandWidth = false;
+        horizontalGroup.spacing = -100f; // move sliders closer to image
+        RectTransform sliderSection = CreateSubSection(subSection, false);
+        sliderSection.gameObject.name = "RGBSliders";
+        VerticalLayoutGroup verticalLayout = sliderSection.gameObject.AddComponent<VerticalLayoutGroup>();
+        verticalLayout.spacing = 5f;
+        verticalLayout.childAlignment = TextAnchor.MiddleLeft;
+        CreateFloatSlider(sliderSection);
+        CreateFloatSlider(sliderSection);
+        CreateFloatSlider(sliderSection);
+
+        RectTransform imageSection = CreateSubSection(subSection);
+        imageSection.gameObject.name = "Image";
+        Image image = imageSection.gameObject.AddComponent<Image>();
+        image.color = Color.white;
+        LayoutElement layoutElement = imageSection.gameObject.AddComponent<LayoutElement>();
+        layoutElement.preferredHeight = 96f;
+        layoutElement.preferredWidth = 96f;
+        layoutElement.flexibleHeight = 0f;
+        layoutElement.flexibleWidth = 0f;
+
+        return subSection.gameObject;
     }
 
     private TextFieldHandler SetupTextField(GameObject textField, ConfigEntry<string> configEntry)
