@@ -763,7 +763,7 @@ public class FikaSettings : SettingsTab
 
     public override void Close()
     {
-        _currentKeybindHandler?.StopRoutine();
+        CancelBind();
         base.Close();
     }
 
