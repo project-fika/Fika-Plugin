@@ -66,6 +66,7 @@ public class FikaSettings : SettingsTab
     private SettingToggle _sharedBossExperience;
 
     private SettingToggle _usePingSystem;
+    private GameObject _pingColor;
     private SettingFloatSlider _pingSize;
     private SettingFloatSlider _pingTime;
     private SettingToggle _playPingAnimation;
@@ -165,7 +166,7 @@ public class FikaSettings : SettingsTab
 
         _usePingSystem = CreateToggle(content);
         //pingButton
-        //pingColor
+        _pingColor = CreateColor(content);
         _pingSize = CreateFloatSlider(content);
         _pingTime = CreateFloatSlider(content);
         RectTransform section12 = CreateSubSection(content);
@@ -262,6 +263,7 @@ public class FikaSettings : SettingsTab
         SetupToggle(_sharedBossExperience, FikaPlugin.SharedBossExperience);
 
         SetupToggle(_usePingSystem, FikaPlugin.UsePingSystem);
+        SetupRGBSlider(_pingColor, FikaPlugin.PingColor);
         SetupFloatSlider(_pingSize, FikaPlugin.PingSize, "F2");
         SetupIntSlider(_pingTime, FikaPlugin.PingTime);
         SetupToggle(_playPingAnimation, FikaPlugin.PlayPingAnimation);
@@ -638,6 +640,10 @@ public class FikaSettings : SettingsTab
         sliderContainer.GetChild(0)
             .GetComponent<LocalizedText>()
             .method_2(configEntry.Definition.Key);
+
+        sliderContainer.GetChild(0).gameObject
+            .GetOrAddComponent<HoverTooltipArea>()
+            .SetMessageText(configEntry.Description.Description);
 
         Image image = sliderObject.transform.GetChild(1)
             .GetComponent<Image>();
