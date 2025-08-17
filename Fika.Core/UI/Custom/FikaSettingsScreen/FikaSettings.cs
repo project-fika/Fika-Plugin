@@ -18,6 +18,9 @@ public class FikaSettings : SettingsTab
 {
     public static FikaSettings Instance { get; internal set; }
 
+    private static FieldInfo _floatSliderChildren = typeof(SettingFloatSlider)
+                .GetField("_children", BindingFlags.Instance | BindingFlags.NonPublic);
+
     private SettingDropDown _dropDownPrefab;
     private SettingSelectSlider _intSliderPrefab;
     private SettingFloatSlider _floatSliderPrefab;
@@ -143,8 +146,8 @@ public class FikaSettings : SettingsTab
         _minimumNamePlateScale = CreateFloatSlider(content);
         _useOcclusion = CreateToggle(content);
         _fullHealthColor = CreateColor(content);
-        //color2
-        //color3
+        _lowHealthColor = CreateColor(content);
+        _namePlateTextColor = CreateColor(content);
 
         RectTransform section8 = CreateSubSection(content);
         _questSharingKills = CreateToggle(section8);
@@ -214,6 +217,7 @@ public class FikaSettings : SettingsTab
         }
         RectTransform rectTransform = (RectTransform)newSection.transform;
         rectTransform.SetParent(parent);
+        rectTransform.localScale = Vector3.one;
         return rectTransform;
     }
 
@@ -243,6 +247,9 @@ public class FikaSettings : SettingsTab
         SetupFloatSlider(_minimumOpacity, FikaPlugin.MinimumOpacity, "F2");
         SetupFloatSlider(_minimumNamePlateScale, FikaPlugin.MinimumNamePlateScale, "F2");
         SetupToggle(_useOcclusion, FikaPlugin.UseOcclusion);
+        SetupRGBSlider(_fullHealthColor, FikaPlugin.FullHealthColor);
+        SetupRGBSlider(_lowHealthColor, FikaPlugin.LowHealthColor);
+        SetupRGBSlider(_namePlateTextColor, FikaPlugin.NamePlateTextColor);
 
         SetupToggle(_questSharingKills, FikaPlugin.QuestTypesToShareAndReceive, FikaPlugin.EQuestSharingTypes.Kills);
         SetupToggle(_questSharingItem, FikaPlugin.QuestTypesToShareAndReceive, FikaPlugin.EQuestSharingTypes.Item);
@@ -427,12 +434,17 @@ public class FikaSettings : SettingsTab
         HorizontalLayoutGroup horizontalGroup = subSection.GetComponent<HorizontalLayoutGroup>();
         horizontalGroup.childForceExpandHeight = false;
         horizontalGroup.childForceExpandWidth = false;
-        horizontalGroup.spacing = -100f; // move sliders closer to image
+        //horizontalGroup.spacing = -100f; // move sliders closer to image
+        
+
         RectTransform sliderSection = CreateSubSection(subSection, false);
         sliderSection.gameObject.name = "RGBSliders";
         VerticalLayoutGroup verticalLayout = sliderSection.gameObject.AddComponent<VerticalLayoutGroup>();
         verticalLayout.spacing = 5f;
         verticalLayout.childAlignment = TextAnchor.MiddleLeft;
+        var label = GameObject.Instantiate(_togglePrefab.transform.GetChild(1).gameObject, sliderSection);
+        label.AddComponent<LayoutElement>();
+        label.GetComponent<CustomTextMeshProUGUI>().alignment = TMPro.TextAlignmentOptions.Center;
         CreateFloatSlider(sliderSection);
         CreateFloatSlider(sliderSection);
         CreateFloatSlider(sliderSection);
@@ -556,9 +568,7 @@ public class FikaSettings : SettingsTab
             numberSlider.UpdateValue(configEntry.Value);
             numberSlider.Bind(value => configEntry.Value = value);
 
-            List<InputNode> children = (List<InputNode>)typeof(SettingFloatSlider)
-                .GetField("_children", BindingFlags.Instance | BindingFlags.NonPublic)
-                .GetValue(slider);
+            List<InputNode> children = (List<InputNode>)_floatSliderChildren.GetValue(slider);
 
             children.Add(numberSlider);
         }
@@ -585,9 +595,7 @@ public class FikaSettings : SettingsTab
             numberSlider.UpdateValue(configEntry.Value);
             numberSlider.Bind(value => configEntry.Value = (ushort)value);
 
-            List<InputNode> children = (List<InputNode>)typeof(SettingFloatSlider)
-                .GetField("_children", BindingFlags.Instance | BindingFlags.NonPublic)
-                .GetValue(slider);
+            List<InputNode> children = (List<InputNode>)_floatSliderChildren.GetValue(slider);
 
             children.Add(numberSlider);
         }
@@ -614,9 +622,7 @@ public class FikaSettings : SettingsTab
             numberSlider.UpdateValue(configEntry.Value);
             numberSlider.Bind(value => configEntry.Value = (int)value);
 
-            List<InputNode> children = (List<InputNode>)typeof(SettingFloatSlider)
-                .GetField("_children", BindingFlags.Instance | BindingFlags.NonPublic)
-                .GetValue(slider);
+            List<InputNode> children = (List<InputNode>)_floatSliderChildren.GetValue(slider);
 
             children.Add(numberSlider);
         }
@@ -624,6 +630,85 @@ public class FikaSettings : SettingsTab
         {
             FikaGlobals.LogError("AcceptableValues was not of type int!");
         }
+    }
+
+    private void SetupRGBSlider(GameObject sliderObject, ConfigEntry<Color> configEntry)
+    {         
+        Transform sliderContainer = sliderObject.transform.GetChild(0);
+        sliderContainer.GetChild(0)
+            .GetComponent<LocalizedText>()
+            .method_2(configEntry.Definition.Key);
+
+        Image image = sliderObject.transform.GetChild(1)
+            .GetComponent<Image>();
+
+        SettingFloatSlider redSlider = sliderContainer.transform.GetChild(1)
+            .GetComponent<SettingFloatSlider>();
+
+        InitSetting(redSlider, "Red");
+        redSlider.GetOrCreateTooltip()
+            .SetMessageText("Red value");
+
+        NumberSlider numberSliderRed = (NumberSlider)typeof(SettingFloatSlider)
+            .GetField("Slider", BindingFlags.Instance | BindingFlags.NonPublic)
+            .GetValue(redSlider);
+
+        numberSliderRed.Show(0f, 1f, "F2");
+        numberSliderRed.UpdateValue(configEntry.Value.r);
+        numberSliderRed.Bind(value =>
+        {
+            configEntry.Value = new(value, configEntry.Value.g, configEntry.Value.b);
+            image.color = configEntry.Value;
+        });
+
+        List<InputNode> childrenRed = (List<InputNode>)_floatSliderChildren.GetValue(redSlider);
+        childrenRed.Add(numberSliderRed);
+
+        SettingFloatSlider greenSlider = sliderContainer.transform.GetChild(2)
+            .GetComponent<SettingFloatSlider>();
+
+        InitSetting(greenSlider, "Green");
+        greenSlider.GetOrCreateTooltip()
+            .SetMessageText("Green value");
+
+        NumberSlider numberSliderGreen = (NumberSlider)typeof(SettingFloatSlider)
+            .GetField("Slider", BindingFlags.Instance | BindingFlags.NonPublic)
+            .GetValue(greenSlider);
+
+        numberSliderGreen.Show(0f, 1f, "F2");
+        numberSliderGreen.UpdateValue(configEntry.Value.g);
+        numberSliderGreen.Bind(value =>
+        {
+            configEntry.Value = new(configEntry.Value.r, value, configEntry.Value.b);
+            image.color = configEntry.Value;
+        });
+
+        List<InputNode> childrenGreen = (List<InputNode>)_floatSliderChildren.GetValue(greenSlider);
+        childrenGreen.Add(numberSliderGreen);
+
+        SettingFloatSlider blueSlider = sliderContainer.transform.GetChild(3)
+            .GetComponent<SettingFloatSlider>();
+
+        InitSetting(blueSlider, "Blue");
+        blueSlider.GetOrCreateTooltip()
+            .SetMessageText("Blue value");
+
+        NumberSlider numberSliderBlue = (NumberSlider)typeof(SettingFloatSlider)
+            .GetField("Slider", BindingFlags.Instance | BindingFlags.NonPublic)
+            .GetValue(blueSlider);
+
+        numberSliderBlue.Show(0f, 1f, "F2");
+        numberSliderBlue.UpdateValue(configEntry.Value.b);
+        numberSliderBlue.Bind(value =>
+        {
+            configEntry.Value = new(configEntry.Value.r, configEntry.Value.g, value);
+            image.color = configEntry.Value;
+        });
+
+        List<InputNode> childrenBlue = (List<InputNode>)_floatSliderChildren.GetValue(blueSlider);
+        childrenBlue.Add(numberSliderBlue);
+
+        image.color = configEntry.Value;
     }
 
     private static int GetIndex(ConfigEntry<string> configEntry, AcceptableValueList<string> list)
