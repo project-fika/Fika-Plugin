@@ -1,10 +1,12 @@
-﻿using BepInEx.Configuration;
+﻿using BepInEx;
+using BepInEx.Configuration;
 using Comfort.Common;
 using EFT.InputSystem;
 using EFT.UI;
 using EFT.UI.Settings;
 using Fika.Core.Main.Utils;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -18,8 +20,9 @@ public class FikaSettings : SettingsTab
 {
     public static FikaSettings Instance { get; internal set; }
 
-    private static FieldInfo _floatSliderChildren = typeof(SettingFloatSlider)
+    private static readonly FieldInfo _floatSliderChildren = typeof(SettingFloatSlider)
                 .GetField("_children", BindingFlags.Instance | BindingFlags.NonPublic);
+    private static readonly KeyCode[] _keysToCheck = [.. UnityInput.Current.SupportedKeyCodes.Except([KeyCode.Mouse0, KeyCode.Mouse1])];
 
     private SettingDropDown _dropDownPrefab;
     private SettingSelectSlider _intSliderPrefab;
@@ -29,11 +32,17 @@ public class FikaSettings : SettingsTab
 
     private ScrollRect _scrollRect;
 
+    private KeybindHandler _currentKeybindHandler;
+
     private SettingToggle _autoUseHeadless;
     private SettingToggle _showNotifications;
     private SettingToggle _autoExtract;
     private SettingToggle _showExtractMessage;
+    private GameObject _extractKey;
+    private KeybindHandler _extractKeyHandler;
     private SettingToggle _enableChat;
+    private GameObject _chatKey;
+    private KeybindHandler _chatKeyHandler;
     private SettingToggle _onlinePlayers;
     private SettingFloatSlider _onlinePlayersScale;
 
@@ -66,6 +75,8 @@ public class FikaSettings : SettingsTab
     private SettingToggle _sharedBossExperience;
 
     private SettingToggle _usePingSystem;
+    private GameObject _pingButton;
+    private KeybindHandler _pingButtonHandler;
     private GameObject _pingColor;
     private SettingFloatSlider _pingSize;
     private SettingFloatSlider _pingTime;
@@ -76,7 +87,8 @@ public class FikaSettings : SettingsTab
     private SettingFloatSlider _pingMinimumOpacity;
     private SettingToggle _showPingRange;
     private SettingDropDown _pingSound;
-
+    private GameObject _freecamButton;
+    private KeybindHandler _freecamButtonHandler;
     private SettingToggle _allowSpectateBots;
     private SettingToggle _azertyMode;
     private SettingToggle _droneMode;
@@ -91,6 +103,7 @@ public class FikaSettings : SettingsTab
     private SettingFloatSlider _connectionTimeout;
     private SettingDropDown _sendRate;
     private SettingToggle _allowVoip;
+
     private SettingToggle _disableBotMetabolism;
 
     public static FikaSettings Create(GameObject parent, SettingDropDown dropdownPrefab,
@@ -121,10 +134,10 @@ public class FikaSettings : SettingsTab
         RectTransform section2 = CreateSubSection(content);
         _autoExtract = CreateToggle(section2);
         _showExtractMessage = CreateToggle(section2);
-        //extractKey
+        _extractKey = CreateKeybind(content);
         RectTransform section3 = CreateSubSection(content);
         _enableChat = CreateToggle(section3);
-        //chatKey
+        _chatKey = CreateKeybind(content);
         _onlinePlayers = CreateToggle(section3);
         _onlinePlayersScale = CreateFloatSlider(content);
 
@@ -165,7 +178,7 @@ public class FikaSettings : SettingsTab
         _sharedBossExperience = CreateToggle(section11);
 
         _usePingSystem = CreateToggle(content);
-        //pingButton
+        _pingButton = CreateKeybind(content);
         _pingColor = CreateColor(content);
         _pingSize = CreateFloatSlider(content);
         _pingTime = CreateFloatSlider(content);
@@ -179,7 +192,7 @@ public class FikaSettings : SettingsTab
         _showPingRange = CreateToggle(content);
         _pingSound = CreateDropDown(content);
 
-        //freecamButton
+        _freecamButton = CreateKeybind(content);
         RectTransform section14 = CreateSubSection(content);
         _allowSpectateBots = CreateToggle(section14);
         _azertyMode = CreateToggle(section14);
@@ -205,7 +218,12 @@ public class FikaSettings : SettingsTab
         GameObject.Destroy(root.GetChild(3).gameObject);
     }
 
-
+    private GameObject CreateKeybind(Transform parent)
+    {
+        GameObject textField = GameObject.Instantiate(_textInputPrefab, parent);
+        textField.AddComponent<LayoutElement>().minHeight = 50f;
+        return textField;
+    }
 
     private RectTransform CreateSubSection(Transform parent, bool createLayout = true)
     {
@@ -228,9 +246,9 @@ public class FikaSettings : SettingsTab
         SetupToggle(_showNotifications, FikaPlugin.ShowNotifications);
         SetupToggle(_autoExtract, FikaPlugin.AutoExtract);
         SetupToggle(_showExtractMessage, FikaPlugin.ShowExtractMessage);
-        //extractKey
+        _extractKeyHandler = SetupKeybind(_extractKey, FikaPlugin.ExtractKey);
         SetupToggle(_enableChat, FikaPlugin.EnableChat);
-        //chatKey
+        _chatKeyHandler = SetupKeybind(_chatKey, FikaPlugin.ChatKey);
         SetupToggle(_onlinePlayers, FikaPlugin.EnableOnlinePlayers);
         SetupFloatSlider(_onlinePlayersScale, FikaPlugin.OnlinePlayersScale, "F1");
 
@@ -262,6 +280,7 @@ public class FikaSettings : SettingsTab
         SetupToggle(_sharedKillExperience, FikaPlugin.SharedKillExperience);
         SetupToggle(_sharedBossExperience, FikaPlugin.SharedBossExperience);
 
+        _pingButtonHandler = SetupKeybind(_pingButton, FikaPlugin.PingButton);
         SetupToggle(_usePingSystem, FikaPlugin.UsePingSystem);
         SetupRGBSlider(_pingColor, FikaPlugin.PingColor);
         SetupFloatSlider(_pingSize, FikaPlugin.PingSize, "F2");
@@ -274,7 +293,7 @@ public class FikaSettings : SettingsTab
         SetupToggle(_showPingRange, FikaPlugin.ShowPingRange);
         SetupDropDown(_pingSound, FikaPlugin.PingSound);
 
-        //freecambutton
+        _freecamButtonHandler = SetupKeybind(_freecamButton, FikaPlugin.FreeCamButton);
         SetupToggle(_allowSpectateBots, FikaPlugin.AllowSpectateBots);
         SetupToggle(_azertyMode, FikaPlugin.AZERTYMode);
         SetupToggle(_droneMode, FikaPlugin.DroneMode);
@@ -293,6 +312,31 @@ public class FikaSettings : SettingsTab
 
         // reset scroll
         _scrollRect.verticalNormalizedPosition = 1f;
+    }
+
+    private KeybindHandler SetupKeybind(GameObject textField, ConfigEntry<KeyboardShortcut> configEntry)
+    {
+        GameObject.Destroy(textField.GetComponent<Image>());
+        textField.transform.GetChild(0).gameObject.SetActive(false);
+        RectTransform label = (RectTransform)textField.transform.GetChild(2);
+        label.sizeDelta = new(-490f, 60f);
+        label.GetComponent<LocalizedText>().LocalizationKey = configEntry.Definition.Key;
+        CustomTextMeshProUGUI tmpText = label.gameObject.GetComponent<CustomTextMeshProUGUI>();
+        tmpText.text = configEntry.Definition.Key;
+        tmpText.raycastTarget = false;
+
+        Transform inputField = textField.transform.GetChild(1);
+        inputField.RectTransform().sizeDelta = new(-600f, 50f);
+        ValidationInputField validation = inputField.gameObject.GetComponent<ValidationInputField>();
+        DefaultUIButton button = inputField.GetChild(1)
+            .GetComponent<DefaultUIButton>();
+        KeybindHandler handler = new(validation, button, configEntry, this);
+        HoverTooltipArea tooltip = inputField.GetChild(0).gameObject.GetComponent<HoverTooltipArea>()
+            ?? inputField.GetChild(0).gameObject.AddComponent<HoverTooltipArea>();
+        tooltip.SetMessageText(configEntry.Description.Description);
+
+        UI.AddDisposable(handler.Dispose);
+        return handler;
     }
 
     public override void OnTabSelected()
@@ -437,14 +481,14 @@ public class FikaSettings : SettingsTab
         horizontalGroup.childForceExpandHeight = false;
         horizontalGroup.childForceExpandWidth = false;
         //horizontalGroup.spacing = -100f; // move sliders closer to image
-        
+
 
         RectTransform sliderSection = CreateSubSection(subSection, false);
         sliderSection.gameObject.name = "RGBSliders";
         VerticalLayoutGroup verticalLayout = sliderSection.gameObject.AddComponent<VerticalLayoutGroup>();
         verticalLayout.spacing = 5f;
         verticalLayout.childAlignment = TextAnchor.MiddleLeft;
-        var label = GameObject.Instantiate(_togglePrefab.transform.GetChild(1).gameObject, sliderSection);
+        GameObject label = GameObject.Instantiate(_togglePrefab.transform.GetChild(1).gameObject, sliderSection);
         label.AddComponent<LayoutElement>();
         label.GetComponent<CustomTextMeshProUGUI>().alignment = TMPro.TextAlignmentOptions.Center;
         CreateFloatSlider(sliderSection);
@@ -635,7 +679,7 @@ public class FikaSettings : SettingsTab
     }
 
     private void SetupRGBSlider(GameObject sliderObject, ConfigEntry<Color> configEntry)
-    {         
+    {
         Transform sliderContainer = sliderObject.transform.GetChild(0);
         sliderContainer.GetChild(0)
             .GetComponent<LocalizedText>()
@@ -715,6 +759,21 @@ public class FikaSettings : SettingsTab
         childrenBlue.Add(numberSliderBlue);
 
         image.color = configEntry.Value;
+    }
+
+    public override void Close()
+    {
+        _currentKeybindHandler?.StopRoutine();
+        base.Close();
+    }
+
+    public void CancelBind()
+    {
+        if (_currentKeybindHandler != null)
+        {
+            _currentKeybindHandler.StopRoutine();
+            _currentKeybindHandler = null;
+        }
     }
 
     private static int GetIndex(ConfigEntry<string> configEntry, AcceptableValueList<string> list)
@@ -804,6 +863,87 @@ public class FikaSettings : SettingsTab
         {
             _text.onValueChanged.RemoveAllListeners();
             _button.OnClick.RemoveAllListeners();
+        }
+    }
+
+    private class KeybindHandler : IDisposable
+    {
+        private readonly ValidationInputField _text;
+        private readonly DefaultUIButton _button;
+        private readonly ConfigEntry<KeyboardShortcut> _configEntry;
+        private readonly FikaSettings _fikaSettings;
+
+        private Coroutine _bindRoutine;
+
+        public KeybindHandler(ValidationInputField text, DefaultUIButton button, ConfigEntry<KeyboardShortcut> configEntry, FikaSettings fikaSettings)
+        {
+            _text = text;
+            _button = button;
+            _configEntry = configEntry;
+            _fikaSettings = fikaSettings;
+
+            _text.onValueChanged.RemoveAllListeners();
+            _button.OnClick.RemoveAllListeners();
+
+            _text.richText = false;
+            _text.isRichTextEditingAllowed = false;
+            _text.text = _configEntry.Value.ToString();
+            _text.interactable = false;
+
+            _button.Interactable = true;
+
+            _button.OnClick.AddListener(OnButtonClick);
+        }
+
+        private void OnButtonClick()
+        {
+            _text.text = "Press a key...";
+            _button.Interactable = false;
+            _fikaSettings.CancelBind();
+            _fikaSettings._currentKeybindHandler = this;
+            _bindRoutine = _fikaSettings.StartCoroutine(HandleKeybind());
+        }
+
+        private IEnumerator HandleKeybind()
+        {
+            IInputSystem input = UnityInput.Current;
+            bool done = false;
+
+            while (!done)
+            {
+                foreach (KeyCode item in _keysToCheck)
+                {
+                    if (input.GetKeyUp(item))
+                    {
+                        _configEntry.Value = new(item,
+                            [.. _keysToCheck.Where(input.GetKey)]);
+                        done = true;
+                        break;
+                    }
+                }
+
+                yield return null;
+            }
+
+            _text.text = _configEntry.Value.ToString();
+            _button.Interactable = true;
+        }
+
+        public void Dispose()
+        {
+            _text.onValueChanged.RemoveAllListeners();
+            _button.OnClick.RemoveAllListeners();
+        }
+
+        internal void StopRoutine()
+        {
+            if (_bindRoutine != null)
+            {
+                _fikaSettings.StopCoroutine(_bindRoutine);
+                _fikaSettings._currentKeybindHandler = null;
+                _text.text = _configEntry.Value.ToString();
+                _button.Interactable = true;
+            }
         }
     }
 }
