@@ -22,7 +22,19 @@ public class FikaSettings : SettingsTab
 
     private static readonly FieldInfo _floatSliderChildren = typeof(SettingFloatSlider)
                 .GetField("_children", BindingFlags.Instance | BindingFlags.NonPublic);
+    private static readonly FieldInfo _numberSlider = typeof(SettingFloatSlider)
+            .GetField("Slider", BindingFlags.Instance | BindingFlags.NonPublic);
+    private static readonly FieldInfo _updatableToggle = typeof(SettingToggle)
+            .GetField("Toggle", BindingFlags.Instance | BindingFlags.NonPublic);
+    private static readonly FieldInfo _dropdownBox = typeof(SettingDropDown)
+            .GetField("DropDown", BindingFlags.Instance | BindingFlags.NonPublic);
+    private static readonly FieldInfo _uiList = typeof(SettingControl)
+            .GetField("UI", BindingFlags.Instance | BindingFlags.NonPublic);
+    private static readonly FieldInfo _localizedText = typeof(SettingControl)
+            .GetField("Text", BindingFlags.Instance | BindingFlags.NonPublic);
     private static readonly KeyCode[] _keysToCheck = [.. UnityInput.Current.SupportedKeyCodes.Except([KeyCode.Mouse0, KeyCode.Mouse1])];
+
+    private SettingControl[] _advancedSettings = [];
 
     private SettingDropDown _dropDownPrefab;
     private SettingSelectSlider _intSliderPrefab;
@@ -33,6 +45,9 @@ public class FikaSettings : SettingsTab
     private ScrollRect _scrollRect;
 
     private KeybindHandler _currentKeybindHandler;
+
+    private SettingToggle _advancedToggle;
+    private bool _showAdvanced;
 
     private SettingToggle _autoUseHeadless;
     private SettingToggle _showNotifications;
@@ -128,6 +143,8 @@ public class FikaSettings : SettingsTab
         RectTransform scrollBar = (RectTransform)parent.parent.GetChild(1).transform;
         scrollBar.anchoredPosition = Vector2.zero;
 
+        List<SettingControl> advancedOptions = [];
+
         RectTransform section1 = CreateSubSection(content);
         _autoUseHeadless = CreateToggle(section1);
         _showNotifications = CreateToggle(section1);
@@ -152,6 +169,7 @@ public class FikaSettings : SettingsTab
         _hideNamePlateInOptic = CreateToggle(section6);
         RectTransform section7 = CreateSubSection(content);
         _namePlateUseOpticZoom = CreateToggle(section7);
+        advancedOptions.Add(_namePlateUseOpticZoom);
         _decreaseOpacityNotLookingAt = CreateToggle(section7);
         _namePlateScale = CreateFloatSlider(content);
         _opacityInAds = CreateFloatSlider(content);
@@ -187,8 +205,11 @@ public class FikaSettings : SettingsTab
         _showPingDuringOptics = CreateToggle(section12);
         RectTransform section13 = CreateSubSection(content);
         _pingUseOpticZoom = CreateToggle(section13);
+        advancedOptions.Add(_pingUseOpticZoom);
         _pingScaleWithDistance = CreateToggle(section13);
+        advancedOptions.Add(_pingScaleWithDistance);
         _pingMinimumOpacity = CreateFloatSlider(content);
+        advancedOptions.Add(_pingMinimumOpacity);
         _showPingRange = CreateToggle(content);
         _pingSound = CreateDropDown(content);
 
@@ -204,17 +225,28 @@ public class FikaSettings : SettingsTab
         _bindIp = CreateDropDown(content);
         _udpPort = CreateFloatSlider(content);
         _useUpnp = CreateToggle(content);
+        advancedOptions.Add(_useUpnp);
         _useNatPunching = CreateToggle(content);
+        advancedOptions.Add(_useNatPunching);
         _connectionTimeout = CreateFloatSlider(content);
         _sendRate = CreateDropDown(content);
         _allowVoip = CreateToggle(content);
 
         _disableBotMetabolism = CreateToggle(content);
 
+        _advancedSettings = [.. advancedOptions];
+
         Transform root = transform.GetChild(0);
         _scrollRect = root.GetChild(0).GetComponent<ScrollRect>();
 
-        GameObject.Destroy(root.GetChild(2).gameObject);
+        Transform bottomSection = root.GetChild(2);
+        Transform newBottomSection = GameObject.Instantiate(bottomSection, root);
+        for (int i = newBottomSection.childCount - 1; i >= 0; i--)
+        {
+            Destroy(newBottomSection.GetChild(i).gameObject);
+        }
+        _advancedToggle = CreateToggle(newBottomSection);
+        GameObject.Destroy(bottomSection.gameObject);
         GameObject.Destroy(root.GetChild(3).gameObject);
     }
 
@@ -242,6 +274,8 @@ public class FikaSettings : SettingsTab
 
     public void Show()
     {
+        SetupAdvancedToggle();
+
         SetupToggle(_autoUseHeadless, FikaPlugin.UseHeadlessIfAvailable);
         SetupToggle(_showNotifications, FikaPlugin.ShowNotifications);
         SetupToggle(_autoExtract, FikaPlugin.AutoExtract);
@@ -312,6 +346,32 @@ public class FikaSettings : SettingsTab
 
         // reset scroll
         _scrollRect.verticalNormalizedPosition = 1f;
+        RefreshAdvanced();
+    }
+
+    private void SetupAdvancedToggle()
+    {
+        InitSetting(_advancedToggle, "Show Advanced Settings");
+
+        _advancedToggle.GetOrCreateTooltip()
+            .SetMessageText("If advanced user settings should be shown.");
+
+        UpdatableToggle updatableToggle = (UpdatableToggle)_updatableToggle.GetValue(_advancedToggle);
+
+        updatableToggle.UpdateValue(_showAdvanced);
+        updatableToggle.Bind(value =>
+        {
+            _showAdvanced = value;
+            RefreshAdvanced();
+        });
+    }
+
+    private void RefreshAdvanced()
+    {
+        for (int i = 0; i < _advancedSettings.Length; i++)
+        {
+            _advancedSettings[i].gameObject.SetActive(_showAdvanced);
+        }
     }
 
     private KeybindHandler SetupKeybind(GameObject textField, ConfigEntry<KeyboardShortcut> configEntry)
@@ -351,27 +411,21 @@ public class FikaSettings : SettingsTab
 
     private void InitSetting<T>(SettingControl control, ConfigEntry<T> configEntry)
     {
-        LocalizedText value = (LocalizedText)typeof(SettingControl)
-            .GetField("Text", BindingFlags.Instance | BindingFlags.NonPublic)
-            .GetValue(control);
-        AddViewListClass ui = (AddViewListClass)typeof(SettingControl)
-            .GetField("UI", BindingFlags.Instance | BindingFlags.NonPublic)
-            .GetValue(control);
+        LocalizedText value = (LocalizedText)_localizedText.GetValue(control);
+        AddViewListClass ui = (AddViewListClass)_uiList.GetValue(control);
 
         ui.Dispose();
+        value.LocalizationKey = configEntry.Definition.Key;
         value.method_2(configEntry.Definition.Key);
     }
 
     private void InitSetting(SettingControl control, string text)
     {
-        LocalizedText value = (LocalizedText)typeof(SettingControl)
-            .GetField("Text", BindingFlags.Instance | BindingFlags.NonPublic)
-            .GetValue(control);
-        AddViewListClass ui = (AddViewListClass)typeof(SettingControl)
-            .GetField("UI", BindingFlags.Instance | BindingFlags.NonPublic)
-            .GetValue(control);
+        LocalizedText value = (LocalizedText)_localizedText.GetValue(control);
+        AddViewListClass ui = (AddViewListClass)_uiList.GetValue(control);
 
         ui.Dispose();
+        value.LocalizationKey = text;
         value.method_2(text);
     }
 
@@ -379,13 +433,8 @@ public class FikaSettings : SettingsTab
     {
         InitSetting(dropDown, configEntry);
 
-        DropDownBox dropDownBox = (DropDownBox)typeof(SettingDropDown)
-            .GetField("DropDown", BindingFlags.Instance | BindingFlags.NonPublic)
-            .GetValue(dropDown);
-
-        AddViewListClass ui = (AddViewListClass)typeof(SettingControl)
-            .GetField("UI", BindingFlags.Instance | BindingFlags.NonPublic)
-            .GetValue(dropDown);
+        DropDownBox dropDownBox = (DropDownBox)_dropdownBox.GetValue(dropDown);
+        AddViewListClass ui = (AddViewListClass)_uiList.GetValue(dropDown);
 
         if (configEntry.Description.AcceptableValues is AcceptableValueList<string> list)
         {
@@ -413,13 +462,8 @@ public class FikaSettings : SettingsTab
     {
         InitSetting(dropDown, configEntry);
 
-        DropDownBox dropDownBox = (DropDownBox)typeof(SettingDropDown)
-            .GetField("DropDown", BindingFlags.Instance | BindingFlags.NonPublic)
-            .GetValue(dropDown);
-
-        AddViewListClass ui = (AddViewListClass)typeof(SettingControl)
-            .GetField("UI", BindingFlags.Instance | BindingFlags.NonPublic)
-            .GetValue(dropDown);
+        DropDownBox dropDownBox = (DropDownBox)_dropdownBox.GetValue(dropDown);
+        AddViewListClass ui = (AddViewListClass)_uiList.GetValue(dropDown);
 
         TEnum[] enumValues = (TEnum[])Enum.GetValues(typeof(TEnum));
         string[] enumNames = [.. enumValues.Select(e => e.ToString())];
@@ -481,7 +525,6 @@ public class FikaSettings : SettingsTab
         horizontalGroup.childForceExpandHeight = false;
         horizontalGroup.childForceExpandWidth = false;
         //horizontalGroup.spacing = -100f; // move sliders closer to image
-
 
         RectTransform sliderSection = CreateSubSection(subSection, false);
         sliderSection.gameObject.name = "RGBSliders";
@@ -557,9 +600,7 @@ public class FikaSettings : SettingsTab
         toggle.GetOrCreateTooltip()
             .SetMessageText(configEntry.Description.Description);
 
-        UpdatableToggle updatableToggle = (UpdatableToggle)typeof(SettingToggle)
-            .GetField("Toggle", BindingFlags.Instance | BindingFlags.NonPublic)
-            .GetValue(toggle);
+        UpdatableToggle updatableToggle = (UpdatableToggle)_updatableToggle.GetValue(toggle);
 
         updatableToggle.UpdateValue(configEntry.Value);
         updatableToggle.Bind(value => configEntry.Value = value);
@@ -572,9 +613,7 @@ public class FikaSettings : SettingsTab
         toggle.GetOrCreateTooltip()
               .SetMessageText(configEntry.Description.Description);
 
-        UpdatableToggle updatableToggle = (UpdatableToggle)typeof(SettingToggle)
-            .GetField("Toggle", BindingFlags.Instance | BindingFlags.NonPublic)
-            .GetValue(toggle);
+        UpdatableToggle updatableToggle = (UpdatableToggle)_updatableToggle.GetValue(toggle);
 
         bool initialState = configEntry.Value.HasFlag(flag);
         updatableToggle.UpdateValue(initialState);
@@ -604,9 +643,7 @@ public class FikaSettings : SettingsTab
         slider.GetOrCreateTooltip()
             .SetMessageText(configEntry.Description.Description);
 
-        NumberSlider numberSlider = (NumberSlider)typeof(SettingFloatSlider)
-            .GetField("Slider", BindingFlags.Instance | BindingFlags.NonPublic)
-            .GetValue(slider);
+        NumberSlider numberSlider = (NumberSlider)_numberSlider.GetValue(slider);
 
         if (configEntry.Description.AcceptableValues is AcceptableValueRange<float> floatRange)
         {
@@ -631,9 +668,7 @@ public class FikaSettings : SettingsTab
         slider.GetOrCreateTooltip()
             .SetMessageText(configEntry.Description.Description);
 
-        NumberSlider numberSlider = (NumberSlider)typeof(SettingFloatSlider)
-            .GetField("Slider", BindingFlags.Instance | BindingFlags.NonPublic)
-            .GetValue(slider);
+        NumberSlider numberSlider = (NumberSlider)_numberSlider.GetValue(slider);
 
         if (configEntry.Description.AcceptableValues is AcceptableValueRange<ushort> intRange)
         {
@@ -658,9 +693,7 @@ public class FikaSettings : SettingsTab
         slider.GetOrCreateTooltip()
             .SetMessageText(configEntry.Description.Description);
 
-        NumberSlider numberSlider = (NumberSlider)typeof(SettingFloatSlider)
-            .GetField("Slider", BindingFlags.Instance | BindingFlags.NonPublic)
-            .GetValue(slider);
+        NumberSlider numberSlider = (NumberSlider)_numberSlider.GetValue(slider);
 
         if (configEntry.Description.AcceptableValues is AcceptableValueRange<int> intRange)
         {
