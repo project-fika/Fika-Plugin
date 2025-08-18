@@ -415,7 +415,7 @@ public class FikaSettings : SettingsTab
         AddViewListClass ui = (AddViewListClass)_uiList.GetValue(control);
 
         ui.Dispose();
-        value.LocalizationKey = configEntry.Definition.Key;
+        value.LocalizationKey = configEntry.Definition.Key; // TODO: Use description.tags
         value.method_2(configEntry.Definition.Key);
     }
 
