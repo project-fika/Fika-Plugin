@@ -5,14 +5,8 @@ using System.Threading.Tasks;
 
 namespace Fika.Core.Main.Patches.DebugPatches;
 
-class TasksExtensions_HandleFinishedTask_Patches
+public static class TasksExtensions_HandleFinishedTask_Patches
 {
-    public static void Enable()
-    {
-        /*new TasksExtensions_HandleFinishedTask_Patch1().Enable();
-        new TasksExtensions_HandleFinishedTask_Patch2().Enable();*/
-    }
-
     [DebugPatch]
     internal class TasksExtensions_HandleFinishedTask_Patch1 : FikaPatch
     {
