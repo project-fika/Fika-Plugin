@@ -3,14 +3,13 @@
 using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Main.Players;
-using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.Player.Common;
 using Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
 namespace Fika.Core.Main.ClientClasses;
 
 public sealed class ClientHealthController(Profile.ProfileHealthClass healthInfo, Player player, InventoryController inventoryController, SkillManager skillManager, bool aiHealth)
-    : GClass2882(healthInfo, player, inventoryController, skillManager, aiHealth)
+    : GClass3010(healthInfo, player, inventoryController, skillManager, aiHealth)
 {
     private readonly FikaPlayer _fikaPlayer = (FikaPlayer)player;
     public override bool _sendNetworkSyncPackets

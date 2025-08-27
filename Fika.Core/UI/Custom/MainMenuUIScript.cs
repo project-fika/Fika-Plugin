@@ -42,7 +42,7 @@ public class MainMenuUIScript : MonoBehaviour
     private DateTime _lastSet;
     private int _minSecondsToWait;
     private RectTransform _transformToScale;
-    private GInterface207<RaidSettings> _backendSession;
+    private GInterface225<RaidSettings> _backendSession;
 
     private DateTime BackendTime
     {

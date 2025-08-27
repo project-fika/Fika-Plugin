@@ -4,12 +4,12 @@ using System.Reflection;
 
 namespace Fika.Core.Main.Patches;
 
-internal class GClass2119_method_0_Patch : FikaPatch
+internal class GClass2287_method_0_Patch : FikaPatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(GClass2119)
-            .GetMethod(nameof(GClass2119.method_0));
+        return typeof(GClass2287)
+            .GetMethod(nameof(GClass2287.method_0));
     }
 
     [PatchPrefix]

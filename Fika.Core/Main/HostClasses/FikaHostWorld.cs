@@ -78,7 +78,7 @@ public class FikaHostWorld : World
         _gameWorld.ArtilleryProjectilesStates.Clear();
     }
 
-    public void UpdateLootItems(GClass816<int, LootItem> lootItems)
+    public void UpdateLootItems(GClass818<int, LootItem> lootItems)
     {
         for (int i = LootSyncPackets.Count - 1; i >= 0; i--)
         {

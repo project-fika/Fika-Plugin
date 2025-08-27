@@ -141,7 +141,7 @@ public sealed class FikaHostInventoryController : Player.PlayerOwnerInventoryCon
         ConsoleScreen.Log($"InvOperation: {operation.GetType().Name}, Id: {operation.Id}");
 #endif
         // Check for GClass increments, TraderServices
-        if (operation is GClass3360)
+        if (operation is GClass3493)
         {
             base.vmethod_1(operation, callback);
             return;

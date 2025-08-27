@@ -14,7 +14,7 @@ public class PartyInfoPanel_Show_Patch : FikaPatch
     }
 
     [PatchPrefix]
-    public static void Prefix(ref GClass3968<GroupPlayerViewModelClass> groupPlayers)
+    public static void Prefix(ref GClass1628<GroupPlayerViewModelClass> groupPlayers)
     {
         if (groupPlayers != FikaBackendUtils.GroupPlayers && FikaBackendUtils.GroupPlayers.Count > 0)
         {

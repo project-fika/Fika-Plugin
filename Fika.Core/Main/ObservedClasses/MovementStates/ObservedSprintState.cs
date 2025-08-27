@@ -34,7 +34,7 @@ public class ObservedSprintState : SprintStateClass
         if (MovementContext.IsSprintEnabled)
         {
             MovementContext.MovementDirection = Vector2.Lerp(MovementContext.MovementDirection, Direction, deltaTime * EFTHardSettings.Instance.DIRECTION_LERP_SPEED);
-            MovementContext.SetUpDiscreteDirection(GClass1909.ConvertToMovementDirection(Direction));
+            MovementContext.SetUpDiscreteDirection(GClass2076.ConvertToMovementDirection(Direction));
             Direction = Vector2.zero;
             MovementContext.ApplyRotation(Quaternion.AngleAxis(MovementContext.Yaw, Vector3.up));
             UpdateRotationAndPosition(deltaTime);

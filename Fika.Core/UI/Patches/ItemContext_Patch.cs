@@ -127,7 +127,7 @@ public class ItemContext_Patch : FikaPatch
                 GameObject matchMakerUiPrefab = InternalBundleLoader.Instance.GetFikaAsset(InternalBundleLoader.EFikaAsset.SendItemMenu);
                 GameObject uiGameObj = Object.Instantiate(matchMakerUiPrefab);
                 uiGameObj.transform.SetParent(GameObject.Find("Preloader UI/Preloader UI/UIContext/").transform);
-                InventoryScreen.GClass3664 screenController = Traverse.Create(CommonUI.Instance.InventoryScreen).Field<InventoryScreen.GClass3664>("ScreenController").Value;
+                InventoryScreen.GClass3871 screenController = Traverse.Create(CommonUI.Instance.InventoryScreen).Field<InventoryScreen.GClass3871>("ScreenController").Value;
                 screenController.OnClose += () => { Object.Destroy(uiGameObj); };
                 SendItemUI sendItemUI = uiGameObj.GetComponent<SendItemUI>();
                 sendItemUI.PlayersDropdown.ClearOptions();

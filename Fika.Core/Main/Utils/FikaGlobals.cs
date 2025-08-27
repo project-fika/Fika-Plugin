@@ -43,7 +43,7 @@ public static class FikaGlobals
     {
         get
         {
-            return GClass2072.Instance;
+            return GClass2240.Instance;
         }
     }
 

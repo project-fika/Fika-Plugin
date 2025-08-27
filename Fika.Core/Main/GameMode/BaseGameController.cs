@@ -93,7 +93,7 @@ public abstract class BaseGameController
     // Raid data
     public List<ThrowWeapItemClass> ThrownGrenades { get; set; }
     public RaidSettings RaidSettings { get; set; }
-    public GClass1399 LootItems { get; set; } = [];
+    public GClass1404 LootItems { get; set; } = [];
     public LocationSettingsClass.Location Location { get; set; }
     public Dictionary<string, Player> Bots = [];
     public CoopHandler CoopHandler
@@ -321,7 +321,7 @@ public abstract class BaseGameController
             yield return endOfFrame;
         }
 
-        GClass2144.ResetAudioBuffer();
+        GClass2313.ResetAudioBuffer();
 
         _gameWorld.TriggersModule = _abstractGame.gameObject.AddComponent<LocalClientTriggersModule>();
         _gameWorld.FillLampControllers();
@@ -506,8 +506,8 @@ public abstract class BaseGameController
 #if DEBUG
             Logger.LogWarning("Spawning BTR controller and setting spawn chance to 100%");
             JsonType.BTRServerSettings settings = Singleton<BackendConfigSettingsClass>.Instance.BTRLocalSettings;
-            KeyValuePair<string, GStruct137> mapSettings = settings.ServerMapBTRSettings.First(x => x.Value.MapID == gameWorld.LocationId);
-            GStruct137 btrSettings = mapSettings.Value;
+            KeyValuePair<string, GStruct140> mapSettings = settings.ServerMapBTRSettings.First(x => x.Value.MapID == gameWorld.LocationId);
+            GStruct140 btrSettings = mapSettings.Value;
             btrSettings.ChanceSpawn = 100;
             btrSettings.SpawnPeriod = new(5, 10);
             btrSettings.MoveSpeed = 32f;
@@ -577,7 +577,7 @@ public abstract class BaseGameController
         }
         else
         {
-            BackendConfigSettingsClass.GClass1583 runddansSettings = instance.runddansSettings;
+            BackendConfigSettingsClass.GClass1748 runddansSettings = instance.runddansSettings;
             runddansActive = runddansSettings != null && runddansSettings.active;
         }
         if (runddansActive)

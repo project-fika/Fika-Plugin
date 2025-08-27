@@ -12,7 +12,7 @@ using System.Collections.Generic;
 
 namespace Fika.Core.Main.ObservedClasses;
 
-public class ObservedInventoryController : Player.PlayerInventoryController, Interface16
+public class ObservedInventoryController : Player.PlayerInventoryController, Interface18
 {
     private readonly IPlayerSearchController _searchController;
     private readonly FikaPlayer _fikaPlayer;
@@ -55,13 +55,14 @@ public class ObservedInventoryController : Player.PlayerInventoryController, Int
         limit = 0;
         return false;
     }
-    public override GStruct461<bool> TryThrowItem(Item item, Callback callback = null, bool silent = false)
+
+    public override GStruct156<bool> TryThrowItem(Item item, Callback callback = null, bool silent = false)
     {
         ThrowItem(item, false, callback);
         return true;
     }
 
-    public override bool CheckOverLimit(IEnumerable<Item> items, [CanBeNull] ItemAddress to, bool useItemCountInEquipment, out InteractionsHandlerClass.GClass3947 error)
+    public override bool CheckOverLimit(IEnumerable<Item> items, [CanBeNull] ItemAddress to, bool useItemCountInEquipment, out InteractionsHandlerClass.GClass1609 error)
     {
         error = null;
         return true;
@@ -113,7 +114,7 @@ public class ObservedInventoryController : Player.PlayerInventoryController, Int
         return null;
     }
 
-    public override void InProcess(TraderControllerClass executor, Item item, ItemAddress to, bool succeed, GInterface421 operation, Callback callback)
+    public override void InProcess(TraderControllerClass executor, Item item, ItemAddress to, bool succeed, GInterface438 operation, Callback callback)
     {
         if (!succeed)
         {
@@ -129,9 +130,9 @@ public class ObservedInventoryController : Player.PlayerInventoryController, Int
         _fikaPlayer.StatisticsManager.OnGrabLoot(item);
     }
 
-    private void HandleInProcess(Item item, ItemAddress to, GInterface421 operation, Callback callback)
+    private void HandleInProcess(Item item, ItemAddress to, GInterface438 operation, Callback callback)
     {
-        Player.Class1256 handler = new()
+        Player.Class1349 handler = new()
         {
             player_0 = _fikaPlayer,
             callback = callback
@@ -170,7 +171,7 @@ public class ObservedInventoryController : Player.PlayerInventoryController, Int
         MongoID_0 = newId;
     }
 
-    OperationDataStruct Interface16.CreateOperationFromDescriptor(BaseDescriptorClass descriptor)
+    OperationDataStruct Interface18.CreateOperationFromDescriptor(BaseDescriptorClass descriptor)
     {
         method_13(descriptor);
         return descriptor.ToInventoryOperation(_fikaPlayer);

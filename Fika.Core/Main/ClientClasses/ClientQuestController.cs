@@ -10,11 +10,11 @@ using System.Threading.Tasks;
 namespace Fika.Core.Main.ClientClasses;
 
 public class ClientQuestController(Profile profile, InventoryController inventoryController, IPlayerSearchController searchController, IQuestActions session, FikaPlayer player)
-    : GClass3800(profile, inventoryController, searchController, session)
+    : GClass4007(profile, inventoryController, searchController, session)
 {
     protected readonly FikaPlayer _player = player;
 
-    public override async Task<GStruct459<GStruct419<QuestClass>>> FinishQuest(QuestClass quest, bool runNetworkTransaction)
+    public override async Task<GStruct154<GStruct426<QuestClass>>> FinishQuest(QuestClass quest, bool runNetworkTransaction)
     {
         List<FlatItemsDataClass[]> items = [];
         bool hasRewards = false;
@@ -31,7 +31,7 @@ public class ClientQuestController(Profile profile, InventoryController inventor
                 items.Add(item.items);
             }
         }
-        GStruct459<GStruct419<QuestClass>> finishResult = await base.FinishQuest(quest, runNetworkTransaction);
+        GStruct154<GStruct426<QuestClass>> finishResult = await base.FinishQuest(quest, runNetworkTransaction);
         if (finishResult.Succeeded && hasRewards)
         {
             InRaidQuestPacket packet = new()

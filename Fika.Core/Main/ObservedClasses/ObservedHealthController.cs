@@ -25,7 +25,7 @@ public sealed class ObservedHealthController(byte[] serializedState, ObservedPla
         return false;
     }
 
-    public override bool ApplyItem(Item item, GStruct375<EBodyPart> bodyPart, float? amount = null)
+    public override bool ApplyItem(Item item, GStruct382<EBodyPart> bodyPart, float? amount = null)
     {
         return false;
     }
@@ -41,7 +41,7 @@ public sealed class ObservedHealthController(byte[] serializedState, ObservedPla
         for (int i = List_1.Count - 1; i >= 0; i--)
         {
             handler.PausedEffects.Add(List_1[i]);
-            PausedEffectsStruct gstruct = Gclass833_0.Withdraw();
+            PausedEffectsStruct gstruct = Gclass835_0.Withdraw();
             gstruct.SaveInfo(List_1[i].Id, List_1[i].HealthController, List_1[i].Type, List_1[i].BodyPart, List_1[i].Strength,
                 List_1[i].CurrentStrength, List_1[i].DelayTime, List_1[i].StateTime, List_1[i].WorkStateTime, List_1[i].BuildUpTime,
                 List_1[i].ResidueTime, List_1[i].State);
@@ -60,7 +60,7 @@ public sealed class ObservedHealthController(byte[] serializedState, ObservedPla
         {
             Profile.ProfileHealthClass profileHealthClass2 = new()
             {
-                BodyParts = GClass864<EBodyPart>.GetDictWith<Profile.ProfileHealthClass.ProfileBodyPartHealthClass>(),
+                BodyParts = GClass866<EBodyPart>.GetDictWith<Profile.ProfileHealthClass.ProfileBodyPartHealthClass>(),
                 Energy = new Profile.ProfileHealthClass.ValueInfo
                 {
                     Current = HealthValue_0.Current,
@@ -109,7 +109,7 @@ public sealed class ObservedHealthController(byte[] serializedState, ObservedPla
 
         foreach (NetworkBodyEffectsAbstractClass gclass in IReadOnlyList_0)
         {
-            if (gclass is GInterface316 && gclass.State != EEffectState.Residued) // We only resync effects that are in-game effects, check for GClass increments, e.g. Dehydration or Exhaustion
+            if (gclass is GInterface333 && gclass.State != EEffectState.Residued) // We only resync effects that are in-game effects, check for GClass increments, e.g. Dehydration or Exhaustion
             {
                 Profile.ProfileHealthClass.ProfileBodyPartHealthClass gclass2 = health.BodyParts[gclass.BodyPart];
                 gclass2.Effects ??= [];
@@ -139,7 +139,7 @@ public sealed class ObservedHealthController(byte[] serializedState, ObservedPla
                     PausedEffectsInfo[i].BuildUpTime, PausedEffectsInfo[i].ResidueStateTime, PausedEffectsInfo[i].State);
                 healthController.AddEffectToList(PausedEffects[i]);
                 PausedEffects[i].UnPauseEffect();
-                healthController.Gclass833_0.Return(PausedEffectsInfo[i]);
+                healthController.Gclass835_0.Return(PausedEffectsInfo[i]);
             }
         }
     }

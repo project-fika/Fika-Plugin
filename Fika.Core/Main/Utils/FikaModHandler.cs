@@ -131,7 +131,7 @@ public class FikaModHandler
         string message = "Your client doesn't meet server requirements, check logs for more details";
 
         // -1f time makes the message permanent
-        GClass3629 errorScreen = Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("INSTALLATION ERROR", message,
+        GClass3835 errorScreen = Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("INSTALLATION ERROR", message,
             ErrorScreen.EButtonType.QuitButton, -1f);
 
         Action quitAction = Application.Quit;

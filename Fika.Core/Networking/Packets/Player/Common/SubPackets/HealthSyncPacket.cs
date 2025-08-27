@@ -96,32 +96,32 @@ public class HealthSyncPacket : IPoolSubPacket
                 break;
 
             case ESyncType.EffectNextState:
-                ref GStruct393 ens = ref data.EffectNextState;
+                ref GStruct400 ens = ref data.EffectNextState;
                 ens.EffectId = reader.GetInt();
                 ens.StateTime = reader.GetFloat();
                 break;
 
             case ESyncType.EffectStateTime:
-                ref GStruct394 est = ref data.EffectStateTime;
+                ref GStruct401 est = ref data.EffectStateTime;
                 est.EffectId = reader.GetInt();
                 est.RemainingStateTime = reader.GetFloat();
                 break;
 
             case ESyncType.EffectStrength:
-                ref GStruct395 estr = ref data.EffectStrength;
+                ref GStruct402 estr = ref data.EffectStrength;
                 estr.EffectId = reader.GetInt();
                 estr.Strength = reader.GetPackedFloat(0f, 27f, EFloatCompression.High);
                 break;
 
             case ESyncType.EffectMedResource:
-                ref GStruct396 emr = ref data.EffectMedResource;
+                ref GStruct403 emr = ref data.EffectMedResource;
                 emr.EffectId = reader.GetInt();
                 emr.Resource = reader.GetPackedFloat(-1f, 3000f);
                 break;
 
             case ESyncType.EffectStimulatorBuff:
                 {
-                    ref GStruct397 stim = ref data.EffectStimulatorBuff;
+                    ref GStruct404 stim = ref data.EffectStimulatorBuff;
                     stim.EffectId = reader.GetInt();
                     stim.BuffIndex = reader.GetPackedInt(0, 63);
                     stim.BuffActivate = reader.GetBool();
@@ -137,7 +137,7 @@ public class HealthSyncPacket : IPoolSubPacket
 
             case ESyncType.IsAlive:
                 {
-                    ref GStruct398 alive = ref data.IsAlive;
+                    ref GStruct405 alive = ref data.IsAlive;
                     alive.IsAlive = reader.GetBool();
 
                     if (!alive.IsAlive)
@@ -158,7 +158,7 @@ public class HealthSyncPacket : IPoolSubPacket
 
             case ESyncType.BodyHealth:
                 {
-                    ref GStruct399 bh = ref data.BodyHealth;
+                    ref GStruct406 bh = ref data.BodyHealth;
                     bh.BodyPart = reader.GetEnum<EBodyPart>();
                     bh.Value = reader.GetFloat();
                     break;
@@ -182,7 +182,7 @@ public class HealthSyncPacket : IPoolSubPacket
 
             case ESyncType.ApplyDamage:
                 {
-                    ref GStruct403 dmg = ref data.ApplyDamage;
+                    ref GStruct410 dmg = ref data.ApplyDamage;
                     dmg.BodyPart = reader.GetEnum<EBodyPart>();
                     dmg.Damage = reader.GetFloat();
                     dmg.DamageType = reader.GetEnum<EDamageType>();
@@ -191,7 +191,7 @@ public class HealthSyncPacket : IPoolSubPacket
 
             case ESyncType.DestroyedBodyPart:
                 {
-                    ref GStruct404 destroyed = ref data.DestroyedBodyPart;
+                    ref GStruct411 destroyed = ref data.DestroyedBodyPart;
                     destroyed.BodyPart = reader.GetEnum<EBodyPart>();
                     destroyed.IsDestroyed = reader.GetBool();
 
@@ -208,7 +208,7 @@ public class HealthSyncPacket : IPoolSubPacket
 
             case ESyncType.HealthRates:
                 {
-                    ref GStruct405 rates = ref data.HealthRates;
+                    ref GStruct412 rates = ref data.HealthRates;
                     rates.HealRate = reader.GetPackedFloat(0f, 3000f, EFloatCompression.High);
                     rates.DamageRate = reader.GetPackedFloat(-1000f, 0f, EFloatCompression.High);
                     rates.DamageMultiplier = reader.GetPackedFloat(0f, 2f, EFloatCompression.High);
@@ -224,7 +224,7 @@ public class HealthSyncPacket : IPoolSubPacket
 
             case ESyncType.BurnEyes:
                 {
-                    ref GStruct407 burn = ref data.BurnEyes;
+                    ref GStruct414 burn = ref data.BurnEyes;
                     burn.Position = reader.GetUnmanaged<Vector3>();
                     burn.DistanceStrength = reader.GetFloat();
                     burn.NormalTime = reader.GetFloat();
@@ -282,7 +282,7 @@ public class HealthSyncPacket : IPoolSubPacket
 
             case ESyncType.EffectNextState:
                 {
-                    ref readonly GStruct393 ens = ref packet.EffectNextState;
+                    ref readonly GStruct400 ens = ref packet.EffectNextState;
                     writer.Put(ens.EffectId);
                     writer.Put(ens.StateTime);
                     break;
@@ -290,7 +290,7 @@ public class HealthSyncPacket : IPoolSubPacket
 
             case ESyncType.EffectStateTime:
                 {
-                    ref readonly GStruct394 est = ref packet.EffectStateTime;
+                    ref readonly GStruct401 est = ref packet.EffectStateTime;
                     writer.Put(est.EffectId);
                     writer.Put(est.RemainingStateTime);
                     break;
@@ -298,7 +298,7 @@ public class HealthSyncPacket : IPoolSubPacket
 
             case ESyncType.EffectStrength:
                 {
-                    ref readonly GStruct395 estr = ref packet.EffectStrength;
+                    ref readonly GStruct402 estr = ref packet.EffectStrength;
                     writer.Put(estr.EffectId);
                     writer.PutPackedFloat(estr.Strength, 0f, 27f, EFloatCompression.High);
                     break;
@@ -306,7 +306,7 @@ public class HealthSyncPacket : IPoolSubPacket
 
             case ESyncType.EffectMedResource:
                 {
-                    ref readonly GStruct396 emr = ref packet.EffectMedResource;
+                    ref readonly GStruct403 emr = ref packet.EffectMedResource;
                     writer.Put(emr.EffectId);
                     writer.PutPackedFloat(emr.Resource, -1f, 3000f);
                     break;
@@ -314,7 +314,7 @@ public class HealthSyncPacket : IPoolSubPacket
 
             case ESyncType.EffectStimulatorBuff:
                 {
-                    ref readonly GStruct397 stim = ref packet.EffectStimulatorBuff;
+                    ref readonly GStruct404 stim = ref packet.EffectStimulatorBuff;
                     writer.Put(stim.EffectId);
                     writer.PutPackedInt(stim.BuffIndex, 0, 63);
                     writer.Put(stim.BuffActivate);
@@ -329,7 +329,7 @@ public class HealthSyncPacket : IPoolSubPacket
 
             case ESyncType.IsAlive:
                 {
-                    ref readonly GStruct398 alive = ref packet.IsAlive;
+                    ref readonly GStruct405 alive = ref packet.IsAlive;
                     writer.Put(alive.IsAlive);
                     if (!alive.IsAlive)
                     {
@@ -349,7 +349,7 @@ public class HealthSyncPacket : IPoolSubPacket
 
             case ESyncType.BodyHealth:
                 {
-                    ref readonly GStruct399 bh = ref packet.BodyHealth;
+                    ref readonly GStruct406 bh = ref packet.BodyHealth;
                     writer.PutEnum(bh.BodyPart);
                     writer.Put(bh.Value);
                     break;
@@ -373,7 +373,7 @@ public class HealthSyncPacket : IPoolSubPacket
 
             case ESyncType.ApplyDamage:
                 {
-                    ref readonly GStruct403 dmg = ref packet.ApplyDamage;
+                    ref readonly GStruct410 dmg = ref packet.ApplyDamage;
                     writer.PutEnum(dmg.BodyPart);
                     writer.Put(dmg.Damage);
                     writer.PutEnum(dmg.DamageType);
@@ -382,19 +382,24 @@ public class HealthSyncPacket : IPoolSubPacket
 
             case ESyncType.DestroyedBodyPart:
                 {
-                    ref readonly GStruct404 destroyed = ref packet.DestroyedBodyPart;
+                    ref readonly GStruct411 destroyed = ref packet.DestroyedBodyPart;
                     writer.PutEnum(destroyed.BodyPart);
                     writer.Put(destroyed.IsDestroyed);
                     if (destroyed.IsDestroyed)
+                    {
                         writer.PutEnum(destroyed.DamageType);
+                    }
                     else
+                    {
                         writer.Put(destroyed.HealthMaximum);
+                    }
+
                     break;
                 }
 
             case ESyncType.HealthRates:
                 {
-                    ref readonly GStruct405 rates = ref packet.HealthRates;
+                    ref readonly GStruct412 rates = ref packet.HealthRates;
                     writer.PutPackedFloat(rates.HealRate, 0f, 3000f, EFloatCompression.High);
                     writer.PutPackedFloat(rates.DamageRate, -1000f, 0f, EFloatCompression.High);
                     writer.PutPackedFloat(rates.DamageMultiplier, 0f, 2f, EFloatCompression.High);
@@ -410,7 +415,7 @@ public class HealthSyncPacket : IPoolSubPacket
 
             case ESyncType.BurnEyes:
                 {
-                    ref readonly GStruct407 burn = ref packet.BurnEyes;
+                    ref readonly GStruct414 burn = ref packet.BurnEyes;
                     writer.PutUnmanaged(burn.Position);
                     writer.Put(burn.DistanceStrength);
                     writer.Put(burn.NormalTime);

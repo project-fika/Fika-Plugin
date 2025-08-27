@@ -12,7 +12,9 @@ public class GameWorld_Create_Patch : FikaPatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(GameWorld).GetMethod(nameof(GameWorld.Create), BindingFlags.Static | BindingFlags.Public).MakeGenericMethod(typeof(ClientLocalGameWorld));
+        return typeof(GameWorld)
+            .GetMethod(nameof(GameWorld.Create), BindingFlags.Static | BindingFlags.Public)
+            .MakeGenericMethod(typeof(ClientLocalGameWorld));
     }
 
     [PatchPrefix]

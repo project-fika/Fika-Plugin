@@ -79,7 +79,7 @@ public class ObservedFirearmController : FirearmController
     {
         // Check for GClass increments..
         Dictionary<Type, OperationFactoryDelegate> operationFactoryDelegates = base.GetOperationFactoryDelegates();
-        operationFactoryDelegates[typeof(GClass1870)] = new OperationFactoryDelegate(Idle1);
+        operationFactoryDelegates[typeof(GClass2037)] = new OperationFactoryDelegate(Idle1);
         // Look for operations that implement OnShellEjectEvent and ThrowPatronAsLoot
         operationFactoryDelegates[typeof(MutliBarrelReloadOperationClass)] = new OperationFactoryDelegate(ThrowPatron1);
         operationFactoryDelegates[typeof(SingleBarrelReloadOperationClass)] = new OperationFactoryDelegate(ThrowPatron2);
@@ -559,7 +559,7 @@ public class ObservedFirearmController : FirearmController
         AmmoItemClass cylinderAmmo = cylinderMagazine.GetFirstAmmo(!revolver.CylinderHammerClosed);
         if (cylinderAmmo != null)
         {
-            GStruct459<GInterface407> removeOperation = cylinderMagazine.RemoveAmmoInCamora(cylinderAmmo, inventoryController);
+            GStruct154<GInterface424> removeOperation = cylinderMagazine.RemoveAmmoInCamora(cylinderAmmo, inventoryController);
             if (removeOperation.Failed)
             {
                 FikaPlugin.Instance.FikaLogger.LogError($"Error removing ammo from cylinderMagazine on netId [{_fikaPlayer.NetId}], error: {removeOperation.Error}");
@@ -782,7 +782,7 @@ public class ObservedFirearmController : FirearmController
         _preallocatedAmmoList.Clear();
         foreach (string id in ammoIds)
         {
-            GStruct461<Item> gstruct = _player.FindItemById(id);
+            GStruct156<Item> gstruct = _player.FindItemById(id);
             if (gstruct.Succeeded && gstruct.Value is AmmoItemClass bulletClass)
             {
                 _preallocatedAmmoList.Add(bulletClass);
@@ -819,7 +819,7 @@ public class ObservedFirearmController : FirearmController
         }
     }
 
-    private class ObservedIdleOperation(FirearmController controller) : GClass1870(controller)
+    private class ObservedIdleOperation(FirearmController controller) : GClass2037(controller)
     {
         public override void ProcessRemoveOneOffWeapon()
         {

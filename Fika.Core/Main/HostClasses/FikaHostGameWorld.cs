@@ -108,7 +108,7 @@ public class FikaHostGameWorld : ClientLocalGameWorld
 
     public override void InitAirdrop(string lootTemplateId = null, bool takeNearbyPoint = false, Vector3 position = default)
     {
-        GameObject gameObject = method_19(takeNearbyPoint, position);
+        GameObject gameObject = method_20(takeNearbyPoint, position);
         if (gameObject == null)
         {
             FikaPlugin.Instance.FikaLogger.LogError("There are no airdrop points here!");
@@ -141,7 +141,7 @@ public class FikaHostGameWorld : ClientLocalGameWorld
         if (SynchronizableObjectLogicProcessor.TripwireManager == null)
         {
             FikaPlugin.Instance.FikaLogger.LogError("TripwireManager was null! Creating new...");
-            SynchronizableObjectLogicProcessor.TripwireManager = new GClass2524(this);
+            SynchronizableObjectLogicProcessor.TripwireManager = new GClass2649(this);
         }
 
         TripwireSynchronizableObject tripwireSynchronizableObject = (TripwireSynchronizableObject)SynchronizableObjectLogicProcessor.TakeFromPool(SynchronizableObjectType.Tripwire);

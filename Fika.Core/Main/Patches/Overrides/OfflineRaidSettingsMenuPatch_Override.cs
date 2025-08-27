@@ -75,7 +75,7 @@ public class OfflineRaidSettingsMenuPatch_Override : FikaPatch
         }
 
         // Remove redundant settings and add our own "Random" to make the setting clear, while also renaming index 0 to "Together"
-        List<BaseDropDownBox.Struct1127> labelList = Traverse.Create(____playersSpawnPlaceDropdown).Field<List<BaseDropDownBox.Struct1127>>("list_0").Value;
+        List<BaseDropDownBox.Struct1160> labelList = Traverse.Create(____playersSpawnPlaceDropdown).Field<List<BaseDropDownBox.Struct1160>>("list_0").Value;
         labelList.Clear();
         labelList.Add(new()
         {

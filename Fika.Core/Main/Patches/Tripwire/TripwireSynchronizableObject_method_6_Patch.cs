@@ -10,12 +10,13 @@ internal class TripwireSynchronizableObject_method_6_Patch : FikaPatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(TripwireSynchronizableObject).GetMethod(nameof(TripwireSynchronizableObject.method_6));
+        return typeof(TripwireSynchronizableObject)
+            .GetMethod(nameof(TripwireSynchronizableObject.method_6));
     }
 
     [PatchPostfix]
     public static void Prefix(Grenade ____grenadeInWorld)
     {
-        Singleton<GInterface151>.Instance.RegisterGrenade(____grenadeInWorld);
+        Singleton<GInterface169>.Instance.RegisterGrenade(____grenadeInWorld);
     }
 }

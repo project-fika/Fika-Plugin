@@ -28,7 +28,7 @@ public class MineEvent : IPoolSubPacket
     {
         if (Singleton<GameWorld>.Instance.MineManager != null)
         {
-            NetworkGame<EftGamePlayerOwner>.Class1557 mineSeeker = new()
+            NetworkGame<EftGamePlayerOwner>.Class1655 mineSeeker = new()
             {
                 minePosition = MinePosition
             };

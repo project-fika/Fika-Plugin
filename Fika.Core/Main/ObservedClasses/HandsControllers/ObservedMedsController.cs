@@ -12,7 +12,7 @@ namespace Fika.Core.Main.ObservedClasses.HandsControllers;
 internal class ObservedMedsController : Player.MedsController
 {
     private FikaPlayer _fikaPlayer;
-    private GStruct375<EBodyPart> _healParts;
+    private GStruct382<EBodyPart> _healParts;
 
     private ObservedMedsOperation ObservedOperation
     {
@@ -22,7 +22,7 @@ internal class ObservedMedsController : Player.MedsController
         }
     }
 
-    public static ObservedMedsController Create(FikaPlayer player, Item item, GStruct375<EBodyPart> bodyParts, float amount, int animationVariant)
+    public static ObservedMedsController Create(FikaPlayer player, Item item, GStruct382<EBodyPart> bodyParts, float amount, int animationVariant)
     {
         ObservedMedsController controller = smethod_6<ObservedMedsController>(player, item, bodyParts, amount, animationVariant);
         controller._fikaPlayer = player;

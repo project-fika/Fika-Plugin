@@ -18,7 +18,7 @@ public class Player_UpdateBtrTraderServiceData_Patch : FikaPatch
     {
         if (FikaBackendUtils.IsClient)
         {
-            __instance.InventoryController.GetTraderServicesDataFromServer(Profile.TraderInfo.TraderServiceToId[Profile.ETraderServiceSource.Btr]);
+            __instance.InventoryController.GetTraderServicesDataFromServer(Profile.TraderInfo.BTR_TRADER_ID);
             __result = Task.CompletedTask;
             return false;
         }

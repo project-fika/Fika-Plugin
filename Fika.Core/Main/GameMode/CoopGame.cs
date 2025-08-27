@@ -361,7 +361,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
             UnityEngine.Events.UnityEvent newEvent = new();
             newEvent.AddListener(() =>
             {
-                GClass3629 errorScreen = Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("WARNING",
+                GClass3835 errorScreen = Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("WARNING",
                     message: "Backing out from this stage is currently experimental. It is recommended to ALT+F4 instead. Do you still want to continue?",
                     ErrorScreen.EButtonType.OkButton, 15f);
                 errorScreen.OnAccept += StopFromCancel(myPlayer);
@@ -460,14 +460,14 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
 
         LocationSettingsClass.Location location = localRaidSettings_0.selectedLocation;
         await GameController.InitializeLoot(location);
-        await method_11(location);
+        await method_12(location);
 
         GameController.CoopHandler.ShouldSync = true;
 
         if (FikaBackendUtils.IsReconnect)
         {
             await Reconnect();
-            foreach (KeyValuePair<EBodyPart, GClass2881<ActiveHealthController.GClass2880>.BodyPartState> item in gparam_0.Player.ActiveHealthController.Dictionary_0)
+            foreach (KeyValuePair<EBodyPart, GClass3009<ActiveHealthController.GClass3008>.BodyPartState> item in gparam_0.Player.ActiveHealthController.Dictionary_0)
             {
                 if (item.Value.Health.AtMinimum)
                 {
@@ -487,10 +487,10 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
             };
             airdropEventClass.Init(true);
             (Singleton<GameWorld>.Instance as ClientGameWorld).ClientSynchronizableObjectLogicProcessor.ServerAirdropManager = airdropEventClass;
-            GameWorld_0.SynchronizableObjectLogicProcessor.Ginterface262_0 = Singleton<FikaServer>.Instance;
+            GameWorld_0.SynchronizableObjectLogicProcessor.Ginterface279_0 = Singleton<FikaServer>.Instance;
         }
 
-        await method_6();
+        await method_7();
         FikaEventDispatcher.DispatchEvent(new GameWorldStartedEvent(GameWorld_0));
     }
 
@@ -577,14 +577,14 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
             IEnumerable<Item> items = Profile_0.Inventory.GetPlayerItems(EPlayerItems.Equipment);
             if (items != null)
             {
-                Class1537 keyFinder = new()
+                Class1633 keyFinder = new()
                 {
                     accessKeys = Location_0.AccessKeys
                 };
                 Item accessKey = items.FirstOrDefault(keyFinder.method_0);
                 if (accessKey != null)
                 {
-                    method_5(Profile_0, accessKey.Id);
+                    method_6(Profile_0, accessKey.Id);
                 }
             }
         }
@@ -783,7 +783,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
             GameUi.TimerPanel.Close();
         }
 
-        player.HealthController.DiedEvent -= method_18;
+        player.HealthController.DiedEvent -= method_19;
         player.HealthController.DiedEvent -= HealthController_DiedEvent;
 
         PlayerOwner.vmethod_1();
@@ -838,7 +838,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         {
             if (myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem != null)
             {
-                GStruct459<GClass3279> result = InteractionsHandlerClass.Remove(myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem,
+                GStruct154<GClass3410> result = InteractionsHandlerClass.Remove(myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem,
                     myPlayer.InventoryController, false);
                 if (result.Error != null)
                 {
@@ -957,7 +957,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
 
         try
         {
-            await iSession.LocalRaidEnded(localRaidSettings_0, parameters, method_12(), GetOwnSentItems(player.ProfileId));
+            await iSession.LocalRaidEnded(localRaidSettings_0, parameters, method_13(), GetOwnSentItems(player.ProfileId));
         }
         catch (Exception ex)
         {
@@ -1038,7 +1038,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         {
             if (myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem != null)
             {
-                GStruct459<GClass3279> result = InteractionsHandlerClass.Remove(myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem,
+                GStruct154<GClass3410> result = InteractionsHandlerClass.Remove(myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem,
                     myPlayer.InventoryController, false);
                 if (result.Error != null)
                 {
@@ -1169,7 +1169,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         BTRSide_Patches.Passengers.Clear();
     }
 
-    private class ExitManager : Class1539
+    private class ExitManager : Class1635
     {
         public new CoopGame baseLocalGame_0;
 
@@ -1192,7 +1192,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
                 {
                     baseLocalGame_0.gparam_0.Player.TriggerZones.Add(triggerZone);
                 }
-                baseLocalGame_0.method_14(profileId, exitStatus, exitName, delay).HandleExceptions();
+                baseLocalGame_0.method_15(profileId, exitStatus, exitName, delay).HandleExceptions();
                 return;
             }
 
@@ -1200,7 +1200,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
             baseLocalGame_0.gparam_0.Player.OnGameSessionEnd(exitStatus, baseLocalGame_0.PastTime, baseLocalGame_0.Location_0.Id, exitName);
             baseLocalGame_0.CleanUp();
 
-            Class1540 exitCallback = new()
+            Class1636 exitCallback = new()
             {
                 baseLocalGame_0 = baseLocalGame_0,
                 duration = EFTDateTimeClass.Now - baseLocalGame_0.dateTime_0,
@@ -1214,7 +1214,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
     /// <summary>
     /// Used to manage the stopping of the <see cref="CoopGame"/> gracefully when cancelling
     /// </summary>
-    private class CancelExitManager : Class1539
+    private class CancelExitManager : Class1635
     {
         public void ExitOverride()
         {
@@ -1232,7 +1232,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
             {
                 MonoBehaviourSingleton<BetterAudio>.Instance.FadeOutVolumeAfterRaid();
             }
-            baseLocalGame_0.method_14(profileId, exitStatus, exitName, delay).HandleExceptions();
+            baseLocalGame_0.method_15(profileId, exitStatus, exitName, delay).HandleExceptions();
         }
     }
 

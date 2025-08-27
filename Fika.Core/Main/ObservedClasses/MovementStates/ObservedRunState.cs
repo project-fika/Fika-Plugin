@@ -48,7 +48,7 @@ public class ObservedRunState : RunStateClass
     private void SetupDirection(float deltaTime)
     {
         MovementContext.MovementDirection = Direction;
-        method_3(GClass1909.ConvertToMovementDirection(Direction), deltaTime);
+        method_3(GClass2076.ConvertToMovementDirection(Direction), deltaTime);
     }
 
     public override void UpdatePosition(float deltaTime)

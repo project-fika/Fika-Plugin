@@ -73,7 +73,7 @@ public class FikaBot : FikaPlayer
 
         await player.Init(rotation, layerName, pointOfView, profile, inventoryController,
             new BotHealthController(profile.Health, player, inventoryController, profile.Skills, aiControl),
-            new ObservedStatisticsManager(), null, null, null, filter,
+            new ObservedStatisticsManager(), null, null, null, null,  filter,
             EVoipState.NotAvailable, aiControl, false);
 
         player.Pedometer.Stop();

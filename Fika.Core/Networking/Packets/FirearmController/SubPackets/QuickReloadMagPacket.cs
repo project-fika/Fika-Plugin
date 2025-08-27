@@ -36,7 +36,7 @@ public class QuickReloadMagPacket : IPoolSubPacket
         {
             try
             {
-                GStruct461<Item> result = player.FindItemById(MagId);
+                GStruct156<Item> result = player.FindItemById(MagId);
                 if (!result.Succeeded)
                 {
                     FikaPlugin.Instance.FikaLogger.LogError(result.Error);

@@ -10,7 +10,7 @@ using Fika.Core.Networking.Packets.Player.Common.SubPackets;
 namespace Fika.Core.Main.BotClasses;
 
 public sealed class BotHealthController(Profile.ProfileHealthClass healthInfo, Player player, InventoryController inventoryController, SkillManager skillManager, bool aiHealth)
-    : GClass2882(healthInfo, player, inventoryController, skillManager, aiHealth)
+    : GClass3010(healthInfo, player, inventoryController, skillManager, aiHealth)
 {
     private readonly FikaBot _fikaBot = (FikaBot)player;
     public override bool _sendNetworkSyncPackets
@@ -36,16 +36,6 @@ public sealed class BotHealthController(Profile.ProfileHealthClass healthInfo, P
             case NetworkHealthSyncPacketStruct.ESyncType.EffectMedResource:
             case NetworkHealthSyncPacketStruct.ESyncType.EffectStimulatorBuff:
                 return true;
-            case NetworkHealthSyncPacketStruct.ESyncType.EffectStateTime:
-            case NetworkHealthSyncPacketStruct.ESyncType.Energy:
-            case NetworkHealthSyncPacketStruct.ESyncType.Hydration:
-            case NetworkHealthSyncPacketStruct.ESyncType.Temperature:
-            case NetworkHealthSyncPacketStruct.ESyncType.DamageCoeff:
-            case NetworkHealthSyncPacketStruct.ESyncType.HealthRates:
-            case NetworkHealthSyncPacketStruct.ESyncType.HealerDone:
-            case NetworkHealthSyncPacketStruct.ESyncType.BurnEyes:
-            case NetworkHealthSyncPacketStruct.ESyncType.Poison:
-            case NetworkHealthSyncPacketStruct.ESyncType.StaminaCoeff:
             default:
                 return false;
         }

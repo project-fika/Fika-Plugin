@@ -26,7 +26,7 @@ public struct StashesPacket : INetSerializable
             for (int i = 0; i < amount; i++)
             {
                 byte[] data = reader.GetByteArray();
-                using GClass1278 eftReader = PacketToEFTReaderAbstractClass.Get(data);
+                using GClass1283 eftReader = PacketToEFTReaderAbstractClass.Get(data);
                 InventoryDescriptorClass descriptor = eftReader.ReadEFTItemDescriptor();
                 BTRStashes[i] = descriptor.Deserialize<StashItemClass>();
             }
@@ -42,7 +42,7 @@ public struct StashesPacket : INetSerializable
             for (int i = 0; i < amount; i++)
             {
                 byte[] data = reader.GetByteArray();
-                using GClass1278 eftReader = PacketToEFTReaderAbstractClass.Get(data);
+                using GClass1283 eftReader = PacketToEFTReaderAbstractClass.Get(data);
                 InventoryDescriptorClass descriptor = eftReader.ReadEFTItemDescriptor();
                 TransitStashes[i] = descriptor.Deserialize<StashItemClass>();
             }

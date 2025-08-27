@@ -16,7 +16,7 @@ public class ProceedPacket : IPoolSubPacket
         return new();
     }
 
-    public static ProceedPacket FromValue(GStruct375<EBodyPart> bodyParts, MongoID itemId, float amount, int animationVariant, EProceedType proceedType, bool scheduled)
+    public static ProceedPacket FromValue(GStruct382<EBodyPart> bodyParts, MongoID itemId, float amount, int animationVariant, EProceedType proceedType, bool scheduled)
     {
         ProceedPacket packet = CommonSubPacketPoolManager.Instance.GetPacket<ProceedPacket>(ECommonSubPacketType.Proceed);
         packet.BodyParts = bodyParts;
@@ -28,7 +28,7 @@ public class ProceedPacket : IPoolSubPacket
         return packet;
     }
 
-    public GStruct375<EBodyPart> BodyParts;
+    public GStruct382<EBodyPart> BodyParts;
     public MongoID ItemId;
     public float Amount;
     public int AnimationVariant;

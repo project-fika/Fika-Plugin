@@ -55,7 +55,7 @@ public class WorldInteractionPacket : IPoolSubPacket
                         return;
                     }
 
-                    GStruct461<Item> result = player.FindItemById(ItemId, false, false);
+                    GStruct156<Item> result = player.FindItemById(ItemId, false, false);
                     if (!result.Succeeded)
                     {
                         FikaPlugin.Instance.FikaLogger.LogWarning("WorldInteractionPacket: Could not find item: " + ItemId);

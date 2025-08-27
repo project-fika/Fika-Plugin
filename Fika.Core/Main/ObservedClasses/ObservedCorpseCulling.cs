@@ -12,7 +12,7 @@ public class ObservedCorpseCulling : IDisposable
     private readonly ObservedPlayer _observedPlayer;
     private readonly Corpse _observedCorpse;
     private readonly List<Renderer> _renderers = new(256);
-    private GClass997 _gClass997;
+    private GClass999 _gClass999;
     private bool _ragdollDone;
     private bool _localVisible = true;
 
@@ -20,18 +20,18 @@ public class ObservedCorpseCulling : IDisposable
     {
         _observedPlayer = observedPlayer;
         _observedCorpse = observedCorpse;
-        _gClass997 = new(observedPlayer.PlayerBones.Spine3.Original,
+        _gClass999 = new(observedPlayer.PlayerBones.Spine3.Original,
             EFTHardSettings.Instance.CULLING_PLAYER_SPHERE_DEAD_BODY_RADIUS,
             EFTHardSettings.Instance.CULLING_PLAYER_DEAD_BODY_DISTANCE);
-        _gClass997.OnVisibilityChanged += ChangeVisibility;
-        _gClass997.Register();
+        _gClass999.OnVisibilityChanged += ChangeVisibility;
+        _gClass999.Register();
     }
 
     public void ManualUpdate()
     {
         if (!_ragdollDone)
         {
-            _gClass997.CustomUpdate();
+            _gClass999.CustomUpdate();
         }
         if (!_ragdollDone && _observedCorpse.Ragdoll.Bool_2)
         {
@@ -72,9 +72,9 @@ public class ObservedCorpseCulling : IDisposable
 
     public void Dispose()
     {
-        _gClass997.OnVisibilityChanged -= ChangeVisibility;
-        _gClass997?.Dispose();
-        _gClass997 = null;
+        _gClass999.OnVisibilityChanged -= ChangeVisibility;
+        _gClass999?.Dispose();
+        _gClass999 = null;
         IsVisible = false;
         ChangeRendererState();
     }

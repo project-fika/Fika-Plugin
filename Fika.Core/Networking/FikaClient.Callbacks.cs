@@ -89,7 +89,7 @@ public partial class FikaClient
 
     private void OnSyncTrapsPacketReceived(SyncTrapsPacket packet)
     {
-        GClass1359 reader = new(packet.Data);
+        GClass1364 reader = new(packet.Data);
         GameWorld gameWorld = Singleton<GameWorld>.Instance;
         if (gameWorld.SyncModule != null)
         {
@@ -200,7 +200,7 @@ public partial class FikaClient
         for (int i = 0; i < packet.GrenadePackets.Count; i++)
         {
             GrenadeDataPacketStruct throwablePacket = packet.GrenadePackets[i];
-            GClass816<int, Throwable> grenades = gameWorld.Grenades;
+            GClass818<int, Throwable> grenades = gameWorld.Grenades;
             if (grenades.TryGetByKey(throwablePacket.Id, out Throwable throwable))
             {
                 throwable.ApplyNetPacket(throwablePacket);
@@ -225,7 +225,7 @@ public partial class FikaClient
             return;
         }
 
-        GStruct461<Item> gstruct2 = gameWorld.FindItemById(packet.ItemId);
+        GStruct156<Item> gstruct2 = gameWorld.FindItemById(packet.ItemId);
         if (gstruct2.Failed)
         {
             _logger.LogError("OnSideEffectPacketReceived: " + gstruct2.Error);
@@ -444,7 +444,7 @@ public partial class FikaClient
         {
             if (!packet.Success)
             {
-                NotificationManagerClass.DisplayNotification(new GClass2380("AirplaneDelayMessage".Localized(null),
+                NotificationManagerClass.DisplayNotification(new GClass2551("AirplaneDelayMessage".Localized(null),
                             ENotificationDurationType.Default, ENotificationIconType.Default, null));
             }
         }
@@ -623,9 +623,9 @@ public partial class FikaClient
         IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
         if (fikaGame != null)
         {
-            using GClass1278 eftReader = PacketToEFTReaderAbstractClass.Get(packet.Data);
-            GClass1782 lootData = eftReader.ReadEFTLootDataDescriptor();
-            GClass1399 lootItems = EFTItemSerializerClass.DeserializeLootData(lootData);
+            using GClass1283 eftReader = PacketToEFTReaderAbstractClass.Get(packet.Data);
+            GClass1947 lootData = eftReader.ReadEFTLootDataDescriptor();
+            GClass1404 lootItems = EFTItemSerializerClass.DeserializeLootData(lootData);
 #if RELEASE
             if (lootItems.Count < 1)
             {

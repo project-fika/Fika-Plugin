@@ -39,12 +39,12 @@ public class ReloadBarrelsPacket : IPoolSubPacket
             AmmoPackReloadingClass ammoPack = new(ammo);
             ItemAddress gridItemAddress = null;
 
-            using GClass1278 eftReader = PacketToEFTReaderAbstractClass.Get(LocationDescription);
+            using GClass1283 eftReader = PacketToEFTReaderAbstractClass.Get(LocationDescription);
             try
             {
                 if (LocationDescription.Length > 0)
                 {
-                    GClass1785 descriptor = eftReader.ReadPolymorph<GClass1785>();
+                    GClass1950 descriptor = eftReader.ReadPolymorph<GClass1950>();
                     gridItemAddress = player.InventoryController.ToItemAddress(descriptor);
                 }
             }

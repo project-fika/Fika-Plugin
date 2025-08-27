@@ -58,7 +58,7 @@ namespace Fika.Core.Networking;
 /// <summary>
 /// Server used to synchronize all <see cref="FikaClient"/>s
 /// </summary>
-public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchListener, GInterface262, IFikaNetworkManager
+public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchListener, GInterface279, IFikaNetworkManager
 {
     public int ReadyClients;
     public DateTime TimeSinceLastPeerDisconnected;
@@ -324,7 +324,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
     public async Task InitializeVOIP()
     {
         VoipSettingsClass voipHandler = FikaGlobals.VOIPHandler;
-        GClass1069 controller = Singleton<SharedGameSettingsClass>.Instance.Sound.Controller;
+        GClass1072 controller = Singleton<SharedGameSettingsClass>.Instance.Sound.Controller;
         if (voipHandler.MicrophoneChecked && !FikaBackendUtils.IsHeadless)
         {
             controller.ResetVoipDisabledReason();

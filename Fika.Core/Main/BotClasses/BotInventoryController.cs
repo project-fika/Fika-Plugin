@@ -51,7 +51,7 @@ public class BotInventoryController : PlayerInventoryController
     {
         // Check for GClass increments
         // Tripwire kit is always null on AI so we cannot use ToDescriptor as it throws a nullref
-        if (operation is not GClass3359)
+        if (operation is not GClass3492)
         {
 #if DEBUG
             FikaPlugin.Instance.FikaLogger.LogInfo($"Sending bot operation {operation.GetType()} from {_fikaBot.Profile.Nickname}");

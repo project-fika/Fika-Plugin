@@ -42,7 +42,7 @@ public class FikaClientGameWorld : ClientLocalGameWorld
             ShotIdStruct shotIdStruct = new(shotResult.Ammo.Id, shotResult.FragmentIndex);
             ShotInfoClass shotInfoClass = (shotResult.HittedBallisticCollider != null) ? shotResult.HittedBallisticCollider.ApplyHit(damageInfoStruct, shotIdStruct) : null;
             shotResult.AddClientHitPosition(shotInfoClass);
-            GClass2983 itemComponent = shotResult.Ammo.GetItemComponent<GClass2983>();
+            ExplosiveItemComponentClass itemComponent = shotResult.Ammo.GetItemComponent<ExplosiveItemComponentClass>();
             if (itemComponent != null && shotResult.TimeSinceShot >= itemComponent.Template.FuzeArmTimeSec)
             {
                 if (Singleton<Effects>.Instantiated)

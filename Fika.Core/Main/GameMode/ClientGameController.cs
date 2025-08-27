@@ -385,7 +385,7 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
             sharedQuestController.ToggleQuestSharing(false);
         }
 
-        BackendConfigSettingsClass.GClass1555.GClass1561 matchEndConfig = Singleton<BackendConfigSettingsClass>.Instance.Experience.MatchEnd;
+        BackendConfigSettingsClass.GClass1720.GClass1726 matchEndConfig = Singleton<BackendConfigSettingsClass>.Instance.Experience.MatchEnd;
         if (player.Profile.EftStats.SessionCounters.GetAllInt([CounterTag.Exp]) < matchEndConfig.SurvivedExpRequirement && coopGame.PastTime < matchEndConfig.SurvivedTimeRequirement)
         {
             coopGame.ExitStatus = ExitStatus.Runner;

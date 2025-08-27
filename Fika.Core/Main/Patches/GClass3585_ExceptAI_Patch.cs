@@ -7,12 +7,12 @@ using System.Reflection;
 
 namespace Fika.Core.Main.Patches;
 
-public class GClass3452_ExceptAI_Patch : FikaPatch
+public class GClass3585_ExceptAI_Patch : FikaPatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(GClass3452)
-            .GetMethod(nameof(GClass3452.ExceptAI));
+        return typeof(GClass3585)
+            .GetMethod(nameof(GClass3585.ExceptAI));
     }
 
     [PatchPrefix]

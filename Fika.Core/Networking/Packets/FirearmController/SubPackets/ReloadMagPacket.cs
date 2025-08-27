@@ -39,7 +39,7 @@ public class ReloadMagPacket : IPoolSubPacket
             MagazineItemClass magazine = null;
             try
             {
-                GStruct461<Item> result = player.FindItemById(MagId);
+                GStruct156<Item> result = player.FindItemById(MagId);
                 if (!result.Succeeded)
                 {
                     FikaPlugin.Instance.FikaLogger.LogError(result.Error);
@@ -65,10 +65,10 @@ public class ReloadMagPacket : IPoolSubPacket
             {
                 try
                 {
-                    using GClass1278 eftReader = PacketToEFTReaderAbstractClass.Get(LocationDescription);
+                    using GClass1283 eftReader = PacketToEFTReaderAbstractClass.Get(LocationDescription);
                     if (LocationDescription.Length != 0)
                     {
-                        GClass1785 descriptor = eftReader.ReadPolymorph<GClass1785>();
+                        GClass1950 descriptor = eftReader.ReadPolymorph<GClass1950>();
                         gridItemAddress = player.InventoryController.ToItemAddress(descriptor);
                     }
                 }

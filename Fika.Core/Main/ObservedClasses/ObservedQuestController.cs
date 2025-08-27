@@ -8,7 +8,7 @@ using System.Collections.Generic;
 namespace Fika.Core.Main.ObservedClasses;
 
 public class ObservedQuestController(Profile profile, InventoryController inventoryController, IPlayerSearchController searchController, IQuestActions session)
-    : GClass3800(profile, inventoryController, searchController, session)
+    : GClass4007(profile, inventoryController, searchController, session)
 {
     public void HandleInraidQuestPacket(InRaidQuestPacket packet)
     {
@@ -29,8 +29,8 @@ public class ObservedQuestController(Profile profile, InventoryController invent
                     }
 
                     int generatedItems = 0;
-                    List<GClass3280> results = [];
-                    GStruct458 appendResult = default;
+                    List<GClass3411> results = [];
+                    GStruct153 appendResult = default;
                     foreach (QuestRewardDataClass item in readList)
                     {
                         appendResult = item.TryAppendClaimResults(InventoryController_0, results, out int clonedCount);
@@ -60,7 +60,7 @@ public class ObservedQuestController(Profile profile, InventoryController invent
                     GameWorld gameWorld = Singleton<GameWorld>.Instance;
                     foreach (string itemId in packet.ItemIdsToRemove)
                     {
-                        GStruct461<Item> result = gameWorld.FindItemById(itemId);
+                        GStruct156<Item> result = gameWorld.FindItemById(itemId);
                         if (result.Failed)
                         {
                             FikaGlobals.LogError($"Could not find itemId {itemId}: {result.Error}");
@@ -69,8 +69,8 @@ public class ObservedQuestController(Profile profile, InventoryController invent
                         itemsToRemove.Add(result.Value);
                     }
 
-                    List<GStruct458> list = [];
-                    GStruct458 discardResult = default;
+                    List<GStruct154<GClass3408>> list = [];
+                    GStruct154<GClass3408> discardResult = default;
                     for (int i = 0; i < itemsToRemove.Count; i++)
                     {
                         discardResult = InteractionsHandlerClass.Discard(itemsToRemove[i], InventoryController_0, false);

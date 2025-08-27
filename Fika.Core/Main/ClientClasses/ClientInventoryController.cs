@@ -239,7 +239,7 @@ public sealed class ClientInventoryController : Player.PlayerOwnerInventoryContr
             EOperationStatus localStatus = Operation.Status;
             if (localStatus.InProgress())
             {
-                if (Operation is GInterface424 ginterface)
+                if (Operation is GInterface441 ginterface)
                 {
                     ginterface.Terminate();
                 }

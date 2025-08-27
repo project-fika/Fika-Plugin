@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace Fika.Core.Main.ClientClasses;
 
-public class ClientTransitController : GClass1741
+public class ClientTransitController : GClass1906
 {
     public ClientTransitController(BackendConfigSettingsClass.TransitSettingsClass settings, LocationSettingsClass.Location.TransitParameters[] parameters, Profile profile, LocalRaidSettings localRaidSettings)
         : base(settings, parameters)

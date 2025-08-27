@@ -315,12 +315,12 @@ public class FreeCameraController : MonoBehaviour
             Destroy(bloodOnScreen);
         }
 
-        List<EffectsController.Class632> effectsManagerList = effectsController.Field<List<EffectsController.Class632>>("list_0").Value;
+        List<EffectsController.Class633> effectsManagerList = effectsController.Field<List<EffectsController.Class633>>("list_0").Value;
         if (effectsManagerList != null)
         {
             for (int i = 0; i < effectsManagerList.Count; i++)
             {
-                EffectsController.Class632 effectsManager = effectsManagerList[i];
+                EffectsController.Class633 effectsManager = effectsManagerList[i];
                 while (effectsManager.ActiveEffects.Count > 0)
                 {
                     IEffect effect = effectsManager.ActiveEffects[0];

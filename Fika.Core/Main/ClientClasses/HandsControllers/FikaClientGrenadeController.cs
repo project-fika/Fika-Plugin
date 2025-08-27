@@ -180,10 +180,10 @@ public class FikaClientGrenadeController : Player.GrenadeHandsController
         }
 
         // Check for GClass increments
-        Class1179 currentOperation = CurrentOperation;
+        Class1271 currentOperation = CurrentOperation;
         if (currentOperation != null)
         {
-            if (currentOperation is not Class1184)
+            if (currentOperation is not Class1276)
             {
                 if (currentOperation is TripwireStateManagerClass)
                 {

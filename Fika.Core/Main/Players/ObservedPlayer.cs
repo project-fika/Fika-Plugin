@@ -200,7 +200,7 @@ public class ObservedPlayer : FikaPlayer
 
         await player.Init(rotation, layerName, pointOfView, profile, inventoryController, healthController,
             statisticsManager, observedQuestController, null,
-            null, filter, player.VoipState, aiControl, false);
+            null, null, filter, player.VoipState, aiControl, false);
 
         player.DisposeObservers();
 
@@ -337,7 +337,7 @@ public class ObservedPlayer : FikaPlayer
         _voiceBroadcastTrigger = gameObject.AddComponent<VoiceBroadcastTrigger>();
         _voiceBroadcastTrigger.ChannelType = CommTriggerTarget.Self;
         _soundSettings = Singleton<SharedGameSettingsClass>.Instance.Sound.Settings;
-        CompositeDisposable.BindState(_soundSettings.VoipDeviceSensitivity, ChangeVoipDeviceSensitivity);
+        CompositeDisposable.BindState(_soundSettings.VoiceChatVolume, ChangeVoipDeviceSensitivity);
     }
 
     private void ChangeVoipDeviceSensitivity(int value)
@@ -444,7 +444,7 @@ public class ObservedPlayer : FikaPlayer
         if (player.IsYourPlayer)
         {
             // Check for GClass increment
-            bool flag = DamageInfo.DidBodyDamage / HealthController.GetBodyPartHealth(bodyPart, false).Maximum >= 0.6f && HealthController.FindExistingEffect<GInterface324>(bodyPart) != null;
+            bool flag = DamageInfo.DidBodyDamage / HealthController.GetBodyPartHealth(bodyPart, false).Maximum >= 0.6f && HealthController.FindExistingEffect<GInterface341>(bodyPart) != null;
             player.StatisticsManager.OnEnemyDamage(DamageInfo, bodyPart, ProfileId, Side, Profile.Info.Settings.Role,
                 GroupId, HealthController.GetBodyPartHealth(EBodyPart.Common, false).Maximum, flag,
                 Vector3.Distance(player.Transform.position, Transform.position), CurrentHour,
@@ -675,7 +675,7 @@ public class ObservedPlayer : FikaPlayer
     public override void OnHealthEffectAdded(IEffect effect)
     {
         // Check for GClass increments
-        if (effect is GInterface325 fracture && !fracture.WasPaused && FractureSound != null && Singleton<BetterAudio>.Instantiated)
+        if (effect is GInterface342 fracture && !fracture.WasPaused && FractureSound != null && Singleton<BetterAudio>.Instantiated)
         {
             Singleton<BetterAudio>.Instance.PlayAtPoint(Position, FractureSound, CameraClass.Instance.Distance(Position),
                 BetterAudio.AudioSourceGroupType.Impacts, 15, 0.7f, EOcclusionTest.Fast, null, false);
@@ -693,10 +693,10 @@ public class ObservedPlayer : FikaPlayer
     }
 
     #region proceed
-    public override void Proceed(bool withNetwork, Callback<GInterface180> callback, bool scheduled = true)
+    public override void Proceed(bool withNetwork, Callback<GInterface198> callback, bool scheduled = true)
     {
         Func<EmptyHandsController> func = new(ProceedEmptyHandsController);
-        new Process<EmptyHandsController, GInterface180>(this, func, null, false)
+        new Process<EmptyHandsController, GInterface198>(this, func, null, false)
             .method_0(null, callback, scheduled);
     }
 
@@ -716,11 +716,11 @@ public class ObservedPlayer : FikaPlayer
             .method_0(null, callback, scheduled);
     }
 
-    public override void Proceed(ThrowWeapItemClass throwWeap, Callback<GInterface188> callback, bool scheduled = true)
+    public override void Proceed(ThrowWeapItemClass throwWeap, Callback<GInterface206> callback, bool scheduled = true)
     {
         HandsControllerFactory factory = new(this, throwWeap);
         Func<QuickGrenadeThrowHandsController> func = new(factory.CreateObservedQuickGrenadeController);
-        new Process<QuickGrenadeThrowHandsController, GInterface188>(this, func, throwWeap, false)
+        new Process<QuickGrenadeThrowHandsController, GInterface206>(this, func, throwWeap, false)
             .method_0(null, callback, scheduled);
     }
 
@@ -732,7 +732,7 @@ public class ObservedPlayer : FikaPlayer
             .method_0(null, callback, scheduled);
     }
 
-    public override void Proceed(MedsItemClass meds, GStruct375<EBodyPart> bodyParts, Callback<GInterface185> callback, int animationVariant, bool scheduled = true)
+    public override void Proceed(MedsItemClass meds, GStruct382<EBodyPart> bodyParts, Callback<GInterface203> callback, int animationVariant, bool scheduled = true)
     {
         HandsControllerFactory factory = new(this)
         {
@@ -741,11 +741,11 @@ public class ObservedPlayer : FikaPlayer
             AnimationVariant = animationVariant
         };
         Func<MedsController> func = new(factory.CreateObservedMedsController);
-        new Process<MedsController, GInterface185>(this, func, meds, false)
+        new Process<MedsController, GInterface203>(this, func, meds, false)
             .method_0(null, callback, scheduled);
     }
 
-    public override void Proceed(FoodDrinkItemClass foodDrink, float amount, Callback<GInterface185> callback, int animationVariant, bool scheduled = true)
+    public override void Proceed(FoodDrinkItemClass foodDrink, float amount, Callback<GInterface203> callback, int animationVariant, bool scheduled = true)
     {
         HandsControllerFactory factory = new(this)
         {
@@ -754,7 +754,7 @@ public class ObservedPlayer : FikaPlayer
             AnimationVariant = animationVariant
         };
         Func<MedsController> func = new(factory.CreateObservedMedsController);
-        new Process<MedsController, GInterface185>(this, func, foodDrink, false)
+        new Process<MedsController, GInterface203>(this, func, foodDrink, false)
             .method_0(null, callback, scheduled);
     }
     #endregion
@@ -1165,8 +1165,8 @@ public class ObservedPlayer : FikaPlayer
                 IEnumerable<Slot> newSlots = newWeapon.AllSlots;
                 if (newSlots != null)
                 {
-                    Dictionary<string, GClass765.GClass766> currentViews = [];
-                    foreach (KeyValuePair<EFT.InventoryLogic.IContainer, GClass765.GClass766> kvp in controller.CCV.ContainerBones)
+                    Dictionary<string, GClass768.GClass769> currentViews = [];
+                    foreach (KeyValuePair<EFT.InventoryLogic.IContainer, GClass768.GClass769> kvp in controller.CCV.ContainerBones)
                     {
                         if (kvp.Key is Slot slot && slot.ContainedItem != null)
                         {
@@ -1196,7 +1196,7 @@ public class ObservedPlayer : FikaPlayer
                                 controller.CCV.AddBone(slot, transform);
                                 continue;
                             }
-                            foreach (KeyValuePair<string, GClass765.GClass766> kvp in currentViews)
+                            foreach (KeyValuePair<string, GClass768.GClass769> kvp in currentViews)
                             {
                                 if (kvp.Key == slot.FullId)
                                 {
@@ -1619,7 +1619,7 @@ public class ObservedPlayer : FikaPlayer
                 oldSlotView.Dispose();
             }
             _observedPlayer.PlayerBody.ValidateHoodedDress(_slotType);
-            GlobalEventHandlerClass.Instance.CreateCommonEvent<GClass3424>().Invoke(_observedPlayer.ProfileId);
+            GlobalEventHandlerClass.Instance.CreateCommonEvent<GClass3558>().Invoke(_observedPlayer.ProfileId);
             Dispose();
         }
 
@@ -1634,7 +1634,7 @@ public class ObservedPlayer : FikaPlayer
                 Dress[] dresses = oldSlotView.Dresses;
                 for (int j = 0; j < dresses.Length; j++)
                 {
-                    GStruct57 bodyRenderer = dresses[j].GetBodyRenderer();
+                    BodyRendererDataStruct bodyRenderer = dresses[j].GetBodyRenderer();
                     for (int k = 0; k < bodyRenderer.Renderers.Length; k++)
                     {
                         bodyRenderer.Renderers[k].forceRenderingOff = false;
@@ -1647,7 +1647,7 @@ public class ObservedPlayer : FikaPlayer
     #region handControllers
     private void CreateHandsController(Func<AbstractHandsController> controllerFactory, Item item)
     {
-        CreateHandsControllerHandler handler = new((item != null) ? method_136(item) : null);
+        CreateHandsControllerHandler handler = new((item != null) ? method_137(item) : null);
 
         handler.SetInHandsOperation?.Confirm(true);
 
@@ -1746,7 +1746,7 @@ public class ObservedPlayer : FikaPlayer
             CreateHandsController(handler.ReturnController, handler.item);
             return;
         }
-        GStruct461<Item> result = FindItemById(itemId, false, false);
+        GStruct156<Item> result = FindItemById(itemId, false, false);
         if (!result.Succeeded)
         {
             FikaPlugin.Instance.FikaLogger.LogError(result.Error);
@@ -1760,7 +1760,7 @@ public class ObservedPlayer : FikaPlayer
     {
         CreateGrenadeControllerHandler handler = new(this);
 
-        GStruct461<Item> result = FindItemById(itemId, false, false);
+        GStruct156<Item> result = FindItemById(itemId, false, false);
         if (!result.Succeeded)
         {
             FikaPlugin.Instance.FikaLogger.LogError(result.Error);
@@ -1777,9 +1777,9 @@ public class ObservedPlayer : FikaPlayer
         }
     }
 
-    private void CreateMedsController(string itemId, GStruct375<EBodyPart> bodyParts, float amount, int animationVariant)
+    private void CreateMedsController(string itemId, GStruct382<EBodyPart> bodyParts, float amount, int animationVariant)
     {
-        GStruct461<Item> result = FindItemById(itemId, false, false);
+        GStruct156<Item> result = FindItemById(itemId, false, false);
         if (!result.Succeeded)
         {
             FikaPlugin.Instance.FikaLogger.LogError(result.Error);
@@ -1792,7 +1792,7 @@ public class ObservedPlayer : FikaPlayer
     private void CreateKnifeController(string itemId)
     {
         CreateKnifeControllerHandler handler = new(this);
-        GStruct461<Item> result = FindItemById(itemId, false, false);
+        GStruct156<Item> result = FindItemById(itemId, false, false);
         if (!result.Succeeded)
         {
             FikaPlugin.Instance.FikaLogger.LogError(result.Error);
@@ -1812,7 +1812,7 @@ public class ObservedPlayer : FikaPlayer
     private void CreateQuickGrenadeController(string itemId)
     {
         CreateQuickGrenadeControllerHandler handler = new(this);
-        GStruct461<Item> result = FindItemById(itemId, false, false);
+        GStruct156<Item> result = FindItemById(itemId, false, false);
         if (!result.Succeeded)
         {
             FikaPlugin.Instance.FikaLogger.LogError(result.Error);
@@ -1832,7 +1832,7 @@ public class ObservedPlayer : FikaPlayer
     private void CreateQuickKnifeController(string itemId)
     {
         CreateQuickKnifeControllerHandler handler = new(this);
-        GStruct461<Item> result = FindItemById(itemId, false, false);
+        GStruct156<Item> result = FindItemById(itemId, false, false);
         if (!result.Succeeded)
         {
             FikaPlugin.Instance.FikaLogger.LogError(result.Error);
@@ -1851,7 +1851,7 @@ public class ObservedPlayer : FikaPlayer
 
     private void CreateUsableItemController(string itemId)
     {
-        GStruct461<Item> result = FindItemById(itemId, false, false);
+        GStruct156<Item> result = FindItemById(itemId, false, false);
         if (!result.Succeeded)
         {
             FikaPlugin.Instance.FikaLogger.LogError(result.Error);
@@ -1863,7 +1863,7 @@ public class ObservedPlayer : FikaPlayer
 
     private void CreateQuickUseItemController(string itemId)
     {
-        GStruct461<Item> result = FindItemById(itemId, false, false);
+        GStruct156<Item> result = FindItemById(itemId, false, false);
         if (!result.Succeeded)
         {
             FikaPlugin.Instance.FikaLogger.LogError(result.Error);
@@ -1994,7 +1994,7 @@ public class ObservedPlayer : FikaPlayer
         private readonly ObservedPlayer _fikaPlayer = fikaPlayer;
         private readonly Callback _callback = callback;
 
-        public void Handle(Result<GInterface160> result)
+        public void Handle(Result<GInterface198> result)
         {
             if (_fikaPlayer._removeFromHandsCallback == _callback)
             {
@@ -2004,13 +2004,13 @@ public class ObservedPlayer : FikaPlayer
         }
     }
 
-    private class CreateHandsControllerHandler(Class1218 setInHandsOperation)
+    private class CreateHandsControllerHandler(Class1310 setInHandsOperation)
     {
-        public readonly Class1218 SetInHandsOperation = setInHandsOperation;
+        public readonly Class1310 SetInHandsOperation = setInHandsOperation;
 
         internal void DisposeHandler()
         {
-            Class1218 handler = SetInHandsOperation;
+            Class1310 handler = SetInHandsOperation;
             if (handler == null)
             {
                 return;
@@ -2041,11 +2041,11 @@ public class ObservedPlayer : FikaPlayer
         }
     }
 
-    private class CreateMedsControllerHandler(ObservedPlayer fikaPlayer, Item item, GStruct375<EBodyPart> bodyParts, float amount, int animationVariant)
+    private class CreateMedsControllerHandler(ObservedPlayer fikaPlayer, Item item, GStruct382<EBodyPart> bodyParts, float amount, int animationVariant)
     {
         private readonly ObservedPlayer _fikaPlayer = fikaPlayer;
         public readonly Item Item = item;
-        private readonly GStruct375<EBodyPart> _bodyParts = bodyParts;
+        private readonly GStruct382<EBodyPart> _bodyParts = bodyParts;
         private readonly float _amount = amount;
         private readonly int _animationVariant = animationVariant;
 

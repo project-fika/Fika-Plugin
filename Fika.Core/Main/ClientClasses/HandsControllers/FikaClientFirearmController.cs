@@ -126,7 +126,7 @@ public class FikaClientFirearmController : Player.FirearmController
     {
         if (Item is RocketLauncherItemClass)
         {
-            return new GClass1869(this);
+            return new GClass2036(this);
         }
         if (Item.IsFlareGun)
         {
@@ -696,7 +696,7 @@ public class FikaClientFirearmController : Player.FirearmController
         public void Process(IResult result)
         {
             ItemAddress itemAddress = _gridItemAddress;
-            GClass1785 descriptor = itemAddress?.ToDescriptor();
+            GClass1950 descriptor = itemAddress?.ToDescriptor();
             EFTWriterClass eftWriter = WriterPoolManager.GetWriter();
 
             byte[] locationDescription;
@@ -753,7 +753,7 @@ public class FikaClientFirearmController : Player.FirearmController
         public void Process(IResult result)
         {
             ItemAddress itemAddress = _placeToPutContainedAmmoMagazine;
-            GClass1785 descriptor = itemAddress?.ToDescriptor();
+            GClass1950 descriptor = itemAddress?.ToDescriptor();
             EFTWriterClass eftWriter = WriterPoolManager.GetWriter();
             string[] ammoIds = _ammoPack.GetReloadingAmmoIds();
 

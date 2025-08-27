@@ -19,7 +19,7 @@ internal class HandsControllerFactory(ObservedPlayer player, Item item = null, K
     public KnifeComponent KnifeComponent = knifeComponent;
     public MedsItemClass MedsItem;
     public FoodDrinkItemClass FoodItem;
-    public GStruct375<EBodyPart> BodyParts;
+    public GStruct382<EBodyPart> BodyParts;
     public float Amount;
     public int AnimationVariant;
 

@@ -75,7 +75,7 @@ public class BTRView_GoIn_Patch : FikaPatch
                     return;
                 }
             }
-            view.method_18(observedPlayer);
+            observedPlayer.HideWeapon();
             observedPlayer.CharacterController.isEnabled = false;
             observedPlayer.BtrState = EPlayerBtrState.GoIn;
             side.AddPassenger(observedPlayer, placeId);
@@ -87,9 +87,9 @@ public class BTRView_GoIn_Patch : FikaPatch
             await view.method_15(observedPlayer.MovementContext.PlayerAnimator, fast, true, cancellationToken);
             if (!cancellationToken.IsCancellationRequested)
             {
-                if (view.method_20() == 1)
+                if (view.method_18() == 1)
                 {
-                    GlobalEventHandlerClass.CreateEvent<GClass3409>().Invoke(observedPlayer.Side);
+                    GlobalEventHandlerClass.CreateEvent<GClass3544>().Invoke(observedPlayer.Side);
                 }
                 observedPlayer.BtrState = EPlayerBtrState.Inside;
             }

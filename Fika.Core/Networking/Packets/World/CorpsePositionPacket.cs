@@ -15,7 +15,7 @@ public struct CorpsePositionPacket : INetSerializable
 
         if (Data.Done)
         {
-            Data.TransformSyncs = new GStruct135[12];
+            Data.TransformSyncs = new GStruct138[12];
             for (int i = 0; i < 12; i++)
             {
                 Data.TransformSyncs[i] = new()
@@ -35,7 +35,7 @@ public struct CorpsePositionPacket : INetSerializable
 
         if (Data.Done && Data.TransformSyncs != null)
         {
-            GStruct135[] transforms = Data.TransformSyncs;
+            GStruct138[] transforms = Data.TransformSyncs;
             for (int i = 0; i < 12; i++)
             {
                 writer.PutUnmanaged(transforms[i].Position);

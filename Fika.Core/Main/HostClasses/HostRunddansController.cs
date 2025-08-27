@@ -7,7 +7,7 @@ using Fika.Core.Networking.Packets.Communication;
 
 namespace Fika.Core.Main.HostClasses;
 
-public class HostRunddansController(BackendConfigSettingsClass.GClass1583 settings, LocationSettingsClass.Location location)
+public class HostRunddansController(BackendConfigSettingsClass.GClass1748 settings, LocationSettingsClass.Location location)
     : LocalGameRunddansControllerClass(settings, location)
 {
     public override void InteractWithEventObject(Player player, InteractPacketStruct packet)

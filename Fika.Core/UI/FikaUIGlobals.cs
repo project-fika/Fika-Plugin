@@ -51,12 +51,12 @@ public static class FikaUIGlobals
         return text;
     }
 
-    public static GClass3629 ShowFikaMessage(this PreloaderUI preloaderUI, string header, string message,
+    public static GClass3835 ShowFikaMessage(this PreloaderUI preloaderUI, string header, string message,
         ErrorScreen.EButtonType buttonType, float waitingTime, Action acceptCallback, Action endTimeCallback)
     {
         Traverse preloaderUiTraverse = Traverse.Create(preloaderUI);
 
-        PreloaderUI.Class2869 messageHandler = new()
+        PreloaderUI.Class2987 messageHandler = new()
         {
             preloaderUI_0 = preloaderUI
         };
@@ -64,7 +64,7 @@ public static class FikaUIGlobals
         if (!AsyncWorker.CheckIsMainThread())
         {
             FikaPlugin.Instance.FikaLogger.LogError("You are trying to show error screen from non-main thread!");
-            return new GClass3629();
+            return new GClass3835();
         }
 
         ErrorScreen errorScreenTemplate = preloaderUiTraverse.Field("_criticalErrorScreenTemplate").GetValue<ErrorScreen>();
@@ -75,19 +75,19 @@ public static class FikaUIGlobals
         return messageHandler.errorScreen.ShowFikaMessage(header, message, acceptCallback, waitingTime, endTimeCallback, buttonType, true);
     }
 
-    public static GClass3630 ShowFikaMessage(this ErrorScreen errorScreen, string title, string message,
+    public static GClass3835 ShowFikaMessage(this ErrorScreen errorScreen, string title, string message,
         Action closeManuallyCallback = null, float waitingTime = 0f, Action timeOutCallback = null,
         ErrorScreen.EButtonType buttonType = ErrorScreen.EButtonType.OkButton, bool removeHtml = true)
     {
         Traverse errorScreenTraverse = Traverse.Create(errorScreen);
 
-        ErrorScreen.Class2627 errorScreenHandler = new()
+        ErrorScreen.Class2740 errorScreenHandler = new()
         {
             errorScreen_0 = errorScreen
         };
         if (!MonoBehaviourSingleton<PreloaderUI>.Instance.CanShowErrorScreen)
         {
-            return new GClass3630();
+            return new GClass3835();
         }
         if (removeHtml)
         {
@@ -99,7 +99,7 @@ public static class FikaUIGlobals
         errorScreenTraverse.Field("action_1").SetValue(action_1);
         MethodBase baseShow = typeof(ErrorScreen).BaseType.GetMethod("Show");
 
-        errorScreenHandler.context = (GClass3630)baseShow.Invoke(errorScreen, []);
+        errorScreenHandler.context = (GClass3835)baseShow.Invoke(errorScreen, []);
         errorScreenHandler.context.OnAccept += errorScreen.method_3;
         if (timeOutCallback != null)
         {

@@ -216,7 +216,7 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
             if (item != null)
             {
                 InventoryController playerInventory = _player.InventoryController;
-                GStruct459<GInterface407> pickupResult = InteractionsHandlerClass.QuickFindAppropriatePlace(item, playerInventory,
+                GStruct154<GInterface424> pickupResult = InteractionsHandlerClass.QuickFindAppropriatePlace(item, playerInventory,
                     playerInventory.Inventory.Equipment.ToEnumerable(),
                     InteractionsHandlerClass.EMoveItemOrder.PickUp, true);
 
@@ -268,7 +268,7 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
         {
             if (questItem.TemplateId == itemId && questItem.QuestItem)
             {
-                GStruct459<GClass3279> removeResult = InteractionsHandlerClass.Remove(questItem, _player.InventoryController, true);
+                GStruct154<GClass3410> removeResult = InteractionsHandlerClass.Remove(questItem, _player.InventoryController, true);
                 _player.InventoryController.TryRunNetworkTransaction(removeResult, (IResult result) =>
                 {
                     if (!result.Succeed)

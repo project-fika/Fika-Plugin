@@ -625,10 +625,10 @@ public class HostGameController : BaseGameController, IBotGame
         BotControllerSettings controllerSettings, GameWorld gameWorld)
     {
         BotsPresets botsPresets = new(_backendSession, _wavesSpawnScenario.SpawnWaves,
-                _bossSpawnScenario.BossSpawnWaves, _nonWavesSpawnScenario.GClass1714_0, false);
+                _bossSpawnScenario.BossSpawnWaves, _nonWavesSpawnScenario.GClass1879_0, false);
         List<WaveInfoClass> waveInfos = [];
-        LocationSettingsClass.Location.GClass1420 halloween = location.Events.Halloween2024;
-        if (halloween != null && halloween.InfectionPercentage > 0)
+        LocationSettingsClass.Location.GClass1425 halloween = location.Events.Halloween2024;
+        if (halloween?.InfectionPercentage > 0)
         {
             waveInfos.AddRange(BotHalloweenWithZombies.GetProfilesOnStart());
         }
@@ -852,7 +852,7 @@ public class HostGameController : BaseGameController, IBotGame
             sharedQuestController.ToggleQuestSharing(false);
         }
 
-        BackendConfigSettingsClass.GClass1555.GClass1561 matchEndConfig = Singleton<BackendConfigSettingsClass>.Instance.Experience.MatchEnd;
+        BackendConfigSettingsClass.GClass1720.GClass1726 matchEndConfig = Singleton<BackendConfigSettingsClass>.Instance.Experience.MatchEnd;
         if (player.Profile.EftStats.SessionCounters.GetAllInt([CounterTag.Exp]) < matchEndConfig.SurvivedExpRequirement && coopGame.PastTime < matchEndConfig.SurvivedTimeRequirement)
         {
             coopGame.ExitStatus = ExitStatus.Runner;
@@ -989,7 +989,7 @@ public class HostGameController : BaseGameController, IBotGame
             location.Loot = [];
         }
 
-        GClass1782 lootDescriptor = EFTItemSerializerClass.SerializeLootData(location.Loot, FikaGlobals.SearchControllerSerializer);
+        GClass1947 lootDescriptor = EFTItemSerializerClass.SerializeLootData(location.Loot, FikaGlobals.SearchControllerSerializer);
         EFTWriterClass eftWriter = WriterPoolManager.GetWriter();
         eftWriter.WriteEFTLootDataDescriptor(lootDescriptor);
         byte[] lootData = eftWriter.ToArray();
@@ -1044,7 +1044,7 @@ public class HostGameController : BaseGameController, IBotGame
             }
             list.Sort(LootCompare);
 
-            GClass1782 lootDescriptor = EFTItemSerializerClass.SerializeLootData(list, FikaGlobals.SearchControllerSerializer);
+            GClass1947 lootDescriptor = EFTItemSerializerClass.SerializeLootData(list, FikaGlobals.SearchControllerSerializer);
             EFTWriterClass eftWriter = WriterPoolManager.GetWriter();
             eftWriter.WriteEFTLootDataDescriptor(lootDescriptor);
 
@@ -1143,7 +1143,7 @@ public class HostGameController : BaseGameController, IBotGame
             Logger.LogError("SyncModule was null when trying to sync trap data!");
         }
 
-        GClass1363 writer = new(new byte[2048]);
+        GClass1368 writer = new(new byte[2048]);
         _gameWorld.SyncModule.Serialize(writer);
 
         SyncTrapsPacket packet = new()

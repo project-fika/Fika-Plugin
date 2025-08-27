@@ -111,7 +111,8 @@ public class ObservedTripwireState(Player.GrenadeHandsController controller, Fik
         // Do nothing
     }
 
-    public override void Execute(GInterface421 operation, Callback callback)
+
+    public override void Execute(GInterface438 operation, Callback callback)
     {
         callback.Succeed();
     }

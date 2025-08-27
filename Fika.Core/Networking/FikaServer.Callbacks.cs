@@ -146,7 +146,7 @@ public partial class FikaServer
             return;
         }
 
-        GStruct461<Item> gstruct2 = gameWorld.FindItemById(packet.ItemId);
+        GStruct156<Item> gstruct2 = gameWorld.FindItemById(packet.ItemId);
         if (gstruct2.Failed)
         {
             _logger.LogError("OnSideEffectPacketReceived: " + gstruct2.Error);
@@ -315,7 +315,7 @@ public partial class FikaServer
             GameWorld gameWorld = Singleton<GameWorld>.Instance;
             Traverse worldTraverse = Traverse.Create(gameWorld.World_0);
 
-            GClass816<int, Throwable>.GStruct45 grenades = gameWorld.Grenades.GetValuesEnumerator();
+            GClass818<int, Throwable>.GStruct48 grenades = gameWorld.Grenades.GetValuesEnumerator();
             List<SmokeGrenadeDataPacketStruct> smokeData = [];
             foreach (Throwable item in grenades)
             {
@@ -337,8 +337,7 @@ public partial class FikaServer
             }
 
             List<WorldInteractiveObject.WorldInteractiveDataPacketStruct> interactivesData = [];
-            WorldInteractiveObject[] worldInteractiveObjects = worldTraverse.Field<WorldInteractiveObject[]>("worldInteractiveObject_0").Value;
-            foreach (WorldInteractiveObject interactiveObject in worldInteractiveObjects)
+            foreach (WorldInteractiveObject interactiveObject in worldTraverse.Field<WorldInteractiveObject[]>("worldInteractiveObject_0").Value)
             {
                 if ((interactiveObject.DoorState != interactiveObject.InitialDoorState
                     && interactiveObject.DoorState != EDoorState.Interacting)
@@ -377,7 +376,7 @@ public partial class FikaServer
                 SendDataToPeer(ref lampPacket, DeliveryMethod.ReliableOrdered, peer);
             }
 
-            GClass816<int, WindowBreaker>.GStruct45 windows = gameWorld.Windows.GetValuesEnumerator();
+            GClass818<int, WindowBreaker>.GStruct48 windows = gameWorld.Windows.GetValuesEnumerator();
             Dictionary<int, Vector3> windowData = [];
             foreach (WindowBreaker window in windows)
             {
@@ -626,10 +625,10 @@ public partial class FikaServer
     {
         if (_coopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer playerToApply))
         {
-            using GClass1278 eftReader = PacketToEFTReaderAbstractClass.Get(packet.OperationBytes);
+            using GClass1283 eftReader = PacketToEFTReaderAbstractClass.Get(packet.OperationBytes);
             try
             {
-                if (playerToApply.InventoryController is Interface16 inventoryController)
+                if (playerToApply.InventoryController is Interface18 inventoryController)
                 {
                     BaseDescriptorClass descriptor = eftReader.ReadPolymorph<BaseDescriptorClass>();
                     OperationDataStruct result = inventoryController.CreateOperationFromDescriptor(descriptor);
@@ -661,7 +660,7 @@ public partial class FikaServer
                 }
                 else
                 {
-                    throw new InvalidTypeException($"Inventory controller was not of type {nameof(Interface16)}!");
+                    throw new InvalidTypeException($"Inventory controller was not of type {nameof(Interface18)}!");
                 }
             }
             catch (Exception exception)

@@ -200,7 +200,7 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
     {
         VoipSettingsClass voipHandler = FikaGlobals.VOIPHandler;
 
-        GClass1069 controller = Singleton<SharedGameSettingsClass>.Instance.Sound.Controller;
+        GClass1072 controller = Singleton<SharedGameSettingsClass>.Instance.Sound.Controller;
         if (voipHandler.MicrophoneChecked)
         {
             controller.ResetVoipDisabledReason();
@@ -624,9 +624,9 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
         {
             try
             {
-                if (controller is Interface16 networkController)
+                if (controller is Interface18 networkController)
                 {
-                    using GClass1278 eftReader = PacketToEFTReaderAbstractClass.Get(packet.OperationBytes);
+                    using GClass1283 eftReader = PacketToEFTReaderAbstractClass.Get(packet.OperationBytes);
                     BaseDescriptorClass descriptor = eftReader.ReadPolymorph<BaseDescriptorClass>();
                     OperationDataStruct result = networkController.CreateOperationFromDescriptor(descriptor);
                     if (!result.Succeeded)

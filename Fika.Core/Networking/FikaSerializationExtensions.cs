@@ -168,7 +168,7 @@ public static class FikaSerializationExtensions
     /// <returns>The deserialized <see cref="Item"/></returns>
     public static Item GetItem(this NetDataReader reader)
     {
-        using GClass1278 eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
+        using GClass1283 eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
         return EFTItemSerializerClass.DeserializeItem(eftReader.ReadEFTItemDescriptor(), Singleton<ItemFactoryClass>.Instance, []);
     }
 
@@ -180,7 +180,7 @@ public static class FikaSerializationExtensions
     /// <returns>An <see cref="Inventory"/></returns>
     public static Inventory GetInventoryFromEquipment(this NetDataReader reader)
     {
-        using GClass1278 eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
+        using GClass1283 eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
         return new EFTInventoryClass()
         {
             Equipment = eftReader.ReadEFTItemDescriptor()
@@ -207,7 +207,7 @@ public static class FikaSerializationExtensions
     /// <returns>The deserialized <see cref="InventoryDescriptorClass"/> instance</returns>
     public static InventoryDescriptorClass GetItemDescriptor(this NetDataReader reader)
     {
-        using GClass1278 eftReader = PacketToEFTReaderAbstractClass.Get(reader.DecompressAndGetByteArray());
+        using GClass1283 eftReader = PacketToEFTReaderAbstractClass.Get(reader.DecompressAndGetByteArray());
         return eftReader.ReadEFTItemDescriptor();
     }
 
@@ -218,15 +218,15 @@ public static class FikaSerializationExtensions
     /// <returns>The deserialized <see cref="Item"/> instance representing the airdrop item</returns>
     public static Item GetAirdropItem(this NetDataReader reader)
     {
-        using GClass1278 eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
+        using GClass1283 eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
         Item item = EFTItemSerializerClass.DeserializeItem(eftReader.ReadEFTItemDescriptor(), Singleton<ItemFactoryClass>.Instance, []);
 
-        GClass1399 enumerable = [new LootItemPositionClass()];
+        GClass1404 enumerable = [new LootItemPositionClass()];
         enumerable[0].Item = item;
         Item[] array = [.. enumerable.Select(FikaGlobals.GetLootItemPositionItem)];
-        ResourceKey[] resourceKeys = [.. array.OfType<GClass3119>().GetAllItemsFromCollections()
-            .Concat(array.Where(AirdropSynchronizableObject.Class2037.class2037_0.method_1))
-            .SelectMany(AirdropSynchronizableObject.Class2037.class2037_0.method_2)];
+        ResourceKey[] resourceKeys = [.. array.OfType<GClass3248>().GetAllItemsFromCollections()
+            .Concat(array.Where(AirdropSynchronizableObject.Class2122.class2122_0.method_1))
+            .SelectMany(AirdropSynchronizableObject.Class2122.class2122_0.method_2)];
         Singleton<PoolManagerClass>.Instance.LoadBundlesAndCreatePools(PoolManagerClass.PoolsCategory.Raid, PoolManagerClass.AssemblyType.Online,
             resourceKeys, JobPriorityClass.Immediate).HandleExceptions();
 
@@ -298,7 +298,7 @@ public static class FikaSerializationExtensions
     /// <returns>The deserialized <see cref="Profile"/></returns>
     public static Profile GetProfile(this NetDataReader reader)
     {
-        using GClass1278 eftReader = PacketToEFTReaderAbstractClass.Get(reader.DecompressAndGetByteArray());
+        using GClass1283 eftReader = PacketToEFTReaderAbstractClass.Get(reader.DecompressAndGetByteArray());
         return new(eftReader.ReadEFTProfileDescriptor());
     }
 
@@ -917,7 +917,7 @@ public static class FikaSerializationExtensions
 
         if (packet.Done && packet.TransformSyncs != null)
         {
-            GStruct135[] transforms = packet.TransformSyncs;
+            GStruct138[] transforms = packet.TransformSyncs;
             for (int i = 0; i < 12; i++)
             {
                 writer.PutUnmanaged(transforms[i].Position);
@@ -942,7 +942,7 @@ public static class FikaSerializationExtensions
 
         if (packet.Done)
         {
-            packet.TransformSyncs = new GStruct135[12];
+            packet.TransformSyncs = new GStruct138[12];
             for (int i = 0; i < 12; i++)
             {
                 packet.TransformSyncs[i] = new()
