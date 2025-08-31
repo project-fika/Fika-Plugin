@@ -9,11 +9,12 @@ namespace Fika.Core.Main.Patches.LocalGame;
 /// <summary>
 /// Used to prevent players from getting everyone elses BTR items
 /// </summary>
-public class BaseLocalGame_method_13_Patch : FikaPatch
+public class BaseLocalGame_method_14_Patch : FikaPatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(BaseLocalGame<EftGamePlayerOwner>).GetMethod(nameof(BaseLocalGame<EftGamePlayerOwner>.method_13));
+        return typeof(BaseLocalGame<EftGamePlayerOwner>)
+            .GetMethod(nameof(BaseLocalGame<EftGamePlayerOwner>.method_14));
     }
 
     [PatchPrefix]

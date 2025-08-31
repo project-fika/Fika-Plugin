@@ -15,7 +15,7 @@ internal class LabsKeycardDebugPatch : FikaPatch
     protected override MethodBase GetTargetMethod()
     {
         return typeof(MainMenuControllerClass)
-            .GetMethod(nameof(MainMenuControllerClass.method_52));
+            .GetMethod(nameof(MainMenuControllerClass.method_53));
     }
 
     [PatchTranspiler]

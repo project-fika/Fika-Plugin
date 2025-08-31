@@ -29,13 +29,14 @@ public class TarkovApplication_LocalGameCreator_Patch : FikaPatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(TarkovApplication).GetMethod(nameof(TarkovApplication.method_49));
+        return typeof(TarkovApplication)
+            .GetMethod(nameof(TarkovApplication.method_49));
     }
 
     [PatchPrefix]
     public static bool Prefix(ref Task __result, TarkovApplication __instance, TimeAndWeatherSettings timeAndWeather, MatchmakerTimeHasCome.TimeHasComeScreenClass timeHasComeScreenController,
         RaidSettings ____raidSettings, InputTree ____inputTree, GameDateTime ____localGameDateTime, float ____fixedDeltaTime, string ____backendUrl, MetricsEventsClass metricsEvents,
-        MetricsConfigClass metricsConfig, GameWorld gameWorld, MainMenuControllerClass ____menuOperation, CompositeDisposableClass ___compositeDisposableClass, BundleLockClass ___BundleLock)
+        MetricsConfigClass metricsConfig, GameWorld gameWorld, MainMenuControllerClass ___mainMenuControllerClass, CompositeDisposableClass ___compositeDisposableClass, BundleLockClass ___BundleLock)
     {
 #if DEBUG
         Logger.LogInfo("TarkovApplication_LocalGameCreator_Patch:Prefix");
@@ -43,7 +44,7 @@ public class TarkovApplication_LocalGameCreator_Patch : FikaPatch
 #endif
         __result = CreateFikaGame(__instance, timeAndWeather, timeHasComeScreenController, ____raidSettings,
             ____inputTree, ____localGameDateTime, ____fixedDeltaTime, ____backendUrl,
-            metricsEvents, metricsConfig, gameWorld, ____menuOperation, ___compositeDisposableClass, ___BundleLock);
+            metricsEvents, metricsConfig, gameWorld, ___mainMenuControllerClass, ___compositeDisposableClass, ___BundleLock);
         return false;
     }
 
