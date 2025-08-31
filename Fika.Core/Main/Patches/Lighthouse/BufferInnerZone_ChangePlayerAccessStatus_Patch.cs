@@ -12,7 +12,8 @@ public class BufferInnerZone_ChangePlayerAccessStatus_Patch : FikaPatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(BufferInnerZone).GetMethod(nameof(BufferInnerZone.ChangePlayerAccessStatus));
+        return typeof(BufferInnerZone)
+            .GetMethod(nameof(BufferInnerZone.ChangePlayerAccessStatus));
     }
 
     [PatchPostfix]

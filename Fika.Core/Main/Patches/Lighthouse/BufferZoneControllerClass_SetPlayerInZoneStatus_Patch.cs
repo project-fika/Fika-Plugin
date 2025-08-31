@@ -12,7 +12,8 @@ public class BufferZoneControllerClass_SetPlayerInZoneStatus_Patch : FikaPatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(BufferZoneControllerClass).GetMethod(nameof(BufferZoneControllerClass.SetPlayerInZoneStatus));
+        return typeof(BufferZoneControllerClass)
+            .GetMethod(nameof(BufferZoneControllerClass.SetPlayerInZoneStatus));
     }
 
     [PatchPostfix]

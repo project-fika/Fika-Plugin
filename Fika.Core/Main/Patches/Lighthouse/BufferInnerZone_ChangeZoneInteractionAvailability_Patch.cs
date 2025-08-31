@@ -12,7 +12,8 @@ public class BufferInnerZone_ChangeZoneInteractionAvailability_Patch : FikaPatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(BufferInnerZone).GetMethod(nameof(BufferInnerZone.ChangeZoneInteractionAvailability));
+        return typeof(BufferInnerZone)
+            .GetMethod(nameof(BufferInnerZone.ChangeZoneInteractionAvailability));
     }
 
     [PatchPostfix]

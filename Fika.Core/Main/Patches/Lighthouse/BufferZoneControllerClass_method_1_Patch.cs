@@ -7,11 +7,12 @@ using System.Reflection;
 
 namespace Fika.Core.Main.Patches.Lighthouse;
 
-internal class BufferZoneControllerClass_method_1_Patch : FikaPatch
+public class BufferZoneControllerClass_method_1_Patch : FikaPatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(BufferZoneControllerClass).GetMethod(nameof(BufferZoneControllerClass.method_1));
+        return typeof(BufferZoneControllerClass)
+            .GetMethod(nameof(BufferZoneControllerClass.method_1));
     }
 
     [PatchPrefix]

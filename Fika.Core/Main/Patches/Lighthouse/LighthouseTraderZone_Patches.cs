@@ -10,7 +10,7 @@ using System.Reflection;
 
 namespace Fika.Core.Main.Patches.Lighthouse;
 
-public class LighthouseTraderZone_Patches
+public static class LighthouseTraderZone_Patches
 {
     public class LighthouseTraderZone_AddPlayer_Patch : FikaPatch
     {
