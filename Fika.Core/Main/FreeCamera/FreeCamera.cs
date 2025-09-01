@@ -406,7 +406,7 @@ public class FreeCamera : MonoBehaviour
 
     protected void OnGUI()
     {
-        if (!IsActive || !_showOverlay || _hidePlayerList)
+        if (!IsActive || !_showOverlay || _hidePlayerList || !FikaPlugin.ShowPlayerList.Value)
         {
             return;
         }
