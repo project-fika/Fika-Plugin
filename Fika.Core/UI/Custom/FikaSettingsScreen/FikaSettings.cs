@@ -54,6 +54,7 @@ public class FikaSettings : SettingsTab
     private SettingToggle _autoExtract;
     private SettingToggle _showExtractMessage;
     private GameObject _extractKey;
+    private SettingToggle _showPlayerList;
     private KeybindHandler _extractKeyHandler;
     private SettingToggle _enableChat;
     private GameObject _chatKey;
@@ -152,6 +153,7 @@ public class FikaSettings : SettingsTab
         _autoExtract = CreateToggle(section2);
         _showExtractMessage = CreateToggle(section2);
         _extractKey = CreateKeybind(content);
+        _showPlayerList = CreateToggle(section2);
         RectTransform section3 = CreateSubSection(content);
         _enableChat = CreateToggle(section3);
         _chatKey = CreateKeybind(content);
@@ -281,6 +283,7 @@ public class FikaSettings : SettingsTab
         SetupToggle(_autoExtract, FikaPlugin.AutoExtract);
         SetupToggle(_showExtractMessage, FikaPlugin.ShowExtractMessage);
         _extractKeyHandler = SetupKeybind(_extractKey, FikaPlugin.ExtractKey);
+        SetupToggle(_showPlayerList, FikaPlugin.ShowPlayerList);
         SetupToggle(_enableChat, FikaPlugin.EnableChat);
         _chatKeyHandler = SetupKeybind(_chatKey, FikaPlugin.ChatKey);
         SetupToggle(_onlinePlayers, FikaPlugin.EnableOnlinePlayers);

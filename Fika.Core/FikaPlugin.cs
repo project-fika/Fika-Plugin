@@ -119,6 +119,7 @@ public class FikaPlugin : BaseUnityPlugin
     public static ConfigEntry<bool> AutoExtract { get; set; }
     public static ConfigEntry<bool> ShowExtractMessage { get; set; }
     public static ConfigEntry<KeyboardShortcut> ExtractKey { get; set; }
+    public static ConfigEntry<bool> ShowPlayerList { get; set; }
     public static ConfigEntry<bool> EnableChat { get; set; }
     public static ConfigEntry<KeyboardShortcut> ChatKey { get; set; }
     public static ConfigEntry<bool> EnableOnlinePlayers { get; set; }
@@ -506,7 +507,7 @@ public class FikaPlugin : BaseUnityPlugin
             {
                 Category = coopHeader,
                 DispName = LocaleUtils.BEPINEX_USE_HEADLESS_T.Localized(),
-                Order = 8
+                Order = 9
             }), "Auto Use Headless", ref failed, headers);
 
         ShowNotifications = SetupSetting(coopDefaultHeader, "Show Feed", true,
@@ -514,7 +515,7 @@ public class FikaPlugin : BaseUnityPlugin
             {
                 Category = coopHeader,
                 DispName = LocaleUtils.BEPINEX_SHOW_FEED_T.Localized(),
-                Order = 7
+                Order = 8
             }),
             "Show Feed", ref failed, headers);
 
@@ -523,7 +524,7 @@ public class FikaPlugin : BaseUnityPlugin
             {
                 Category = coopHeader,
                 DispName = LocaleUtils.BEPINEX_AUTO_EXTRACT_T.Localized(),
-                Order = 6
+                Order = 7
             }),
             "Auto Extract", ref failed, headers);
 
@@ -532,7 +533,7 @@ public class FikaPlugin : BaseUnityPlugin
             {
                 Category = coopHeader,
                 DispName = LocaleUtils.BEPINEX_SHOW_EXTRACT_MESSAGE_T.Localized(),
-                Order = 5
+                Order = 6
             }),
             "Show Extract Message", ref failed, headers);
 
@@ -541,9 +542,19 @@ public class FikaPlugin : BaseUnityPlugin
             {
                 Category = coopHeader,
                 DispName = LocaleUtils.BEPINEX_EXTRACT_KEY_T.Localized(),
-                Order = 4
+                Order = 5
             }),
             "Extract Key", ref failed, headers);
+
+        ShowPlayerList = SetupSetting(coopDefaultHeader, "Show In-Game Player List", true,
+            new ConfigDescription(LocaleUtils.BEPINEX_SHOW_EXTRACT_MESSAGE_D.Localized(), tags: new ConfigurationManagerAttributes() // TODO
+            {
+                Category = coopHeader,
+                /* DispName = LocaleUtils.BEPINEX_SHOW_EXTRACT_MESSAGE_T.Localized(), */ // TODO
+                DispName = "Show Player List",
+                Order = 4
+            }),
+            "Show In-Game Player List", ref failed, headers);
 
         EnableChat = SetupSetting(coopDefaultHeader, "Enable Chat", false,
             new ConfigDescription(LocaleUtils.BEPINEX_ENABLE_CHAT_D.Localized(), tags: new ConfigurationManagerAttributes()
