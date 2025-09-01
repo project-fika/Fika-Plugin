@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 
 namespace Fika.Core.Networking.LiteNetLib.Utils;
 
-public class NetDataReader
+public unsafe class NetDataReader
 {
     protected byte[] _data;
     protected int _position;
@@ -581,7 +581,7 @@ public class NetDataReader
     /// Thrown in DEBUG mode if there is not enough data remaining in the buffer to read a value of type <typeparamref name="T"/>.
     /// </exception>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public unsafe T GetUnmanaged<T>() where T : unmanaged
+    public T GetUnmanaged<T>() where T : unmanaged
     {
         int size = sizeof(T);
 #if DEBUG
@@ -591,7 +591,12 @@ public class NetDataReader
         }
 #endif
 
-        T value = Unsafe.ReadUnaligned<T>(ref _data[_position]);
+        T value;
+        fixed (byte* ptr = &_data[_position])
+        {
+            value = *(T*)ptr;
+        }
+
         _position += size;
         return value;
     }
@@ -611,9 +616,10 @@ public class NetDataReader
     /// Thrown in DEBUG mode if there is not enough data remaining in the buffer to read the value.
     /// </exception>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public unsafe T? GetNullableUnmanaged<T>() where T : unmanaged
+    public T? GetNullableUnmanaged<T>() where T : unmanaged
     {
         bool hasValue = GetBool();
+
 #if DEBUG
         int requiredSize = hasValue ? sizeof(T) : 0;
         if (_position + requiredSize > _data.Length)
@@ -627,9 +633,7 @@ public class NetDataReader
             return null;
         }
 
-        T value = Unsafe.ReadUnaligned<T>(ref _data[_position]);
-        _position += sizeof(T);
-        return value;
+        return GetUnmanaged<T>();
     }
 
     /// <summary>
@@ -642,9 +646,14 @@ public class NetDataReader
     /// Thrown in DEBUG mode if there is not enough data remaining in the buffer to read a value of type <typeparamref name="T"/>.
     /// </exception>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public unsafe T PeekUnmanaged<T>() where T : unmanaged
+    public T PeekUnmanaged<T>() where T : unmanaged
     {
-        return Unsafe.ReadUnaligned<T>(ref _data[_position]);
+        T value;
+        fixed (byte* ptr = &_data[_position])
+        {
+            value = *(T*)ptr;
+        }
+        return value;
     }
 
     /// <summary>
@@ -662,7 +671,6 @@ public class NetDataReader
     /// <summary>
     /// Deserializes a <see cref="DateTime"/> from the <paramref name="reader"/>
     /// </summary>
-    /// <param name="reader">The <see cref="NetDataReader"/> to read data from</param>
     /// <returns>The deserialized <see cref="DateTime"/></returns>
     public DateTime GetDateTime()
     {
@@ -940,7 +948,7 @@ public class NetDataReader
         if (AvailableBytes >= 2)
         {
             ushort length = PeekUShort();
-            if (length >= 0 && AvailableBytes >= 2 + length)
+            if (AvailableBytes >= 2 + length)
             {
                 result = GetBytesWithLength();
                 return true;

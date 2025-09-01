@@ -7,7 +7,7 @@ using System.Threading;
 
 namespace Fika.Core.Networking.LiteNetLib.Utils;
 
-public class NetDataWriter
+public unsafe class NetDataWriter
 {
     protected byte[] _data;
     protected int _position;
@@ -499,14 +499,18 @@ public class NetDataWriter
     /// <typeparam name="T">An unmanaged value type to write into the buffer.</typeparam>
     /// <param name="value">The nullable value to write into the buffer. If <see langword="null"/>, only a <see langword="false"/> flag is written.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public unsafe void PutUnmanaged<T>(T value) where T : unmanaged
+    public void PutUnmanaged<T>(T value) where T : unmanaged
     {
         if (_autoResize)
         {
             ResizeIfNeed(_position + sizeof(T));
         }
 
-        Unsafe.WriteUnaligned(ref _data[_position], value);
+        fixed (byte* ptr = &_data[_position])
+        {
+            *(T*)ptr = value;
+        }
+
         _position += sizeof(T);
     }
 
@@ -517,7 +521,7 @@ public class NetDataWriter
     /// <typeparam name="T">An unmanaged value type to write into the buffer.</typeparam>
     /// <param name="value">The value to write into the buffer.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public unsafe void PutNullableUnmanaged<T>(T? value) where T : unmanaged
+    public void PutNullableUnmanaged<T>(T? value) where T : unmanaged
     {
         bool hasValue = value.HasValue;
         Put(hasValue);
@@ -526,13 +530,7 @@ public class NetDataWriter
             return;
         }
 
-        if (_autoResize)
-        {
-            ResizeIfNeed(_position + sizeof(T));
-        }
-
-        Unsafe.WriteUnaligned(ref _data[_position], value);
-        _position += sizeof(T);
+        PutUnmanaged(value.Value);
     }
 
     /// <summary>
