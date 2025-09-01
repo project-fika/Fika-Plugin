@@ -271,7 +271,7 @@ public struct PlayerStatePacket
     private static byte PackFloatToByte(float value, float min, float max)
     {
         float clamped = Mathf.Clamp(value, min, max);
-        int maxInt = 255;
+        const int maxInt = 255;
         int quantized = Mathf.RoundToInt((clamped - min) / (max - min) * maxInt);
         return (byte)quantized;
     }
@@ -279,21 +279,21 @@ public struct PlayerStatePacket
     private static ushort PackFloatToUShort(float value, float min, float max)
     {
         float clamped = Mathf.Clamp(value, min, max);
-        int maxInt = ushort.MaxValue;
+        const int maxInt = ushort.MaxValue;
         int quantized = Mathf.RoundToInt((clamped - min) / (max - min) * maxInt);
         return (ushort)quantized;
     }
 
     private static byte PackIntToByte(int value, int minValue, int maxValue)
     {
-        int minTarget = 0;
-        int maxTarget = byte.MaxValue;
+        const int minTarget = 0;
+        const int maxTarget = byte.MaxValue;
 
         int clampedValue = Mathf.Clamp(value, minValue, maxValue) - minValue;
         int rangeInput = maxValue - minValue;
 
         float normalized = (float)clampedValue / rangeInput;
-        int scaled = (int)(minTarget + normalized * (maxTarget - minTarget));
+        int scaled = (int)(minTarget + (normalized * (maxTarget - minTarget)));
 
         return (byte)Mathf.Clamp(scaled, minTarget, maxTarget);
     }
@@ -301,19 +301,19 @@ public struct PlayerStatePacket
     private static float UnpackByteToFloat(byte packed, float min, float max)
     {
         float normalized = packed / (float)byte.MaxValue;
-        return min + normalized * (max - min);
+        return min + (normalized * (max - min));
     }
 
     private static float UnpackUShortToFloat(ushort packed, float min, float max)
     {
         float normalized = packed / (float)ushort.MaxValue;
-        return min + normalized * (max - min);
+        return min + (normalized * (max - min));
     }
 
     private static int UnpackByteToInt(byte packed, int minValue, int maxValue)
     {
         float normalized = packed / (float)byte.MaxValue;
-        return (int)(minValue + normalized * (maxValue - minValue));
+        return (int)(minValue + (normalized * (maxValue - minValue)));
     }
 
     public static byte PackBools(params bool[] bools)
