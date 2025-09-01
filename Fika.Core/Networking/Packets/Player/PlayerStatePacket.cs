@@ -83,7 +83,8 @@ public struct PlayerStatePacket
     {
         readonly get
         {
-            return new Vector2(UnpackByteToFloat(_headRotYawPacked, -50f, 20f), UnpackByteToFloat(_headRotPitchPacked, -40f, 40f));
+            return new Vector2(UnpackByteToFloat(_headRotYawPacked, -50f, 20f),
+                UnpackByteToFloat(_headRotPitchPacked, -40f, 40f));
         }
 
         set
@@ -97,7 +98,8 @@ public struct PlayerStatePacket
     {
         readonly get
         {
-            return new Vector2(_rotYaw, UnpackByteToFloat(_rotPitchPacked, -90f, 90f));
+            return new Vector2(_rotYaw, UnpackByteToFloat(_rotPitchPacked,
+                -90f, 90f));
         }
 
         set
@@ -111,7 +113,8 @@ public struct PlayerStatePacket
     {
         readonly get
         {
-            return new Vector2(UnpackByteToFloat(_moveDirXPacked, -1f, 1f), UnpackByteToFloat(_moveDirYPacked, -1f, 1f));
+            return new Vector2(UnpackByteToFloat(_moveDirXPacked, -1f, 1f),
+                UnpackByteToFloat(_moveDirYPacked, -1f, 1f));
         }
 
         set
@@ -374,7 +377,7 @@ public struct PlayerStatePacket
 
     public static PlayerStatePacket CreateFromPlayer(FikaPlayer player, bool isMoving)
     {
-        PlayerStatePacket packet = new()
+        return new()
         {
             RemoteTime = NetworkTimeSync.NetworkTime,
             LocalTime = 0,
@@ -413,7 +416,5 @@ public struct PlayerStatePacket
                 player.Physical.SerializationStruct.HandsExhausted
             )
         };
-
-        return packet;
     }
 }
