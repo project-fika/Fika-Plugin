@@ -1,6 +1,7 @@
 ﻿using BSG.CameraEffects;
 using Comfort.Common;
 using EFT;
+using EFT.HealthSystem;
 using EFT.UI;
 using Fika.Core.Bundles;
 using Fika.Core.Main.Components;
@@ -20,7 +21,7 @@ namespace Fika.Core.Main.FreeCamera;
 /// This is HEAVILY based on Terkoiz's work found here. Thanks for your work Terkoiz! <br/>
 /// <see href="https://dev.sp-tarkov.com/Terkoiz/Freecam/raw/branch/master/project/Terkoiz.Freecam/FreecamController.cs"/>
 /// </summary>
-public class FreeCamera : MonoBehaviour
+public partial class FreeCamera : MonoBehaviour
 {
     public bool IsActive { get; set; }
 
@@ -44,20 +45,7 @@ public class FreeCamera : MonoBehaviour
     private bool _nightVisionActive;
     private bool _thermalVisionActive;
     private FreecamUI _freecamUI;
-
-    private bool _hidePlayerList;
-    private bool _initPlayerListGuiStyles;
-    private Texture2D _texWhite;
-    private GUIStyle _rowGuiStyle, _badgeGuiStyle, _hpTextGuiStyle, _nameGuiStyle;
-    private FikaPlayer _lastSpectatingPlayer;
-    private bool _superFastMode;
-
-    enum CameraState
-    {
-        Follow3rdPerson,
-        FollowHeadcam
-    };
-    CameraState _cameraState;
+    private CoopHandler _coopHandler;
 
     private KeyCode _forwardKey;
     private KeyCode _backKey;
@@ -83,6 +71,15 @@ public class FreeCamera : MonoBehaviour
         _detachKey = KeyCode.G;
         _upKey = KeyCode.R;
         _downKey = KeyCode.F;
+
+        InitPlayerListGuiStyles();
+        if (!CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
+        {
+            FikaGlobals.LogError("Could not find CoopHandler when creating FreeCamera");
+            return;
+        }
+
+        _coopHandler = coopHandler;
     }
 
     protected void Start()
@@ -149,7 +146,6 @@ public class FreeCamera : MonoBehaviour
             _isFollowing = false;
             transform.parent = null;
         }
-        return;
     }
 
     public void SwitchSpectateMode()
@@ -165,260 +161,13 @@ public class FreeCamera : MonoBehaviour
 
         switch (_cameraState)
         {
-            case CameraState.FollowHeadcam:
+            case ECameraState.FollowHeadcam:
                 AttachToPlayer();
                 break;
-            case CameraState.Follow3rdPerson:
+            case ECameraState.Follow3rdPerson:
                 Attach3rdPerson();
                 break;
         }
-    }
-
-    private void InitPlayerListGuiStyles()
-    {
-        if (_texWhite == null)
-        {
-            _texWhite = new Texture2D(1, 1, TextureFormat.RGBA32, false);
-            _texWhite.SetPixel(0, 0, Color.white);
-            _texWhite.Apply();
-        }
-
-        _rowGuiStyle = new GUIStyle(GUI.skin.label) { padding = new RectOffset(6, 6, 4, 4) };
-
-        _badgeGuiStyle = new GUIStyle(GUI.skin.box)
-        {
-            padding = new RectOffset(6, 6, 1, 1),
-            margin = new RectOffset(4, 6, 0, 0),
-            fontSize = 11,
-            alignment = TextAnchor.MiddleCenter,
-            border = new RectOffset(0, 0, 0, 0),
-            normal = { textColor = Color.black }
-        };
-
-        _hpTextGuiStyle = new GUIStyle(GUI.skin.label)
-        {
-            alignment = TextAnchor.MiddleCenter,
-            fontSize = 12,
-            normal = { textColor = Color.white }
-        };
-
-        _nameGuiStyle = new GUIStyle(GUI.skin.box)
-        {
-            padding = new RectOffset(6, 6, 1, 1),
-            margin = new RectOffset(4, 6, 0, 0),
-            fontSize = 12,
-            alignment = TextAnchor.MiddleCenter,
-            border = new RectOffset(0, 0, 0, 0),
-            normal = { textColor = Color.black }
-        };
-    }
-
-    private static void DrawRect(Rect r, Color c, Texture2D white)
-    {
-        var prev = GUI.color; GUI.color = c;
-        GUI.DrawTexture(r, white);
-        GUI.color = prev;
-    }
-
-    private static void DrawRectBorder(Rect r, float border, Color color, Texture2D white)
-    {
-        DrawRect(new Rect(r.x, r.y, r.width, border), color, white);
-        DrawRect(new Rect(r.x, r.yMax - border, r.width, border), color, white);
-        DrawRect(new Rect(r.x, r.y, border, r.height), color, white);
-        DrawRect(new Rect(r.xMax - border, r.y, border, r.height), color, white);
-    }
-
-    private void DrawPlayerRow(FikaPlayer p)
-    {
-        string playerName = p.Profile.Info.MainProfileNickname;
-        if (string.IsNullOrWhiteSpace(playerName))
-            playerName = p.Profile.GetCorrectedNickname();
-
-        var common = p.HealthController.GetBodyPartHealth(EBodyPart.Common);
-        float hpCur = common.Current;
-        float hpMax = common.Maximum;
-
-        var role = p.Profile.Info.Settings.Role;
-        string kind =
-            role == WildSpawnType.pmcUSEC ? "USEC" :
-            role == WildSpawnType.pmcBEAR ? "BEAR" :
-            role == WildSpawnType.assault || role == WildSpawnType.assaultGroup ? "Scav" :
-            role == WildSpawnType.pmcBot ? "Raider" :
-            role == WildSpawnType.exUsec ? "Rogue" :
-            role.ToString().StartsWith("boss", StringComparison.OrdinalIgnoreCase) ? $"Boss ({role})" :
-            role.ToString().StartsWith("follower", StringComparison.OrdinalIgnoreCase) ? $"Follower ({role})" :
-            p.Profile.Side.ToString();
-
-        if (kind == "Scav" && !string.IsNullOrEmpty(p.Profile.Info.MainProfileNickname))
-            kind = "Player Scav";
-
-        if (kind == "Savage")
-        {
-            string r = p.Profile.Info.Settings != null ? p.Profile.Info.Settings.Role.ToString() : "NoRole";
-            if (r == "marksman") kind = "Sniper Scav";
-            else if (r == "shooterBTR") kind = "BTR Gunner";
-            else if (r == "pmcUSEC") kind = "AI USEC";
-            else if (r == "pmcBEAR") kind = "AI BEAR";
-        }
-
-        Color kindColor =
-            kind == "USEC" ? new Color(0.45f, 0.55f, 0.80f, 1f) :
-            kind == "BEAR" ? new Color(0.70f, 0.45f, 0.45f, 1f) :
-            kind == "AI USEC" ? new Color(0.35f, 0.45f, 0.65f, 1f) :
-            kind == "AI BEAR" ? new Color(0.55f, 0.35f, 0.35f, 1f) :
-            kind == "Scav" ? new Color(0.50f, 0.70f, 0.50f, 1f) :
-            kind == "Player Scav" ? new Color(0.55f, 0.80f, 0.80f, 1f) :
-            kind == "Sniper Scav" ? new Color(0.60f, 0.75f, 0.85f, 1f) :
-            kind == "BTR Gunner" ? new Color(0.80f, 0.70f, 0.50f, 1f) :
-            kind == "Raider" ? new Color(0.75f, 0.65f, 0.45f, 1f) :
-            kind == "Rogue" ? new Color(0.65f, 0.55f, 0.75f, 1f) :
-            kind.StartsWith("Boss") ? new Color(0.80f, 0.60f, 0.80f, 1f) :
-            kind.StartsWith("Follower") ? new Color(0.85f, 0.70f, 0.55f, 1f) :
-            new Color(0.55f, 0.55f, 0.55f, 1f);
-
-        const float hpWidth = 100f;
-        Vector2 nameSize = _nameGuiStyle.CalcSize(new GUIContent(playerName));
-        Vector2 kindSize = _badgeGuiStyle.CalcSize(new GUIContent(kind));
-
-        const float pad = 6f;
-        Rect row = GUILayoutUtility.GetRect(0, 24, GUILayout.ExpandWidth(true));
-        float x = row.x + pad;
-        float y = row.y + 3f;
-
-        float rowWidth = hpWidth + 24f + nameSize.x + kindSize.x;
-        var rowRect = new Rect(row.x, row.y + 1, rowWidth + 28, row.height);
-
-        if (p == _currentPlayer)
-        {
-            DrawRect(rowRect, new Color(0.5f, 0.5f, 0.5f, 0.75f), _texWhite);
-            DrawRectBorder(rowRect, 1f, Color.black, _texWhite);
-        }
-        else if (_currentPlayer == null && p == _lastSpectatingPlayer)
-        {
-            DrawRect(rowRect, new Color(0.5f, 0.5f, 0.5f, 0.5f), _texWhite);
-            DrawRectBorder(rowRect, 1f, Color.grey, _texWhite);
-        }
-
-        var hpRect = new Rect(x, y + 2f, hpWidth, row.height - 8f);
-        DrawRect(hpRect, Color.black, _texWhite);
-        float healthPercent = Mathf.Clamp01(hpMax > 0 ? hpCur / hpMax : 0);
-
-        float healthRedValue = 0.0f;
-        float healthGreenValue = 0.0f;
-        if (healthPercent > 0.5f)
-        {
-            // Start at red=0 at 100% health, end at red=.75 at 50% health
-            healthRedValue = (1.0f - healthPercent) / 0.5f * 0.75f;
-            healthGreenValue = 0.5f;
-        }
-        else
-        {
-            healthRedValue = 0.75f;
-            // Start at green=0.5 at 50% health, end at green=0 at 0% health
-            healthGreenValue = healthPercent;
-        }
-        var healthBarColor = new Color(healthRedValue, healthGreenValue, 0.0f, 1f);
-
-        var fill = new Rect(hpRect.x, hpRect.y, hpRect.width * healthPercent, hpRect.height);
-        DrawRect(fill, healthBarColor, _texWhite);
-        DrawRectBorder(hpRect, 1f, Color.black, _texWhite);
-        var hpLabelRect = new Rect(x, y + 1f, hpWidth, row.height - 6f);
-        GUI.Label(hpLabelRect, $"{(int)hpCur}/{(int)hpMax}", _hpTextGuiStyle);
-        x += hpWidth + 8f;
-
-        var nameRect = new Rect(x, y + 2f, nameSize.x + 12f, row.height - 8f);
-        DrawRect(nameRect, kindColor, _texWhite);
-        DrawRectBorder(nameRect, 1f, Color.black, _texWhite);
-        var prevNameBg = _nameGuiStyle.normal.background; _nameGuiStyle.normal.background = null;
-        GUI.Label(nameRect, playerName, _nameGuiStyle);
-        _nameGuiStyle.normal.background = prevNameBg;
-        x += nameRect.width + 8f;
-
-        var kindRect = new Rect(x, y + 2f, kindSize.x + 12f, row.height - 8f);
-        DrawRect(kindRect, kindColor, _texWhite);
-        DrawRectBorder(kindRect, 1f, Color.black, _texWhite);
-        var prevBadgeBg = _badgeGuiStyle.normal.background; _badgeGuiStyle.normal.background = null;
-        GUI.Label(kindRect, kind, _badgeGuiStyle);
-        _badgeGuiStyle.normal.background = prevBadgeBg;
-    }
-
-    private void DrawPlayerList()
-    {
-        if (!_initPlayerListGuiStyles)
-        {
-            InitPlayerListGuiStyles();
-            _initPlayerListGuiStyles = true;
-        }
-
-        if (!CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
-        {
-            return;
-        }
-
-        List<FikaPlayer> players = [];
-        List<FikaPlayer> humanPlayers = coopHandler.HumanPlayers;
-        for (int i = 0; i < humanPlayers.Count; i++)
-        {
-            FikaPlayer player = humanPlayers[i];
-            if (!player.IsYourPlayer && player.HealthController.IsAlive)
-            {
-                players.Add(player);
-            }
-        }
-        // If no alive players, add bots to spectate pool if enabled
-#if DEBUG
-        if (FikaPlugin.AllowSpectateBots.Value)
-#else
-
-        if (players.Count <= 0 && FikaPlugin.AllowSpectateBots.Value)
-#endif
-        {
-            _isSpectatingBots = true;
-            if (FikaBackendUtils.IsServer)
-            {
-                foreach (FikaPlayer player in coopHandler.Players.Values)
-                {
-                    if (player.IsAI && player.HealthController.IsAlive)
-                    {
-                        players.Add(player);
-                    }
-                }
-            }
-            else
-            {
-                foreach (FikaPlayer player in coopHandler.Players.Values)
-                {
-                    if (player.IsObservedAI && player.HealthController.IsAlive)
-                    {
-                        players.Add(player);
-                    }
-                }
-            }
-        }
-
-        if (players == null || players.Count == 0) return;
-
-        for (int i = 0; i < players.Count; i++)
-        {
-            DrawPlayerRow(players[i]);
-        }
-    }
-
-    protected void OnGUI()
-    {
-        if (!IsActive || !_showOverlay || _hidePlayerList || !FikaPlugin.ShowPlayerList.Value)
-        {
-            return;
-        }
-
-        const float verticalOffset = 360f;
-        GUILayout.BeginArea(new Rect(5f, 5f + verticalOffset, 500f, Screen.height - 10f - verticalOffset));
-        GUILayout.BeginVertical();
-
-        DrawPlayerList();
-
-        GUILayout.EndVertical();
-        GUILayout.EndArea();
     }
 
     /// <summary>
@@ -429,13 +178,8 @@ public class FreeCamera : MonoBehaviour
     /// </param>
     public void CycleSpectatePlayers(bool reverse = false)
     {
-        if (!CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
-        {
-            return;
-        }
-
         List<FikaPlayer> players = [];
-        List<FikaPlayer> humanPlayers = coopHandler.HumanPlayers;
+        List<FikaPlayer> humanPlayers = _coopHandler.HumanPlayers;
         for (int i = 0; i < humanPlayers.Count; i++)
         {
             FikaPlayer player = humanPlayers[i];
@@ -455,7 +199,7 @@ public class FreeCamera : MonoBehaviour
             _isSpectatingBots = true;
             if (FikaBackendUtils.IsServer)
             {
-                foreach (FikaPlayer player in coopHandler.Players.Values)
+                foreach (FikaPlayer player in _coopHandler.Players.Values)
                 {
                     if (player.IsAI && player.HealthController.IsAlive)
                     {
@@ -465,7 +209,7 @@ public class FreeCamera : MonoBehaviour
             }
             else
             {
-                foreach (FikaPlayer player in coopHandler.Players.Values)
+                foreach (FikaPlayer player in _coopHandler.Players.Values)
                 {
                     if (player.IsObservedAI && player.HealthController.IsAlive)
                     {
@@ -612,11 +356,11 @@ public class FreeCamera : MonoBehaviour
         {
             switch (_cameraState)
             {
-                case CameraState.FollowHeadcam:
-                    _cameraState = CameraState.Follow3rdPerson;
+                case ECameraState.FollowHeadcam:
+                    _cameraState = ECameraState.Follow3rdPerson;
                     break;
-                case CameraState.Follow3rdPerson:
-                    _cameraState = CameraState.FollowHeadcam;
+                case ECameraState.Follow3rdPerson:
+                    _cameraState = ECameraState.FollowHeadcam;
                     break;
             }
             SwitchSpectateMode();
@@ -674,7 +418,11 @@ public class FreeCamera : MonoBehaviour
         }
 
         bool fastMode = Input.GetKey(KeyCode.LeftShift);
-        if (Input.GetKeyDown(KeyCode.LeftControl)) _superFastMode = !_superFastMode;
+        if (Input.GetKeyDown(KeyCode.LeftControl))
+        {
+            _superFastMode = !_superFastMode;
+        }
+
         float movementSpeed = fastMode ? 20f : 2f;
         float deltaTime = Time.deltaTime;
 
@@ -741,14 +489,9 @@ public class FreeCamera : MonoBehaviour
         // Teleportation
         if (Input.GetKeyDown(KeyCode.T))
         {
-            if (!CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
-            {
-                return;
-            }
-
             FikaPlayer player = (FikaPlayer)Singleton<GameWorld>.Instance.MainPlayer;
 
-            if (player != null && !coopHandler.ExtractedPlayers.Contains(player.NetId) && player.HealthController.IsAlive)
+            if (player != null && !_coopHandler.ExtractedPlayers.Contains(player.NetId) && player.HealthController.IsAlive)
             {
                 player.Teleport(transform.position);
             }
@@ -862,7 +605,7 @@ public class FreeCamera : MonoBehaviour
         transform.localPosition = new Vector3(-0.1f, -0.07f, -0.17f);
         transform.localEulerAngles = new Vector3(260, 80, 0);
         _isFollowing = true;
-        _cameraState = CameraState.FollowHeadcam;
+        _cameraState = ECameraState.FollowHeadcam;
     }
 
     public void AttachToMap()
@@ -896,7 +639,7 @@ public class FreeCamera : MonoBehaviour
             transform.localEulerAngles = new Vector3(-115f, 125f, -30f);
         }
         _isFollowing = true;
-        _cameraState = CameraState.Follow3rdPerson;
+        _cameraState = ECameraState.Follow3rdPerson;
     }
 
     public void SetActive(bool active, bool extracted = false)
