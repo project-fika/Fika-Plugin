@@ -1,5 +1,5 @@
 ﻿using EFT;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using HarmonyLib;
 using System.Collections.Generic;
 using System.Reflection;
@@ -10,7 +10,7 @@ namespace Fika.Core.Main.Patches.PlayerPatches;
 /// <summary>
 /// This patch stops BSGs dogtag handling as it is poorly executed
 /// </summary>
-public class Player_OnDead_Patch : FikaPatch
+public class Player_OnDead_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

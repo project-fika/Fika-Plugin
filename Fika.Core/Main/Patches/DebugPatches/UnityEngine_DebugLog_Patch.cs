@@ -1,4 +1,4 @@
-﻿using Fika.Core.Patching;
+﻿using SPT.Reflection.Patching;
 using HarmonyLib;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -8,7 +8,7 @@ namespace Fika.Core.Main.Patches.DebugPatches;
 public static class TasksExtensions_HandleFinishedTask_Patches
 {
     [DebugPatch]
-    internal class TasksExtensions_HandleFinishedTask_Patch1 : FikaPatch
+    internal class TasksExtensions_HandleFinishedTask_Patch1 : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
@@ -28,7 +28,7 @@ public static class TasksExtensions_HandleFinishedTask_Patches
     }
 
     [DebugPatch]
-    internal class TasksExtensions_HandleFinishedTask_Patch2 : FikaPatch
+    internal class TasksExtensions_HandleFinishedTask_Patch2 : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {

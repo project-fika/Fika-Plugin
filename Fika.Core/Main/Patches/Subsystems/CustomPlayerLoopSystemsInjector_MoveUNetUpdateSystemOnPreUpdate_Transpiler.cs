@@ -1,5 +1,5 @@
 ﻿using CustomPlayerLoopSystem;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using HarmonyLib;
 using System.Collections.Generic;
 using System.Reflection;
@@ -10,7 +10,7 @@ namespace Fika.Core.Main.Patches.Subsystems;
 /// <summary>
 /// Prevents logic that is never used from being injected into the <see cref="UnityEngine.LowLevel.PlayerLoop"/>
 /// </summary>
-internal class CustomPlayerLoopSystemsInjector_MoveUNetUpdateSystemOnPreUpdate_Transpiler : FikaPatch
+internal class CustomPlayerLoopSystemsInjector_MoveUNetUpdateSystemOnPreUpdate_Transpiler : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

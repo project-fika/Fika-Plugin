@@ -1,6 +1,6 @@
 ﻿using EFT;
 using Fika.Core.Networking.Websocket;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using System.Reflection;
 
 namespace Fika.Core.UI.Patches;
@@ -8,7 +8,7 @@ namespace Fika.Core.UI.Patches;
 /// <summary>
 /// The intention of this patch is to enable FikaNotificationManager after NotificationManagerClass and the NotifierView are initialized.
 /// </summary>
-public class TarkovApplication_method_16_Patch : FikaPatch
+public class TarkovApplication_method_16_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

@@ -26,7 +26,6 @@ using Fika.Core.Networking.Models;
 using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
 using Fika.Core.Networking.Packets.World;
-using Fika.Core.Networking.Pooling;
 using Fika.Core.UI.Models;
 using HarmonyLib;
 using JsonType;
@@ -83,26 +82,6 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
     /// <summary>
     /// Creates a <see cref="CoopGame"/>
     /// </summary>
-    /// <param name="inputTree"></param>
-    /// <param name="profile"></param>
-    /// <param name="gameWorld"></param>
-    /// <param name="backendDateTime"></param>
-    /// <param name="insurance"></param>
-    /// <param name="gameUI"></param>
-    /// <param name="location"></param>
-    /// <param name="timeAndWeather"></param>
-    /// <param name="wavesSettings"></param>
-    /// <param name="dateTime"></param>
-    /// <param name="callback"></param>
-    /// <param name="fixedDeltaTime"></param>
-    /// <param name="updateQueue"></param>
-    /// <param name="backEndSession"></param>
-    /// <param name="sessionTime"></param>
-    /// <param name="metricsEvents"></param>
-    /// <param name="metricsCollector"></param>
-    /// <param name="localRaidSettings"></param>
-    /// <param name="raidSettings"></param>
-    /// <returns></returns>
     internal static CoopGame Create(IInputTree inputTree, Profile profile, GameWorld gameWorld, GameDateTime backendDateTime,
         InsuranceCompanyClass insurance, GameUI gameUI, LocationSettingsClass.Location location,
         TimeAndWeatherSettings timeAndWeather, WavesSettings wavesSettings, EDateTime dateTime,
@@ -209,11 +188,6 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         }
     }
 
-    /*public override void vmethod_0()
-    {
-        localGameLoggerClass = new(LoggerMode.None, dictionary_0, GameController.Bots);
-    }*/
-
     public override void SetMatchmakerStatus(string status, float? progress = null)
     {
         InvokeMatchingStatusChanged(status, progress);
@@ -228,28 +202,6 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         yield return GameController.CountdownScreen(Profile_0, ProfileId);
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="playerId"></param>
-    /// <param name="position"></param>
-    /// <param name="rotation"></param>
-    /// <param name="layerName"></param>
-    /// <param name="prefix"></param>
-    /// <param name="pointOfView"></param>
-    /// <param name="profile"></param>
-    /// <param name="aiControl"></param>
-    /// <param name="updateQueue"></param>
-    /// <param name="armsUpdateMode"></param>
-    /// <param name="bodyUpdateMode"></param>
-    /// <param name="characterControllerMode"></param>
-    /// <param name="getSensitivity"></param>
-    /// <param name="getAimingSensitivity"></param>
-    /// <param name="statisticsManager"></param>
-    /// <param name="questController"></param>
-    /// <param name="achievementsController"></param>
-    /// <returns></returns>
-    /// <exception cref="MissingComponentException"></exception>
     public override async Task<LocalPlayer> vmethod_3(GameWorld gameWorld, int playerId, Vector3 position, Quaternion rotation,
         string layerName, string prefix, EPointOfView pointOfView, Profile profile, bool aiControl,
         EUpdateQueue updateQueue, Player.EUpdateMode armsUpdateMode, Player.EUpdateMode bodyUpdateMode,
@@ -338,7 +290,6 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
     /// This creates a "custom" Back button so that we can back out if we get stuck
     /// </summary>
     /// <param name="myPlayer"></param>
-    /// <param name="fikaPlayer"></param>
     /// <param name="customButton"></param>
     /// <returns></returns>
     private GameObject CreateCancelButton(LocalPlayer myPlayer, GameObject customButton)
@@ -385,7 +336,6 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
     /// </summary>
     /// <param name="botsSettings"></param>
     /// <param name="backendUrl"></param>
-    /// <param name="runCallback"></param>
     /// <returns></returns>
     public async Task InitPlayer(BotControllerSettings botsSettings, string backendUrl)
     {
@@ -577,7 +527,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
             IEnumerable<Item> items = Profile_0.Inventory.GetPlayerItems(EPlayerItems.Equipment);
             if (items != null)
             {
-                Class1633 keyFinder = new()
+                Class1634 keyFinder = new()
                 {
                     accessKeys = Location_0.AccessKeys
                 };
@@ -1169,7 +1119,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         BTRSide_Patches.Passengers.Clear();
     }
 
-    private class ExitManager : Class1635
+    private class ExitManager : Class1636
     {
         public new CoopGame baseLocalGame_0;
 
@@ -1200,7 +1150,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
             baseLocalGame_0.gparam_0.Player.OnGameSessionEnd(exitStatus, baseLocalGame_0.PastTime, baseLocalGame_0.Location_0.Id, exitName);
             baseLocalGame_0.CleanUp();
 
-            Class1636 exitCallback = new()
+            Class1637 exitCallback = new()
             {
                 baseLocalGame_0 = baseLocalGame_0,
                 duration = EFTDateTimeClass.Now - baseLocalGame_0.dateTime_0,
@@ -1214,7 +1164,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
     /// <summary>
     /// Used to manage the stopping of the <see cref="CoopGame"/> gracefully when cancelling
     /// </summary>
-    private class CancelExitManager : Class1635
+    private class CancelExitManager : Class1636
     {
         public void ExitOverride()
         {

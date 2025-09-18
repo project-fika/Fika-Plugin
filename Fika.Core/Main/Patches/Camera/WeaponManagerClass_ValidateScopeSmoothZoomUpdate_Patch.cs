@@ -1,9 +1,9 @@
-﻿using Fika.Core.Patching;
+﻿using SPT.Reflection.Patching;
 using System.Reflection;
 
 namespace Fika.Core.Main.Patches.Camera;
 
-public class WeaponManagerClass_ValidateScopeSmoothZoomUpdate_Patch : FikaPatch
+public class WeaponManagerClass_ValidateScopeSmoothZoomUpdate_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

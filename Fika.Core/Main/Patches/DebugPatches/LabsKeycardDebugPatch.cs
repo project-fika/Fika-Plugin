@@ -1,4 +1,4 @@
-﻿using Fika.Core.Patching;
+﻿using SPT.Reflection.Patching;
 using HarmonyLib;
 using System.Collections.Generic;
 using System.Reflection;
@@ -10,7 +10,7 @@ namespace Fika.Core.Main.Patches.DebugPatches;
 /// Removes the need for a Lab Keycard on debug builds
 /// </summary>
 [DebugPatch]
-internal class LabsKeycardDebugPatch : FikaPatch
+internal class LabsKeycardDebugPatch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

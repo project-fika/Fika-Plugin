@@ -1,5 +1,5 @@
 ﻿using EFT.UI;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using System.Reflection;
 
 namespace Fika.Core.UI.Patches;
@@ -7,7 +7,7 @@ namespace Fika.Core.UI.Patches;
 /// <summary>
 /// By default the amount of players that have earned an achievement is not shown in if the session mode is <see cref="ESessionMode.Pve"/>, this patch forces it to be shown regardless of mode
 /// </summary>
-public class AchievementsScreen_Show_Patch : FikaPatch
+public class AchievementsScreen_Show_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

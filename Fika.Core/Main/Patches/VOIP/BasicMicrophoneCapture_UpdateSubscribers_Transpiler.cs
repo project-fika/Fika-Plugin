@@ -1,5 +1,5 @@
 ﻿using Dissonance.Audio.Capture;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using HarmonyLib;
 using System.Collections.Generic;
 using System.Reflection;
@@ -10,7 +10,7 @@ namespace Fika.Core.Main.Patches.VOIP;
 /// <summary>
 /// Used to temporarily mitigate a bug that causes log spam until the bug can be resolved
 /// </summary>
-public class BasicMicrophoneCapture_UpdateSubscribers_Transpiler : FikaPatch
+public class BasicMicrophoneCapture_UpdateSubscribers_Transpiler : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

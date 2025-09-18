@@ -1,4 +1,4 @@
-﻿using Fika.Core.Patching;
+﻿using SPT.Reflection.Patching;
 using Fika.Core.UI.Custom;
 using System.Reflection;
 using static EFT.UI.InventoryScreen;
@@ -6,7 +6,7 @@ using static Fika.Core.UI.FikaUIGlobals;
 
 namespace Fika.Core.UI.Patches.MainMenuUI;
 
-public class GClass3871_ShowAction_Patch : FikaPatch
+public class GClass3871_ShowAction_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

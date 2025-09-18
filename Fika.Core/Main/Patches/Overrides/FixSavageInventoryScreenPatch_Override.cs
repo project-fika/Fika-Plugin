@@ -1,7 +1,7 @@
 ﻿using EFT;
 using Fika.Core.Main.GameMode;
 using Fika.Core.Main.Utils;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using HarmonyLib;
 using SPT.Common.Http;
 using System.Linq;
@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace Fika.Core.Main.Patches.Overrides;
 
-public class GetProfileAtEndOfRaidPatch_Override : FikaPatch
+public class GetProfileAtEndOfRaidPatch_Override : ModulePatch
 {
     public static CompleteProfileDescriptorClass ProfileDescriptor { get; private set; }
 
@@ -28,7 +28,7 @@ public class GetProfileAtEndOfRaidPatch_Override : FikaPatch
 /// Get profile from other patch (GetProfileAtEndOfRaidPatch)
 /// if our profile is savage Create new Session.AllProfiles and pass in our own profile to allow us to use the ScavengerInventoryScreen
 /// </summary>
-public class FixSavageInventoryScreenPatch_Override : FikaPatch
+public class FixSavageInventoryScreenPatch_Override : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

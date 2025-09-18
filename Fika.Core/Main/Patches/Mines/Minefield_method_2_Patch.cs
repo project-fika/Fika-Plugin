@@ -7,7 +7,7 @@ using Fika.Core.Networking;
 using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.Player.Common;
 using Fika.Core.Networking.Packets.Player.Common.SubPackets;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -17,7 +17,7 @@ namespace Fika.Core.Main.Patches.Mines;
 /// <summary>
 /// This patch prevents a null exception when an <see cref="ObservedPlayer"/> is hit by a mine explosion
 /// </summary>
-internal class Minefield_method_2_Patch : FikaPatch
+internal class Minefield_method_2_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

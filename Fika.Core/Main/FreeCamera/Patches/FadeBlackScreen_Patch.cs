@@ -1,5 +1,5 @@
 ﻿using EFT.UI;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using System;
 using System.Reflection;
 using UnityEngine.UI;
@@ -7,7 +7,7 @@ using UnityEngine.UI;
 namespace Fika.Core.Main.FreeCamera.Patches;
 
 [IgnoreAutoPatch]
-internal class FadeBlackScreen_Patch : FikaPatch
+internal class FadeBlackScreen_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
@@ -23,7 +23,7 @@ internal class FadeBlackScreen_Patch : FikaPatch
 }
 
 [IgnoreAutoPatch]
-internal class StartBlackScreenShow_Patch : FikaPatch
+internal class StartBlackScreenShow_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
@@ -44,7 +44,7 @@ internal class StartBlackScreenShow_Patch : FikaPatch
 }
 
 [IgnoreAutoPatch]
-internal class SetBlackImageAlpha_Patch : FikaPatch
+internal class SetBlackImageAlpha_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

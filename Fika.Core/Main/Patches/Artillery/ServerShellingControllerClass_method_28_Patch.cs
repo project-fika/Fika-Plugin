@@ -1,9 +1,9 @@
-﻿using Fika.Core.Patching;
+﻿using SPT.Reflection.Patching;
 using System.Reflection;
 
 namespace Fika.Core.Main.Patches.Artillery;
 
-public class ServerShellingControllerClass_method_28_Patch : FikaPatch
+public class ServerShellingControllerClass_method_28_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

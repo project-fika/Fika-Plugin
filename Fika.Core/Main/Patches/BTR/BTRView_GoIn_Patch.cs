@@ -6,7 +6,7 @@ using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.World;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using HarmonyLib;
 using System;
 using System.Reflection;
@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace Fika.Core.Main.Patches.BTR;
 
-public class BTRView_GoIn_Patch : FikaPatch
+public class BTRView_GoIn_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

@@ -1,5 +1,5 @@
 ﻿using EFT.UI;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using HarmonyLib;
 using SPT.Common.Http;
 using SPT.Common.Utils;
@@ -11,7 +11,7 @@ namespace Fika.Core.UI.Patches;
 /// <summary>
 /// Originally developed by SPT team
 /// </summary>
-public class FikaVersionLabel_Patch : FikaPatch
+public class FikaVersionLabel_Patch : ModulePatch
 {
     private static string versionLabel;
     private static Traverse versionNumberTraverse;

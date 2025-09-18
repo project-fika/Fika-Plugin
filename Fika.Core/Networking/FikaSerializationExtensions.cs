@@ -225,8 +225,8 @@ public static class FikaSerializationExtensions
         enumerable[0].Item = item;
         Item[] array = [.. enumerable.Select(FikaGlobals.GetLootItemPositionItem)];
         ResourceKey[] resourceKeys = [.. array.OfType<GClass3248>().GetAllItemsFromCollections()
-            .Concat(array.Where(AirdropSynchronizableObject.Class2122.class2122_0.method_1))
-            .SelectMany(AirdropSynchronizableObject.Class2122.class2122_0.method_2)];
+            .Concat(array.Where(AirdropSynchronizableObject.Class2123.class2123_0.method_1))
+            .SelectMany(AirdropSynchronizableObject.Class2123.class2123_0.method_2)];
         Singleton<PoolManagerClass>.Instance.LoadBundlesAndCreatePools(PoolManagerClass.PoolsCategory.Raid, PoolManagerClass.AssemblyType.Online,
             resourceKeys, JobPriorityClass.Immediate).HandleExceptions();
 

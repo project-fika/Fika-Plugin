@@ -1,11 +1,11 @@
 ﻿using EFT;
 using EFT.InventoryLogic;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using System.Reflection;
 
 namespace Fika.Core.Main.Patches.PlayerPatches;
 
-class Player_HasMarkOfUnknown_Patch : FikaPatch
+class Player_HasMarkOfUnknown_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

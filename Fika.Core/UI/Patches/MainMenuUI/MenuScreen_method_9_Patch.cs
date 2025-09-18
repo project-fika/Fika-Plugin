@@ -1,11 +1,11 @@
 ﻿using EFT.UI;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using Fika.Core.UI.Custom;
 using System.Reflection;
 
 namespace Fika.Core.UI.Patches.MainMenuUI;
 
-public class MenuScreen_method_9_Patch : FikaPatch
+public class MenuScreen_method_9_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

@@ -39,7 +39,7 @@ public class ObservedStationaryState(MovementContext movementContext) : Stationa
 
     public void SetStationaryCallback(Player.AbstractHandsController arg1, Player.AbstractHandsController newContoller)
     {
-        Class1401 @class = new()
+        Class1402 @class = new()
         {
             StationaryStateClass = this
         };

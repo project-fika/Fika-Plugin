@@ -1,10 +1,10 @@
 ﻿using Fika.Core.Main.Utils;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using System.Reflection;
 
 namespace Fika.Core.Main.Patches;
 
-internal class GClass2287_method_0_Patch : FikaPatch
+internal class GClass2287_method_0_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

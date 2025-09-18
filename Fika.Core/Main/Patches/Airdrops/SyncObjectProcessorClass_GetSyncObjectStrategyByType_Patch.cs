@@ -1,11 +1,11 @@
 ﻿using EFT.SynchronizableObjects;
 using Fika.Core.Main.Utils;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using System.Reflection;
 
 namespace Fika.Core.Main.Patches.Airdrops;
 
-public class SyncObjectProcessorClass_GetSyncObjectStrategyByType_Patch : FikaPatch
+public class SyncObjectProcessorClass_GetSyncObjectStrategyByType_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

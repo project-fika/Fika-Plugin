@@ -1,5 +1,5 @@
 ﻿using EFT;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using HarmonyLib;
 using System.Collections.Generic;
 using System.Reflection;
@@ -9,7 +9,7 @@ namespace Fika.Core.Main.Patches.MovementContextPatches;
 /// <summary>
 /// Stops unnecessary static lookups to <see cref="BackendConfigAbstractClass.Config"/>
 /// </summary>
-internal class MovementContext_RestorePreviousYaw_Transpiler : FikaPatch
+internal class MovementContext_RestorePreviousYaw_Transpiler : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

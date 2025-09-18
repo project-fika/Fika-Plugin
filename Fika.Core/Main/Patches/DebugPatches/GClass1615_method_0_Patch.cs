@@ -1,4 +1,4 @@
-﻿using Fika.Core.Patching;
+﻿using SPT.Reflection.Patching;
 using System.Reflection;
 
 namespace Fika.Core.Main.Patches.DebugPatches;
@@ -7,7 +7,7 @@ namespace Fika.Core.Main.Patches.DebugPatches;
 /// Used to speed up debugging
 /// </summary>
 [DebugPatch]
-public class GClass1640_method_0_Patch : FikaPatch
+public class GClass1640_method_0_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

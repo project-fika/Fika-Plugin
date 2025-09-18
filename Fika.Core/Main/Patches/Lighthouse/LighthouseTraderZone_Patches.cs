@@ -3,7 +3,7 @@ using EFT.Interactive;
 using EFT.InventoryLogic;
 using Fika.Core.Main.Components;
 using Fika.Core.Main.Utils;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -12,7 +12,7 @@ namespace Fika.Core.Main.Patches.Lighthouse;
 
 public static class LighthouseTraderZone_Patches
 {
-    public class LighthouseTraderZone_AddPlayer_Patch : FikaPatch
+    public class LighthouseTraderZone_AddPlayer_Patch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
@@ -76,7 +76,7 @@ public static class LighthouseTraderZone_Patches
         }
     }
 
-    public class LighthouseTraderZone_RemovePlayer_Patch : FikaPatch
+    public class LighthouseTraderZone_RemovePlayer_Patch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
@@ -120,7 +120,7 @@ public static class LighthouseTraderZone_Patches
         }
     }
 
-    public class LighthouseTraderZone_Awake_Patch : FikaPatch
+    public class LighthouseTraderZone_Awake_Patch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {

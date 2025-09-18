@@ -2,7 +2,7 @@
 using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using RootMotion.FinalIK;
 using System.Reflection;
 
@@ -11,7 +11,7 @@ namespace Fika.Core.Main.Patches.PlayerPatches;
 /// <summary>
 /// Fixes a bug with BSG's <see cref="SpatialAudioSystem"/> causing and endless spam of nullrefs, reducing the framerate for every player
 /// </summary>
-public class Player_SpawnInHands_Patch : FikaPatch
+public class Player_SpawnInHands_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

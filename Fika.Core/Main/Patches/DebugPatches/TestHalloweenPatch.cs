@@ -1,11 +1,11 @@
 ﻿using EFT;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using System.Reflection;
 
 namespace Fika.Core.Main.Patches.DebugPatches;
 
 [DebugPatch]
-public class TestHalloweenPatch : FikaPatch
+public class TestHalloweenPatch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

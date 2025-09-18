@@ -1,11 +1,11 @@
 ﻿using EFT;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using System;
 using System.Reflection;
 
 namespace Fika.Core.Main.Patches;
 
-public class BotCacher_Patch : FikaPatch
+public class BotCacher_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

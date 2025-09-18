@@ -1,11 +1,11 @@
 ﻿using EFT;
 using Fika.Core.Main.Utils;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using System.Reflection;
 
 namespace Fika.Core.Main.Patches.LocalGame;
 
-internal class NonWaveSpawnScenario_Patch : FikaPatch
+internal class NonWaveSpawnScenario_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod() => typeof(NonWavesSpawnScenario).GetMethod(nameof(NonWavesSpawnScenario.Run));
 

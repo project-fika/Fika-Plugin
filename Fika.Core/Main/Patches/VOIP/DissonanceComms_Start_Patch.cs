@@ -1,11 +1,11 @@
 ﻿using Dissonance;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using HarmonyLib;
 using System.Reflection;
 
 namespace Fika.Core.Main.Patches.VOIP;
 
-public class DissonanceComms_Start_Patch : FikaPatch
+public class DissonanceComms_Start_Patch : ModulePatch
 {
     public static bool IsReady;
 

@@ -1,13 +1,13 @@
 ﻿using EFT;
 using EFT.Interactive;
 using Fika.Core.Main.Utils;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using System;
 using System.Reflection;
 
 namespace Fika.Core.Main.Patches.Lighthouse;
 
-public class BufferZoneControllerClass_method_1_Patch : FikaPatch
+public class BufferZoneControllerClass_method_1_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

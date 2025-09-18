@@ -1,7 +1,7 @@
 ﻿using EFT;
 using EFT.InventoryLogic;
 using EFT.UI.Matchmaker;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using System.Reflection;
 
 namespace Fika.Core.Main.Patches.Bugfixes;
@@ -11,7 +11,7 @@ namespace Fika.Core.Main.Patches.Bugfixes;
 /// Source code here: <see href="https://github.com/tyfon7/UIFixes/blob/main/src/Patches/FixPlayerInspectPatch.cs"/>
 /// </summary>
 [IgnoreAutoPatch]
-public class PartyInfoPanel_method_3_Patch : FikaPatch
+public class PartyInfoPanel_method_3_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

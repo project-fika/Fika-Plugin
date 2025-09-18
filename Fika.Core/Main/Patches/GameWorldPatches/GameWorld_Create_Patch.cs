@@ -2,13 +2,13 @@
 using Fika.Core.Main.ClientClasses;
 using Fika.Core.Main.HostClasses;
 using Fika.Core.Main.Utils;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using HarmonyLib;
 using System.Reflection;
 
 namespace Fika.Core.Main.Patches.GameWorldPatches;
 
-public class GameWorld_Create_Patch : FikaPatch
+public class GameWorld_Create_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

@@ -1,6 +1,6 @@
 ﻿using EFT;
 using EFT.Vehicle;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
@@ -12,7 +12,7 @@ public class BTRSide_Patches
 {
     public static List<ValueTuple<BTRSide, Player, int>> Passengers = [];
 
-    public class BTRSide_AddPassenger_Patch : FikaPatch
+    public class BTRSide_AddPassenger_Patch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
@@ -35,7 +35,7 @@ public class BTRSide_Patches
         }
     }
 
-    public class BTRSide_RemovePassenger_Patch : FikaPatch
+    public class BTRSide_RemovePassenger_Patch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
@@ -64,7 +64,7 @@ public class BTRSide_Patches
         }
     }
 
-    public class BTRSide_method_9_Patch : FikaPatch
+    public class BTRSide_method_9_Patch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {

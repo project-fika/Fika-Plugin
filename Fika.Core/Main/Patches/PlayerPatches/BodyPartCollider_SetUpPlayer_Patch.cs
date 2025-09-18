@@ -3,12 +3,12 @@ using Fika.Core.Main.BotClasses;
 using Fika.Core.Main.ObservedClasses.PlayerBridge;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using System.Reflection;
 
 namespace Fika.Core.Main.Patches.PlayerPatches;
 
-public class BodyPartCollider_SetUpPlayer_Patch : FikaPatch
+public class BodyPartCollider_SetUpPlayer_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

@@ -4,7 +4,7 @@ using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Models;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using Fika.Core.UI.Models;
 using System.Linq;
 using System.Reflection;
@@ -14,7 +14,7 @@ namespace Fika.Core.Main.Patches.LocalGame;
 /// <summary>
 /// Created by: Lacyway
 /// </summary>
-internal class TarkovApplication_LocalGamePreparer_Patch : FikaPatch
+internal class TarkovApplication_LocalGamePreparer_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

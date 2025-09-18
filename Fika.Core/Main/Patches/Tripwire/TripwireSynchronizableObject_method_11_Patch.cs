@@ -2,12 +2,12 @@
 using EFT.SynchronizableObjects;
 using Fika.Core.Main.HostClasses;
 using Fika.Core.Main.Utils;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using System.Reflection;
 
 namespace Fika.Core.Main.Patches.Tripwire;
 
-internal class TripwireSynchronizableObject_method_11_Patch : FikaPatch
+internal class TripwireSynchronizableObject_method_11_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

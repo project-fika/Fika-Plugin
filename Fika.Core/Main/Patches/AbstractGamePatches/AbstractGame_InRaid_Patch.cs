@@ -1,6 +1,6 @@
 ﻿using EFT;
 using Fika.Core.Main.GameMode;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using System.Reflection;
 
 namespace Fika.Core.Main.Patches.AbstractGamePatches;
@@ -8,7 +8,7 @@ namespace Fika.Core.Main.Patches.AbstractGamePatches;
 /// <summary>
 /// Used to support mods that rely on the <see cref="AbstractGame.InRaid"/> property, which normally casts to <see cref="LocalGame"/>
 /// </summary>
-internal class AbstractGame_InRaid_Patch : FikaPatch
+internal class AbstractGame_InRaid_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

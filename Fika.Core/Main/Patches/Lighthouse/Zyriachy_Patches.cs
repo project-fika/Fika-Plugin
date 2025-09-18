@@ -1,7 +1,7 @@
 ﻿using Comfort.Common;
 using EFT;
 using EFT.BufferZone;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using System.Reflection;
 
 namespace Fika.Core.Main.Patches.Lighthouse;
@@ -11,7 +11,7 @@ public static class Zyriachy_Patches
     /// <summary>
     /// Search for 'Zryachiy don't have controllable zone FIX it' string in assembly to find class
     /// </summary>
-    public class ZyriachyBossLogicClass_Activate_Patch : FikaPatch
+    public class ZyriachyBossLogicClass_Activate_Patch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {

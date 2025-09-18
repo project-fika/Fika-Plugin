@@ -1,11 +1,11 @@
 ﻿using EFT.UI;
 using Fika.Core.Main.Utils;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using System.Reflection;
 
 namespace Fika.Core.Main.FreeCamera.Patches;
 
-public class PlayEndGameSound_Patch : FikaPatch
+public class PlayEndGameSound_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

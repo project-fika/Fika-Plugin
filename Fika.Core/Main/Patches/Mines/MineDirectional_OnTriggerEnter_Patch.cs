@@ -1,10 +1,10 @@
 ﻿using Fika.Core.Main.Utils;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using System.Reflection;
 
 namespace Fika.Core.Main.Patches.Mines;
 
-public class MineDirectional_OnTriggerEnter_Patch : FikaPatch
+public class MineDirectional_OnTriggerEnter_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

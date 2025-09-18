@@ -1,11 +1,11 @@
 ﻿using EFT;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using Fika.Core.UI.Custom;
 using System.Reflection;
 
 namespace Fika.Core.UI.Patches.MainMenuUI;
 
-public class HideoutPlayerOwner_SetPointOfView_Patch : FikaPatch
+public class HideoutPlayerOwner_SetPointOfView_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

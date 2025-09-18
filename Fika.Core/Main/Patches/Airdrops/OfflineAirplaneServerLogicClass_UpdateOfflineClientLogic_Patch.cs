@@ -1,11 +1,11 @@
 ﻿using Comfort.Common;
 using Fika.Core.Main.HostClasses;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using System.Reflection;
 
 namespace Fika.Core.Main.Patches.Airdrops;
 
-public class OfflineAirplaneServerLogicClass_UpdateOfflineClientLogic_Patch : FikaPatch
+public class OfflineAirplaneServerLogicClass_UpdateOfflineClientLogic_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

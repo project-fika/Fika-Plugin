@@ -12,7 +12,6 @@ using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Models;
 using Fika.Core.Networking.Websocket;
-using Fika.Core.Patching;
 #if GOLDMASTER
 using Fika.Core.UI; 
 #endif
@@ -20,6 +19,7 @@ using Fika.Core.UI.Patches;
 using SPT.Common.Http;
 using SPT.Custom.Patches;
 using SPT.Custom.Utils;
+using SPT.Reflection.Patching;
 using SPT.SinglePlayer.Patches.MainMenu;
 using SPT.SinglePlayer.Patches.RaidFix;
 using SPT.SinglePlayer.Patches.ScavMode;
@@ -238,7 +238,7 @@ public class FikaPlugin : BaseUnityPlugin
         _patchManager = new(this, true);
 
         GetNatPunchServerConfig();
-        EnableFikaPatches();
+        EnableModulePatches();
         DisableSPTPatches();
         FixSPTBugPatches();
 
@@ -283,7 +283,7 @@ public class FikaPlugin : BaseUnityPlugin
         OfficialVersion.SettingChanged += OfficialVersion_SettingChanged;
     }
 
-    private void EnableFikaPatches()
+    private void EnableModulePatches()
     {
         _patchManager.EnablePatches();
     }

@@ -1,12 +1,12 @@
 ﻿using Comfort.Common;
 using EFT;
 using Fika.Core.Main.Utils;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using System.Reflection;
 
 namespace Fika.Core.Main.Patches.TransitController;
 
-public class TransitControllerAbstractClass_Exist_Patch : FikaPatch
+public class TransitControllerAbstractClass_Exist_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

@@ -1,12 +1,12 @@
 ﻿using EFT;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using System.Reflection;
 
 namespace Fika.Core.Main.Patches;
 
-public class TransitInteractionControllerAbstractClass_method_11_Patch : FikaPatch
+public class TransitInteractionControllerAbstractClass_method_11_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

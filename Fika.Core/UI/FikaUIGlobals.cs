@@ -56,7 +56,7 @@ public static class FikaUIGlobals
     {
         Traverse preloaderUiTraverse = Traverse.Create(preloaderUI);
 
-        PreloaderUI.Class2987 messageHandler = new()
+        PreloaderUI.Class2988 messageHandler = new()
         {
             preloaderUI_0 = preloaderUI
         };
@@ -81,7 +81,7 @@ public static class FikaUIGlobals
     {
         Traverse errorScreenTraverse = Traverse.Create(errorScreen);
 
-        ErrorScreen.Class2740 errorScreenHandler = new()
+        ErrorScreen.Class2741 errorScreenHandler = new()
         {
             errorScreen_0 = errorScreen
         };

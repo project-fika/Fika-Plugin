@@ -1,6 +1,6 @@
 ﻿using Comfort.Common;
 using Fika.Core.Main.GameMode;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using System.Reflection;
 
 namespace Fika.Core.Main.Patches;
@@ -8,7 +8,7 @@ namespace Fika.Core.Main.Patches;
 /// <summary>
 /// Used to help us keep track of thrown grenades during a session for kill progression
 /// </summary>
-public class GrenadeClass_Init_Patch : FikaPatch
+public class GrenadeClass_Init_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

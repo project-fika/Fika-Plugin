@@ -9,7 +9,7 @@ using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Models;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using Fika.Core.UI.Custom;
 using HarmonyLib;
 using JsonType;
@@ -25,7 +25,7 @@ namespace Fika.Core.Main.Patches.LocalGame;
 /// Created by: Paulov
 /// Paulov: Overwrite and use our own CoopGame instance instead
 /// </summary>
-public class TarkovApplication_LocalGameCreator_Patch : FikaPatch
+public class TarkovApplication_LocalGameCreator_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

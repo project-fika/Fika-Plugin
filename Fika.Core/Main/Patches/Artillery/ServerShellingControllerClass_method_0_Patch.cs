@@ -2,7 +2,7 @@
 using CommonAssets.Scripts.ArtilleryShelling;
 using EFT;
 using Fika.Core.Main.GameMode;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using System;
 using System.Linq;
 using System.Reflection;
@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Fika.Core.Main.Patches.Artillery;
 
-public class ServerShellingControllerClass_method_0_Patch : FikaPatch
+public class ServerShellingControllerClass_method_0_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

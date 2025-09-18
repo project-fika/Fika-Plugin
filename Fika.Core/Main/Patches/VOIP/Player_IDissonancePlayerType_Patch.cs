@@ -1,12 +1,12 @@
 ﻿using Dissonance;
 using EFT;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using HarmonyLib;
 using System.Reflection;
 
 namespace Fika.Core.Main.Patches.VOIP;
 
-class Player_IDissonancePlayerType_Patch : FikaPatch
+class Player_IDissonancePlayerType_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

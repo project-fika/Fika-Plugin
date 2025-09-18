@@ -1,13 +1,13 @@
 ﻿using Comfort.Common;
 using EFT;
 using Fika.Core.Networking;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using System.Collections.Generic;
 using System.Reflection;
 
 namespace Fika.Core.Main.Patches;
 
-public class GClass3585_ExceptAI_Patch : FikaPatch
+public class GClass3585_ExceptAI_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

@@ -5,9 +5,9 @@ using EFT.UI;
 using Fika.Core.Bundles;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Http;
-using Fika.Core.Patching;
 using Fika.Core.UI.Models;
 using HarmonyLib;
+using SPT.Reflection.Patching;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -17,9 +17,9 @@ using static Fika.Core.UI.FikaUIGlobals;
 namespace Fika.Core.UI.Patches;
 
 [IgnoreAutoPatch]
-public class ItemContext_Patch : FikaPatch
+public class ItemContext_Patch : ModulePatch
 {
-    private static int _lastIndex = 0;
+    private static int _lastIndex;
 
     protected override MethodBase GetTargetMethod()
     {

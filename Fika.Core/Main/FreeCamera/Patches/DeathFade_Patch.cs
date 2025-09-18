@@ -1,10 +1,10 @@
-﻿using Fika.Core.Patching;
+﻿using SPT.Reflection.Patching;
 using System;
 using System.Reflection;
 
 namespace Fika.Core.Main.FreeCamera.Patches;
 
-public class DeathFade_Patch : FikaPatch
+public class DeathFade_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

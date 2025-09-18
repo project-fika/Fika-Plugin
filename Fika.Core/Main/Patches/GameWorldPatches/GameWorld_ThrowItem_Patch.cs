@@ -2,13 +2,13 @@
 using EFT.Interactive;
 using Fika.Core.Main.Components;
 using Fika.Core.Main.Utils;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using System.Linq;
 using System.Reflection;
 
 namespace Fika.Core.Main.Patches.GameWorldPatches;
 
-public class GameWorld_ThrowItem_Patch : FikaPatch
+public class GameWorld_ThrowItem_Patch : ModulePatch
 {
     private static readonly FieldInfo _networkPhysics = typeof(ObservedLootItem)
         .GetField("bool_3", BindingFlags.Instance | BindingFlags.NonPublic);

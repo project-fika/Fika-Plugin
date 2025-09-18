@@ -132,7 +132,7 @@ public class ObservedInventoryController : Player.PlayerInventoryController, Int
 
     private void HandleInProcess(Item item, ItemAddress to, GInterface438 operation, Callback callback)
     {
-        Player.Class1349 handler = new()
+        Player.Class1350 handler = new()
         {
             player_0 = _fikaPlayer,
             callback = callback

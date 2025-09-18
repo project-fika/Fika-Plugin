@@ -1,5 +1,5 @@
 ﻿using EFT.CameraControl;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using HarmonyLib;
 using System.Collections.Generic;
 using System.Reflection;
@@ -10,7 +10,7 @@ namespace Fika.Core.Main.Patches.Camera;
 /// <summary>
 /// This patch removes the camera reset on the <see cref="PlayerCameraController.LateUpdate"/>
 /// </summary>
-public class PlayerCameraController_LateUpdate_Transpiler : FikaPatch
+public class PlayerCameraController_LateUpdate_Transpiler : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

@@ -1,12 +1,12 @@
 ﻿using Comfort.Common;
 using Fika.Core.Main.GameMode;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using System.Linq;
 using System.Reflection;
 
 namespace Fika.Core.Main.Patches.Artillery;
 
-public class ArtilleryServerProjectileClass_Constructor_Patch : FikaPatch
+public class ArtilleryServerProjectileClass_Constructor_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

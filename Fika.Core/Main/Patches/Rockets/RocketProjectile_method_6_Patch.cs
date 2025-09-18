@@ -1,6 +1,6 @@
 ﻿using EFT.RocketLauncher;
 using Fika.Core.Main.Utils;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using System.Reflection;
 
 namespace Fika.Core.Main.Patches.Rockets;
@@ -8,7 +8,7 @@ namespace Fika.Core.Main.Patches.Rockets;
 /// <summary>
 /// Do not run method unless server to avoid double damage
 /// </summary>
-public class RocketProjectile_method_6_Patch : FikaPatch
+public class RocketProjectile_method_6_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

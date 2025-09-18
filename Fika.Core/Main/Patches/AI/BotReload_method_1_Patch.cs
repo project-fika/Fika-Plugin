@@ -1,6 +1,6 @@
 ﻿using EFT;
 using EFT.InventoryLogic;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using System.Reflection;
 
 namespace Fika.Core.Main.Patches.AI;
@@ -8,7 +8,7 @@ namespace Fika.Core.Main.Patches.AI;
 /// <summary>
 /// This patch aims to alleviate problems with bots refilling mags too quickly causing a desync on <see cref="Item.Id"/>s by blocking firing for 0.7s
 /// </summary>
-public class BotReload_method_1_Patch : FikaPatch
+public class BotReload_method_1_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

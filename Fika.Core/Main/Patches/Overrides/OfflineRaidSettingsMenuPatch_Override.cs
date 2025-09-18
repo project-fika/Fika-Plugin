@@ -2,14 +2,14 @@
 using EFT.UI;
 using EFT.UI.Matchmaker;
 using Fika.Core.Main.Utils;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using HarmonyLib;
 using System.Collections.Generic;
 using System.Reflection;
 
 namespace Fika.Core.Main.Patches.Overrides;
 
-public class OfflineRaidSettingsMenuPatch_Override : FikaPatch
+public class OfflineRaidSettingsMenuPatch_Override : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

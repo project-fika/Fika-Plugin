@@ -1,6 +1,6 @@
 ﻿using EFT.UI;
 using EFT.UI.Settings;
-using Fika.Core.Patching;
+using SPT.Reflection.Patching;
 using Fika.Core.UI.Custom.FikaSettingsScreen;
 using HarmonyLib;
 using System.Collections;
@@ -10,7 +10,7 @@ using UnityEngine.UI;
 
 namespace Fika.Core.UI.Patches.SettingsUIScreen;
 
-internal class SettingsScreen_Awake_Patch : FikaPatch
+internal class SettingsScreen_Awake_Patch : ModulePatch
 {
     private static readonly FieldInfo _settingsTabField = typeof(SettingsScreen)
         .GetField("settingsTab_0", BindingFlags.Instance | BindingFlags.NonPublic);
