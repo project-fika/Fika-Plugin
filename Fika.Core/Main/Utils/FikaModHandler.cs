@@ -28,7 +28,7 @@ public class FikaModHandler
     public bool SAINLoaded;
     public bool UIFixesLoaded;
 
-    public Version SPTCoreVersion { get; private set; }
+    public Version SPTCoreVersion { get; }
 
     public FikaModHandler()
     {
@@ -68,7 +68,7 @@ public class FikaModHandler
         if (validationResult.Forbidden == null || validationResult.MissingRequired == null || validationResult.HashMismatch == null)
         {
             FikaPlugin.Instance.FikaLogger.LogError("FikaModHandler::VerifyMods: Response was invalid!");
-            MessageBoxHelper.Show($"Failed to verify mods with server.\nMake sure that the server mod is installed!", "FIKA ERROR", MessageBoxHelper.MessageBoxType.OK);
+            MessageBoxHelper.Show("Failed to verify mods with server.\nMake sure that the server mod is installed!", "FIKA ERROR", MessageBoxHelper.MessageBoxType.OK);
             AsyncWorker.RunInMainTread(Application.Quit);
             return;
         }
@@ -128,7 +128,7 @@ public class FikaModHandler
 
     private void ShowModErrorMessage()
     {
-        string message = "Your client doesn't meet server requirements, check logs for more details";
+        const string message = "Your client doesn't meet server requirements, check logs for more details";
 
         // -1f time makes the message permanent
         GClass3835 errorScreen = Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("INSTALLATION ERROR", message,

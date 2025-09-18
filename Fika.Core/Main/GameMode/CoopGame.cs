@@ -113,7 +113,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         coopGame.GameController.Location = location;
 
         float hearingDistance = FikaGlobals.VOIPHandler.PushToTalkSettings.HearingDistance;
-        coopGame._voipDistance = hearingDistance * hearingDistance + 9;
+        coopGame._voipDistance = (hearingDistance * hearingDistance) + 9;
 
         ClientHearingTable.Instance = coopGame;
 
@@ -463,7 +463,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         } while (Profile_0 == null);
 
         await Singleton<PoolManagerClass>.Instance.LoadBundlesAndCreatePools(PoolManagerClass.PoolsCategory.Raid, PoolManagerClass.AssemblyType.Local,
-            Profile_0.GetAllPrefabPaths(true).ToArray(), JobPriorityClass.General);
+            [.. Profile_0.GetAllPrefabPaths(true)], JobPriorityClass.General);
     }
 
     private async Task Reconnect()
@@ -573,7 +573,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
                     Profile_0, false, UpdateQueue, eupdateMode, Player.EUpdateMode.Auto,
                     BackendConfigAbstractClass.Config.CharacterController.ClientPlayerMode,
                     FikaGlobals.GetLocalPlayerSensitivity, FikaGlobals.GetLocalPlayerAimingSensitivity, statisticsManager,
-                    iSession, (localRaidSettings_0 != null) ? localRaidSettings_0.mode : ELocalMode.TRAINING);
+                    iSession, (localRaidSettings_0?.mode) ?? ELocalMode.TRAINING);
         }
         catch (Exception ex)
         {
@@ -997,9 +997,6 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
             }
         }
 
-        string exitName = null;
-        float delay = 0f;
-
         PlayerLeftRequest body = new(FikaBackendUtils.Profile.ProfileId);
         FikaRequestHandler.RaidLeave(body);
 
@@ -1028,6 +1025,10 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         {
             (GameController as HostGameController).StopBotsSystem(true);
         }
+
+
+        const string exitName = null;
+        const float delay = 0f;
 
         CancelExitManager stopManager = new()
         {
@@ -1072,9 +1073,8 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
     }
 
     /// <summary>
-    /// Tells the server that we have left the raid and 
+    /// Tells the server that we have left the raid
     /// </summary>
-    /// <returns></returns>
     public override MetricsClass vmethod_7()
     {
         if (!FikaBackendUtils.IsTransit)
@@ -1138,10 +1138,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
             if (!baseLocalGame_0._hasSaved)
             {
                 baseLocalGame_0.gparam_0.Player.TriggerZones.Clear();
-                foreach (string triggerZone in baseLocalGame_0.GameController.LocalTriggerZones)
-                {
-                    baseLocalGame_0.gparam_0.Player.TriggerZones.Add(triggerZone);
-                }
+                baseLocalGame_0.gparam_0.Player.TriggerZones.AddRange(baseLocalGame_0.GameController.LocalTriggerZones);
                 baseLocalGame_0.method_15(profileId, exitStatus, exitName, delay).HandleExceptions();
                 return;
             }

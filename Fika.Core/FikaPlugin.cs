@@ -246,7 +246,7 @@ public class FikaPlugin : BaseUnityPlugin
 
         string fikaVersion = Assembly.GetAssembly(typeof(FikaPlugin)).GetName().Version.ToString();
 
-        Logger.LogInfo($"Fika is loaded! Running version: " + fikaVersion);
+        Logger.LogInfo($"Fika is loaded! Running version: {fikaVersion}");
 
         BundleLoaderPlugin = new();
 
@@ -462,7 +462,7 @@ public class FikaPlugin : BaseUnityPlugin
         // Advanced
 
         string advancedHeader = LocaleUtils.BEPINEX_H_ADVANCED.Localized();
-        string advancedDefaultHeader = "Advanced";
+        const string advancedDefaultHeader = "Advanced";
 
         OfficialVersion = SetupSetting(advancedDefaultHeader, "Show Official Version", false,
                 new ConfigDescription(LocaleUtils.BEPINEX_OFFICIAL_VERSION_D.Localized(), tags: new ConfigurationManagerAttributes()
@@ -500,7 +500,7 @@ public class FikaPlugin : BaseUnityPlugin
         // Coop
 
         string coopHeader = CleanConfigString(LocaleUtils.BEPINEX_H_COOP.Localized());
-        string coopDefaultHeader = "Coop";
+        const string coopDefaultHeader = "Coop";
 
         UseHeadlessIfAvailable = SetupSetting(coopDefaultHeader, "Auto Use Headless", false,
             new ConfigDescription(LocaleUtils.BEPINEX_USE_HEADLESS_D.Localized(), tags: new ConfigurationManagerAttributes()
@@ -596,7 +596,7 @@ public class FikaPlugin : BaseUnityPlugin
         // Coop | Name Plates
 
         string coopNameplatesHeader = CleanConfigString(LocaleUtils.BEPINEX_H_COOP_NAME_PLATES.Localized());
-        string coopDefaultNamePlatesHeader = "Coop | Name Plates";
+        const string coopDefaultNamePlatesHeader = "Coop | Name Plates";
 
         UseNamePlates = SetupSetting(coopDefaultNamePlatesHeader, "Show Player Name Plates", true,
             new ConfigDescription(LocaleUtils.BEPINEX_USE_NAME_PLATES_D.Localized(), tags: new ConfigurationManagerAttributes()
@@ -760,7 +760,7 @@ public class FikaPlugin : BaseUnityPlugin
         // Coop | Quest Sharing
 
         string coopQuestSharingHeader = CleanConfigString(LocaleUtils.BEPINEX_H_COOP_QUEST_SHARING.Localized());
-        string coopDefaultQuestSharingHeader = "Coop | Quest Sharing";
+        const string coopDefaultQuestSharingHeader = "Coop | Quest Sharing";
         bool questSharingEnabled = SharedQuestProgression;
         string disabledMessage = LocaleUtils.UI_DISABLED_BY_HOST.Localized();
 
@@ -817,7 +817,7 @@ public class FikaPlugin : BaseUnityPlugin
         // Coop | Pinging
 
         string coopPingingHeader = CleanConfigString(LocaleUtils.BEPINEX_H_COOP_PINGING.Localized());
-        string coopDefaultPingingHeader = "Coop | Pinging";
+        const string coopDefaultPingingHeader = "Coop | Pinging";
 
         UsePingSystem = SetupSetting(coopDefaultPingingHeader, "Ping System", true,
             new ConfigDescription(LocaleUtils.BEPINEX_PING_SYSTEM_D.Localized(), tags: new ConfigurationManagerAttributes()
@@ -936,7 +936,7 @@ public class FikaPlugin : BaseUnityPlugin
         // Coop | Debug
 
         string coopDebugHeader = CleanConfigString(LocaleUtils.BEPINEX_H_COOP_DEBUG.Localized());
-        string coopDefaultDebugHeader = "Coop | Debug";
+        const string coopDefaultDebugHeader = "Coop | Debug";
 
         FreeCamButton = SetupSetting(coopDefaultDebugHeader, "Free Camera Button", new KeyboardShortcut(KeyCode.F9),
             new ConfigDescription(CleanConfigString(LocaleUtils.BEPINEX_FREE_CAM_BUTTON_D.Localized()), tags: new ConfigurationManagerAttributes()
@@ -986,7 +986,7 @@ public class FikaPlugin : BaseUnityPlugin
         // Performance
 
         string performanceHeader = CleanConfigString(LocaleUtils.BEPINEX_H_PERFORMANCE.Localized());
-        string performanceDefaultHeader = "Performance";
+        const string performanceDefaultHeader = "Performance";
 
         DynamicAI = SetupSetting(performanceDefaultHeader, "Dynamic AI", false,
             new ConfigDescription(LocaleUtils.BEPINEX_DYNAMIC_AI_T.Localized(), tags: new ConfigurationManagerAttributes()
@@ -1037,7 +1037,7 @@ public class FikaPlugin : BaseUnityPlugin
         // Performance | Max Bots
 
         string performanceBotsHeader = CleanConfigString(LocaleUtils.BEPINEX_H_PERFORMANCE_BOTS.Localized());
-        string performanceDefaultBotsHeader = "Performance | Max Bots";
+        const string performanceDefaultBotsHeader = "Performance | Max Bots";
 
         EnforcedSpawnLimits = SetupSetting(performanceDefaultBotsHeader, "Enforced Spawn Limits", false,
             new ConfigDescription(LocaleUtils.BEPINEX_ENFORCED_SPAWN_LIMITS_D.Localized(), tags: new ConfigurationManagerAttributes()
@@ -1078,7 +1078,7 @@ public class FikaPlugin : BaseUnityPlugin
             "Despawn Minimum Distance", ref failed, headers);
 
         string maxBotsHeader = CleanConfigString(LocaleUtils.BEPINEX_MAX_BOTS_T.Localized());
-        string maxDefaultBotsHeader = "Max Bots {0}";
+        const string maxDefaultBotsHeader = "Max Bots {0}";
         string maxBotsDescription = LocaleUtils.BEPINEX_MAX_BOTS_D.Localized();
 
         string factory = "factory4_day".Localized();
@@ -1194,7 +1194,7 @@ public class FikaPlugin : BaseUnityPlugin
         // Network
 
         string networkHeader = CleanConfigString(LocaleUtils.BEPINEX_H_NETWORK.Localized());
-        string networkDefaultHeader = "Network";
+        const string networkDefaultHeader = "Network";
 
         ForceIP = SetupSetting(networkDefaultHeader, "Force IP", "",
             new ConfigDescription(LocaleUtils.BEPINEX_FORCE_IP_D.Localized(), tags: new ConfigurationManagerAttributes()

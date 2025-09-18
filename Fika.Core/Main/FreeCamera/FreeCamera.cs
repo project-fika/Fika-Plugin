@@ -13,13 +13,14 @@ using System.Collections.Generic;
 namespace Fika.Core.Main.FreeCamera;
 
 /// <summary>
-/// A simple free camera to be added to a Unity game object. <br/><br/>
-/// 
-/// Full credit to Ashley Davis on GitHub for the inital code:<br/>
-/// <see href="https://gist.github.com/ashleydavis/f025c03a9221bc840a2b"/><br/><br/>
-/// 
+/// <para>A simple free camera to be added to a Unity game object.</para>
+/// <para>
+/// Full credit to Ashley Davis on GitHub for the inital code: <br/>
+/// <see href="https://gist.github.com/ashleydavis/f025c03a9221bc840a2b"/></para>
+/// <para>
 /// This is HEAVILY based on Terkoiz's work found here. Thanks for your work Terkoiz! <br/>
 /// <see href="https://dev.sp-tarkov.com/Terkoiz/Freecam/raw/branch/master/project/Terkoiz.Freecam/FreecamController.cs"/>
+/// </para>
 /// </summary>
 public partial class FreeCamera : MonoBehaviour
 {
@@ -222,7 +223,7 @@ public partial class FreeCamera : MonoBehaviour
         FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: There are {players.Count} players");
 #endif
 
-        if (players.Count <= 0)
+        if (players.Count == 0)
         {
             // Clear out all spectate positions
             DetachCamera();
@@ -284,7 +285,7 @@ public partial class FreeCamera : MonoBehaviour
 #if DEBUG
                 FikaPlugin.Instance.FikaLogger.LogInfo("Freecam: Looping back to end player");
 #endif
-                _currentPlayer = players[players.Count - 1];
+                _currentPlayer = players[^1];
             }
         }
         SwitchSpectateMode();
@@ -610,13 +611,12 @@ public partial class FreeCamera : MonoBehaviour
 
     public void AttachToMap()
     {
-        if (_lastKnownPlayerPosition != null)
+        if (_lastKnownPlayerPosition != default)
         {
 #if DEBUG
             FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: Attaching to last tracked player position {_lastKnownPlayerPosition}");
 #endif
             transform.position = _lastKnownPlayerPosition;
-            return;
         }
     }
 
@@ -731,7 +731,7 @@ public partial class FreeCamera : MonoBehaviour
     {
         // set camera position and rotation based on target
         transform.rotation = target.rotation;
-        transform.position = target.position - target.forward * 1f + target.up * 0.1f;
+        transform.position = target.position - (target.forward * 1f) + (target.up * 0.1f);
 
         // extract pitch and yaw from current camera rotation
         Vector3 euler = transform.eulerAngles;

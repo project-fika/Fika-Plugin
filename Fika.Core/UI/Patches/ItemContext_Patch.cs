@@ -70,12 +70,8 @@ public class ItemContext_Patch : ModulePatch
             }
 
             // Check for GClass increments
-            Dictionary<string, DynamicInteractionClass> dynamicInteractions = contextInteractions.Dictionary_0;
-            if (dynamicInteractions == null)
-            {
-                dynamicInteractions = [];
-            }
-
+            Dictionary<string, DynamicInteractionClass> dynamicInteractions = contextInteractions.Dictionary_0
+                ?? [];
             dynamicInteractions["SEND"] = new("SEND", "SEND", () =>
             {
                 foreach (string itemId in FikaPlugin.Instance.BlacklistedItems)
@@ -128,7 +124,7 @@ public class ItemContext_Patch : ModulePatch
                 GameObject uiGameObj = Object.Instantiate(matchMakerUiPrefab);
                 uiGameObj.transform.SetParent(GameObject.Find("Preloader UI/Preloader UI/UIContext/").transform);
                 InventoryScreen.GClass3871 screenController = Traverse.Create(CommonUI.Instance.InventoryScreen).Field<InventoryScreen.GClass3871>("ScreenController").Value;
-                screenController.OnClose += () => { Object.Destroy(uiGameObj); };
+                screenController.OnClose += () => Object.Destroy(uiGameObj);
                 SendItemUI sendItemUI = uiGameObj.GetComponent<SendItemUI>();
                 sendItemUI.PlayersDropdown.ClearOptions();
                 sendItemUI.PlayersDropdown.AddOptions(optionDatas);
@@ -138,20 +134,9 @@ public class ItemContext_Patch : ModulePatch
                     sendItemUI.PlayersDropdown.value = _lastIndex;
                 }
 
-                sendItemUI.PlayersDropdown.onValueChanged.AddListener((value) =>
-                {
-                    Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuDropdownSelect);
-                });
-
-                sendItemUI.CloseButton.onClick.AddListener(() =>
-                {
-                    Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
-                });
-
-                sendItemUI.CloseButton.onClick.AddListener(() =>
-                {
-                    Object.Destroy(uiGameObj);
-                });
+                sendItemUI.PlayersDropdown.onValueChanged.AddListener((_) => Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuDropdownSelect));
+                sendItemUI.CloseButton.onClick.AddListener(() => Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick));
+                sendItemUI.CloseButton.onClick.AddListener(() => Object.Destroy(uiGameObj));
 
                 sendItemUI.SendButton.onClick.AddListener(() =>
                 {

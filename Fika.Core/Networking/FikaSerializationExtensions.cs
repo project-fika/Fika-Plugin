@@ -546,7 +546,7 @@ public static class FikaSerializationExtensions
         writer.WriteValueInfo(health.Hydration);
         writer.WriteValueInfo(health.Temperature);
         writer.WriteValueInfo(health.Poison);
-        float standard = 1f;
+        const float standard = 1f;
         // Heal Rate
         writer.Write(standard);
         // Damage Rate
@@ -573,9 +573,9 @@ public static class FikaSerializationExtensions
         }
 
         // Effect Amount - Set to 0 as it's a fresh profile
-        short effectAmount = 0;
+        const short effectAmount = 0;
         writer.Write(effectAmount);
-        byte end = 42;
+        const byte end = 42;
         writer.Write(end);
 
         return stream.ToArray();
