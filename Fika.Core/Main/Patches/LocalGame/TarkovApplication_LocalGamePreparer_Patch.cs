@@ -4,8 +4,8 @@ using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Models;
-using SPT.Reflection.Patching;
 using Fika.Core.UI.Models;
+using SPT.Reflection.Patching;
 using System.Linq;
 using System.Reflection;
 

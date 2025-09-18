@@ -28,6 +28,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace Fika.Core.Networking;
+
 public partial class FikaClient
 {
     private void OnStashesPacketReceived(StashesPacket packet)
@@ -44,7 +45,7 @@ public partial class FikaClient
                 if (gameWorld.BtrController != null)
                 {
                     for (int i = 0; i < packet.BTRStashes.Length; i++)
-                    {                        
+                    {
                         gameWorld.BtrController.TransferItemsController.InitTransferContainer(packet.BTRStashes[i], "BTR");
                         StashGridClass[] array = new StashGridClass[gameWorld.BtrController.TransferItemsController.Stash.Grids.Length + 1];
                         gameWorld.BtrController.TransferItemsController.Stash.Grids.CopyTo(array, 0);
@@ -65,7 +66,7 @@ public partial class FikaClient
                 if (gameWorld.TransitController != null)
                 {
                     for (int i = 0; i < packet.TransitStashes.Length; i++)
-                    {                        
+                    {
                         gameWorld.TransitController.TransferItemsController.InitTransferContainer(packet.TransitStashes[i], "BTR");
                         StashGridClass[] array = new StashGridClass[gameWorld.TransitController.TransferItemsController.Stash.Grids.Length + 1];
                         gameWorld.TransitController.TransferItemsController.Stash.Grids.CopyTo(array, 0);

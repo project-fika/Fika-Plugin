@@ -21,7 +21,7 @@ using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.Backend;
 using Fika.Core.Networking.Packets.Communication;
 #if DEBUG
-using Fika.Core.Networking.Packets.Debug; 
+using Fika.Core.Networking.Packets.Debug;
 #endif
 using Fika.Core.Networking.Packets.FirearmController;
 using Fika.Core.Networking.Packets.Generic;
@@ -278,7 +278,7 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
         RegisterNetReusable<WeaponPacket>(OnWeaponPacketReceived);
         RegisterNetReusable<CommonPlayerPacket>(OnCommonPlayerPacketReceived);
         RegisterNetReusable<GenericPacket>(OnGenericPacketReceived);
-    }    
+    }
 
 #if DEBUG
     private void AddDebugPackets()
@@ -515,7 +515,7 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
             case EPacketType.VOIP:
                 if (VOIPClient != null)
                 {
-                    VOIPClient.NetworkReceivedPacket(reader.GetRemainingBytesSegment()); 
+                    VOIPClient.NetworkReceivedPacket(reader.GetRemainingBytesSegment());
                 }
                 break;
         }

@@ -1,7 +1,5 @@
-﻿using EFT.UI;
-using Fika.Core.Main.Utils;
+﻿using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Pooling;
-using System.Collections.Generic;
 
 namespace Fika.Core.Networking.Packets.Backend;
 
@@ -30,7 +28,7 @@ public struct StashesPacket : INetSerializable
                 InventoryDescriptorClass descriptor = eftReader.ReadEFTItemDescriptor();
                 BTRStashes[i] = descriptor.Deserialize<StashItemClass>();
             }
-            
+
         }
 
         HasTransit = reader.GetBool();

@@ -2,6 +2,7 @@
 using System.Runtime.CompilerServices;
 
 namespace Fika.Core.Networking.Pooling;
+
 public static class WriterPoolManager
 {
     static WriterPoolManager()

@@ -1,6 +1,6 @@
 ﻿using EFT;
-using SPT.Reflection.Patching;
 using HarmonyLib;
+using SPT.Reflection.Patching;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;

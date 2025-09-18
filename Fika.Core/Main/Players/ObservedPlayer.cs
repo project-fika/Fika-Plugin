@@ -20,7 +20,6 @@ using Fika.Core.Main.ObservedClasses.Snapshotting;
 using Fika.Core.Main.PacketHandlers;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
-using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.Communication;
 using Fika.Core.Networking.Packets.Player.Common;
 using Fika.Core.Networking.Packets.Player.Common.SubPackets;
@@ -309,14 +308,14 @@ public class ObservedPlayer : FikaPlayer
             WaitForSeconds waitForSeconds = new(1);
             while (VoipAudioSource == null)
             {
-                FikaGlobals.LogInfo($"VoipAudioSource is null, waiting 1 second... [{attempts/5}]");
+                FikaGlobals.LogInfo($"VoipAudioSource is null, waiting 1 second... [{attempts / 5}]");
                 if (attempts++ > 5)
                 {
                     FikaGlobals.LogError("VoipAudioSource was null after 5 attempts! Cancelling.");
                     yield break;
                 }
                 yield return waitForSeconds;
-            } 
+            }
         }
 
         VoipEftSource = MonoBehaviourSingleton<BetterAudio>.Instance.CreateBetterSource<SimpleSource>(

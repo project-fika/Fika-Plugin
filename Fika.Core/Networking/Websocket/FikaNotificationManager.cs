@@ -8,7 +8,7 @@ using Newtonsoft.Json.Linq;
 using SPT.Common.Http;
 using System;
 #if DEBUG
-using System.Linq; 
+using System.Linq;
 #endif
 using System.Threading.Tasks;
 using WebSocketSharp;

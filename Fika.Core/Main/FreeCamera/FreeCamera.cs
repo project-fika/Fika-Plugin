@@ -1,7 +1,6 @@
 ﻿using BSG.CameraEffects;
 using Comfort.Common;
 using EFT;
-using EFT.HealthSystem;
 using EFT.UI;
 using Fika.Core.Bundles;
 using Fika.Core.Main.Components;

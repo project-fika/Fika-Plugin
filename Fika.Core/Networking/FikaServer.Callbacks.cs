@@ -635,7 +635,7 @@ public partial class FikaServer
 #if DEBUG
                     if (result.Succeeded)
                     {
-                        ConsoleScreen.Log($"Received InvOperation: {result.Value.GetType().Name}, Id: {result.Value.Id}"); 
+                        ConsoleScreen.Log($"Received InvOperation: {result.Value.GetType().Name}, Id: {result.Value.Id}");
                     }
 #endif
 

@@ -12,7 +12,6 @@ using Fika.Core.Main.ObservedClasses;
 using Fika.Core.Main.PacketHandlers;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
-using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.Communication;
 using Fika.Core.Networking.Packets.Player.Common;
 using Fika.Core.Networking.Packets.Player.Common.SubPackets;
@@ -73,7 +72,7 @@ public class FikaBot : FikaPlayer
 
         await player.Init(rotation, layerName, pointOfView, profile, inventoryController,
             new BotHealthController(profile.Health, player, inventoryController, profile.Skills, aiControl),
-            new ObservedStatisticsManager(), null, null, null, null,  filter,
+            new ObservedStatisticsManager(), null, null, null, null, filter,
             EVoipState.NotAvailable, aiControl, false);
 
         player.Pedometer.Stop();

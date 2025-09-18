@@ -1,5 +1,5 @@
 ﻿#if DEBUG
-using Fika.Core.Main.Utils; 
+using Fika.Core.Main.Utils;
 #endif
 using System;
 using System.Collections.Generic;

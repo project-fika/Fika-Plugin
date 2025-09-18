@@ -2,8 +2,8 @@
 using Fika.Core.Main.ClientClasses;
 using Fika.Core.Main.HostClasses;
 using Fika.Core.Main.Utils;
-using SPT.Reflection.Patching;
 using HarmonyLib;
+using SPT.Reflection.Patching;
 using System.Reflection;
 
 namespace Fika.Core.Main.Patches.GameWorldPatches;

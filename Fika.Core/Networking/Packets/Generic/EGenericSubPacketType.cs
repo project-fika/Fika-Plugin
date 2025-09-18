@@ -79,7 +79,7 @@ public enum EGenericSubPacketType : byte
     /// Callback status for operation
     /// </summary>
     OperationCallback,
-    
+
     /// <summary>
     /// Pinging
     /// </summary>

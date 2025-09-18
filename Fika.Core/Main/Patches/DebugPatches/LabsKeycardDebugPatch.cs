@@ -1,5 +1,5 @@
-﻿using SPT.Reflection.Patching;
-using HarmonyLib;
+﻿using HarmonyLib;
+using SPT.Reflection.Patching;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;

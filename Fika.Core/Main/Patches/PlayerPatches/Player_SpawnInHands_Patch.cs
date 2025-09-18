@@ -2,8 +2,8 @@
 using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
-using SPT.Reflection.Patching;
 using RootMotion.FinalIK;
+using SPT.Reflection.Patching;
 using System.Reflection;
 
 namespace Fika.Core.Main.Patches.PlayerPatches;

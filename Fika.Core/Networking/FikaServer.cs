@@ -962,7 +962,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
                 if (VOIPServer != null)
                 {
                     VOIPServer.NetworkReceivedPacket(new(new RemotePeer(peer)),
-                                reader.GetRemainingBytesSegment()); 
+                                reader.GetRemainingBytesSegment());
                 }
                 break;
         }

@@ -1,5 +1,5 @@
-﻿using SPT.Reflection.Patching;
-using Fika.Core.UI.Custom;
+﻿using Fika.Core.UI.Custom;
+using SPT.Reflection.Patching;
 using System.Reflection;
 using static EFT.UI.InventoryScreen;
 using static Fika.Core.UI.FikaUIGlobals;

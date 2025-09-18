@@ -64,7 +64,7 @@ public class DamagePacket : IPoolSubPacket
 
         if (!string.IsNullOrEmpty(damageInfo.SourceId))
         {
-            packet.SourceId = damageInfo.SourceId; 
+            packet.SourceId = damageInfo.SourceId;
         }
 
         return packet;

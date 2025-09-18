@@ -1,7 +1,7 @@
 ﻿using EFT;
 using EFT.Vehicle;
-using SPT.Reflection.Patching;
 using HarmonyLib;
+using SPT.Reflection.Patching;
 using System;
 using System.Collections.Generic;
 using System.Reflection;

@@ -1,5 +1,4 @@
 using EFT;
-using Fika.Core.Networking.Websocket.Notifications;
 using System.Runtime.Serialization;
 
 namespace Fika.Core.Networking.Models;

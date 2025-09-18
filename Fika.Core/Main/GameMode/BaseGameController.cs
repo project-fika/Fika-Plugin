@@ -3,7 +3,6 @@ using BepInEx.Logging;
 using Comfort.Common;
 using CommonAssets.Scripts.Audio.RadioSystem;
 using Dissonance;
-using Diz.Utils;
 using EFT;
 using EFT.Bots;
 using EFT.Game.Spawning;
@@ -22,12 +21,10 @@ using Fika.Core.Main.Utils;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking;
-using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.Backend;
 using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
 using Fika.Core.Networking.Packets.World;
-using Fika.Core.Networking.Pooling;
 using HarmonyLib;
 using System;
 using System.Collections;
@@ -380,7 +377,7 @@ public abstract class BaseGameController
         if (Singleton<IFikaNetworkManager>.Instance.AllowVOIP && !FikaBackendUtils.IsHeadless)
         {
             _abstractGame.StartCoroutine(FixVOIPAudioDevice());
-        }        
+        }
 
         if (FikaPlugin.UseFikaGC.Value)
         {

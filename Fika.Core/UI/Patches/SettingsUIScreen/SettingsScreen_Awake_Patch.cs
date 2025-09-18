@@ -1,8 +1,8 @@
 ﻿using EFT.UI;
 using EFT.UI.Settings;
-using SPT.Reflection.Patching;
 using Fika.Core.UI.Custom.FikaSettingsScreen;
 using HarmonyLib;
+using SPT.Reflection.Patching;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
