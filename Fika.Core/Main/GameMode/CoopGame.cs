@@ -788,8 +788,8 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         {
             if (myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem != null)
             {
-                GStruct154<GClass3410> result = InteractionsHandlerClass.Remove(myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem,
-                    myPlayer.InventoryController, false);
+                GStruct154<GClass3410> result = InteractionsHandlerClass.Remove(myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag)
+                    .ContainedItem, myPlayer.InventoryController, false);
                 if (result.Error != null)
                 {
                     _logger.LogError("Stop: Error removing dog tag!");
@@ -802,12 +802,9 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
             exitStatus = ExitStatus.Killed;
         }
 
-        if (!ExtractedPlayers.Contains(myPlayer.NetId))
+        if (!ExtractedPlayers.Contains(myPlayer.NetId) && GameTimer.SessionTime != null && GameTimer.PastTime >= GameTimer.SessionTime)
         {
-            if (GameTimer.SessionTime != null && GameTimer.PastTime >= GameTimer.SessionTime)
-            {
-                exitStatus = ExitStatus.MissingInAction;
-            }
+            exitStatus = ExitStatus.MissingInAction;
         }
 
         if (GameController.IsServer)
@@ -818,16 +815,23 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         if (GameController.CoopHandler != null)
         {
             // Create a copy to prevent errors when the dictionary is being modified (which happens when using spawn mods)
-            FikaPlayer[] players = [.. GameController.CoopHandler.Players.Values];
-            foreach (FikaPlayer player in players)
+            foreach (FikaPlayer player in (FikaPlayer[])[.. GameController.CoopHandler.Players.Values])
             {
                 if (player == null || player.IsYourPlayer)
                 {
                     continue;
                 }
 
-                player.Dispose();
-                AssetPoolObject.ReturnToPool(player.gameObject, true);
+                try
+                {
+                    player.Dispose();
+                    AssetPoolObject.ReturnToPool(player.gameObject, true);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"There was an error disposing of player [{player.Profile.GetCorrectedNickname()}]: {ex}");
+                    throw;
+                }
             }
         }
         else
