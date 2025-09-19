@@ -24,9 +24,9 @@ public class FikaHealthBar : MonoBehaviour
     /// <summary>
     /// Check for GClass increments, can be checked in <see cref="StaticIcons.EffectSprites"/> method <see cref="ISerializationCallbackReceiver.OnAfterDeserialize"/> <br/><br/>
     /// <see cref="ActiveHealthController.Wound"/>, <see cref="ActiveHealthController.Encumbered"/>, <see cref="ActiveHealthController.OverEncumbered"/>, <br/>
-    /// <see cref="ActiveHealthController-MildMusclePlain"/>, <see cref="ActiveHealthController.SevereMusclePain"/>
+    /// <see cref="ActiveHealthController.MildMusclePain"/>, <see cref="ActiveHealthController.SevereMusclePain"/>
     /// </summary>
-    private static readonly List<Type> _ignoredTypes = [typeof(GInterface345), typeof(GInterface347), typeof(GInterface348), typeof(GInterface362), typeof(GInterface363)];
+    private static readonly List<Type> _ignoredTypes = [typeof(GInterface362), typeof(GInterface364), typeof(GInterface365), typeof(GInterface379), typeof(GInterface380)];
 
     private ObservedPlayer _currentPlayer;
     private FikaPlayer _mainPlayer;
