@@ -10,6 +10,7 @@ using UnityEngine.UI;
 
 namespace Fika.Core.UI.Patches.SettingsUIScreen;
 
+[DebugPatch]
 internal class SettingsScreen_Awake_Patch : ModulePatch
 {
     private static readonly FieldInfo _settingsTabField = typeof(SettingsScreen)
