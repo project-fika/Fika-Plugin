@@ -749,10 +749,6 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
     /// <summary>
     /// Stops the local <see cref="CoopGame"/>
     /// </summary>
-    /// <param name="profileId"></param>
-    /// <param name="exitStatus"></param>
-    /// <param name="exitName"></param>
-    /// <param name="delay"></param>
     public override void Stop(string profileId, ExitStatus exitStatus, string exitName, float delay = 0f)
     {
         FikaEventDispatcher.DispatchEvent(new FikaGameEndedEvent(GameController.IsServer, exitStatus, exitName));
@@ -874,11 +870,6 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
     /// <summary>
     /// Saves your own <see cref="FikaPlayer"/> to the server
     /// </summary>
-    /// <param name="player"></param>
-    /// <param name="exitStatus"></param>
-    /// <param name="exitName"></param>
-    /// <param name="fromDeath"></param>
-    /// <returns></returns>
     private async Task SavePlayer(FikaPlayer player, ExitStatus exitStatus, string exitName, bool fromDeath)
     {
         if (_hasSaved)
@@ -921,6 +912,13 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         _hasSaved = true;
     }
 
+    /// <summary>
+    /// Retrieves the sent item containers associated with the specified profile from the player's own stash and transit
+    /// stash, if available.
+    /// </summary>
+    /// <param name="profileId">The profile id to get the items from.</param>
+    /// <returns>A dictionary mapping stash names to arrays of flat item data for each matching sent item container. The
+    /// dictionary is empty if no matching containers are found.</returns>
     public Dictionary<string, FlatItemsDataClass[]> GetOwnSentItems(string profileId)
     {
         GameWorld instance = Singleton<GameWorld>.Instance;
@@ -974,8 +972,6 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
     /// <summary>
     /// Stops the local <see cref="CoopGame"/> when waiting for other players
     /// </summary>
-    /// <param name="profileId"></param>
-    /// <param name="exitStatus"></param>
     public void StopFromCancel(string profileId, ExitStatus exitStatus)
     {
         if (exitStatus < ExitStatus.Transit)
@@ -1070,7 +1066,6 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
     /// <summary>
     /// Toggles the <see cref="FikaDebug"/> menu
     /// </summary>
-    /// <param name="enabled"></param>
     public void ToggleDebug(bool enabled)
     {
         GameController.ToggleDebug(enabled);
