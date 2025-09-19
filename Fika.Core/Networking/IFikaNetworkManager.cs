@@ -50,7 +50,6 @@ public interface IFikaNetworkManager
     /// Sends a packet of data directly to a specific peer
     /// </summary>
     /// <typeparam name="T">The type of packet to send, which must implement <see cref="INetSerializable"/></typeparam>
-    /// <param name="data">The packet instance to send, passed by reference</param>
     /// <param name="peer">The target <see cref="NetPeer"/> that will receive the packet</param>
     /// <remarks>
     /// Should only be used as a <see cref="FikaServer"/>, since a <see cref="FikaClient"/> only has one <see cref="NetPeer"/>
@@ -99,10 +98,19 @@ public interface IFikaNetworkManager
     /// <summary>
     /// Registers a custom type to the <see cref="NetPacketProcessor"/> so that it can handle serializing the type
     /// </summary>
-    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="T">The type to register</typeparam>
     /// <param name="writeDelegate">The serialize method</param>
     /// <param name="readDelegate">The deserialize method</param>
     public void RegisterCustomType<T>(Action<NetDataWriter, T> writeDelegate, Func<NetDataReader, T> readDelegate);
     public Task InitializeVOIP();
     internal void PrintStatistics();
+    /// <summary>
+    /// The SendRate of the <see cref="Networking.IFikaNetworkManager"/>
+    /// </summary>
+    public enum ESendRate : byte
+    {
+        Low,
+        Medium,
+        High
+    }
 }

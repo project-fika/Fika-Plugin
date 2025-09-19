@@ -31,6 +31,7 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Threading.Tasks;
+using static Fika.Core.Networking.IFikaNetworkManager;
 
 namespace Fika.Core;
 
@@ -1164,19 +1165,10 @@ public class FikaPlugin : BaseUnityPlugin
         MenuEscape,
     }
 
-    /// <summary>
-    /// The SendRate of the <see cref="Networking.IFikaNetworkManager"/>
-    /// </summary>
-    public enum ESendRate : byte
-    {
-        Low,
-        Medium,
-        High
-    }
-
     [Flags]
     public enum EQuestSharingTypes
     {
+        None = 0,
         Kills = 1,
         Item = 2,
         Location = 4,

@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using static Fika.Core.FikaPlugin;
+using static Fika.Core.Networking.IFikaNetworkManager;
 
 namespace Fika.Core.Main.Utils;
 
