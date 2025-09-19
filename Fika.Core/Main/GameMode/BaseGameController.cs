@@ -159,10 +159,6 @@ public abstract class BaseGameController
     /// <summary>
     /// This creates a "custom" Back button so that we can back out if we get stuck
     /// </summary>
-    /// <param name="myPlayer"></param>
-    /// <param name="fikaPlayer"></param>
-    /// <param name="customButton"></param>
-    /// <returns></returns>
     protected GameObject CreateStartButton()
     {
         if (MenuUI.Instantiated)
@@ -377,11 +373,6 @@ public abstract class BaseGameController
         if (Singleton<IFikaNetworkManager>.Instance.AllowVOIP && !FikaBackendUtils.IsHeadless)
         {
             _abstractGame.StartCoroutine(FixVOIPAudioDevice());
-        }
-
-        if (FikaPlugin.UseFikaGC.Value)
-        {
-            NetManagerUtils.FikaGameObject.AddComponent<GCManager>();
         }
     }
 

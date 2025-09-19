@@ -65,7 +65,6 @@ public class HostGameController : BaseGameController, IBotGame
     }
 
     public byte[] LootData { get; set; }
-    public FikaDynamicAI DynamicAI { get; set; }
 
     protected readonly BotStateManager _botStateManager;
     protected readonly NonWavesSpawnScenario _nonWavesSpawnScenario;
@@ -196,31 +195,6 @@ public class HostGameController : BaseGameController, IBotGame
             return null;
         }
 
-        WildSpawnType role = profile.Info.Settings.Role;
-        bool isSpecial = false;
-        if (role is not WildSpawnType.pmcUSEC and not WildSpawnType.pmcBEAR and not WildSpawnType.assault)
-        {
-            isSpecial = true;
-        }
-
-        if (FikaPlugin.EnforcedSpawnLimits.Value && _botsController.BotSpawner.MaxBots > 0 && Bots.Count >= _botsController.BotSpawner.MaxBots)
-        {
-            bool despawned = false;
-            if (FikaPlugin.DespawnFurthest.Value)
-            {
-                despawned = TryDespawnFurthestBot(profile, position, _coopHandler);
-            }
-
-            // If it's not special and we didnt despawn something, we dont spawn a new bot.
-            if (!isSpecial && !despawned)
-            {
-#if DEBUG
-                Logger.LogWarning($"Stopping spawn of bot {profile.Nickname}, max count reached and enforced limits enabled. Current: {Bots.Count}, Max: {_botsController.BotSpawner.MaxBots}, Alive & Loading: {_botsController.BotSpawner.AliveAndLoadingBotsCount}");
-#endif
-                return null;
-            }
-        }
-
         int netId = 1000;
         FikaBot fikaBot;
         if (Bots.ContainsKey(profile.Id))
@@ -336,56 +310,6 @@ public class HostGameController : BaseGameController, IBotGame
         }
 
         _botQueue.Remove(netId);
-    }
-
-    /// <summary>
-    /// Tries to despawn the furthest bot from all players
-    /// </summary>
-    /// <param name="profile"></param>
-    /// <param name="position"></param>
-    /// <param name="coopHandler"></param>
-    /// <returns></returns>
-    private bool TryDespawnFurthestBot(Profile profile, Vector3 position, CoopHandler coopHandler)
-    {
-        List<FikaPlayer> humanPlayers = BotExtensions.GetPlayers(coopHandler);
-
-        bool onlyScavs = FikaPlugin.DespawnOnlyScavs.Value;
-
-        string botKey = BotExtensions.GetFurthestBot(humanPlayers, Bots, out float furthestDistance, onlyScavs);
-
-        if (botKey == string.Empty)
-        {
-#if DEBUG
-            Logger.LogWarning("TryDespawnFurthest: botKey was empty");
-#endif
-            return false;
-        }
-
-        if (furthestDistance > BotExtensions.GetDistanceFromPlayers(position, humanPlayers))
-        {
-#if DEBUG
-            Logger.LogWarning($"We're not despawning anything. The furthest bot is closer than the one we wanted to spawn.");
-#endif
-            return false;
-        }
-
-        //Dont despawn inside of dynamic AI range
-        if (furthestDistance < FikaPlugin.DespawnMinimumDistance.Value * FikaPlugin.DespawnMinimumDistance.Value) //Square it because we use sqrMagnitude for distance calculation
-        {
-#if DEBUG
-            Logger.LogWarning($"We're not despawning anything. Furthest despawnable bot is inside minimum despawn range.");
-#endif
-            return false;
-        }
-        Player bot = Bots[botKey];
-#if DEBUG
-        Logger.LogWarning($"Removing {bot.Profile.Info.Settings.Role} at a distance of {Math.Sqrt(furthestDistance)}m from its nearest player.");
-#endif
-        DespawnBot(coopHandler, bot);
-#if DEBUG
-        Logger.LogWarning($"Bot {bot.Profile.Info.Settings.Role} despawned successfully.");
-#endif
-        return true;
     }
 
     /// <summary>
@@ -523,11 +447,6 @@ public class HostGameController : BaseGameController, IBotGame
         float expectedPlayers = Singleton<IFikaNetworkManager>.Instance.PlayerAmount;
         if (expectedPlayers <= 1)
         {
-            if (DynamicAI != null)
-            {
-                DynamicAI.AddHumans();
-            }
-
             Singleton<FikaServer>.Instance.ReadyClients++;
             return;
         }
@@ -568,11 +487,6 @@ public class HostGameController : BaseGameController, IBotGame
             await Task.Delay(100);
             _abstractGame.SetMatchmakerStatus(LocaleUtils.UI_WAIT_FOR_OTHER_PLAYERS.Localized(), (float)server.ReadyClients / expectedPlayers);
         } while (server.ReadyClients < expectedPlayers);
-
-        if (DynamicAI != null)
-        {
-            DynamicAI.AddHumans();
-        }
 
         InformationPacket finalPacket = new()
         {
@@ -673,31 +587,21 @@ public class HostGameController : BaseGameController, IBotGame
             }
         }
 
-        if (FikaPlugin.EnforcedSpawnLimits.Value)
+        var limits = SetMaxBotsLimit(location);
+        if (limits > 0)
         {
-            int limits = location.Id.ToLower() switch
-            {
-                "factory4_day" => FikaPlugin.MaxBotsFactory.Value,
-                "factory4_night" => FikaPlugin.MaxBotsFactory.Value,
-                "bigmap" => FikaPlugin.MaxBotsCustoms.Value,
-                "interchange" => FikaPlugin.MaxBotsInterchange.Value,
-                "rezervbase" => FikaPlugin.MaxBotsReserve.Value,
-                "woods" => FikaPlugin.MaxBotsWoods.Value,
-                "shoreline" => FikaPlugin.MaxBotsShoreline.Value,
-                "tarkovstreets" => FikaPlugin.MaxBotsStreets.Value,
-                "sandbox" => FikaPlugin.MaxBotsGroundZero.Value,
-                "laboratory" => FikaPlugin.MaxBotsLabs.Value,
-                "lighthouse" => FikaPlugin.MaxBotsLighthouse.Value,
-                _ => 0
-            };
-
-            if (limits > 0)
-            {
-                _botsController.BotSpawner.SetMaxBots(limits);
-            }
+            _botsController.BotSpawner.SetMaxBots(limits);
         }
+    }
 
-        DynamicAI = _abstractGame.gameObject.AddComponent<FikaDynamicAI>();
+    /// <summary>
+    /// Made for modders to set custom limits in their mods
+    /// </summary>
+    /// <param name="location">The map to get the max bots for</param>
+    /// <returns>Max bots if any</returns>
+    protected int SetMaxBotsLimit(LocationSettingsClass.Location location)
+    {
+        return 0;
     }
 
     public async Task StartBotsSystem(LocationSettingsClass.Location location)
@@ -726,35 +630,6 @@ public class HostGameController : BaseGameController, IBotGame
 
         _bossSpawnScenario.Run(_botsController.BotSpawner.GetPmcZones());
         _botsController.EventsController.SpawnAction();
-
-        FikaPlugin.DynamicAI.SettingChanged += DynamicAI_SettingChanged;
-        FikaPlugin.DynamicAIRate.SettingChanged += DynamicAIRate_SettingChanged;
-    }
-
-    /// <summary>
-    /// Triggers when the <see cref="FikaPlugin.DynamicAIRate"/> setting is changed
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    private void DynamicAIRate_SettingChanged(object sender, EventArgs e)
-    {
-        if (DynamicAI != null)
-        {
-            DynamicAI.RateChanged(FikaPlugin.DynamicAIRate.Value);
-        }
-    }
-
-    /// <summary>
-    /// Triggers when the <see cref="FikaPlugin.DynamicAI"/> setting is changed
-    /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
-    private void DynamicAI_SettingChanged(object sender, EventArgs e)
-    {
-        if (DynamicAI != null)
-        {
-            DynamicAI.EnabledChange(FikaPlugin.DynamicAI.Value);
-        }
     }
 
     public override void SetupEventsAndExfils(Player player)
@@ -963,11 +838,6 @@ public class HostGameController : BaseGameController, IBotGame
             }
         }
 
-        if (DynamicAI != null)
-        {
-            GameObject.Destroy(DynamicAI);
-        }
-
         if (!FikaBackendUtils.IsTransit)
         {
             NetManagerUtils.StopPinger();
@@ -976,9 +846,6 @@ public class HostGameController : BaseGameController, IBotGame
         {
             Singleton<FikaServer>.Instance.HostReady = false;
         }
-
-        FikaPlugin.DynamicAI.SettingChanged -= DynamicAI_SettingChanged;
-        FikaPlugin.DynamicAIRate.SettingChanged -= DynamicAIRate_SettingChanged;
     }
 
     public override Task InitializeLoot(LocationSettingsClass.Location location)

@@ -92,12 +92,6 @@ public static class NetManagerUtils
 
         if (FikaGameObject != null)
         {
-            GCManager gcManager = FikaGameObject.GetComponent<GCManager>();
-            if (gcManager != null)
-            {
-                UnityEngine.Object.Destroy(gcManager);
-            }
-
             if (isServer)
             {
                 FikaServer server = Singleton<FikaServer>.Instance;
