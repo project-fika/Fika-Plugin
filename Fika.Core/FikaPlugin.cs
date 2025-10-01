@@ -16,6 +16,7 @@ using Fika.Core.Networking.Websocket;
 using Fika.Core.UI; 
 #endif
 using Fika.Core.UI.Patches;
+using HarmonyLib;
 using SPT.Common.Http;
 using SPT.Custom.Patches;
 using SPT.Custom.Utils;
@@ -1125,15 +1126,30 @@ public class FikaPlugin : BaseUnityPlugin
     private void DisableSPTPatches()
     {
         // Disable these as they interfere with Fika
-        new VersionLabelPatch().Disable();
-        new AmmoUsedCounterPatch().Disable();
-        new ArmorDamageCounterPatch().Disable();
-        new ScavRepAdjustmentPatch().Disable();
-        new GetProfileAtEndOfRaidPatch().Disable();
-        new ScavExfilPatch().Disable();
-        new SendPlayerScavProfileToServerAfterRaidPatch().Disable();
-        new MatchStartServerLocationPatch().Disable();
-        new QuestAchievementRewardInRaidPatch().Disable();
+        var patches = ModPatchCache.GetActivePatches();
+        var targets = new HashSet<string>
+        {
+            nameof(VersionLabelPatch),
+            nameof(AmmoUsedCounterPatch),
+            nameof(ArmorDamageCounterPatch),
+            nameof(ScavRepAdjustmentPatch),
+            nameof(GetProfileAtEndOfRaidPatch),
+            nameof(ScavExfilPatch),
+            nameof(SendPlayerScavProfileToServerAfterRaidPatch),
+            nameof(MatchStartServerLocationPatch),
+            nameof(QuestAchievementRewardInRaidPatch)
+        };
+
+        for (var i = 0; i < patches.Count; i++)
+        {
+            var patch = patches[i];
+            var name = patch.GetType().Name;
+            if (targets.Contains(name))
+            {
+                Logger.LogInfo($"Found {name}, disabling...");
+                patch.Disable();
+            }
+        }
     }
 
     public void FixSPTBugPatches()
