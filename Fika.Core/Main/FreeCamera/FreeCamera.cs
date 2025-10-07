@@ -624,18 +624,9 @@ public partial class FreeCamera : MonoBehaviour
 #if DEBUG
         FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: Attaching to 3rd person current player {_currentPlayer.Profile.GetCorrectedNickname()}");
 #endif
-        if (!_currentPlayer.IsAI)
-        {
-            transform.SetParent(_currentPlayer.SpectateTransform);
-            transform.localPosition = new Vector3(2.0f, 1.5f, -1.5f);
-            transform.localEulerAngles = new Vector3(4.3f, 25.0f, -30f);
-        }
-        else
-        {
-            transform.SetParent(_currentPlayer.PlayerBones.Head.Original);
-            transform.localPosition = new Vector3(0f, -1.5f, -1.5f);
-            transform.localEulerAngles = new Vector3(-115f, 125f, -30f);
-        }
+        transform.SetParent(_currentPlayer.SpectateTransform);
+        transform.localPosition = new Vector3(0.3f, 0.2f, -0.65f);
+        transform.localEulerAngles = new Vector3(4.3f, 5.9f, 0f);
         _isFollowing = true;
         _cameraState = ECameraState.Follow3rdPerson;
     }
