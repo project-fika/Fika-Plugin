@@ -36,9 +36,6 @@ jobs:
           cache: true
           cache-dependency-path: 'Fika.Core/packages.lock.json'
 
-      - name: Install 7-Zip
-        run: sudo apt-get update && sudo apt-get install -y p7zip-full
-
       - name: Restore dependencies
         run: dotnet restore Fika-Plugin.sln
 
@@ -51,8 +48,8 @@ jobs:
           cp -r output/Fika.Core.dll BepInEx/plugins/Fika
           cp Licenses/* BepInEx/plugins/Fika
 
-      - name: Archive build with 7z
-        run: 7z a "${{ inputs.release_name }}.7z" BepInEx/plugins/Fika
+      - name: Zip the build and loose files
+        run: zip -r "${{ inputs.release_name }}.zip" BepInEx/plugins/Fika
 
       - name: Create GitHub Release Draft
         uses: softprops/action-gh-release@v2
@@ -62,6 +59,6 @@ jobs:
           body: ${{ inputs.release_notes }}
           draft: true
           files: |
-            ${{ inputs.release_name }}.7z
+            ${{ inputs.release_name }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
