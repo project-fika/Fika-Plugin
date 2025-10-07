@@ -219,7 +219,6 @@ public class FikaPlugin : BaseUnityPlugin
         GetNatPunchServerConfig();
         EnableModulePatches();
         DisableSPTPatches();
-        FixSPTBugPatches();
 
         GetClientConfig();
 
@@ -1125,7 +1124,7 @@ public class FikaPlugin : BaseUnityPlugin
 
     private void DisableSPTPatches()
     {
-        // Disable these as they interfere with Fika
+        /*// Disable these as they interfere with Fika (currently does not work, use below)
         var patches = ModPatchCache.GetActivePatches();
         var targets = new HashSet<string>
         {
@@ -1144,20 +1143,22 @@ public class FikaPlugin : BaseUnityPlugin
         {
             var patch = patches[i];
             var name = patch.GetType().Name;
+            Logger.LogWarning(name);
             if (targets.Contains(name))
             {
                 Logger.LogInfo($"Found {name}, disabling...");
                 patch.Disable();
             }
-        }
-    }
+        }*/
 
-    public void FixSPTBugPatches()
-    {
-        if (ModHandler.SPTCoreVersion.ToString() == "3.11.0")
-        {
-            // Empty, for now ;)
-        }
+        new VersionLabelPatch().Disable();
+        new AmmoUsedCounterPatch().Disable();
+        new ScavRepAdjustmentPatch().Disable();
+        new GetProfileAtEndOfRaidPatch().Disable();
+        new ScavExfilPatch().Disable();
+        new SendPlayerScavProfileToServerAfterRaidPatch().Disable();
+        new MatchStartServerLocationPatch().Disable();
+        new QuestAchievementRewardInRaidPatch().Disable();
     }
 
     public enum EDynamicAIRates
