@@ -15,9 +15,24 @@ namespace Fika.Core.Networking;
 /// </summary>
 public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchListener
 {
+    /// <summary>
+    /// The network client manager instance.
+    /// </summary>
     public NetManager NetClient;
+
+    /// <summary>
+    /// Indicates if a successful response has been received from the server.
+    /// </summary>
     public bool Received;
+
+    /// <summary>
+    /// Indicates if the connection attempt was rejected by the server.
+    /// </summary>
     public bool Rejected;
+
+    /// <summary>
+    /// Indicates if the server is currently in progress (busy).
+    /// </summary>
     public bool InProgress;
 
     private ManualLogSource _logger;
@@ -25,11 +40,19 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
     private IPEndPoint _localEndPoint;
     private Coroutine _keepAliveRoutine;
 
+    /// <summary>
+    /// Initializes the logger for the pinging client.
+    /// </summary>
     public void Awake()
     {
         _logger = Logger.CreateLogSource("Fika.PingingClient");
     }
 
+    /// <summary>
+    /// Initializes the pinging client and attempts to resolve the server endpoint.
+    /// </summary>
+    /// <param name="serverId">The server identifier to connect to.</param>
+    /// <returns>True if initialization was successful, otherwise false.</returns>
     public bool Init(string serverId)
     {
         NetClient = new(this)
@@ -92,6 +115,13 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
         return true;
     }
 
+    /// <summary>
+    /// Resolves a remote address from a string IP or hostname and port.
+    /// </summary>
+    /// <param name="ip">The IP address or hostname.</param>
+    /// <param name="port">The port number.</param>
+    /// <returns>The resolved <see cref="IPEndPoint"/>.</returns>
+    /// <exception cref="ParseException">Thrown if the address cannot be resolved.</exception>
     private IPEndPoint ResolveRemoteAddress(string ip, int port)
     {
         if (IPAddress.TryParse(ip, out IPAddress address))
@@ -108,6 +138,11 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
         throw new ParseException($"ResolveRemoteAddress::Could not parse the address {ip}");
     }
 
+    /// <summary>
+    /// Sends a ping message to the configured endpoints.
+    /// </summary>
+    /// <param name="message">The message to send.</param>
+    /// <param name="reconnect">Whether this is a reconnect attempt.</param>
     public void PingEndPoint(string message, bool reconnect = false)
     {
         NetDataWriter writer = new();
@@ -124,11 +159,17 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
         }
     }
 
+    /// <summary>
+    /// Starts the keep-alive coroutine to periodically ping the server.
+    /// </summary>
     public void StartKeepAliveRoutine()
     {
         _keepAliveRoutine = StartCoroutine(KeepAlive());
     }
 
+    /// <summary>
+    /// Stops the keep-alive coroutine if it is running.
+    /// </summary>
     public void StopKeepAliveRoutine()
     {
         if (_keepAliveRoutine != null)
@@ -137,6 +178,10 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
         }
     }
 
+    /// <summary>
+    /// Coroutine that sends keep-alive messages to the server at regular intervals.
+    /// </summary>
+    /// <returns>An enumerator for the coroutine.</returns>
     public IEnumerator KeepAlive()
     {
         WaitForSeconds waitForSeconds = new(1f);
@@ -150,26 +195,36 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
         }
     }
 
+    /// <inheritdoc/>
     public void OnConnectionRequest(ConnectionRequest request)
     {
         // Do nothing
     }
 
+    /// <inheritdoc/>
     public void OnNetworkError(IPEndPoint endPoint, SocketError socketError)
     {
         // Do nothing
     }
 
+    /// <inheritdoc/>
     public void OnNetworkLatencyUpdate(NetPeer peer, int latency)
     {
         // Do nothing
     }
 
+    /// <inheritdoc/>
     public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
     {
         // Do nothing
     }
 
+    /// <summary>
+    /// Handles unconnected network messages received from remote endpoints.
+    /// </summary>
+    /// <param name="remoteEndPoint">The remote endpoint that sent the message.</param>
+    /// <param name="reader">The packet reader containing the message data.</param>
+    /// <param name="messageType">The type of unconnected message received.</param>
     public void OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType)
     {
         if (reader.TryGetString(out string result))
@@ -207,26 +262,36 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
         }
     }
 
+    /// <inheritdoc/>
     public void OnPeerConnected(NetPeer peer)
     {
         // Do nothing
     }
 
+    /// <inheritdoc/>
     public void OnPeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo)
     {
         // Do nothing
     }
 
+    /// <inheritdoc/>
     public void OnNatIntroductionRequest(IPEndPoint localEndPoint, IPEndPoint remoteEndPoint, string token)
     {
         // Do nothing
     }
 
+    /// <inheritdoc/>
     public void OnNatIntroductionSuccess(IPEndPoint targetEndPoint, NatAddressType type, string token)
     {
         // Do nothing
     }
 
+    /// <summary>
+    /// Handles the NAT introduction response and sends hello messages to both local and remote endpoints.
+    /// </summary>
+    /// <param name="natLocalEndPoint">The local NAT endpoint.</param>
+    /// <param name="natRemoteEndPoint">The remote NAT endpoint.</param>
+    /// <param name="token">The NAT punch token.</param>
     public void OnNatIntroductionResponse(IPEndPoint natLocalEndPoint, IPEndPoint natRemoteEndPoint, string token)
     {
         _logger.LogInfo($"OnNatIntroductionResponse: {_remoteEndPoint}");
