@@ -13,8 +13,14 @@ using TMPro;
 
 namespace Fika.Core.UI;
 
+/// <summary>
+/// Provides global UI utilities and helpers
+/// </summary>
 public static class FikaUIGlobals
 {
+    /// <summary>
+    /// Dictionary mapping <see cref="EColor"/> values to their corresponding hex color codes.
+    /// </summary>
     private static readonly Dictionary<EColor, string> _keyValuePairs = new()
     {
         { EColor.WHITE, "ffffff" },
@@ -25,6 +31,11 @@ public static class FikaUIGlobals
         { EColor.RED, "a83232" }
     };
 
+    /// <summary>
+    /// Creates an overlay text element in the UI with the specified text.
+    /// </summary>
+    /// <param name="overlayText">The text to display in the overlay.</param>
+    /// <returns>The created <see cref="TextMeshProUGUI"/> component.</returns>
     public static TextMeshProUGUI CreateOverlayText(string overlayText)
     {
         GameObject obj = GameObject.Find("/Preloader UI/Preloader UI/Watermark");
@@ -51,6 +62,17 @@ public static class FikaUIGlobals
         return text;
     }
 
+    /// <summary>
+    /// Shows a Fika message using the <see cref="PreloaderUI"/> error screen.
+    /// </summary>
+    /// <param name="preloaderUI">The preloader UI instance.</param>
+    /// <param name="header">The header text for the message.</param>
+    /// <param name="message">The message body text.</param>
+    /// <param name="buttonType">The type of button to display.</param>
+    /// <param name="waitingTime">The time to wait before auto-closing the message.</param>
+    /// <param name="acceptCallback">Callback to invoke when the message is accepted.</param>
+    /// <param name="endTimeCallback">Callback to invoke when the waiting time ends.</param>
+    /// <returns>The context object for the displayed message.</returns>
     public static GClass3835 ShowFikaMessage(this PreloaderUI preloaderUI, string header, string message,
         ErrorScreen.EButtonType buttonType, float waitingTime, Action acceptCallback, Action endTimeCallback)
     {
@@ -75,6 +97,18 @@ public static class FikaUIGlobals
         return messageHandler.errorScreen.ShowFikaMessage(header, message, acceptCallback, waitingTime, endTimeCallback, buttonType, true);
     }
 
+    /// <summary>
+    /// Shows a Fika message using the <see cref="ErrorScreen"/> UI.
+    /// </summary>
+    /// <param name="errorScreen">The error screen instance.</param>
+    /// <param name="title">The title of the error message.</param>
+    /// <param name="message">The message body text.</param>
+    /// <param name="closeManuallyCallback">Callback to invoke when the message is closed manually.</param>
+    /// <param name="waitingTime">The time to wait before auto-closing the message.</param>
+    /// <param name="timeOutCallback">Callback to invoke when the waiting time ends.</param>
+    /// <param name="buttonType">The type of button to display.</param>
+    /// <param name="removeHtml">Whether to remove HTML tags from the message.</param>
+    /// <returns>The context object for the displayed message.</returns>
     public static GClass3835 ShowFikaMessage(this ErrorScreen errorScreen, string title, string message,
         Action closeManuallyCallback = null, float waitingTime = 0f, Action timeOutCallback = null,
         ErrorScreen.EButtonType buttonType = ErrorScreen.EButtonType.OkButton, bool removeHtml = true)
@@ -145,32 +179,40 @@ public static class FikaUIGlobals
         return errorScreenHandler.context;
     }
 
+    /// <summary>
+    /// Gets the hex color code for the specified <see cref="EColor"/>.
+    /// </summary>
+    /// <param name="color">The color enum value.</param>
+    /// <returns>The hex color code as a string.</returns>
     private static string GetHexByColor(EColor color)
     {
         return _keyValuePairs.TryGetValue(color, out string value) ? value : "ffffff";
     }
 
     /// <summary>
-    /// Utility used to color text within a <see cref="CustomTextMeshProUGUI"/>
+    /// Utility used to color text within a <see cref="CustomTextMeshProUGUI"/>.
     /// </summary>
-    /// <param name="color">The color to return the text in</param>
-    /// <param name="text">The original text</param>
-    /// <returns>Text in color</returns>
+    /// <param name="color">The color to return the text in.</param>
+    /// <param name="text">The original text.</param>
+    /// <returns>Text in color.</returns>
     public static string ColorizeText(EColor color, string text)
     {
         return $"<color=#{GetHexByColor(color)}>{text}</color>";
     }
 
     /// <summary>
-    /// Utility used to color text within a <see cref="CustomTextMeshProUGUI"/>
+    /// Utility used to make text bold within a <see cref="CustomTextMeshProUGUI"/>.
     /// </summary>
-    /// <param name="text">The original text</param>
-    /// <returns>Text in bold</returns>
+    /// <param name="text">The original text.</param>
+    /// <returns>Text in bold.</returns>
     public static string BoldText(string text)
     {
         return $"<b>{text}</b>";
     }
 
+    /// <summary>
+    /// Gets a static date and time value used for certain UI displays.
+    /// </summary>
     public static DateTime StaticTime
     {
         get
@@ -179,6 +221,12 @@ public static class FikaUIGlobals
         }
     }
 
+    /// <summary>
+    /// Returns a formatted time string based on the specified <see cref="EDateTime"/> and static time flag.
+    /// </summary>
+    /// <param name="time">The time type to format (current or previous).</param>
+    /// <param name="staticTime">Whether to use the static time or backend time.</param>
+    /// <returns>The formatted time string, or an empty string if unavailable.</returns>
     public static string FormattedTime(EDateTime time, bool staticTime)
     {
         if (TarkovApplication.Exist(out TarkovApplication tarkovApplication))
@@ -204,25 +252,61 @@ public static class FikaUIGlobals
         return "";
     }
 
+    /// <summary>
+    /// Represents the presence state of a Fika player.
+    /// </summary>
     public enum EFikaPlayerPresence
     {
+        /// <summary>
+        /// Player is in the menu.
+        /// </summary>
         IN_MENU,
+        /// <summary>
+        /// Player is in a raid.
+        /// </summary>
         IN_RAID,
+        /// <summary>
+        /// Player is in the stash.
+        /// </summary>
         IN_STASH,
+        /// <summary>
+        /// Player is in the hideout.
+        /// </summary>
         IN_HIDEOUT,
+        /// <summary>
+        /// Player is in the flea market.
+        /// </summary>
         IN_FLEA
     }
 
     /// <summary>
-    /// Enum used for <see cref="ColorizeText"/>
+    /// Enum used for <see cref="ColorizeText"/> to specify text color.
     /// </summary>
     public enum EColor
     {
+        /// <summary>
+        /// White color.
+        /// </summary>
         WHITE,
+        /// <summary>
+        /// Black color.
+        /// </summary>
         BLACK,
+        /// <summary>
+        /// Green color.
+        /// </summary>
         GREEN,
+        /// <summary>
+        /// Brown color.
+        /// </summary>
         BROWN,
+        /// <summary>
+        /// Blue color.
+        /// </summary>
         BLUE,
+        /// <summary>
+        /// Red color.
+        /// </summary>
         RED
     }
 }
