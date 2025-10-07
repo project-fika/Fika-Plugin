@@ -71,8 +71,7 @@ public partial class FreeCamera : MonoBehaviour
         _detachKey = KeyCode.G;
         _upKey = KeyCode.R;
         _downKey = KeyCode.F;
-
-        InitPlayerListGuiStyles();
+        
         if (!CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
         {
             FikaGlobals.LogError("Could not find CoopHandler when creating FreeCamera");

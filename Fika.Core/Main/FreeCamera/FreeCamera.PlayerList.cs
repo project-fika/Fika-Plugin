@@ -13,6 +13,7 @@ public partial class FreeCamera
     private GUIStyle _rowGuiStyle, _badgeGuiStyle, _hpTextGuiStyle, _nameGuiStyle;
     private FikaPlayer _lastSpectatingPlayer;
     private bool _superFastMode;
+    private bool _guiCreated;
 
     ECameraState _cameraState;
 
@@ -53,6 +54,8 @@ public partial class FreeCamera
             border = new RectOffset(0, 0, 0, 0),
             normal = { textColor = Color.black }
         };
+
+        _guiCreated = true;
     }
 
     private static void DrawRect(Rect r, Color c, Texture2D white)
@@ -267,6 +270,11 @@ public partial class FreeCamera
         if (!IsActive || !_showOverlay || _hidePlayerList || !FikaPlugin.ShowPlayerList.Value)
         {
             return;
+        }
+
+        if (!_guiCreated)
+        {
+            InitPlayerListGuiStyles();
         }
 
         const float verticalOffset = 360f;
