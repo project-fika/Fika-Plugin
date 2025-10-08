@@ -6,6 +6,7 @@ using Fika.Core.Bundles;
 using Fika.Core.Main.Components;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
+using Fika.Core.UI.Patches;
 using System;
 using System.Collections.Generic;
 
@@ -46,6 +47,7 @@ public partial class FreeCamera : MonoBehaviour
     private bool _thermalVisionActive;
     private FreecamUI _freecamUI;
     private CoopHandler _coopHandler;
+    private List<FikaPlayer> _players;
 
     private KeyCode _forwardKey;
     private KeyCode _backKey;
@@ -71,8 +73,10 @@ public partial class FreeCamera : MonoBehaviour
         _detachKey = KeyCode.G;
         _upKey = KeyCode.R;
         _downKey = KeyCode.F;
+
+        _players = [];
         
-        if (!CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
+        if (!CoopHandler.TryGetCoopHandler(out var coopHandler))
         {
             FikaGlobals.LogError("Could not find CoopHandler when creating FreeCamera");
             return;
@@ -103,8 +107,8 @@ public partial class FreeCamera : MonoBehaviour
         _freeCameraController = Singleton<GameWorld>.Instance.gameObject.GetComponent<FreeCameraController>();
         _originalFov = CameraClass.Instance.Fov;
 
-        GameObject asset = InternalBundleLoader.Instance.GetFikaAsset(InternalBundleLoader.EFikaAsset.FreecamUI);
-        GameObject freecamObject = Instantiate(asset);
+        var asset = InternalBundleLoader.Instance.GetFikaAsset(InternalBundleLoader.EFikaAsset.FreecamUI);
+        var freecamObject = Instantiate(asset);
         freecamObject.transform.SetParent(transform);
         _freecamUI = freecamObject.GetComponent<FreecamUI>();
         if (_freecamUI == null)
@@ -177,14 +181,15 @@ public partial class FreeCamera : MonoBehaviour
     /// </param>
     public void CycleSpectatePlayers(bool reverse = false)
     {
-        List<FikaPlayer> players = [];
-        List<FikaPlayer> humanPlayers = _coopHandler.HumanPlayers;
-        for (int i = 0; i < humanPlayers.Count; i++)
+        _players.Clear();
+
+        var humanPlayers = _coopHandler.HumanPlayers;
+        for (var i = 0; i < humanPlayers.Count; i++)
         {
-            FikaPlayer player = humanPlayers[i];
+            var player = humanPlayers[i];
             if (!player.IsYourPlayer && player.HealthController.IsAlive)
             {
-                players.Add(player);
+                _players.Add(player);
             }
         }
         // If no alive players, add bots to spectate pool if enabled
@@ -198,30 +203,30 @@ public partial class FreeCamera : MonoBehaviour
             _isSpectatingBots = true;
             if (FikaBackendUtils.IsServer)
             {
-                foreach (FikaPlayer player in _coopHandler.Players.Values)
+                foreach (var player in _coopHandler.Players.Values)
                 {
                     if (player.IsAI && player.HealthController.IsAlive)
                     {
-                        players.Add(player);
+                        _players.Add(player);
                     }
                 }
             }
             else
             {
-                foreach (FikaPlayer player in _coopHandler.Players.Values)
+                foreach (var player in _coopHandler.Players.Values)
                 {
                     if (player.IsObservedAI && player.HealthController.IsAlive)
                     {
-                        players.Add(player);
+                        _players.Add(player);
                     }
                 }
             }
         }
 #if DEBUG
-        FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: There are {players.Count} players");
+        FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: There are {_players.Count} players");
 #endif
 
-        if (players.Count == 0)
+        if (_players.Count == 0)
         {
             // Clear out all spectate positions
             DetachCamera();
@@ -230,34 +235,34 @@ public partial class FreeCamera : MonoBehaviour
         }
 
         // Start spectating a player if we haven't before
-        if (_currentPlayer == null && players[0])
+        if (_currentPlayer == null && _players[0])
         {
-            if (_lastSpectatingPlayer && players.Contains(_lastSpectatingPlayer))
+            if (_lastSpectatingPlayer && _players.Contains(_lastSpectatingPlayer))
             {
                 _currentPlayer = _lastSpectatingPlayer;
             }
             else
             {
-                _currentPlayer = players[0];
+                _currentPlayer = _players[0];
             }
 
 #if DEBUG
-            FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: currentPlayer was null, setting to first player {players[0].Profile.GetCorrectedNickname()}");
+            FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: currentPlayer was null, setting to first player {_players[0].Profile.GetCorrectedNickname()}");
 #endif
             SwitchSpectateMode();
             return;
         }
 
         // Cycle through spectate-able players
-        int nextIndex = reverse ? players.IndexOf(_currentPlayer) - 1 : players.IndexOf(_currentPlayer) + 1;
+        var nextIndex = reverse ? _players.IndexOf(_currentPlayer) - 1 : _players.IndexOf(_currentPlayer) + 1;
         if (!reverse)
         {
-            if (nextIndex <= players.Count - 1)
+            if (nextIndex <= _players.Count - 1)
             {
 #if DEBUG
                 FikaPlugin.Instance.FikaLogger.LogInfo("Freecam: Setting to next player");
 #endif
-                _currentPlayer = players[nextIndex];
+                _currentPlayer = _players[nextIndex];
             }
             else
             {
@@ -265,7 +270,7 @@ public partial class FreeCamera : MonoBehaviour
 #if DEBUG
                 FikaPlugin.Instance.FikaLogger.LogInfo("Freecam: Looping back to start player");
 #endif
-                _currentPlayer = players[0];
+                _currentPlayer = _players[0];
             }
         }
         else
@@ -275,7 +280,7 @@ public partial class FreeCamera : MonoBehaviour
 #if DEBUG
                 FikaPlugin.Instance.FikaLogger.LogInfo("Freecam: Setting to previous player");
 #endif
-                _currentPlayer = players[nextIndex];
+                _currentPlayer = _players[nextIndex];
             }
             else
             {
@@ -283,7 +288,7 @@ public partial class FreeCamera : MonoBehaviour
 #if DEBUG
                 FikaPlugin.Instance.FikaLogger.LogInfo("Freecam: Looping back to end player");
 #endif
-                _currentPlayer = players[^1];
+                _currentPlayer = _players[^1];
             }
         }
         SwitchSpectateMode();
@@ -370,7 +375,7 @@ public partial class FreeCamera : MonoBehaviour
         {
             if (_isFollowing)
             {
-                if (_isSpectatingBots || FikaPlugin.Instance.AllowSpectateFreeCam || _isSpectator)
+                if ((FikaPlugin.Instance.AllowSpectateFreeCam || _isSpectator) && _isSpectatingBots)
                 {
                     DetachCamera();
                 }
@@ -416,14 +421,14 @@ public partial class FreeCamera : MonoBehaviour
             return;
         }
 
-        bool fastMode = Input.GetKey(KeyCode.LeftShift);
+        var fastMode = Input.GetKey(KeyCode.LeftShift);
         if (Input.GetKeyDown(KeyCode.LeftControl))
         {
             _superFastMode = !_superFastMode;
         }
 
-        float movementSpeed = fastMode ? 20f : 2f;
-        float deltaTime = Time.deltaTime;
+        var movementSpeed = fastMode ? 20f : 2f;
+        var deltaTime = Time.deltaTime;
 
         if (_superFastMode)
         {
@@ -497,19 +502,22 @@ public partial class FreeCamera : MonoBehaviour
         }
 
         // Zooming
-        float scrollValue = Input.GetAxisRaw("Mouse ScrollWheel");
+        const string mouseScrollAxis = "Mouse ScrollWheel";
+        var scrollValue = Input.GetAxisRaw(mouseScrollAxis);
         if (scrollValue != 0)
         {
-            float currentFov = CameraClass.Instance.Fov;
+            var currentFov = CameraClass.Instance.Fov;
             if (currentFov >= _minFov && currentFov <= _originalFov)
             {
-                float newFov = Mathf.Clamp(currentFov -= (scrollValue * 100), _minFov, _originalFov);
+                var newFov = Mathf.Clamp(currentFov -= (scrollValue * 100), _minFov, _originalFov);
                 CameraClass.Instance.SetFov(newFov, 1f);
             }
         }
 
-        float mouseX = Input.GetAxis("Mouse X");
-        float mouseY = Input.GetAxis("Mouse Y");
+        const string mouseAxisX = "Mouse X";
+        const string mouseAxisY = "Mouse Y";
+        var mouseX = Input.GetAxis(mouseAxisX);
+        var mouseY = Input.GetAxis(mouseAxisY);
 
         // update yaw first
         _yaw += mouseX * _lookSensitivity;
@@ -524,7 +532,7 @@ public partial class FreeCamera : MonoBehaviour
 
     private Vector3 GetNormalizedVector3(Transform transform)
     {
-        Vector3 newForward = transform.forward;
+        var newForward = transform.forward;
         newForward.y = 0f;
         return newForward.normalized;
     }
@@ -646,7 +654,7 @@ public partial class FreeCamera : MonoBehaviour
                 _thermalVision.method_1(false);
             }
 
-            Player player = Singleton<GameWorld>.Instance.MainPlayer;
+            var player = Singleton<GameWorld>.Instance.MainPlayer;
             if (player != null && player.HealthController.IsAlive)
             {
                 if (_nightVisionActive)
@@ -673,7 +681,7 @@ public partial class FreeCamera : MonoBehaviour
             _nightVisionActive = false;
             _thermalVisionActive = false;
 
-            Player player = Singleton<GameWorld>.Instance.MainPlayer;
+            var player = Singleton<GameWorld>.Instance.MainPlayer;
             if (player != null)
             {
                 if (player.HealthController.IsAlive)
@@ -723,7 +731,7 @@ public partial class FreeCamera : MonoBehaviour
         transform.position = target.position - (target.forward * 1f) + (target.up * 0.1f);
 
         // extract pitch and yaw from current camera rotation
-        Vector3 euler = transform.eulerAngles;
+        var euler = transform.eulerAngles;
         _pitch = -NormalizeAngle(euler.x);
         _yaw = NormalizeAngle(euler.y);
 
