@@ -68,17 +68,17 @@ public interface IFikaNetworkManager
     /// <typeparam name="T">The type of packet to send, which must implement <see cref="INetSerializable"/>.</typeparam>
     /// <param name="packet">The packet instance to send, passed by reference.</param>
     /// <param name="deliveryMethod">The delivery method (reliable, unreliable, etc.) to use for sending the packet.</param>
-    /// <param name="multicast">If <see langword="true"/>, the packet will be sent to multiple recipients; otherwise, it will be sent to a single target (server is always multicast).</param>
-    void SendData<T>(ref T packet, DeliveryMethod deliveryMethod, bool multicast = false) where T : INetSerializable;
+    /// <param name="broadcast">If <see langword="true"/>, the packet will be sent to multiple recipients; otherwise, it will be sent to a single target (server is always broadcast).</param>
+    void SendData<T>(ref T packet, DeliveryMethod deliveryMethod, bool broadcast = false) where T : INetSerializable;
 
     /// <summary>
     /// Sends a generic network packet to one or more peers.
     /// </summary>
     /// <param name="type">The generic sub-packet type identifier used to determine how the packet will be processed.</param>
     /// <param name="subpacket">The sub-packet payload to send. Must implement <see cref="IPoolSubPacket"/>.</param>
-    /// <param name="multicast">If <see langword="true"/>, the packet will be sent to multiple recipients; otherwise, it will be sent to a single target (server is always multicast).</param>
+    /// <param name="broadcast">If <see langword="true"/>, the packet will be sent to multiple recipients; otherwise, it will be sent to a single target (server is always broadcast).</param>
     /// <param name="peerToIgnore">An optional peer to exclude from receiving the packet, typically the sender.</param>
-    void SendGenericPacket(EGenericSubPacketType type, IPoolSubPacket subpacket, bool multicast = false, NetPeer peerToIgnore = null);
+    void SendGenericPacket(EGenericSubPacketType type, IPoolSubPacket subpacket, bool broadcast = false, NetPeer peerToIgnore = null);
 
     /// <summary>
     /// Sends a packet implementing <see cref="INetReusable"/> with manual serialization control.
@@ -86,9 +86,9 @@ public interface IFikaNetworkManager
     /// <typeparam name="T">The packet type, which must implement <see cref="INetReusable"/>.</typeparam>
     /// <param name="packet">A reference to the packet instance to send.</param>
     /// <param name="deliveryMethod">The delivery method (reliable, unreliable, etc.) to use for sending the packet.</param>
-    /// <param name="multicast">If <see langword="true"/>, the packet will be sent to multiple recipients; otherwise, it will be sent to a single target (server is always multicast).</param>
+    /// <param name="broadcast">If <see langword="true"/>, the packet will be sent to multiple recipients; otherwise, it will be sent to a single target (server is always broadcast).</param>
     /// <param name="peerToIgnore">An optional peer to exclude from receiving the packet, typically the sender.</param>
-    void SendNetReusable<T>(ref T packet, DeliveryMethod deliveryMethod, bool multicast = false, NetPeer peerToIgnore = null) where T : INetReusable;
+    void SendNetReusable<T>(ref T packet, DeliveryMethod deliveryMethod, bool broadcast = false, NetPeer peerToIgnore = null) where T : INetReusable;
 
     /// <summary>
     /// Sends a packet of data directly to a specific peer.

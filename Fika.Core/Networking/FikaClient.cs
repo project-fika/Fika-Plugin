@@ -366,13 +366,13 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
         FikaEventDispatcher.DispatchEvent(new FikaNetworkManagerDestroyedEvent(this));
     }
 
-    public void SendData<T>(ref T packet, DeliveryMethod deliveryMethod, bool multicast = false) where T : INetSerializable
+    public void SendData<T>(ref T packet, DeliveryMethod deliveryMethod, bool broadcast = false) where T : INetSerializable
     {
         NetPeer peer = _netClient.FirstPeer;
         if (peer != null)
         {
             _dataWriter.Reset();
-            _dataWriter.Put(multicast);
+            _dataWriter.Put(broadcast);
             _dataWriter.PutEnum(EPacketType.Serializable);
 
             _packetProcessor.WriteNetSerializable(_dataWriter, ref packet);
@@ -390,18 +390,18 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
         _netClient.SendToAll(_dataWriter.AsReadOnlySpan, DeliveryMethod.Unreliable);
     }
 
-    public void SendGenericPacket(EGenericSubPacketType type, IPoolSubPacket subpacket, bool multicast = false, NetPeer peerToIgnore = null)
+    public void SendGenericPacket(EGenericSubPacketType type, IPoolSubPacket subpacket, bool broadcast = false, NetPeer peerToIgnore = null)
     {
         GenericPacket packet = _genericPacket;
         packet.Type = type;
         packet.SubPacket = subpacket;
-        SendNetReusable(ref packet, DeliveryMethod.ReliableOrdered, multicast);
+        SendNetReusable(ref packet, DeliveryMethod.ReliableOrdered, broadcast);
     }
 
-    public void SendNetReusable<T>(ref T packet, DeliveryMethod deliveryMethod, bool multicast = false, NetPeer peerToIgnore = null) where T : INetReusable
+    public void SendNetReusable<T>(ref T packet, DeliveryMethod deliveryMethod, bool broadcast = false, NetPeer peerToIgnore = null) where T : INetReusable
     {
         _dataWriter.Reset();
-        _dataWriter.Put(multicast);
+        _dataWriter.Put(broadcast);
         _dataWriter.PutEnum(EPacketType.Serializable);
 
         _packetProcessor.WriteNetReusable(_dataWriter, ref packet);
@@ -442,7 +442,7 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
     /// <param name="packet">The <see cref="INetSerializable"/> to send</param>
     /// <param name="deliveryMethod">The deliverymethod</param>
     /// <remarks>
-    /// Reusable will always be of type multicast when sent from a client
+    /// Reusable will always be of type broadcast when sent from a client
     /// </remarks>
     public void SendReusable<T>(T packet, DeliveryMethod deliveryMethod) where T : class, IReusable, new()
     {

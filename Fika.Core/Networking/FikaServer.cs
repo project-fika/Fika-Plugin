@@ -631,7 +631,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         FikaEventDispatcher.DispatchEvent(new FikaNetworkManagerDestroyedEvent(this));
     }
 
-    public void SendData<T>(ref T packet, DeliveryMethod deliveryMethod, bool multicast = false) where T : INetSerializable
+    public void SendData<T>(ref T packet, DeliveryMethod deliveryMethod, bool broadcast = false) where T : INetSerializable
     {
         _dataWriter.Reset();
         _dataWriter.PutEnum(EPacketType.Serializable);
@@ -640,12 +640,12 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         _netServer.SendToAll(_dataWriter.AsReadOnlySpan, deliveryMethod);
     }
 
-    public void SendGenericPacket(EGenericSubPacketType type, IPoolSubPacket subpacket, bool multicast = false, NetPeer peerToIgnore = null)
+    public void SendGenericPacket(EGenericSubPacketType type, IPoolSubPacket subpacket, bool broadcast = false, NetPeer peerToIgnore = null)
     {
         GenericPacket packet = _genericPacket;
         packet.Type = type;
         packet.SubPacket = subpacket;
-        SendNetReusable(ref packet, DeliveryMethod.ReliableOrdered, multicast, peerToIgnore);
+        SendNetReusable(ref packet, DeliveryMethod.ReliableOrdered, broadcast, peerToIgnore);
     }
 
     public void SendGenericPacketToPeer(EGenericSubPacketType type, IPoolSubPacket subpacket, NetPeer peer)
@@ -656,7 +656,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         SendNetReusableToPeer(ref packet, DeliveryMethod.ReliableOrdered, peer);
     }
 
-    public void SendNetReusable<T>(ref T packet, DeliveryMethod deliveryMethod, bool multicast = false, NetPeer peerToIgnore = null) where T : INetReusable
+    public void SendNetReusable<T>(ref T packet, DeliveryMethod deliveryMethod, bool broadcast = false, NetPeer peerToIgnore = null) where T : INetReusable
     {
         _dataWriter.Reset();
         _dataWriter.PutEnum(EPacketType.Serializable);
@@ -940,10 +940,10 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
 
     public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
     {
-        // check for multicast
+        // check for broadcast
         if (reader.GetByte() == 1)
         {
-            // we're skipping the multicast byte as clients do not care about it
+            // we're skipping the broadcast byte as clients do not care about it
             _netServer.SendToAll(reader.GetRemainingBytesSpan(), deliveryMethod, peer);
         }
 
