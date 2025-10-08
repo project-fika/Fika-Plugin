@@ -38,7 +38,7 @@ Use `for` or `foreach` loops rather than LINQ statements where applicable, espec
 
 ### Do not use null propagation or null-coalescing operators
 
-They do not play nice with `Unity.GameObject`.
+They do not work with `Unity.GameObject`, more info [here](https://discussions.unity.com/t/usage-of-null-propagation-on-unity-objects-is-incorrect/880951).
 
 This is ok:
 ```cs
@@ -82,3 +82,8 @@ playerTraverse.Field("_vaultAudioController").SetValue(null);
 playerTraverse.Field("_sprintVaultAudioController").SetValue(null);
 playerTraverse.Field("_climbAudioController").SetValue(null);
 ```
+
+### AI-Generated Code Policy
+
+We do not allow AI-generated code in contributions. We reserve the right to reject any submissions we suspect to be AI-generated.
+The only exception is using AI to generate comments or documentation for code you write yourself.
