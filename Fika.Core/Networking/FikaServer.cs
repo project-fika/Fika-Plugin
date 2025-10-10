@@ -140,7 +140,6 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
     private Dictionary<Profile, bool> _visualProfiles;
     private Dictionary<string, int> _cachedConnections;
     private JobHandle _stateHandle;
-    private ArraySegment<byte>[] _snapshots;
     private int _snapshotCount;
     private GenericPacket _genericPacket;
 
@@ -170,9 +169,8 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         _statisticsCounter = 0f;
         _sendThreshold = 2f;
         _cachedConnections = [];
-        _logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Server");
-        _snapshotCount = 0;
-        _snapshots = _snapshots = new ArraySegment<byte>[512];
+        _logger = Logger.CreateLogSource("Fika.Server");
+        _snapshotCount = 0;        
         ObservedCoopPlayers = [];
         PlayerAmount = 1;
 
@@ -207,6 +205,8 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         {
             NetId = NetId
         };
+
+        PlayerSnapshots.Init();
 
         RegisterPacketsAndTypes();
 
@@ -553,7 +553,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
     {
         _netServer?.PollEvents();
         float unscaledDelta = Time.unscaledDeltaTime;
-        _stateHandle = new InterpolatorJob(unscaledDelta, NetworkTimeSync.NetworkTime, _snapshots, _snapshotCount)
+        _stateHandle = new InterpolatorJob(unscaledDelta, NetworkTimeSync.NetworkTime, _snapshotCount)
             .Schedule();
 
         _statisticsCounter += unscaledDelta;
@@ -590,7 +590,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         {
             for (int i = 0; i < _snapshotCount; i++)
             {
-                ArraySegmentPooling.Return(_snapshots[i]);
+                ArraySegmentPooling.Return(PlayerSnapshots.Snapshots[i]);
             }
             _snapshotCount = 0;
         }
@@ -613,10 +613,11 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
     {
         _netServer?.Stop();
         _stateHandle.Complete();
-        _snapshots = null;
         _genericPacket.Clear();
 
+
         PoolUtils.ReleaseAll();
+        PlayerSnapshots.Clear();
 
         if (_fikaChat != null)
         {
@@ -952,9 +953,9 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
                 _packetProcessor.ReadAllPackets(reader, peer);
                 break;
             case EPacketType.PlayerState:
-                if (_snapshotCount < _snapshots.Length)
+                if (_snapshotCount < PlayerSnapshots.Snapshots.Length)
                 {
-                    _snapshots[_snapshotCount++] = ArraySegmentPooling.Get(reader.GetRemainingBytesSpan());
+                    PlayerSnapshots.Snapshots[_snapshotCount++] = ArraySegmentPooling.Get(reader.GetRemainingBytesSpan());
                 }
                 break;
             case EPacketType.VOIP:

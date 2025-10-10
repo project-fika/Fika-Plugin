@@ -8,17 +8,15 @@ using Unity.Jobs;
 
 namespace Fika.Core.Jobs;
 
-internal readonly struct HandlePlayerStates(double networkTime, ArraySegment<byte>[] snapshots) : IJobFor
+internal readonly struct HandlePlayerStates(double networkTime) : IJobFor
 {
     [ReadOnly]
     private readonly double _networkTime = networkTime;
-    [ReadOnly]
-    private readonly ArraySegment<byte>[] _snapshots = snapshots;
 
     public readonly void Execute(int index)
     {
         IFikaNetworkManager manager = Singleton<IFikaNetworkManager>.Instance;
-        ArraySegment<byte> buffer = _snapshots[index];
+        ArraySegment<byte> buffer = PlayerSnapshots.Snapshots[index];
         PlayerStatePacket packet = PlayerStatePacket.FromBuffer(in buffer);
         if (manager.CoopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer player))
         {

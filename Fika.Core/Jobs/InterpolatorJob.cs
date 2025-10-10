@@ -8,14 +8,12 @@ using Unity.Jobs;
 
 namespace Fika.Core.Jobs;
 
-internal readonly struct InterpolatorJob(float unscaledDeltaTime, double networkTime, ArraySegment<byte>[] snapshots, int amount) : IJob
+internal readonly struct InterpolatorJob(float unscaledDeltaTime, double networkTime, int amount) : IJob
 {
     [ReadOnly]
     public readonly float _unscaledDeltaTime = unscaledDeltaTime;
     [ReadOnly]
     private readonly double _networkTime = networkTime;
-    [ReadOnly]
-    private readonly ArraySegment<byte>[] _snapshots = snapshots;
     [ReadOnly]
     private readonly int _amount = amount;
 
@@ -24,7 +22,7 @@ internal readonly struct InterpolatorJob(float unscaledDeltaTime, double network
         IFikaNetworkManager netManager = Singleton<IFikaNetworkManager>.Instance;
         for (int i = 0; i < _amount; i++)
         {
-            ArraySegment<byte> buffer = _snapshots[i];
+            ArraySegment<byte> buffer = PlayerSnapshots.Snapshots[i];
             PlayerStatePacket packet = PlayerStatePacket.FromBuffer(in buffer);
             if (netManager.CoopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer player))
             {

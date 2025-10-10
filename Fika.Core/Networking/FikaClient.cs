@@ -123,7 +123,6 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
     private JobHandle _stateHandle;
     private int _snapshotCount;
     private GenericPacket _genericPacket;
-    private ArraySegment<byte>[] _snapshots;
 
     public async void Init()
     {
@@ -147,7 +146,6 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
         _inventoryOperations = new(8);
         _missingIds = [];
         _snapshotCount = 0;
-        _snapshots = new ArraySegment<byte>[512];
         ObservedCoopPlayers = [];
         PlayerAmount = 1;
 
@@ -160,6 +158,8 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
 
         _myProfileId = FikaBackendUtils.Profile.ProfileId;
         _genericPacket = new();
+
+        PlayerSnapshots.Init();
 
         RegisterPacketsAndTypes();
 
@@ -301,7 +301,7 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
     {
         _netClient?.PollEvents();
         _stateHandle = new UpdateInterpolators(Time.unscaledDeltaTime).ScheduleParallel(ObservedCoopPlayers.Count, 4,
-            new HandlePlayerStates(NetworkTimeSync.NetworkTime, _snapshots).ScheduleParallel(_snapshotCount, 4, default));
+            new HandlePlayerStates(NetworkTimeSync.NetworkTime).ScheduleParallel(_snapshotCount, 4, default));
 
         int inventoryOps = _inventoryOperations.Count;
         if (inventoryOps > 0)
@@ -340,7 +340,7 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
         {
             for (int i = 0; i < _snapshotCount; i++)
             {
-                ArraySegmentPooling.Return(_snapshots[i]);
+                ArraySegmentPooling.Return(PlayerSnapshots.Snapshots[i]);
             }
             _snapshotCount = 0;
         }
@@ -350,10 +350,10 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
     {
         _netClient?.Stop();
         _stateHandle.Complete();
-        _snapshots = null;
         _genericPacket.Clear();
 
         PoolUtils.ReleaseAll();
+        PlayerSnapshots.Clear();
 
         if (_fikaChat != null)
         {
@@ -500,9 +500,9 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
                 _packetProcessor.ReadAllPackets(reader, peer);
                 break;
             case EPacketType.PlayerState:
-                if (_snapshotCount < _snapshots.Length)
+                if (_snapshotCount < PlayerSnapshots.Snapshots.Length)
                 {
-                    _snapshots[_snapshotCount++] = ArraySegmentPooling.Get(reader.GetRemainingBytesSpan());
+                    PlayerSnapshots.Snapshots[_snapshotCount++] = ArraySegmentPooling.Get(reader.GetRemainingBytesSpan());
                 }
                 break;
             case EPacketType.BTR:
