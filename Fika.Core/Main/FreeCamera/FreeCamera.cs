@@ -197,7 +197,7 @@ public partial class FreeCamera : MonoBehaviour
         if (FikaPlugin.AllowSpectateBots.Value)
 #else
 
-        if (players.Count <= 0 && FikaPlugin.AllowSpectateBots.Value)
+        if (_players.Count == 0 && FikaPlugin.AllowSpectateBots.Value)
 #endif
         {
             _isSpectatingBots = true;
