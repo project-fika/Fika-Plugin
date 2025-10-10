@@ -8,14 +8,14 @@ using Unity.Jobs;
 
 namespace Fika.Core.Jobs;
 
-internal readonly struct InterpolatorJob(float unscaledDeltaTime, double networkTime, NativeArray<ArraySegment<byte>> snapshots, int amount) : IJob
+internal readonly struct InterpolatorJob(float unscaledDeltaTime, double networkTime, ArraySegment<byte>[] snapshots, int amount) : IJob
 {
     [ReadOnly]
     public readonly float _unscaledDeltaTime = unscaledDeltaTime;
     [ReadOnly]
     private readonly double _networkTime = networkTime;
     [ReadOnly]
-    private readonly NativeArray<ArraySegment<byte>> _snapshots = snapshots;
+    private readonly ArraySegment<byte>[] _snapshots = snapshots;
     [ReadOnly]
     private readonly int _amount = amount;
 

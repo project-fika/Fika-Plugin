@@ -8,12 +8,12 @@ using Unity.Jobs;
 
 namespace Fika.Core.Jobs;
 
-internal readonly struct HandlePlayerStates(double networkTime, NativeArray<ArraySegment<byte>> snapshots) : IJobFor
+internal readonly struct HandlePlayerStates(double networkTime, ArraySegment<byte>[] snapshots) : IJobFor
 {
     [ReadOnly]
     private readonly double _networkTime = networkTime;
     [ReadOnly]
-    private readonly NativeArray<ArraySegment<byte>> _snapshots = snapshots;
+    private readonly ArraySegment<byte>[] _snapshots = snapshots;
 
     public readonly void Execute(int index)
     {

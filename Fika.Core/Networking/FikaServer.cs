@@ -140,8 +140,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
     private Dictionary<Profile, bool> _visualProfiles;
     private Dictionary<string, int> _cachedConnections;
     private JobHandle _stateHandle;
-    [NativeDisableContainerSafetyRestriction]
-    private NativeArray<ArraySegment<byte>> _snapshots;
+    private ArraySegment<byte>[] _snapshots;
     private int _snapshotCount;
     private GenericPacket _genericPacket;
 
@@ -173,7 +172,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         _cachedConnections = [];
         _logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Server");
         _snapshotCount = 0;
-        _snapshots = _snapshots = new(512, Allocator.Persistent);
+        _snapshots = _snapshots = new ArraySegment<byte>[512];
         ObservedCoopPlayers = [];
         PlayerAmount = 1;
 
@@ -614,7 +613,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
     {
         _netServer?.Stop();
         _stateHandle.Complete();
-        _snapshots.Dispose();
+        _snapshots = null;
         _genericPacket.Clear();
 
         PoolUtils.ReleaseAll();

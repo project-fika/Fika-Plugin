@@ -123,10 +123,7 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
     private JobHandle _stateHandle;
     private int _snapshotCount;
     private GenericPacket _genericPacket;
-
-    [NativeDisableContainerSafetyRestriction]
-    [NativeDisableParallelForRestriction]
-    private NativeArray<ArraySegment<byte>> _snapshots;
+    private ArraySegment<byte>[] _snapshots;
 
     public async void Init()
     {
@@ -150,7 +147,7 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
         _inventoryOperations = new(8);
         _missingIds = [];
         _snapshotCount = 0;
-        _snapshots = new(512, Allocator.Persistent);
+        _snapshots = new ArraySegment<byte>[512];
         ObservedCoopPlayers = [];
         PlayerAmount = 1;
 
@@ -353,7 +350,7 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
     {
         _netClient?.Stop();
         _stateHandle.Complete();
-        _snapshots.Dispose();
+        _snapshots = null;
         _genericPacket.Clear();
 
         PoolUtils.ReleaseAll();
