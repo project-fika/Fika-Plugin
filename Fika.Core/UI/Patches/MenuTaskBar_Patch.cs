@@ -73,7 +73,7 @@ public class MenuTaskBar_Patch : ModulePatch
                             {
                                 Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonBottomBarClick);
                                 string installDir = Environment.CurrentDirectory;
-                                string fikaDir = installDir + @"SPT\user\fika";
+                                string fikaDir = installDir + @"\SPT\user\fika";
 
                                 if (!string.IsNullOrEmpty(installDir))
                                 {
