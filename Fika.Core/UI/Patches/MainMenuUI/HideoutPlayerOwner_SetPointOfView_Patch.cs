@@ -9,7 +9,8 @@ public class HideoutPlayerOwner_SetPointOfView_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(HideoutPlayerOwner).GetMethod(nameof(HideoutPlayerOwner.SetPointOfView));
+        return typeof(HideoutPlayerOwner)
+            .GetMethod(nameof(HideoutPlayerOwner.SetPointOfView));
     }
 
     [PatchPostfix]

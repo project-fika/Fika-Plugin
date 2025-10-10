@@ -9,7 +9,8 @@ public class MenuScreen_Awake_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(MenuScreen).GetMethod(nameof(MenuScreen.Awake));
+        return typeof(MenuScreen)
+            .GetMethod(nameof(MenuScreen.Awake));
     }
 
     [PatchPostfix]

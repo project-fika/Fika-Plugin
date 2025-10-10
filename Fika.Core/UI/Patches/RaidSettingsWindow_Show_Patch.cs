@@ -9,7 +9,8 @@ public class RaidSettingsWindow_Show_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(RaidSettingsWindow).GetMethod(nameof(RaidSettingsWindow.Show));
+        return typeof(RaidSettingsWindow)
+            .GetMethod(nameof(RaidSettingsWindow.Show));
     }
 
     [PatchPrefix]

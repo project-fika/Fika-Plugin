@@ -9,7 +9,8 @@ public class RagfairScreen_Show_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(RagfairScreen).GetMethod(nameof(RagfairScreen.Show));
+        return typeof(RagfairScreen)
+            .GetMethod(nameof(RagfairScreen.Show));
     }
 
     [PatchPostfix]

@@ -9,7 +9,8 @@ public class MenuScreen_method_9_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(MenuScreen).GetMethod(nameof(MenuScreen.method_9));
+        return typeof(MenuScreen)
+            .GetMethod(nameof(MenuScreen.method_9));
     }
 
     [PatchPostfix]
