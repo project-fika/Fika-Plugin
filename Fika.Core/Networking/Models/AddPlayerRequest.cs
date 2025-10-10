@@ -1,24 +1,23 @@
 using System.Runtime.Serialization;
 
-namespace Fika.Core.Networking.Http
+namespace Fika.Core.Networking.Models;
+
+[DataContract]
+public struct AddPlayerRequest
 {
-    [DataContract]
-    public struct AddPlayerRequest
+    [DataMember(Name = "serverId")]
+    public string ServerId;
+
+    [DataMember(Name = "profileId")]
+    public string ProfileId;
+
+    [DataMember(Name = "isSpectator")]
+    public bool IsSpectator;
+
+    public AddPlayerRequest(string serverId, string profileId, bool isSpectator)
     {
-        [DataMember(Name = "serverId")]
-        public string ServerId;
-
-        [DataMember(Name = "profileId")]
-        public string ProfileId;
-
-        [DataMember(Name = "isSpectator")]
-        public bool IsSpectator;
-
-        public AddPlayerRequest(string serverId, string profileId, bool isSpectator)
-        {
-            ServerId = serverId;
-            ProfileId = profileId;
-            IsSpectator = isSpectator;
-        }
+        ServerId = serverId;
+        ProfileId = profileId;
+        IsSpectator = isSpectator;
     }
 }

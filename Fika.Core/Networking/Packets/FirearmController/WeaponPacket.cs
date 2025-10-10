@@ -1,32 +1,48 @@
-﻿using Fika.Core.Coop.Players;
-using LiteNetLib.Utils;
-using static Fika.Core.Networking.SubPacket;
+﻿using Fika.Core.Main.Players;
+using Fika.Core.Networking.Pooling;
 
-namespace Fika.Core.Networking
+namespace Fika.Core.Networking.Packets.FirearmController;
+
+public class WeaponPacket : INetReusable
 {
-    public struct WeaponPacket : INetSerializable
+    public int NetId;
+    public EFirearmSubPacketType Type;
+    public IPoolSubPacket SubPacket;
+
+    public void Execute(FikaPlayer player = null)
     {
-        public int NetId;
-        public EFirearmSubPacketType Type;
-        public ISubPacket SubPacket;
+        SubPacket.Execute(player);
+    }
 
-        public void Execute(CoopPlayer player)
-        {
-            SubPacket.Execute(player);
-        }
+    public void Deserialize(NetDataReader reader)
+    {
+        NetId = reader.GetInt();
+        Type = reader.GetEnum<EFirearmSubPacketType>();
+        SubPacket = FirearmSubPacketPoolManager.Instance.GetPacket<IPoolSubPacket>(Type);
+        SubPacket.Deserialize(reader);
+    }
 
-        public void Deserialize(NetDataReader reader)
-        {
-            NetId = reader.GetInt();
-            Type = (EFirearmSubPacketType)reader.GetByte();
-            SubPacket = reader.GetFirearmSubPacket(Type);
-        }
+    public void Serialize(NetDataWriter writer)
+    {
+        writer.Put(NetId);
+        writer.PutEnum(Type);
+        SubPacket?.Serialize(writer);
+    }
 
-        public void Serialize(NetDataWriter writer)
+    public void Clear()
+    {
+        if (SubPacket != null)
         {
-            writer.Put(NetId);
-            writer.Put((byte)Type);
-            writer.PutFirearmSubPacket(SubPacket, Type);
+            FirearmSubPacketPoolManager.Instance.ReturnPacket(Type, SubPacket);
+            SubPacket = null;
+            Type = default;
         }
+    }
+
+    public void Flush()
+    {
+        FirearmSubPacketPoolManager.Instance.ReturnPacket(Type, SubPacket);
+        SubPacket = null;
+        Type = default;
     }
 }

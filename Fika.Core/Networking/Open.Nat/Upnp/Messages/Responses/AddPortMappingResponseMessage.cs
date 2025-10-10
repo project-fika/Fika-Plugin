@@ -26,9 +26,8 @@
 
 using System.Xml;
 
-namespace Open.Nat
+namespace Fika.Core.Networking.Open.Nat.Upnp.Messages.Responses;
+
+internal class AddPortMappingResponseMessage(XmlDocument response, string serviceType, string typeName) : ResponseMessageBase(response, serviceType, typeName)
 {
-    internal class AddPortMappingResponseMessage(XmlDocument response, string serviceType, string typeName) : ResponseMessageBase(response, serviceType, typeName)
-    {
-    }
 }

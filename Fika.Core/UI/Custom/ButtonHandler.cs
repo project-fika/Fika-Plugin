@@ -1,15 +1,14 @@
 ﻿using System.Collections;
 using TMPro;
-using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class ButtonHandler : MonoBehaviour, IPointerExitHandler, IPointerEnterHandler
 {
-    private Image handleImage;
-    private TextMeshProUGUI handleText;
-    private WaitForFixedUpdate fixedUpdateAwaiter;
-    private float alphaModifier;
+    private Image _handleImage;
+    private TextMeshProUGUI _handleText;
+    private WaitForFixedUpdate _fixedUpdateAwaiter;
+    private float _alphaModifier;
 
     [SerializeField]
 #pragma warning disable CS0169 // Remove unused private members
@@ -18,43 +17,43 @@ public class ButtonHandler : MonoBehaviour, IPointerExitHandler, IPointerEnterHa
 
     protected void Awake()
     {
-        fixedUpdateAwaiter = new();
-        alphaModifier = 0.15f;
+        _fixedUpdateAwaiter = new();
+        _alphaModifier = 0.15f;
     }
 
     protected void Start()
     {
-        handleImage = GetComponent<Image>();
-        handleText = GetComponentInChildren<TextMeshProUGUI>();
+        _handleImage = GetComponent<Image>();
+        _handleText = GetComponentInChildren<TextMeshProUGUI>();
     }
 
     private IEnumerator FadeButton()
     {
-        while (handleImage.color.a > 0)
+        while (_handleImage.color.a > 0)
         {
-            yield return fixedUpdateAwaiter;
-            handleImage.color = new Color(0.9059f, 0.898f, 0.8314f, handleImage.color.a - alphaModifier);
-            handleText.color = new Color(0, 0, 0, handleText.color.a - alphaModifier);
+            yield return _fixedUpdateAwaiter;
+            _handleImage.color = new Color(0.9059f, 0.898f, 0.8314f, _handleImage.color.a - _alphaModifier);
+            _handleText.color = new Color(0, 0, 0, _handleText.color.a - _alphaModifier);
         }
-        while (handleText.color.a < 1)
+        while (_handleText.color.a < 1)
         {
-            yield return fixedUpdateAwaiter;
-            handleText.color = new Color(0.9059f, 0.898f, 0.8314f, handleText.color.a + alphaModifier);
+            yield return _fixedUpdateAwaiter;
+            _handleText.color = new Color(0.9059f, 0.898f, 0.8314f, _handleText.color.a + _alphaModifier);
         }
     }
 
     private IEnumerator ShowButton()
     {
-        while (handleText.color.a > 0)
+        while (_handleText.color.a > 0)
         {
-            yield return fixedUpdateAwaiter;
-            handleText.color = new Color(0.9059f, 0.898f, 0.8314f, handleText.color.a - alphaModifier);
+            yield return _fixedUpdateAwaiter;
+            _handleText.color = new Color(0.9059f, 0.898f, 0.8314f, _handleText.color.a - _alphaModifier);
         }
-        while (handleImage.color.a < 1)
+        while (_handleImage.color.a < 1)
         {
-            yield return fixedUpdateAwaiter;
-            handleImage.color = new Color(0.9059f, 0.898f, 0.8314f, handleImage.color.a + alphaModifier);
-            handleText.color = new Color(0, 0, 0, handleText.color.a + alphaModifier);
+            yield return _fixedUpdateAwaiter;
+            _handleImage.color = new Color(0.9059f, 0.898f, 0.8314f, _handleImage.color.a + _alphaModifier);
+            _handleText.color = new Color(0, 0, 0, _handleText.color.a + _alphaModifier);
         }
     }
 

@@ -3,60 +3,47 @@ using JsonType;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 
-namespace Fika.Core.UI.Models
+namespace Fika.Core.UI.Models;
+
+[DataContract]
+public struct LobbyEntry(string serverId, string hostUsername, int playerCount,
+    LobbyEntry.ELobbyStatus status, string location, ESideType side, EDateTime time,
+    Dictionary<string, bool> players, bool isHeadless, string headlessRequesterNickname)
 {
-    [DataContract]
-    public struct LobbyEntry
+    [DataMember]
+    public string ServerId = serverId;
+
+    [DataMember]
+    public string HostUsername = hostUsername;
+
+    [DataMember]
+    public int PlayerCount = playerCount;
+
+    [DataMember]
+    public ELobbyStatus Status = status;
+
+    [DataMember]
+    public string Location = location;
+
+    [DataMember]
+    public ESideType Side = side;
+
+    [DataMember]
+    public EDateTime Time = time;
+
+    [DataMember]
+    public Dictionary<string, bool> Players = players;
+
+    [DataMember]
+    public bool IsHeadless = isHeadless;
+
+    [DataMember]
+    public string HeadlessRequesterNickname = headlessRequesterNickname;
+
+    public enum ELobbyStatus
     {
-        [DataMember]
-        public string ServerId;
-
-        [DataMember]
-        public string HostUsername;
-
-        [DataMember]
-        public int PlayerCount;
-
-        [DataMember]
-        public ELobbyStatus Status;
-
-        [DataMember]
-        public string Location;
-
-        [DataMember]
-        public ESideType Side;
-
-        [DataMember]
-        public EDateTime Time;
-
-        [DataMember]
-        public Dictionary<string, bool> Players;
-
-        [DataMember]
-        public bool IsHeadless;
-
-        [DataMember]
-        public string HeadlessRequesterNickname;
-
-        public LobbyEntry(string serverId, string hostUsername, int playerCount, ELobbyStatus status, string location, ESideType side, EDateTime time, Dictionary<string, bool> players, bool isHeadless, string headlessRequesterNickname)
-        {
-            ServerId = serverId;
-            HostUsername = hostUsername;
-            PlayerCount = playerCount;
-            Status = status;
-            Location = location;
-            Side = side;
-            Time = time;
-            Players = players;
-            IsHeadless = isHeadless;
-            HeadlessRequesterNickname = headlessRequesterNickname;
-        }
-
-        public enum ELobbyStatus
-        {
-            LOADING = 0,
-            IN_GAME = 1,
-            COMPLETE = 2
-        }
+        LOADING = 0,
+        IN_GAME = 1,
+        COMPLETE = 2
     }
 }

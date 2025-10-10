@@ -28,10 +28,9 @@
 
 using System.Collections.Generic;
 
-namespace Open.Nat
+namespace Fika.Core.Networking.Open.Nat.Upnp;
+
+internal abstract class RequestMessageBase
 {
-    internal abstract class RequestMessageBase
-    {
-        public abstract IDictionary<string, object> ToXml();
-    }
+    public abstract IDictionary<string, object> ToXml();
 }

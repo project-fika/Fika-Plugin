@@ -1,12 +1,6 @@
-﻿namespace Fika.Core.Modding.Events
-{
-    public class FikaRaidStartedEvent : FikaEvent
-    {
-        public bool IsServer;
+﻿namespace Fika.Core.Modding.Events;
 
-        internal FikaRaidStartedEvent(bool isServer)
-        {
-            IsServer = isServer;
-        }
-    }
+public class FikaRaidStartedEvent(bool isServer) : FikaEvent
+{
+    public bool IsServer = isServer;
 }

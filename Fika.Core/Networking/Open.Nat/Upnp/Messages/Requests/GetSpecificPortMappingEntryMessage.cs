@@ -26,29 +26,29 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+using Fika.Core.Networking.Open.Nat.Enums;
 using System.Collections.Generic;
 
-namespace Open.Nat
+namespace Fika.Core.Networking.Open.Nat.Upnp.Messages.Requests;
+
+internal class GetSpecificPortMappingEntryRequestMessage : RequestMessageBase
 {
-    internal class GetSpecificPortMappingEntryRequestMessage : RequestMessageBase
+    private readonly int _externalPort;
+    private readonly Protocol _protocol;
+
+    public GetSpecificPortMappingEntryRequestMessage(Protocol protocol, int externalPort)
     {
-        private readonly int _externalPort;
-        private readonly Protocol _protocol;
+        _protocol = protocol;
+        _externalPort = externalPort;
+    }
 
-        public GetSpecificPortMappingEntryRequestMessage(Protocol protocol, int externalPort)
-        {
-            _protocol = protocol;
-            _externalPort = externalPort;
-        }
-
-        public override IDictionary<string, object> ToXml()
-        {
-            return new Dictionary<string, object>
-                       {
-                           {"NewRemoteHost", string.Empty},
-                           {"NewExternalPort", _externalPort},
-                           {"NewProtocol", _protocol == Protocol.Tcp ? "TCP" : "UDP"}
-                       };
-        }
+    public override IDictionary<string, object> ToXml()
+    {
+        return new Dictionary<string, object>
+                   {
+                       {"NewRemoteHost", string.Empty},
+                       {"NewExternalPort", _externalPort},
+                       {"NewProtocol", _protocol == Protocol.Tcp ? "TCP" : "UDP"}
+                   };
     }
 }

@@ -1,67 +1,65 @@
 ﻿using EFT;
 using EFT.GlobalEvents;
-using LiteNetLib.Utils;
 
-namespace Fika.Core.Networking
+namespace Fika.Core.Networking.Packets.Communication;
+
+public class EventControllerEventPacket : INetSerializable
 {
-    public class EventControllerEventPacket : INetSerializable
+    public EEventType Type;
+    public SyncEventFromServer Event;
+
+    public void Deserialize(NetDataReader reader)
     {
-        public EEventType Type;
-        public SyncEventFromServer Event;
-
-        public void Deserialize(NetDataReader reader)
+        Type = (EEventType)reader.GetByte();
+        if (Type == EEventType.StateEvent)
         {
-            Type = (EEventType)reader.GetByte();
-            if (Type == EEventType.StateEvent)
+            RunddansStateEvent stateEvent = new()
             {
-                RunddansStateEvent stateEvent = new()
-                {
-                    PlayerId = reader.GetInt()
-                };
-                int amount = reader.GetInt();
-                stateEvent.Objects = new(amount);
-                for (int i = 0; i < amount; i++)
-                {
-                    stateEvent.Objects.Add(reader.GetInt(),
-                        (EventObject.EState)reader.GetByte());
-                }
-            }
-            else
+                PlayerId = reader.GetInt()
+            };
+            int amount = reader.GetInt();
+            stateEvent.Objects = new(amount);
+            for (int i = 0; i < amount; i++)
             {
-                Event = new RunddansMessagesEvent()
-                {
-                    PlayerId = reader.GetInt(),
-                    Type = (RunddansMessagesEvent.EType)reader.GetByte()
-                };
+                stateEvent.Objects.Add(reader.GetInt(),
+                    (EventObject.EState)reader.GetByte());
             }
         }
-
-        public void Serialize(NetDataWriter writer)
+        else
         {
-            writer.Put((byte)Type);
-            if (Type == EEventType.StateEvent)
+            Event = new RunddansMessagesEvent()
             {
-                RunddansStateEvent stateEvent = (RunddansStateEvent)Event;
-                writer.Put(stateEvent.PlayerId);
-                writer.Put(stateEvent.Objects.Count);
-                foreach ((int objectId, EventObject.EState state) in stateEvent.Objects)
-                {
-                    writer.Put(objectId);
-                    writer.Put((byte)state);
-                }
-            }
-            else
+                PlayerId = reader.GetInt(),
+                Type = (RunddansMessagesEvent.EType)reader.GetByte()
+            };
+        }
+    }
+
+    public void Serialize(NetDataWriter writer)
+    {
+        writer.Put((byte)Type);
+        if (Type == EEventType.StateEvent)
+        {
+            RunddansStateEvent stateEvent = (RunddansStateEvent)Event;
+            writer.Put(stateEvent.PlayerId);
+            writer.Put(stateEvent.Objects.Count);
+            foreach ((int objectId, EventObject.EState state) in stateEvent.Objects)
             {
-                RunddansMessagesEvent messagesEvent = (RunddansMessagesEvent)Event;
-                writer.Put(messagesEvent.PlayerId);
-                writer.Put((byte)messagesEvent.Type);
+                writer.Put(objectId);
+                writer.Put((byte)state);
             }
         }
-
-        public enum EEventType
+        else
         {
-            StateEvent,
-            MessageEvent
+            RunddansMessagesEvent messagesEvent = (RunddansMessagesEvent)Event;
+            writer.Put(messagesEvent.PlayerId);
+            writer.Put((byte)messagesEvent.Type);
         }
+    }
+
+    public enum EEventType
+    {
+        StateEvent,
+        MessageEvent
     }
 }

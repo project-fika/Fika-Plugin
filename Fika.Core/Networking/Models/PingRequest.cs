@@ -1,17 +1,16 @@
-using Fika.Core.Coop.Utils;
+using Fika.Core.Main.Utils;
 using System.Runtime.Serialization;
 
-namespace Fika.Core.Networking.Http
-{
-    [DataContract]
-    public struct PingRequest
-    {
-        [DataMember(Name = "serverId")]
-        public string ServerId;
+namespace Fika.Core.Networking.Models;
 
-        public PingRequest()
-        {
-            ServerId = FikaBackendUtils.GroupId;
-        }
+[DataContract]
+public struct PingRequest
+{
+    [DataMember(Name = "serverId")]
+    public string ServerId;
+
+    public PingRequest()
+    {
+        ServerId = FikaBackendUtils.GroupId;
     }
 }

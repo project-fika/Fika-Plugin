@@ -3,110 +3,109 @@ using Dissonance;
 using Dissonance.Datastructures;
 using Dissonance.Extensions;
 using Dissonance.Networking;
-using Fika.Core.Coop.Utils;
+using Fika.Core.Main.Utils;
 using System;
 using System.Collections.Generic;
 
-namespace Fika.Core.Networking.VOIP
+namespace Fika.Core.Networking.VOIP;
+
+public class FikaCommsNetwork : BaseCommsNetwork<FikaVOIPServer, FikaVOIPClient, FikaVOIPPeer, Unit, Unit>
 {
-    public class FikaCommsNetwork : BaseCommsNetwork<FikaVOIPServer, FikaVOIPClient, FikaVOIPPeer, Unit, Unit>
+    private readonly ConcurrentPool<byte[]> _loopbackBuffers = new(8, () => new byte[1024]);
+    private readonly List<ArraySegment<byte>> _loopbackQueue = [];
+
+    protected override FikaVOIPClient CreateClient(Unit connectionParameters)
     {
-        private readonly ConcurrentPool<byte[]> loopbackBuffers = new(8, () => new byte[1024]);
-        private readonly List<ArraySegment<byte>> loopbackQueue = [];
-
-        protected override FikaVOIPClient CreateClient(Unit connectionParameters)
+        FikaVOIPClient client = new(this);
+        if (FikaBackendUtils.IsClient)
         {
-            FikaVOIPClient client = new(this);
-            if (FikaBackendUtils.IsClient)
-            {
-                Singleton<FikaClient>.Instance.VOIPClient = client;
-            }
-            else
-            {
-                Singleton<FikaServer>.Instance.VOIPClient = client;
-            }
-            return client;
+            Singleton<FikaClient>.Instance.VOIPClient = client;
         }
-
-        protected override FikaVOIPServer CreateServer(Unit connectionParameters)
+        else
         {
-            FikaVOIPServer server = new(this);
-            Singleton<FikaServer>.Instance.VOIPServer = server;
-            return server;
+            Singleton<FikaServer>.Instance.VOIPClient = client;
         }
+        return client;
+    }
 
-        public bool PreprocessPacketToClient(ArraySegment<byte> packet, FikaVOIPPeer peer)
+    protected override FikaVOIPServer CreateServer(Unit connectionParameters)
+    {
+        FikaVOIPServer server = new(this);
+        Singleton<FikaServer>.Instance.VOIPServer = server;
+        return server;
+    }
+
+    public bool PreprocessPacketToClient(ArraySegment<byte> packet, FikaVOIPPeer peer)
+    {
+        if (Server == null)
         {
-            if (Server == null)
+            FikaGlobals.LogError("Server packet processing running, but this peer is not a server");
+            return true;
+        }
+        if (Client == null)
+        {
+            return false;
+        }
+        if (!peer.Peer.IsLocal)
+        {
+            return false;
+        }
+        if (Client != null)
+        {
+            _loopbackQueue.Add(packet.CopyToSegment(_loopbackBuffers.Get(), 0));
+        }
+        return true;
+    }
+
+    public bool PreprocessPacketToServer(ArraySegment<byte> packet)
+    {
+        if (Client == null)
+        {
+            FikaGlobals.LogError("Client packet processing running, but this peer is not a client");
+            return true;
+        }
+        if (Server == null)
+        {
+            return false;
+        }
+        Server.NetworkReceivedPacket(new(new LocalPeer()), packet);
+        return true;
+    }
+
+    protected override void Update()
+    {
+        if (IsInitialized)
+        {
+            if (FikaBackendUtils.IsClient && !Mode.IsClientEnabled())
             {
-                FikaGlobals.LogError("Server packet processing running, but this peer is not a server");
-                return true;
+                RunAsClient(Unit.None);
             }
-            if (Client == null)
+            else if (FikaBackendUtils.IsServer && !Mode.IsServerEnabled())
             {
-                return false;
+                if (FikaBackendUtils.IsHeadless)
+                {
+                    RunAsDedicatedServer(Unit.None);
+                }
+                else
+                {
+                    RunAsHost(Unit.None, Unit.None);
+                }
             }
-            if (!peer.Peer.IsLocal)
-            {
-                return false;
-            }
+        }
+        else if (Mode != NetworkMode.None)
+        {
+            Stop();
+            _loopbackQueue.Clear();
+        }
+        for (int i = 0; i < _loopbackQueue.Count; i++)
+        {
+            ArraySegment<byte> segment = _loopbackQueue[i];
             if (Client != null)
             {
-                loopbackQueue.Add(packet.CopyToSegment(loopbackBuffers.Get(), 0));
+                Client.NetworkReceivedPacket(segment);
             }
-            return true;
+            _loopbackBuffers.Put(segment.Array);
         }
-
-        public bool PreprocessPacketToServer(ArraySegment<byte> packet)
-        {
-            if (Client == null)
-            {
-                FikaGlobals.LogError("Client packet processing running, but this peer is not a client");
-                return true;
-            }
-            if (Server == null)
-            {
-                return false;
-            }
-            Server.NetworkReceivedPacket(new(new LocalPeer()), packet);
-            return true;
-        }
-
-        protected override void Update()
-        {
-            if (IsInitialized)
-            {
-                if (FikaBackendUtils.IsClient && !Mode.IsClientEnabled())
-                {
-                    RunAsClient(Unit.None);
-                }
-                else if (FikaBackendUtils.IsServer && !Mode.IsServerEnabled())
-                {
-                    if (FikaBackendUtils.IsHeadless)
-                    {
-                        RunAsDedicatedServer(Unit.None);
-                    }
-                    else
-                    {
-                        RunAsHost(Unit.None, Unit.None);
-                    }
-                }
-            }
-            else if (Mode != NetworkMode.None)
-            {
-                Stop();
-                loopbackQueue.Clear();
-            }
-            for (int i = 0; i < loopbackQueue.Count; i++)
-            {
-                ArraySegment<byte> segment = loopbackQueue[i];
-                if (Client != null)
-                {
-                    Client.NetworkReceivedPacket(segment);
-                }
-                loopbackBuffers.Put(segment.Array);
-            }
-            base.Update();
-        }
+        base.Update();
     }
 }

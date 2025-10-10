@@ -32,96 +32,96 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 
-namespace Open.Nat
+namespace Fika.Core.Networking.Open.Nat.Utils;
+
+internal static class StreamExtensions
 {
-    internal static class StreamExtensions
+    internal static string ReadAsMany(this StreamReader stream, int bytesToRead)
     {
-        internal static string ReadAsMany(this StreamReader stream, int bytesToRead)
+        var buffer = new char[bytesToRead];
+        stream.ReadBlock(buffer, 0, bytesToRead);
+        return new string(buffer);
+    }
+
+    internal static string GetXmlElementText(this XmlNode node, string elementName)
+    {
+        XmlElement element = node[elementName];
+        return element != null ? element.InnerText : string.Empty;
+    }
+
+    internal static bool ContainsIgnoreCase(this string s, string pattern)
+    {
+        return s.IndexOf(pattern, StringComparison.OrdinalIgnoreCase) >= 0;
+    }
+
+    internal static void LogInfo(this TraceSource source, string format, params object[] args)
+    {
+        try
         {
-            var buffer = new char[bytesToRead];
-            stream.ReadBlock(buffer, 0, bytesToRead);
-            return new string(buffer);
+            source.TraceEvent(TraceEventType.Information, 0, format, args);
         }
-
-        internal static string GetXmlElementText(this XmlNode node, string elementName)
+        catch (ObjectDisposedException)
         {
-            XmlElement element = node[elementName];
-            return element != null ? element.InnerText : string.Empty;
+            source.Switch.Level = SourceLevels.Off;
         }
+    }
 
-        internal static bool ContainsIgnoreCase(this string s, string pattern)
+    internal static void LogWarn(this TraceSource source, string format, params object[] args)
+    {
+        try
         {
-            return s.IndexOf(pattern, StringComparison.OrdinalIgnoreCase) >= 0;
+            source.TraceEvent(TraceEventType.Warning, 0, format, args);
         }
-
-        internal static void LogInfo(this TraceSource source, string format, params object[] args)
+        catch (ObjectDisposedException)
         {
-            try
-            {
-                source.TraceEvent(TraceEventType.Information, 0, format, args);
-            }
-            catch (ObjectDisposedException)
-            {
-                source.Switch.Level = SourceLevels.Off;
-            }
+            source.Switch.Level = SourceLevels.Off;
         }
+    }
 
-        internal static void LogWarn(this TraceSource source, string format, params object[] args)
+
+    internal static void LogError(this TraceSource source, string format, params object[] args)
+    {
+        try
         {
-            try
-            {
-                source.TraceEvent(TraceEventType.Warning, 0, format, args);
-            }
-            catch (ObjectDisposedException)
-            {
-                source.Switch.Level = SourceLevels.Off;
-            }
+            source.TraceEvent(TraceEventType.Error, 0, format, args);
         }
-
-
-        internal static void LogError(this TraceSource source, string format, params object[] args)
+        catch (ObjectDisposedException)
         {
-            try
-            {
-                source.TraceEvent(TraceEventType.Error, 0, format, args);
-            }
-            catch (ObjectDisposedException)
-            {
-                source.Switch.Level = SourceLevels.Off;
-            }
+            source.Switch.Level = SourceLevels.Off;
         }
+    }
 
-        internal static string ToPrintableXml(this XmlDocument document)
+    internal static string ToPrintableXml(this XmlDocument document)
+    {
+        using (var stream = new MemoryStream())
         {
-            using (var stream = new MemoryStream())
+            using (var writer = new XmlTextWriter(stream, Encoding.Unicode))
             {
-                using (var writer = new XmlTextWriter(stream, Encoding.Unicode))
+                try
                 {
-                    try
-                    {
-                        writer.Formatting = Formatting.Indented;
+                    writer.Formatting = Formatting.Indented;
 
-                        document.WriteContentTo(writer);
-                        writer.Flush();
-                        stream.Flush();
+                    document.WriteContentTo(writer);
+                    writer.Flush();
+                    stream.Flush();
 
-                        // Have to rewind the MemoryStream in order to read
-                        // its contents.
-                        stream.Position = 0;
+                    // Have to rewind the MemoryStream in order to read
+                    // its contents.
+                    stream.Position = 0;
 
-                        // Read MemoryStream contents into a StreamReader.
-                        var reader = new StreamReader(stream);
+                    // Read MemoryStream contents into a StreamReader.
+                    var reader = new StreamReader(stream);
 
-                        // Extract the text from the StreamReader.
-                        return reader.ReadToEnd();
-                    }
-                    catch (Exception)
-                    {
-                        return document.ToString();
-                    }
+                    // Extract the text from the StreamReader.
+                    return reader.ReadToEnd();
+                }
+                catch (Exception)
+                {
+                    return document.ToString();
                 }
             }
         }
+    }
 
 #if NET35
 		public static Task<TResult> TimeoutAfter<TResult>(this Task<TResult> task, TimeSpan timeout)
@@ -146,26 +146,26 @@ namespace Open.Nat
 				}).Unwrap();
 		}
 #else
-        public static async Task<TResult> TimeoutAfter<TResult>(this Task<TResult> task, TimeSpan timeout)
-        {
+    public static async Task<TResult> TimeoutAfter<TResult>(this Task<TResult> task, TimeSpan timeout)
+    {
 #if DEBUG
-            return await task;
+        return await task;
 #endif
 #pragma warning disable CS0162 // Unreachable code detected
-            var timeoutCancellationTokenSource = new CancellationTokenSource();
+        var timeoutCancellationTokenSource = new CancellationTokenSource();
 #pragma warning restore CS0162 // Unreachable code detected
 
-            Task completedTask = await Task.WhenAny(task, Task.Delay(timeout, timeoutCancellationTokenSource.Token));
-            if (completedTask == task)
-            {
-                timeoutCancellationTokenSource.Cancel();
-                return await task;
-            }
-            throw new TimeoutException(
-                "The operation has timed out. The network is broken, router has gone or is too busy.");
+        Task completedTask = await Task.WhenAny(task, Task.Delay(timeout, timeoutCancellationTokenSource.Token));
+        if (completedTask == task)
+        {
+            timeoutCancellationTokenSource.Cancel();
+            return await task;
         }
-#endif //NET35
+        throw new TimeoutException(
+            "The operation has timed out. The network is broken, router has gone or is too busy.");
     }
+#endif //NET35
+}
 
 #if NET35
 	internal static class EnumExtension
@@ -235,4 +235,3 @@ namespace Open.Nat
 		}
 	}
 #endif //NET35
-}

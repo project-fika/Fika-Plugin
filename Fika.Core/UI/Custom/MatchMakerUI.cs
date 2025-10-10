@@ -1,55 +1,32 @@
 ﻿using EFT.UI;
-using Fika.Core.Utils;
+using Fika.Core.Main.Utils;
 using TMPro;
-using UnityEngine;
 using UnityEngine.UI;
 
 public class MatchMakerUI : MonoBehaviour
 {
-    [SerializeField]
     public GameObject ServerBrowserPanel;
-    [SerializeField]
     public Button RefreshButton;
-    [SerializeField]
     public Button RaidGroupHostButton;
-    [SerializeField]
     public GameObject RaidGroupDefaultToClone;
-    [SerializeField]
     public GameObject DediSelection;
-    [SerializeField]
     public Button StartButton;
-    [SerializeField]
     public Button CloseButton;
-    [SerializeField]
     public Toggle DedicatedToggle;
-    [SerializeField]
     public GameObject LoadingScreen;
-    [SerializeField]
     public Image LoadingImage;
-    [SerializeField]
     public Toggle SpectatorToggle;
 
-    [SerializeField]
     public TextMeshProUGUI RaidsText;
-    [SerializeField]
     public TextMeshProUGUI JoinText;
-    [SerializeField]
     public TextMeshProUGUI HostRaidText;
-    [SerializeField]
     public TextMeshProUGUI SelectAmountText;
-    [SerializeField]
     public TextMeshProUGUI UseDedicatedHostText;
-    [SerializeField]
     public TextMeshProUGUI StartText;
-    [SerializeField]
     public TextMeshProUGUI LoadingAnimationText;
-    [SerializeField]
     public TextMeshProUGUI LoadingScreenHeaderText;
-    [SerializeField]
     public TextMeshProUGUI LoadingScreenInfoText;
-    [SerializeField]
     public TextMeshProUGUI JoinAsSpectatorText;
-    [SerializeField]
     public TMP_Dropdown HeadlessSelection;
 
     protected void Awake()

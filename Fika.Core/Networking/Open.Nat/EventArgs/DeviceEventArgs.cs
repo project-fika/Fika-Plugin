@@ -26,15 +26,14 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-namespace Open.Nat
-{
-    internal class DeviceEventArgs : System.EventArgs
-    {
-        public DeviceEventArgs(NatDevice device)
-        {
-            Device = device;
-        }
+namespace Fika.Core.Networking.Open.Nat.EventArgs;
 
-        public NatDevice Device { get; private set; }
+internal class DeviceEventArgs : System.EventArgs
+{
+    public DeviceEventArgs(NatDevice device)
+    {
+        Device = device;
     }
+
+    public NatDevice Device { get; private set; }
 }

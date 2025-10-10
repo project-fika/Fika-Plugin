@@ -1,54 +1,44 @@
 using EFT;
 using JsonType;
+using System;
 using System.Runtime.Serialization;
 
-namespace Fika.Core.Networking.Http
+namespace Fika.Core.Networking.Models;
+
+[DataContract]
+public struct CreateMatch(string raidCode, MongoID serverId, Guid serverGuid, string hostUsername, bool isSpectator,
+    long timestamp, RaidSettings settings, uint crc32, ESideType side, EDateTime time)
 {
-    [DataContract]
-    public struct CreateMatch
-    {
-        [DataMember(Name = "raidCode")]
-        public string RaidCode;
+    [DataMember(Name = "raidCode")]
+    public string RaidCode = raidCode;
 
-        [DataMember(Name = "serverId")]
-        public string ServerId;
+    [DataMember(Name = "serverId")]
+    public MongoID ServerId = serverId;
 
-        [DataMember(Name = "hostUsername")]
-        public string HostUsername;
+    [DataMember(Name = "serverGuid")]
+    public Guid ServerGuid = serverGuid;
 
-        [DataMember(Name = "timestamp")]
-        public long Timestamp;
+    [DataMember(Name = "hostUsername")]
+    public string HostUsername = hostUsername;
 
-        [DataMember(Name = "settings")]
-        public RaidSettings Settings;
+    [DataMember(Name = "timestamp")]
+    public long Timestamp = timestamp;
 
-        [DataMember(Name = "gameVersion")]
-        public string GameVersion;
+    [DataMember(Name = "settings")]
+    public RaidSettings Settings = settings;
 
-        [DataMember(Name = "crc32")]
-        public uint Crc32;
+    [DataMember(Name = "gameVersion")]
+    public string GameVersion = FikaPlugin.EFTVersionMajor;
 
-        [DataMember(Name = "side")]
-        public ESideType Side;
+    [DataMember(Name = "crc32")]
+    public uint Crc32 = crc32;
 
-        [DataMember(Name = "time")]
-        public EDateTime Time;
+    [DataMember(Name = "side")]
+    public ESideType Side = side;
 
-        [DataMember(Name = "isSpectator")]
-        public bool IsSpectator;
+    [DataMember(Name = "time")]
+    public EDateTime Time = time;
 
-        public CreateMatch(string raidCode, string serverId, string hostUsername, bool isSpectator, long timestamp, RaidSettings settings, uint crc32, ESideType side, EDateTime time)
-        {
-            RaidCode = raidCode;
-            ServerId = serverId;
-            HostUsername = hostUsername;
-            Timestamp = timestamp;
-            Settings = settings;
-            GameVersion = FikaPlugin.EFTVersionMajor;
-            Crc32 = crc32;
-            Side = side;
-            Time = time;
-            IsSpectator = isSpectator;
-        }
-    }
+    [DataMember(Name = "isSpectator")]
+    public bool IsSpectator = isSpectator;
 }

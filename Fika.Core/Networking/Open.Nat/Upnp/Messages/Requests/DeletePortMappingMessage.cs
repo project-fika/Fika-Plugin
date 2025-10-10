@@ -26,27 +26,27 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+using Fika.Core.Networking.Open.Nat.Enums;
 using System.Collections.Generic;
 
-namespace Open.Nat
+namespace Fika.Core.Networking.Open.Nat.Upnp.Messages.Requests;
+
+internal class DeletePortMappingRequestMessage : RequestMessageBase
 {
-    internal class DeletePortMappingRequestMessage : RequestMessageBase
+    private readonly Mapping _mapping;
+
+    public DeletePortMappingRequestMessage(Mapping mapping)
     {
-        private readonly Mapping _mapping;
+        _mapping = mapping;
+    }
 
-        public DeletePortMappingRequestMessage(Mapping mapping)
-        {
-            _mapping = mapping;
-        }
-
-        public override IDictionary<string, object> ToXml()
-        {
-            return new Dictionary<string, object>
-                       {
-                           {"NewRemoteHost", string.Empty},
-                           {"NewExternalPort", _mapping.PublicPort},
-                           {"NewProtocol", _mapping.Protocol == Protocol.Tcp ? "TCP" : "UDP"}
-                       };
-        }
+    public override IDictionary<string, object> ToXml()
+    {
+        return new Dictionary<string, object>
+                   {
+                       {"NewRemoteHost", string.Empty},
+                       {"NewExternalPort", _mapping.PublicPort},
+                       {"NewProtocol", _mapping.Protocol == Protocol.Tcp ? "TCP" : "UDP"}
+                   };
     }
 }

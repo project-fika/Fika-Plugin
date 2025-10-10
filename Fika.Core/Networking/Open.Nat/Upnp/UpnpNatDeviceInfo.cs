@@ -24,37 +24,37 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+using Fika.Core.Networking.Open.Nat.Utils;
 using System;
 using System.Net;
 
-namespace Open.Nat
+namespace Fika.Core.Networking.Open.Nat.Upnp;
+
+internal class UpnpNatDeviceInfo
 {
-    internal class UpnpNatDeviceInfo
+    public UpnpNatDeviceInfo(IPAddress localAddress, Uri locationUri, string serviceControlUrl, string serviceType)
     {
-        public UpnpNatDeviceInfo(IPAddress localAddress, Uri locationUri, string serviceControlUrl, string serviceType)
+        LocalAddress = localAddress;
+        ServiceType = serviceType;
+        HostEndPoint = new IPEndPoint(IPAddress.Parse(locationUri.Host), locationUri.Port);
+
+        if (Uri.IsWellFormedUriString(serviceControlUrl, UriKind.Absolute))
         {
-            LocalAddress = localAddress;
-            ServiceType = serviceType;
-            HostEndPoint = new IPEndPoint(IPAddress.Parse(locationUri.Host), locationUri.Port);
+            var u = new Uri(serviceControlUrl);
+            IPEndPoint old = HostEndPoint;
+            serviceControlUrl = u.PathAndQuery;
 
-            if (Uri.IsWellFormedUriString(serviceControlUrl, UriKind.Absolute))
-            {
-                var u = new Uri(serviceControlUrl);
-                IPEndPoint old = HostEndPoint;
-                serviceControlUrl = u.PathAndQuery;
-
-                NatDiscoverer.TraceSource.LogInfo("{0}: Absolute URI detected. Host address is now: {1}", old,
-                                                  HostEndPoint);
-                NatDiscoverer.TraceSource.LogInfo("{0}: New control url: {1}", HostEndPoint, serviceControlUrl);
-            }
-
-            var builder = new UriBuilder("http", locationUri.Host, locationUri.Port);
-            ServiceControlUri = new Uri(builder.Uri, serviceControlUrl); ;
+            NatDiscoverer.TraceSource.LogInfo("{0}: Absolute URI detected. Host address is now: {1}", old,
+                                              HostEndPoint);
+            NatDiscoverer.TraceSource.LogInfo("{0}: New control url: {1}", HostEndPoint, serviceControlUrl);
         }
 
-        public IPEndPoint HostEndPoint { get; private set; }
-        public IPAddress LocalAddress { get; private set; }
-        public string ServiceType { get; private set; }
-        public Uri ServiceControlUri { get; private set; }
+        var builder = new UriBuilder("http", locationUri.Host, locationUri.Port);
+        ServiceControlUri = new Uri(builder.Uri, serviceControlUrl); ;
     }
+
+    public IPEndPoint HostEndPoint { get; private set; }
+    public IPAddress LocalAddress { get; private set; }
+    public string ServiceType { get; private set; }
+    public Uri ServiceControlUri { get; private set; }
 }

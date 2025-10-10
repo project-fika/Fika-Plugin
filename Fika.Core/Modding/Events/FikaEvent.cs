@@ -1,6 +1,5 @@
-﻿namespace Fika.Core.Modding.Events
+﻿namespace Fika.Core.Modding.Events;
+
+public abstract class FikaEvent
 {
-    public abstract class FikaEvent
-    {
-    }
 }

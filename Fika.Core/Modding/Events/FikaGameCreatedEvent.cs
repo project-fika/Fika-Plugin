@@ -1,14 +1,8 @@
-﻿using Fika.Core.Coop.GameMode;
+﻿using Fika.Core.Main.GameMode;
 
-namespace Fika.Core.Modding.Events
+namespace Fika.Core.Modding.Events;
+
+public class FikaGameCreatedEvent(IFikaGame game) : FikaEvent
 {
-    public class FikaGameCreatedEvent : FikaEvent
-    {
-        public IFikaGame Game { get; }
-
-        internal FikaGameCreatedEvent(IFikaGame game)
-        {
-            this.Game = game;
-        }
-    }
+    public IFikaGame Game { get; } = game;
 }

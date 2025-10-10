@@ -24,20 +24,19 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-namespace Open.Nat
+namespace Fika.Core.Networking.Open.Nat.Enums;
+
+/// <summary>
+/// Protocol to allow/disallow 
+/// </summary>
+public enum Protocol
 {
     /// <summary>
-    /// Protocol to allow/disallow 
+    /// Transport Control Protocol
     /// </summary>
-    public enum Protocol
-    {
-        /// <summary>
-        /// Transport Control Protocol
-        /// </summary>
-        Tcp,
-        /// <summary>
-        /// Datagram Protocol
-        /// </summary>
-        Udp
-    }
+    Tcp,
+    /// <summary>
+    /// Datagram Protocol
+    /// </summary>
+    Udp
 }

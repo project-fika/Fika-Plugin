@@ -1,22 +1,28 @@
 ﻿using Comfort.Common;
-using Fika.Core.Coop.Players;
+using Fika.Core.Main.Players;
 using Fika.Core.Networking;
+using Fika.Core.Networking.Packets.Player;
+using System;
+using Unity.Collections;
 using Unity.Jobs;
 
-namespace Fika.Core.Jobs
-{
-    internal struct HandlePlayerStates(double networkTime) : IJobParallelFor
-    {
-        private readonly double _networkTime = networkTime;
+namespace Fika.Core.Jobs;
 
-        public void Execute(int index)
+internal readonly struct HandlePlayerStates(double networkTime, NativeArray<ArraySegment<byte>> snapshots) : IJobFor
+{
+    [ReadOnly]
+    private readonly double _networkTime = networkTime;
+    [ReadOnly]
+    private readonly NativeArray<ArraySegment<byte>> _snapshots = snapshots;
+
+    public readonly void Execute(int index)
+    {
+        IFikaNetworkManager manager = Singleton<IFikaNetworkManager>.Instance;
+        ArraySegment<byte> buffer = _snapshots[index];
+        PlayerStatePacket packet = PlayerStatePacket.FromBuffer(in buffer);
+        if (manager.CoopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer player))
         {
-            IFikaNetworkManager manager = Singleton<IFikaNetworkManager>.Instance;
-            PlayerStatePacket packet = manager.Snapshots[index];
-            if (manager.CoopHandler.Players.TryGetValue(packet.NetId, out CoopPlayer player))
-            {
-                player.Snapshotter.Insert(packet, _networkTime);
-            }
+            player.Snapshotter.Insert(ref packet, _networkTime);
         }
     }
 }

@@ -1,20 +1,19 @@
 using System.Runtime.Serialization;
 
-namespace Fika.Core.Networking.Http
+namespace Fika.Core.Networking.Models;
+
+[DataContract]
+public struct MatchJoinRequest
 {
-    [DataContract]
-    public struct MatchJoinRequest
+    [DataMember(Name = "serverId")]
+    public string ServerId;
+
+    [DataMember(Name = "profileId")]
+    public string ProfileId;
+
+    public MatchJoinRequest(string serverId, string profileId)
     {
-        [DataMember(Name = "serverId")]
-        public string ServerId;
-
-        [DataMember(Name = "profileId")]
-        public string ProfileId;
-
-        public MatchJoinRequest(string serverId, string profileId)
-        {
-            ServerId = serverId;
-            ProfileId = profileId;
-        }
+        ServerId = serverId;
+        ProfileId = profileId;
     }
 }

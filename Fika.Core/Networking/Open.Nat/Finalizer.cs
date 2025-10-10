@@ -23,15 +23,16 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
-namespace Open.Nat
+using Fika.Core.Networking.Open.Nat.Utils;
+
+namespace Fika.Core.Networking.Open.Nat;
+
+sealed class Finalizer
 {
-    sealed class Finalizer
+    ~Finalizer()
     {
-        ~Finalizer()
-        {
-            NatDiscoverer.TraceSource.LogInfo("Closing ports opened in this session");
-            NatDiscoverer.RenewTimer.Dispose();
-            NatDiscoverer.ReleaseSessionMappings();
-        }
+        NatDiscoverer.TraceSource.LogInfo("Closing ports opened in this session");
+        NatDiscoverer.RenewTimer.Dispose();
+        NatDiscoverer.ReleaseSessionMappings();
     }
 }

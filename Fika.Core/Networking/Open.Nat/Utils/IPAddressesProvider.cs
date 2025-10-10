@@ -31,40 +31,39 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 
-namespace Open.Nat
+namespace Fika.Core.Networking.Open.Nat.Utils;
+
+internal class IPAddressesProvider : IIPAddressesProvider
 {
-    internal class IPAddressesProvider : IIPAddressesProvider
+    #region IIPAddressesProvider Members
+
+    public IEnumerable<IPAddress> UnicastAddresses()
     {
-        #region IIPAddressesProvider Members
+        return IPAddresses(p => p.UnicastAddresses.Select(x => x.Address));
+    }
 
-        public IEnumerable<IPAddress> UnicastAddresses()
-        {
-            return IPAddresses(p => p.UnicastAddresses.Select(x => x.Address));
-        }
+    public IEnumerable<IPAddress> DnsAddresses()
+    {
+        return IPAddresses(p => p.DnsAddresses);
+    }
 
-        public IEnumerable<IPAddress> DnsAddresses()
-        {
-            return IPAddresses(p => p.DnsAddresses);
-        }
+    public IEnumerable<IPAddress> GatewayAddresses()
+    {
+        return IPAddresses(p => p.GatewayAddresses.Select(x => x.Address));
+    }
 
-        public IEnumerable<IPAddress> GatewayAddresses()
-        {
-            return IPAddresses(p => p.GatewayAddresses.Select(x => x.Address));
-        }
+    #endregion
 
-        #endregion
-
-        private static IEnumerable<IPAddress> IPAddresses(Func<IPInterfaceProperties, IEnumerable<IPAddress>> ipExtractor)
-        {
-            return from networkInterface in NetworkInterface.GetAllNetworkInterfaces()
-                   where
-                       networkInterface.OperationalStatus == OperationalStatus.Up ||
-                       networkInterface.OperationalStatus == OperationalStatus.Unknown
-                   let properties = networkInterface.GetIPProperties()
-                   from address in ipExtractor(properties)
-                   where address.AddressFamily == AddressFamily.InterNetwork
-                      || address.AddressFamily == AddressFamily.InterNetworkV6
-                   select address;
-        }
+    private static IEnumerable<IPAddress> IPAddresses(Func<IPInterfaceProperties, IEnumerable<IPAddress>> ipExtractor)
+    {
+        return from networkInterface in NetworkInterface.GetAllNetworkInterfaces()
+               where
+                   networkInterface.OperationalStatus == OperationalStatus.Up ||
+                   networkInterface.OperationalStatus == OperationalStatus.Unknown
+               let properties = networkInterface.GetIPProperties()
+               from address in ipExtractor(properties)
+               where address.AddressFamily == AddressFamily.InterNetwork
+                  || address.AddressFamily == AddressFamily.InterNetworkV6
+               select address;
     }
 }
