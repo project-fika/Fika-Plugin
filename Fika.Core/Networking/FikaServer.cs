@@ -612,7 +612,18 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
     protected void OnDestroy()
     {
         _netServer?.Stop();
-        _stateHandle.Complete();
+        try
+        {
+            _stateHandle.Complete();
+        }
+        finally
+        {
+            for (int i = 0; i < _snapshotCount; i++)
+            {
+                ArraySegmentPooling.Return(PlayerSnapshots.Snapshots[i]);
+            }
+            _snapshotCount = 0;
+        }
         _genericPacket.Clear();
 
 
@@ -962,7 +973,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
                 if (VOIPServer != null)
                 {
                     VOIPServer.NetworkReceivedPacket(new(new RemotePeer(peer)),
-                                reader.GetRemainingBytesSegment());
+                        reader.GetRemainingBytesSegment());
                 }
                 break;
         }
