@@ -375,10 +375,7 @@ public partial class FreeCamera : MonoBehaviour
         {
             if (_isFollowing)
             {
-                if ((FikaPlugin.Instance.AllowSpectateFreeCam || _isSpectator) && _isSpectatingBots)
-                {
-                    DetachCamera();
-                }
+                DetachCamera();
             }
             else
             {
