@@ -420,15 +420,10 @@ public partial class FreeCamera : MonoBehaviour
         }
 
         var fastMode = Input.GetKey(KeyCode.LeftShift);
-        if (Input.GetKeyDown(KeyCode.LeftControl))
-        {
-            _superFastMode = !_superFastMode;
-        }
-
         var movementSpeed = fastMode ? 20f : 2f;
         var deltaTime = Time.deltaTime;
 
-        if (_superFastMode)
+        if (Input.GetKeyDown(KeyCode.LeftControl))
         {
             movementSpeed *= 12;
         }
