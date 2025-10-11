@@ -380,6 +380,7 @@ public partial class FreeCamera : MonoBehaviour
             else
             {
                 _isFollowing = true;
+                SwitchSpectateMode();
             }
         }
 
