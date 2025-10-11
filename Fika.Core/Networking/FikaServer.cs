@@ -835,7 +835,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
             if (data == guid)
             {
                 bool reconnect = reader.GetBool();
-                resp.Put(started && reconnect ? "fika.inprogress" : "fika.hello");
+                resp.Put(started && !reconnect ? "fika.inprogress" : "fika.hello");
                 _netServer.SendUnconnectedMessage(resp.AsReadOnlySpan, remoteEndPoint);
             }
             else if (data == "fika.keepalive")
