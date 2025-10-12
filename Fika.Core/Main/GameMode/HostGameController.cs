@@ -300,7 +300,7 @@ public class HostGameController : BaseGameController, IBotGame
         {
             if (elapsedSeconds >= _botTimeout)
             {
-                Logger.LogWarning("WaitForPlayersToLoadBotProfile::Took too long for every player to load the bot, force spawning!");
+                Logger.LogWarning($"WaitForPlayersToLoadBotProfile::Took too long for every player to load the bot with id {netId}, force spawning!");
                 _botQueue.Remove(netId);
                 return;
             }
