@@ -15,6 +15,7 @@ using Fika.Core.Main.Components;
 using Fika.Core.Main.FreeCamera;
 using Fika.Core.Main.HostClasses;
 using Fika.Core.Main.ObservedClasses;
+using Fika.Core.Main.Patches.LocalGame;
 using Fika.Core.Main.Patches.Overrides;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
@@ -683,6 +684,7 @@ public class HostGameController : BaseGameController, IBotGame
 
         if (Location.EventTrapsData != null)
         {
+            Logger.LogInfo("Loading trap data");
             LabyrinthSyncableTrapClass.InitLabyrinthSyncableTraps(Location.EventTrapsData);
             _gameWorld.SyncModule = new();
         }
@@ -1001,6 +1003,7 @@ public class HostGameController : BaseGameController, IBotGame
     {
         if (Location.EventTrapsData == null)
         {
+            Logger.LogError("EventTrapsData was null when trying to sync trap data!");
             return;
         }
 
