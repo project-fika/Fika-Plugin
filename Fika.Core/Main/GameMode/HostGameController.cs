@@ -1007,6 +1007,7 @@ public class HostGameController : BaseGameController, IBotGame
         if (_gameWorld.SyncModule == null)
         {
             Logger.LogError("SyncModule was null when trying to sync trap data!");
+            return;
         }
 
         GClass1368 writer = new(new byte[2048]);
