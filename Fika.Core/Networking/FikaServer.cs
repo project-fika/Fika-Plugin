@@ -887,7 +887,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
 
     public void OnPeerDisconnected(NetPeer peer, DisconnectInfo disconnectInfo)
     {
-        _logger.LogInfo("Peer disconnected " + peer.Port + ", info: " + disconnectInfo.Reason);
+        _logger.LogInfo($"Peer disconnected {peer.Port}, info: {disconnectInfo.Reason}");
         if (disconnectInfo.Reason != DisconnectReason.RemoteConnectionClose)
         {
             NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.PEER_DISCONNECTED.Localized(), [peer.Port, disconnectInfo.Reason]),
