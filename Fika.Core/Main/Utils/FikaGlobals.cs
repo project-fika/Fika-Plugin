@@ -54,7 +54,7 @@ public static class FikaGlobals
         {
             if (_inputTree == null)
             {
-                GameObject inputObj = GameObject.Find("___Input")
+                var inputObj = GameObject.Find("___Input")
                     ?? throw new NullReferenceException("Could not find InputTree object!");
 
                 _inputTree = inputObj.GetComponent<InputTree>();
@@ -76,7 +76,7 @@ public static class FikaGlobals
                 _voipHandler.VoipQualitySettings.Apply();
                 _voipHandler.MicrophoneChecked = SoundSettingsControllerClass.CheckMicrophone();
                 _voipHandler.VoipEnabled = true;
-                PushToTalkSettingsClass pttSettings = _voipHandler.PushToTalkSettings;
+                var pttSettings = _voipHandler.PushToTalkSettings;
                 pttSettings.SpeakingSecondsLimit = 20f;
                 pttSettings.BlockingTime = 5f;
             }
@@ -146,10 +146,10 @@ public static class FikaGlobals
 
     internal static string FormatFileSize(long bytes)
     {
-        int unit = 1024;
+        var unit = 1024;
         if (bytes < unit) { return $"{bytes} B"; }
 
-        int exp = (int)(Math.Log(bytes) / Math.Log(unit));
+        var exp = (int)(Math.Log(bytes) / Math.Log(unit));
         return $"{bytes / Math.Pow(unit, exp):F2} {("KMGTPE")[exp - 1]}B";
     }
 
@@ -161,15 +161,11 @@ public static class FikaGlobals
     private static IEnumerator SpawnItemRoutine(Item item, FikaPlayer player)
     {
         List<ResourceKey> collection = [];
-        IEnumerable<Item> items = item.GetAllItems();
-        foreach (Item subItem in items)
+        foreach (var subItem in item.GetAllItems())
         {
-            foreach (ResourceKey resourceKey in subItem.Template.AllResources)
-            {
-                collection.Add(resourceKey);
-            }
+            collection.AddRange(subItem.Template.AllResources);
         }
-        Task loadTask = Singleton<PoolManagerClass>.Instance.LoadBundlesAndCreatePools(PoolManagerClass.PoolsCategory.Raid, PoolManagerClass.AssemblyType.Online,
+        var loadTask = Singleton<PoolManagerClass>.Instance.LoadBundlesAndCreatePools(PoolManagerClass.PoolsCategory.Raid, PoolManagerClass.AssemblyType.Online,
             [.. collection], JobPriorityClass.Immediate, null, default);
 
         WaitForEndOfFrame waitForEndOfFrame = new();
@@ -220,7 +216,7 @@ public static class FikaGlobals
     /// <returns><see cref="ISession"/> of the application</returns>
     public static ISession GetSession()
     {
-        if (TarkovApplication.Exist(out TarkovApplication tarkovApplication))
+        if (TarkovApplication.Exist(out var tarkovApplication))
         {
             return tarkovApplication.Session;
         }
@@ -236,7 +232,7 @@ public static class FikaGlobals
     /// <returns><see cref="Profile"/> of chosen side</returns>
     public static Profile GetProfile(bool scav)
     {
-        ISession session = GetSession();
+        var session = GetSession();
         if (session == null)
         {
             _logger.LogError("GetProfile: Session was null!");
@@ -258,7 +254,7 @@ public static class FikaGlobals
     /// <returns>A trimmed <see cref="Profile"/> of chosen side</returns>
     public static Profile GetLiteProfile(bool scav)
     {
-        Profile profile = GetProfile(scav);
+        var profile = GetProfile(scav);
         CompleteProfileDescriptorClass liteDescriptor = new(profile, SearchControllerSerializer)
         {
             Encyclopedia = [],
@@ -320,8 +316,8 @@ public static class FikaGlobals
     /// <param name="action"></param>
     public static Action<T> ClearDelegates<T>(Action<T> action) where T : class
     {
-        Delegate[] list = action.GetInvocationList();
-        for (int i = 0; i < list.Length; i++)
+        var list = action.GetInvocationList();
+        for (var i = 0; i < list.Length; i++)
         {
 #if DEBUG
             LogWarning($"Clearing {list[i].Method.Name}");
@@ -342,8 +338,8 @@ public static class FikaGlobals
         where T : class
         where Y : class
     {
-        Delegate[] list = action.GetInvocationList();
-        for (int i = 0; i < list.Length; i++)
+        var list = action.GetInvocationList();
+        for (var i = 0; i < list.Length; i++)
         {
 #if DEBUG
             LogWarning($"Clearing {list[i].Method.Name}");
