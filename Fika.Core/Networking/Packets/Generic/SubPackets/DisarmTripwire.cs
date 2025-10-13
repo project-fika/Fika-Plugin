@@ -7,7 +7,7 @@ using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.Generic.SubPackets;
 
-public class DisarmTripwire : IPoolSubPacket
+public sealed class DisarmTripwire : IPoolSubPacket
 {
     public AirplaneDataPacketStruct Data;
 

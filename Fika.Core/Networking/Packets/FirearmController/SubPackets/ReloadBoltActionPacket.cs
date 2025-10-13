@@ -4,7 +4,7 @@ using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
-public class ReloadBoltActionPacket : IPoolSubPacket
+public sealed class ReloadBoltActionPacket : IPoolSubPacket
 {
     private ReloadBoltActionPacket()
     {

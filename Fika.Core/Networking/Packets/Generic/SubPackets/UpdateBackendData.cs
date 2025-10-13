@@ -4,7 +4,7 @@ using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.Generic.SubPackets;
 
-public class UpdateBackendData : IPoolSubPacket
+public sealed class UpdateBackendData : IPoolSubPacket
 {
     public int PlayerAmount;
 

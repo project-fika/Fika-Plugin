@@ -5,7 +5,7 @@ using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
-public class ChangeFireModePacket : IPoolSubPacket
+public sealed class ChangeFireModePacket : IPoolSubPacket
 {
     private ChangeFireModePacket()
     {

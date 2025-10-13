@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Fika.Core.Networking.Packets.Generic.SubPackets;
 
-public class CharacterSyncPacket : IPoolSubPacket
+public sealed class CharacterSyncPacket : IPoolSubPacket
 {
     private CharacterSyncPacket()
     {

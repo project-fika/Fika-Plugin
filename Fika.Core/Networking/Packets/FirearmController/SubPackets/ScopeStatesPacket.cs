@@ -4,7 +4,7 @@ using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
-public class ScopeStatesPacket : IPoolSubPacket
+public sealed class ScopeStatesPacket : IPoolSubPacket
 {
     private ScopeStatesPacket()
     {

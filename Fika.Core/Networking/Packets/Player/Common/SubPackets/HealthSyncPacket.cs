@@ -9,7 +9,7 @@ using static NetworkHealthSyncPacketStruct.NetworkHealthExtraDataTypeStruct;
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
-public class HealthSyncPacket : IPoolSubPacket
+public sealed class HealthSyncPacket : IPoolSubPacket
 {
     private HealthSyncPacket() { }
 

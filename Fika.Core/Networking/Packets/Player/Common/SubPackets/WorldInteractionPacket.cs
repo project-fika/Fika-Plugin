@@ -9,7 +9,7 @@ using static Fika.Core.Main.Players.FikaPlayer;
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
-public class WorldInteractionPacket : IPoolSubPacket
+public sealed class WorldInteractionPacket : IPoolSubPacket
 {
     private WorldInteractionPacket()
     {

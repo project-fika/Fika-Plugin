@@ -6,7 +6,7 @@ using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
-public class ContainerInteractionPacket : IPoolSubPacket
+public sealed class ContainerInteractionPacket : IPoolSubPacket
 {
     private ContainerInteractionPacket()
     {

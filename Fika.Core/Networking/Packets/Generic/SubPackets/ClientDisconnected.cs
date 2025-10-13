@@ -5,7 +5,7 @@ using static Fika.Core.UI.FikaUIGlobals;
 
 namespace Fika.Core.Networking.Packets.Generic.SubPackets;
 
-public class ClientDisconnected : IPoolSubPacket
+public sealed class ClientDisconnected : IPoolSubPacket
 {
     public string Name;
 

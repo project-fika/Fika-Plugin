@@ -3,7 +3,7 @@ using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
-public class FirearmLootPacket : IPoolSubPacket
+public sealed class FirearmLootPacket : IPoolSubPacket
 {
     private FirearmLootPacket()
     {

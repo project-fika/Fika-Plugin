@@ -9,7 +9,7 @@ using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.Generic.SubPackets;
 
-public class ExfilCountdown : IPoolSubPacket
+public sealed class ExfilCountdown : IPoolSubPacket
 {
     public string ExfilName;
     public float ExfilStartTime;

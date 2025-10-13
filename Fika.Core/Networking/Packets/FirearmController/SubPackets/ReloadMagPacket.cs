@@ -7,7 +7,7 @@ using System;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
-public class ReloadMagPacket : IPoolSubPacket
+public sealed class ReloadMagPacket : IPoolSubPacket
 {
     private ReloadMagPacket()
     {

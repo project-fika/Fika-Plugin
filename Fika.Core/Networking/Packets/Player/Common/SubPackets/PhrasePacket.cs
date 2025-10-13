@@ -3,7 +3,7 @@ using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
-public class PhrasePacket : IPoolSubPacket
+public sealed class PhrasePacket : IPoolSubPacket
 {
     private PhrasePacket()
     {

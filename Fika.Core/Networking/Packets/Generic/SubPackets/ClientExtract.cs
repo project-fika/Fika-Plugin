@@ -9,7 +9,7 @@ using static Fika.Core.UI.FikaUIGlobals;
 
 namespace Fika.Core.Networking.Packets.Generic.SubPackets;
 
-public class ClientExtract : IPoolSubPacket
+public sealed class ClientExtract : IPoolSubPacket
 {
     public int NetId;
 

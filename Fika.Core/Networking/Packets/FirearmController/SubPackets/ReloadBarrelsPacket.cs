@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
-public class ReloadBarrelsPacket : IPoolSubPacket
+public sealed class ReloadBarrelsPacket : IPoolSubPacket
 {
     private ReloadBarrelsPacket()
     {

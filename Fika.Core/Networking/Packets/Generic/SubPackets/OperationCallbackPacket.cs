@@ -5,7 +5,7 @@ using System;
 
 namespace Fika.Core.Networking.Packets.Generic.SubPackets;
 
-public class OperationCallbackPacket : IPoolSubPacket
+public sealed class OperationCallbackPacket : IPoolSubPacket
 {
     private OperationCallbackPacket() { }
 

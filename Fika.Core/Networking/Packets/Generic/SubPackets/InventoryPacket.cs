@@ -4,7 +4,7 @@ using System;
 
 namespace Fika.Core.Networking.Packets.Generic.SubPackets;
 
-public class InventoryPacket : IPoolSubPacket
+public sealed class InventoryPacket : IPoolSubPacket
 {
     private InventoryPacket() { }
 

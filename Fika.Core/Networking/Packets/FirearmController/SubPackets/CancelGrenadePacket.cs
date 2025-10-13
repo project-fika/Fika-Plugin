@@ -4,7 +4,7 @@ using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
-public class CancelGrenadePacket : IPoolSubPacket
+public sealed class CancelGrenadePacket : IPoolSubPacket
 {
     private CancelGrenadePacket()
     {

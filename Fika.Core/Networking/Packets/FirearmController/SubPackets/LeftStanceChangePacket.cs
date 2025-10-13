@@ -4,7 +4,7 @@ using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
-public class LeftStanceChangePacket : IPoolSubPacket
+public sealed class LeftStanceChangePacket : IPoolSubPacket
 {
     private LeftStanceChangePacket()
     {

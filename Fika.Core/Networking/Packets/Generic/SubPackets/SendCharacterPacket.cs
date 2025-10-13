@@ -6,7 +6,7 @@ using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.Generic.SubPackets;
 
-public class SendCharacterPacket : IPoolSubPacket
+public sealed class SendCharacterPacket : IPoolSubPacket
 {
     private SendCharacterPacket() { }
 
@@ -39,7 +39,7 @@ public class SendCharacterPacket : IPoolSubPacket
         {
             handler.QueueProfile(PlayerInfoPacket.Profile, PlayerInfoPacket.HealthByteArray, Position, NetId, IsAlive, IsAI,
                 PlayerInfoPacket.ControllerId, PlayerInfoPacket.FirstOperationId, PlayerInfoPacket.IsZombie,
-                PlayerInfoPacket.ControllerType, PlayerInfoPacket.ItemId);
+                PlayerInfoPacket.ItemId, PlayerInfoPacket.ControllerType);
         }
     }
 
@@ -75,7 +75,7 @@ public struct PlayerInfoPacket
 {
     public Profile Profile;
     public MongoID ControllerId;
-    public string ItemId;
+    public MongoID? ItemId;
 
     public byte[] HealthByteArray;
 

@@ -6,7 +6,7 @@ using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
-public class FlareShotPacket : IPoolSubPacket
+public sealed class FlareShotPacket : IPoolSubPacket
 {
     private FlareShotPacket()
     {

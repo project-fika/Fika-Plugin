@@ -4,7 +4,7 @@ using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
-public class ProceedPacket : IPoolSubPacket
+public sealed class ProceedPacket : IPoolSubPacket
 {
     private ProceedPacket()
     {

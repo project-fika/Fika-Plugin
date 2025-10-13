@@ -4,7 +4,7 @@ using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
-public class ToggleInventoryPacket : IPoolSubPacket
+public sealed class ToggleInventoryPacket : IPoolSubPacket
 {
     private ToggleInventoryPacket()
     {

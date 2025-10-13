@@ -4,7 +4,7 @@ using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
-public class UnderbarrelSightingRangeDownPacket : IPoolSubPacket
+public sealed class UnderbarrelSightingRangeDownPacket : IPoolSubPacket
 {
     private UnderbarrelSightingRangeDownPacket()
     {

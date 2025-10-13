@@ -4,7 +4,7 @@ using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
-public class RollCylinderPacket : IPoolSubPacket
+public sealed class RollCylinderPacket : IPoolSubPacket
 {
     private RollCylinderPacket()
     {

@@ -4,7 +4,7 @@ using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.Generic.SubPackets;
 
-public class BtrSpawn : IPoolSubPacket
+public sealed class BtrSpawn : IPoolSubPacket
 {
     public Vector3 Position;
     public Quaternion Rotation;

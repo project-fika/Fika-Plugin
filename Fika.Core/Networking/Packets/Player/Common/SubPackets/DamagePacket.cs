@@ -5,7 +5,7 @@ using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
-public class DamagePacket : IPoolSubPacket
+public sealed class DamagePacket : IPoolSubPacket
 {
     private DamagePacket() { }
 

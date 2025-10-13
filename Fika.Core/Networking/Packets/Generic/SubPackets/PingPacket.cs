@@ -5,7 +5,7 @@ using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.Generic.SubPackets;
 
-public class PingPacket : IPoolSubPacket
+public sealed class PingPacket : IPoolSubPacket
 {
     private PingPacket() { }
 

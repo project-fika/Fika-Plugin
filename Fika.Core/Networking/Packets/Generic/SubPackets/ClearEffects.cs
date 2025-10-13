@@ -6,7 +6,7 @@ using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.Generic.SubPackets;
 
-public class ClearEffects : IPoolSubPacket
+public sealed class ClearEffects : IPoolSubPacket
 {
     public int NetId;
 

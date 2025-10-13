@@ -2,7 +2,7 @@
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
-public class InteractionPacket : IPoolSubPacket
+public sealed class InteractionPacket : IPoolSubPacket
 {
     private InteractionPacket()
     {

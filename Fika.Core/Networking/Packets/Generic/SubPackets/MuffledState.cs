@@ -5,7 +5,7 @@ using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.Generic.SubPackets;
 
-public class MuffledState : IPoolSubPacket
+public sealed class MuffledState : IPoolSubPacket
 {
     public int NetId;
     public bool Muffled;

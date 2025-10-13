@@ -4,7 +4,7 @@ using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.Generic.SubPackets;
 
-public class SecretExfilFound : IPoolSubPacket
+public sealed class SecretExfilFound : IPoolSubPacket
 {
     public string GroupId;
     public string ExitName;

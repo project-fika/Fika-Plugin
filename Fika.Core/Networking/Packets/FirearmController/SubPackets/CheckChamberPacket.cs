@@ -4,7 +4,7 @@ using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
-public class CheckChamberPacket : IPoolSubPacket
+public sealed class CheckChamberPacket : IPoolSubPacket
 {
     private CheckChamberPacket()
     {

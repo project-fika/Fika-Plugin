@@ -4,7 +4,7 @@ using static EFT.Player;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
-public class CompassChangePacket : IPoolSubPacket
+public sealed class CompassChangePacket : IPoolSubPacket
 {
     private CompassChangePacket()
     {

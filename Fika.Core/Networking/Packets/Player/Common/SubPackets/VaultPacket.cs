@@ -5,7 +5,7 @@ using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
-public class VaultPacket : IPoolSubPacket
+public sealed class VaultPacket : IPoolSubPacket
 {
     private VaultPacket()
     {

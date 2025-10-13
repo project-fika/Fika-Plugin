@@ -3,7 +3,7 @@ using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
-public class DropPacket : IPoolSubPacket
+public sealed class DropPacket : IPoolSubPacket
 {
     private DropPacket()
     {

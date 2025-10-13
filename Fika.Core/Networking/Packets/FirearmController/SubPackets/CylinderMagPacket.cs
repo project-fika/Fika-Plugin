@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
-public class CylinderMagPacket : IPoolSubPacket
+public sealed class CylinderMagPacket : IPoolSubPacket
 {
     private CylinderMagPacket()
     {

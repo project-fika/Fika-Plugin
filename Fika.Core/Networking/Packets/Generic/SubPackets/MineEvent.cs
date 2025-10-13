@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace Fika.Core.Networking.Packets.Generic.SubPackets;
 
-public class MineEvent : IPoolSubPacket
+public sealed class MineEvent : IPoolSubPacket
 {
     public Vector3 MinePosition;
 

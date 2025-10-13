@@ -7,7 +7,7 @@ using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.Generic.SubPackets;
 
-public class SyncableItemPacket : IPoolSubPacket
+public sealed class SyncableItemPacket : IPoolSubPacket
 {
     private SyncableItemPacket() { }
 

@@ -4,7 +4,7 @@ using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
-public class KnifePacket : IPoolSubPacket
+public sealed class KnifePacket : IPoolSubPacket
 {
     private KnifePacket()
     {

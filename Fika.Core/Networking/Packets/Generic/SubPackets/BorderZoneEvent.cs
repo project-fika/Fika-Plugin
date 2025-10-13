@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace Fika.Core.Networking.Packets.Generic.SubPackets;
 
-public class BorderZoneEvent : IPoolSubPacket
+public sealed class BorderZoneEvent : IPoolSubPacket
 {
     public string ProfileId;
     public int ZoneId;
