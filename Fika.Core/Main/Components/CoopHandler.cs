@@ -102,6 +102,7 @@ public class CoopHandler : MonoBehaviour
     private bool _isClient;
     private float _charSyncCounter;
     private bool _requestQuitGame;
+    private bool _loadingBundles;
     #endregion
 
     public static bool TryGetCoopHandler(out CoopHandler coopHandler)
@@ -166,7 +167,7 @@ public class CoopHandler : MonoBehaviour
 
         if (ShouldSync)
         {
-            if (_spawnQueue.Count > 0)
+            if (_spawnQueue.Count > 0 && !_loadingBundles)
             {
                 _ = SpawnPlayer(_spawnQueue.Dequeue());
             }
@@ -271,10 +272,13 @@ public class CoopHandler : MonoBehaviour
 
     private async ValueTask SpawnPlayer(SpawnObject spawnObject)
     {
+        _loadingBundles = true;
+
         if (spawnObject.Profile == null)
         {
             _logger.LogError("SpawnPlayer: Profile was null!");
             _queuedPlayers.Remove(spawnObject.NetId);
+            _loadingBundles = false;
             return;
         }
 
@@ -282,6 +286,7 @@ public class CoopHandler : MonoBehaviour
         {
             if (player.ProfileId == spawnObject.Profile.ProfileId)
             {
+                _loadingBundles = false;
                 return;
             }
         }
@@ -290,6 +295,7 @@ public class CoopHandler : MonoBehaviour
         if (allPrefabPaths.Length == 0)
         {
             _logger.LogError($"SpawnPlayer::{spawnObject.Profile.Info.Nickname}::PrefabPaths are empty!");
+            _loadingBundles = false;
             return;
         }
 
@@ -340,6 +346,7 @@ public class CoopHandler : MonoBehaviour
         }
 
         _queuedPlayers.Remove(spawnObject.NetId);
+        _loadingBundles = false;
     }
 
     public void QueueProfile(Profile profile, byte[] healthByteArray, Vector3 position, int netId, bool isAlive, bool isAI, MongoID firstId, ushort firstOperationId, bool isZombie, MongoID? itemId,

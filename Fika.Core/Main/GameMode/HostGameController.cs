@@ -78,7 +78,7 @@ public class HostGameController : BaseGameController, IBotGame
     /// <summary>
     /// How long in seconds until a bot is force spawned if not every client could load it
     /// </summary>
-    private readonly float _botTimeout = 30f;
+    private readonly float _botTimeout = 45f;
     /// <summary>
     /// The <see cref="Task.Delay(int)"/> in every loop during the <see cref="_botTimeout"/>
     /// </summary>
