@@ -107,7 +107,7 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
     public FikaClientWorld FikaClientWorld { get; set; }
     public ESideType RaidSide { get; set; }
     public bool AllowVOIP { get; set; }
-    public List<ObservedPlayer> ObservedCoopPlayers { get; set; }
+    public List<ObservedPlayer> ObservedPlayers { get; set; }
     public int PlayerAmount { get; set; }
 
     private NetPacketProcessor _packetProcessor;
@@ -146,7 +146,7 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
         _inventoryOperations = new(8);
         _missingIds = [];
         _snapshotCount = 0;
-        ObservedCoopPlayers = [];
+        ObservedPlayers = [];
         PlayerAmount = 1;
 
         Ping = 0;
@@ -300,7 +300,7 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
     protected void Update()
     {
         _netClient?.PollEvents();
-        _stateHandle = new UpdateInterpolators(Time.unscaledDeltaTime).ScheduleParallel(ObservedCoopPlayers.Count, 4,
+        _stateHandle = new UpdateInterpolators(Time.unscaledDeltaTime).ScheduleParallel(ObservedPlayers.Count, 4,
             new HandlePlayerStates(NetworkTimeSync.NetworkTime).ScheduleParallel(_snapshotCount, 4, default));
 
         int inventoryOps = _inventoryOperations.Count;
@@ -327,9 +327,9 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
         try
         {
             _stateHandle.Complete();
-            for (int i = 0; i < ObservedCoopPlayers.Count; i++)
+            for (int i = 0; i < ObservedPlayers.Count; i++)
             {
-                ObservedPlayer player = ObservedCoopPlayers[i];
+                ObservedPlayer player = ObservedPlayers[i];
                 if (player.CurrentPlayerState.ShouldUpdate)
                 {
                     player.ManualStateUpdate();

@@ -30,10 +30,10 @@ internal readonly struct InterpolatorJob(float unscaledDeltaTime, double network
             }
         }
 
-        int amount = netManager.ObservedCoopPlayers.Count;
+        int amount = netManager.ObservedPlayers.Count;
         for (int i = 0; i < amount; i++)
         {
-            netManager.ObservedCoopPlayers[i].Snapshotter
+            netManager.ObservedPlayers[i].Snapshotter
                 .ManualUpdate(_unscaledDeltaTime);
         }
     }

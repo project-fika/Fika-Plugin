@@ -1003,7 +1003,7 @@ public class ObservedPlayer : FikaPlayer
         }
         CorpseSyncPacket = default;
         Snapshotter.Clear();
-        Singleton<IFikaNetworkManager>.Instance.ObservedCoopPlayers.Remove(this);
+        Singleton<IFikaNetworkManager>.Instance.ObservedPlayers.Remove(this);
     }
 
     public override void vmethod_3(TransitControllerAbstractClass controller, int transitPointId, string keyId, EDateTime time)
@@ -1511,7 +1511,7 @@ public class ObservedPlayer : FikaPlayer
         _observedCorpseCulling?.Dispose();
         if (HealthController.IsAlive)
         {
-            if (!Singleton<IFikaNetworkManager>.Instance.ObservedCoopPlayers.Remove(this) && !Profile.Nickname.StartsWith("headless_"))
+            if (!Singleton<IFikaNetworkManager>.Instance.ObservedPlayers.Remove(this) && !Profile.Nickname.StartsWith("headless_"))
             {
                 FikaGlobals.LogWarning($"Failed to remove {ProfileId}, {Profile.Nickname} from observed list");
             }
@@ -1708,7 +1708,7 @@ public class ObservedPlayer : FikaPlayer
                 CreateUsableItemController(itemId);
                 break;
             default:
-                FikaPlugin.Instance.FikaLogger.LogWarning($"ObservedCoopPlayer::SpawnHandsController: Unhandled ControllerType, was {controllerType}");
+                FikaPlugin.Instance.FikaLogger.LogWarning($"ObservedPlayer::SpawnHandsController: Unhandled ControllerType, was {controllerType}");
                 break;
         }
     }

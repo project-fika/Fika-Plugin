@@ -44,7 +44,7 @@ public interface IFikaNetworkManager
     /// <summary>
     /// Gets or sets the list of observed cooperative players in the session.
     /// </summary>
-    List<ObservedPlayer> ObservedCoopPlayers { get; set; }
+    List<ObservedPlayer> ObservedPlayers { get; set; }
 
     /// <summary>
     /// Gets or sets the total number of players in the session.

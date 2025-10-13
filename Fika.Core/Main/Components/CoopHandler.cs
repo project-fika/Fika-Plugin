@@ -174,7 +174,7 @@ public class CoopHandler : MonoBehaviour
             if (!_isClient)
             {
                 _charSyncCounter += Time.unscaledDeltaTime;
-                int waitTime = LocalGameInstance.GameController.GameInstance.Status == GameStatus.Started ? 20 : 5;
+                int waitTime = LocalGameInstance.GameController.GameInstance.Status == GameStatus.Started ? 15 : 5;
                 if (_charSyncCounter > waitTime)
                 {
                     _charSyncCounter = 0f;
@@ -286,7 +286,7 @@ public class CoopHandler : MonoBehaviour
             }
         }
 
-        ResourceKey[] allPrefabPaths = spawnObject.Profile.GetAllPrefabPaths(!spawnObject.IsAI).ToArray();
+        ResourceKey[] allPrefabPaths = [.. spawnObject.Profile.GetAllPrefabPaths(!spawnObject.IsAI)];
         if (allPrefabPaths.Length == 0)
         {
             _logger.LogError($"SpawnPlayer::{spawnObject.Profile.Info.Nickname}::PrefabPaths are empty!");
@@ -294,7 +294,8 @@ public class CoopHandler : MonoBehaviour
         }
 
         await Singleton<PoolManagerClass>.Instance.LoadBundlesAndCreatePools(PoolManagerClass.PoolsCategory.Raid,
-            PoolManagerClass.AssemblyType.Local, allPrefabPaths, JobPriorityClass.Low).ContinueWith(x =>
+            PoolManagerClass.AssemblyType.Local, allPrefabPaths, JobPriorityClass.Low)
+            .ContinueWith(x =>
             {
                 if (x.IsFaulted)
                 {
@@ -417,7 +418,7 @@ public class CoopHandler : MonoBehaviour
             return null;
         }
 
-        Singleton<IFikaNetworkManager>.Instance.ObservedCoopPlayers.Add(otherPlayer);
+        Singleton<IFikaNetworkManager>.Instance.ObservedPlayers.Add(otherPlayer);
 
         otherPlayer.NetId = netId;
 #if DEBUG

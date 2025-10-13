@@ -118,7 +118,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
     public int NetId { get; set; }
     public ESideType RaidSide { get; set; }
     public bool AllowVOIP { get; set; }
-    public List<ObservedPlayer> ObservedCoopPlayers { get; set; }
+    public List<ObservedPlayer> ObservedPlayers { get; set; }
     public int PlayerAmount { get; set; }
 
     private int _sendRate;
@@ -171,7 +171,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         _cachedConnections = [];
         _logger = Logger.CreateLogSource("Fika.Server");
         _snapshotCount = 0;        
-        ObservedCoopPlayers = [];
+        ObservedPlayers = [];
         PlayerAmount = 1;
 
         ReadyClients = 0;
@@ -577,9 +577,9 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         try
         {
             _stateHandle.Complete();
-            for (int i = 0; i < ObservedCoopPlayers.Count; i++)
+            for (int i = 0; i < ObservedPlayers.Count; i++)
             {
-                ObservedPlayer player = ObservedCoopPlayers[i];
+                ObservedPlayer player = ObservedPlayers[i];
                 if (player.CurrentPlayerState.ShouldUpdate)
                 {
                     player.ManualStateUpdate();

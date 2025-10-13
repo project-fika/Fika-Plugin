@@ -28,7 +28,7 @@ public class BTRView_GoOut_Patch : ModulePatch
         if (player is ObservedPlayer observedPlayer)
         {
             __result = ObservedGoOut(__instance, observedPlayer, side, fast);
-            Singleton<IFikaNetworkManager>.Instance.ObservedCoopPlayers.Add(observedPlayer);
+            Singleton<IFikaNetworkManager>.Instance.ObservedPlayers.Add(observedPlayer);
             return false;
         }
 

@@ -12,7 +12,7 @@ internal readonly struct UpdateInterpolators(float unscaledDeltaTime) : IJobFor
 
     public readonly void Execute(int index)
     {
-        Singleton<IFikaNetworkManager>.Instance.ObservedCoopPlayers[index]
+        Singleton<IFikaNetworkManager>.Instance.ObservedPlayers[index]
             .Snapshotter.ManualUpdate(_unscaledDeltaTime);
     }
 }

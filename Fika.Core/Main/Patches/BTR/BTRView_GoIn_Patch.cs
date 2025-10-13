@@ -29,7 +29,7 @@ public class BTRView_GoIn_Patch : ModulePatch
         if (player is ObservedPlayer observedPlayer)
         {
             __result = ObservedGoIn(__instance, observedPlayer, side, placeId, fast);
-            Singleton<IFikaNetworkManager>.Instance.ObservedCoopPlayers.Remove(observedPlayer);
+            Singleton<IFikaNetworkManager>.Instance.ObservedPlayers.Remove(observedPlayer);
             return false;
         }
 
