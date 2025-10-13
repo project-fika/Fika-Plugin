@@ -13,7 +13,7 @@ using Fika.Core.Networking.Packets.Generic.SubPackets;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
+using System.Threading.Tasks;
 
 namespace Fika.Core.Main.Components;
 
@@ -168,7 +168,7 @@ public class CoopHandler : MonoBehaviour
         {
             if (_spawnQueue.Count > 0)
             {
-                SpawnPlayer(_spawnQueue.Dequeue());
+                _ = SpawnPlayer(_spawnQueue.Dequeue());
             }
 
             if (!_isClient)
@@ -269,7 +269,7 @@ public class CoopHandler : MonoBehaviour
         fikaGame.Stop(MyPlayer.ProfileId, fikaGame.ExitStatus, exitLocation, 0);
     }
 
-    private async void SpawnPlayer(SpawnObject spawnObject)
+    private async ValueTask SpawnPlayer(SpawnObject spawnObject)
     {
         if (spawnObject.Profile == null)
         {
@@ -293,19 +293,19 @@ public class CoopHandler : MonoBehaviour
             return;
         }
 
-        await Singleton<PoolManagerClass>.Instance.LoadBundlesAndCreatePools(PoolManagerClass.PoolsCategory.Raid,
-            PoolManagerClass.AssemblyType.Local, allPrefabPaths, JobPriorityClass.Low)
-            .ContinueWith(x =>
-            {
-                if (x.IsFaulted)
-                {
-                    _logger.LogError($"SpawnPlayer::{spawnObject.Profile.Info.Nickname}::Load Failed");
-                }
-                else if (x.IsCanceled)
-                {
-                    _logger.LogError($"SpawnPlayer::{spawnObject.Profile.Info.Nickname}::Load Cancelled");
-                }
-            });
+        try
+        {
+            await Singleton<PoolManagerClass>.Instance.LoadBundlesAndCreatePools(PoolManagerClass.PoolsCategory.Raid,
+                PoolManagerClass.AssemblyType.Local, allPrefabPaths, JobPriorityClass.Low);
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogError($"SpawnPlayer::{spawnObject.Profile.Info.Nickname}::Load Cancelled");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"SpawnPlayer::{spawnObject.Profile.Info.Nickname}::Load Failed: {ex.Message}");
+        }
 
         var otherPlayer = SpawnObservedPlayer(spawnObject);
 
@@ -348,6 +348,7 @@ public class CoopHandler : MonoBehaviour
         var gameWorld = Singleton<GameWorld>.Instance;
         if (gameWorld == null)
         {
+            _logger.LogInfo("QueueProfile::GameWorld was null, not queuing");
             return;
         }
 
