@@ -765,7 +765,7 @@ public static class FikaSerializationExtensions
     {
         writer.PutProfile(packet.Profile);
         writer.PutMongoID(packet.ControllerId);
-        writer.Put(packet.ItemId);
+        writer.PutNullableMongoID(packet.ItemId);
         writer.PutByteArray(packet.HealthByteArray ?? []);
 
         writer.Put(packet.FirstOperationId);
@@ -788,7 +788,7 @@ public static class FikaSerializationExtensions
         {
             Profile = reader.GetProfile(),
             ControllerId = reader.GetMongoID(),
-            ItemId = reader.GetString(),
+            ItemId = reader.GetNullableMongoID(),
             HealthByteArray = reader.GetByteArray(),
 
             FirstOperationId = reader.GetUShort(),

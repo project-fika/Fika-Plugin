@@ -727,21 +727,6 @@ public partial class FikaClient
         }
     }
 
-    private void OnSendCharacterPacketReceived(SendCharacterPacket packet)
-    {
-        if (_coopHandler == null)
-        {
-            return;
-        }
-
-        if (packet.PlayerInfoPacket.Profile.ProfileId != _myProfileId)
-        {
-            _coopHandler.QueueProfile(packet.PlayerInfoPacket.Profile, packet.PlayerInfoPacket.HealthByteArray, packet.Position, packet.NetId, packet.IsAlive, packet.IsAI,
-                         packet.PlayerInfoPacket.ControllerId, packet.PlayerInfoPacket.FirstOperationId, packet.PlayerInfoPacket.IsZombie,
-                         packet.PlayerInfoPacket.ControllerType, packet.PlayerInfoPacket.ItemId);
-        }
-    }
-
     private void OnGenericPacketReceived(GenericPacket packet)
     {
         if (packet.Type is EGenericSubPacketType.InventoryOperation)

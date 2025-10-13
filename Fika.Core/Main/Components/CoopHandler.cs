@@ -107,7 +107,7 @@ public class CoopHandler : MonoBehaviour
     public static bool TryGetCoopHandler(out CoopHandler coopHandler)
     {
         coopHandler = null;
-        IFikaNetworkManager networkManager = Singleton<IFikaNetworkManager>.Instance;
+        var networkManager = Singleton<IFikaNetworkManager>.Instance;
         if (networkManager != null)
         {
             coopHandler = networkManager.CoopHandler;
@@ -119,7 +119,7 @@ public class CoopHandler : MonoBehaviour
 
     public static string GetServerId()
     {
-        IFikaNetworkManager networkManager = Singleton<IFikaNetworkManager>.Instance;
+        var networkManager = Singleton<IFikaNetworkManager>.Instance;
         if (networkManager != null && networkManager.CoopHandler != null)
         {
             return networkManager.CoopHandler.ServerId;
@@ -174,7 +174,7 @@ public class CoopHandler : MonoBehaviour
             if (!_isClient)
             {
                 _charSyncCounter += Time.unscaledDeltaTime;
-                int waitTime = LocalGameInstance.GameController.GameInstance.Status == GameStatus.Started ? 15 : 5;
+                var waitTime = LocalGameInstance.GameController.GameInstance.Status == GameStatus.Started ? 15 : 5;
                 if (_charSyncCounter > waitTime)
                 {
                     _charSyncCounter = 0f;
@@ -218,21 +218,21 @@ public class CoopHandler : MonoBehaviour
             return;
         }
 
-        EQuitState quitState = QuitState;
+        var quitState = QuitState;
         if (quitState == EQuitState.None || _requestQuitGame)
         {
             return;
         }
 
-        string keyName = FikaPlugin.ExtractKey.Value.ToString();
+        var keyName = FikaPlugin.ExtractKey.Value.ToString();
         ConsoleScreen.Log($"{keyName} pressed, attempting to extract!");
         _logger.LogInfo($"{keyName} pressed, attempting to extract!");
 
         _requestQuitGame = true;
-        IFikaGame fikaGame = LocalGameInstance;
+        var fikaGame = LocalGameInstance;
 
-        bool isPlayerAlive = MyPlayer.ActiveHealthController.IsAlive;
-        string exitLocation = isPlayerAlive ? fikaGame.ExitLocation : null;
+        var isPlayerAlive = MyPlayer.ActiveHealthController.IsAlive;
+        var exitLocation = isPlayerAlive ? fikaGame.ExitLocation : null;
 
         // client logic
         if (_isClient)
@@ -242,8 +242,8 @@ public class CoopHandler : MonoBehaviour
         }
 
         // host logic
-        FikaServer server = Singleton<FikaServer>.Instance;
-        int peers = server.NetServer.ConnectedPeersCount;
+        var server = Singleton<FikaServer>.Instance;
+        var peers = server.NetServer.ConnectedPeersCount;
 
         if (fikaGame.ExitStatus == ExitStatus.Transit && HumanPlayers.Count <= 1)
         {
@@ -258,7 +258,7 @@ public class CoopHandler : MonoBehaviour
             return;
         }
 
-        bool recentDisconnect = server.TimeSinceLastPeerDisconnected > DateTime.Now.AddSeconds(-5);
+        var recentDisconnect = server.TimeSinceLastPeerDisconnected > DateTime.Now.AddSeconds(-5);
         if (server.HasHadPeer && recentDisconnect)
         {
             NotificationManagerClass.DisplayWarningNotification(LocaleUtils.HOST_WAIT_5_SECONDS.Localized());
@@ -307,7 +307,7 @@ public class CoopHandler : MonoBehaviour
                 }
             });
 
-        ObservedPlayer otherPlayer = SpawnObservedPlayer(spawnObject);
+        var otherPlayer = SpawnObservedPlayer(spawnObject);
 
         if (!spawnObject.IsAlive)
         {
@@ -319,7 +319,7 @@ public class CoopHandler : MonoBehaviour
         {
             if (LocalGameInstance != null)
             {
-                BotsController botController = (Singleton<IFikaGame>.Instance.GameController as HostGameController).BotsController;
+                var botController = (Singleton<IFikaGame>.Instance.GameController as HostGameController).BotsController;
                 if (botController != null)
                 {
                     // Start Coroutine as botController might need a while to start sometimes...
@@ -342,10 +342,10 @@ public class CoopHandler : MonoBehaviour
         _queuedPlayers.Remove(spawnObject.NetId);
     }
 
-    public void QueueProfile(Profile profile, byte[] healthByteArray, Vector3 position, int netId, bool isAlive, bool isAI, MongoID firstId, ushort firstOperationId, bool isZombie,
-        EHandsControllerType controllerType = EHandsControllerType.None, string itemId = null)
+    public void QueueProfile(Profile profile, byte[] healthByteArray, Vector3 position, int netId, bool isAlive, bool isAI, MongoID firstId, ushort firstOperationId, bool isZombie, MongoID? itemId,
+        EHandsControllerType controllerType = EHandsControllerType.None)
     {
-        GameWorld gameWorld = Singleton<GameWorld>.Instance;
+        var gameWorld = Singleton<GameWorld>.Instance;
         if (gameWorld == null)
         {
             return;
@@ -372,9 +372,9 @@ public class CoopHandler : MonoBehaviour
         if (controllerType != EHandsControllerType.None)
         {
             spawnObject.ControllerType = controllerType;
-            if (!string.IsNullOrEmpty(itemId))
+            if (itemId.HasValue)
             {
-                spawnObject.ItemId = itemId;
+                spawnObject.ItemId = itemId.Value;
             }
         }
         if (healthByteArray != null)
@@ -386,14 +386,14 @@ public class CoopHandler : MonoBehaviour
 
     private ObservedPlayer SpawnObservedPlayer(SpawnObject spawnObject)
     {
-        bool isAi = spawnObject.IsAI;
-        Profile profile = spawnObject.Profile;
-        Vector3 position = spawnObject.Position;
-        int netId = spawnObject.NetId;
-        MongoID firstId = spawnObject.CurrentId;
-        ushort firstOperationId = spawnObject.FirstOperationId;
-        byte[] healthBytes = spawnObject.HealthBytes;
-        bool isZombie = spawnObject.IsZombie;
+        var isAi = spawnObject.IsAI;
+        var profile = spawnObject.Profile;
+        var position = spawnObject.Position;
+        var netId = spawnObject.NetId;
+        var firstId = spawnObject.CurrentId;
+        var firstOperationId = spawnObject.FirstOperationId;
+        var healthBytes = spawnObject.HealthBytes;
+        var isZombie = spawnObject.IsZombie;
 
         // Handle null bytes on players
         if (!isAi && (spawnObject.HealthBytes == null || spawnObject.HealthBytes.Length == 0))
@@ -401,15 +401,15 @@ public class CoopHandler : MonoBehaviour
             healthBytes = profile.Health.SerializeHealthInfo();
         }
 
-        GameWorld gameWorld = Singleton<GameWorld>.Instance;
+        var gameWorld = Singleton<GameWorld>.Instance;
 
         // Check for GClass increments on filter
-        ObservedPlayer otherPlayer = ObservedPlayer.CreateObservedPlayer(gameWorld, netId, position, Quaternion.identity, "Player",
+        var otherPlayer = ObservedPlayer.CreateObservedPlayer(gameWorld, netId, position, Quaternion.identity, "Player",
             isAi ? "Bot_" : $"Player_{profile.Nickname}_", EPointOfView.ThirdPerson, profile, healthBytes, isAi,
             EUpdateQueue.Update, Player.EUpdateMode.Manual, Player.EUpdateMode.Auto,
             BackendConfigAbstractClass.Config.CharacterController.ObservedPlayerMode,
-            FikaGlobals.GetOtherPlayerSensitivity, FikaGlobals.GetOtherPlayerSensitivity,
-            ObservedViewFilter.Default, firstId, firstOperationId, isZombie)
+            FikaGlobals.GetOtherPlayerSensitivity, FikaGlobals.GetOtherPlayerSensitivity, ObservedViewFilter.Default,
+            firstId, firstOperationId, isZombie)
             .GetAwaiter()
             .GetResult();
 
@@ -439,15 +439,15 @@ public class CoopHandler : MonoBehaviour
             HumanPlayers.Add(otherPlayer);
         }
 
-        foreach (FikaPlayer player in Players.Values)
+        foreach (var player in Players.Values)
         {
             if (player is not ObservedPlayer)
             {
                 continue;
             }
 
-            Collider playerCollider = otherPlayer.GetCharacterControllerCommon().GetCollider();
-            Collider otherCollider = player.GetCharacterControllerCommon().GetCollider();
+            var playerCollider = otherPlayer.GetCharacterControllerCommon().GetCollider();
+            var otherCollider = player.GetCharacterControllerCommon().GetCollider();
 
             if (playerCollider != null && otherCollider != null)
             {
@@ -459,10 +459,10 @@ public class CoopHandler : MonoBehaviour
         {
             if (profile.Info.Side is EPlayerSide.Bear or EPlayerSide.Usec)
             {
-                Item backpack = profile.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack).ContainedItem;
+                var backpack = profile.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack).ContainedItem;
                 if (backpack != null)
                 {
-                    foreach (Item backpackItem in backpack.GetAllItems())
+                    foreach (var backpackItem in backpack.GetAllItems())
                     {
                         if (backpackItem != backpack)
                         {
@@ -472,7 +472,7 @@ public class CoopHandler : MonoBehaviour
                 }
 
                 // We still want DogTags to be 'FiR'
-                Item item = otherPlayer.Inventory.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem;
+                var item = otherPlayer.Inventory.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem;
                 if (item != null)
                 {
                     item.SpawnedInSession = true;
@@ -490,14 +490,14 @@ public class CoopHandler : MonoBehaviour
         _logger.LogInfo($"CreateLocalPlayer::{profile.GetCorrectedNickname()}::Spawned.");
 #endif
 
-        EHandsControllerType controllerType = spawnObject.ControllerType;
-        string itemId = spawnObject.ItemId;
-        bool isStationary = spawnObject.IsStationary;
+        var controllerType = spawnObject.ControllerType;
+        var itemId = spawnObject.ItemId;
+        var isStationary = spawnObject.IsStationary;
         if (controllerType != EHandsControllerType.None)
         {
-            if (controllerType != EHandsControllerType.Empty && string.IsNullOrEmpty(itemId))
+            if (controllerType != EHandsControllerType.Empty && itemId == default)
             {
-                _logger.LogError($"CreateLocalPlayer: ControllerType was not Empty but itemId was null! ControllerType: {controllerType}");
+                _logger.LogError($"CreateLocalPlayer: ControllerType was not Empty but itemId was default! ControllerType: {controllerType}");
             }
             else
             {
@@ -509,8 +509,8 @@ public class CoopHandler : MonoBehaviour
 
     private IEnumerator AddClientToBotEnemies(BotsController botController, LocalPlayer playerToAdd)
     {
-        IFikaGame coopGame = LocalGameInstance;
-        _logger.LogInfo($"AddClientToBotEnemies: " + playerToAdd.Profile.GetCorrectedNickname());
+        var coopGame = LocalGameInstance;
+        _logger.LogInfo($"AddClientToBotEnemies: {playerToAdd.Profile.GetCorrectedNickname()}");
         while (coopGame.GameController.GameInstance.Status != GameStatus.Running && !botController.IsEnable)
         {
             yield return null;
@@ -526,9 +526,9 @@ public class CoopHandler : MonoBehaviour
 #endif
         botController.AddActivePLayer(playerToAdd);
 
-        bool found = false;
+        var found = false;
 
-        for (int i = 0; i < botController.BotSpawner.PlayersCount; i++)
+        for (var i = 0; i < botController.BotSpawner.PlayersCount; i++)
         {
             if (botController.BotSpawner.GetPlayer(i) == playerToAdd)
             {
@@ -550,7 +550,7 @@ public class CoopHandler : MonoBehaviour
 
     public void CheckIds(List<int> playerIds, List<int> missingIds)
     {
-        foreach (int netId in playerIds)
+        foreach (var netId in playerIds)
         {
             if (!_queuedPlayers.Contains(netId) && !Players.ContainsKey(netId))
             {
@@ -579,7 +579,7 @@ public class CoopHandler : MonoBehaviour
         public MongoID CurrentId = currentId;
         public ushort FirstOperationId = firstOperationId;
         public EHandsControllerType ControllerType;
-        public string ItemId;
+        public MongoID ItemId;
         public bool IsStationary;
         public byte[] HealthBytes;
         public bool IsZombie = isZombie;

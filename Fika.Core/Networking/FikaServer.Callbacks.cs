@@ -558,21 +558,6 @@ public partial class FikaServer
         }
     }
 
-    private void OnSendCharacterPacketReceived(SendCharacterPacket packet, NetPeer peer)
-    {
-        if (_coopHandler == null)
-        {
-            return;
-        }
-
-        if (_hostPlayer == null || packet.PlayerInfoPacket.Profile.ProfileId != _hostPlayer.ProfileId)
-        {
-            _coopHandler.QueueProfile(packet.PlayerInfoPacket.Profile, packet.PlayerInfoPacket.HealthByteArray, packet.Position, packet.NetId, packet.IsAlive, packet.IsAI,
-                packet.PlayerInfoPacket.ControllerId, packet.PlayerInfoPacket.FirstOperationId, packet.PlayerInfoPacket.IsZombie,
-                packet.PlayerInfoPacket.ControllerType, packet.PlayerInfoPacket.ItemId);
-        }
-    }
-
     private void OnGenericPacketReceived(GenericPacket packet, NetPeer peer)
     {
         if (packet.Type is EGenericSubPacketType.InventoryOperation)

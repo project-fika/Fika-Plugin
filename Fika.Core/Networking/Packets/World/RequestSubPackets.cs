@@ -427,7 +427,7 @@ public class RequestSubPackets
         }
 
         /// <summary>
-        /// Handled in <see cref="FikaClient.OnSendCharacterPacketReceived(SendCharacterPacket)"/>
+        /// Handled in <see cref="SendCharacterPacket.Execute(FikaPlayer)"/>
         /// </summary>
         public void HandleResponse()
         {

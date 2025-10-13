@@ -111,7 +111,7 @@ public class ObservedPlayer : FikaPlayer
             SetCompensationScale(false);
             PlayerBones.Ribcage.Original.localScale = new Vector3(1f, 1f, 1f);
             MovementContext.PlayerAnimatorPointOfView(value);
-            BindableEvent pointOfViewChanged = PointOfViewChanged;
+            var pointOfViewChanged = PointOfViewChanged;
             pointOfViewChanged?.Invoke();
             _playerBody.UpdatePlayerRenders(_playerBody.PointOfView.Value, Side);
             ProceduralWeaponAnimation.PointOfView = value;
@@ -127,7 +127,7 @@ public class ObservedPlayer : FikaPlayer
         set
         {
             base.HandsController = value;
-            PlayerAnimator.EWeaponAnimationType weaponAnimationType = GetWeaponAnimationType(_handsController);
+            var weaponAnimationType = GetWeaponAnimationType(_handsController);
             MovementContext.PlayerAnimatorSetWeaponId(weaponAnimationType);
         }
     }
@@ -135,7 +135,7 @@ public class ObservedPlayer : FikaPlayer
     {
         get
         {
-            Vector3 vector = HandsRotation * Vector3.forward;
+            var vector = HandsRotation * Vector3.forward;
             return new(_playerLookRaycastTransform.position, vector);
         }
     }
@@ -171,8 +171,8 @@ public class ObservedPlayer : FikaPlayer
             FikaPlugin.Instance.FikaLogger.LogWarning("Using SimpleAnimator!");
         }
 #endif
-        ResourceKey resourceKey = useSimpleAnimator ? ResourceKeyManagerAbstractClass.ZOMBIE_BUNDLE_NAME : ResourceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME;
-        ObservedPlayer player = Create<ObservedPlayer>(gameWorld, resourceKey, playerId, position, updateQueue,
+        var resourceKey = useSimpleAnimator ? ResourceKeyManagerAbstractClass.ZOMBIE_BUNDLE_NAME : ResourceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME;
+        var player = Create<ObservedPlayer>(gameWorld, resourceKey, playerId, position, updateQueue,
             armsUpdateMode, bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix, aiControl, useSimpleAnimator);
 
         player.IsYourPlayer = false;
@@ -229,8 +229,8 @@ public class ObservedPlayer : FikaPlayer
 
         if (!aiControl)
         {
-            HashSet<ETraderServiceType> services = Traverse.Create(player).Field<HashSet<ETraderServiceType>>("hashSet_0").Value;
-            foreach (ETraderServiceType etraderServiceType in Singleton<BackendConfigSettingsClass>.Instance.ServicesData.Keys)
+            var services = Traverse.Create(player).Field<HashSet<ETraderServiceType>>("hashSet_0").Value;
+            foreach (var etraderServiceType in Singleton<BackendConfigSettingsClass>.Instance.ServicesData.Keys)
             {
                 services.Add(etraderServiceType);
             }
@@ -363,7 +363,7 @@ public class ObservedPlayer : FikaPlayer
 
     public override void PlayGroundedSound(float fallHeight, float jumpHeight)
     {
-        (bool hit, BaseBallistic.ESurfaceSound surfaceSound) = method_75();
+        (bool hit, var surfaceSound) = method_75();
         method_76(hit, surfaceSound);
         base.PlayGroundedSound(fallHeight, jumpHeight);
     }
@@ -433,7 +433,7 @@ public class ObservedPlayer : FikaPlayer
         {
             return;
         }
-        Player player = Singleton<GameWorld>.Instance.GetAlivePlayerByProfileID(DamageInfo.Player.iPlayer.ProfileId);
+        var player = Singleton<GameWorld>.Instance.GetAlivePlayerByProfileID(DamageInfo.Player.iPlayer.ProfileId);
         if (player == this)
         {
             return;
@@ -547,8 +547,8 @@ public class ObservedPlayer : FikaPlayer
         ApplyHitDebuff(damageInfo.Damage, 0f, bodyPartType, damageInfo.DamageType);
         bool flag = damageInfo.DeflectedBy != null;
         float damage = damageInfo.Damage;
-        List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
-        MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1)
+        var list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
+        var materialType = flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1)
             ? MaterialType.Body : list[0].Material);
         ShotInfoClass hitInfo = new()
         {
@@ -586,10 +586,10 @@ public class ObservedPlayer : FikaPlayer
             _preAllocatedArmorComponents.Clear();
             List<ArmorComponent> listToCheck = [];
             Inventory.GetPutOnArmorsNonAlloc(listToCheck);
-            foreach (ArmorComponent armorComponent in listToCheck)
+            foreach (var armorComponent in listToCheck)
             {
                 float num = 0f;
-                foreach (KeyValuePair<ExplosiveHitArmorColliderStruct, float> keyValuePair in armorDamage)
+                foreach (var keyValuePair in armorDamage)
                 {
                     if (armorComponent.ShotMatches(keyValuePair.Key.BodyPartColliderType, keyValuePair.Key.ArmorPlateCollider))
                     {
@@ -624,8 +624,8 @@ public class ObservedPlayer : FikaPlayer
 
         bool flag = damageInfo.DeflectedBy != null;
         float damage = damageInfo.Damage;
-        List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
-        MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1)
+        var list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
+        var materialType = flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1)
             ? MaterialType.Body : list[0].Material);
         ShotInfoClass hitInfo = new()
         {
@@ -661,7 +661,7 @@ public class ObservedPlayer : FikaPlayer
         if (_cullingHandler.IsVisible || _isServer)
         {
             if (CorpseSyncPacket.BodyPartColliderType != EBodyPartColliderType.None
-                    && PlayerBones.BodyPartCollidersDictionary.TryGetValue(CorpseSyncPacket.BodyPartColliderType, out BodyPartCollider bodyPartCollider))
+                    && PlayerBones.BodyPartCollidersDictionary.TryGetValue(CorpseSyncPacket.BodyPartColliderType, out var bodyPartCollider))
             {
                 Corpse.Ragdoll.ApplyImpulse(bodyPartCollider.Collider, CorpseSyncPacket.Direction, CorpseSyncPacket.Point, CorpseSyncPacket.Force);
             }
@@ -670,7 +670,7 @@ public class ObservedPlayer : FikaPlayer
 
     public override void CreateMovementContext()
     {
-        LayerMask movement_MASK = EFTHardSettings.Instance.MOVEMENT_MASK;
+        var movement_MASK = EFTHardSettings.Instance.MOVEMENT_MASK;
         MovementContext = ObservedMovementContext.Create(this, GetBodyAnimatorCommon, GetCharacterControllerCommon, movement_MASK);
     }
 
@@ -796,7 +796,7 @@ public class ObservedPlayer : FikaPlayer
             return false;
         }
 
-        (bool hit, BaseBallistic.ESurfaceSound surfaceSound) = method_75();
+        (bool hit, var surfaceSound) = method_75();
         method_76(hit, surfaceSound);
         if (Environment == EnvironmentType.Outdoor)
         {
@@ -815,7 +815,7 @@ public class ObservedPlayer : FikaPlayer
         HeadRotation = CurrentPlayerState.HeadRotation;
         ProceduralWeaponAnimation.SetHeadRotation(CurrentPlayerState.HeadRotation);
 
-        EPlayerState newState = CurrentPlayerState.State;
+        var newState = CurrentPlayerState.State;
 
         if (newState == EPlayerState.Jump)
         {
@@ -898,12 +898,12 @@ public class ObservedPlayer : FikaPlayer
         }
 
         InteractableObjectIsProxy = false;
-        Ray interactionRay = InteractionRay;
+        var interactionRay = InteractionRay;
         Boolean_0 = false;
-        GameObject gameObject = GameWorld.FindInteractable(interactionRay, out _);
+        var gameObject = GameWorld.FindInteractable(interactionRay, out _);
         if (gameObject != null)
         {
-            Player player = gameObject.GetComponent<Player>();
+            var player = gameObject.GetComponent<Player>();
             if (player != null && player != InteractablePlayer)
             {
                 InteractablePlayer = (player != this) ? player : null;
@@ -922,14 +922,14 @@ public class ObservedPlayer : FikaPlayer
         }
         if (FikaBackendUtils.IsClient)
         {
-            ObservedCorpse observedCorpse = CreateCorpse<ObservedCorpse>(CorpseSyncPacket.OverallVelocity);
+            var observedCorpse = CreateCorpse<ObservedCorpse>(CorpseSyncPacket.OverallVelocity);
             observedCorpse.IsZombieCorpse = UsedSimplifiedSkeleton;
             observedCorpse.SetSpecificSettings(PlayerBones.RightPalm);
             Singleton<GameWorld>.Instance.ObservedPlayersCorpses.Add(NetId, observedCorpse);
             return observedCorpse;
         }
 
-        Corpse corpse = CreateCorpse<Corpse>(CorpseSyncPacket.OverallVelocity);
+        var corpse = CreateCorpse<Corpse>(CorpseSyncPacket.OverallVelocity);
         corpse.IsZombieCorpse = UsedSimplifiedSkeleton;
         //CorpsePositionSyncer.Create(corpse.gameObject, corpse, NetId);
         return corpse;
@@ -1037,7 +1037,7 @@ public class ObservedPlayer : FikaPlayer
 
         if (packet.ProfileId.HasValue)
         {
-            IPlayerOwner player = Singleton<GameWorld>.Instance.GetAlivePlayerBridgeByProfileID(packet.ProfileId.Value);
+            var player = Singleton<GameWorld>.Instance.GetAlivePlayerBridgeByProfileID(packet.ProfileId.Value);
 
             if (player != null)
             {
@@ -1085,10 +1085,10 @@ public class ObservedPlayer : FikaPlayer
                 return;
             }
 
-            WildSpawnType role = Profile.Info.Settings.Role;
+            var role = Profile.Info.Settings.Role;
             bool countAsBoss = role.CountAsBossForStatistics() && !(role is WildSpawnType.pmcUSEC or WildSpawnType.pmcBEAR);
             int experience = Profile.Info.Settings.Experience;
-            SessionCountersClass sessionCounters = mainPlayer.Profile.EftStats.SessionCounters;
+            var sessionCounters = mainPlayer.Profile.EftStats.SessionCounters;
             HandleSharedExperience(countAsBoss, experience, sessionCounters);
 
             if (FikaPlugin.Instance.SharedQuestProgression && FikaPlugin.EasyKillConditions.Value)
@@ -1125,7 +1125,7 @@ public class ObservedPlayer : FikaPlayer
         InventoryController.ReplaceInventory(inventory);
         if (CorpseSyncPacket.ItemSlot <= EquipmentSlot.Scabbard)
         {
-            Item heldItem = Equipment.GetSlot(CorpseSyncPacket.ItemSlot).ContainedItem;
+            var heldItem = Equipment.GetSlot(CorpseSyncPacket.ItemSlot).ContainedItem;
             if (heldItem != null)
             {
                 CorpseSyncPacket.ItemInHands = heldItem;
@@ -1140,23 +1140,23 @@ public class ObservedPlayer : FikaPlayer
 
     private void RefreshSlotViews()
     {
-        foreach (EquipmentSlot equipmentSlot in PlayerBody.SlotNames)
+        foreach (var equipmentSlot in PlayerBody.SlotNames)
         {
-            Slot slot = Inventory.Equipment.GetSlot(equipmentSlot);
+            var slot = Inventory.Equipment.GetSlot(equipmentSlot);
             ObservedSlotViewHandler handler = new(slot, this, equipmentSlot);
             _observedSlotViewHandlers.Add(handler);
         }
 
         if (PlayerBody.HaveHolster && PlayerBody.SlotViews.ContainsKey(EquipmentSlot.Holster))
         {
-            Slot slot = Inventory.Equipment.GetSlot(EquipmentSlot.Holster);
+            var slot = Inventory.Equipment.GetSlot(EquipmentSlot.Holster);
             ObservedSlotViewHandler handler = new(slot, this, EquipmentSlot.Holster);
             _observedSlotViewHandlers.Add(handler);
         }
 
         if (HandsController != null && HandsController is ObservedFirearmController controller)
         {
-            if (Inventory.Equipment.TryFindItem(controller.Weapon.Id, out Item item))
+            if (Inventory.Equipment.TryFindItem(controller.Weapon.Id, out var item))
             {
                 if (item is not Weapon newWeapon)
                 {
@@ -1164,11 +1164,11 @@ public class ObservedPlayer : FikaPlayer
                     return;
                 }
 
-                IEnumerable<Slot> newSlots = newWeapon.AllSlots;
+                var newSlots = newWeapon.AllSlots;
                 if (newSlots != null)
                 {
                     Dictionary<string, GClass768.GClass769> currentViews = [];
-                    foreach (KeyValuePair<EFT.InventoryLogic.IContainer, GClass768.GClass769> kvp in controller.CCV.ContainerBones)
+                    foreach (var kvp in controller.CCV.ContainerBones)
                     {
                         if (kvp.Key is Slot slot && slot.ContainedItem != null)
                         {
@@ -1187,7 +1187,7 @@ public class ObservedPlayer : FikaPlayer
                         {
                             if (slot.ContainedItem == null)
                             {
-                                Transform transform = TransformHelperClass.FindTransformRecursive(controller.CCV.GameObject.transform, slot.ID, true);
+                                var transform = TransformHelperClass.FindTransformRecursive(controller.CCV.GameObject.transform, slot.ID, true);
                                 if (transform == null)
                                 {
 #if DEBUG
@@ -1198,7 +1198,7 @@ public class ObservedPlayer : FikaPlayer
                                 controller.CCV.AddBone(slot, transform);
                                 continue;
                             }
-                            foreach (KeyValuePair<string, GClass768.GClass769> kvp in currentViews)
+                            foreach (var kvp in currentViews)
                             {
                                 if (kvp.Key == slot.FullId)
                                 {
@@ -1259,7 +1259,7 @@ public class ObservedPlayer : FikaPlayer
 
             PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered);
 
-            IVaultingComponent vaultingComponent = playerTraverse.Field<IVaultingComponent>("_vaultingComponent").Value;
+            var vaultingComponent = playerTraverse.Field<IVaultingComponent>("_vaultingComponent").Value;
             if (vaultingComponent != null)
             {
                 UpdateEvent -= vaultingComponent.DoVaultingTick;
@@ -1283,7 +1283,7 @@ public class ObservedPlayer : FikaPlayer
                 _waitForStartRoutine = StartCoroutine(CreateHealthBar());
             }
 
-            IVaultingComponent vaultingComponent = playerTraverse.Field<IVaultingComponent>("_vaultingComponent").Value;
+            var vaultingComponent = playerTraverse.Field<IVaultingComponent>("_vaultingComponent").Value;
             if (vaultingComponent != null)
             {
                 UpdateEvent -= vaultingComponent.DoVaultingTick;
@@ -1306,7 +1306,7 @@ public class ObservedPlayer : FikaPlayer
 
     private IEnumerator CreateHealthBar()
     {
-        IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
+        var fikaGame = Singleton<IFikaGame>.Instance;
         if (fikaGame == null)
         {
             yield break;
@@ -1359,8 +1359,8 @@ public class ObservedPlayer : FikaPlayer
         Muffled = muffled;
         if (MonoBehaviourSingleton<BetterAudio>.Instantiated)
         {
-            BetterAudio instance = MonoBehaviourSingleton<BetterAudio>.Instance;
-            AudioMixerGroup audioMixerGroup = Muffled ? instance.SimpleOccludedMixerGroup : instance.ObservedPlayerSpeechMixer;
+            var instance = MonoBehaviourSingleton<BetterAudio>.Instance;
+            var audioMixerGroup = Muffled ? instance.SimpleOccludedMixerGroup : instance.ObservedPlayerSpeechMixer;
             if (SpeechSource != null)
             {
                 SpeechSource.SetMixerGroup(audioMixerGroup);
@@ -1382,7 +1382,7 @@ public class ObservedPlayer : FikaPlayer
         bool compassInstantiated = Traverse.Create(this).Field<bool>("_compassInstantiated").Value;
         if (!compassInstantiated)
         {
-            Transform transform = Singleton<PoolManagerClass>.Instance.CreateFromPool<Transform>(new ResourceKey
+            var transform = Singleton<PoolManagerClass>.Instance.CreateFromPool<Transform>(new ResourceKey
             {
                 path = "assets/content/weapons/additional_hands/item_compass.bundle"
             });
@@ -1491,7 +1491,7 @@ public class ObservedPlayer : FikaPlayer
     {
         if (HandsController != null)
         {
-            AbstractHandsController handsController = HandsController;
+            var handsController = HandsController;
             if (handsController != null && handsController.ControllerGameObject != null)
             {
                 HandsController.OnGameSessionEnd();
@@ -1506,7 +1506,7 @@ public class ObservedPlayer : FikaPlayer
         {
             Singleton<BetterAudio>.Instance.ProtagonistHearingChanged -= UpdateSoundRolloff;
         }
-        foreach (ObservedSlotViewHandler slotViewHandler in _observedSlotViewHandlers)
+        foreach (var slotViewHandler in _observedSlotViewHandlers)
         {
             slotViewHandler.Dispose();
         }
@@ -1610,11 +1610,11 @@ public class ObservedPlayer : FikaPlayer
 
         private void HandleItemMove(Item item)
         {
-            Transform slotBone = _observedPlayer.PlayerBody.GetSlotBone(_slotType);
-            Transform alternativeHolsterBone = _observedPlayer.PlayerBody.GetAlternativeHolsterBone(_slotType);
+            var slotBone = _observedPlayer.PlayerBody.GetSlotBone(_slotType);
+            var alternativeHolsterBone = _observedPlayer.PlayerBody.GetAlternativeHolsterBone(_slotType);
             PlayerBody.EquipmentSlotClass newSlotView = new(_observedPlayer.PlayerBody, _slot, slotBone, _slotType,
                     _observedPlayer.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack), alternativeHolsterBone, false);
-            PlayerBody.EquipmentSlotClass oldSlotView = _observedPlayer.PlayerBody.SlotViews.AddOrReplace(_slotType, newSlotView);
+            var oldSlotView = _observedPlayer.PlayerBody.SlotViews.AddOrReplace(_slotType, newSlotView);
             if (oldSlotView != null)
             {
                 ClearSlotView(oldSlotView);
@@ -1633,10 +1633,10 @@ public class ObservedPlayer : FikaPlayer
             }
             if (oldSlotView.Dresses != null)
             {
-                Dress[] dresses = oldSlotView.Dresses;
+                var dresses = oldSlotView.Dresses;
                 for (int j = 0; j < dresses.Length; j++)
                 {
-                    BodyRendererDataStruct bodyRenderer = dresses[j].GetBodyRenderer();
+                    var bodyRenderer = dresses[j].GetBodyRenderer();
                     for (int k = 0; k < bodyRenderer.Renderers.Length; k++)
                     {
                         bodyRenderer.Renderers[k].forceRenderingOff = false;
@@ -1655,7 +1655,7 @@ public class ObservedPlayer : FikaPlayer
 
         if (HandsController != null)
         {
-            AbstractHandsController handsController = HandsController;
+            var handsController = HandsController;
             HandsController.FastForwardCurrentState();
             if (HandsController != handsController && HandsController != null)
             {
@@ -1679,7 +1679,7 @@ public class ObservedPlayer : FikaPlayer
         _shouldCullController = _handsController is EmptyHandsController || _handsController is KnifeController || _handsController is UsableItemController;
     }
 
-    public void SpawnHandsController(EHandsControllerType controllerType, string itemId, bool isStationary)
+    public void SpawnHandsController(EHandsControllerType controllerType, MongoID itemId, bool isStationary)
     {
         switch (controllerType)
         {
@@ -1731,7 +1731,7 @@ public class ObservedPlayer : FikaPlayer
         return ObservedEmptyHandsController.Create(this);
     }
 
-    private void CreateFirearmController(string itemId, bool isStationary = false, bool initial = false)
+    private void CreateFirearmController(MongoID itemId, bool isStationary = false, bool initial = false)
     {
         CreateFirearmControllerHandler handler = new(this);
 
@@ -1748,7 +1748,7 @@ public class ObservedPlayer : FikaPlayer
             CreateHandsController(handler.ReturnController, handler.item);
             return;
         }
-        GStruct156<Item> result = FindItemById(itemId, false, false);
+        var result = FindItemById(itemId, false, false);
         if (!result.Succeeded)
         {
             FikaPlugin.Instance.FikaLogger.LogError(result.Error);
@@ -1758,11 +1758,11 @@ public class ObservedPlayer : FikaPlayer
         CreateHandsController(handler.ReturnController, handler.item);
     }
 
-    private void CreateGrenadeController(string itemId)
+    private void CreateGrenadeController(MongoID itemId)
     {
         CreateGrenadeControllerHandler handler = new(this);
 
-        GStruct156<Item> result = FindItemById(itemId, false, false);
+        var result = FindItemById(itemId, false, false);
         if (!result.Succeeded)
         {
             FikaPlugin.Instance.FikaLogger.LogError(result.Error);
@@ -1779,9 +1779,9 @@ public class ObservedPlayer : FikaPlayer
         }
     }
 
-    private void CreateMedsController(string itemId, GStruct382<EBodyPart> bodyParts, float amount, int animationVariant)
+    private void CreateMedsController(MongoID itemId, GStruct382<EBodyPart> bodyParts, float amount, int animationVariant)
     {
-        GStruct156<Item> result = FindItemById(itemId, false, false);
+        var result = FindItemById(itemId, false, false);
         if (!result.Succeeded)
         {
             FikaPlugin.Instance.FikaLogger.LogError(result.Error);
@@ -1791,10 +1791,10 @@ public class ObservedPlayer : FikaPlayer
         CreateHandsController(handler.ReturnController, handler.Item);
     }
 
-    private void CreateKnifeController(string itemId)
+    private void CreateKnifeController(MongoID itemId)
     {
         CreateKnifeControllerHandler handler = new(this);
-        GStruct156<Item> result = FindItemById(itemId, false, false);
+        var result = FindItemById(itemId, false, false);
         if (!result.Succeeded)
         {
             FikaPlugin.Instance.FikaLogger.LogError(result.Error);
@@ -1811,10 +1811,10 @@ public class ObservedPlayer : FikaPlayer
         }
     }
 
-    private void CreateQuickGrenadeController(string itemId)
+    private void CreateQuickGrenadeController(MongoID itemId)
     {
         CreateQuickGrenadeControllerHandler handler = new(this);
-        GStruct156<Item> result = FindItemById(itemId, false, false);
+        var result = FindItemById(itemId, false, false);
         if (!result.Succeeded)
         {
             FikaPlugin.Instance.FikaLogger.LogError(result.Error);
@@ -1831,10 +1831,10 @@ public class ObservedPlayer : FikaPlayer
         }
     }
 
-    private void CreateQuickKnifeController(string itemId)
+    private void CreateQuickKnifeController(MongoID itemId)
     {
         CreateQuickKnifeControllerHandler handler = new(this);
-        GStruct156<Item> result = FindItemById(itemId, false, false);
+        var result = FindItemById(itemId, false, false);
         if (!result.Succeeded)
         {
             FikaPlugin.Instance.FikaLogger.LogError(result.Error);
@@ -1851,9 +1851,9 @@ public class ObservedPlayer : FikaPlayer
         }
     }
 
-    private void CreateUsableItemController(string itemId)
+    private void CreateUsableItemController(MongoID itemId)
     {
-        GStruct156<Item> result = FindItemById(itemId, false, false);
+        var result = FindItemById(itemId, false, false);
         if (!result.Succeeded)
         {
             FikaPlugin.Instance.FikaLogger.LogError(result.Error);
@@ -1863,9 +1863,9 @@ public class ObservedPlayer : FikaPlayer
         CreateHandsController(handler.ReturnController, handler.Item);
     }
 
-    private void CreateQuickUseItemController(string itemId)
+    private void CreateQuickUseItemController(MongoID itemId)
     {
-        GStruct156<Item> result = FindItemById(itemId, false, false);
+        var result = FindItemById(itemId, false, false);
         if (!result.Succeeded)
         {
             FikaPlugin.Instance.FikaLogger.LogError(result.Error);
@@ -1877,7 +1877,7 @@ public class ObservedPlayer : FikaPlayer
 
     public void SetAggressorData(MongoID? killerId, EBodyPart bodyPart, MongoID? weaponId)
     {
-        Player killer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(killerId);
+        var killer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(killerId);
         if (killer != null)
         {
             LastAggressor = killer;
@@ -1954,7 +1954,7 @@ public class ObservedPlayer : FikaPlayer
                 PlayerBones.AnimatedTransform.localPosition = new Vector3(PlayerBones.AnimatedTransform.localPosition.x, 0f, PlayerBones.AnimatedTransform.localPosition.z);
             }
             MouseLook(false);
-            Transform child = PlayerBones.Weapon_Root_Anim.GetChild(0);
+            var child = PlayerBones.Weapon_Root_Anim.GetChild(0);
             child.localPosition = Vector3.zero;
             child.localRotation = Quaternion.identity;
         }
@@ -2012,7 +2012,7 @@ public class ObservedPlayer : FikaPlayer
 
         internal void DisposeHandler()
         {
-            Class1310 handler = SetInHandsOperation;
+            var handler = SetInHandsOperation;
             if (handler == null)
             {
                 return;
