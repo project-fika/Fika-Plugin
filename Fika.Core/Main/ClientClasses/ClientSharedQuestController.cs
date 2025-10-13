@@ -177,7 +177,7 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
         {
             var quest = Quests[i];
             // Extra check to prevent redundant notifications
-            if (quest.IsDone())
+            if (!IsQuestActive(quest))
             {
                 continue;
             }
@@ -283,12 +283,17 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
         _isItemBeingDropped = false;
     }
 
+    private bool IsQuestActive(QuestClass quest)
+    {
+        return quest.QuestStatus is EQuestStatus.Started;
+    }
+
     private bool HasQuestForItem(string itemId, string zoneId, out string questName)
     {
         for (var i = 0; i < Quests.Count; i++)
         {
             var quest = Quests[i];
-            if (quest.IsDone() || (quest.QuestStatus is EQuestStatus.AvailableForStart or EQuestStatus.Locked))
+            if (!IsQuestActive(quest))
             {
                 continue;
             }

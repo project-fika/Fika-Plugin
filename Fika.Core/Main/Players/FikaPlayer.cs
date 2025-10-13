@@ -1414,12 +1414,9 @@ public class FikaPlayer : LocalPlayer
         for (int i = 0; i < Singleton<GameWorld>.Instance.LootList.Count; i++)
         {
             IKillableLootItem lootItem = Singleton<GameWorld>.Instance.LootList[i];
-            if (lootItem is LootItem observedLootItem)
+            if (lootItem is LootItem observedLootItem && observedLootItem.Item.TemplateId == itemId && observedLootItem.isActiveAndEnabled)
             {
-                if (observedLootItem.Item.TemplateId == itemId && observedLootItem.isActiveAndEnabled)
-                {
-                    return observedLootItem.Item;
-                }
+                return observedLootItem.Item;
             }
         }
 #if DEBUG
