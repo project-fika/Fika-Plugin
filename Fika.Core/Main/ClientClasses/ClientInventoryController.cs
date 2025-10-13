@@ -138,7 +138,7 @@ public sealed class ClientInventoryController : Player.PlayerOwnerInventoryContr
         }
 
         // Do not replicate search operations
-        if (operation is SearchContentOperationResultClass)
+        if (operation is SearchContentOperationResultClass or GClass3496) // search for "DialogController not available"
         {
             base.vmethod_1(operation, callback);
             return;

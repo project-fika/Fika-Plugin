@@ -187,11 +187,14 @@ public class ObservedPlayer : FikaPlayer
 
         ObservedStatisticsManager statisticsManager = new();
         ObservedQuestController observedQuestController = null;
+        GClass3618 dialogueController = null;
         if (!aiControl)
         {
             observedQuestController = new(profile, inventoryController, inventoryController.PlayerSearchController, null);
             observedQuestController.Init();
             observedQuestController.Run();
+
+            dialogueController = new(profile, observedQuestController, inventoryController);
         }
 
         player.VoipState = (!FikaBackendUtils.IsHeadless && !aiControl && Singleton<IFikaNetworkManager>.Instance.AllowVOIP)
@@ -199,7 +202,7 @@ public class ObservedPlayer : FikaPlayer
 
         await player.Init(rotation, layerName, pointOfView, profile, inventoryController, healthController,
             statisticsManager, observedQuestController, null,
-            null, null, filter, player.VoipState, aiControl, false);
+            null, dialogueController, filter, player.VoipState, aiControl, false);
 
         player.DisposeObservers();
 
