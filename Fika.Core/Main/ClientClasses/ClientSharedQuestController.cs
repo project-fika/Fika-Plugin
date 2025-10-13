@@ -8,6 +8,7 @@ using Fika.Core.Networking.Packets.Communication;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
 using static Fika.Core.UI.FikaUIGlobals;
 
 namespace Fika.Core.Main.ClientClasses;
@@ -25,9 +26,9 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
     {
         base.Init();
         FikaPlugin.EQuestSharingTypes[] array = (FikaPlugin.EQuestSharingTypes[])Enum.GetValues(typeof(FikaPlugin.EQuestSharingTypes));
-        for (int i = 0; i < array.Length; i++)
+        for (var i = 0; i < array.Length; i++)
         {
-            FikaPlugin.EQuestSharingTypes shareType = array[i];
+            var shareType = array[i];
             if (FikaPlugin.QuestTypesToShareAndReceive.Value.HasFlag(shareType))
             {
                 switch (shareType)
@@ -142,7 +143,7 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
 
         if (conditional is QuestClass quest)
         {
-            TaskConditionCounterClass counter = quest.ConditionCountersManager.GetCounter(condition.id);
+            var counter = quest.ConditionCountersManager.GetCounter(condition.id);
             if (counter != null)
             {
                 if (!ValidateQuestType(counter))
@@ -172,9 +173,9 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
         }
 
         AddNetworkId(packet.Id);
-        for (int i = 0; i < Quests.Count; i++)
+        for (var i = 0; i < Quests.Count; i++)
         {
-            QuestClass quest = Quests[i];
+            var quest = Quests[i];
             // Extra check to prevent redundant notifications
             if (quest.IsDone())
             {
@@ -183,7 +184,7 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
 
             if (quest.Id == packet.SourceId && quest.QuestStatus == EQuestStatus.Started)
             {
-                TaskConditionCounterClass counter = quest.ConditionCountersManager.GetCounter(packet.Id);
+                var counter = quest.ConditionCountersManager.GetCounter(packet.Id);
                 if (counter != null && !quest.CompletedConditions.Contains(counter.Id))
                 {
                     if (!ValidateQuestType(counter))
@@ -212,11 +213,11 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
 
         if (!string.IsNullOrEmpty(packet.ItemId))
         {
-            Item item = _player.FindQuestItem(packet.ItemId);
+            var item = _player.FindQuestItem(packet.ItemId);
             if (item != null)
             {
-                InventoryController playerInventory = _player.InventoryController;
-                GStruct154<GInterface424> pickupResult = InteractionsHandlerClass.QuickFindAppropriatePlace(item, playerInventory,
+                var playerInventory = _player.InventoryController;
+                var pickupResult = InteractionsHandlerClass.QuickFindAppropriatePlace(item, playerInventory,
                     playerInventory.Inventory.Equipment.ToEnumerable(),
                     InteractionsHandlerClass.EMoveItemOrder.PickUp, true);
 
@@ -249,9 +250,9 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
 
         _isItemBeingDropped = true;
         string itemId = packet.ItemId;
-        string zoneId = packet.ZoneId;
+        var zoneId = packet.ZoneId;
 
-        if (!HasQuestForItem(itemId, zoneId, out string questName))
+        if (!HasQuestForItem(itemId, zoneId, out var questName))
         {
             _isItemBeingDropped = false;
             return;
@@ -264,11 +265,11 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
                                 iconType: EFT.Communications.ENotificationIconType.Quest);
         }
 
-        foreach (Item questItem in _player.Inventory.QuestRaidItems.GetAllItems())
+        foreach (var questItem in _player.Inventory.QuestRaidItems.GetAllItems())
         {
             if (questItem.TemplateId == itemId && questItem.QuestItem)
             {
-                GStruct154<GClass3410> removeResult = InteractionsHandlerClass.Remove(questItem, _player.InventoryController, true);
+                var removeResult = InteractionsHandlerClass.Remove(questItem, _player.InventoryController, true);
                 _player.InventoryController.TryRunNetworkTransaction(removeResult, (IResult result) =>
                 {
                     if (!result.Succeed)
@@ -284,15 +285,15 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
 
     private bool HasQuestForItem(string itemId, string zoneId, out string questName)
     {
-        for (int i = 0; i < Quests.Count; i++)
+        for (var i = 0; i < Quests.Count; i++)
         {
-            QuestClass quest = Quests[i];
-            if (quest.IsDone())
+            var quest = Quests[i];
+            if (quest.IsDone() || (quest.QuestStatus is EQuestStatus.AvailableForStart or EQuestStatus.Locked))
             {
                 continue;
             }
 
-            foreach (ConditionPlaceBeacon conditionPlaceBeacon in quest.GetConditions<ConditionPlaceBeacon>(EQuestStatus.AvailableForFinish))
+            foreach (var conditionPlaceBeacon in quest.GetConditions<ConditionPlaceBeacon>(EQuestStatus.AvailableForFinish))
             {
                 if (conditionPlaceBeacon.target.Contains(itemId) && conditionPlaceBeacon.zoneId == zoneId)
                 {
@@ -313,7 +314,7 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
                 }
             }
 
-            foreach (ConditionLeaveItemAtLocation conditionLeaveItemAtLocation in quest.GetConditions<ConditionLeaveItemAtLocation>(EQuestStatus.AvailableForFinish))
+            foreach (var conditionLeaveItemAtLocation in quest.GetConditions<ConditionLeaveItemAtLocation>(EQuestStatus.AvailableForFinish))
             {
                 if (conditionLeaveItemAtLocation.target.Contains(itemId) && conditionLeaveItemAtLocation.zoneId == zoneId)
                 {
