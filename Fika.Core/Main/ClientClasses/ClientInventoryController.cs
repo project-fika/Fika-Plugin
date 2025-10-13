@@ -128,13 +128,10 @@ public sealed class ClientInventoryController : Player.PlayerOwnerInventoryContr
         }
 
         // Do not replicate stashing quest items
-        if (operation is RemoveOperationClass discardOperation)
+        if (operation is RemoveOperationClass discardOperation && discardOperation.Item.QuestItem)
         {
-            if (discardOperation.Item.QuestItem)
-            {
-                base.vmethod_1(operation, callback);
-                return;
-            }
+            base.vmethod_1(operation, callback);
+            return;
         }
 
         // Do not replicate search operations
