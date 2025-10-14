@@ -489,29 +489,41 @@ public abstract class BaseGameController
 
     public void InitBTRController(BackendConfigSettingsClass instance, GameWorld gameWorld, LocationSettingsClass.Location location)
     {
-        if (FikaPlugin.Instance.UseBTR && instance != null && instance.BTRSettings.LocationsWithBTR.Contains(location.Id))
+        Logger.LogInfo("Loading BTR data...");
+        if (FikaPlugin.Instance.UseBTR)
         {
-#if DEBUG
-            Logger.LogWarning("Spawning BTR controller and setting spawn chance to 100%");
-            JsonType.BTRServerSettings settings = Singleton<BackendConfigSettingsClass>.Instance.BTRLocalSettings;
-            KeyValuePair<string, GStruct140> mapSettings = settings.ServerMapBTRSettings.First(x => x.Value.MapID == gameWorld.LocationId);
-            GStruct140 btrSettings = mapSettings.Value;
-            btrSettings.ChanceSpawn = 100;
-            btrSettings.SpawnPeriod = new(5, 10);
-            btrSettings.MoveSpeed = 32f;
-            btrSettings.PauseDurationRange = new(595, 600);
-            settings.ServerMapBTRSettings[mapSettings.Key] = btrSettings;
-#endif
-            gameWorld.BtrController = new BTRControllerClass(gameWorld);
-            if (IsServer)
+            if (instance != null)
             {
-                GlobalEventHandlerClass.Instance.SubscribeOnEvent<BtrSpawnOnThePathEvent>(OnBtrSpawn);
+                if (instance.BTRSettings.LocationsWithBTR.Contains(location.Id))
+                {
+#if DEBUG
+                    Logger.LogWarning("Spawning BTR controller and setting spawn chance to 100%");
+                    JsonType.BTRServerSettings settings = Singleton<BackendConfigSettingsClass>.Instance.BTRLocalSettings;
+                    KeyValuePair<string, GStruct140> mapSettings = settings.ServerMapBTRSettings.First(x => x.Value.MapID == gameWorld.LocationId);
+                    GStruct140 btrSettings = mapSettings.Value;
+                    btrSettings.ChanceSpawn = 100;
+                    btrSettings.SpawnPeriod = new(5, 10);
+                    btrSettings.MoveSpeed = 32f;
+                    btrSettings.PauseDurationRange = new(595, 600);
+                    settings.ServerMapBTRSettings[mapSettings.Key] = btrSettings;
+#endif
+                    gameWorld.BtrController = new BTRControllerClass(gameWorld);
+                    if (IsServer)
+                    {
+                        GlobalEventHandlerClass.Instance.SubscribeOnEvent<BtrSpawnOnThePathEvent>(OnBtrSpawn);
+                    }
+                }
+            }
+            else
+            {
+                Logger.LogError("InitBTRController::BackendConfigSettingsClass was missing when initializing BTR!");
             }
         }
     }
 
     private void OnBtrSpawn(BtrSpawnOnThePathEvent spawnEvent)
     {
+        Logger.LogInfo("BTR spawned, notifying clients");
         Singleton<IFikaNetworkManager>.Instance.SendGenericPacket(EGenericSubPacketType.SpawnBTR,
             BtrSpawn.FromValue(spawnEvent.Position, spawnEvent.Rotation, spawnEvent.PlayerProfileId), true);
     }
