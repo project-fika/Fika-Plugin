@@ -209,7 +209,7 @@ public class HostGameController : BaseGameController, IBotGame
         netId = server.PopNetId();
 
         MongoID mongoId = MongoID.Generate(true);
-        ushort nextOperationId = 0;
+        const ushort nextOperationId = 0;
         SendCharacterPacket packet = SendCharacterPacket.FromValue(new()
         {
             Profile = profile,
