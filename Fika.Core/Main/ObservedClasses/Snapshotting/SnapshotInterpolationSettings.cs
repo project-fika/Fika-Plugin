@@ -44,7 +44,7 @@ public class SnapshotInterpolationSettings
     /// Local timeline slowdown in % while slowing down.
     /// </summary>
     [Range(0, 1)]
-    public double slowdownSpeed = 0.04f;
+    public double slowdownSpeed = 0.04d;
 
     /// <summary>
     /// Catchup/Slowdown is adjusted over n-second exponential moving average.
