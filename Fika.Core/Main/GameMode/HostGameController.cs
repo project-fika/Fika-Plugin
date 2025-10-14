@@ -209,7 +209,7 @@ public class HostGameController : BaseGameController, IBotGame
         netId = server.PopNetId();
 
         MongoID mongoId = MongoID.Generate(true);
-        ushort nextOperationId = 0;
+        const ushort nextOperationId = 0;
         SendCharacterPacket packet = SendCharacterPacket.FromValue(new()
         {
             Profile = profile,
@@ -220,7 +220,7 @@ public class HostGameController : BaseGameController, IBotGame
         packet.PlayerInfoPacket.HealthByteArray = profile.Health.SerializeHealthInfo();
         Singleton<IFikaNetworkManager>.Instance.SendGenericPacket(EGenericSubPacketType.SendCharacter, packet, true);
 
-        if (server.NetServer.ConnectedPeersCount > 0)
+        if (server.NetServer.ConnectedPeersCount > 0 && profile.Info.Settings.Role != WildSpawnType.shooterBTR)
         {
             await WaitForPlayersToLoadBotProfile(netId);
         }
