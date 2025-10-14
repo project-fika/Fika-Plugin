@@ -136,7 +136,7 @@ public unsafe class NetDataWriter
 
     public byte[] CopyData()
     {
-        byte[] resultData = new byte[_position];
+        var resultData = new byte[_position];
         Buffer.BlockCopy(_data, 0, resultData, 0, _position);
         return resultData;
     }
@@ -148,7 +148,7 @@ public unsafe class NetDataWriter
     /// <returns>previous position of data writer</returns>
     public int SetPosition(int position)
     {
-        int prevPosition = _position;
+        var prevPosition = _position;
         _position = position;
         return prevPosition;
     }
@@ -350,7 +350,7 @@ public unsafe class NetDataWriter
 
     public void PutArray(Array arr, int sz)
     {
-        ushort length = arr == null ? (ushort)0 : (ushort)arr.Length;
+        var length = arr == null ? (ushort)0 : (ushort)arr.Length;
         sz *= length;
         if (_autoResize)
             ResizeIfNeed(_position + sz + 2);
@@ -407,25 +407,25 @@ public unsafe class NetDataWriter
 
     public void PutArray(string[] value)
     {
-        ushort strArrayLength = value == null ? (ushort)0 : (ushort)value.Length;
+        var strArrayLength = value == null ? (ushort)0 : (ushort)value.Length;
         Put(strArrayLength);
-        for (int i = 0; i < strArrayLength; i++)
+        for (var i = 0; i < strArrayLength; i++)
             Put(value[i]);
     }
 
     public void PutArray(string[] value, int strMaxLength)
     {
-        ushort strArrayLength = value == null ? (ushort)0 : (ushort)value.Length;
+        var strArrayLength = value == null ? (ushort)0 : (ushort)value.Length;
         Put(strArrayLength);
-        for (int i = 0; i < strArrayLength; i++)
+        for (var i = 0; i < strArrayLength; i++)
             Put(value[i], strMaxLength);
     }
 
     public void PutArray<T>(T[] value) where T : INetSerializable, new()
     {
-        ushort strArrayLength = (ushort)(value?.Length ?? 0);
+        var strArrayLength = (ushort)(value?.Length ?? 0);
         Put(strArrayLength);
-        for (int i = 0; i < strArrayLength; i++)
+        for (var i = 0; i < strArrayLength; i++)
             value[i].Serialize(this);
     }
 
@@ -442,7 +442,7 @@ public unsafe class NetDataWriter
             Put(0);
             return;
         }
-        int size = UTF8Encoding.Value.GetByteCount(value);
+        var size = UTF8Encoding.Value.GetByteCount(value);
         if (size == 0)
         {
             Put(0);
@@ -471,11 +471,11 @@ public unsafe class NetDataWriter
             return;
         }
 
-        int length = maxLength > 0 && value.Length > maxLength ? maxLength : value.Length;
-        int maxSize = UTF8Encoding.Value.GetMaxByteCount(length);
+        var length = maxLength > 0 && value.Length > maxLength ? maxLength : value.Length;
+        var maxSize = UTF8Encoding.Value.GetMaxByteCount(length);
         if (_autoResize)
             ResizeIfNeed(_position + maxSize + sizeof(ushort));
-        int size = UTF8Encoding.Value.GetBytes(value, 0, length, _data, _position + sizeof(ushort));
+        var size = UTF8Encoding.Value.GetBytes(value, 0, length, _data, _position + sizeof(ushort));
         if (size == 0)
         {
             Put((ushort)0);
@@ -523,7 +523,7 @@ public unsafe class NetDataWriter
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void PutNullableUnmanaged<T>(T? value) where T : unmanaged
     {
-        bool hasValue = value.HasValue;
+        var hasValue = value.HasValue;
         Put(hasValue);
         if (!hasValue)
         {
@@ -539,18 +539,21 @@ public unsafe class NetDataWriter
     /// Advances the position by the size of <typeparamref name="T"/>.
     /// </summary>
     /// <typeparam name="T">An unmanaged enum type to write.</typeparam>
-    /// <param name="en">The enum value to write.</param>
-    public void PutEnum<T>(T en) where T : unmanaged, Enum
+    /// <param name="value">The enum value to write.</param>
+    public void PutEnum<T>(T value) where T : unmanaged, Enum
     {
-        int size = Unsafe.SizeOf<T>();
+        var size = Unsafe.SizeOf<T>();
         if (_autoResize)
         {
             ResizeIfNeed(_position + size);
         }
 
-        Span<byte> span = stackalloc byte[size];
-        MemoryMarshal.Write(span, ref en);
-        Put(span);
+        fixed (byte* ptr = &_data[_position])
+        {
+            *(T*)ptr = value;
+        }
+
+        _position += size;
     }
 
     /// <summary>
