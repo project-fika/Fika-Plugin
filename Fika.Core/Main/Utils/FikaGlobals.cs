@@ -192,11 +192,6 @@ public static class FikaGlobals
     /// <param name="nickname"></param>
     public static void SetProfileNickname(this InfoClass infoClass, string nickname)
     {
-        if (!string.IsNullOrEmpty(infoClass.MainProfileNickname) && infoClass.EplayerSide_0 != EPlayerSide.Savage)
-        {
-            return;
-        }
-
         Traverse.Create(infoClass).Field<string>("MainProfileNickname").Value = nickname;
     }
 

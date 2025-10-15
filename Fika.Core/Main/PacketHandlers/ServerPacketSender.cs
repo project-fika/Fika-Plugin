@@ -212,7 +212,7 @@ public class ServerPacketSender : MonoBehaviour, IPacketSender
             abstractPing.Initialize(ref hitPoint, userData, pingColor);
 
             NetworkManager.SendGenericPacket(Networking.Packets.Generic.EGenericSubPacketType.Ping,
-                PingPacket.FromValue(hitPoint, pingType, pingColor, _player.Profile.GetCorrectedNickname(), localeId), true);
+                PingPacket.FromValue(hitPoint, pingType, pingColor, _player.Profile.Info.MainProfileNickname, localeId), true);
 
             if (FikaPlugin.PlayPingAnimation.Value && _player.HealthController.IsAlive)
             {
