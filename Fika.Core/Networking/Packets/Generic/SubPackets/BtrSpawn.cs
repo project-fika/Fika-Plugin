@@ -1,5 +1,6 @@
 ﻿using EFT.GlobalEvents;
 using Fika.Core.Main.Players;
+using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.Generic.SubPackets;
@@ -28,7 +29,9 @@ public sealed class BtrSpawn : IPoolSubPacket
 
     public void Execute(FikaPlayer player = null)
     {
-        GlobalEventHandlerClass.CreateEvent<BtrSpawnOnThePathEvent>().Invoke(Position, Rotation, PlayerProfileId);
+        FikaGlobals.LogInfo("Received BTR spawn event from server");
+        GlobalEventHandlerClass.CreateEvent<BtrSpawnOnThePathEvent>()
+            .Invoke(Position, Rotation, PlayerProfileId);
     }
 
     public void Serialize(NetDataWriter writer)
