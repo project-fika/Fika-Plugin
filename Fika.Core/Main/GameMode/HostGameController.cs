@@ -290,10 +290,10 @@ public class HostGameController : BaseGameController, IBotGame
     private async Task WaitForPlayersToLoadBotProfile(int netId)
     {
         _botQueue.Add(netId, 0);
-        FikaServer server = Singleton<FikaServer>.Instance;
-        int connectedPeers = server.NetServer.ConnectedPeersCount;
+        var server = Singleton<FikaServer>.Instance;
+        var connectedPeers = server.NetServer.ConnectedPeersCount;
 
-        float elapsedSeconds = 0f;
+        var elapsedSeconds = 0f;
 
         while (_botQueue[netId] < connectedPeers)
         {
@@ -307,6 +307,11 @@ public class HostGameController : BaseGameController, IBotGame
             await Task.Delay((int)(_botTimeoutDelay * 1000)); // multiply 0.X * 1000 to get milliseconds
             elapsedSeconds += _botTimeoutDelay;
             connectedPeers = server.NetServer.ConnectedPeersCount;
+        }
+
+        if (elapsedSeconds > 10f)
+        {
+            Logger.LogWarning($"WaitForPlayersToLoadBotProfile::Bot [{netId}] took an abnormal amount of time to load");
         }
 
         _botQueue.Remove(netId);
