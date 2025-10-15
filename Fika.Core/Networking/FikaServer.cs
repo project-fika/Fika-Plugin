@@ -512,22 +512,6 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
             (bytes[0] == 172 && bytes[1] >= 16 && bytes[1] <= 31);  // 172.16.0.0/12
     }
 
-    private async void NatIntroduceRoutine(string natPunchServerIP, int natPunchServerPort, string token, CancellationToken ct)
-    {
-        _logger.LogInfo("NatIntroduceRoutine started.");
-
-        while (!ct.IsCancellationRequested)
-        {
-            _netServer.NatPunchModule.SendNatIntroduceRequest(natPunchServerIP, natPunchServerPort, token);
-
-            _logger.LogInfo($"SendNatIntroduceRequest: {natPunchServerIP}:{natPunchServerPort}");
-
-            await Task.Delay(TimeSpan.FromSeconds(15));
-        }
-
-        _logger.LogInfo("NatIntroduceRoutine ended.");
-    }
-
     public int PopNetId()
     {
         int netId = _currentNetId;
@@ -838,16 +822,6 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
                 resp.Put(started && !reconnect ? "fika.inprogress" : "fika.hello");
                 _netServer.SendUnconnectedMessage(resp.AsReadOnlySpan, remoteEndPoint);
             }
-            else if (data == "fika.keepalive")
-            {
-                resp.Put(data);
-                _netServer.SendUnconnectedMessage(resp.AsReadOnlySpan, remoteEndPoint);
-
-                if (!_natIntroduceRoutineCts.IsCancellationRequested)
-                {
-                    _natIntroduceRoutineCts.Cancel();
-                }
-            }
             else
             {
                 _logger.LogError($"PingingRequest::Data was not as expected: {data}");
@@ -979,34 +953,6 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         }
     }
 
-    public void OnNatIntroductionRequest(IPEndPoint localEndPoint, IPEndPoint remoteEndPoint, string token)
-    {
-        // Do nothing
-    }
-
-    public void OnNatIntroductionSuccess(IPEndPoint targetEndPoint, NatAddressType type, string token)
-    {
-        // Do nothing
-    }
-
-    public void OnNatIntroductionResponse(IPEndPoint localEndPoint, IPEndPoint remoteEndPoint, string token)
-    {
-        _logger.LogInfo($"OnNatIntroductionResponse: {remoteEndPoint}");
-
-        Task.Run(async () =>
-        {
-            NetDataWriter data = new();
-            data.Put("fika.hello");
-
-            for (int i = 0; i < 20; i++)
-            {
-                _netServer.SendUnconnectedMessage(data, localEndPoint);
-                _netServer.SendUnconnectedMessage(data, remoteEndPoint);
-                await Task.Delay(250);
-            }
-        });
-    }
-
     public void RegisterPacket<T>(Action<T> handle) where T : INetSerializable, new()
     {
         _packetProcessor.SubscribeNetSerializable(handle);
@@ -1058,5 +1004,59 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         {
             _raidAdminUIScript.Toggle();
         }
+    }
+
+    // NAT Punching
+
+    public void OnNatIntroductionRequest(IPEndPoint localEndPoint, IPEndPoint remoteEndPoint, string token)
+    {
+        // Do nothing
+    }
+
+    public void OnNatIntroductionSuccess(IPEndPoint targetEndPoint, NatAddressType type, string token)
+    {
+        // Do nothing
+    }
+    public void OnNatIntroductionResponse(IPEndPoint localEndPoint, IPEndPoint remoteEndPoint, string token)
+    {
+        _logger.LogInfo($"OnNatIntroductionResponse: {remoteEndPoint}");
+
+        Task.Run(async () =>
+        {
+            NetDataWriter data = new();
+            data.Put("fika.hello");
+
+            for (int i = 0; i < 20; i++)
+            {
+                _netServer.SendUnconnectedMessage(data, localEndPoint);
+                _netServer.SendUnconnectedMessage(data, remoteEndPoint);
+                await Task.Delay(250);
+            }
+        });
+    }
+
+    public void StopNatIntroduceRoutine()
+    {
+        if (_natIntroduceRoutineCts != null)
+        {
+            _natIntroduceRoutineCts.Cancel();
+        }
+    }
+
+    private async void NatIntroduceRoutine(string natPunchServerIP, int natPunchServerPort, string token, CancellationToken ct)
+    {
+        _logger.LogInfo("NatIntroduceRoutine started.");
+
+        while (!ct.IsCancellationRequested)
+        {
+
+            _logger.LogInfo($"SendNatIntroduceRequest: {natPunchServerIP}:{natPunchServerPort}");
+
+            _netServer.NatPunchModule.SendNatIntroduceRequest(natPunchServerIP, natPunchServerPort, token);
+
+            await Task.Delay(TimeSpan.FromSeconds(15));
+        }
+
+        _logger.LogInfo("NatIntroduceRoutine ended.");
     }
 }

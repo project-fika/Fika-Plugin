@@ -3,6 +3,7 @@ using Fika.Core.Main.GameMode;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Models;
+using System;
 using System.Collections;
 using System.Net;
 using System.Net.Sockets;
@@ -159,42 +160,6 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
         }
     }
 
-    /// <summary>
-    /// Starts the keep-alive coroutine to periodically ping the server.
-    /// </summary>
-    public void StartKeepAliveRoutine()
-    {
-        _keepAliveRoutine = StartCoroutine(KeepAlive());
-    }
-
-    /// <summary>
-    /// Stops the keep-alive coroutine if it is running.
-    /// </summary>
-    public void StopKeepAliveRoutine()
-    {
-        if (_keepAliveRoutine != null)
-        {
-            StopCoroutine(_keepAliveRoutine);
-        }
-    }
-
-    /// <summary>
-    /// Coroutine that sends keep-alive messages to the server at regular intervals.
-    /// </summary>
-    /// <returns>An enumerator for the coroutine.</returns>
-    public IEnumerator KeepAlive()
-    {
-        WaitForSeconds waitForSeconds = new(1f);
-        while (true)
-        {
-            PingEndPoint("fika.keepalive");
-            NetClient.PollEvents();
-            NetClient.NatPunchModule.PollEvents();
-
-            yield return waitForSeconds;
-        }
-    }
-
     /// <inheritdoc/>
     public void OnConnectionRequest(ConnectionRequest request)
     {
@@ -241,9 +206,6 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
                     FikaBackendUtils.RemotePort = remoteEndPoint.Port;
                     FikaBackendUtils.LocalPort = NetClient.LocalPort;
                     _logger.LogInfo($"Got response from {FikaBackendUtils.RemoteIp}:{FikaBackendUtils.RemotePort}, using LocalPort: {NetClient.LocalPort}");
-                    break;
-                case "fika.keepalive":
-                    // Do nothing
                     break;
                 case "fika.inprogress":
                     InProgress = true;
@@ -301,13 +263,9 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
 
         Task.Run(async () =>
         {
-            NetDataWriter data = new();
-            data.Put("fika.hello");
-
             for (int i = 0; i < 20; i++)
             {
-                NetClient.SendUnconnectedMessage(data.AsReadOnlySpan, _localEndPoint);
-                NetClient.SendUnconnectedMessage(data.AsReadOnlySpan, _remoteEndPoint);
+                PingEndPoint("fika.hello");
                 await Task.Delay(250);
             }
         });

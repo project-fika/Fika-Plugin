@@ -433,6 +433,11 @@ public class HostGameController : BaseGameController, IBotGame
 
         Logger.LogInfo("Raid has been started...");
 
+        if (FikaPlugin.UseNatPunching.Value)
+        {
+            server.StopNatIntroduceRoutine();
+        }
+
         if (startButton != null)
         {
             GameObject.Destroy(startButton);
