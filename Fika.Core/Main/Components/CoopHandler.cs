@@ -302,7 +302,7 @@ public class CoopHandler : MonoBehaviour
         try
         {
             await Singleton<PoolManagerClass>.Instance.LoadBundlesAndCreatePools(PoolManagerClass.PoolsCategory.Raid,
-                PoolManagerClass.AssemblyType.Local, allPrefabPaths, JobPriorityClass.Low);
+                PoolManagerClass.AssemblyType.Local, allPrefabPaths, JobPriorityClass.General);
         }
         catch (OperationCanceledException)
         {

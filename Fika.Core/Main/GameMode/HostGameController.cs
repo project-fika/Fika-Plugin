@@ -311,7 +311,7 @@ public class HostGameController : BaseGameController, IBotGame
 
         if (elapsedSeconds > 10f)
         {
-            Logger.LogWarning($"WaitForPlayersToLoadBotProfile::Bot [{netId}] took an abnormal amount of time to load");
+            Logger.LogWarning($"WaitForPlayersToLoadBotProfile::Bot [{netId}] took an abnormal amount of time to load: {elapsedSeconds:F1}");
         }
 
         _botQueue.Remove(netId);
