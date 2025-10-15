@@ -519,7 +519,7 @@ public class HostGameController : BaseGameController, IBotGame
         yield return base.CountdownScreen(profile, profileId);
         _localPlayer.PacketSender.Init();
 
-        SyncTraps();
+        _gameWorld.StartCoroutine(SyncTraps());
         _gameWorld.StartCoroutine(CreateStashes());
     }
 
@@ -998,18 +998,19 @@ public class HostGameController : BaseGameController, IBotGame
         }
     }
 
-    public void SyncTraps()
+    public IEnumerator SyncTraps()
     {
+        yield return new WaitForSeconds(5);
+
         if (Location.EventTrapsData == null)
         {
-            Logger.LogError("EventTrapsData was null when trying to sync trap data!");
-            return;
+            yield break;
         }
 
         if (_gameWorld.SyncModule == null)
         {
             Logger.LogError("SyncModule was null when trying to sync trap data!");
-            return;
+            yield break;
         }
 
         GClass1368 writer = new(new byte[2048]);
