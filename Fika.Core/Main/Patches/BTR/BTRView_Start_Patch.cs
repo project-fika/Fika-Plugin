@@ -17,7 +17,8 @@ public class BTRView_Start_Patch : ModulePatch
             .GetMethod(nameof(BTRView.Start));
     }
 
-    public static void Prefix()
+    [PatchPostfix]
+    public static void Postfix()
     {
         if (FikaBackendUtils.IsHeadless)
         {
