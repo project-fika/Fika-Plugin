@@ -400,4 +400,20 @@ public static class FikaGlobals
     {
 
     }
+
+    /// <summary>
+    /// Converts the <see cref="ELoadPriority"/> to a delegate
+    /// </summary>
+    /// <param name="priority">The priority</param>
+    /// <returns>A new <see cref="GDelegate62"/> for <see cref="Components.CoopHandler.SpawnPlayer(Components.CoopHandler.SpawnObject)"/></returns>
+    public static GDelegate62 ToLoadPriorty(this ELoadPriority priority)
+    {
+        return priority switch
+        {
+            ELoadPriority.Low => JobPriorityClass.Low,
+            ELoadPriority.Medium => JobPriorityClass.General,
+            ELoadPriority.High => JobPriorityClass.Immediate,
+            _ => JobPriorityClass.Low,
+        };
+    }
 }
