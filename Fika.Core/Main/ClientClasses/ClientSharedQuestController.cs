@@ -182,7 +182,7 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
                 continue;
             }
 
-            if (quest.Id == packet.SourceId && quest.QuestStatus == EQuestStatus.Started)
+            if (quest.Id == packet.SourceId)
             {
                 var counter = quest.ConditionCountersManager.GetCounter(packet.Id);
                 if (counter != null && !quest.CompletedConditions.Contains(counter.Id))
