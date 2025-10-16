@@ -1049,7 +1049,6 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
 
         while (!ct.IsCancellationRequested)
         {
-
             _logger.LogInfo($"SendNatIntroduceRequest: {natPunchServerIP}:{natPunchServerPort}");
 
             _netServer.NatPunchModule.SendNatIntroduceRequest(natPunchServerIP, natPunchServerPort, token);
