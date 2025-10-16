@@ -448,7 +448,8 @@ public class FikaPlugin : BaseUnityPlugin
                 {
                     IsAdvanced = true,
                     Category = advancedHeader,
-                    DispName = LocaleUtils.BEPINEX_OFFICIAL_VERSION_T.Localized()
+                    DispName = LocaleUtils.BEPINEX_OFFICIAL_VERSION_T.Localized(),
+                    Order = 6
                 }),
                 "Official Version", ref failed, headers);
 
@@ -457,7 +458,8 @@ public class FikaPlugin : BaseUnityPlugin
             {
                 IsAdvanced = true,
                 Category = advancedHeader,
-                DispName = "Developer Mode"
+                DispName = "Developer Mode",
+                Order = 5
             }), "Developer Mode", ref failed, headers);
 
         NoAI = SetupSetting(advancedDefaultHeader, "No AI", false,
@@ -465,7 +467,8 @@ public class FikaPlugin : BaseUnityPlugin
             {
                 IsAdvanced = true,
                 Category = advancedHeader,
-                DispName = "No AI"
+                DispName = "No AI",
+                Order = 4
             }), "No AI", ref failed, headers);
 
         NoLoot = SetupSetting(advancedDefaultHeader, "No Loot", false,
@@ -473,7 +476,8 @@ public class FikaPlugin : BaseUnityPlugin
             {
                 IsAdvanced = true,
                 Category = advancedHeader,
-                DispName = "No Loot"
+                DispName = "No Loot",
+                Order = 3
             }), "No Loot", ref failed, headers);
 
         LoadPriority = SetupSetting(advancedDefaultHeader, "Player Load Priority", ELoadPriority.Low,
@@ -481,18 +485,20 @@ public class FikaPlugin : BaseUnityPlugin
             {
                 IsAdvanced = true,
                 Category = advancedHeader,
-                DispName = "Player Load Priority"
+                DispName = "Player Load Priority",
+                Order = 2
             }), "Player Load Priority", ref failed, headers);
 
         MaxBundleLock = SetupSetting(advancedDefaultHeader, "Max Bundle Lock", 5,
             new ConfigDescription("Max amount of bundles loading in parallel.\n" +
             "Increase if you take a long time to load bots as a client.\n\n" +
-            "Default game value is 1 but has been increased to remedy the base game issue",
+            "Default game value is 1 but has been increased to remedy the base game issue where bundles load too slow",
             new AcceptableValueRange<int>(1, 10), new ConfigurationManagerAttributes()
             {
                 IsAdvanced = true,
                 Category = advancedHeader,
-                DispName = "Max Bundle Lock"
+                DispName = "Max Bundle Lock",
+                Order = 1
             }), "Max Bundle Lock", ref failed, headers);
 
         // Coop
