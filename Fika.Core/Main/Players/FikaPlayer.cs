@@ -1409,21 +1409,18 @@ public class FikaPlayer : LocalPlayer
         }
     }
 
-    public Item FindQuestItem(string itemId)
+    public Item FindQuestItem(MongoID templateId)
     {
         for (int i = 0; i < Singleton<GameWorld>.Instance.LootList.Count; i++)
         {
             IKillableLootItem lootItem = Singleton<GameWorld>.Instance.LootList[i];
-            if (lootItem is LootItem observedLootItem)
+            if (lootItem is LootItem observedLootItem && observedLootItem.Item.TemplateId == templateId && observedLootItem.isActiveAndEnabled)
             {
-                if (observedLootItem.Item.TemplateId == itemId && observedLootItem.isActiveAndEnabled)
-                {
-                    return observedLootItem.Item;
-                }
+                return observedLootItem.Item;
             }
         }
 #if DEBUG
-        FikaPlugin.Instance.FikaLogger.LogInfo($"CoopPlayer::FindItem: Could not find questItem with id '{itemId}' in the current session, either the quest is not active or something else occured.");
+        FikaGlobals.LogInfo($"Could not find questItem with id '{templateId}' in the current session, either the quest is not active or something else occured.");
 #endif
         return null;
     }

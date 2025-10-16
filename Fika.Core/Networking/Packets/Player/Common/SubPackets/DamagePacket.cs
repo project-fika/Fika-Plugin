@@ -1,6 +1,7 @@
 ﻿using EFT;
 using EFT.Ballistics;
 using Fika.Core.Main.Players;
+using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
@@ -36,7 +37,7 @@ public sealed class DamagePacket : IPoolSubPacket
     public MongoID? WeaponId;
     public MongoID? SourceId;
 
-    public static DamagePacket FromValue(int netId, in DamageInfoStruct damageInfo, EBodyPart bodyPartType,
+    public static DamagePacket FromValue(int netId, DamageInfoStruct damageInfo, EBodyPart bodyPartType,
         EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider = default, MaterialType materialType = default, float absorbed = default)
     {
         DamagePacket packet = CommonSubPacketPoolManager.Instance.GetPacket<DamagePacket>(ECommonSubPacketType.Damage);
@@ -59,9 +60,14 @@ public sealed class DamagePacket : IPoolSubPacket
 
         packet.BlockedBy = damageInfo.BlockedBy;
         packet.DeflectedBy = damageInfo.DeflectedBy;
-        packet.ProfileId = damageInfo.Player?.iPlayer.ProfileId;
-        packet.WeaponId = damageInfo.Weapon?.Id;
-
+        if (damageInfo.Player != null)
+        {
+            packet.ProfileId = damageInfo.Player.iPlayer.ProfileId;
+        }
+        if (damageInfo.Weapon != null)
+        {
+            packet.WeaponId = damageInfo.Weapon.Id;
+        }
         if (!string.IsNullOrEmpty(damageInfo.SourceId))
         {
             packet.SourceId = damageInfo.SourceId;

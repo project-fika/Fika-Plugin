@@ -138,6 +138,11 @@ public partial class FreeCamera : MonoBehaviour
 
     public void DetachCamera()
     {
+        if (!FikaPlugin.Instance.AllowSpectateFreeCam && !_isSpectator)
+        {
+            return;
+        }
+
         if (_currentPlayer)
         {
             _lastSpectatingPlayer = _currentPlayer;

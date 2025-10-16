@@ -6,6 +6,7 @@ using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Models;
 using Fika.Core.UI.Models;
 using SPT.Reflection.Patching;
+using System;
 using System.Linq;
 using System.Reflection;
 
@@ -33,21 +34,21 @@ internal class TarkovApplication_LocalGamePreparer_Patch : ModulePatch
         {
             if (!string.IsNullOrEmpty(FikaBackendUtils.HostLocationId))
             {
-                if (____raidSettings.LocationId.ToLower() == "sandbox" && FikaBackendUtils.HostLocationId.ToLower() == "sandbox_high")
+                if (string.Equals(____raidSettings.LocationId, "sandbox", System.StringComparison.OrdinalIgnoreCase)
+                    && string.Equals(FikaBackendUtils.HostLocationId, "sandbox_high", System.StringComparison.OrdinalIgnoreCase))
                 {
-                    LocationSettingsClass.Location sandboxHigh = __instance.Session.LocationSettings.locations.Values
+                    ____raidSettings.SelectedLocation = __instance.Session.LocationSettings.locations.Values
                         .FirstOrDefault(IsSandboxHigh);
-                    ____raidSettings.SelectedLocation = sandboxHigh;
 
                     NotificationManagerClass.DisplayMessageNotification("Notification/HighLevelQueue".Localized(null),
                         ENotificationDurationType.Default, ENotificationIconType.Default, null);
                 }
 
-                if (____raidSettings.LocationId.ToLower() == "sandbox_high" && FikaBackendUtils.HostLocationId.ToLower() == "sandbox")
+                if (string.Equals(____raidSettings.LocationId, "sandbox_high", StringComparison.OrdinalIgnoreCase)
+                    && string.Equals(FikaBackendUtils.HostLocationId, "sandbox", StringComparison.OrdinalIgnoreCase))
                 {
-                    LocationSettingsClass.Location sandbox = __instance.Session.LocationSettings.locations.Values
+                    ____raidSettings.SelectedLocation = __instance.Session.LocationSettings.locations.Values
                         .FirstOrDefault(IsSandbox);
-                    ____raidSettings.SelectedLocation = sandbox;
                 }
             }
         }
@@ -74,11 +75,11 @@ internal class TarkovApplication_LocalGamePreparer_Patch : ModulePatch
 
     private static bool IsSandboxHigh(LocationSettingsClass.Location location)
     {
-        return location.Id.ToLower() == "sandbox_high";
+        return string.Equals(location.Id, "sandbox_high", StringComparison.OrdinalIgnoreCase);
     }
 
     private static bool IsSandbox(LocationSettingsClass.Location location)
     {
-        return location.Id.ToLower() == "sandbox";
+        return string.Equals(location.Id, "sandbox", StringComparison.OrdinalIgnoreCase);
     }
 }

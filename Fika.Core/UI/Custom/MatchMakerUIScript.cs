@@ -499,14 +499,7 @@ public class MatchMakerUIScript : MonoBehaviour
             AddPlayerRequest data = new(FikaBackendUtils.GroupId, profileId, FikaBackendUtils.IsSpectator);
             FikaRequestHandler.UpdateAddPlayer(data);
 
-            if (FikaBackendUtils.IsHostNatPunch)
-            {
-                pingingClient.StartKeepAliveRoutine();
-            }
-            else
-            {
-                NetManagerUtils.DestroyPingingClient();
-            }
+            NetManagerUtils.DestroyPingingClient();
 
             callback?.Invoke(true);
         }

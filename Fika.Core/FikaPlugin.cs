@@ -16,7 +16,6 @@ using Fika.Core.Networking.Websocket;
 using Fika.Core.UI; 
 #endif
 using Fika.Core.UI.Patches;
-using HarmonyLib;
 using SPT.Common.Http;
 using SPT.Custom.Patches;
 using SPT.Custom.Utils;
@@ -49,7 +48,7 @@ namespace Fika.Core;
 [BepInDependency("com.SPT.debugging", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after spt-debugging, that way we can disable its patches
 public class FikaPlugin : BaseUnityPlugin
 {
-    public const string FikaVersion = "2.0.1";
+    public const string FikaVersion = "2.0.2";
     public static FikaPlugin Instance { get; private set; }
     public static string EFTVersionMajor { get; internal set; }
     public ManualLogSource FikaLogger
@@ -114,6 +113,8 @@ public class FikaPlugin : BaseUnityPlugin
     public static ConfigEntry<bool> DevMode { get; set; }
     public static ConfigEntry<bool> NoAI { get; set; }
     public static ConfigEntry<bool> NoLoot { get; set; }
+    public static ConfigEntry<ELoadPriority> LoadPriority { get; set; }
+    public static ConfigEntry<int> MaxBundleLock { get; set; }
 
     // Coop
     public static ConfigEntry<bool> UseHeadlessIfAvailable { get; set; }
@@ -447,7 +448,8 @@ public class FikaPlugin : BaseUnityPlugin
                 {
                     IsAdvanced = true,
                     Category = advancedHeader,
-                    DispName = LocaleUtils.BEPINEX_OFFICIAL_VERSION_T.Localized()
+                    DispName = LocaleUtils.BEPINEX_OFFICIAL_VERSION_T.Localized(),
+                    Order = 6
                 }),
                 "Official Version", ref failed, headers);
 
@@ -456,7 +458,8 @@ public class FikaPlugin : BaseUnityPlugin
             {
                 IsAdvanced = true,
                 Category = advancedHeader,
-                DispName = "Developer Mode"
+                DispName = "Developer Mode",
+                Order = 5
             }), "Developer Mode", ref failed, headers);
 
         NoAI = SetupSetting(advancedDefaultHeader, "No AI", false,
@@ -464,7 +467,8 @@ public class FikaPlugin : BaseUnityPlugin
             {
                 IsAdvanced = true,
                 Category = advancedHeader,
-                DispName = "No AI"
+                DispName = "No AI",
+                Order = 4
             }), "No AI", ref failed, headers);
 
         NoLoot = SetupSetting(advancedDefaultHeader, "No Loot", false,
@@ -472,8 +476,30 @@ public class FikaPlugin : BaseUnityPlugin
             {
                 IsAdvanced = true,
                 Category = advancedHeader,
-                DispName = "No Loot"
+                DispName = "No Loot",
+                Order = 3
             }), "No Loot", ref failed, headers);
+
+        LoadPriority = SetupSetting(advancedDefaultHeader, "Player Load Priority", ELoadPriority.Low,
+            new ConfigDescription("What priority loading other players (and AI as a client) uses.\nMight not have a huge effect.", tags: new ConfigurationManagerAttributes()
+            {
+                IsAdvanced = true,
+                Category = advancedHeader,
+                DispName = "Player Load Priority",
+                Order = 2
+            }), "Player Load Priority", ref failed, headers);
+
+        MaxBundleLock = SetupSetting(advancedDefaultHeader, "Max Bundle Lock", 5,
+            new ConfigDescription("Max amount of bundles loading in parallel.\n" +
+            "Increase if you take a long time to load bots as a client.\n\n" +
+            "Default game value is 1 but has been increased to remedy the base game issue where bundles load too slow",
+            new AcceptableValueRange<int>(1, 10), new ConfigurationManagerAttributes()
+            {
+                IsAdvanced = true,
+                Category = advancedHeader,
+                DispName = "Max Bundle Lock",
+                Order = 1
+            }), "Max Bundle Lock", ref failed, headers);
 
         // Coop
 
@@ -960,7 +986,7 @@ public class FikaPlugin : BaseUnityPlugin
                 Order = 0
             }),
             "Keybind Overlay", ref failed, headers);
-        
+
         // Network
 
         string networkHeader = CleanConfigString(LocaleUtils.BEPINEX_H_NETWORK.Localized());
@@ -1161,13 +1187,6 @@ public class FikaPlugin : BaseUnityPlugin
         new QuestAchievementRewardInRaidPatch().Disable();
     }
 
-    public enum EDynamicAIRates
-    {
-        Low,
-        Medium,
-        High
-    }
-
     public enum EPingSound
     {
         SubQuestComplete,
@@ -1192,5 +1211,12 @@ public class FikaPlugin : BaseUnityPlugin
         PlaceBeacon = 8,
 
         All = Kills | Item | Location | PlaceBeacon
+    }
+
+    public enum ELoadPriority
+    {
+        Low,
+        Medium,
+        High
     }
 }

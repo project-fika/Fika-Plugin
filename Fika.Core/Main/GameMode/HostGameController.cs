@@ -78,7 +78,7 @@ public class HostGameController : BaseGameController, IBotGame
     /// <summary>
     /// How long in seconds until a bot is force spawned if not every client could load it
     /// </summary>
-    private readonly float _botTimeout = 45f;
+    private readonly float _botTimeout = 120f;
     /// <summary>
     /// The <see cref="Task.Delay(int)"/> in every loop during the <see cref="_botTimeout"/>
     /// </summary>
@@ -209,7 +209,7 @@ public class HostGameController : BaseGameController, IBotGame
         netId = server.PopNetId();
 
         MongoID mongoId = MongoID.Generate(true);
-        ushort nextOperationId = 0;
+        const ushort nextOperationId = 0;
         SendCharacterPacket packet = SendCharacterPacket.FromValue(new()
         {
             Profile = profile,
@@ -225,7 +225,6 @@ public class HostGameController : BaseGameController, IBotGame
             await WaitForPlayersToLoadBotProfile(netId);
         }
 
-        // Check for GClass increments on filter
         fikaBot = await FikaBot.CreateBot(_gameWorld, netId, position, Quaternion.identity, "Player",
            "Bot_", EPointOfView.ThirdPerson, profile, true, _updateQueue, Player.EUpdateMode.Auto,
            Player.EUpdateMode.Auto, BackendConfigAbstractClass.Config.CharacterController.BotPlayerMode, FikaGlobals.GetOtherPlayerSensitivity,
@@ -291,10 +290,10 @@ public class HostGameController : BaseGameController, IBotGame
     private async Task WaitForPlayersToLoadBotProfile(int netId)
     {
         _botQueue.Add(netId, 0);
-        FikaServer server = Singleton<FikaServer>.Instance;
-        int connectedPeers = server.NetServer.ConnectedPeersCount;
+        var server = Singleton<FikaServer>.Instance;
+        var connectedPeers = server.NetServer.ConnectedPeersCount;
 
-        float elapsedSeconds = 0f;
+        var elapsedSeconds = 0f;
 
         while (_botQueue[netId] < connectedPeers)
         {
@@ -308,6 +307,11 @@ public class HostGameController : BaseGameController, IBotGame
             await Task.Delay((int)(_botTimeoutDelay * 1000)); // multiply 0.X * 1000 to get milliseconds
             elapsedSeconds += _botTimeoutDelay;
             connectedPeers = server.NetServer.ConnectedPeersCount;
+        }
+
+        if (elapsedSeconds > 30f)
+        {
+            Logger.LogWarning($"WaitForPlayersToLoadBotProfile::Bot [{netId}] took an abnormal amount of time to load: {elapsedSeconds:F1}s");
         }
 
         _botQueue.Remove(netId);
@@ -429,6 +433,11 @@ public class HostGameController : BaseGameController, IBotGame
 
         Logger.LogInfo("Raid has been started...");
 
+        if (FikaPlugin.UseNatPunching.Value)
+        {
+            server.StopNatIntroduceRoutine();
+        }
+
         if (startButton != null)
         {
             GameObject.Destroy(startButton);
@@ -520,7 +529,7 @@ public class HostGameController : BaseGameController, IBotGame
         yield return base.CountdownScreen(profile, profileId);
         _localPlayer.PacketSender.Init();
 
-        SyncTraps();
+        _gameWorld.StartCoroutine(SyncTraps());
         _gameWorld.StartCoroutine(CreateStashes());
     }
 
@@ -999,18 +1008,19 @@ public class HostGameController : BaseGameController, IBotGame
         }
     }
 
-    public void SyncTraps()
+    public IEnumerator SyncTraps()
     {
+        yield return new WaitForSeconds(5);
+
         if (Location.EventTrapsData == null)
         {
-            Logger.LogError("EventTrapsData was null when trying to sync trap data!");
-            return;
+            yield break;
         }
 
         if (_gameWorld.SyncModule == null)
         {
             Logger.LogError("SyncModule was null when trying to sync trap data!");
-            return;
+            yield break;
         }
 
         GClass1368 writer = new(new byte[2048]);

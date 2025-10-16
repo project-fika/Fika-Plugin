@@ -183,7 +183,7 @@ public class TarkovApplication_LocalGameCreator_Patch : ModulePatch
         await coopGame.InitPlayer(raidSettings.BotSettings, backendUrl);
         UnityEngine.Object.DestroyImmediate(MonoBehaviourSingleton<MenuUI>.Instance.gameObject);
         ___mainMenuController?.Unsubscribe();
-        bundleLock.MaxConcurrentOperations = 1;
+        bundleLock.MaxConcurrentOperations = FikaPlugin.MaxBundleLock.Value;
         gameWorld.OnGameStarted();
         updater.Dispose();
 

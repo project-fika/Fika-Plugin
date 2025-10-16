@@ -1,71 +1,71 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="..\Build.props" />
+	<Import Project="..\Build.props" />
 
-  <PropertyGroup>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-	<Nullable>disable</Nullable>
-    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>	  
-  </PropertyGroup>
+	<PropertyGroup>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<Nullable>disable</Nullable>
+		<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+	</PropertyGroup>
 
-  <!-- targets -->
-  <PropertyGroup>
-    <Configurations>Debug;Release;GoldMaster</Configurations>
-    <DefineConstants Condition="'$(Configuration)' == 'GoldMaster|AnyCPU' ">TRACE;GOLDMASTER</DefineConstants>   
-  </PropertyGroup>
+	<!-- targets -->
+	<PropertyGroup>
+		<Configurations>Debug;Release;GoldMaster</Configurations>
+		<DefineConstants Condition="'$(Configuration)' == 'GoldMaster|AnyCPU' ">TRACE;GOLDMASTER</DefineConstants>   
+		</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)'=='GoldMaster'">
-	  <DebugType>none</DebugType>
-	  <DebugSymbols>false</DebugSymbols>
-	  <Optimize>true</Optimize>
-	  <PlatformTarget>AnyCPU</PlatformTarget>
+		<DebugType>none</DebugType>
+		<DebugSymbols>false</DebugSymbols>
+		<Optimize>true</Optimize>
+		<PlatformTarget>AnyCPU</PlatformTarget>
 	</PropertyGroup>
 	
-  <ItemGroup>
-	<EmbeddedResource Include="Bundles\Files\masterbundle.bundle" />	
-    <None Remove="Bundles\Files\masterbundle.bundle" />
-  </ItemGroup>
+	<ItemGroup>
+		<EmbeddedResource Include="Bundles\Files\masterbundle.bundle" />	
+		<None Remove="Bundles\Files\masterbundle.bundle" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="BepInEx.Core" Version="5.*" />
-    <PackageReference Include="UnityEngine.Modules" Version="2022.3.43" IncludeAssets="compile" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="BepInEx.Core" Version="5.*" />
+		<PackageReference Include="UnityEngine.Modules" Version="2022.3.43" IncludeAssets="compile" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <!-- These are used by .github/workflows/dotnet-build.yml and when building from non-Windows OS -->
-    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
-  </ItemGroup>
+	<ItemGroup>
+		<!-- These are used by .github/workflows/dotnet-build.yml and when building from non-Windows OS -->
+		<PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="AnimationSystem.Types" HintPath="..\References\AnimationSystem.Types.dll" Private="false" />
-    <Reference Include="Assembly-CSharp" HintPath="..\References\hollowed.dll" Private="false" />
-    <Reference Include="bsg.componentace.compression.libs.zlib" HintPath="..\References\bsg.componentace.compression.libs.zlib.dll" Private="false" />
-    <Reference Include="bsg.console.core" HintPath="..\References\bsg.console.core.dll" Private="false" />
-	<Reference Include="com.unity.multiplayer-hlapi.Runtime" HintPath="..\References\com.unity.multiplayer-hlapi.Runtime.dll" />
-    <Reference Include="Comfort" HintPath="..\References\Comfort.dll" Private="false" />
-    <Reference Include="Comfort.Unity" HintPath="..\References\Comfort.Unity.dll" Private="false" />
-    <Reference Include="CommonExtensions" HintPath="..\References\CommonExtensions.dll" Private="false" />
-    <Reference Include="DissonanceVoip" HintPath="..\References\DissonanceVoip.dll" Private="false" />
-	<Reference Include="DOTween" HintPath="..\References\DOTween.dll" />
-    <Reference Include="ItemComponent.Types" HintPath="..\References\ItemComponent.Types.dll" Private="false" />
-	<Reference Include="ItemTemplate.Types" HintPath="..\References\ItemTemplate.Types.dll" Private="false" />
-    <Reference Include="Newtonsoft.Json" HintPath="..\References\Newtonsoft.Json.dll" Private="false" />
-    <Reference Include="Sirenix.Serialization" HintPath="..\References\Sirenix.Serialization.dll" Private="false" />
-    <Reference Include="spt-common" HintPath="..\References\spt-common.dll" Private="false" />
-    <Reference Include="spt-core" HintPath="..\References\spt-core.dll" Private="false" />
-    <Reference Include="spt-custom" HintPath="..\References\spt-custom.dll" Private="false" />
-    <Reference Include="spt-debugging" HintPath="..\References\spt-debugging.dll" Private="false" />
-    <Reference Include="spt-reflection" HintPath="..\References\spt-reflection.dll" Private="false" />
-    <Reference Include="spt-singleplayer" HintPath="..\References\spt-singleplayer.dll" Private="false" />
-	<Reference Include="System.Runtime.CompilerServices.Unsafe" HintPath="..\References\System.Runtime.CompilerServices.Unsafe.dll" />
-    <Reference Include="Unity.Postprocessing.Runtime" HintPath="..\References\Unity.Postprocessing.Runtime.dll" Private="false" />
-    <Reference Include="Unity.TextMeshPro" HintPath="..\References\Unity.TextMeshPro.dll" Private="false" />
-    <Reference Include="UnityEngine" HintPath="..\References\UnityEngine.dll" Private="false" />
-    <Reference Include="UnityEngine.UI" HintPath="..\References\UnityEngine.UI.dll" Private="false" />
-	<Reference Include="websocket-sharp" HintPath="..\References\websocket-sharp.dll" Private="false" />
-  </ItemGroup>   <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition=" '$(OS)' == 'Windows_NT' ">
-    <Exec Condition=" '$(Configuration)|$(Platform)' != 'GoldMaster|AnyCPU' " Command="call ../Properties/build/postbuild-core.bat &quot;$(TargetPath)&quot; &quot;$(ProjectDir)&quot;" />
-    <!--<Exec Condition=" '$(Configuration)|$(Platform)' == 'GoldMaster|AnyCPU' " Command="call ../Properties/build/goldmaster-core.bat" />-->
-  </Target> 
+	<ItemGroup>
+		<Reference Include="AnimationSystem.Types" HintPath="..\References\AnimationSystem.Types.dll" Private="false" />
+		<Reference Include="Assembly-CSharp" HintPath="..\References\hollowed.dll" Private="false" />
+		<Reference Include="bsg.componentace.compression.libs.zlib" HintPath="..\References\bsg.componentace.compression.libs.zlib.dll" Private="false" />
+		<Reference Include="bsg.console.core" HintPath="..\References\bsg.console.core.dll" Private="false" />
+		<Reference Include="com.unity.multiplayer-hlapi.Runtime" HintPath="..\References\com.unity.multiplayer-hlapi.Runtime.dll" />
+		<Reference Include="Comfort" HintPath="..\References\Comfort.dll" Private="false" />
+		<Reference Include="Comfort.Unity" HintPath="..\References\Comfort.Unity.dll" Private="false" />
+		<Reference Include="CommonExtensions" HintPath="..\References\CommonExtensions.dll" Private="false" />
+		<Reference Include="DissonanceVoip" HintPath="..\References\DissonanceVoip.dll" Private="false" />
+		<Reference Include="DOTween" HintPath="..\References\DOTween.dll" />
+		<Reference Include="ItemComponent.Types" HintPath="..\References\ItemComponent.Types.dll" Private="false" />
+		<Reference Include="ItemTemplate.Types" HintPath="..\References\ItemTemplate.Types.dll" Private="false" />
+		<Reference Include="Newtonsoft.Json" HintPath="..\References\Newtonsoft.Json.dll" Private="false" />
+		<Reference Include="Sirenix.Serialization" HintPath="..\References\Sirenix.Serialization.dll" Private="false" />
+		<Reference Include="spt-common" HintPath="..\References\spt-common.dll" Private="false" />
+		<Reference Include="spt-core" HintPath="..\References\spt-core.dll" Private="false" />
+		<Reference Include="spt-custom" HintPath="..\References\spt-custom.dll" Private="false" />
+		<Reference Include="spt-debugging" HintPath="..\References\spt-debugging.dll" Private="false" />
+		<Reference Include="spt-reflection" HintPath="..\References\spt-reflection.dll" Private="false" />
+		<Reference Include="spt-singleplayer" HintPath="..\References\spt-singleplayer.dll" Private="false" />
+		<Reference Include="System.Runtime.CompilerServices.Unsafe" HintPath="..\References\System.Runtime.CompilerServices.Unsafe.dll" />
+		<Reference Include="Unity.Postprocessing.Runtime" HintPath="..\References\Unity.Postprocessing.Runtime.dll" Private="false" />
+		<Reference Include="Unity.TextMeshPro" HintPath="..\References\Unity.TextMeshPro.dll" Private="false" />
+		<Reference Include="UnityEngine" HintPath="..\References\UnityEngine.dll" Private="false" />
+		<Reference Include="UnityEngine.UI" HintPath="..\References\UnityEngine.UI.dll" Private="false" />
+		<Reference Include="websocket-sharp" HintPath="..\References\websocket-sharp.dll" Private="false" />
+		</ItemGroup>   <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition=" '$(OS)' == 'Windows_NT' ">
+		<Exec Condition=" '$(Configuration)|$(Platform)' != 'GoldMaster|AnyCPU' " Command="call ../Properties/build/postbuild-core.bat &quot;$(TargetPath)&quot; &quot;$(ProjectDir)&quot;" />
+		<!--<Exec Condition=" '$(Configuration)|$(Platform)' == 'GoldMaster|AnyCPU' " Command="call ../Properties/build/goldmaster-core.bat" />-->
+	</Target> 
 
 </Project>

@@ -107,7 +107,7 @@ public sealed class ClientInventoryController : Player.PlayerOwnerInventoryContr
             Item lootedItem = moveOperation.Item;
             if (lootedItem.QuestItem)
             {
-                if (_fikaPlayer.AbstractQuestControllerClass is ClientSharedQuestController sharedQuestController && sharedQuestController.ContainsAcceptedType("PlaceBeacon"))
+                if (_fikaPlayer.AbstractQuestControllerClass is ClientSharedQuestController sharedQuestController && sharedQuestController.ContainsAcceptedType("FindItem"))
                 {
                     if (!sharedQuestController.CheckForTemplateId(lootedItem.TemplateId))
                     {
