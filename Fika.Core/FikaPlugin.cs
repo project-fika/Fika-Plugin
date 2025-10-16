@@ -477,15 +477,17 @@ public class FikaPlugin : BaseUnityPlugin
             }), "No Loot", ref failed, headers);
 
         LoadPriority = SetupSetting(advancedDefaultHeader, "Player Load Priority", ELoadPriority.Low,
-            new ConfigDescription("What priority loading other players (and AI as a client) uses", tags: new ConfigurationManagerAttributes()
+            new ConfigDescription("What priority loading other players (and AI as a client) uses.\nMight not have a huge effect.", tags: new ConfigurationManagerAttributes()
             {
                 IsAdvanced = true,
                 Category = advancedHeader,
                 DispName = "Player Load Priority"
             }), "Player Load Priority", ref failed, headers);
 
-        MaxBundleLock = SetupSetting(advancedDefaultHeader, "Max Bundle Lock", 1,
-            new ConfigDescription("Max amount of bundles loading in parallel.\nIncrease if you take a long time to load bots as a client",
+        MaxBundleLock = SetupSetting(advancedDefaultHeader, "Max Bundle Lock", 5,
+            new ConfigDescription("Max amount of bundles loading in parallel.\n" +
+            "Increase if you take a long time to load bots as a client.\n\n" +
+            "Default game value is 1 but has been increased to remedy the base game issue",
             new AcceptableValueRange<int>(1, 10), new ConfigurationManagerAttributes()
             {
                 IsAdvanced = true,
