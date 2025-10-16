@@ -488,14 +488,14 @@ public abstract class BaseGameController
     }
 
     public void InitBTRController(BackendConfigSettingsClass instance, GameWorld gameWorld, LocationSettingsClass.Location location)
-    {
-        Logger.LogInfo("Loading BTR data...");
+    {        
         if (FikaPlugin.Instance.UseBTR)
         {
             if (instance != null)
             {
                 if (instance.BTRSettings.LocationsWithBTR.Contains(location.Id))
                 {
+                    Logger.LogInfo("Loading BTR data...");
 #if DEBUG
                     Logger.LogWarning("Spawning BTR controller and setting spawn chance to 100%");
                     JsonType.BTRServerSettings settings = Singleton<BackendConfigSettingsClass>.Instance.BTRLocalSettings;
