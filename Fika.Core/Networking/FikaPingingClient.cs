@@ -3,8 +3,6 @@ using Fika.Core.Main.GameMode;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Models;
-using System;
-using System.Collections;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
@@ -39,7 +37,6 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
     private ManualLogSource _logger;
     private IPEndPoint _remoteEndPoint;
     private IPEndPoint _localEndPoint;
-    private Coroutine _keepAliveRoutine;
 
     /// <summary>
     /// Initializes the logger for the pinging client.
