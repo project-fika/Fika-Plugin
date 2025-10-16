@@ -1,5 +1,6 @@
 ﻿using BepInEx.Logging;
 using Comfort.Common;
+using Diz.Jobs;
 using EFT;
 using EFT.InventoryLogic;
 using EFT.UI;
@@ -293,6 +294,7 @@ public class CoopHandler : MonoBehaviour
             return;
         }
 
+        await JobScheduler.Yield();
         try
         {
             await Singleton<PoolManagerClass>.Instance.LoadBundlesAndCreatePools(PoolManagerClass.PoolsCategory.Raid,
@@ -306,6 +308,7 @@ public class CoopHandler : MonoBehaviour
         {
             _logger.LogError($"SpawnPlayer::{spawnObject.Profile.Info.Nickname}::Load Failed: {ex.Message}");
         }
+        await JobScheduler.Yield();
 
         var otherPlayer = SpawnObservedPlayer(spawnObject);
 
