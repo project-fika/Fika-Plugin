@@ -14,7 +14,7 @@
     <DefineConstants Condition="'$(Configuration)' == 'GoldMaster|AnyCPU' ">TRACE;GOLDMASTER</DefineConstants>   
   </PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)'=='GoldMaster'">
+	<PropertyGroup Condition="'$(Configuration)'=='GoldMaster|AnyCPU'">
 		<DebugType>none</DebugType>
 		<DebugSymbols>false</DebugSymbols>
 	</PropertyGroup>
