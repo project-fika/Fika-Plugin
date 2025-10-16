@@ -13,6 +13,11 @@
     <Configurations>Debug;Release;GoldMaster</Configurations>
     <DefineConstants Condition="'$(Configuration)' == 'GoldMaster|AnyCPU' ">TRACE;GOLDMASTER</DefineConstants>   
   </PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)'=='GoldMaster'">
+		<DebugType>none</DebugType>
+		<DebugSymbols>false</DebugSymbols>
+	</PropertyGroup>
 	
   <ItemGroup>
 	<EmbeddedResource Include="Bundles\Files\masterbundle.bundle" />	
