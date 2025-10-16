@@ -1409,12 +1409,12 @@ public class FikaPlayer : LocalPlayer
         }
     }
 
-    public Item FindQuestItem(string itemId)
+    public Item FindQuestItem(MongoID templateId)
     {
         for (int i = 0; i < Singleton<GameWorld>.Instance.LootList.Count; i++)
         {
             IKillableLootItem lootItem = Singleton<GameWorld>.Instance.LootList[i];
-            if (lootItem is LootItem observedLootItem && observedLootItem.Item.TemplateId == itemId && observedLootItem.isActiveAndEnabled)
+            if (lootItem is LootItem observedLootItem && observedLootItem.Item.TemplateId == templateId && observedLootItem.isActiveAndEnabled)
             {
                 return observedLootItem.Item;
             }

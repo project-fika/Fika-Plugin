@@ -211,9 +211,9 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
             return;
         }
 
-        if (!string.IsNullOrEmpty(packet.ItemId))
+        if (packet.ItemId.HasValue)
         {
-            var item = _player.FindQuestItem(packet.ItemId);
+            var item = _player.FindQuestItem(packet.ItemId.Value);
             if (item != null)
             {
                 var playerInventory = _player.InventoryController;
@@ -255,8 +255,15 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
         if (!HasQuestForItem(itemId, zoneId, out var questName))
         {
             _isItemBeingDropped = false;
+#if DEBUG
+        FikaGlobals.LogInfo($"Did not have quest for item {itemId}, zoneId {zoneId}"); 
+#endif
             return;
         }
+
+#if DEBUG
+        FikaGlobals.LogInfo($"Had quest for item {itemId}, zoneId {zoneId}"); 
+#endif
 
         if (FikaPlugin.QuestSharingNotifications.Value)
         {
@@ -270,7 +277,7 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
             if (questItem.TemplateId == itemId && questItem.QuestItem)
             {
                 var removeResult = InteractionsHandlerClass.Remove(questItem, _player.InventoryController, true);
-                _player.InventoryController.TryRunNetworkTransaction(removeResult, (IResult result) =>
+                _player.InventoryController.TryRunNetworkTransaction(removeResult, result =>
                 {
                     if (!result.Succeed)
                     {
