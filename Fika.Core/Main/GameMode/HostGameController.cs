@@ -309,7 +309,7 @@ public class HostGameController : BaseGameController, IBotGame
             connectedPeers = server.NetServer.ConnectedPeersCount;
         }
 
-        if (elapsedSeconds > 10f)
+        if (elapsedSeconds > 30f)
         {
             Logger.LogWarning($"WaitForPlayersToLoadBotProfile::Bot [{netId}] took an abnormal amount of time to load: {elapsedSeconds:F1}s");
         }
