@@ -139,7 +139,6 @@ public static class NetManagerUtils
         if (FikaGameObject != null)
         {
             FikaPingingClient pingingClient = Singleton<FikaPingingClient>.Instance;
-            pingingClient.StopKeepAliveRoutine();
             pingingClient.NetClient.Stop();
             Singleton<FikaPingingClient>.TryRelease(pingingClient);
             UnityEngine.Object.Destroy(pingingClient);

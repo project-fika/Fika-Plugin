@@ -171,7 +171,6 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
 
         if (FikaBackendUtils.IsHostNatPunch)
         {
-            NetManagerUtils.DestroyPingingClient();
             _netClient.Start(FikaBackendUtils.LocalPort); // NAT punching has to re-use the same local port
         }
         else
