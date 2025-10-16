@@ -183,7 +183,7 @@ public class TarkovApplication_LocalGameCreator_Patch : ModulePatch
         await coopGame.InitPlayer(raidSettings.BotSettings, backendUrl);
         UnityEngine.Object.DestroyImmediate(MonoBehaviourSingleton<MenuUI>.Instance.gameObject);
         ___mainMenuController?.Unsubscribe();
-        bundleLock.MaxConcurrentOperations = 1;
+        bundleLock.MaxConcurrentOperations = 5;
         gameWorld.OnGameStarted();
         updater.Dispose();
 
