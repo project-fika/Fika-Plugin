@@ -279,14 +279,6 @@ public class CoopHandler : MonoBehaviour
             return;
         }
 
-        foreach (IPlayer player in Singleton<GameWorld>.Instance.AllPlayersEverExisted)
-        {
-            if (player.ProfileId == spawnObject.Profile.ProfileId)
-            {
-                return;
-            }
-        }
-
         ResourceKey[] allPrefabPaths = [.. spawnObject.Profile.GetAllPrefabPaths(!spawnObject.IsAI)];
         if (allPrefabPaths.Length == 0)
         {
