@@ -1,5 +1,4 @@
-﻿using Comfort.Common;
-using EFT;
+﻿using EFT;
 using EFT.InventoryLogic;
 using EFT.Quests;
 using Fika.Core.Main.Players;
@@ -8,7 +7,6 @@ using Fika.Core.Networking.Packets.Communication;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Sockets;
 using static Fika.Core.UI.FikaUIGlobals;
 
 namespace Fika.Core.Main.ClientClasses;
@@ -256,13 +254,13 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
         {
             _isItemBeingDropped = false;
 #if DEBUG
-        FikaGlobals.LogInfo($"Did not have quest for item {itemId}, zoneId {zoneId}"); 
+            FikaGlobals.LogInfo($"Did not have quest for item {itemId}, zoneId {zoneId}");
 #endif
             return;
         }
 
 #if DEBUG
-        FikaGlobals.LogInfo($"Had quest for item {itemId}, zoneId {zoneId}"); 
+        FikaGlobals.LogInfo($"Had quest for item {itemId}, zoneId {zoneId}");
 #endif
 
         if (FikaPlugin.QuestSharingNotifications.Value)
