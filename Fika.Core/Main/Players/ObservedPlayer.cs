@@ -810,7 +810,7 @@ public class ObservedPlayer : FikaPlayer
     /// </summary>
     public void ManualStateUpdate()
     {
-        if (!_cullingHandler.IsVisible && _lastDistance > 150f)
+        if (!_cullingHandler.IsVisible)
         {
             Position = CurrentPlayerState.Position;
             Rotation = CurrentPlayerState.Rotation;
