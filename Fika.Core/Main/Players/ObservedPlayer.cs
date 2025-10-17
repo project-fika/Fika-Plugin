@@ -156,6 +156,7 @@ public class ObservedPlayer : FikaPlayer
     private bool _shouldCullController;
     private readonly List<ObservedSlotViewHandler> _observedSlotViewHandlers = [];
     private ObservedCorpseCulling _observedCorpseCulling;
+    private bool _compassLoaded;
     #endregion
 
     public static async Task<ObservedPlayer> CreateObservedPlayer(GameWorld gameWorld, int playerId, Vector3 position, Quaternion rotation, string layerName,
@@ -1116,6 +1117,23 @@ public class ObservedPlayer : FikaPlayer
     public override void ExternalInteraction()
     {
         // Do nothing
+    }
+
+    public void CreateObservedCompass()
+    {
+        const string bundlePath = "assets/content/weapons/additional_hands/item_compass.bundle";
+        if (!_compassLoaded)
+        {
+            var transform = Singleton<PoolManagerClass>.Instance.CreateFromPool<Transform>(new ResourceKey
+            {
+                path = bundlePath
+            });
+            transform.SetParent(PlayerBones.Ribcage.Original, false);
+            transform.localRotation = Quaternion.identity;
+            transform.localPosition = Vector3.zero;
+            method_27(transform.gameObject);
+            _compassLoaded = true;
+        }
     }
 
     public void SetInventory(InventoryDescriptorClass inventoryDescriptor)

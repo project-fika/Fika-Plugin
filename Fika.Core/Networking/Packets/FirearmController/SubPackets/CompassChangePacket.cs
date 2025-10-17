@@ -29,7 +29,7 @@ public sealed class CompassChangePacket : IPoolSubPacket
     {
         if (player.HandsController is ItemHandsController handsController)
         {
-            handsController.CompassState.Value = Enabled;
+            handsController.CompassStateHandler(Enabled);
         }
     }
 

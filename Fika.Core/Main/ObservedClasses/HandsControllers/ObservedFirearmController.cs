@@ -32,7 +32,7 @@ public class ObservedFirearmController : FirearmController
 
     public bool IsRevolver { get; internal set; }
 
-    private ObservedPlayer _fikaPlayer;
+    private ObservedPlayer _observedPlayer;
     private bool _triggerPressed;
     private bool _needsReset;
     private float _lastFireTime;
@@ -63,7 +63,7 @@ public class ObservedFirearmController : FirearmController
             }
             _isAiming = value;
             method_63(_isAiming); // Set animator flags
-            _fikaPlayer.ProceduralWeaponAnimation.IsAiming = _isAiming;
+            _observedPlayer.ProceduralWeaponAnimation.IsAiming = _isAiming;
         }
     }
 
@@ -130,7 +130,7 @@ public class ObservedFirearmController : FirearmController
     public static ObservedFirearmController Create(ObservedPlayer player, Weapon weapon)
     {
         ObservedFirearmController controller = smethod_6<ObservedFirearmController>(player, weapon);
-        controller._fikaPlayer = player;
+        controller._observedPlayer = player;
         return controller;
     }
 
@@ -230,45 +230,45 @@ public class ObservedFirearmController : FirearmController
 
     public override void WeaponOverlapping()
     {
-        if (!_fikaPlayer.ShouldOverlap)
+        if (!_observedPlayer.ShouldOverlap)
         {
             return;
         }
 
-        SetWeaponOverlapValue(_fikaPlayer.ObservedOverlap);
+        SetWeaponOverlapValue(_observedPlayer.ObservedOverlap);
         ObservedOverlapView();
         if (_overlapCounter <= 1f)
         {
             _overlapCounter += Time.deltaTime / 1f;
         }
-        if (_fikaPlayer.LeftStanceDisabled && _fikaPlayer.MovementContext.LeftStanceEnabled && _overlapCounter > 1f)
+        if (_observedPlayer.LeftStanceDisabled && _observedPlayer.MovementContext.LeftStanceEnabled && _overlapCounter > 1f)
         {
-            _fikaPlayer.MovementContext.LeftStanceController.DisableLeftStanceAnimFromHandsAction();
+            _observedPlayer.MovementContext.LeftStanceController.DisableLeftStanceAnimFromHandsAction();
             _overlapCounter = 0f;
         }
-        if (!_fikaPlayer.MovementContext.LeftStanceController.LastAnimValue && !_fikaPlayer.LeftStanceDisabled && _fikaPlayer.MovementContext.LeftStanceEnabled && _overlapCounter > 1f)
+        if (!_observedPlayer.MovementContext.LeftStanceController.LastAnimValue && !_observedPlayer.LeftStanceDisabled && _observedPlayer.MovementContext.LeftStanceEnabled && _overlapCounter > 1f)
         {
-            _fikaPlayer.MovementContext.LeftStanceController.SetAnimatorLeftStanceToCacheFromHandsAction();
+            _observedPlayer.MovementContext.LeftStanceController.SetAnimatorLeftStanceToCacheFromHandsAction();
             _overlapCounter = 0f;
         }
 
-        _fikaPlayer.ShouldOverlap = false;
+        _observedPlayer.ShouldOverlap = false;
     }
 
     private void ObservedOverlapView()
     {
-        if (_fikaPlayer.ObservedOverlap < 0.02f)
+        if (_observedPlayer.ObservedOverlap < 0.02f)
         {
-            _player.ProceduralWeaponAnimation.TurnAway.OverlapDepth = _fikaPlayer.ObservedOverlap;
+            _player.ProceduralWeaponAnimation.TurnAway.OverlapDepth = _observedPlayer.ObservedOverlap;
             _player.ProceduralWeaponAnimation.OverlappingAllowsBlindfire = true;
-            _fikaPlayer.ShouldOverlap = false;
+            _observedPlayer.ShouldOverlap = false;
             return;
         }
 
         Vector3 vector = _player.ProceduralWeaponAnimation.HandsContainer.HandsPosition.Get();
         _player.ProceduralWeaponAnimation.OverlappingAllowsBlindfire = false;
         _player.ProceduralWeaponAnimation.TurnAway.OriginZShift = vector.y;
-        _player.ProceduralWeaponAnimation.TurnAway.OverlapDepth = _fikaPlayer.ObservedOverlap;
+        _player.ProceduralWeaponAnimation.TurnAway.OverlapDepth = _observedPlayer.ObservedOverlap;
     }
 
     public override void OnPlayerDead()
@@ -282,7 +282,7 @@ public class ObservedFirearmController : FirearmController
             _needsReset = false;
             WeaponSoundPlayer.OnBreakLoop();
 
-            _fikaPlayer.HandsAnimator.Animator.Update(Time.fixedDeltaTime);
+            _observedPlayer.HandsAnimator.Animator.Update(Time.fixedDeltaTime);
             ManualUpdate(Time.fixedDeltaTime);
             if (CurrentOperation.State != EOperationState.Finished)
             {
@@ -306,14 +306,14 @@ public class ObservedFirearmController : FirearmController
             return;
         }
 
-        _weaponManager.StartSpawnShell(_fikaPlayer.Velocity * 0.66f, 0);
+        _weaponManager.StartSpawnShell(_observedPlayer.Velocity * 0.66f, 0);
         if (_boltActionReload)
         {
             MagazineItemClass magazine = Item.GetCurrentMagazine();
             Weapon weapon = Weapon;
             if (magazine != null && magazine is not CylinderMagazineItemClass && weapon.HasChambers)
             {
-                magazine.Cartridges.PopTo(_fikaPlayer.InventoryController, Item.Chambers[0].CreateItemAddress());
+                magazine.Cartridges.PopTo(_observedPlayer.InventoryController, Item.Chambers[0].CreateItemAddress());
             }
 
             FirearmsAnimator.SetBoltActionReload(false);
@@ -321,6 +321,12 @@ public class ObservedFirearmController : FirearmController
 
             _boltActionReload = false;
         }
+    }
+
+    public override void CompassStateHandler(bool isActive)
+    {
+        _observedPlayer.CreateObservedCompass();
+        _objectInHandsAnimator.ShowCompass(isActive);
     }
 
     private IEnumerator BreakFiringLoop()
@@ -479,7 +485,7 @@ public class ObservedFirearmController : FirearmController
                     MagazineItemClass currentMagazine = Weapon.GetCurrentMagazine();
                     if (currentMagazine != null)
                     {
-                        AmmoItemClass fedAmmo = (AmmoItemClass)currentMagazine.Cartridges.PopToNowhere(_fikaPlayer.InventoryController).Value.ResultItem;
+                        AmmoItemClass fedAmmo = (AmmoItemClass)currentMagazine.Cartridges.PopToNowhere(_observedPlayer.InventoryController).Value.ResultItem;
                         if (fedAmmo != null)
                         {
                             Weapon.MalfState.MalfunctionedAmmo = fedAmmo;
@@ -543,7 +549,7 @@ public class ObservedFirearmController : FirearmController
         CylinderMagazineItemClass cylinderMagazine = (CylinderMagazineItemClass)revolver.GetCurrentMagazine();
 
         AmmoItemClass ammo = (AmmoItemClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), packet.AmmoTemplate, null);
-        _fikaPlayer.TurnOffFbbikAt = Time.time + 0.6f;
+        _observedPlayer.TurnOffFbbikAt = Time.time + 0.6f;
         InitiateShot(Item, ammo, packet.ShotPosition, packet.ShotDirection,
             CurrentFireport.position, packet.ChamberIndex, packet.Overheat);
 
@@ -562,7 +568,7 @@ public class ObservedFirearmController : FirearmController
             GStruct154<GInterface424> removeOperation = cylinderMagazine.RemoveAmmoInCamora(cylinderAmmo, inventoryController);
             if (removeOperation.Failed)
             {
-                FikaPlugin.Instance.FikaLogger.LogError($"Error removing ammo from cylinderMagazine on netId [{_fikaPlayer.NetId}], error: {removeOperation.Error}");
+                FikaPlugin.Instance.FikaLogger.LogError($"Error removing ammo from cylinderMagazine on netId [{_observedPlayer.NetId}], error: {removeOperation.Error}");
             }
             inventoryController.CheckChamber(revolver, false);
             cylinderAmmo.IsUsed = true;
@@ -603,7 +609,7 @@ public class ObservedFirearmController : FirearmController
     private void HandleObservedShot(ShotInfoPacket packet, InventoryController inventoryController)
     {
         AmmoItemClass ammo = (AmmoItemClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), packet.AmmoTemplate, null);
-        _fikaPlayer.TurnOffFbbikAt = Time.time + 0.6f;
+        _observedPlayer.TurnOffFbbikAt = Time.time + 0.6f;
         InitiateShot(Item, ammo, packet.ShotPosition, packet.ShotDirection,
             CurrentFireport.position, packet.ChamberIndex, packet.Overheat);
 

@@ -7,8 +7,18 @@ namespace Fika.Core.Main.ObservedClasses.HandsControllers;
 
 internal class ObservedKnifeController : EFT.Player.KnifeController
 {
-    public static ObservedKnifeController Create(FikaPlayer player, KnifeComponent item)
+    private ObservedPlayer _observedPlayer;
+
+    public static ObservedKnifeController Create(ObservedPlayer observerdPlayer, KnifeComponent item)
     {
-        return smethod_9<ObservedKnifeController>(player, item);
+        var controller = smethod_9<ObservedKnifeController>(observerdPlayer, item);
+        controller._observedPlayer = observerdPlayer;
+        return controller;
+    }
+
+    public override void CompassStateHandler(bool isActive)
+    {
+        _observedPlayer.CreateObservedCompass();
+        _objectInHandsAnimator.ShowCompass(isActive);
     }
 }
