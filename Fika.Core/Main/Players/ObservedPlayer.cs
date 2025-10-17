@@ -146,8 +146,8 @@ public class ObservedPlayer : FikaPlayer
             return Mathf.Max(1f, Singleton<BetterAudio>.Instance.ProtagonistHearing + 1f);
         }
     }
-    public float TurnOffFbbikAt = 0f;
-    private float _lastDistance = 0f;
+    public float TurnOffFbbikAt;
+    private float _lastDistance;
     private LocalPlayerCullingHandlerClass _cullingHandler;
     private float _rightHand;
     private float _leftHand;
@@ -810,6 +810,14 @@ public class ObservedPlayer : FikaPlayer
     /// </summary>
     public void ManualStateUpdate()
     {
+        if (!_cullingHandler.IsVisible && _lastDistance > 150f)
+        {
+            Position = CurrentPlayerState.Position;
+            Rotation = CurrentPlayerState.Rotation;
+
+            return;
+        }
+
         Rotation = CurrentPlayerState.Rotation;
 
         HeadRotation = CurrentPlayerState.HeadRotation;
