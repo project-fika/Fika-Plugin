@@ -6,7 +6,6 @@ using Fika.Core.Bundles;
 using Fika.Core.Main.Components;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
-using Fika.Core.UI.Patches;
 using System;
 using System.Collections.Generic;
 
@@ -75,7 +74,7 @@ public partial class FreeCamera : MonoBehaviour
         _downKey = KeyCode.F;
 
         _players = [];
-        
+
         if (!CoopHandler.TryGetCoopHandler(out var coopHandler))
         {
             FikaGlobals.LogError("Could not find CoopHandler when creating FreeCamera");
@@ -602,6 +601,11 @@ public partial class FreeCamera : MonoBehaviour
 
     public void AttachToPlayer()
     {
+        if (!CheckAndAssignPlayer())
+        {
+            return;
+        }
+
         CheckAndResetFov();
 #if DEBUG
         FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: Attaching to helmet cam current player {_currentPlayer.Profile.GetCorrectedNickname()}");
@@ -611,6 +615,21 @@ public partial class FreeCamera : MonoBehaviour
         transform.localEulerAngles = new Vector3(260, 80, 0);
         _isFollowing = true;
         _cameraState = ECameraState.FollowHeadcam;
+    }
+
+    private bool CheckAndAssignPlayer()
+    {
+        if (_currentPlayer == null && _lastSpectatingPlayer != null)
+        {
+            _currentPlayer = _lastSpectatingPlayer;
+        }
+
+        if (_currentPlayer == null)
+        {
+            return false;
+        }
+
+        return true;
     }
 
     public void AttachToMap()
@@ -626,6 +645,11 @@ public partial class FreeCamera : MonoBehaviour
 
     public void Attach3rdPerson()
     {
+        if (!CheckAndAssignPlayer())
+        {
+            return;
+        }
+
         CheckAndResetFov();
 #if DEBUG
         FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: Attaching to 3rd person current player {_currentPlayer.Profile.GetCorrectedNickname()}");
