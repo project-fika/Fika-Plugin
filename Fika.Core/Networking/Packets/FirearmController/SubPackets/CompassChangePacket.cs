@@ -28,16 +28,11 @@ public sealed class CompassChangePacket : IPoolSubPacket
 
     public void Execute(FikaPlayer player)
     {
-#if DEBUG
-        FikaGlobals.LogInfo("Received CompassState packet"); 
-#endif
-        if (player.HandsController is ItemHandsController handsController)
+        // temporarily disabled, broken in base game
+        /*if (player.HandsController is ItemHandsController handsController)
         {
-#if DEBUG
-            FikaGlobals.LogInfo("Executing CompassState packet"); 
-#endif
             handsController.CompassStateHandler(Enabled);
-        }
+        }*/
     }
 
     public void Serialize(NetDataWriter writer)

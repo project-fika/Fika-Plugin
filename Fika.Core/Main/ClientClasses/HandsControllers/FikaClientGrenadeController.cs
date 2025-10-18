@@ -37,7 +37,7 @@ public class FikaClientGrenadeController : Player.GrenadeHandsController
 
     public override void CompassStateHandler(bool isActive)
     {
-        SendCompassState(CompassChangePacket.FromValue(isActive));
+        //SendCompassState(CompassChangePacket.FromValue(isActive));
         base.CompassStateHandler(isActive);
     }
 

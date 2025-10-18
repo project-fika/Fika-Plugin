@@ -43,7 +43,7 @@ public class FikaClientFirearmController : Player.FirearmController
 
     public override void CompassStateHandler(bool isActive)
     {
-        SendCompassState(CompassChangePacket.FromValue(isActive));
+        //SendCompassState(CompassChangePacket.FromValue(isActive));
         base.CompassStateHandler(isActive);
     }
 

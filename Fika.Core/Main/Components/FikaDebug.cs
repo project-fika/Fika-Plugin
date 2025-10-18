@@ -36,7 +36,7 @@ internal class FikaDebug : MonoBehaviour
         }
     }
 
-    private bool isServer = false;
+    private bool isServer;
 
     private List<FikaPlayer> alivePlayers;
     private List<FikaPlayer> aliveBots;

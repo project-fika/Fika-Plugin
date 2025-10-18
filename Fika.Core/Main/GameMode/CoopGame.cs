@@ -1064,7 +1064,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
     }
 
     /// <summary>
-    /// Toggles the <see cref="FikaDebug"/> menu
+    /// Toggles the <see cref="DebugUI"/> menu
     /// </summary>
     public void ToggleDebug(bool enabled)
     {

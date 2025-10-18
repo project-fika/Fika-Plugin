@@ -81,6 +81,7 @@ internal class InternalBundleLoader
             EFikaAsset.AdminUI => _masterBundle.LoadAsset<GameObject>("AdminSettingsUI.prefab"),
             EFikaAsset.FikaChatUI => _masterBundle.LoadAsset<GameObject>("FikaChatUI.prefab"),
             EFikaAsset.RaidAdminUI => _masterBundle.LoadAsset<GameObject>("RaidAdminUI.prefab"),
+            EFikaAsset.DebugUI => _masterBundle.LoadAsset<GameObject>("DebugUI.prefab"),
             _ => throw new ArgumentOutOfRangeException(nameof(asset), "Invalid type was given")
         };
     }
@@ -123,6 +124,7 @@ internal class InternalBundleLoader
         FreecamUI,
         AdminUI,
         FikaChatUI,
-        RaidAdminUI
+        RaidAdminUI,
+        DebugUI
     }
 }

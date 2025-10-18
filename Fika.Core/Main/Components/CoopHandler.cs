@@ -147,7 +147,7 @@ public class CoopHandler : MonoBehaviour
 
     protected void Awake()
     {
-        _logger = BepInEx.Logging.Logger.CreateLogSource("CoopHandler");
+        _logger = Logger.CreateLogSource("CoopHandler");
         _spawnQueue = new(50);
         _queuedPlayers = [];
         Players = [];

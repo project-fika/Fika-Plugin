@@ -12,6 +12,7 @@ using EFT.Interactive;
 using EFT.UI;
 using EFT.UI.Matchmaker;
 using EFT.UI.Screens;
+using Fika.Core.Bundles;
 using Fika.Core.Main.ClientClasses;
 using Fika.Core.Main.Components;
 using Fika.Core.Main.HostClasses;
@@ -127,7 +128,7 @@ public abstract class BaseGameController
     protected ISpawnPoint _spawnPoint;
 
     private FikaHalloweenEventManager _halloweenEventManager;
-    private FikaDebug _fikaDebug;
+    private DebugUI _debugUi;
 
     private ESeason _season;
 
@@ -211,7 +212,14 @@ public abstract class BaseGameController
 
     public virtual void CreateDebugComponent()
     {
-        _fikaDebug = _abstractGame.gameObject.AddComponent<FikaDebug>();
+        var asset = InternalBundleLoader.Instance.GetFikaAsset(InternalBundleLoader.EFikaAsset.DebugUI);
+        var debugObject = GameObject.Instantiate(asset);
+        _debugUi = debugObject.GetComponent<DebugUI>();
+        debugObject.SetActive(false);
+        if (asset != null) // i don't know why there are 2 and i don't care anymore
+        {
+            GameObject.Destroy(asset);
+        }
     }
 
     public Task SetupCoopHandler(IFikaGame fikaGame)
@@ -640,24 +648,24 @@ public abstract class BaseGameController
     }
 
     /// <summary>
-    /// Toggles the <see cref="FikaDebug"/> menu
+    /// Toggles the <see cref="DebugUI"/> menu
     /// </summary>
     /// <param name="enabled"></param>
     public void ToggleDebug(bool enabled)
     {
-        if (_fikaDebug != null)
+        if (_debugUi != null)
         {
-            _fikaDebug.enabled = enabled;
+            _debugUi.gameObject.SetActive(enabled);
         }
     }
 
     public void DestroyDebugComponent()
     {
-        if (_fikaDebug != null)
+        if (_debugUi != null)
         {
             ToggleDebug(false);
-            GameObject.Destroy(_fikaDebug);
-            _fikaDebug = null;
+            GameObject.Destroy(_debugUi.gameObject);
+            _debugUi = null;
         }
     }
 
