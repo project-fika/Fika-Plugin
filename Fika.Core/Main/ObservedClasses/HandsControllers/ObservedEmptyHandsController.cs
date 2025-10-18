@@ -33,8 +33,8 @@ internal class ObservedEmptyHandsController : Player.EmptyHandsController
 
     public override void CompassStateHandler(bool isActive)
     {
-        _observedPlayer.CreateObservedCompass();
+        /*_observedPlayer.CreateObservedCompass();
         _objectInHandsAnimator.ShowCompass(isActive);
-        _observedPlayer.SetPropVisibility(isActive);
+        _observedPlayer.SetPropVisibility(isActive);*/
     }
 }

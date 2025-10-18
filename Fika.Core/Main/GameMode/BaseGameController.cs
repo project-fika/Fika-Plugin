@@ -216,10 +216,6 @@ public abstract class BaseGameController
         var debugObject = GameObject.Instantiate(asset);
         _debugUi = debugObject.GetComponent<DebugUI>();
         debugObject.SetActive(false);
-        if (asset != null) // i don't know why there are 2 and i don't care anymore
-        {
-            GameObject.Destroy(asset);
-        }
     }
 
     public Task SetupCoopHandler(IFikaGame fikaGame)
