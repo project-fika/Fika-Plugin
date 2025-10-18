@@ -33,8 +33,6 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
-using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 #if DEBUG
 using Fika.Core.Networking.Packets.Debug;
@@ -170,7 +168,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         _sendThreshold = 2f;
         _cachedConnections = [];
         _logger = Logger.CreateLogSource("Fika.Server");
-        _snapshotCount = 0;        
+        _snapshotCount = 0;
         ObservedPlayers = [];
         PlayerAmount = 1;
 
@@ -317,7 +315,10 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         SetHostRequest body = new(Ips, _port, FikaPlugin.UseNatPunching.Value, FikaBackendUtils.IsHeadlessGame);
         FikaRequestHandler.UpdateSetHost(body);
 
-        _raidAdminUIScript = RaidAdminUIScript.Create(this, _netServer);
+        if (!FikaBackendUtils.IsHeadless)
+        {
+            _raidAdminUIScript = RaidAdminUIScript.Create(this, _netServer);
+        }
     }
 
     public async Task InitializeVOIP()
