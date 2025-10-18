@@ -125,7 +125,7 @@ public class DebugUI : MonoBehaviour
 
         foreach (FikaPlayer player in _coopHandler.Players.Values)
         {
-            if (player.IsAI && !_aliveBots.Contains(player) && player.HealthController.IsAlive)
+            if (player.IsObservedAI && !_aliveBots.Contains(player) && player.HealthController.IsAlive)
             {
                 AddBot(player);
             }
