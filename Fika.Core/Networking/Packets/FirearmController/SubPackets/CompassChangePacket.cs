@@ -1,4 +1,5 @@
 ﻿using Fika.Core.Main.Players;
+using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Pooling;
 using static EFT.Player;
 
@@ -27,8 +28,14 @@ public sealed class CompassChangePacket : IPoolSubPacket
 
     public void Execute(FikaPlayer player)
     {
+#if DEBUG
+        FikaGlobals.LogInfo("Received CompassState packet"); 
+#endif
         if (player.HandsController is ItemHandsController handsController)
         {
+#if DEBUG
+            FikaGlobals.LogInfo("Executing CompassState packet"); 
+#endif
             handsController.CompassStateHandler(Enabled);
         }
     }

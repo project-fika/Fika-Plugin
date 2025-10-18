@@ -635,20 +635,6 @@ public class FikaPlayer : LocalPlayer
         PacketSender.NetworkManager.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
     }
 
-    public override void SetCompassState(bool value)
-    {
-        base.SetCompassState(value);
-        if (PacketSender == null)
-        {
-            return;
-        }
-
-        if (HandsController is FikaClientFirearmController controller)
-        {
-            controller.SendCompassState(CompassChangePacket.FromValue(value));
-        }
-    }
-
     public override void SendHeadlightsPacket(bool isSilent)
     {
         if (PacketSender != null && PacketSender.NetworkManager != null)

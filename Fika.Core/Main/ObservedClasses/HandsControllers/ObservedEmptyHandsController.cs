@@ -35,5 +35,6 @@ internal class ObservedEmptyHandsController : Player.EmptyHandsController
     {
         _observedPlayer.CreateObservedCompass();
         _objectInHandsAnimator.ShowCompass(isActive);
+        _observedPlayer.SetPropVisibility(isActive);
     }
 }

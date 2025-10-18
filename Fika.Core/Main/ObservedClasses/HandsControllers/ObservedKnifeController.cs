@@ -20,5 +20,6 @@ internal class ObservedKnifeController : EFT.Player.KnifeController
     {
         _observedPlayer.CreateObservedCompass();
         _objectInHandsAnimator.ShowCompass(isActive);
+        _observedPlayer.SetPropVisibility(isActive);
     }
 }

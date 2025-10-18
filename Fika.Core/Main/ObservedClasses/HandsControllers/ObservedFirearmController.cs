@@ -327,6 +327,7 @@ public class ObservedFirearmController : FirearmController
     {
         _observedPlayer.CreateObservedCompass();
         _objectInHandsAnimator.ShowCompass(isActive);
+        _observedPlayer.SetPropVisibility(isActive);
     }
 
     private IEnumerator BreakFiringLoop()
