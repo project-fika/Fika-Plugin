@@ -24,8 +24,8 @@ public class DebugUI : MonoBehaviour
     private CoopHandler _coopHandler;
     private int _frameCounter;
     private bool _isServer;
-    private List<FikaPlayer> _alivePlayers = [];
-    private List<FikaPlayer> _aliveBots = [];
+    private List<FikaPlayer> _alivePlayers;
+    private List<FikaPlayer> _aliveBots;
 
     private int Ping
     {
