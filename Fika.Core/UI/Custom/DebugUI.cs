@@ -86,6 +86,7 @@ public class DebugUI : MonoBehaviour
             ClientsText.gameObject.SetActive(false);
         }
         Frame.sizeDelta = sizeDelta;
+        Border.sizeDelta = borderSizeDelta;
     }
 
     protected void Start()
