@@ -768,10 +768,6 @@ public class ObservedFirearmController : FirearmController
             {
                 _weaponManager.DestroyPatronInWeapon();
             }
-            if (!bullet.AmmoTemplate.RemoveShellAfterFire)
-            {
-                weapon.ShellsInChambers[index] = bullet.AmmoTemplate;
-            }
             ammoSlot.RemoveItem();
         }
     }
