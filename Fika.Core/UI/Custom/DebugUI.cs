@@ -87,12 +87,9 @@ public class DebugUI : MonoBehaviour
         }
         Frame.sizeDelta = sizeDelta;
         Border.sizeDelta = borderSizeDelta;
-    }
 
-    protected void Start()
-    {
-        Frame.gameObject.AddComponent<UIDragComponent>()
-            .Init(Frame, true);
+        Border.gameObject.AddComponent<UIDragComponent>()
+            .Init(Border, true);
     }
 
     protected void Update()
