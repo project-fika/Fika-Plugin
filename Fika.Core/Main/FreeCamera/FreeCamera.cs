@@ -135,9 +135,9 @@ public partial class FreeCamera : MonoBehaviour
 #endif
     }
 
-    public void DetachCamera()
+    public void DetachCamera(bool force = false)
     {
-        if (!FikaPlugin.Instance.AllowSpectateFreeCam && !_isSpectator)
+        if (!FikaPlugin.Instance.AllowSpectateFreeCam && !_isSpectator && !force)
         {
             return;
         }
@@ -233,7 +233,7 @@ public partial class FreeCamera : MonoBehaviour
         if (_players.Count == 0)
         {
             // Clear out all spectate positions
-            DetachCamera();
+            DetachCamera(true);
 
             return;
         }
