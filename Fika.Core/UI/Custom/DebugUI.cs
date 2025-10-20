@@ -16,6 +16,7 @@ public class DebugUI : MonoBehaviour
     public TMP_Text PingText;
     public TMP_Text RTTText;
     public TMP_Text ServerFPSText;
+    public RectTransform Border;
     public RectTransform Frame;
 
     private const float _serverHeight = 90f;
@@ -69,9 +70,11 @@ public class DebugUI : MonoBehaviour
         }
 
         var sizeDelta = Frame.sizeDelta;
+        var borderSizeDelta = Border.sizeDelta;
         if (_isServer)
         {
             sizeDelta.y = _serverHeight;
+            borderSizeDelta.y = _serverHeight + 10f;
             PingText.gameObject.SetActive(false);
             RTTText.gameObject.SetActive(false);
             ServerFPSText.gameObject.SetActive(false);
@@ -79,6 +82,7 @@ public class DebugUI : MonoBehaviour
         else
         {
             sizeDelta.y = _clientHeight;
+            borderSizeDelta.y = _clientHeight + 10f;
             ClientsText.gameObject.SetActive(false);
         }
         Frame.sizeDelta = sizeDelta;
