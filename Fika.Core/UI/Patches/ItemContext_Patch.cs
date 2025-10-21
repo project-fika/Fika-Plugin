@@ -16,6 +16,9 @@ using static Fika.Core.UI.FikaUIGlobals;
 
 namespace Fika.Core.UI.Patches;
 
+/// <summary>
+/// Used to send items to other players
+/// </summary>
 [IgnoreAutoPatch]
 public class ItemContext_Patch : ModulePatch
 {
@@ -48,7 +51,9 @@ public class ItemContext_Patch : ModulePatch
             // Save as variable in case we need to add more checks later...
             MenuUI menuUI = Singleton<MenuUI>.Instance;
 
-            if (menuUI.HideoutAreaTransferItemsScreen.isActiveAndEnabled || menuUI.HideoutMannequinEquipmentScreen.isActiveAndEnabled)
+            if (menuUI.HideoutAreaTransferItemsScreen.isActiveAndEnabled
+                || menuUI.HideoutMannequinEquipmentScreen.isActiveAndEnabled
+                || menuUI.HideoutCircleOfCultistsScreen.isActiveAndEnabled)
             {
                 return;
             }
