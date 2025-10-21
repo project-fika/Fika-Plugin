@@ -190,10 +190,7 @@ public class MatchMakerUIScript : MonoBehaviour
             }
 
             _fikaMatchMakerUi.HeadlessSelection.gameObject.SetActive(true);
-            _fikaMatchMakerUi.HeadlessSelection.onValueChanged.AddListener((value) =>
-            {
-                Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuDropdownSelect);
-            });
+            _fikaMatchMakerUi.HeadlessSelection.onValueChanged.AddListener((_) => Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuDropdownSelect));
 
             _fikaMatchMakerUi.HeadlessSelection.ClearOptions();
 
