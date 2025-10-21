@@ -24,6 +24,8 @@ public static class FikaGlobals
     public const string TransitTraderName = "BTR";
     public const string DefaultTransitId = "66f5750951530ca5ae09876d";
 
+    public static int PingMask = LayerMask.GetMask(["HighPolyCollider", "Interactive", "Deadbody", "Player", "Loot", "Terrain"]);
+
     public const int PingRange = 1000;
 
     private static readonly ManualLogSource _logger = BepInEx.Logging.Logger.CreateLogSource("FikaGlobals");

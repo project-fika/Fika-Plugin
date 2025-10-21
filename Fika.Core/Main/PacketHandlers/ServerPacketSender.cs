@@ -148,8 +148,7 @@ public class ServerPacketSender : MonoBehaviour, IPacketSender
         {
             return;
         }
-        int layer = LayerMask.GetMask(["HighPolyCollider", "Interactive", "Deadbody", "Player", "Loot", "Terrain"]);
-        if (Physics.Raycast(sourceRaycast, out RaycastHit hit, FikaGlobals.PingRange, layer))
+        if (Physics.Raycast(sourceRaycast, out RaycastHit hit, FikaGlobals.PingRange, FikaGlobals.PingMask))
         {
             _lastPingTime = DateTime.Now;
             //GameObject gameObject = new("Ping", typeof(FikaPing));
