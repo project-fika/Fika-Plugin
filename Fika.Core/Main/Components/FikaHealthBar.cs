@@ -180,6 +180,7 @@ public class FikaHealthBar : MonoBehaviour
 
         var t = Mathf.InverseLerp(2f, FikaPlugin.MaxDistanceToShow.Value, distance);
         var scaleMultiplier = Mathf.Lerp(0.48f, 0.075f, Mathf.Pow(t, 1.5f)); // a = near player, b = far player
+        scaleMultiplier *= FikaPlugin.NamePlateScale.Value;
         _playerPlate.ScalarObjectScreen.transform.localScale = Vector3.one * scaleMultiplier;
 
         var distanceAlpha = Mathf.Lerp(1f, 0.3f, t);

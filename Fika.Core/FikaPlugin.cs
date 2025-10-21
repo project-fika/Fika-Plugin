@@ -675,9 +675,9 @@ public class FikaPlugin : BaseUnityPlugin
             }),
             "Decrease Opacity In Peripheral", ref failed, headers);
 
-        NamePlateScale = SetupSetting(coopDefaultNamePlatesHeader, "Name Plate Scale", 0.22f,
+        NamePlateScale = SetupSetting(coopDefaultNamePlatesHeader, "Name Plate Scale", 1f,
             new ConfigDescription(LocaleUtils.BEPINEX_NAME_PLATE_SCALE_D.Localized(),
-            new AcceptableValueRange<float>(0.05f, 1f), new ConfigurationManagerAttributes()
+            new AcceptableValueRange<float>(0.5f, 1.5f), new ConfigurationManagerAttributes()
             {
                 Category = coopNameplatesHeader,
                 DispName = LocaleUtils.BEPINEX_NAME_PLATE_SCALE_T.Localized(),
