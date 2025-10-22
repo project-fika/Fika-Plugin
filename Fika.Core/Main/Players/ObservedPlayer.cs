@@ -3,14 +3,12 @@
 using Audio.SpatialSystem;
 using Comfort.Common;
 using Dissonance;
-using Diz.Binding;
 using EFT;
 using EFT.AssetsManager;
 using EFT.Ballistics;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.Vaulting;
-using EFT.Visual;
 using Fika.Core.Main.Components;
 using Fika.Core.Main.Factories;
 using Fika.Core.Main.GameMode;
@@ -30,7 +28,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using UnityEngine.Audio;
 using static Fika.Core.UI.FikaUIGlobals;
 
 namespace Fika.Core.Main.Players;
