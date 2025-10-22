@@ -55,6 +55,14 @@ public class TarkovApplication_LocalGameCreator_Patch : ModulePatch
         bool isServer = FikaBackendUtils.IsServer;
         bool isTransit = FikaBackendUtils.IsTransit;
 
+        if (FikaPlugin.NoAI.Value)
+        {
+            FikaGlobals.LogWarning("No AI enabled - stopping bot spawns");
+            raidSettings.BotSettings.BotAmount = EFT.Bots.EBotAmount.NoBots;
+            raidSettings.WavesSettings.BotAmount = EFT.Bots.EBotAmount.NoBots;
+            raidSettings.WavesSettings.IsBosses = false;
+        }
+
         if (isServer && !isTransit)
         {
             FikaBackendUtils.CachedRaidSettings = raidSettings;
