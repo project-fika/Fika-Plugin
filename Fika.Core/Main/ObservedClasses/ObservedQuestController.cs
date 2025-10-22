@@ -20,6 +20,16 @@ public class ObservedQuestController(Profile profile, InventoryController invent
         // do nothing
     }
 
+    public override void Dispose()
+    {
+        CompositeDisposableClass.Dispose();
+        ConditionalBook.Dispose();
+        foreach (var quest in ConditionalBook)
+        {
+            method_3(quest);
+        }
+    }
+
     public void HandleInraidQuestPacket(InRaidQuestPacket packet)
     {
         switch (packet.Type)
