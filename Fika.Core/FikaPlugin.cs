@@ -140,7 +140,6 @@ public class FikaPlugin : BaseUnityPlugin
     public static ConfigEntry<float> OpacityInADS { get; set; }
     public static ConfigEntry<float> MaxDistanceToShow { get; set; }
     public static ConfigEntry<float> MinimumOpacity { get; set; }
-    public static ConfigEntry<float> MinimumNamePlateScale { get; set; }
     public static ConfigEntry<bool> ShowEffects { get; set; }
     public static ConfigEntry<bool> UseOcclusion { get; set; }
     public static ConfigEntry<Color> FullHealthColor { get; set; }
@@ -714,16 +713,6 @@ public class FikaPlugin : BaseUnityPlugin
                 Order = 5
             }),
             "Minimum Opacity", ref failed, headers);
-
-        MinimumNamePlateScale = SetupSetting(coopDefaultNamePlatesHeader, "Minimum Name Plate Scale", 0.01f,
-            new ConfigDescription(LocaleUtils.BEPINEX_MIN_PLATE_SCALE_D.Localized(),
-            new AcceptableValueRange<float>(0.0f, 1f), new ConfigurationManagerAttributes()
-            {
-                Category = coopNameplatesHeader,
-                DispName = LocaleUtils.BEPINEX_MIN_PLATE_SCALE_T.Localized(),
-                Order = 4
-            }),
-            "Minimum Name Plate Scale", ref failed, headers);
 
         UseOcclusion = SetupSetting(coopDefaultNamePlatesHeader, "Use Occlusion", false,
             new ConfigDescription(LocaleUtils.BEPINEX_USE_OCCLUSION_D.Localized(), tags: new ConfigurationManagerAttributes()

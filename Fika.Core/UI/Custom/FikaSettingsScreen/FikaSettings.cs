@@ -74,7 +74,6 @@ public class FikaSettings : SettingsTab
     private SettingFloatSlider _opacityInAds;
     private SettingFloatSlider _maxDistanceToShow;
     private SettingFloatSlider _minimumOpacity;
-    private SettingFloatSlider _minimumNamePlateScale;
     private SettingToggle _useOcclusion;
     private GameObject _fullHealthColor;
     private GameObject _lowHealthColor;
@@ -177,7 +176,6 @@ public class FikaSettings : SettingsTab
         _opacityInAds = CreateFloatSlider(content);
         _maxDistanceToShow = CreateFloatSlider(content);
         _minimumOpacity = CreateFloatSlider(content);
-        _minimumNamePlateScale = CreateFloatSlider(content);
         _useOcclusion = CreateToggle(content);
         _fullHealthColor = CreateColor(content);
         _lowHealthColor = CreateColor(content);
@@ -301,7 +299,6 @@ public class FikaSettings : SettingsTab
         SetupFloatSlider(_opacityInAds, FikaPlugin.OpacityInADS, "F2");
         SetupFloatSlider(_maxDistanceToShow, FikaPlugin.MaxDistanceToShow);
         SetupFloatSlider(_minimumOpacity, FikaPlugin.MinimumOpacity, "F2");
-        SetupFloatSlider(_minimumNamePlateScale, FikaPlugin.MinimumNamePlateScale, "F2");
         SetupToggle(_useOcclusion, FikaPlugin.UseOcclusion);
         SetupRGBSlider(_fullHealthColor, FikaPlugin.FullHealthColor);
         SetupRGBSlider(_lowHealthColor, FikaPlugin.LowHealthColor);
