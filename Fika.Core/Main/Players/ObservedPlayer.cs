@@ -327,7 +327,6 @@ public class ObservedPlayer : FikaPlayer
             }
         }
 
-
         VoipEftSource = MonoBehaviourSingleton<BetterAudio>.Instance.CreateBetterSource<SimpleSource>(
             VoipAudioSource, BetterAudio.AudioSourceGroupType.Voip, true, true);
         if (VoipEftSource == null)
