@@ -671,7 +671,7 @@ public partial class FikaClient
         {
             if (MyPlayer.AbstractQuestControllerClass is ClientSharedQuestController sharedQuestController)
             {
-                sharedQuestController.ReceiveQuestDropItemPacket(ref packet);
+                sharedQuestController.ReceiveQuestDropItemPacket(packet);
             }
         }
     }
@@ -687,7 +687,7 @@ public partial class FikaClient
         {
             if (MyPlayer.AbstractQuestControllerClass is ClientSharedQuestController sharedQuestController)
             {
-                sharedQuestController.ReceiveQuestItemPacket(ref packet);
+                sharedQuestController.ReceiveQuestItemPacket(packet);
             }
         }
     }
@@ -703,7 +703,7 @@ public partial class FikaClient
         {
             if (MyPlayer.AbstractQuestControllerClass is ClientSharedQuestController sharedQuestController)
             {
-                sharedQuestController.ReceiveQuestPacket(ref packet);
+                sharedQuestController.ReceiveQuestPacket(packet);
             }
         }
     }
