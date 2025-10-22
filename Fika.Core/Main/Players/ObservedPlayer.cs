@@ -1054,13 +1054,6 @@ public class ObservedPlayer : FikaPlayer
             {
                 damageInfo.Player = player;
                 LastAggressor = player.iPlayer;
-                if (IsYourPlayer)
-                {
-                    if (!FikaPlugin.Instance.FriendlyFire && damageInfo.Player.iPlayer.GroupId == GroupId)
-                    {
-                        return;
-                    }
-                }
             }
 
             _lastWeaponId = packet.WeaponId;
