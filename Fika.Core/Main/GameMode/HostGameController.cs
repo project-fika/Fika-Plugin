@@ -873,8 +873,7 @@ public class HostGameController : BaseGameController, IBotGame
         GClass1947 lootDescriptor = EFTItemSerializerClass.SerializeLootData(location.Loot, FikaGlobals.SearchControllerSerializer);
         EFTWriterClass eftWriter = WriterPoolManager.GetWriter();
         eftWriter.WriteEFTLootDataDescriptor(lootDescriptor);
-        byte[] lootData = eftWriter.ToArray();
-        LootData = lootData;
+        LootData = eftWriter.ToArray();
         WriterPoolManager.ReturnWriter(eftWriter);
         return Task.CompletedTask;
     }
