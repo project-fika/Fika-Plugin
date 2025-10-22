@@ -18,7 +18,7 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
     private readonly HashSet<string> _acceptedTypes = [];
     private readonly HashSet<string> _lootedTemplateIds = [];
     private bool _canSendAndReceive = true;
-    private bool _isItemBeingDropped = false;
+    private bool _isItemBeingDropped;
 
     public override void Init()
     {
@@ -163,7 +163,7 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
         }
     }
 
-    internal void ReceiveQuestPacket(ref QuestConditionPacket packet)
+    internal void ReceiveQuestPacket(QuestConditionPacket packet)
     {
         if (!_canSendAndReceive)
         {
@@ -182,11 +182,17 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
 
             if (quest.Id == packet.SourceId)
             {
+#if DEBUG
+                FikaGlobals.LogInfo($"Quest id matched sourceId, status: {quest.QuestStatus}, name: {quest.Template.Name.ParseLocalization()}"); 
+#endif
                 var counter = quest.ConditionCountersManager.GetCounter(packet.Id);
                 if (counter != null && !quest.CompletedConditions.Contains(counter.Id))
                 {
                     if (!ValidateQuestType(counter))
                     {
+#if DEBUG
+                        FikaGlobals.LogInfo($"Failed to verify quest type for {quest.Template.Name.ParseLocalization()}"); 
+#endif
                         return;
                     }
 
@@ -202,7 +208,7 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
         }
     }
 
-    internal void ReceiveQuestItemPacket(ref QuestItemPacket packet)
+    internal void ReceiveQuestItemPacket(QuestItemPacket packet)
     {
         if (!_canSendAndReceive)
         {
@@ -234,7 +240,7 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
         }
     }
 
-    internal void ReceiveQuestDropItemPacket(ref QuestDropItemPacket packet)
+    internal void ReceiveQuestDropItemPacket(QuestDropItemPacket packet)
     {
         if (!_canSendAndReceive)
         {
@@ -358,8 +364,11 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
     /// </summary>
     /// <param name="counter">The counter to validate</param>
     /// <returns>Returns true if the quest type is valid, returns false if not</returns>
-    internal bool ValidateQuestType(TaskConditionCounterClass counter)
+    private bool ValidateQuestType(TaskConditionCounterClass counter)
     {
+#if DEBUG
+        FikaGlobals.LogInfo($"Validating counter of type {counter.Type}");
+#endif
         if (_acceptedTypes.Contains(counter.Type))
         {
             return true;
@@ -368,9 +377,8 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
         if (counter.Type == "CounterCreator")
         {
             ConditionCounterCreator CounterCreator = (ConditionCounterCreator)counter.Template;
-
 #if DEBUG
-            FikaPlugin.Instance.FikaLogger.LogInfo($"CoopClientSharedQuestController::ValidateQuestType: CounterCreator Type {CounterCreator.type}");
+            FikaGlobals.LogInfo($"CounterCreator Type {CounterCreator.type}");
 #endif
 
             if (_acceptedTypes.Contains(CounterCreator.type.ToString()))
