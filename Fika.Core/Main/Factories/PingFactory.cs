@@ -139,27 +139,13 @@ public static class PingFactory
 
             const float edgePadding = 20f;
 
-            // World → screen space
-            var cam = CameraClass.Instance.Camera;
-            var screenPoint = cam.WorldToScreenPoint(_hitPoint);
+            WorldToScreen.ProjectToCanvas(_hitPoint, _mainPlayer,
+                _canvasRect, out var canvasPos,
+                FikaPlugin.PingUseOpticZoom.Value, true);
 
-            // Check if behind camera
-            var behindCamera = screenPoint.z < 0f;
-
-            // Convert to canvas position
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(_canvasRect, screenPoint, null, out var canvasPos);
-
-            // If behind camera, flip the position so it stays on-screen edge in opposite direction
-            if (behindCamera)
-            {
-                canvasPos *= -1f;
-            }
-
-            // Distance-based alpha
+            // distance-based alpha
             var distanceToCenter = canvasPos.magnitude;
-            var alpha = distanceToCenter < 200f
-                ? Mathf.Max(FikaPlugin.PingMinimumOpacity.Value, distanceToCenter / 200f)
-                : 1f;
+            var alpha = distanceToCenter < 200f ? Mathf.Max(FikaPlugin.PingMinimumOpacity.Value, distanceToCenter / 200f) : 1f;
 
             _image.color = new Color(_pingColor.r, _pingColor.g, _pingColor.b, alpha);
             if (_displayRange)
@@ -167,7 +153,6 @@ public static class PingFactory
                 _rangeText.color = Color.white.SetAlpha(alpha);
             }
 
-            // Clamp to screen edges
             var halfWidth = (_canvasRect.sizeDelta.x / 2f) - edgePadding;
             var halfHeight = (_canvasRect.sizeDelta.y / 2f) - edgePadding;
 
@@ -177,14 +162,12 @@ public static class PingFactory
 
             _image.rectTransform.anchoredPosition = clampedPos;
 
-            // Display range text
             if (_displayRange)
             {
                 var distance = (int)CameraClass.Instance.Distance(_hitPoint);
                 _rangeText.text = $"[{distance}m]";
             }
         }
-
 
         public virtual void Initialize(ref Vector3 point, Object userObject, Color pingColor)
         {
