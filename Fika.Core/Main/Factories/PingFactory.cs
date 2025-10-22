@@ -134,18 +134,54 @@ public static class PingFactory
                 {
                     _rangeText.color = Color.clear;
                 }
+
                 return;
             }
 
             const float edgePadding = 20f;
+            var cam = CameraClass.Instance.Camera;
+            var targetPos = _hitPoint;
 
-            WorldToScreen.ProjectToCanvas(_hitPoint, _mainPlayer,
-                _canvasRect, out var canvasPos,
-                FikaPlugin.PingUseOpticZoom.Value, true);
+            // vector from camera to target
+            var toTarget = targetPos - cam.transform.position;
+            var behindCamera = Vector3.Dot(cam.transform.forward, toTarget.normalized) <= 0f;
+
+            // project normally if in front
+            Vector2 canvasPos;
+            if (!behindCamera)
+            {
+                WorldToScreen.ProjectToCanvas(targetPos, _mainPlayer, _canvasRect, out canvasPos,
+                    FikaPlugin.PingUseOpticZoom.Value, true);
+            }
+            else
+            {
+                // compute direction in camera plane if behind
+                var local = cam.transform.InverseTransformPoint(targetPos);
+                var dir = new Vector2(local.x, local.y); // X=horizontal, Y=vertical
+                if (dir.sqrMagnitude < 0.001f)
+                {
+                    dir = Vector2.up; // fallback to avoid zero vector
+                }
+
+                dir.Normalize();
+
+                // clamp to canvas edge
+                var halfWidth = (_canvasRect.sizeDelta.x / 2f) - edgePadding;
+                var halfHeight = (_canvasRect.sizeDelta.y / 2f) - edgePadding;
+
+                // scale so the ping sits on the edge
+                var scaleX = halfWidth / Mathf.Abs(dir.x);
+                var scaleY = halfHeight / Mathf.Abs(dir.y);
+                var scale = Mathf.Min(scaleX, scaleY);
+
+                canvasPos = dir * scale;
+            }
 
             // distance-based alpha
             var distanceToCenter = canvasPos.magnitude;
-            var alpha = distanceToCenter < 200f ? Mathf.Max(FikaPlugin.PingMinimumOpacity.Value, distanceToCenter / 200f) : 1f;
+            var alpha = distanceToCenter < 200f
+                ? Mathf.Max(FikaPlugin.PingMinimumOpacity.Value, distanceToCenter / 200f)
+                : 1f;
 
             _image.color = new Color(_pingColor.r, _pingColor.g, _pingColor.b, alpha);
             if (_displayRange)
@@ -153,19 +189,17 @@ public static class PingFactory
                 _rangeText.color = Color.white.SetAlpha(alpha);
             }
 
-            var halfWidth = (_canvasRect.sizeDelta.x / 2f) - edgePadding;
-            var halfHeight = (_canvasRect.sizeDelta.y / 2f) - edgePadding;
+            // clamp to canvas edges (safety)
+            var halfW = (_canvasRect.sizeDelta.x / 2f) - edgePadding;
+            var halfH = (_canvasRect.sizeDelta.y / 2f) - edgePadding;
+            canvasPos.x = Mathf.Clamp(canvasPos.x, -halfW, halfW);
+            canvasPos.y = Mathf.Clamp(canvasPos.y, -halfH, halfH);
 
-            var clampedPos = canvasPos;
-            clampedPos.x = Mathf.Clamp(clampedPos.x, -halfWidth, halfWidth);
-            clampedPos.y = Mathf.Clamp(clampedPos.y, -halfHeight, halfHeight);
-
-            _image.rectTransform.anchoredPosition = clampedPos;
+            _image.rectTransform.anchoredPosition = canvasPos;
 
             if (_displayRange)
             {
-                var distance = (int)CameraClass.Instance.Distance(_hitPoint);
-                _rangeText.text = $"[{distance}m]";
+                _rangeText.text = $"[{CameraClass.Instance.Distance(_hitPoint):F1}m]";
             }
         }
 
