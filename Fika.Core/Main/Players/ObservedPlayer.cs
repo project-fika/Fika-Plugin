@@ -286,6 +286,7 @@ public class ObservedPlayer : FikaPlayer
                 StartCoroutine(SourceBindingCreated());
                 if (VoipAudioSource != null)
                 {
+
                 }
                 else
                 {
@@ -308,19 +309,24 @@ public class ObservedPlayer : FikaPlayer
 
         if (VoipAudioSource == null)
         {
-            int attempts = 0;
-            WaitForSeconds waitForSeconds = new(1);
+            var attempts = 0;
+            var waitForSeconds = new WaitForSeconds(1);
+
             while (VoipAudioSource == null)
             {
-                FikaGlobals.LogInfo($"VoipAudioSource is null, waiting 1 second... [{attempts / 5}]");
-                if (attempts++ > 5)
+                FikaGlobals.LogInfo($"VoipAudioSource is null, waiting 1 second... [Attempt {attempts + 1}]");
+
+                if (attempts >= 5)
                 {
                     FikaGlobals.LogError("VoipAudioSource was null after 5 attempts! Cancelling.");
                     yield break;
                 }
+
+                attempts++;
                 yield return waitForSeconds;
             }
         }
+
 
         VoipEftSource = MonoBehaviourSingleton<BetterAudio>.Instance.CreateBetterSource<SimpleSource>(
             VoipAudioSource, BetterAudio.AudioSourceGroupType.Voip, true, true);
