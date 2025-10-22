@@ -10,6 +10,16 @@ namespace Fika.Core.Main.ObservedClasses;
 public class ObservedQuestController(Profile profile, InventoryController inventoryController, IPlayerSearchController searchController, IQuestActions session)
     : GClass4007(profile, inventoryController, searchController, session)
 {
+    public override void Run()
+    {
+        // do nothing
+    }
+
+    public override void ManageConditional(QuestClass conditional)
+    {
+        // do nothing
+    }
+
     public void HandleInraidQuestPacket(InRaidQuestPacket packet)
     {
         switch (packet.Type)
@@ -18,7 +28,7 @@ public class ObservedQuestController(Profile profile, InventoryController invent
                 {
                     FikaGlobals.LogInfo($"Processing {packet.Items.Count} items fom quest reward for {Profile.Info.MainProfileNickname}");
                     List<QuestRewardDataClass> readList = [];
-                    foreach (FlatItemsDataClass[] item in packet.Items)
+                    foreach (var item in packet.Items)
                     {
                         readList.Add(new()
                         {
@@ -28,12 +38,12 @@ public class ObservedQuestController(Profile profile, InventoryController invent
                         });
                     }
 
-                    int generatedItems = 0;
+                    var generatedItems = 0;
                     List<GClass3411> results = [];
                     GStruct153 appendResult = default;
-                    foreach (QuestRewardDataClass item in readList)
+                    foreach (var item in readList)
                     {
-                        appendResult = item.TryAppendClaimResults(InventoryController_0, results, out int clonedCount);
+                        appendResult = item.TryAppendClaimResults(InventoryController_0, results, out var clonedCount);
                         generatedItems += clonedCount;
                         if (appendResult.Failed)
                         {
@@ -43,7 +53,7 @@ public class ObservedQuestController(Profile profile, InventoryController invent
                     if (appendResult.Failed)
                     {
                         results.RollBack();
-                        for (int i = 0; i < generatedItems; i++)
+                        for (var i = 0; i < generatedItems; i++)
                         {
                             InventoryController_0.RollBack();
                         }
@@ -57,10 +67,10 @@ public class ObservedQuestController(Profile profile, InventoryController invent
                 {
                     FikaGlobals.LogInfo($"Discarding {packet.ItemIdsToRemove.Count} items from {Profile.Info.MainProfileNickname}");
                     List<Item> itemsToRemove = [];
-                    GameWorld gameWorld = Singleton<GameWorld>.Instance;
+                    var gameWorld = Singleton<GameWorld>.Instance;
                     foreach (string itemId in packet.ItemIdsToRemove)
                     {
-                        GStruct156<Item> result = gameWorld.FindItemById(itemId);
+                        var result = gameWorld.FindItemById(itemId);
                         if (result.Failed)
                         {
                             FikaGlobals.LogError($"Could not find itemId {itemId}: {result.Error}");
@@ -71,7 +81,7 @@ public class ObservedQuestController(Profile profile, InventoryController invent
 
                     List<GStruct154<GClass3408>> list = [];
                     GStruct154<GClass3408> discardResult = default;
-                    for (int i = 0; i < itemsToRemove.Count; i++)
+                    for (var i = 0; i < itemsToRemove.Count; i++)
                     {
                         discardResult = InteractionsHandlerClass.Discard(itemsToRemove[i], InventoryController_0, false);
                         if (discardResult.Failed)
@@ -87,8 +97,6 @@ public class ObservedQuestController(Profile profile, InventoryController invent
                         FikaGlobals.LogError($"Could not discard items: {discardResult.Error.Localized()}");
                     }
                 }
-                break;
-            default:
                 break;
         }
     }
