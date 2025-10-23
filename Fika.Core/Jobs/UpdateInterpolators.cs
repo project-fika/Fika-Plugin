@@ -12,11 +12,15 @@ internal readonly struct UpdateInterpolators(float unscaledDeltaTime) : IJobFor
 
     public readonly void Execute(int index)
     {
-        var players = Singleton<IFikaNetworkManager>.Instance.ObservedPlayers;
-        if ((uint)index < (uint)players.Count) // single unsigned bounds check
+        var netManager = Singleton<IFikaNetworkManager>.Instance;
+        if (netManager != null)
         {
-            var player = players[index];
-            player?.Snapshotter.ManualUpdate(_unscaledDeltaTime);
+            var players = netManager.ObservedPlayers;
+            if ((uint)index < (uint)players.Count) // single unsigned bounds check
+            {
+                var player = players[index];
+                player?.Snapshotter.ManualUpdate(_unscaledDeltaTime);
+            }
         }
     }
 }
