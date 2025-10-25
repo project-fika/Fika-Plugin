@@ -512,10 +512,10 @@ public abstract class BaseGameController
                     settings.ServerMapBTRSettings[mapSettings.Key] = btrSettings;
 #endif
                     gameWorld.BtrController = new BTRControllerClass(gameWorld);
-                    /*if (IsServer)
+                    if (IsServer)
                     {
                         GlobalEventHandlerClass.Instance.SubscribeOnEvent<BtrSpawnOnThePathEvent>(OnBtrSpawn);
-                    }*/
+                    }
                 }
             }
             else
