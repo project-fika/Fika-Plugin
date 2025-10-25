@@ -3,14 +3,12 @@
 using Audio.SpatialSystem;
 using Comfort.Common;
 using Dissonance;
-using Diz.Binding;
 using EFT;
 using EFT.AssetsManager;
 using EFT.Ballistics;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.Vaulting;
-using EFT.Visual;
 using Fika.Core.Main.Components;
 using Fika.Core.Main.Factories;
 using Fika.Core.Main.GameMode;
@@ -30,7 +28,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using UnityEngine.Audio;
 using static Fika.Core.UI.FikaUIGlobals;
 
 namespace Fika.Core.Main.Players;
@@ -146,8 +143,8 @@ public class ObservedPlayer : FikaPlayer
             return Mathf.Max(1f, Singleton<BetterAudio>.Instance.ProtagonistHearing + 1f);
         }
     }
-    public float TurnOffFbbikAt = 0f;
-    private float _lastDistance = 0f;
+    public float TurnOffFbbikAt;
+    private float _lastDistance;
     private LocalPlayerCullingHandlerClass _cullingHandler;
     private float _rightHand;
     private float _leftHand;
@@ -156,6 +153,7 @@ public class ObservedPlayer : FikaPlayer
     private bool _shouldCullController;
     private readonly List<ObservedSlotViewHandler> _observedSlotViewHandlers = [];
     private ObservedCorpseCulling _observedCorpseCulling;
+    private bool _compassLoaded;
     #endregion
 
     public static async Task<ObservedPlayer> CreateObservedPlayer(GameWorld gameWorld, int playerId, Vector3 position, Quaternion rotation, string layerName,
@@ -285,6 +283,7 @@ public class ObservedPlayer : FikaPlayer
                 StartCoroutine(SourceBindingCreated());
                 if (VoipAudioSource != null)
                 {
+
                 }
                 else
                 {
@@ -307,16 +306,20 @@ public class ObservedPlayer : FikaPlayer
 
         if (VoipAudioSource == null)
         {
-            int attempts = 0;
-            WaitForSeconds waitForSeconds = new(1);
+            var attempts = 0;
+            var waitForSeconds = new WaitForSeconds(1);
+
             while (VoipAudioSource == null)
             {
-                FikaGlobals.LogInfo($"VoipAudioSource is null, waiting 1 second... [{attempts / 5}]");
-                if (attempts++ > 5)
+                FikaGlobals.LogInfo($"VoipAudioSource is null, waiting 1 second... [Attempt {attempts + 1}]");
+
+                if (attempts >= 5)
                 {
                     FikaGlobals.LogError("VoipAudioSource was null after 5 attempts! Cancelling.");
                     yield break;
                 }
+
+                attempts++;
                 yield return waitForSeconds;
             }
         }
@@ -810,6 +813,14 @@ public class ObservedPlayer : FikaPlayer
     /// </summary>
     public void ManualStateUpdate()
     {
+        if (!_cullingHandler.IsVisible)
+        {
+            Position = CurrentPlayerState.Position;
+            Rotation = CurrentPlayerState.Rotation;
+
+            return;
+        }
+
         Rotation = CurrentPlayerState.Rotation;
 
         HeadRotation = CurrentPlayerState.HeadRotation;
@@ -1043,13 +1054,6 @@ public class ObservedPlayer : FikaPlayer
             {
                 damageInfo.Player = player;
                 LastAggressor = player.iPlayer;
-                if (IsYourPlayer)
-                {
-                    if (!FikaPlugin.Instance.FriendlyFire && damageInfo.Player.iPlayer.GroupId == GroupId)
-                    {
-                        return;
-                    }
-                }
             }
 
             _lastWeaponId = packet.WeaponId;
@@ -1108,6 +1112,23 @@ public class ObservedPlayer : FikaPlayer
     public override void ExternalInteraction()
     {
         // Do nothing
+    }
+
+    public void CreateObservedCompass()
+    {
+        const string bundlePath = "assets/content/weapons/additional_hands/item_compass.bundle";
+        if (!_compassLoaded)
+        {
+            var transform = Singleton<PoolManagerClass>.Instance.CreateFromPool<Transform>(new ResourceKey
+            {
+                path = bundlePath
+            });
+            transform.SetParent(PlayerBones.Ribcage.Original, false);
+            transform.localRotation = Quaternion.identity;
+            transform.localPosition = Vector3.zero;
+            method_27(transform.gameObject);
+            _compassLoaded = true;
+        }
     }
 
     public void SetInventory(InventoryDescriptorClass inventoryDescriptor)

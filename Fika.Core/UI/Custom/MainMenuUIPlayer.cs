@@ -14,7 +14,7 @@ public class MainMenuUIPlayer : MonoBehaviour
     {
         PlayerName.text = nickname;
         PlayerLevel.text = $"({level})";
-        string status = presence switch
+        PlayerStatus.text = presence switch
         {
             EFikaPlayerPresence.IN_MENU => LocaleUtils.UI_MMUI_IN_MENU.Localized(),
             EFikaPlayerPresence.IN_RAID => LocaleUtils.UI_MMUI_IN_RAID.Localized(),
@@ -23,7 +23,6 @@ public class MainMenuUIPlayer : MonoBehaviour
             EFikaPlayerPresence.IN_FLEA => LocaleUtils.UI_MMUI_IN_FLEA.Localized(),
             _ => LocaleUtils.UI_MMUI_IN_MENU.Localized(),
         };
-        PlayerStatus.text = status;
         SetImageColor(presence);
     }
 

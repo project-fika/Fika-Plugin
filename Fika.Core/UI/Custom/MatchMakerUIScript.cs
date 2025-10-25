@@ -83,7 +83,6 @@ public class MatchMakerUIScript : MonoBehaviour
 
         if (_fikaMatchMakerUi.LoadingScreen.activeSelf)
         {
-            _fikaMatchMakerUi.LoadingImage.transform.Rotate(0, 0, 3f);
             string text = _fikaMatchMakerUi.LoadingAnimationText.text;
             TextMeshProUGUI tmpText = _fikaMatchMakerUi.LoadingAnimationText;
 
@@ -191,10 +190,7 @@ public class MatchMakerUIScript : MonoBehaviour
             }
 
             _fikaMatchMakerUi.HeadlessSelection.gameObject.SetActive(true);
-            _fikaMatchMakerUi.HeadlessSelection.onValueChanged.AddListener((value) =>
-            {
-                Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuDropdownSelect);
-            });
+            _fikaMatchMakerUi.HeadlessSelection.onValueChanged.AddListener((_) => Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuDropdownSelect));
 
             _fikaMatchMakerUi.HeadlessSelection.ClearOptions();
 
@@ -706,8 +702,6 @@ public class MatchMakerUIScript : MonoBehaviour
                     tooltipArea = joinButton.GetOrAddComponent<HoverTooltipArea>();
                     tooltipArea.enabled = true;
                     tooltipArea.SetMessageText(LocaleUtils.UI_JOIN_RAID.Localized());
-                    break;
-                default:
                     break;
             }
         }

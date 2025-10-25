@@ -11,12 +11,12 @@ namespace Fika.Core.Main.ObservedClasses.HandsControllers;
 
 internal class ObservedGrenadeController : Player.GrenadeHandsController
 {
-    private FikaPlayer _fikaPlayer;
+    private ObservedPlayer _observedPlayer;
 
-    public static ObservedGrenadeController Create(FikaPlayer player, ThrowWeapItemClass item)
+    public static ObservedGrenadeController Create(ObservedPlayer observedPlayer, ThrowWeapItemClass item)
     {
-        ObservedGrenadeController controller = smethod_9<ObservedGrenadeController>(player, item);
-        controller._fikaPlayer = player;
+        ObservedGrenadeController controller = smethod_9<ObservedGrenadeController>(observedPlayer, item);
+        controller._observedPlayer = observedPlayer;
         return controller;
     }
 
@@ -29,7 +29,7 @@ internal class ObservedGrenadeController : Player.GrenadeHandsController
 
     private Player.BaseAnimationOperationClass Grenade1()
     {
-        return new ObservedTripwireState(this, _fikaPlayer);
+        return new ObservedTripwireState(this, _observedPlayer);
     }
 
     public override bool CanChangeCompassState(bool newState)
@@ -50,6 +50,13 @@ internal class ObservedGrenadeController : Player.GrenadeHandsController
     public override void SetCompassState(bool active)
     {
         // Do nothing
+    }
+
+    public override void CompassStateHandler(bool isActive)
+    {
+        /*_observedPlayer.CreateObservedCompass();
+        _objectInHandsAnimator.ShowCompass(isActive);
+        _observedPlayer.SetPropVisibility(isActive);*/
     }
 
     /// <summary>

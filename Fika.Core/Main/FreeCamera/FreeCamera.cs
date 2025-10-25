@@ -6,7 +6,6 @@ using Fika.Core.Bundles;
 using Fika.Core.Main.Components;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
-using Fika.Core.UI.Patches;
 using System;
 using System.Collections.Generic;
 
@@ -75,7 +74,7 @@ public partial class FreeCamera : MonoBehaviour
         _downKey = KeyCode.F;
 
         _players = [];
-        
+
         if (!CoopHandler.TryGetCoopHandler(out var coopHandler))
         {
             FikaGlobals.LogError("Could not find CoopHandler when creating FreeCamera");
@@ -136,9 +135,9 @@ public partial class FreeCamera : MonoBehaviour
 #endif
     }
 
-    public void DetachCamera()
+    public void DetachCamera(bool force = false)
     {
-        if (!FikaPlugin.Instance.AllowSpectateFreeCam && !_isSpectator)
+        if (!FikaPlugin.Instance.AllowSpectateFreeCam && !_isSpectator && !force)
         {
             return;
         }
@@ -234,7 +233,7 @@ public partial class FreeCamera : MonoBehaviour
         if (_players.Count == 0)
         {
             // Clear out all spectate positions
-            DetachCamera();
+            DetachCamera(true);
 
             return;
         }
@@ -590,7 +589,7 @@ public partial class FreeCamera : MonoBehaviour
 
     public void JumpToPlayer()
     {
-        SetCameraPosition(_currentPlayer.CameraPosition);
+        SetCameraPosition(_currentPlayer);
 
         if (_isFollowing)
         {
@@ -602,6 +601,11 @@ public partial class FreeCamera : MonoBehaviour
 
     public void AttachToPlayer()
     {
+        if (!CheckAndAssignPlayer())
+        {
+            return;
+        }
+
         CheckAndResetFov();
 #if DEBUG
         FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: Attaching to helmet cam current player {_currentPlayer.Profile.GetCorrectedNickname()}");
@@ -611,6 +615,21 @@ public partial class FreeCamera : MonoBehaviour
         transform.localEulerAngles = new Vector3(260, 80, 0);
         _isFollowing = true;
         _cameraState = ECameraState.FollowHeadcam;
+    }
+
+    private bool CheckAndAssignPlayer()
+    {
+        if (_currentPlayer == null && _lastSpectatingPlayer != null)
+        {
+            _currentPlayer = _lastSpectatingPlayer;
+        }
+
+        if (_currentPlayer == null)
+        {
+            return false;
+        }
+
+        return true;
     }
 
     public void AttachToMap()
@@ -626,6 +645,11 @@ public partial class FreeCamera : MonoBehaviour
 
     public void Attach3rdPerson()
     {
+        if (!CheckAndAssignPlayer())
+        {
+            return;
+        }
+
         CheckAndResetFov();
 #if DEBUG
         FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: Attaching to 3rd person current player {_currentPlayer.Profile.GetCorrectedNickname()}");
@@ -686,7 +710,7 @@ public partial class FreeCamera : MonoBehaviour
                 {
                     if (!extracted)
                     {
-                        SetCameraPosition(player.CameraPosition);
+                        SetCameraPosition(player);
                     }
 
                     if (player.NightVisionObserver.Component != null && player.NightVisionObserver.Component.Togglable.On)
@@ -722,21 +746,28 @@ public partial class FreeCamera : MonoBehaviour
         transform.parent = null;
     }
 
-    private void SetCameraPosition(Transform target)
+    /// <summary>
+    /// Sets the camera's position relative to the player
+    /// </summary>
+    /// <param name="player">The <see cref="Player"/> object containing transform and bone references</param>
+    private void SetCameraPosition(Player player)
     {
-        // set camera position and rotation based on target
-        transform.rotation = target.rotation;
-        transform.position = target.position - (target.forward * 1f) + (target.up * 0.1f);
+        // Offset camera relative to player
+        transform.position = player.Transform.position - (player.Transform.forward * 1.5f) + (player.Transform.up * 2f);
+        // Look at the head
+        transform.LookAt(player.PlayerBones.Head.Original.position, Vector3.up);
 
-        // extract pitch and yaw from current camera rotation
+        // Extract pitch and yaw from rotation
         var euler = transform.eulerAngles;
-        _pitch = -NormalizeAngle(euler.x);
+        _pitch = NormalizeAngle(euler.x);
         _yaw = NormalizeAngle(euler.y);
-
-        // reapply adjusted rotation
-        transform.rotation = Quaternion.Euler(-_pitch, _yaw, 0f);
     }
 
+    /// <summary>
+    /// Normalizes an angle to the range [-180, 180] degrees
+    /// </summary>
+    /// <param name="angle">The angle in degrees to normalize</param>
+    /// <returns>The normalized angle within [-180, 180]</returns>
     private float NormalizeAngle(float angle)
     {
         angle %= 360f;

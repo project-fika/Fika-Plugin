@@ -1,4 +1,5 @@
 ﻿using Fika.Core.Main.Players;
+using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Pooling;
 using static EFT.Player;
 
@@ -27,10 +28,11 @@ public sealed class CompassChangePacket : IPoolSubPacket
 
     public void Execute(FikaPlayer player)
     {
-        if (player.HandsController is ItemHandsController handsController)
+        // temporarily disabled, broken in base game
+        /*if (player.HandsController is ItemHandsController handsController)
         {
-            handsController.CompassState.Value = Enabled;
-        }
+            handsController.CompassStateHandler(Enabled);
+        }*/
     }
 
     public void Serialize(NetDataWriter writer)

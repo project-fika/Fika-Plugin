@@ -47,6 +47,7 @@
 		<Reference Include="CommonExtensions" HintPath="..\References\CommonExtensions.dll" Private="false" />
 		<Reference Include="DissonanceVoip" HintPath="..\References\DissonanceVoip.dll" Private="false" />
 		<Reference Include="DOTween" HintPath="..\References\DOTween.dll" />
+		<Reference Include="DOTween.Modules" HintPath="..\References\DOTween.Modules.dll" />
 		<Reference Include="ItemComponent.Types" HintPath="..\References\ItemComponent.Types.dll" Private="false" />
 		<Reference Include="ItemTemplate.Types" HintPath="..\References\ItemTemplate.Types.dll" Private="false" />
 		<Reference Include="Newtonsoft.Json" HintPath="..\References\Newtonsoft.Json.dll" Private="false" />

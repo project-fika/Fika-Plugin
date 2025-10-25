@@ -248,15 +248,9 @@ public class FikaPlayer : LocalPlayer
 
     public override void ApplyDamageInfo(DamageInfoStruct damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, float absorbed)
     {
-        if (IsYourPlayer)
+        if (IsYourPlayer && damageInfo.Player != null && !FikaPlugin.Instance.FriendlyFire && damageInfo.Player.iPlayer.GroupId == GroupId)
         {
-            if (damageInfo.Player != null)
-            {
-                if (!FikaPlugin.Instance.FriendlyFire && damageInfo.Player.iPlayer.GroupId == GroupId)
-                {
-                    return;
-                }
-            }
+            return;
         }
 
         if (damageInfo.Weapon != null)
@@ -633,20 +627,6 @@ public class FikaPlayer : LocalPlayer
         CommonPacket.Type = ECommonSubPacketType.InventoryChanged;
         CommonPacket.SubPacket = InventoryChangedPacket.FromValue(opened);
         PacketSender.NetworkManager.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
-    }
-
-    public override void SetCompassState(bool value)
-    {
-        base.SetCompassState(value);
-        if (PacketSender == null)
-        {
-            return;
-        }
-
-        if (HandsController is FikaClientFirearmController controller)
-        {
-            controller.SendCompassState(CompassChangePacket.FromValue(value));
-        }
     }
 
     public override void SendHeadlightsPacket(bool isSilent)
@@ -1249,17 +1229,13 @@ public class FikaPlayer : LocalPlayer
 
         if (packet.ProfileId.HasValue)
         {
-            IPlayerOwner player = Singleton<GameWorld>.Instance.GetAlivePlayerBridgeByProfileID(packet.ProfileId.Value);
-
+            var player = Singleton<GameWorld>.Instance.GetAlivePlayerBridgeByProfileID(packet.ProfileId.Value);
             if (player != null)
             {
                 damageInfo.Player = player;
-                if (IsYourPlayer)
+                if (IsYourPlayer && !FikaPlugin.Instance.FriendlyFire && damageInfo.Player.iPlayer.GroupId == GroupId)
                 {
-                    if (!FikaPlugin.Instance.FriendlyFire && damageInfo.Player.iPlayer.GroupId == GroupId)
-                    {
-                        return;
-                    }
+                    return;
                 }
             }
             _lastWeaponId = packet.WeaponId;

@@ -89,7 +89,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         ISession backEndSession, TimeSpan sessionTime, MetricsEventsClass metricsEvents,
         MetricsCollectorClass metricsCollector, LocalRaidSettings localRaidSettings, RaidSettings raidSettings)
     {
-        _logger = BepInEx.Logging.Logger.CreateLogSource("CoopGame");
+        _logger = Logger.CreateLogSource("CoopGame");
 
         Singleton<IFikaNetworkManager>.Instance.RaidSide = localRaidSettings.playerSide;
 
@@ -1064,7 +1064,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
     }
 
     /// <summary>
-    /// Toggles the <see cref="FikaDebug"/> menu
+    /// Toggles the <see cref="DebugUI"/> menu
     /// </summary>
     public void ToggleDebug(bool enabled)
     {

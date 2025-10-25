@@ -28,9 +28,9 @@ public static class PingFactory
 
     public static void ReceivePing(Vector3 location, EPingType pingType, Color pingColor, string nickname, string localeId)
     {
-        GameObject prefab = InternalBundleLoader.Instance.GetFikaAsset(InternalBundleLoader.EFikaAsset.Ping);
-        GameObject pingGameObject = UnityEngine.Object.Instantiate(prefab);
-        AbstractPing abstractPing = FromPingType(pingType, pingGameObject);
+        var prefab = InternalBundleLoader.Instance.GetFikaAsset(InternalBundleLoader.EFikaAsset.Ping);
+        var pingGameObject = UnityEngine.Object.Instantiate(prefab);
+        var abstractPing = FromPingType(pingType, pingGameObject);
         if (abstractPing != null)
         {
             abstractPing.Initialize(ref location, null, pingColor);
@@ -42,7 +42,7 @@ public static class PingFactory
             }
             else
             {
-                string localizedName = localeId.Localized();
+                var localizedName = localeId.Localized();
                 NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.RECEIVE_PING_OBJECT.Localized(),
                     [FikaUIGlobals.ColorizeText(FikaUIGlobals.EColor.GREEN, nickname), FikaUIGlobals.ColorizeText(FikaUIGlobals.EColor.BLUE, localizedName)]),
                     ENotificationDurationType.Default, ENotificationIconType.Friend);
@@ -126,83 +126,80 @@ public static class PingFactory
 
         protected void Update()
         {
-            if (_mainPlayer.HealthController.IsAlive && _mainPlayer.ProceduralWeaponAnimation.IsAiming)
+            if (_mainPlayer.HealthController.IsAlive && _mainPlayer.ProceduralWeaponAnimation.IsAiming
+                && _mainPlayer.ProceduralWeaponAnimation.CurrentScope.IsOptic && !FikaPlugin.ShowPingDuringOptics.Value)
             {
-                if (_mainPlayer.ProceduralWeaponAnimation.CurrentScope.IsOptic && !FikaPlugin.ShowPingDuringOptics.Value)
-                {
-                    _image.color = Color.clear;
-                    if (_displayRange)
-                    {
-                        _rangeText.color = Color.clear;
-                    }
-                    return;
-                }
-            }
-
-            if (CameraClass.Instance.SSAA != null && CameraClass.Instance.SSAA.isActiveAndEnabled)
-            {
-                int outputWidth = CameraClass.Instance.SSAA.GetOutputWidth();
-                float inputWidth = CameraClass.Instance.SSAA.GetInputWidth();
-                _screenScale = outputWidth / inputWidth;
-            }
-
-            /*
-			* Positioning based on https://github.com/Omti90/Off-Screen-Target-Indicator-Tutorial/blob/main/Scripts/TargetIndicator.cs
-			*/
-
-            if (WorldToScreen.GetScreenPoint(_hitPoint, _mainPlayer, out Vector3 screenPoint, FikaPlugin.PingUseOpticZoom.Value, true))
-            {
-                float distanceToCenter = Vector3.Distance(screenPoint, new Vector3(Screen.width, Screen.height, 0) / 2);
-
-                if (distanceToCenter < 200)
-                {
-                    float alpha = Mathf.Max(FikaPlugin.PingMinimumOpacity.Value, distanceToCenter / 200);
-                    Color newColor = new(_pingColor.r, _pingColor.g, _pingColor.b, alpha);
-                    _image.color = newColor;
-                    if (_displayRange)
-                    {
-                        _rangeText.color = Color.white.SetAlpha(alpha);
-                    }
-                }
-                else
-                {
-                    _image.color = _pingColor;
-                    if (_displayRange)
-                    {
-                        _rangeText.color = Color.white;
-                    }
-                }
-
-                if (screenPoint.z >= 0f
-                    & screenPoint.x <= _canvasRect.rect.width * _canvasRect.localScale.x
-                    & screenPoint.y <= _canvasRect.rect.height * _canvasRect.localScale.x
-                    & screenPoint.x >= 0f
-                    & screenPoint.y >= 0f)
-                {
-                    screenPoint.z = 0f;
-                    WorldToScreen.TargetOutOfSight(false, screenPoint, _image.rectTransform, _canvasRect);
-                }
-
-                else if (screenPoint.z >= 0f)
-                {
-                    screenPoint = WorldToScreen.OutOfRangeindicatorPositionB(screenPoint, _canvasRect, 20f);
-                    WorldToScreen.TargetOutOfSight(true, screenPoint, _image.rectTransform, _canvasRect);
-                }
-                else
-                {
-                    screenPoint *= -1f;
-
-                    screenPoint = WorldToScreen.OutOfRangeindicatorPositionB(screenPoint, _canvasRect, 20f);
-                    WorldToScreen.TargetOutOfSight(true, screenPoint, _image.rectTransform, _canvasRect);
-
-                }
-
-                _image.transform.position = _screenScale < 1 ? screenPoint : screenPoint * _screenScale;
+                _image.color = Color.clear;
                 if (_displayRange)
                 {
-                    int distance = (int)CameraClass.Instance.Distance(_hitPoint);
-                    _rangeText.text = $"[{distance}m]";
+                    _rangeText.color = Color.clear;
                 }
+
+                return;
+            }
+
+            const float edgePadding = 20f;
+            var cam = CameraClass.Instance.Camera;
+            var targetPos = _hitPoint;
+
+            // vector from camera to target
+            var toTarget = targetPos - cam.transform.position;
+            var behindCamera = Vector3.Dot(cam.transform.forward, toTarget.normalized) <= 0f;
+
+            // project normally if in front
+            Vector2 canvasPos;
+            if (!behindCamera)
+            {
+                WorldToScreen.ProjectToCanvas(targetPos, _mainPlayer, _canvasRect, out canvasPos,
+                    FikaPlugin.PingUseOpticZoom.Value, true);
+            }
+            else
+            {
+                // compute direction in camera plane if behind
+                var local = cam.transform.InverseTransformPoint(targetPos);
+                var dir = new Vector2(local.x, local.y); // X=horizontal, Y=vertical
+                if (dir.sqrMagnitude < 0.001f)
+                {
+                    dir = Vector2.up; // fallback to avoid zero vector
+                }
+
+                dir.Normalize();
+
+                // clamp to canvas edge
+                var halfWidth = (_canvasRect.sizeDelta.x / 2f) - edgePadding;
+                var halfHeight = (_canvasRect.sizeDelta.y / 2f) - edgePadding;
+
+                // scale so the ping sits on the edge
+                var scaleX = halfWidth / Mathf.Abs(dir.x);
+                var scaleY = halfHeight / Mathf.Abs(dir.y);
+                var scale = Mathf.Min(scaleX, scaleY);
+
+                canvasPos = dir * scale;
+            }
+
+            // distance-based alpha
+            var distanceToCenter = canvasPos.magnitude;
+            var alpha = distanceToCenter < 200f
+                ? Mathf.Max(FikaPlugin.PingMinimumOpacity.Value, distanceToCenter / 200f)
+                : 1f;
+
+            _image.color = new Color(_pingColor.r, _pingColor.g, _pingColor.b, alpha);
+            if (_displayRange)
+            {
+                _rangeText.color = Color.white.SetAlpha(alpha);
+            }
+
+            // clamp to canvas edges (safety)
+            var halfW = (_canvasRect.sizeDelta.x / 2f) - edgePadding;
+            var halfH = (_canvasRect.sizeDelta.y / 2f) - edgePadding;
+            canvasPos.x = Mathf.Clamp(canvasPos.x, -halfW, halfW);
+            canvasPos.y = Mathf.Clamp(canvasPos.y, -halfH, halfH);
+
+            _image.rectTransform.anchoredPosition = canvasPos;
+
+            if (_displayRange)
+            {
+                _rangeText.text = $"[{CameraClass.Instance.Distance(_hitPoint):F1}m]";
             }
         }
 
@@ -212,8 +209,8 @@ public static class PingFactory
             transform.position = point;
             _pingColor = pingColor;
 
-            float distance = Mathf.Clamp(Vector3.Distance(CameraClass.Instance.Camera.transform.position, transform.position) / 100, 0.4f, 0.6f);
-            float pingSize = FikaPlugin.PingSize.Value;
+            var distance = Mathf.Clamp(Vector3.Distance(CameraClass.Instance.Camera.transform.position, transform.position) / 100, 0.4f, 0.6f);
+            var pingSize = FikaPlugin.PingSize.Value;
             Vector3 scaledSize = new(pingSize, pingSize, pingSize);
             if (FikaPlugin.PingScaleWithDistance.Value)
             {

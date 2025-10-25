@@ -1,8 +1,6 @@
 ﻿using Comfort.Common;
-using Fika.Core.Main.Players;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Player;
-using System;
 using Unity.Collections;
 using Unity.Jobs;
 
@@ -19,22 +17,25 @@ internal readonly struct InterpolatorJob(float unscaledDeltaTime, double network
 
     public void Execute()
     {
-        IFikaNetworkManager netManager = Singleton<IFikaNetworkManager>.Instance;
-        for (int i = 0; i < _amount; i++)
+        var netManager = Singleton<IFikaNetworkManager>.Instance;
+        if (netManager != null)
         {
-            ArraySegment<byte> buffer = PlayerSnapshots.Snapshots[i];
-            PlayerStatePacket packet = PlayerStatePacket.FromBuffer(in buffer);
-            if (netManager.CoopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer player))
+            for (var i = 0; i < _amount; i++)
             {
-                player.Snapshotter.Insert(ref packet, _networkTime);
+                var buffer = PlayerSnapshots.Snapshots[i];
+                var packet = PlayerStatePacket.FromBuffer(in buffer);
+                if (netManager.CoopHandler.Players.TryGetValue(packet.NetId, out var player))
+                {
+                    player.Snapshotter.Insert(ref packet, _networkTime);
+                }
             }
-        }
 
-        int amount = netManager.ObservedPlayers.Count;
-        for (int i = 0; i < amount; i++)
-        {
-            netManager.ObservedPlayers[i].Snapshotter
-                .ManualUpdate(_unscaledDeltaTime);
+            var amount = netManager.ObservedPlayers.Count;
+            for (var i = 0; i < amount; i++)
+            {
+                netManager.ObservedPlayers[i].Snapshotter
+                    .ManualUpdate(_unscaledDeltaTime);
+            }
         }
     }
 }

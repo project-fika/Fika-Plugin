@@ -48,7 +48,7 @@ namespace Fika.Core;
 [BepInDependency("com.SPT.debugging", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after spt-debugging, that way we can disable its patches
 public class FikaPlugin : BaseUnityPlugin
 {
-    public const string FikaVersion = "2.0.2";
+    public const string FikaVersion = "2.0.3";
     public static FikaPlugin Instance { get; private set; }
     public static string EFTVersionMajor { get; internal set; }
     public ManualLogSource FikaLogger
@@ -140,7 +140,6 @@ public class FikaPlugin : BaseUnityPlugin
     public static ConfigEntry<float> OpacityInADS { get; set; }
     public static ConfigEntry<float> MaxDistanceToShow { get; set; }
     public static ConfigEntry<float> MinimumOpacity { get; set; }
-    public static ConfigEntry<float> MinimumNamePlateScale { get; set; }
     public static ConfigEntry<bool> ShowEffects { get; set; }
     public static ConfigEntry<bool> UseOcclusion { get; set; }
     public static ConfigEntry<Color> FullHealthColor { get; set; }
@@ -675,9 +674,9 @@ public class FikaPlugin : BaseUnityPlugin
             }),
             "Decrease Opacity In Peripheral", ref failed, headers);
 
-        NamePlateScale = SetupSetting(coopDefaultNamePlatesHeader, "Name Plate Scale", 0.22f,
+        NamePlateScale = SetupSetting(coopDefaultNamePlatesHeader, "Name Plate Scale", 1f,
             new ConfigDescription(LocaleUtils.BEPINEX_NAME_PLATE_SCALE_D.Localized(),
-            new AcceptableValueRange<float>(0.05f, 1f), new ConfigurationManagerAttributes()
+            new AcceptableValueRange<float>(0.5f, 1.5f), new ConfigurationManagerAttributes()
             {
                 Category = coopNameplatesHeader,
                 DispName = LocaleUtils.BEPINEX_NAME_PLATE_SCALE_T.Localized(),
@@ -714,16 +713,6 @@ public class FikaPlugin : BaseUnityPlugin
                 Order = 5
             }),
             "Minimum Opacity", ref failed, headers);
-
-        MinimumNamePlateScale = SetupSetting(coopDefaultNamePlatesHeader, "Minimum Name Plate Scale", 0.01f,
-            new ConfigDescription(LocaleUtils.BEPINEX_MIN_PLATE_SCALE_D.Localized(),
-            new AcceptableValueRange<float>(0.0f, 1f), new ConfigurationManagerAttributes()
-            {
-                Category = coopNameplatesHeader,
-                DispName = LocaleUtils.BEPINEX_MIN_PLATE_SCALE_T.Localized(),
-                Order = 4
-            }),
-            "Minimum Name Plate Scale", ref failed, headers);
 
         UseOcclusion = SetupSetting(coopDefaultNamePlatesHeader, "Use Occlusion", false,
             new ConfigDescription(LocaleUtils.BEPINEX_USE_OCCLUSION_D.Localized(), tags: new ConfigurationManagerAttributes()

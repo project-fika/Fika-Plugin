@@ -2,6 +2,7 @@
 
 using EFT.InventoryLogic;
 using Fika.Core.Main.Players;
+using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Packets.FirearmController;
 using Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
@@ -27,6 +28,22 @@ public class FikaClientKnifeController : EFT.Player.KnifeController
     {
         _packet = null;
         base.Destroy();
+    }
+
+    public override void CompassStateHandler(bool isActive)
+    {
+        //SendCompassState(CompassChangePacket.FromValue(isActive));
+        base.CompassStateHandler(isActive);
+    }
+
+    public void SendCompassState(CompassChangePacket packet)
+    {
+#if DEBUG
+        FikaGlobals.LogInfo("Sending CompassPacket");
+#endif
+        _packet.Type = EFirearmSubPacketType.CompassChange;
+        _packet.SubPacket = packet;
+        _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
     }
 
     public override void ExamineWeapon()

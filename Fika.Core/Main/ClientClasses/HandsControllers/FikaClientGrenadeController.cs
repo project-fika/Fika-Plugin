@@ -35,6 +35,22 @@ public class FikaClientGrenadeController : Player.GrenadeHandsController
         base.Destroy();
     }
 
+    public override void CompassStateHandler(bool isActive)
+    {
+        //SendCompassState(CompassChangePacket.FromValue(isActive));
+        base.CompassStateHandler(isActive);
+    }
+
+    public void SendCompassState(CompassChangePacket packet)
+    {
+#if DEBUG
+        FikaGlobals.LogInfo("Sending CompassPacket");
+#endif
+        _packet.Type = EFirearmSubPacketType.CompassChange;
+        _packet.SubPacket = packet;
+        _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
+    }
+
     public override bool CanThrow()
     {
         if (_isClient)

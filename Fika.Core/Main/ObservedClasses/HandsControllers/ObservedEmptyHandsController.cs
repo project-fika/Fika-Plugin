@@ -7,9 +7,13 @@ namespace Fika.Core.Main.ObservedClasses.HandsControllers;
 
 internal class ObservedEmptyHandsController : Player.EmptyHandsController
 {
-    public static ObservedEmptyHandsController Create(FikaPlayer player)
+    private ObservedPlayer _observedPlayer;
+
+    public static ObservedEmptyHandsController Create(ObservedPlayer observedPlayer)
     {
-        return smethod_6<ObservedEmptyHandsController>(player);
+        var controller = smethod_6<ObservedEmptyHandsController>(observedPlayer);
+        controller._observedPlayer = observedPlayer;
+        return controller;
     }
 
     public override bool CanChangeCompassState(bool newState)
@@ -25,5 +29,12 @@ internal class ObservedEmptyHandsController : Player.EmptyHandsController
     public override void SetCompassState(bool active)
     {
         // Do nothing
+    }
+
+    public override void CompassStateHandler(bool isActive)
+    {
+        /*_observedPlayer.CreateObservedCompass();
+        _objectInHandsAnimator.ShowCompass(isActive);
+        _observedPlayer.SetPropVisibility(isActive);*/
     }
 }

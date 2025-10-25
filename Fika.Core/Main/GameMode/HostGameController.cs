@@ -73,7 +73,7 @@ public class HostGameController : BaseGameController, IBotGame
     protected readonly WavesSpawnScenario _wavesSpawnScenario;
     protected readonly BossSpawnScenario _bossSpawnScenario;
     protected readonly Dictionary<int, int> _botQueue = [];
-    protected readonly GameDateTime _gameDateTime;
+    protected GameDateTime _gameDateTime;
 
     /// <summary>
     /// How long in seconds until a bot is force spawned if not every client could load it
@@ -97,6 +97,10 @@ public class HostGameController : BaseGameController, IBotGame
         get
         {
             return _gameDateTime;
+        }
+        set
+        {
+            _gameDateTime = value;
         }
     }
 
@@ -869,8 +873,7 @@ public class HostGameController : BaseGameController, IBotGame
         GClass1947 lootDescriptor = EFTItemSerializerClass.SerializeLootData(location.Loot, FikaGlobals.SearchControllerSerializer);
         EFTWriterClass eftWriter = WriterPoolManager.GetWriter();
         eftWriter.WriteEFTLootDataDescriptor(lootDescriptor);
-        byte[] lootData = eftWriter.ToArray();
-        LootData = lootData;
+        LootData = eftWriter.ToArray();
         WriterPoolManager.ReturnWriter(eftWriter);
         return Task.CompletedTask;
     }
