@@ -32,7 +32,7 @@ public sealed class ClientExtract : IPoolSubPacket
         CoopHandler coopHandler = Singleton<IFikaNetworkManager>.Instance.CoopHandler;
         if (coopHandler == null)
         {
-            FikaPlugin.Instance.FikaLogger.LogError("ClientExtract: CoopHandler was null!");
+            FikaGlobals.LogWarning("ClientExtract: CoopHandler was null! This is probably harmless.");
             return;
         }
 

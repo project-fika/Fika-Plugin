@@ -15,7 +15,6 @@ using Fika.Core.Main.Components;
 using Fika.Core.Main.FreeCamera;
 using Fika.Core.Main.HostClasses;
 using Fika.Core.Main.ObservedClasses;
-using Fika.Core.Main.Patches.LocalGame;
 using Fika.Core.Main.Patches.Overrides;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
@@ -222,11 +221,33 @@ public class HostGameController : BaseGameController, IBotGame
             IsZombie = profile.Info.Settings.UseSimpleAnimator
         }, true, true, position, netId);
         packet.PlayerInfoPacket.HealthByteArray = profile.Health.SerializeHealthInfo();
-        Singleton<IFikaNetworkManager>.Instance.SendGenericPacket(EGenericSubPacketType.SendCharacter, packet, true);
+        server.SendGenericPacket(EGenericSubPacketType.SendCharacter, packet, true);
 
         if (server.NetServer.ConnectedPeersCount > 0)
         {
             await WaitForPlayersToLoadBotProfile(netId);
+        }
+
+        if (profile.Info.Side is not EPlayerSide.Savage)
+        {
+            var backpack = profile.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack).ContainedItem;
+            if (backpack != null)
+            {
+                foreach (var backpackItem in backpack.GetAllItems())
+                {
+                    if (backpackItem != backpack)
+                    {
+                        backpackItem.SpawnedInSession = true;
+                    }
+                }
+            }
+
+            // We still want DogTags to be 'FiR'
+            var item = profile.Inventory.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem;
+            if (item != null)
+            {
+                item.SpawnedInSession = true;
+            }
         }
 
         fikaBot = await FikaBot.CreateBot(_gameWorld, netId, position, Quaternion.identity, "Player",
@@ -237,29 +258,6 @@ public class HostGameController : BaseGameController, IBotGame
         fikaBot.Location = Location.Id;
         Bots.Add(fikaBot.ProfileId, fikaBot);
 
-        if (profile.Info.Side is not EPlayerSide.Savage)
-        {
-            Slot backpackSlot = profile.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack);
-            Item backpack = backpackSlot.ContainedItem;
-            if (backpack != null)
-            {
-                Item[] items = backpack.GetAllItems()?.ToArray();
-                if (items != null)
-                {
-                    for (int i = 0; i < items.Count(); i++)
-                    {
-                        Item item = items[i];
-                        if (item == backpack)
-                        {
-                            continue;
-                        }
-
-                        item.SpawnedInSession = true;
-                    }
-                }
-            }
-        }
-
         if (FikaPlugin.DisableBotMetabolism.Value)
         {
             fikaBot.HealthController.DisableMetabolism();
@@ -267,13 +265,19 @@ public class HostGameController : BaseGameController, IBotGame
         _coopHandler.Players.Add(fikaBot.NetId, fikaBot);
         _botStateManager.AddBot(fikaBot);
 
+        if (profile.Info.Settings.Role != WildSpawnType.shooterBTR)
+        {
+            var spawnPacket = SpawnAI.FromValue(netId, position);
+            server.SendGenericPacket(EGenericSubPacketType.SpawnAI, spawnPacket);
+        }
+
         return fikaBot;
     }
 
     /// <summary>
     /// Increments the amount of players that have loaded a bot, used for <see cref="WaitForPlayersToLoadBotProfile(int)"/>
     /// </summary>
-    /// <param name="netId"></param>
+    /// <param name="netId">The id to increment</param>
     public void IncreaseLoadedPlayers(int netId)
     {
         if (_botQueue.ContainsKey(netId))

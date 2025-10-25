@@ -93,7 +93,12 @@ public enum EGenericSubPacketType : byte
     /// <summary>
     /// Syncable item, e.g. window or lamp
     /// </summary>
-    SyncableItem
+    SyncableItem,
+
+    /// <summary>
+    /// AI loaded by all clients
+    /// </summary>
+    SpawnAI
 
     /// <summary>
     /// Train synchronization event (commented out).
