@@ -5,6 +5,7 @@ using Fika.Core.Main.Components;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
+using Mono.Cecil.Cil;
 using System.Collections.Generic;
 using TMPro;
 
@@ -56,7 +57,7 @@ public class DebugUI : MonoBehaviour
     {
         _isServer = FikaBackendUtils.IsServer;
 
-        if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
+        if (CoopHandler.TryGetCoopHandler(out var coopHandler))
         {
             _coopHandler = coopHandler;
 
@@ -65,7 +66,7 @@ public class DebugUI : MonoBehaviour
         }
         else
         {
-            FikaPlugin.Instance.FikaLogger.LogError("FikaDebug: CoopHandler was null!");
+            FikaGlobals.LogError("FikaDebug: CoopHandler was null!");
             Destroy(gameObject);
         }
 
@@ -117,7 +118,8 @@ public class DebugUI : MonoBehaviour
 
     private void CheckAndAdd()
     {
-        foreach (FikaPlayer player in _coopHandler.HumanPlayers)
+        _alivePlayers.Clear();
+        foreach (var player in _coopHandler.HumanPlayers)
         {
             if (!_alivePlayers.Contains(player) && player.HealthController.IsAlive)
             {
@@ -125,7 +127,7 @@ public class DebugUI : MonoBehaviour
             }
         }
 
-        foreach (FikaPlayer player in _coopHandler.Players.Values)
+        foreach (var player in _coopHandler.Players.Values)
         {
             if (player.IsObservedAI && !_aliveBots.Contains(player) && player.HealthController.IsAlive)
             {
@@ -141,13 +143,13 @@ public class DebugUI : MonoBehaviour
 
     protected void OnDisable()
     {
-        foreach (FikaPlayer player in _alivePlayers)
+        foreach (var player in _alivePlayers)
         {
             player.OnPlayerDead -= PlayerDied;
         }
         _alivePlayers.Clear();
 
-        foreach (FikaPlayer bot in _aliveBots)
+        foreach (var bot in _aliveBots)
         {
             bot.OnPlayerDead -= BotDied;
         }
