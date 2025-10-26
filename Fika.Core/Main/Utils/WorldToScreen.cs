@@ -24,6 +24,9 @@ public static class WorldToScreen
 
         var projCam = camClass.Camera;
 
+        Vector2 canvasSize = canvasRect.sizeDelta;
+        float scaleFactor = 1f;
+
         // Use optic camera if zoomed
         if (useOpticCamera && IsZoomedOpticAiming(mainPlayer.ProceduralWeaponAnimation))
         {
@@ -31,6 +34,8 @@ public static class WorldToScreen
             if (opticCam != null)
             {
                 projCam = opticCam;
+                canvasSize = opticCam.pixelRect.max;
+                scaleFactor = canvasRect.sizeDelta.x / Screen.width;
             }
         }
 
@@ -43,8 +48,8 @@ public static class WorldToScreen
         }
 
         // Convert normalized viewport (0-1) to canvas local position
-        canvasPosition = new Vector2((viewportPoint.x - 0.5f) * canvasRect.sizeDelta.x,
-            (viewportPoint.y - 0.5f) * canvasRect.sizeDelta.y);
+        canvasPosition = new Vector2((viewportPoint.x - 0.5f) * canvasSize.x * scaleFactor,
+            (viewportPoint.y - 0.5f) * canvasSize.y * scaleFactor);
 
         return true;
     }
