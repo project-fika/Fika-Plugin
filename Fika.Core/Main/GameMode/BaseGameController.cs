@@ -320,7 +320,7 @@ public abstract class BaseGameController
 
         GClass2313.ResetAudioBuffer();
 
-        _gameWorld.TriggersModule = _abstractGame.gameObject.AddComponent<LocalClientTriggersModule>();
+        _gameWorld.TriggersModule = _abstractGame.gameObject.AddComponent<LocalFikaTriggersModule>();
         _gameWorld.FillLampControllers();
         if (Location.Id == "laboratory")
         {
