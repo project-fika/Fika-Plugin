@@ -14,11 +14,8 @@ namespace Fika.Core.Main.FreeCamera;
 /// <summary>
 /// <para>A simple free camera to be added to a Unity game object.</para>
 /// <para>
-/// Full credit to Ashley Davis on GitHub for the inital code: <br/>
-/// <see href="https://gist.github.com/ashleydavis/f025c03a9221bc840a2b"/></para>
-/// <para>
 /// This is HEAVILY based on Terkoiz's work found here. Thanks for your work Terkoiz! <br/>
-/// <see href="https://dev.sp-tarkov.com/Terkoiz/Freecam/raw/branch/master/project/Terkoiz.Freecam/FreecamController.cs"/>
+/// <see href="https://github.com/acidphantasm/SPT-Freecam"/>
 /// </para>
 /// </summary>
 public partial class FreeCamera : MonoBehaviour
