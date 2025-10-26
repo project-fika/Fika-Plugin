@@ -345,13 +345,10 @@ public partial class FreeCamera : MonoBehaviour
         }
 
         // Disable culling
-        if (Input.GetKeyDown(KeyCode.M))
+        if (Input.GetKeyDown(KeyCode.M) && _freeCameraController != null)
         {
-            if (_freeCameraController != null)
-            {
-                _freeCameraController.DisableAllCullingObjects();
-                return;
-            }
+            _freeCameraController.DisableAllCullingObjects();
+            return;
         }
 
         if (Input.GetKeyDown(KeyCode.L))
