@@ -12,9 +12,9 @@ using System.Collections.Generic;
 namespace Fika.Core.Main.FreeCamera;
 
 /// <summary>
-/// <para>A simple free camera to be added to a Unity game object.</para>
+/// <para>FreeCamera modified for Fika</para>
 /// <para>
-/// This is HEAVILY based on Terkoiz's work found here. Thanks for your work Terkoiz! <br/>
+/// This is based on the original freecam by Terkoiz <br/>
 /// <see href="https://github.com/acidphantasm/SPT-Freecam"/>
 /// </para>
 /// </summary>
