@@ -30,7 +30,6 @@ using Fika.Core.UI.Models;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using static LocationSettingsClass;
 
@@ -263,10 +262,10 @@ public class HostGameController : BaseGameController, IBotGame
             fikaBot.HealthController.DisableMetabolism();
         }
         _coopHandler.Players.Add(fikaBot.NetId, fikaBot);
-        _botStateManager.AddBot(fikaBot);
 
         if (profile.Info.Settings.Role != WildSpawnType.shooterBTR)
         {
+            _botStateManager.AddBot(fikaBot);
             var spawnPacket = SpawnAI.FromValue(netId, position);
             server.SendGenericPacket(EGenericSubPacketType.SpawnAI, spawnPacket);
         }
