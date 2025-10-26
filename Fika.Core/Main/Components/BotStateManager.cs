@@ -15,15 +15,14 @@ public class BotStateManager : MonoBehaviour
     private float _updateCount;
     private float _updatesPerTick;
 
-    public bool AddBot(FikaBot bot)
+    public void AddBot(FikaBot bot)
     {
         if (_bots.Contains(bot))
         {
-            return false;
+            return;
         }
 
         _bots.Add(bot);
-        return true;
     }
 
     public bool RemoveBot(FikaBot bot)
@@ -49,9 +48,9 @@ public class BotStateManager : MonoBehaviour
         _updateCount += Time.unscaledDeltaTime;
         if (_updateCount >= _updatesPerTick)
         {
-            for (int i = _bots.Count - 1; i >= 0; i--)
+            for (var i = _bots.Count - 1; i >= 0; i--)
             {
-                FikaBot bot = _bots[i];
+                var bot = _bots[i];
                 if (!bot.HealthController.IsAlive)
                 {
                     _bots.Remove(bot);
