@@ -43,7 +43,7 @@ public class ItemContext_Patch : ModulePatch
         ItemContextAbstractClass itemContext = Traverse.Create(contextInteractions).Field<ItemContextAbstractClass>("ItemContextAbstractClass").Value;
         if (itemContext.ViewType == EItemViewType.Inventory)
         {
-            if (Singleton<GameWorld>.Instantiated && Singleton<GameWorld>.Instance is not HideoutGameWorld)
+            if (GClass2340.InRaid)
             {
                 return;
             }
