@@ -39,8 +39,8 @@ public class ItemContext_Patch : ModulePatch
             return;
         }
 
-        // Check for GClass increments
-        var itemContext = Traverse.Create(contextInteractions).Field<ItemContextAbstractClass>("ItemContextAbstractClass").Value;
+        // check for GClass increments
+        var itemContext = gclass.ItemContextAbstractClass;
         if (itemContext.ViewType == EItemViewType.Inventory)
         {
             if (GClass2340.InRaid)
@@ -75,7 +75,7 @@ public class ItemContext_Patch : ModulePatch
             }
 
             // Check for GClass increments
-            var dynamicInteractions = contextInteractions.Dictionary_0
+            var dynamicInteractions = gclass.Dictionary_0
                 ?? [];
             dynamicInteractions["SEND"] = new("SEND", "SEND", () =>
             {
