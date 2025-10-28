@@ -31,8 +31,8 @@ public class MainMenuUIPlayer : MonoBehaviour
         StatusImage.color = presence switch
         {
             EFikaPlayerPresence.IN_MENU => Color.green,
-            EFikaPlayerPresence.IN_RAID => Color.red,
-            EFikaPlayerPresence.IN_STASH or EFikaPlayerPresence.IN_HIDEOUT or EFikaPlayerPresence.IN_FLEA => Color.yellow,
+            EFikaPlayerPresence.IN_RAID => Color.red + (Color.black * 0.3f),
+            EFikaPlayerPresence.IN_STASH or EFikaPlayerPresence.IN_HIDEOUT or EFikaPlayerPresence.IN_FLEA => Color.blue + (Color.white * 0.3f),
             _ => Color.green,
         };
     }
