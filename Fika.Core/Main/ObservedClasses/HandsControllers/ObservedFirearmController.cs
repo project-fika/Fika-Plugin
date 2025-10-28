@@ -4,6 +4,7 @@ using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Main.Players;
+using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Packets.FirearmController.SubPackets;
 using HarmonyLib;
 using System;
@@ -78,7 +79,7 @@ public class ObservedFirearmController : FirearmController
     public override Dictionary<Type, OperationFactoryDelegate> GetOperationFactoryDelegates()
     {
         // Check for GClass increments..
-        Dictionary<Type, OperationFactoryDelegate> operationFactoryDelegates = base.GetOperationFactoryDelegates();
+        var operationFactoryDelegates = base.GetOperationFactoryDelegates();
         operationFactoryDelegates[typeof(GClass2037)] = new OperationFactoryDelegate(Idle1);
         // Look for operations that implement OnShellEjectEvent and ThrowPatronAsLoot
         operationFactoryDelegates[typeof(MutliBarrelReloadOperationClass)] = new OperationFactoryDelegate(ThrowPatron1);
@@ -120,7 +121,7 @@ public class ObservedFirearmController : FirearmController
         _weaponManager = _weaponPrefab.ObjectInHands as WeaponManagerClass;
         if (UnderbarrelWeapon != null)
         {
-            Traverse weaponTraverse = Traverse.Create(this);
+            var weaponTraverse = Traverse.Create(this);
             _underBarrelManager = weaponTraverse.Field<UnderbarrelManagerClass>("underbarrelManagerClass").Value;
         }
         IsRevolver = Weapon is RevolverItemClass;
@@ -129,7 +130,7 @@ public class ObservedFirearmController : FirearmController
 
     public static ObservedFirearmController Create(ObservedPlayer player, Weapon weapon)
     {
-        ObservedFirearmController controller = smethod_6<ObservedFirearmController>(player, weapon);
+        var controller = smethod_6<ObservedFirearmController>(player, weapon);
         controller._observedPlayer = player;
         return controller;
     }
@@ -265,7 +266,7 @@ public class ObservedFirearmController : FirearmController
             return;
         }
 
-        Vector3 vector = _player.ProceduralWeaponAnimation.HandsContainer.HandsPosition.Get();
+        var vector = _player.ProceduralWeaponAnimation.HandsContainer.HandsPosition.Get();
         _player.ProceduralWeaponAnimation.OverlappingAllowsBlindfire = false;
         _player.ProceduralWeaponAnimation.TurnAway.OriginZShift = vector.y;
         _player.ProceduralWeaponAnimation.TurnAway.OverlapDepth = _observedPlayer.ObservedOverlap;
@@ -309,8 +310,8 @@ public class ObservedFirearmController : FirearmController
         _weaponManager.StartSpawnShell(_observedPlayer.Velocity * 0.66f, 0);
         if (_boltActionReload)
         {
-            MagazineItemClass magazine = Item.GetCurrentMagazine();
-            Weapon weapon = Weapon;
+            var magazine = Item.GetCurrentMagazine();
+            var weapon = Weapon;
             if (magazine != null && magazine is not CylinderMagazineItemClass && weapon.HasChambers)
             {
                 magazine.Cartridges.PopTo(_observedPlayer.InventoryController, Item.Chambers[0].CreateItemAddress());
@@ -333,8 +334,8 @@ public class ObservedFirearmController : FirearmController
     private IEnumerator BreakFiringLoop()
     {
         WeaponSoundPlayer.Release();
-        Traverse<bool> isFiring = Traverse.Create(WeaponSoundPlayer).Field<bool>("_isFiring");
-        int attempts = 0;
+        var isFiring = Traverse.Create(WeaponSoundPlayer).Field<bool>("_isFiring");
+        var attempts = 0;
         WaitForEndOfFrame waitForEndOfFrame = new();
         while (isFiring.Value && attempts < 10)
         {
@@ -392,7 +393,7 @@ public class ObservedFirearmController : FirearmController
 
         // Handle the rocket shot
         rocketClass.IsUsed = true;
-        Transform smokePort = TransformHelperClass.FindTransformRecursiveContains(WeaponRoot.transform, "smokeport", false);
+        var smokePort = TransformHelperClass.FindTransformRecursiveContains(WeaponRoot.transform, "smokeport", false);
         InitiateRocket(rocketClass, shotPosition, shotForward, smokePort);
         Weapon.FirstLoadedChamberSlot.RemoveItem();
         WeaponManager.MoveAmmoFromChamberToShellPort(true, 0);
@@ -429,7 +430,7 @@ public class ObservedFirearmController : FirearmController
                     break;
             }
 
-            AmmoItemClass ammo = (AmmoItemClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), packet.AmmoTemplate, null);
+            var ammo = (AmmoItemClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), packet.AmmoTemplate, null);
             Weapon.MalfState.MalfunctionedAmmo = ammo;
             Weapon.MalfState.AmmoToFire = ammo;
 
@@ -460,7 +461,7 @@ public class ObservedFirearmController : FirearmController
             {
                 if (Weapon.HasChambers)
                 {
-                    Slot firstChamber = Weapon.Chambers[0];
+                    var firstChamber = Weapon.Chambers[0];
                     if (firstChamber.ContainedItem is AmmoItemClass)
                     {
                         firstChamber.RemoveItemWithoutRestrictions();
@@ -475,7 +476,7 @@ public class ObservedFirearmController : FirearmController
 
             if (Weapon.HasChambers)
             {
-                Slot firstChamber = Weapon.Chambers[0];
+                var firstChamber = Weapon.Chambers[0];
                 if (firstChamber.ContainedItem is AmmoItemClass)
                 {
                     firstChamber.RemoveItemWithoutRestrictions();
@@ -483,10 +484,10 @@ public class ObservedFirearmController : FirearmController
 
                 if (Weapon.MalfState.State == Weapon.EMalfunctionState.Feed)
                 {
-                    MagazineItemClass currentMagazine = Weapon.GetCurrentMagazine();
+                    var currentMagazine = Weapon.GetCurrentMagazine();
                     if (currentMagazine != null)
                     {
-                        AmmoItemClass fedAmmo = (AmmoItemClass)currentMagazine.Cartridges.PopToNowhere(_observedPlayer.InventoryController).Value.ResultItem;
+                        var fedAmmo = (AmmoItemClass)currentMagazine.Cartridges.PopToNowhere(_observedPlayer.InventoryController).Value.ResultItem;
                         if (fedAmmo != null)
                         {
                             Weapon.MalfState.MalfunctionedAmmo = fedAmmo;
@@ -519,8 +520,8 @@ public class ObservedFirearmController : FirearmController
     {
         if (IsRevolver)
         {
-            Weapon revolver = Weapon;
-            CylinderMagazineItemClass cylinderMagazine = (CylinderMagazineItemClass)revolver.GetCurrentMagazine();
+            var revolver = Weapon;
+            var cylinderMagazine = (CylinderMagazineItemClass)revolver.GetCurrentMagazine();
 
             revolver.CylinderHammerClosed = revolver.FireMode.FireMode == Weapon.EFireMode.doubleaction;
             FirearmsAnimator.SetCamoraFireIndex(cylinderMagazine.CurrentCamoraIndex);
@@ -546,15 +547,15 @@ public class ObservedFirearmController : FirearmController
 
     private void HandleRevolverShot(ShotInfoPacket packet, InventoryController inventoryController)
     {
-        Weapon revolver = Weapon;
-        CylinderMagazineItemClass cylinderMagazine = (CylinderMagazineItemClass)revolver.GetCurrentMagazine();
+        var revolver = Weapon;
+        var cylinderMagazine = (CylinderMagazineItemClass)revolver.GetCurrentMagazine();
 
-        AmmoItemClass ammo = (AmmoItemClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), packet.AmmoTemplate, null);
+        var ammo = (AmmoItemClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), packet.AmmoTemplate, null);
         _observedPlayer.TurnOffFbbikAt = Time.time + 0.6f;
         InitiateShot(Item, ammo, packet.ShotPosition, packet.ShotDirection,
             CurrentFireport.position, packet.ChamberIndex, packet.Overheat);
 
-        float pitchMult = method_61();
+        var pitchMult = method_61();
         WeaponSoundPlayer.FireBullet(ammo, packet.ShotPosition, packet.ShotDirection,
             pitchMult, Malfunction, false, IsBirstOf2Start);
 
@@ -562,11 +563,11 @@ public class ObservedFirearmController : FirearmController
 
         revolver.CylinderHammerClosed = revolver.FireMode.FireMode == Weapon.EFireMode.doubleaction;
         FirearmsAnimator.SetCamoraFireIndex(cylinderMagazine.CurrentCamoraIndex);
-        int firstIndex = cylinderMagazine.GetCamoraFireOrLoadStartIndex(!revolver.CylinderHammerClosed);
-        AmmoItemClass cylinderAmmo = cylinderMagazine.GetFirstAmmo(!revolver.CylinderHammerClosed);
+        var firstIndex = cylinderMagazine.GetCamoraFireOrLoadStartIndex(!revolver.CylinderHammerClosed);
+        var cylinderAmmo = cylinderMagazine.GetFirstAmmo(!revolver.CylinderHammerClosed);
         if (cylinderAmmo != null)
         {
-            GStruct154<GInterface424> removeOperation = cylinderMagazine.RemoveAmmoInCamora(cylinderAmmo, inventoryController);
+            var removeOperation = cylinderMagazine.RemoveAmmoInCamora(cylinderAmmo, inventoryController);
             if (removeOperation.Failed)
             {
                 FikaPlugin.Instance.FikaLogger.LogError($"Error removing ammo from cylinderMagazine on netId [{_observedPlayer.NetId}], error: {removeOperation.Error}");
@@ -609,12 +610,12 @@ public class ObservedFirearmController : FirearmController
 
     private void HandleObservedShot(ShotInfoPacket packet, InventoryController inventoryController)
     {
-        AmmoItemClass ammo = (AmmoItemClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), packet.AmmoTemplate, null);
+        var ammo = (AmmoItemClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), packet.AmmoTemplate, null);
         _observedPlayer.TurnOffFbbikAt = Time.time + 0.6f;
         InitiateShot(Item, ammo, packet.ShotPosition, packet.ShotDirection,
             CurrentFireport.position, packet.ChamberIndex, packet.Overheat);
 
-        Weapon weapon = Weapon;
+        var weapon = Weapon;
         SetMalfAndDurability(packet, weapon);
 
         if (_stationaryWeapon)
@@ -627,7 +628,7 @@ public class ObservedFirearmController : FirearmController
             _triggerPressed = true;
         }
 
-        float pitchMult = method_61();
+        var pitchMult = method_61();
         WeaponSoundPlayer.FireBullet(ammo, packet.ShotPosition, packet.ShotDirection,
             pitchMult, Malfunction, false, IsBirstOf2Start);
 
@@ -639,7 +640,7 @@ public class ObservedFirearmController : FirearmController
             _needsReset = true;
         }
 
-        MagazineItemClass magazine = weapon.GetCurrentMagazine();
+        var magazine = weapon.GetCurrentMagazine();
 
         FirearmsAnimator.SetFire(true);
 
@@ -671,8 +672,8 @@ public class ObservedFirearmController : FirearmController
 
             if (weapon.ReloadMode == Weapon.EReloadMode.OnlyBarrel)
             {
-                Slot slot = weapon.FirstLoadedChamberSlot;
-                int index = Array.IndexOf(weapon.Chambers, slot);
+                var slot = weapon.FirstLoadedChamberSlot;
+                var index = Array.IndexOf(weapon.Chambers, slot);
                 if (slot.ContainedItem is AmmoItemClass grenadeBullet && !grenadeBullet.IsUsed)
                 {
                     grenadeBullet.IsUsed = true;
@@ -682,23 +683,26 @@ public class ObservedFirearmController : FirearmController
                     FirearmsAnimator.SetAmmoInChamber(weapon.ChamberAmmoCount);
                     FirearmsAnimator.SetShellsInWeapon(weapon.ShellsInWeaponCount);
                 }
+
+                FirearmsAnimator.SetFire(false);
+                return;
             }
         }
 
-        bool hasChambers = weapon.HasChambers;
+        var hasChambers = weapon.HasChambers;
         if (hasChambers)
         {
             if (weapon.ReloadMode is Weapon.EReloadMode.OnlyBarrel)
             {
                 if (weapon.FireMode.FireMode == Weapon.EFireMode.single)
                 {
-                    Slot firstLoadedSlot = weapon.FirstLoadedChamberSlot;
-                    int index = Array.IndexOf(weapon.Chambers, firstLoadedSlot);
+                    var firstLoadedSlot = weapon.FirstLoadedChamberSlot;
+                    var index = Array.IndexOf(weapon.Chambers, firstLoadedSlot);
                     HandleBarrelOnlyShot(weapon, index);
                 }
                 else
                 {
-                    for (int i = 0; i < weapon.Chambers.Length; i++)
+                    for (var i = 0; i < weapon.Chambers.Length; i++)
                     {
                         HandleBarrelOnlyShot(weapon, i);
                     }
@@ -756,7 +760,7 @@ public class ObservedFirearmController : FirearmController
     /// <param name="index">Index of the chamber</param>
     private void HandleBarrelOnlyShot(Weapon weapon, int index)
     {
-        Slot ammoSlot = weapon.Chambers[index];
+        var ammoSlot = weapon.Chambers[index];
         if (ammoSlot.ContainedItem is AmmoItemClass bullet && !bullet.IsUsed)
         {
             bullet.IsUsed = true;
@@ -783,9 +787,9 @@ public class ObservedFirearmController : FirearmController
     public List<AmmoItemClass> FindAmmoByIds(string[] ammoIds)
     {
         _preallocatedAmmoList.Clear();
-        foreach (string id in ammoIds)
+        foreach (var id in ammoIds)
         {
-            GStruct156<Item> gstruct = _player.FindItemById(id);
+            var gstruct = _player.FindItemById(id);
             if (gstruct.Succeeded && gstruct.Value is AmmoItemClass bulletClass)
             {
                 _preallocatedAmmoList.Add(bulletClass);
@@ -808,7 +812,7 @@ public class ObservedFirearmController : FirearmController
             FirearmsAnimator.SetShellsInWeapon(0);
         }
 
-        bool boltAction = Weapon.BoltAction;
+        var boltAction = Weapon.BoltAction;
 
         if (magazine != null && !boltAction)
         {

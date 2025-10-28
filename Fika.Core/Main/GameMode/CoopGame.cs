@@ -334,10 +334,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
     /// <summary>
     /// Initializes the local player, replaces <see cref="BaseLocalGame{TPlayerOwner}.method_4(BotControllerSettings, string, InventoryController)"/>
     /// </summary>
-    /// <param name="botsSettings"></param>
-    /// <param name="backendUrl"></param>
-    /// <returns></returns>
-    public async Task InitPlayer(BotControllerSettings botsSettings, string backendUrl)
+    public async Task InitPlayer(BotControllerSettings botsSettings)
     {
         if (FikaBackendUtils.IsHeadless)
         {

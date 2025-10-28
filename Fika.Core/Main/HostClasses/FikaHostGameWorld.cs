@@ -188,6 +188,7 @@ public class FikaHostGameWorld : ClientLocalGameWorld
             IsActive = true
         };
         FikaHostWorld.WorldPacket.SyncObjectPackets.Add(packet);
+        FikaHostWorld.SetCritical();
 
         base.TriggerTripwire(tripwire);
     }
@@ -210,6 +211,7 @@ public class FikaHostGameWorld : ClientLocalGameWorld
             IsActive = true
         };
         FikaHostWorld.WorldPacket.SyncObjectPackets.Add(packet);
+        FikaHostWorld.SetCritical();
 
         base.DeActivateTripwire(tripwire);
     }

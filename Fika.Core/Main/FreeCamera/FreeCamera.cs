@@ -12,13 +12,10 @@ using System.Collections.Generic;
 namespace Fika.Core.Main.FreeCamera;
 
 /// <summary>
-/// <para>A simple free camera to be added to a Unity game object.</para>
+/// <para>FreeCamera modified for Fika</para>
 /// <para>
-/// Full credit to Ashley Davis on GitHub for the inital code: <br/>
-/// <see href="https://gist.github.com/ashleydavis/f025c03a9221bc840a2b"/></para>
-/// <para>
-/// This is HEAVILY based on Terkoiz's work found here. Thanks for your work Terkoiz! <br/>
-/// <see href="https://dev.sp-tarkov.com/Terkoiz/Freecam/raw/branch/master/project/Terkoiz.Freecam/FreecamController.cs"/>
+/// This is based on the original freecam by Terkoiz <br/>
+/// <see href="https://github.com/acidphantasm/SPT-Freecam"/>
 /// </para>
 /// </summary>
 public partial class FreeCamera : MonoBehaviour
@@ -345,13 +342,10 @@ public partial class FreeCamera : MonoBehaviour
         }
 
         // Disable culling
-        if (Input.GetKeyDown(KeyCode.M))
+        if (Input.GetKeyDown(KeyCode.M) && _freeCameraController != null)
         {
-            if (_freeCameraController != null)
-            {
-                _freeCameraController.DisableAllCullingObjects();
-                return;
-            }
+            _freeCameraController.DisableAllCullingObjects();
+            return;
         }
 
         if (Input.GetKeyDown(KeyCode.L))

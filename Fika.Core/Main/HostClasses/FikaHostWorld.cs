@@ -5,6 +5,7 @@ using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
 using Fika.Core.Networking.Packets.World;
+using System;
 using System.Collections.Generic;
 
 namespace Fika.Core.Main.HostClasses;
@@ -19,10 +20,12 @@ public class FikaHostWorld : World
 
     private FikaServer _server;
     private GameWorld _gameWorld;
+    private List<GrenadeDataPacketStruct> _grenadeData;
+    private bool _hasCriticalData;
 
     public static FikaHostWorld Create(FikaHostGameWorld gameWorld)
     {
-        FikaHostWorld hostWorld = gameWorld.gameObject.AddComponent<FikaHostWorld>();
+        var hostWorld = gameWorld.gameObject.AddComponent<FikaHostWorld>();
         hostWorld._server = Singleton<FikaServer>.Instance;
         hostWorld._server.FikaHostWorld = hostWorld;
         hostWorld._gameWorld = gameWorld;
@@ -32,9 +35,9 @@ public class FikaHostWorld : World
             ArtilleryPackets = new(8),
             SyncObjectPackets = new(8),
             GrenadePackets = new(8),
-            LootSyncStructs = new(8),
-            RagdollPackets = new(8)
+            LootSyncStructs = new(8)
         };
+        hostWorld._grenadeData = new(16);
         WindowBreaker.OnWindowHitAction += hostWorld.WindowBreaker_OnWindowHitAction;
         return hostWorld;
     }
@@ -56,33 +59,52 @@ public class FikaHostWorld : World
         UpdateLootItems(_gameWorld.LootItems);
     }
 
+    /// <summary>
+    /// Marks the current <see cref="WorldPacket"/> as critical
+    /// </summary>
+    internal void SetCritical()
+    {
+        _hasCriticalData = true;
+    }
+
     protected void LateUpdate()
     {
-        int grenadesCount = _gameWorld.Grenades.Count;
-        for (int i = 0; i < grenadesCount; i++)
+        var grenadesCount = _gameWorld.Grenades.Count;
+        for (var i = 0; i < grenadesCount; i++)
         {
-            Throwable throwable = _gameWorld.Grenades.GetByIndex(i);
-            _gameWorld.method_2(throwable);
+            var throwable = _gameWorld.Grenades.GetByIndex(i);
+            if (throwable.HasNetData)
+            {
+                var packet = throwable.GetNetPacket();
+                if (packet.Done)
+                {
+                    SetCritical();
+                }
+                _grenadeData.Add(packet);
+            }
         }
 
-        WorldPacket.GrenadePackets.AddRange(_gameWorld.GrenadesCriticalStates);
+        WorldPacket.GrenadePackets.AddRange(_grenadeData);
         WorldPacket.ArtilleryPackets.AddRange(_gameWorld.ArtilleryProjectilesStates);
 
         if (WorldPacket.HasData)
         {
-            _server.SendReusableToAll(WorldPacket, DeliveryMethod.ReliableOrdered);
+            _server.SendReusableToAll(WorldPacket,
+                _hasCriticalData ? DeliveryMethod.ReliableOrdered : DeliveryMethod.Unreliable);
+
+            _hasCriticalData = false;
         }
 
-        _gameWorld.GrenadesCriticalStates.Clear();
+        _grenadeData.Clear();
         _gameWorld.ArtilleryProjectilesStates.Clear();
     }
 
     public void UpdateLootItems(GClass818<int, LootItem> lootItems)
     {
-        for (int i = LootSyncPackets.Count - 1; i >= 0; i--)
+        for (var i = LootSyncPackets.Count - 1; i >= 0; i--)
         {
-            LootSyncStruct gstruct = LootSyncPackets[i];
-            if (lootItems.TryGetByKey(gstruct.Id, out LootItem lootItem))
+            var gstruct = LootSyncPackets[i];
+            if (lootItems.TryGetByKey(gstruct.Id, out var lootItem))
             {
                 if (lootItem is ObservedLootItem observedLootItem)
                 {
@@ -115,5 +137,10 @@ public class FikaHostWorld : World
     {
         _server.SendGenericPacket(EGenericSubPacketType.BorderZone,
             BorderZoneEvent.FromValue(player.iPlayer.ProfileId, zone.Id), true);
+    }
+
+    internal void RegisterGrenade(Grenade grenadeInWorld)
+    {
+        throw new NotImplementedException();
     }
 }

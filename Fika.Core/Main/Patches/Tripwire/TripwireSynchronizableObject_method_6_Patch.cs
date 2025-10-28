@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace Fika.Core.Main.Patches.Tripwire;
 
-internal class TripwireSynchronizableObject_method_6_Patch : ModulePatch
+public class TripwireSynchronizableObject_method_6_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

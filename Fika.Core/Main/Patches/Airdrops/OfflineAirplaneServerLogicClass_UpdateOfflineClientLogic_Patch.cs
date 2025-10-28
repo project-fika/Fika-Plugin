@@ -9,12 +9,18 @@ public class OfflineAirplaneServerLogicClass_UpdateOfflineClientLogic_Patch : Mo
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(OfflineAirplaneServerLogicClass).GetMethod(nameof(OfflineAirplaneServerLogicClass.UpdateOfflineClientLogic));
+        return typeof(OfflineAirplaneServerLogicClass)
+            .GetMethod(nameof(OfflineAirplaneServerLogicClass.UpdateOfflineClientLogic));
     }
 
     [PatchPostfix]
     public static void Postfix(AirplaneDataPacketStruct ___AirplaneDataPacketStruct)
     {
-        Singleton<FikaHostGameWorld>.Instance.FikaHostWorld.WorldPacket.SyncObjectPackets.Add(___AirplaneDataPacketStruct);
+        var hostWorld = Singleton<FikaHostGameWorld>.Instance.FikaHostWorld;
+        hostWorld.WorldPacket.SyncObjectPackets.Add(___AirplaneDataPacketStruct);
+        if (___AirplaneDataPacketStruct.Outdated)
+        {
+            hostWorld.SetCritical();
+        }
     }
 }

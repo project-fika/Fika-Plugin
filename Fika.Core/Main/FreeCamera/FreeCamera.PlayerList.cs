@@ -12,7 +12,6 @@ public partial class FreeCamera
     private Texture2D _texWhite;
     private GUIStyle _rowGuiStyle, _badgeGuiStyle, _hpTextGuiStyle, _nameGuiStyle;
     private FikaPlayer _lastSpectatingPlayer;
-    private bool _superFastMode;
     private bool _guiCreated;
 
     ECameraState _cameraState;

@@ -407,6 +407,40 @@ public class CoopHandler : MonoBehaviour
 
         var gameWorld = Singleton<GameWorld>.Instance;
 
+        if (isAi && profile.Info.Settings.Role != WildSpawnType.shooterBTR) // spawn underground until everyone has loaded the AI
+        {
+            position = new(0f, -5000f, 0f);
+        }
+
+        if (isAi)
+        {
+            if (profile.Info.Side is not EPlayerSide.Savage)
+            {
+                var backpack = profile.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack).ContainedItem;
+                if (backpack != null)
+                {
+                    foreach (var backpackItem in backpack.GetAllItems())
+                    {
+                        if (backpackItem != backpack)
+                        {
+                            backpackItem.SpawnedInSession = true;
+                        }
+                    }
+                }
+
+                // We still want DogTags to be 'FiR'
+                var item = profile.Inventory.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem;
+                if (item != null)
+                {
+                    item.SpawnedInSession = true;
+                }
+            }
+        }
+        else if (profile.Info.Side != EPlayerSide.Savage) // Make sure player PMC items are all not 'FiR'
+        {
+            profile.SetSpawnedInSession(false);
+        }
+
         // Check for GClass increments on filter
         var otherPlayer = ObservedPlayer.CreateObservedPlayer(gameWorld, netId, position, Quaternion.identity, "Player",
             isAi ? "Bot_" : $"Player_{profile.Nickname}_", EPointOfView.ThirdPerson, profile, healthBytes, isAi,
@@ -457,35 +491,6 @@ public class CoopHandler : MonoBehaviour
             {
                 EFTPhysicsClass.IgnoreCollision(playerCollider, otherCollider);
             }
-        }
-
-        if (isAi)
-        {
-            if (profile.Info.Side is EPlayerSide.Bear or EPlayerSide.Usec)
-            {
-                var backpack = profile.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack).ContainedItem;
-                if (backpack != null)
-                {
-                    foreach (var backpackItem in backpack.GetAllItems())
-                    {
-                        if (backpackItem != backpack)
-                        {
-                            backpackItem.SpawnedInSession = true;
-                        }
-                    }
-                }
-
-                // We still want DogTags to be 'FiR'
-                var item = otherPlayer.Inventory.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem;
-                if (item != null)
-                {
-                    item.SpawnedInSession = true;
-                }
-            }
-        }
-        else if (profile.Info.Side != EPlayerSide.Savage)// Make Player PMC items are all not 'FiR'
-        {
-            profile.SetSpawnedInSession(false);
         }
 
         otherPlayer.InitObservedPlayer();

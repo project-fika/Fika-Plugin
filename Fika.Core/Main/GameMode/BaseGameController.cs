@@ -320,7 +320,7 @@ public abstract class BaseGameController
 
         GClass2313.ResetAudioBuffer();
 
-        _gameWorld.TriggersModule = _abstractGame.gameObject.AddComponent<LocalClientTriggersModule>();
+        _gameWorld.TriggersModule = _abstractGame.gameObject.AddComponent<LocalFikaTriggersModule>();
         _gameWorld.FillLampControllers();
         if (Location.Id == "laboratory")
         {
@@ -512,10 +512,10 @@ public abstract class BaseGameController
                     settings.ServerMapBTRSettings[mapSettings.Key] = btrSettings;
 #endif
                     gameWorld.BtrController = new BTRControllerClass(gameWorld);
-                    /*if (IsServer)
+                    if (IsServer)
                     {
                         GlobalEventHandlerClass.Instance.SubscribeOnEvent<BtrSpawnOnThePathEvent>(OnBtrSpawn);
-                    }*/
+                    }
                 }
             }
             else

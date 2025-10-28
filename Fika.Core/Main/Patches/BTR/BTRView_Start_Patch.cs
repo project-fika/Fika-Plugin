@@ -9,6 +9,7 @@ namespace Fika.Core.Main.Patches.BTR;
 /// <summary>
 /// Ensures that the BtrViewReadyEvent fires on the headless due to it having no <see cref="EFT.GamePlayerOwner"/>
 /// </summary>
+[DebugPatch]
 public class BTRView_Start_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()

@@ -107,20 +107,19 @@ public sealed class ClientInventoryController : Player.PlayerOwnerInventoryContr
             Item lootedItem = moveOperation.Item;
             if (lootedItem.QuestItem)
             {
-                if (_fikaPlayer.AbstractQuestControllerClass is ClientSharedQuestController sharedQuestController && sharedQuestController.ContainsAcceptedType("FindItem"))
+                if (_fikaPlayer.AbstractQuestControllerClass is ClientSharedQuestController sharedQuestController
+                    && sharedQuestController.ContainsAcceptedType("FindItem")
+                    && !sharedQuestController.CheckForTemplateId(lootedItem.TemplateId))
                 {
-                    if (!sharedQuestController.CheckForTemplateId(lootedItem.TemplateId))
-                    {
-                        sharedQuestController.AddLootedTemplateId(lootedItem.TemplateId);
+                    sharedQuestController.AddLootedTemplateId(lootedItem.TemplateId);
 
-                        // We use templateId because each client gets a unique itemId
-                        QuestItemPacket questPacket = new()
-                        {
-                            Nickname = _fikaPlayer.Profile.Info.MainProfileNickname,
-                            ItemId = lootedItem.TemplateId
-                        };
-                        _fikaPlayer.PacketSender.NetworkManager.SendData(ref questPacket, DeliveryMethod.ReliableOrdered, true);
-                    }
+                    // We use templateId because each client gets a unique itemId
+                    QuestItemPacket questPacket = new()
+                    {
+                        Nickname = _fikaPlayer.Profile.Info.MainProfileNickname,
+                        ItemId = lootedItem.TemplateId
+                    };
+                    _fikaPlayer.PacketSender.NetworkManager.SendData(ref questPacket, DeliveryMethod.ReliableOrdered, true);
                 }
                 base.vmethod_1(operation, callback);
                 return;

@@ -9,12 +9,18 @@ public class OfflineAirdropServerLogicClass_UpdateOfflineClientLogic_Patch : Mod
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(OfflineAirdropServerLogicClass).GetMethod(nameof(OfflineAirdropServerLogicClass.UpdateOfflineClientLogic));
+        return typeof(OfflineAirdropServerLogicClass)
+            .GetMethod(nameof(OfflineAirdropServerLogicClass.UpdateOfflineClientLogic));
     }
 
     [PatchPostfix]
     public static void Postfix(AirplaneDataPacketStruct ___AirplaneDataPacketStruct)
     {
-        Singleton<FikaHostGameWorld>.Instance.FikaHostWorld.WorldPacket.SyncObjectPackets.Add(___AirplaneDataPacketStruct);
+        var hostWorld = Singleton<FikaHostGameWorld>.Instance.FikaHostWorld;
+        hostWorld.WorldPacket.SyncObjectPackets.Add(___AirplaneDataPacketStruct);
+        if (___AirplaneDataPacketStruct.PacketData.AirdropDataPacket.FallingStage is EAirdropFallingStage.Landed)
+        {
+            hostWorld.SetCritical();
+        }
     }
 }

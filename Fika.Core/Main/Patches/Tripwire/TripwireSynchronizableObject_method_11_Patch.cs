@@ -34,7 +34,10 @@ internal class TripwireSynchronizableObject_method_11_Patch : ModulePatch
                 Rotation = __instance.transform.rotation.eulerAngles,
                 IsActive = true
             };
-            Singleton<FikaHostGameWorld>.Instance.FikaHostWorld.WorldPacket.SyncObjectPackets.Add(packet);
+
+            var hostWorld = Singleton<FikaHostGameWorld>.Instance.FikaHostWorld;
+            hostWorld.WorldPacket.SyncObjectPackets.Add(packet);
+            hostWorld.SetCritical();
         }
     }
 }

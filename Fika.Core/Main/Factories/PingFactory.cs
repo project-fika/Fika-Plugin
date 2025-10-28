@@ -97,7 +97,6 @@ public static class PingFactory
         private RectTransform _canvasRect;
         private TextMeshProUGUI _rangeText;
         private bool _displayRange;
-        private float _screenScale = 1f;
         private Color _pingColor = Color.white;
         private FikaPlayer _mainPlayer;
 

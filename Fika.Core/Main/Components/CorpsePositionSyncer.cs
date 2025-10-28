@@ -48,7 +48,7 @@ internal class CorpsePositionSyncer : MonoBehaviour
             _data.Position = _corpse.TrackableTransform.position;
             _data.TransformSyncs = _corpse.TransformSyncs;
             _data.Done = true;
-            _world.WorldPacket.RagdollPackets.Add(_data);
+            //_world.WorldPacket.RagdollPackets.Add(_data);
             Destroy(this);
             return;
         }
@@ -58,7 +58,7 @@ internal class CorpsePositionSyncer : MonoBehaviour
         {
             _counter = 0;
             _data.Position = _corpse.TrackableTransform.position;
-            _world.WorldPacket.RagdollPackets.Add(_data);
+            //_world.WorldPacket.RagdollPackets.Add(_data);
         }
     }
 }

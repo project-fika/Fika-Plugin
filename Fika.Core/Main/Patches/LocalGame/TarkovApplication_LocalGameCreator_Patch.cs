@@ -188,7 +188,7 @@ public class TarkovApplication_LocalGameCreator_Patch : ModulePatch
             coopGame.SetMatchmakerStatus("Coop game created");
         }
 
-        await coopGame.InitPlayer(raidSettings.BotSettings, backendUrl);
+        await coopGame.InitPlayer(raidSettings.BotSettings);
         UnityEngine.Object.DestroyImmediate(MonoBehaviourSingleton<MenuUI>.Instance.gameObject);
         ___mainMenuController?.Unsubscribe();
         bundleLock.MaxConcurrentOperations = FikaPlugin.MaxBundleLock.Value;
