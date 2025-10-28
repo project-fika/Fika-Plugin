@@ -75,8 +75,7 @@ public class ItemContext_Patch : ModulePatch
             }
 
             // Check for GClass increments
-            var dynamicInteractions = gclass.Dictionary_0
-                ?? [];
+            var dynamicInteractions = gclass.Dictionary_0 ?? [];
             dynamicInteractions["SEND"] = new("SEND", "SEND", () =>
             {
                 foreach (var itemId in FikaPlugin.Instance.BlacklistedItems)
