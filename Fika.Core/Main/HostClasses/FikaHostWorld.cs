@@ -19,6 +19,8 @@ public class FikaHostWorld : World
 
     private FikaServer _server;
     private GameWorld _gameWorld;
+    private List<GrenadeDataPacketStruct> _grenadeData;
+    private bool _hasCriticalData;
 
     public static FikaHostWorld Create(FikaHostGameWorld gameWorld)
     {
@@ -35,6 +37,7 @@ public class FikaHostWorld : World
             LootSyncStructs = new(8),
             RagdollPackets = new(8)
         };
+        hostWorld._grenadeData = new(16);
         WindowBreaker.OnWindowHitAction += hostWorld.WindowBreaker_OnWindowHitAction;
         return hostWorld;
     }
@@ -58,31 +61,42 @@ public class FikaHostWorld : World
 
     protected void LateUpdate()
     {
-        int grenadesCount = _gameWorld.Grenades.Count;
-        for (int i = 0; i < grenadesCount; i++)
+        var grenadesCount = _gameWorld.Grenades.Count;
+        for (var i = 0; i < grenadesCount; i++)
         {
-            Throwable throwable = _gameWorld.Grenades.GetByIndex(i);
-            _gameWorld.method_2(throwable);
+            var throwable = _gameWorld.Grenades.List_0[i];
+            if (throwable.HasNetData)
+            {
+                var packet = throwable.GetNetPacket();
+                if (packet.Done)
+                {
+                    _hasCriticalData = true;
+                }
+                _grenadeData.Add(packet);
+            }
         }
 
-        WorldPacket.GrenadePackets.AddRange(_gameWorld.GrenadesCriticalStates);
+        WorldPacket.GrenadePackets.AddRange(_grenadeData);
         WorldPacket.ArtilleryPackets.AddRange(_gameWorld.ArtilleryProjectilesStates);
 
         if (WorldPacket.HasData)
         {
-            _server.SendReusableToAll(WorldPacket, DeliveryMethod.ReliableOrdered);
+            _server.SendReusableToAll(WorldPacket,
+                _hasCriticalData ? DeliveryMethod.ReliableOrdered : DeliveryMethod.Unreliable);
         }
 
-        _gameWorld.GrenadesCriticalStates.Clear();
+        _grenadeData.Clear();
         _gameWorld.ArtilleryProjectilesStates.Clear();
+
+        _hasCriticalData = false;
     }
 
     public void UpdateLootItems(GClass818<int, LootItem> lootItems)
     {
-        for (int i = LootSyncPackets.Count - 1; i >= 0; i--)
+        for (var i = LootSyncPackets.Count - 1; i >= 0; i--)
         {
-            LootSyncStruct gstruct = LootSyncPackets[i];
-            if (lootItems.TryGetByKey(gstruct.Id, out LootItem lootItem))
+            var gstruct = LootSyncPackets[i];
+            if (lootItems.TryGetByKey(gstruct.Id, out var lootItem))
             {
                 if (lootItem is ObservedLootItem observedLootItem)
                 {
