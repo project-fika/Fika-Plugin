@@ -169,7 +169,7 @@ public partial class FikaClient
 
     private void OnWorldPacketReceived(WorldPacket packet)
     {
-        GameWorld gameWorld = Singleton<GameWorld>.Instance;
+        var gameWorld = Singleton<GameWorld>.Instance;
         if (gameWorld == null)
         {
             _logger.LogError("OnNewWorldPacketReceived: GameWorld was null!");
@@ -194,17 +194,17 @@ public partial class FikaClient
 
         if (packet.ArtilleryPackets.Count > 0)
         {
-            List<ArtilleryPacketStruct> packets = packet.ArtilleryPackets;
+            var packets = packet.ArtilleryPackets;
             gameWorld.ClientShellingController.SyncProjectilesStates(ref packets);
         }
 
-        for (int i = 0; i < packet.GrenadePackets.Count; i++)
+        for (var i = 0; i < packet.GrenadePackets.Count; i++)
         {
-            GrenadeDataPacketStruct throwablePacket = packet.GrenadePackets[i];
-            GClass818<int, Throwable> grenades = gameWorld.Grenades;
-            if (grenades.TryGetByKey(throwablePacket.Id, out Throwable throwable))
+            var throwablePacket = packet.GrenadePackets[i];
+            var grenades = gameWorld.Grenades;
+            if (grenades.TryGetByKey(throwablePacket.Id, out var throwable))
             {
-                throwable.ApplyNetPacket(throwablePacket);
+                throwable.ApplyFikaNetPacket(throwablePacket);
             }
         }
 
@@ -219,20 +219,20 @@ public partial class FikaClient
 #if DEBUG
         _logger.LogWarning("OnSideEffectPacketReceived: Received");
 #endif
-        GameWorld gameWorld = Singleton<GameWorld>.Instance;
+        var gameWorld = Singleton<GameWorld>.Instance;
         if (gameWorld == null)
         {
             _logger.LogError("OnSideEffectPacketReceived: GameWorld was null!");
             return;
         }
 
-        GStruct156<Item> gstruct2 = gameWorld.FindItemById(packet.ItemId);
+        var gstruct2 = gameWorld.FindItemById(packet.ItemId);
         if (gstruct2.Failed)
         {
             _logger.LogError("OnSideEffectPacketReceived: " + gstruct2.Error);
             return;
         }
-        Item item = gstruct2.Value;
+        var item = gstruct2.Value;
         if (item.TryGetItemComponent(out SideEffectComponent sideEffectComponent))
         {
             sideEffectComponent.Value = packet.Value;

@@ -111,7 +111,7 @@ public partial class FikaServer
 
     private void OnWorldPacketReceived(WorldPacket packet, NetPeer peer)
     {
-        GameWorld gameWorld = Singleton<GameWorld>.Instance;
+        var gameWorld = Singleton<GameWorld>.Instance;
         if (gameWorld == null)
         {
             _logger.LogError("OnNewWorldPacketReceived: GameWorld was null!");
@@ -119,7 +119,6 @@ public partial class FikaServer
         }
 
         FikaHostWorld.LootSyncPackets.AddRange(packet.LootSyncStructs);
-        SendReusableToAll(packet, DeliveryMethod.ReliableOrdered, peer);
     }
 
     private void OnRequestPacketReceived(RequestPacket packet, NetPeer peer)

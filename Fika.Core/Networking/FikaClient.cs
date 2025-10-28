@@ -452,12 +452,12 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
     /// </remarks>
     public void SendReusable<T>(T packet, DeliveryMethod deliveryMethod) where T : class, IReusable, new()
     {
-        NetPeer peer = _netClient.FirstPeer;
+        var peer = _netClient.FirstPeer;
         if (peer != null)
         {
             _dataWriter.Reset();
 
-            _dataWriter.Put(false);
+            _dataWriter.Put(true);
             _dataWriter.PutEnum(EPacketType.Serializable);
             _packetProcessor.Write(_dataWriter, packet);
             peer.Send(_dataWriter.AsReadOnlySpan, deliveryMethod);

@@ -18,6 +18,7 @@ public class FikaClientWorld : World
 
     private FikaClientGameWorld _clientGameWorld;
     private FikaClient _client;
+    private bool _hasCriticalData;
 
     public static FikaClientWorld Create(FikaClientGameWorld gameWorld)
     {
@@ -30,8 +31,7 @@ public class FikaClientWorld : World
             ArtilleryPackets = new(8),
             SyncObjectPackets = new(8),
             GrenadePackets = new(8),
-            LootSyncStructs = new(8),
-            RagdollPackets = new(8)
+            LootSyncStructs = new(8)
         };
         clientWorld._client = Singleton<FikaClient>.Instance;
         clientWorld._client.FikaClientWorld = clientWorld;
@@ -44,20 +44,31 @@ public class FikaClientWorld : World
         _clientGameWorld.ClientSynchronizableObjectLogicProcessor.ProcessSyncObjectPackets(SyncObjectPackets);
     }
 
+    /// <summary>
+    /// Marks the current <see cref="WorldPacket"/> as critical
+    /// </summary>
+    internal void SetCritical()
+    {
+        _hasCriticalData = true;
+    }
+
     protected void LateUpdate()
     {
         if (WorldPacket.HasData)
         {
-            _client.SendReusable(WorldPacket, DeliveryMethod.ReliableOrdered);
+            _client.SendReusable(WorldPacket,
+                _hasCriticalData ? DeliveryMethod.ReliableOrdered : DeliveryMethod.Unreliable);
+
+            _hasCriticalData = false;
         }
     }
 
     public void UpdateLootItems(GClass818<int, LootItem> lootItems)
     {
-        for (int i = LootSyncPackets.Count - 1; i >= 0; i--)
+        for (var i = LootSyncPackets.Count - 1; i >= 0; i--)
         {
-            LootSyncStruct lootSyncData = LootSyncPackets[i];
-            if (lootItems.TryGetByKey(lootSyncData.Id, out LootItem lootItem))
+            var lootSyncData = LootSyncPackets[i];
+            if (lootItems.TryGetByKey(lootSyncData.Id, out var lootItem))
             {
                 if (lootItem is ObservedLootItem observedLootItem)
                 {
@@ -73,9 +84,9 @@ public class FikaClientWorld : World
     /// </summary>
     public override void SubscribeToBorderZones(BorderZone[] zones)
     {
-        for (int i = 0; i < zones.Length; i++)
+        for (var i = 0; i < zones.Length; i++)
         {
-            BorderZone borderZone = zones[i];
+            var borderZone = zones[i];
             borderZone.RemoveAuthority();
         }
     }
