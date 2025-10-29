@@ -138,9 +138,4 @@ public class FikaHostWorld : World
         _server.SendGenericPacket(EGenericSubPacketType.BorderZone,
             BorderZoneEvent.FromValue(player.iPlayer.ProfileId, zone.Id), true);
     }
-
-    internal void RegisterGrenade(Grenade grenadeInWorld)
-    {
-        throw new NotImplementedException();
-    }
 }
