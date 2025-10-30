@@ -204,7 +204,7 @@ public partial class FikaClient
             var grenades = gameWorld.Grenades;
             if (grenades.TryGetByKey(throwablePacket.Id, out var throwable))
             {
-                throwable.ApplyFikaNetPacket(throwablePacket);
+                throwable.ApplyNetPacket(throwablePacket);
             }
         }
 
