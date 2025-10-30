@@ -8,11 +8,11 @@ body:
   - type: markdown
     attributes:
       value: |
-      "## Please read these steps carefully:
-    
-      - You must be able to reliably reproduce the issue, with no mods other than Fika
-      - You must fill in all the required fields and attach all required files
-      If you do not meet the requirements above, we will close the Issue ***without warning***"
+        ## Please read these steps carefully:
+      
+        - You must be able to reliably reproduce the issue, with no mods other than Fika
+        - You must fill in all the required fields and attach all required files
+        If you do not meet the requirements above, we will close the Issue ***without warning***
   - type: textarea
     id: description
     attributes:
