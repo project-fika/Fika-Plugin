@@ -43,7 +43,7 @@ body:
     attributes:
       label: "Client Log"
       description: |
-        "Upload a copy of your *entire* `Player.log` from `%Appdata%\..\LocalLow\Battlestate Games\EscapeFromTarkov`."
+        Upload a copy of your *entire* `Player.log` from `%Appdata%\..\LocalLow\Battlestate Games\EscapeFromTarkov`
       placeholder: "Attach the log file, do not paste the contents."
     validations:
       required: true
