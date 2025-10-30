@@ -336,12 +336,6 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
     /// </summary>
     public async Task InitPlayer(BotControllerSettings botsSettings)
     {
-        if (FikaBackendUtils.IsHeadless)
-        {
-            _logger.LogWarning("Unloading resources");
-            await Resources.UnloadUnusedAssets().Await();
-        }
-
         Status = GameStatus.Running;
         UnityEngine.Random.InitState((int)EFTDateTimeClass.Now.Ticks);
 
