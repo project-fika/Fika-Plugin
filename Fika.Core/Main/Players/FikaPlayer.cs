@@ -756,6 +756,7 @@ public class FikaPlayer : LocalPlayer
             MovementContext.IsInMountedState ? MovementContext.PlayerMountingPointData.MountPointData.MountPoint : default,
             MovementContext.IsInMountedState ? MovementContext.PlayerMountingPointData.CurrentMountingPointVerticalOffset : 0f,
            MovementContext.IsInMountedState ? (short)MovementContext.PlayerMountingPointData.MountPointData.MountSideDirection : (short)0);
+
         if (command == MountingPacketStruct.EMountingCommand.Enter)
         {
             packet.TransitionTime = MovementContext.PlayerMountingPointData.CurrentApproachTime;
@@ -770,7 +771,9 @@ public class FikaPlayer : LocalPlayer
 
         CommonPacket.Type = ECommonSubPacketType.Mounting;
         CommonPacket.SubPacket = packet;
-        PacketSender.NetworkManager.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
+        PacketSender.NetworkManager.SendNetReusable(ref CommonPacket,
+            command is MountingPacketStruct.EMountingCommand.Update ? DeliveryMethod.Unreliable : DeliveryMethod.ReliableOrdered,
+            true);
     }
 
     public override void vmethod_3(TransitControllerAbstractClass controller, int transitPointId, string keyId, EDateTime time)
