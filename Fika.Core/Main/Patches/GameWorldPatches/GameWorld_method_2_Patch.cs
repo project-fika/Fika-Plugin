@@ -20,8 +20,11 @@ public class GameWorld_method_2_Patch : ModulePatch
         if (grenade.HasNetData)
         {
             var hostWorld = Singleton<FikaHostGameWorld>.Instance.FikaHostWorld;
-            hostWorld.WorldPacket.GrenadePackets.Add(grenade.GetNetPacket());
-            hostWorld.SetCritical();
+            if (hostWorld != null)
+            {
+                hostWorld.WorldPacket.GrenadePackets.Add(grenade.GetNetPacket());
+                hostWorld.SetCritical(); 
+            }
         }
 
         return false;
