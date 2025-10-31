@@ -23,7 +23,7 @@ public class GameWorld_method_2_Patch : ModulePatch
             if (hostWorld != null)
             {
                 hostWorld.WorldPacket.GrenadePackets.Add(grenade.GetNetPacket());
-                hostWorld.SetCritical(); 
+                hostWorld.SetCritical();
             }
         }
 
