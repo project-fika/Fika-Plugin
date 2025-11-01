@@ -22,7 +22,7 @@ public class GameWorld_method_2_Patch : ModulePatch
             var hostWorld = Singleton<FikaHostGameWorld>.Instance.FikaHostWorld;
             if (hostWorld != null)
             {
-                hostWorld.WorldPacket.GrenadePackets.Add(grenade.GetNetPacket());
+                hostWorld.WorldPacket?.GrenadePackets?.Add(grenade.GetNetPacket());
                 hostWorld.SetCritical();
             }
         }
