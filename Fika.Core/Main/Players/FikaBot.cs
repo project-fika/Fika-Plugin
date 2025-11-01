@@ -291,7 +291,7 @@ public class FikaBot : FikaPlayer
     public override void OnDead(EDamageType damageType)
     {
         var num = EFTHardSettings.Instance.HIT_FORCE;
-        num *= 0.3f + 0.7f * Mathf.InverseLerp(50f, 20f, LastDamageInfo.PenetrationPower);
+        num *= 0.3f + (0.7f * Mathf.InverseLerp(50f, 20f, LastDamageInfo.PenetrationPower));
         _corpseAppliedForce = num;
 
         if (FikaPlugin.ShowNotifications.Value)

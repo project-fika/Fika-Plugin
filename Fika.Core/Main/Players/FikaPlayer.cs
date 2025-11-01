@@ -747,12 +747,17 @@ public class FikaPlayer : LocalPlayer
 
     public override void HealthControllerUpdate(float deltaTime)
     {
-        _healthController.ManualUpdate(deltaTime);
+        _healthController?.ManualUpdate(deltaTime);
+    }
+
+    public override void UpdateTriggerColliderSearcher(float deltaTime, bool isCloseToCamera = true)
+    {
+        _triggerColliderSearcher.ManualUpdate(deltaTime);
     }
 
     public override void OnMounting(MountingPacketStruct.EMountingCommand command)
     {
-        MountingPacket packet = MountingPacket.FromValue(command, MovementContext.IsInMountedState, MovementContext.IsInMountedState ? MovementContext.PlayerMountingPointData.MountPointData.MountDirection : default,
+        var packet = MountingPacket.FromValue(command, MovementContext.IsInMountedState, MovementContext.IsInMountedState ? MovementContext.PlayerMountingPointData.MountPointData.MountDirection : default,
             MovementContext.IsInMountedState ? MovementContext.PlayerMountingPointData.MountPointData.MountPoint : default,
             MovementContext.IsInMountedState ? MovementContext.PlayerMountingPointData.CurrentMountingPointVerticalOffset : 0f,
            MovementContext.IsInMountedState ? (short)MovementContext.PlayerMountingPointData.MountPointData.MountSideDirection : (short)0);
@@ -863,7 +868,7 @@ public class FikaPlayer : LocalPlayer
 
         var inventoryDescriptor = EFTItemSerializerClass.SerializeItem(Inventory.Equipment, FikaGlobals.SearchControllerSerializer);
 
-        HealthSyncPacket packets = HealthSyncPacket.FromValue(packet);
+        var packets = HealthSyncPacket.FromValue(packet);
         packets.BodyPart = LastBodyPart;
         packets.CorpseSyncPacket = new()
         {
