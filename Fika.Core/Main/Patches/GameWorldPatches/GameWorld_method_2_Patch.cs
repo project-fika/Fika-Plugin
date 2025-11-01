@@ -17,7 +17,7 @@ public class GameWorld_method_2_Patch : ModulePatch
     [PatchPrefix]
     public static bool Prefix(Throwable grenade)
     {
-        if (grenade.HasNetData)
+        if (grenade != null && grenade.HasNetData)
         {
             var hostWorld = Singleton<FikaHostGameWorld>.Instance.FikaHostWorld;
             if (hostWorld != null)
