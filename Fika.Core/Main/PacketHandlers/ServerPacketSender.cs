@@ -18,6 +18,7 @@ using Fika.Core.Networking.Packets.Player;
 using Fika.Core.UI.Custom;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Fika.Core.Main.PacketHandlers;
 
@@ -54,9 +55,9 @@ public class ServerPacketSender : MonoBehaviour, IPacketSender
     private float _updateCount;
     private float _updatesPerTick;
 
-    public static ServerPacketSender Create(FikaPlayer player)
+    public static Task<ServerPacketSender> Create(FikaPlayer player)
     {
-        ServerPacketSender sender = player.gameObject.AddComponent<ServerPacketSender>();
+        var sender = player.gameObject.AddComponent<ServerPacketSender>();
         sender._player = player;
         sender.NetworkManager = Singleton<FikaServer>.Instance;
         sender.enabled = false;
@@ -69,7 +70,7 @@ public class ServerPacketSender : MonoBehaviour, IPacketSender
             NetId = (byte)player.NetId
         };
         sender._animHash = PlayerAnimator.INERT_PARAM_HASH;
-        return sender;
+        return Task.FromResult(sender);
     }
 
     public void Init()

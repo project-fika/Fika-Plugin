@@ -12,6 +12,7 @@ public sealed class ClientHealthController(Profile.ProfileHealthClass healthInfo
     : GClass3010(healthInfo, player, inventoryController, skillManager, aiHealth)
 {
     private readonly FikaPlayer _fikaPlayer = (FikaPlayer)player;
+
     public override bool _sendNetworkSyncPackets
     {
         get

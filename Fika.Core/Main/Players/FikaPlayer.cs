@@ -128,14 +128,15 @@ public class FikaPlayer : LocalPlayer
 
         if (FikaBackendUtils.IsServer)
         {
-            player.PacketSender = ServerPacketSender.Create(player);
+            player.PacketSender = await ServerPacketSender.Create(player);
         }
         else if (FikaBackendUtils.IsClient)
         {
-            player.PacketSender = ClientPacketSender.Create(player);
+            player.PacketSender = await ClientPacketSender.Create(player);
         }
 
-        var voipState = (!FikaBackendUtils.IsHeadless && Singleton<IFikaNetworkManager>.Instance.AllowVOIP && SoundSettingsControllerClass.CheckMicrophone()) ? EVoipState.Available : EVoipState.NotAvailable;
+        var voipState = (!FikaBackendUtils.IsHeadless && Singleton<IFikaNetworkManager>.Instance.AllowVOIP && SoundSettingsControllerClass.CheckMicrophone())
+            ? EVoipState.Available : EVoipState.NotAvailable;
 
         await player.Init(rotation, layerName, pointOfView, profile, inventoryController,
             new ClientHealthController(profile.Health, player, inventoryController, profile.Skills, aiControl),
