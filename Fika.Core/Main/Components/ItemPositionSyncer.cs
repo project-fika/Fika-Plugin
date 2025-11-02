@@ -102,12 +102,10 @@ public class ItemPositionSyncer : MonoBehaviour
             if (_isServer)
             {
                 _server.FikaHostWorld.WorldPacket.LootSyncStructs.Add(_data);
-                Destroy(this);
                 return;
             }
 
             _client.FikaClientWorld.WorldPacket.LootSyncStructs.Add(_data);
-            Destroy(this);
         }
     }
 }
