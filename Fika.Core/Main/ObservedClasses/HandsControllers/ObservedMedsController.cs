@@ -153,7 +153,7 @@ internal class ObservedMedsController : Player.MedsController
         public void HealthController_EffectRemovedEvent(IEffect effect)
         {
             // Look for GClass increments
-            if (effect is not GInterface359)
+            if (effect is not GInterface376)
             {
                 return;
             }
