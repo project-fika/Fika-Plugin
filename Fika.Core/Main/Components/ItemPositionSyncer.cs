@@ -71,7 +71,7 @@ public class ItemPositionSyncer : MonoBehaviour
 
     public void FixedUpdate()
     {
-        if (_lootItem.IsRigidbodyDone())
+        if (Rigidbody == null)
         {
             _data.Position = _lootItem.transform.position;
             _data.Rotation = _lootItem.transform.rotation;
@@ -89,10 +89,8 @@ public class ItemPositionSyncer : MonoBehaviour
             _client.FikaClientWorld.WorldPacket.LootSyncStructs.Add(_data);
             _client.FikaClientWorld.SetCritical();
             Destroy(this);
-            return;
         }
-
-        if (Rigidbody != null)
+        else
         {
             _data.Position = _lootItem.transform.position;
             _data.Rotation = _lootItem.transform.rotation;
