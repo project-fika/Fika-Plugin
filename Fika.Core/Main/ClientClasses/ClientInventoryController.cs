@@ -13,7 +13,6 @@ using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
 using Fika.Core.Networking.Packets.World;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Fika.Core.Main.ClientClasses;
@@ -30,24 +29,17 @@ public sealed class ClientInventoryController : Player.PlayerOwnerInventoryContr
     private readonly ManualLogSource _logger;
     private readonly Player _player;
     private readonly FikaPlayer _fikaPlayer;
-    private readonly IPlayerSearchController _searchController;
 
     public ClientInventoryController(Player player, Profile profile, bool examined) : base(player, profile, examined)
     {
-        this._player = player;
+        _player = player;
         _fikaPlayer = (FikaPlayer)player;
         MongoID_0 = MongoID.Generate(true);
-        _searchController = new PlayerSearchControllerClass(profile, this);
+        PlayerSearchController = new PlayerSearchControllerClass(profile, this);
         _logger = BepInEx.Logging.Logger.CreateLogSource(nameof(ClientInventoryController));
     }
 
-    public override IPlayerSearchController PlayerSearchController
-    {
-        get
-        {
-            return _searchController;
-        }
-    }
+    public override IPlayerSearchController PlayerSearchController { get; }
 
     public override void GetTraderServicesDataFromServer(string traderId)
     {
@@ -104,7 +96,7 @@ public sealed class ClientInventoryController : Player.PlayerOwnerInventoryContr
         // Do not replicate picking up quest items, throws an error on the other clients            
         if (operation is MoveOperationClass moveOperation)
         {
-            Item lootedItem = moveOperation.Item;
+            var lootedItem = moveOperation.Item;
             if (lootedItem.QuestItem)
             {
                 if (_fikaPlayer.AbstractQuestControllerClass is ClientSharedQuestController sharedQuestController
@@ -147,7 +139,7 @@ public sealed class ClientInventoryController : Player.PlayerOwnerInventoryContr
             InventoryController = this
         };
 
-        ushort operationNum = AddOperationCallback(operation, handler.ReceiveStatusFromServer);
+        var operationNum = AddOperationCallback(operation, handler.ReceiveStatusFromServer);
         _fikaPlayer.PacketSender.NetworkManager.SendGenericPacket(EGenericSubPacketType.InventoryOperation,
                 InventoryPacket.FromValue(_fikaPlayer.NetId, operation));
 #if DEBUG
@@ -158,7 +150,9 @@ public sealed class ClientInventoryController : Player.PlayerOwnerInventoryContr
     public override bool HasCultistAmulet(out CultistAmuletItemClass amulet)
     {
         amulet = null;
-        using IEnumerator<Item> enumerator = Inventory.GetItemsInSlots([EquipmentSlot.Pockets]).GetEnumerator();
+        using var enumerator = Inventory.GetItemsInSlots([EquipmentSlot.Pockets])
+            .GetEnumerator();
+
         while (enumerator.MoveNext())
         {
             if (enumerator.Current is CultistAmuletItemClass cultistAmuletClass)
@@ -172,7 +166,7 @@ public sealed class ClientInventoryController : Player.PlayerOwnerInventoryContr
 
     private ushort AddOperationCallback(BaseInventoryOperationClass operation, Action<ServerOperationStatus> callback)
     {
-        ushort id = operation.Id;
+        var id = operation.Id;
         _fikaPlayer.OperationCallbacks.Add(id, callback);
         return id;
     }
@@ -187,8 +181,8 @@ public sealed class ClientInventoryController : Player.PlayerOwnerInventoryContr
         public BaseInventoryOperationClass Operation;
         public Callback Callback;
         public ClientInventoryController InventoryController;
-        public IResult OperationResult = null;
-        public ServerOperationStatus ServerStatus = default;
+        public IResult OperationResult;
+        public ServerOperationStatus ServerStatus;
 
         public void ReceiveStatusFromServer(ServerOperationStatus serverStatus)
         {
@@ -222,17 +216,17 @@ public sealed class ClientInventoryController : Player.PlayerOwnerInventoryContr
 
         private void HandleFinalResult(IResult result)
         {
-            IResult result2 = OperationResult;
+            var result2 = OperationResult;
             if (result2 == null || !result2.Failed)
             {
                 OperationResult = result;
             }
-            EOperationStatus serverStatus = ServerStatus.Status;
+            var serverStatus = ServerStatus.Status;
             if (!serverStatus.Finished())
             {
                 return;
             }
-            EOperationStatus localStatus = Operation.Status;
+            var localStatus = Operation.Status;
             if (localStatus.InProgress())
             {
                 if (Operation is GInterface441 ginterface)
