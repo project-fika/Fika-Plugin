@@ -1,7 +1,6 @@
 ﻿using Comfort.Common;
 using EFT.Vehicle;
 using Fika.Core.Main.Custom;
-using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 
 namespace Fika.Core.Main.Components;
