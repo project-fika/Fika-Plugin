@@ -26,7 +26,7 @@ internal readonly struct InterpolatorJob(float unscaledDeltaTime, double network
                 var packet = PlayerStatePacket.FromBuffer(in buffer);
                 if (netManager.CoopHandler.Players.TryGetValue(packet.NetId, out var player))
                 {
-                    player.Snapshotter.Insert(ref packet, _networkTime);
+                    player.Snapshotter.Insert(packet, _networkTime);
                 }
             }
 

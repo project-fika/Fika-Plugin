@@ -109,7 +109,7 @@ public class Snapshotter
     /// Inserts a snapshot to the <see cref="_buffer"/>
     /// </summary>
     /// <param name="snapshot"></param>
-    public void Insert(ref PlayerStatePacket snapshot, double networkTime)
+    public void Insert(PlayerStatePacket snapshot, double networkTime)
     {
         lock (_bufferLock)
         {

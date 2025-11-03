@@ -20,7 +20,7 @@ internal readonly struct HandlePlayerStates(double networkTime) : IJobFor
         PlayerStatePacket packet = PlayerStatePacket.FromBuffer(in buffer);
         if (manager.CoopHandler.Players.TryGetValue(packet.NetId, out FikaPlayer player))
         {
-            player.Snapshotter.Insert(ref packet, _networkTime);
+            player.Snapshotter.Insert(packet, _networkTime);
         }
     }
 }
