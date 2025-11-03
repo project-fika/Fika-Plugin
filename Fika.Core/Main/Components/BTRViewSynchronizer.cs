@@ -31,7 +31,6 @@ internal class BTRViewSynchronizer : ThrottledMono
     {
         if (_server != null)
         {
-            FikaGlobals.LogInfo("Sending packet");
             _server.SendBTRPacket(ref BTRControllerClass.Instance.BTRDataPacketStruct);
         }
     }
