@@ -515,8 +515,11 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
                 }
                 break;
             case EPacketType.BTR:
-                BTRDataPacketStruct data = reader.GetUnmanaged<BTRDataPacketStruct>();
-                BTRControllerClass.Instance?.SyncBTRVehicleFromServer(data);
+                var data = reader.GetUnmanaged<BTRDataPacketStruct>();
+                if (BTRControllerClass.Instance.BtrView != null)
+                {
+                    BTRControllerClass.Instance.BtrView.SyncViewFromServer(ref data);
+                }
                 break;
             case EPacketType.VOIP:
                 if (VOIPClient != null)
