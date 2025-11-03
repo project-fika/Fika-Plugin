@@ -1,15 +1,12 @@
 ﻿using EFT.GlobalEvents;
 using EFT.Vehicle;
+using Fika.Core.Main.Components;
 using Fika.Core.Main.Utils;
 using SPT.Reflection.Patching;
 using System.Reflection;
 
 namespace Fika.Core.Main.Patches.BTR;
 
-/// <summary>
-/// Ensures that the BtrViewReadyEvent fires on the headless due to it having no <see cref="EFT.GamePlayerOwner"/>
-/// </summary>
-[DebugPatch]
 public class BTRView_Start_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
@@ -19,12 +16,11 @@ public class BTRView_Start_Patch : ModulePatch
     }
 
     [PatchPostfix]
-    public static void Postfix()
+    public static void Postfix(BTRView __instance)
     {
-        if (FikaBackendUtils.IsHeadless)
+        if (FikaBackendUtils.IsServer)
         {
-            var btrViewReadyEvent = GlobalEventHandlerClass.Instance.CreateCommonEvent<BtrViewReadyEvent>();
-            btrViewReadyEvent.Invoke(string.Empty);
+            BTRViewSynchronizer.CreateInstance(__instance);
         }
     }
 }
