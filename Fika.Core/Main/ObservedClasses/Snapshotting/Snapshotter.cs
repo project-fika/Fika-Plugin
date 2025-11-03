@@ -20,6 +20,7 @@ public class Snapshotter
     private readonly object _bufferLock;
     private readonly ObservedPlayer _player;
     private readonly float _deadZone;
+    private readonly bool _isZombie;
 
     internal Snapshotter(ObservedPlayer observedPlayer)
     {
@@ -34,6 +35,7 @@ public class Snapshotter
         _bufferLock = new();
         _player = observedPlayer;
         _deadZone = 0.05f * 0.05f;
+        _isZombie = observedPlayer.UsedSimplifiedSkeleton;
     }
 
     private double BufferTime
@@ -53,7 +55,7 @@ public class Snapshotter
         {
             SnapshotInterpolation.Step(_buffer, unscaledDeltaTime, ref _localTimeline, _localTimeScale, out PlayerStatePacket fromSnapshot,
                 out PlayerStatePacket toSnapshot, out double ratio);
-            Interpolate(in toSnapshot, in fromSnapshot, (float)ratio);
+            Interpolate(toSnapshot, fromSnapshot, (float)ratio);
         }
     }
 
@@ -63,9 +65,9 @@ public class Snapshotter
     /// <param name="to">Goal state</param>
     /// <param name="from">State to lerp from</param>
     /// <param name="ratio">Interpolation ratio</param>
-    public void Interpolate(in PlayerStatePacket to, in PlayerStatePacket from, float ratio)
+    public void Interpolate(PlayerStatePacket to, PlayerStatePacket from, float ratio)
     {
-        ObservedState currentState = _player.CurrentPlayerState;
+        var currentState = _player.CurrentPlayerState;
         currentState.ShouldUpdate = true;
 
         currentState.Rotation = new Vector2(
@@ -76,8 +78,8 @@ public class Snapshotter
         currentState.HeadRotation = Vector3.LerpUnclamped(from.HeadRotation, to.HeadRotation, ratio);
         currentState.Position = Vector3.LerpUnclamped(from.Position, to.Position, ratio);
 
-        Vector2 newDir = currentState.MovementDirection = Vector2.LerpUnclamped(from.MovementDirection, to.MovementDirection, ratio);
-        if (to.State is EPlayerState.Idle or EPlayerState.Transition || newDir.sqrMagnitude < _deadZone)
+        var newDir = currentState.MovementDirection = Vector2.LerpUnclamped(from.MovementDirection, to.MovementDirection, ratio);
+        if (!_isZombie && (to.State is EPlayerState.Idle or EPlayerState.Transition || newDir.sqrMagnitude < _deadZone))
         {
             currentState.MovementDirection = Vector2.zero;
             currentState.IsMoving = false;
