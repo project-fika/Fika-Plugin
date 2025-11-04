@@ -69,7 +69,7 @@ public class RequestSubPackets
                     fikaGame.GameController.InfiltrationPoint = Infiltration;
                     fikaGame.GameController.ClientSpawnPosition = Position;
                     fikaGame.GameController.ClientSpawnRotation = Rotation;
-                    FikaGlobals.LogInfo($"Received spawn position from host: {Position}, rotation: {Rotation}");
+                    FikaGlobals.LogInfo($"Received spawn position from host: {Position:F2}, rotation: {Rotation:F2}");
                     return;
                 }
                 FikaGlobals.LogError("SpawnPointRequest::HandleResponse: Infiltration was empty!");
