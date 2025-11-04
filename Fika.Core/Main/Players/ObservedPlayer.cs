@@ -1414,7 +1414,6 @@ public class ObservedPlayer : FikaPlayer
             transform.localPosition = Vector3.zero;
             method_27(transform.gameObject);
             Traverse.Create(this).Field("_compassInstantiated").SetValue(true);
-            return;
         }
     }
 
