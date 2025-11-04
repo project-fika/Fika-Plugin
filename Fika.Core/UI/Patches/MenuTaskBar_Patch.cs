@@ -65,10 +65,10 @@ public class MenuTaskBar_Patch : ModulePatch
                     {
                         try
                         {
-                            var profile = await FikaRequestHandler.GetProfile();
-                            var responseHasError = profile.ContainsKey("errmsg");
-                            var error = responseHasError ? profile.Value<string>("errmsg") : "Failed to retrieve profile";
-                            if (!responseHasError && profile != null)
+                            var profileResponse = await FikaRequestHandler.GetProfile();
+                            var responseHasError = !string.IsNullOrEmpty(profileResponse.ErrorMessage);
+                            var error = responseHasError ? profileResponse.ErrorMessage : "Failed to retrieve profile";
+                            if (!responseHasError && profileResponse != null && profileResponse.Profile != null)
                             {
                                 Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonBottomBarClick);
                                 var installDir = Environment.CurrentDirectory;
@@ -81,14 +81,30 @@ public class MenuTaskBar_Patch : ModulePatch
                                         Directory.CreateDirectory(fikaDir);
                                     }
 
+                                    // create dir, put profile in dir and moddata, change to dictionary, key = modName
+
                                     var profileId = Singleton<ClientApplication<ISession>>.Instance.Session.Profile.ProfileId;
 
-                                    if (File.Exists(@$"{fikaDir}\{profileId}.json"))
+                                    var profileDir = Path.Combine(fikaDir, profileId);
+                                    if (!Directory.Exists(profileDir))
                                     {
-                                        File.Copy(@$"{fikaDir}\{profileId}.json", @$"{fikaDir}\{profileId}.json.BAK", true);
+                                        Directory.CreateDirectory(profileDir);
                                     }
 
-                                    File.WriteAllText(@$"{fikaDir}\{profileId}.json", profile.ToString());
+                                    if (File.Exists(@$"{profileDir}\{profileId}.json"))
+                                    {
+                                        File.Copy(Path.Combine(profileDir, $"{profileId}.json"), Path.Combine(profileDir, $"{profileId}.json.BAK"), true);
+                                    }
+
+                                    if (profileResponse.ModData != null)
+                                    {
+                                        foreach ((var modName, var modData) in profileResponse.ModData)
+                                        {
+                                            File.WriteAllText(Path.Combine(profileDir, $"{modName}.json"), modData);
+                                        }
+                                    }
+
+                                    File.WriteAllText(Path.Combine(profileDir, $"{profileId}.json"), profileResponse.Profile.ToString());
                                     NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.SAVED_PROFILE.Localized(),
                                         [ColorizeText(EColor.BLUE, profileId), fikaDir]));
 
