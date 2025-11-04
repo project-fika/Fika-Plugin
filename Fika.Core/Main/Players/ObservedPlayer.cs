@@ -1355,7 +1355,7 @@ public class ObservedPlayer : FikaPlayer
     {
         DistanceDirty = true;
         OcclusionDirty = true;
-        if (HealthController == null || !HealthController.IsAlive)
+        if (HealthController?.IsAlive != true)
         {
             return;
         }
