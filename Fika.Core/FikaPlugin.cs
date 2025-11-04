@@ -10,7 +10,6 @@ using Fika.Core.ConsoleCommands;
 using Fika.Core.Main.Custom;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Http;
-using Fika.Core.Networking.Models;
 using Fika.Core.Networking.Websocket;
 #if GOLDMASTER
 using Fika.Core.UI; 
@@ -202,6 +201,7 @@ public class FikaPlugin : BaseUnityPlugin
     public bool CanEditRaidSettings;
     public bool EnableTransits;
     public bool AnyoneCanStartRaid;
+    public bool AllowNamePlates;
     #endregion
 
     #region natpunch config
@@ -222,7 +222,7 @@ public class FikaPlugin : BaseUnityPlugin
 
         GetClientConfig();
 
-        string fikaVersion = Assembly.GetAssembly(typeof(FikaPlugin)).GetName().Version.ToString();
+        var fikaVersion = Assembly.GetAssembly(typeof(FikaPlugin)).GetName().Version.ToString();
 
         Logger.LogInfo($"Fika is loaded! Running version: {fikaVersion}");
 
@@ -268,9 +268,9 @@ public class FikaPlugin : BaseUnityPlugin
 
     private void VerifyServerVersion()
     {
-        string version = FikaRequestHandler.CheckServerVersion().Version;
-        bool failed = true;
-        if (Version.TryParse(version, out Version serverVersion))
+        var version = FikaRequestHandler.CheckServerVersion().Version;
+        var failed = true;
+        if (Version.TryParse(version, out var serverVersion))
         {
             if (serverVersion >= _requiredServerVersion)
             {
@@ -326,7 +326,7 @@ public class FikaPlugin : BaseUnityPlugin
 
     private void GetClientConfig()
     {
-        ClientConfigModel clientConfig = FikaRequestHandler.GetClientConfig();
+        var clientConfig = FikaRequestHandler.GetClientConfig();
 
         UseBTR = clientConfig.UseBTR;
         FriendlyFire = clientConfig.FriendlyFire;
@@ -341,13 +341,14 @@ public class FikaPlugin : BaseUnityPlugin
         CanEditRaidSettings = clientConfig.CanEditRaidSettings;
         EnableTransits = clientConfig.EnableTransits;
         AnyoneCanStartRaid = clientConfig.AnyoneCanStartRaid;
+        AllowNamePlates = clientConfig.AllowNamePlates;
 
         clientConfig.LogValues();
     }
 
     private void GetNatPunchServerConfig()
     {
-        NatPunchServerConfigModel natPunchServerConfig = FikaRequestHandler.GetNatPunchServerConfig();
+        var natPunchServerConfig = FikaRequestHandler.GetNatPunchServerConfig();
 
         NatPunchServerEnable = natPunchServerConfig.Enable;
         NatPunchServerIP = RequestHandler.Host.Replace("https://", "").Split(':')[0];
@@ -380,10 +381,10 @@ public class FikaPlugin : BaseUnityPlugin
 
     private string CleanConfigString(string header)
     {
-        string original = string.Copy(header);
-        bool foundForbidden = false;
+        var original = string.Copy(header);
+        var foundForbidden = false;
         char[] forbiddenChars = ['\n', '\t', '\\', '\"', '\'', '[', ']'];
-        foreach (char character in forbiddenChars)
+        foreach (var character in forbiddenChars)
         {
             if (header.Contains(character))
             {
@@ -418,8 +419,9 @@ public class FikaPlugin : BaseUnityPlugin
 
     private void SetupConfig()
     {
-        bool failed = false;
+        var failed = false;
         List<string> headers = [];
+        var disabledMessage = LocaleUtils.UI_DISABLED_BY_HOST.Localized();
 
         // Hidden
 
@@ -439,7 +441,7 @@ public class FikaPlugin : BaseUnityPlugin
 
         // Advanced
 
-        string advancedHeader = LocaleUtils.BEPINEX_H_ADVANCED.Localized();
+        var advancedHeader = LocaleUtils.BEPINEX_H_ADVANCED.Localized();
         const string advancedDefaultHeader = "Advanced";
 
         OfficialVersion = SetupSetting(advancedDefaultHeader, "Show Official Version", false,
@@ -502,7 +504,7 @@ public class FikaPlugin : BaseUnityPlugin
 
         // Coop
 
-        string coopHeader = CleanConfigString(LocaleUtils.BEPINEX_H_COOP.Localized());
+        var coopHeader = CleanConfigString(LocaleUtils.BEPINEX_H_COOP.Localized());
         const string coopDefaultHeader = "Coop";
 
         UseHeadlessIfAvailable = SetupSetting(coopDefaultHeader, "Auto Use Headless", false,
@@ -598,15 +600,16 @@ public class FikaPlugin : BaseUnityPlugin
 
         // Coop | Name Plates
 
-        string coopNameplatesHeader = CleanConfigString(LocaleUtils.BEPINEX_H_COOP_NAME_PLATES.Localized());
+        var coopNameplatesHeader = CleanConfigString(LocaleUtils.BEPINEX_H_COOP_NAME_PLATES.Localized());
         const string coopDefaultNamePlatesHeader = "Coop | Name Plates";
 
         UseNamePlates = SetupSetting(coopDefaultNamePlatesHeader, "Show Player Name Plates", true,
-            new ConfigDescription(LocaleUtils.BEPINEX_USE_NAME_PLATES_D.Localized(), tags: new ConfigurationManagerAttributes()
+            new ConfigDescription(AllowNamePlates ? LocaleUtils.BEPINEX_USE_NAME_PLATES_D.Localized() : disabledMessage, tags: new ConfigurationManagerAttributes()
             {
                 Category = coopNameplatesHeader,
                 DispName = LocaleUtils.BEPINEX_USE_NAME_PLATES_T.Localized(),
-                Order = 16
+                Order = 16,
+                ReadOnly = !AllowNamePlates
             }),
             "Show Player Name Plates", ref failed, headers);
 
@@ -752,10 +755,9 @@ public class FikaPlugin : BaseUnityPlugin
 
         // Coop | Quest Sharing
 
-        string coopQuestSharingHeader = CleanConfigString(LocaleUtils.BEPINEX_H_COOP_QUEST_SHARING.Localized());
+        var coopQuestSharingHeader = CleanConfigString(LocaleUtils.BEPINEX_H_COOP_QUEST_SHARING.Localized());
         const string coopDefaultQuestSharingHeader = "Coop | Quest Sharing";
-        bool questSharingEnabled = SharedQuestProgression;
-        string disabledMessage = LocaleUtils.UI_DISABLED_BY_HOST.Localized();
+        var questSharingEnabled = SharedQuestProgression;
 
         QuestTypesToShareAndReceive = SetupSetting(coopDefaultQuestSharingHeader, "Quest Types", EQuestSharingTypes.All,
             new ConfigDescription(questSharingEnabled ? LocaleUtils.BEPINEX_QUEST_TYPES_D.Localized() : disabledMessage, tags: new ConfigurationManagerAttributes()
@@ -809,7 +811,7 @@ public class FikaPlugin : BaseUnityPlugin
 
         // Coop | Pinging
 
-        string coopPingingHeader = CleanConfigString(LocaleUtils.BEPINEX_H_COOP_PINGING.Localized());
+        var coopPingingHeader = CleanConfigString(LocaleUtils.BEPINEX_H_COOP_PINGING.Localized());
         const string coopDefaultPingingHeader = "Coop | Pinging";
 
         UsePingSystem = SetupSetting(coopDefaultPingingHeader, "Ping System", true,
@@ -928,7 +930,7 @@ public class FikaPlugin : BaseUnityPlugin
 
         // Coop | Debug
 
-        string coopDebugHeader = CleanConfigString(LocaleUtils.BEPINEX_H_COOP_DEBUG.Localized());
+        var coopDebugHeader = CleanConfigString(LocaleUtils.BEPINEX_H_COOP_DEBUG.Localized());
         const string coopDefaultDebugHeader = "Coop | Debug";
 
         FreeCamButton = SetupSetting(coopDefaultDebugHeader, "Free Camera Button", new KeyboardShortcut(KeyCode.F9),
@@ -978,7 +980,7 @@ public class FikaPlugin : BaseUnityPlugin
 
         // Network
 
-        string networkHeader = CleanConfigString(LocaleUtils.BEPINEX_H_NETWORK.Localized());
+        var networkHeader = CleanConfigString(LocaleUtils.BEPINEX_H_NETWORK.Localized());
         const string networkDefaultHeader = "Network";
 
         ForceIP = SetupSetting(networkDefaultHeader, "Force IP", "",
@@ -1072,7 +1074,7 @@ public class FikaPlugin : BaseUnityPlugin
 
         if (failed)
         {
-            string headerString = string.Join(", ", headers);
+            var headerString = string.Join(", ", headers);
             Singleton<PreloaderUI>.Instance.ShowErrorScreen(LocaleUtils.UI_LOCALE_ERROR_HEADER.Localized(),
                 string.Format(LocaleUtils.UI_LOCALE_ERROR_DESCRIPTION.Localized(), headerString));
             FikaLogger.LogError("SetupConfig: Headers failed: " + headerString);
@@ -1100,9 +1102,9 @@ public class FikaPlugin : BaseUnityPlugin
 
         try
         {
-            foreach (NetworkInterface networkInterface in NetworkInterface.GetAllNetworkInterfaces())
+            foreach (var networkInterface in NetworkInterface.GetAllNetworkInterfaces())
             {
-                foreach (UnicastIPAddressInformation ip in networkInterface.GetIPProperties().UnicastAddresses)
+                foreach (var ip in networkInterface.GetIPProperties().UnicastAddresses)
                 {
                     if (networkInterface.Description.Contains("Radmin VPN") || networkInterface.Description.Contains("ZeroTier"))
                     {
@@ -1116,7 +1118,7 @@ public class FikaPlugin : BaseUnityPlugin
 
                     if (ip.Address.AddressFamily == AddressFamily.InterNetwork)
                     {
-                        string stringIp = ip.Address.ToString();
+                        var stringIp = ip.Address.ToString();
                         if (stringIp != "127.0.0.1")
                         {
                             ips.Add(stringIp);
@@ -1126,7 +1128,7 @@ public class FikaPlugin : BaseUnityPlugin
             }
 
             LocalIPs = [.. ips.Skip(1)];
-            string allIps = string.Join(", ", LocalIPs);
+            var allIps = string.Join(", ", LocalIPs);
             Logger.LogInfo($"Cached local IPs: {allIps}");
             return [.. ips];
         }

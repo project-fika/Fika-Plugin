@@ -210,7 +210,7 @@ public class ObservedPlayer : FikaPlayer
 
         player.AIData = new PlayerAIDataClass(null, player);
 
-        Traverse observedTraverse = Traverse.Create(player);
+        var observedTraverse = Traverse.Create(player);
         observedTraverse.Field<LocalPlayerCullingHandlerClass>("localPlayerCullingHandlerClass").Value = new();
         player._cullingHandler = observedTraverse.Field<LocalPlayerCullingHandlerClass>("localPlayerCullingHandlerClass").Value;
         player._cullingHandler.Initialize(player, player.PlayerBones);
@@ -1077,7 +1077,7 @@ public class ObservedPlayer : FikaPlayer
 
         if (aggressor.GroupId == "Fika" && !aggressor.IsYourPlayer)
         {
-            FikaPlayer mainPlayer = (FikaPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+            var mainPlayer = (FikaPlayer)Singleton<GameWorld>.Instance.MainPlayer;
             if (mainPlayer == null)
             {
                 return;
@@ -1137,7 +1137,7 @@ public class ObservedPlayer : FikaPlayer
             HandsController.FastForwardCurrentState();
         }
 
-        Inventory inventory = new EFTInventoryClass()
+        var inventory = new EFTInventoryClass()
         {
             Equipment = inventoryDescriptor
         }.ToInventory();
@@ -1267,7 +1267,7 @@ public class ObservedPlayer : FikaPlayer
     public void InitObservedPlayer()
     {
         PacketSender = gameObject.AddComponent<ObservedPacketSender>();
-        Traverse playerTraverse = Traverse.Create(this);
+        var playerTraverse = Traverse.Create(this);
 
         if (IsObservedAI)
         {
@@ -1337,7 +1337,10 @@ public class ObservedPlayer : FikaPlayer
             yield return null;
         }
 
-        _healthBar = FikaHealthBar.Create(this);
+        if (FikaPlugin.Instance.AllowNamePlates)
+        {
+            _healthBar = FikaHealthBar.Create(this);
+        }
 
         while (Singleton<GameWorld>.Instance.MainPlayer == null)
         {

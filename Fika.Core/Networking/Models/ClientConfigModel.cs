@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reflection;
 using System.Runtime.Serialization;
 
 namespace Fika.Core.Networking.Models;
@@ -46,17 +45,19 @@ public struct ClientConfigModel
     [DataMember(Name = "anyoneCanStartRaid")]
     public bool AnyoneCanStartRaid { get; set; }
 
+    [DataMember(Name = "allowNamePlates")]
+    public bool AllowNamePlates { get; set; }
+
     public readonly void LogValues()
     {
         FikaPlugin.Instance.FikaLogger.LogInfo("Received config from server:");
-        FieldInfo[] fields = typeof(ClientConfigModel).GetFields();
-        foreach (FieldInfo field in fields)
+        foreach (var field in typeof(ClientConfigModel).GetFields())
         {
-            object value = field.GetValue(this);
+            var value = field.GetValue(this);
             if (value is Array valueArray)
             {
-                string values = "";
-                for (int i = 0; i < valueArray.Length; i++)
+                var values = "";
+                for (var i = 0; i < valueArray.Length; i++)
                 {
                     if (i == 0)
                     {
