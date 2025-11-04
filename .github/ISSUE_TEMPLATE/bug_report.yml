@@ -1,0 +1,64 @@
+name: Bug report
+description: Create a bug report for the Fika-Plugin
+title: "[BUG] "
+labels: bug
+type: bug
+assignees: 'lacyway'
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Please read these steps carefully:
+      
+        - You must be able to reliably reproduce the issue, with no mods other than Fika
+        - You must fill in all the required fields and attach all required files
+        If you do not meet the requirements above, we will close the Issue ***without warning***
+  - type: textarea
+    id: description
+    attributes:
+        label: Description
+        description: "Describe the issue and how to reproduce it"
+        placeholder: "Be as thorough as possible..."
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+        label: Expected Result
+        description: "What were you expecting to happen?"
+    validations:
+      required: true
+  - type: dropdown
+    id: type
+    attributes:
+      label: Does it happen for clients, the host, or both?
+      options:
+        - Client
+        - Host
+        - Both
+    validations:
+      required: true
+  - type: textarea
+    id: clientlog
+    attributes:
+      label: "Client Log"
+      description: |
+        Upload a copy of your *entire* `Player.log` from `%Appdata%\..\LocalLow\Battlestate Games\EscapeFromTarkov`
+      placeholder: "Attach the log file, do not paste the contents."
+    validations:
+      required: true
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: "Screenshots"
+      description: "Attach any screenshots if applicable"
+    validations:
+      required: false
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: "Confirmation"
+      description: "Confirm that you have read all the requirements above, that all information is thruthful, and that *absolutely* no other mods are running"
+      options:
+        - label: "I confirm"
+          required: true
