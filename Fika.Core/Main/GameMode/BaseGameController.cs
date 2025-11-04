@@ -64,7 +64,7 @@ public abstract class BaseGameController
     protected IFikaGame _fikaGame;
     protected AbstractGame _abstractGame;
 
-    public bool IsServer { get; private set; }
+    public bool IsServer { get; }
     public bool RaidStarted { get; internal set; }
     public FikaTimeManager TimeManager { get; set; }
 
@@ -377,11 +377,6 @@ public abstract class BaseGameController
         {
             _abstractGame.StartCoroutine(FixVOIPAudioDevice());
         }
-
-        if (_abstractGame is CoopGame coopGame)
-        {
-            coopGame.ResetGameDateTime();
-        }
     }
 
     private IEnumerator FixVOIPAudioDevice()
@@ -681,9 +676,15 @@ public abstract class BaseGameController
 
     public abstract Task StartBotSystemsAndCountdown(BotControllerSettings controllerSettings, GameWorld gameWorld);
 
-    public void SetClientTime(DateTime gameTime, TimeSpan sessionTime)
+    public void SetClientTime(DateTime gameTime, TimeSpan sessionTime, GameDateTime gameDateTime)
     {
         GameTime = gameTime;
         SessionTime = sessionTime;
+        if (_abstractGame is CoopGame coopGame)
+        {
+            Logger.LogInfo($"Received date from server, was [{coopGame.GameDateTime.Calculate():G}] - new [{gameDateTime.Calculate():G}]");
+            coopGame.GameDateTime = gameDateTime;
+            coopGame.GameWorld_0.GameDateTime = gameDateTime;
+        }
     }
 }

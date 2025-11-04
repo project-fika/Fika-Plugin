@@ -752,7 +752,7 @@ public partial class FikaClient
                 fikaGame.GameController.RaidStarted = packet.RaidStarted;
                 if (packet.HostReady)
                 {
-                    fikaGame.GameController.SetClientTime(packet.GameTime, packet.SessionTime);
+                    fikaGame.GameController.SetClientTime(packet.GameTime, packet.SessionTime, packet.GameDateTime);
                 }
             }
         }

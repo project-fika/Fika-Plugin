@@ -77,7 +77,6 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
     private FikaPlayer _localPlayer;
     private bool _hasSaved;
     private float _voipDistance;
-    private static GameDateTime _gameDateTime;
 
     /// <summary>
     /// Creates a <see cref="CoopGame"/>
@@ -104,8 +103,6 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
             gameTime.Reset(newTime);
             dateTime = EDateTime.CURR;
         }
-
-        _gameDateTime = gameTime;
 
         var coopGame = smethod_0<CoopGame>(inputTree, profile, gameWorld, gameTime, insurance, gameUI,
             location, timeAndWeather, wavesSettings, dateTime, callback, fixedDeltaTime, updateQueue, backEndSession,
@@ -1224,20 +1221,5 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
     public void ReportAbuse()
     {
         _logger.LogInfo("NO");
-    }
-
-    /// <summary>
-    /// Resets the <see cref="GameDateTime"/> of the game and <see cref="GameWorld"/> upon start to ensure all times are synced between clients
-    /// </summary>
-    /// <remarks>
-    /// This mitigates unsynced times if players wait at "Waiting for host to start raid" for a long time, and someone joins late
-    /// </remarks>
-    internal void ResetGameDateTime()
-    {
-        _logger.LogInfo($"Resyncing the GameDate to {_gameDateTime.Calculate():G}");
-        GameDateTime = _gameDateTime;
-        GameWorld_0.GameDateTime = _gameDateTime;
-
-        _gameDateTime = null;
     }
 }

@@ -170,7 +170,8 @@ public class HostGameController : BaseGameController, IBotGame
             ReadyPlayers = server.ReadyClients,
             HostReady = server.HostReady,
             GameTime = GameTime.Value,
-            SessionTime = SessionTime.Value
+            SessionTime = SessionTime.Value,
+            GameDateTime = GameDateTime
         };
 
         server.SendData(ref packet, DeliveryMethod.ReliableOrdered);

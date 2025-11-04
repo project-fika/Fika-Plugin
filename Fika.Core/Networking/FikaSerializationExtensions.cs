@@ -58,7 +58,7 @@ public static class FikaSerializationExtensions
     /// <returns>The deserialized <see cref="PhysicalStateStruct"/></returns>
     public static PhysicalStateStruct GetPhysical(this NetDataReader reader)
     {
-        byte flags = reader.GetByte();
+        var flags = reader.GetByte();
         return new()
         {
             StaminaExhausted = (flags & (1 << 0)) != 0,
@@ -74,7 +74,7 @@ public static class FikaSerializationExtensions
     /// <param name="bytes"></param>
     public static void PutByteArray(this NetDataWriter writer, byte[] bytes)
     {
-        int length = bytes.Length;
+        var length = bytes.Length;
         writer.Put(length);
         if (length > 0)
         {
@@ -89,7 +89,7 @@ public static class FikaSerializationExtensions
     /// <param name="bytes"></param>
     public static void PutByteArray(this NetDataWriter writer, ReadOnlySpan<byte> bytes)
     {
-        int length = bytes.Length;
+        var length = bytes.Length;
         writer.Put(length);
         if (length > 0)
         {
@@ -104,13 +104,13 @@ public static class FikaSerializationExtensions
     /// <returns>A <see cref="byte"/> array</returns>
     public static byte[] GetByteArray(this NetDataReader reader)
     {
-        int length = reader.GetInt();
+        var length = reader.GetInt();
         if (length <= 0)
         {
             return [];
         }
 
-        byte[] bytes = new byte[length];
+        var bytes = new byte[length];
         reader.GetBytes(bytes, length);
         return bytes;
     }
@@ -137,7 +137,7 @@ public static class FikaSerializationExtensions
     /// <returns>The decompressed original byte array or an empty array if length is zero</returns>
     public static byte[] DecompressAndGetByteArray(this NetDataReader reader)
     {
-        int originalLength = reader.GetInt();
+        var originalLength = reader.GetInt();
         if (originalLength == 0)
         {
             return [];
@@ -259,9 +259,9 @@ public static class FikaSerializationExtensions
     /// <returns>A <see cref="List{T}"/> of <see cref="SmokeGrenadeDataPacketStruct"/></returns>
     public static List<SmokeGrenadeDataPacketStruct> GetThrowableData(this NetDataReader reader)
     {
-        int amount = reader.GetInt();
+        var amount = reader.GetInt();
         List<SmokeGrenadeDataPacketStruct> throwables = new(amount);
-        for (int i = 0; i < amount; i++)
+        for (var i = 0; i < amount; i++)
         {
             SmokeGrenadeDataPacketStruct data = new()
             {
@@ -310,7 +310,7 @@ public static class FikaSerializationExtensions
     public static void PutInteractivesStates(this NetDataWriter writer, List<WorldInteractiveObject.WorldInteractiveDataPacketStruct> interactiveObjectsData)
     {
         writer.Put(interactiveObjectsData.Count);
-        for (int i = 0; i < interactiveObjectsData.Count; i++)
+        for (var i = 0; i < interactiveObjectsData.Count; i++)
         {
             writer.Put(interactiveObjectsData[i].NetId);
             writer.Put(interactiveObjectsData[i].State);
@@ -325,9 +325,9 @@ public static class FikaSerializationExtensions
     /// <returns>A <see cref="List{T}"/> of <see cref="WorldInteractiveObject.WorldInteractiveDataPacketStruct"/></returns>
     public static List<WorldInteractiveObject.WorldInteractiveDataPacketStruct> GetInteractivesStates(this NetDataReader reader)
     {
-        int amount = reader.GetInt();
+        var amount = reader.GetInt();
         List<WorldInteractiveObject.WorldInteractiveDataPacketStruct> interactivesStates = new(amount);
-        for (int i = 0; i < amount; i++)
+        for (var i = 0; i < amount; i++)
         {
             WorldInteractiveObject.WorldInteractiveDataPacketStruct data = new()
             {
@@ -348,7 +348,7 @@ public static class FikaSerializationExtensions
     /// <param name="lampStates"></param>
     public static void PutLampStates(this NetDataWriter writer, Dictionary<int, byte> lampStates)
     {
-        int amount = lampStates.Count;
+        var amount = lampStates.Count;
         writer.Put(amount);
         foreach (KeyValuePair<int, byte> lampState in lampStates)
         {
@@ -364,9 +364,9 @@ public static class FikaSerializationExtensions
     /// <returns>A <see cref="Dictionary{TKey, TValue}"/> of information for <see cref="LampController"/>s</returns>
     public static Dictionary<int, byte> GetLampStates(this NetDataReader reader)
     {
-        int amount = reader.GetInt();
+        var amount = reader.GetInt();
         Dictionary<int, byte> states = new(amount);
-        for (int i = 0; i < amount; i++)
+        for (var i = 0; i < amount; i++)
         {
             states.Add(reader.GetInt(), reader.GetByte());
         }
@@ -381,7 +381,7 @@ public static class FikaSerializationExtensions
     /// <param name="windowBreakerStates"></param>
     public static void PutWindowBreakerStates(this NetDataWriter writer, Dictionary<int, Vector3> windowBreakerStates)
     {
-        int amount = windowBreakerStates.Count;
+        var amount = windowBreakerStates.Count;
         writer.Put(amount);
         foreach (KeyValuePair<int, Vector3> windowBreakerState in windowBreakerStates)
         {
@@ -397,9 +397,9 @@ public static class FikaSerializationExtensions
     /// <returns>A <see cref="Dictionary{TKey, TValue}"/> of information for <see cref="WindowBreaker"/>s</returns>
     public static Dictionary<int, Vector3> GetWindowBreakerStates(this NetDataReader reader)
     {
-        int amount = reader.GetInt();
+        var amount = reader.GetInt();
         Dictionary<int, Vector3> states = new(amount);
-        for (int i = 0; i < amount; i++)
+        for (var i = 0; i < amount; i++)
         {
             states.Add(reader.GetInt(), reader.GetUnmanaged<Vector3>());
         }
@@ -478,19 +478,19 @@ public static class FikaSerializationExtensions
         writer.Put(traderService.CanAfford);
         writer.Put(traderService.WasPurchasedInThisRaid);
         writer.Put(traderService.ItemsToPay.Count);
-        foreach ((MongoID id, int amount) in traderService.ItemsToPay)
+        foreach ((MongoID id, var amount) in traderService.ItemsToPay)
         {
             writer.PutMongoID(id);
             writer.Put(amount);
         }
-        int uniqueAmount = traderService.UniqueItems.Length;
+        var uniqueAmount = traderService.UniqueItems.Length;
         writer.Put(uniqueAmount);
-        for (int i = 0; i < uniqueAmount; i++)
+        for (var i = 0; i < uniqueAmount; i++)
         {
             writer.PutMongoID(traderService.UniqueItems[i]);
         }
         writer.Put(traderService.SubServices.Count);
-        foreach ((string key, int value) in traderService.SubServices)
+        foreach ((var key, var value) in traderService.SubServices)
         {
             writer.Put(key);
             writer.Put(value);
@@ -511,21 +511,21 @@ public static class FikaSerializationExtensions
             CanAfford = reader.GetBool(),
             WasPurchasedInThisRaid = reader.GetBool()
         };
-        int toPayAmount = reader.GetInt();
+        var toPayAmount = reader.GetInt();
         traderService.ItemsToPay = new(toPayAmount);
-        for (int i = 0; i < toPayAmount; i++)
+        for (var i = 0; i < toPayAmount; i++)
         {
             traderService.ItemsToPay[reader.GetMongoID()] = reader.GetInt();
         }
-        int uniqueAmount = reader.GetInt();
+        var uniqueAmount = reader.GetInt();
         traderService.UniqueItems = new MongoID[uniqueAmount];
-        for (int i = 0; i < uniqueAmount; i++)
+        for (var i = 0; i < uniqueAmount; i++)
         {
             traderService.UniqueItems[i] = reader.GetMongoID();
         }
-        int subAmount = reader.GetInt();
+        var subAmount = reader.GetInt();
         traderService.SubServices = new(subAmount);
-        for (int i = 0; i < subAmount; i++)
+        for (var i = 0; i < subAmount; i++)
         {
             traderService.SubServices[reader.GetString()] = reader.GetInt();
         }
@@ -795,7 +795,7 @@ public static class FikaSerializationExtensions
             ControllerType = reader.GetEnum<EHandsControllerType>(),
         };
 
-        byte flags = reader.GetByte();
+        var flags = reader.GetByte();
         packet.IsStationary = (flags & 1) != 0;
         packet.IsZombie = (flags & 2) != 0;
 
@@ -918,7 +918,7 @@ public static class FikaSerializationExtensions
         if (packet.Done && packet.TransformSyncs != null)
         {
             GStruct138[] transforms = packet.TransformSyncs;
-            for (int i = 0; i < 12; i++)
+            for (var i = 0; i < 12; i++)
             {
                 writer.PutUnmanaged(transforms[i].Position);
                 writer.PutUnmanaged(transforms[i].Rotation);
@@ -943,7 +943,7 @@ public static class FikaSerializationExtensions
         if (packet.Done)
         {
             packet.TransformSyncs = new GStruct138[12];
-            for (int i = 0; i < 12; i++)
+            for (var i = 0; i < 12; i++)
             {
                 packet.TransformSyncs[i] = new()
                 {
@@ -1011,13 +1011,13 @@ public static class FikaSerializationExtensions
     public static void PutPackedFloat(this NetDataWriter writer, float value, float min, float max, EFloatCompression compression = EFloatCompression.Low)
     {
         // Clamp input value to expected range
-        float clamped = Mathf.Clamp(value, min, max);
+        var clamped = Mathf.Clamp(value, min, max);
 
         // Calculate max integer value for the bit width (e.g., 255 for 8 bits, 65535 for 16 bits)
-        int maxInt = (1 << (int)compression) - 1;
+        var maxInt = (1 << (int)compression) - 1;
 
         // Normalize and quantize using rounding for better precision
-        int quantized = Mathf.RoundToInt((clamped - min) / (max - min) * maxInt);
+        var quantized = Mathf.RoundToInt((clamped - min) / (max - min) * maxInt);
 
         if (compression is EFloatCompression.High)
         {
@@ -1040,7 +1040,7 @@ public static class FikaSerializationExtensions
     /// <returns>The decompressed float value.</returns>
     public static float GetPackedFloat(this NetDataReader reader, float min, float max, EFloatCompression compression = EFloatCompression.Low)
     {
-        int maxInt = (1 << (int)compression) - 1;
+        var maxInt = (1 << (int)compression) - 1;
         int quantized;
 
         if (compression is EFloatCompression.High)
@@ -1052,7 +1052,7 @@ public static class FikaSerializationExtensions
             quantized = reader.GetUShort();
         }
 
-        float normalized = (float)quantized / maxInt;
+        var normalized = (float)quantized / maxInt;
         return min + (normalized * (max - min));
     }
 
@@ -1068,14 +1068,14 @@ public static class FikaSerializationExtensions
         const int minTarget = 0;
         const int maxTarget = byte.MaxValue;
 
-        int clampedValue = Mathf.Clamp(value, minValue, maxValue) - minValue;
-        int rangeInput = maxValue - minValue;
+        var clampedValue = Mathf.Clamp(value, minValue, maxValue) - minValue;
+        var rangeInput = maxValue - minValue;
         const int rangeTarget = maxTarget - minTarget;
 
-        float normalized = (float)clampedValue / rangeInput;
-        int scaled = (int)(minTarget + (normalized * rangeTarget));
+        var normalized = (float)clampedValue / rangeInput;
+        var scaled = (int)(minTarget + (normalized * rangeTarget));
 
-        byte result = (byte)Mathf.Clamp(scaled, minTarget, maxTarget);
+        var result = (byte)Mathf.Clamp(scaled, minTarget, maxTarget);
         writer.Put(result);
     }
 
@@ -1091,13 +1091,13 @@ public static class FikaSerializationExtensions
         const int minValue = 0;
         const int maxValue = byte.MaxValue;
 
-        byte value = reader.GetByte();
+        var value = reader.GetByte();
 
         const int rangeInput = maxValue - minValue;
-        int clampedValue = Mathf.Clamp(value, minValue, maxValue) - minValue;
+        var clampedValue = Mathf.Clamp(value, minValue, maxValue) - minValue;
         float rangeTarget = maxTarget - minTarget;
 
-        float normalized = (float)clampedValue / rangeInput;
+        var normalized = (float)clampedValue / rangeInput;
         return (int)(minTarget + (normalized * rangeTarget));
     }
 
@@ -1166,6 +1166,32 @@ public static class FikaSerializationExtensions
     {
         writer.Put(rotation.x);
         writer.PutPackedFloat(rotation.y, -90f, 90f, EFloatCompression.High);
+    }
+
+    /// <summary>
+    /// Serializes a <see cref="GameDateTime"/>
+    /// </summary>
+    /// <param name="writer">The writer to write with</param>
+    /// <param name="gameDateTime">The <see cref="GameDateTime"/> to serialize</param>
+    public static void PutGameDateTime(this NetDataWriter writer, GameDateTime gameDateTime)
+    {
+        writer.Put(gameDateTime.DateTime_0.ToBinary());
+        writer.Put(gameDateTime.DateTime_1.ToBinary());
+        writer.Put(gameDateTime.TimeFactor);
+        writer.Put(gameDateTime.TimeFactorMod);
+    }
+
+    /// <summary>
+    /// Deserializes a <see cref="GameDateTime"/>
+    /// </summary>
+    /// <param name="reader">The reader to read with</param>
+    /// <returns>A new <see cref="GameDateTime"/> with data</returns>
+    public static GameDateTime GetGameDateTime(this NetDataReader reader)
+    {
+        return new GameDateTime(DateTime.FromBinary(reader.GetLong()), DateTime.FromBinary(reader.GetLong()), reader.GetFloat())
+        {
+            TimeFactorMod = reader.GetFloat()
+        };
     }
 
     /// <summary>
