@@ -592,6 +592,7 @@ public partial class FikaServer
             respondPackage.GameTime = _gameStartTime.Value;
             GameTimerClass gameTimer = _coopHandler.LocalGameInstance.GameController.GameInstance.GameTimer;
             respondPackage.SessionTime = gameTimer.SessionTime.Value;
+            respondPackage.GameDateTime = (Singleton<IFikaGame>.Instance.GameController as HostGameController).GameDateTime;
         }
 
         SendData(ref respondPackage, DeliveryMethod.ReliableOrdered);

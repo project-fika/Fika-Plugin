@@ -38,6 +38,7 @@ public sealed class DisarmTripwire : IPoolSubPacket
             }
 
             FikaGlobals.LogError($"OnSyncObjectPacketReceived: Tripwire with id {Data.ObjectId} could not be found!");
+            return;
         }
 
         FikaGlobals.LogWarning($"OnSyncObjectPacketReceived: Received a packet we shouldn't receive: {Data.ObjectType}");

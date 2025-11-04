@@ -129,7 +129,7 @@ public class DebugUI : MonoBehaviour
 
         foreach (var player in _coopHandler.Players.Values)
         {
-            if (player.IsObservedAI && !_aliveBots.Contains(player) && player.HealthController.IsAlive)
+            if ((player.IsObservedAI || player.IsAI) && !_aliveBots.Contains(player) && player.HealthController.IsAlive)
             {
                 AddBot(player);
             }

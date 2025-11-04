@@ -6,7 +6,6 @@ using Dissonance;
 using EFT;
 using EFT.Bots;
 using EFT.Game.Spawning;
-using EFT.GameTriggers;
 using EFT.GlobalEvents;
 using EFT.Interactive;
 using EFT.UI;
@@ -65,7 +64,7 @@ public abstract class BaseGameController
     protected IFikaGame _fikaGame;
     protected AbstractGame _abstractGame;
 
-    public bool IsServer { get; private set; }
+    public bool IsServer { get; }
     public bool RaidStarted { get; internal set; }
     public FikaTimeManager TimeManager { get; set; }
 
@@ -164,12 +163,12 @@ public abstract class BaseGameController
     {
         if (MenuUI.Instantiated)
         {
-            MenuUI menuUI = MenuUI.Instance;
-            DefaultUIButton backButton = Traverse.Create(menuUI.MatchmakerTimeHasCome).Field<DefaultUIButton>("_cancelButton").Value;
-            GameObject customButton = GameObject.Instantiate(backButton.gameObject, backButton.gameObject.transform.parent);
+            var menuUI = MenuUI.Instance;
+            var backButton = Traverse.Create(menuUI.MatchmakerTimeHasCome).Field<DefaultUIButton>("_cancelButton").Value;
+            var customButton = GameObject.Instantiate(backButton.gameObject, backButton.gameObject.transform.parent);
             customButton.gameObject.name = "FikaStartButton";
             customButton.gameObject.SetActive(true);
-            DefaultUIButton backButtonComponent = customButton.GetComponent<DefaultUIButton>();
+            var backButtonComponent = customButton.GetComponent<DefaultUIButton>();
             backButtonComponent.SetHeaderText(LocaleUtils.UI_START_RAID.Localized(), 32);
             backButtonComponent.SetEnabledTooltip(LocaleUtils.UI_START_RAID_DESCRIPTION.Localized());
             UnityEvent newEvent = new();
@@ -181,7 +180,7 @@ public abstract class BaseGameController
                     return;
                 }
 
-                FikaClient fikaClient = Singleton<FikaClient>.Instance ?? throw new NullReferenceException("CreateStartButton::FikaClient was null!");
+                var fikaClient = Singleton<FikaClient>.Instance ?? throw new NullReferenceException("CreateStartButton::FikaClient was null!");
                 InformationPacket packet = new()
                 {
                     RequestStart = true
@@ -220,7 +219,7 @@ public abstract class BaseGameController
 
     public Task SetupCoopHandler(IFikaGame fikaGame)
     {
-        if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
+        if (CoopHandler.TryGetCoopHandler(out var coopHandler))
         {
             _coopHandler = coopHandler;
             _coopHandler.LocalGameInstance = fikaGame;
@@ -268,9 +267,9 @@ public abstract class BaseGameController
 
         if (_coopHandler != null)
         {
-            for (int i = 0; i < _coopHandler.HumanPlayers.Count; i++)
+            for (var i = 0; i < _coopHandler.HumanPlayers.Count; i++)
             {
-                FikaPlayer player = _coopHandler.HumanPlayers[i];
+                var player = _coopHandler.HumanPlayers[i];
                 try
                 {
                     if (_gameWorld.BtrController != null)
@@ -312,7 +311,7 @@ public abstract class BaseGameController
         _abstractGame.SetMatchmakerStatus(LocaleUtils.UI_FINISHING_RAID_INIT.Localized());
 
         WaitForEndOfFrame endOfFrame = new();
-        Task musicTask = Singleton<GUISounds>.Instance.method_10(false, CancellationToken.None);
+        var musicTask = Singleton<GUISounds>.Instance.method_10(false, CancellationToken.None);
         while (!musicTask.IsCompleted)
         {
             yield return endOfFrame;
@@ -335,7 +334,7 @@ public abstract class BaseGameController
 #if DEBUG
         Logger.LogWarning($"Running season handler for season: {Season}");
 #endif
-        Task runSeason = seasonController.Run(Season, SeasonsSettings);
+        var runSeason = seasonController.Run(Season, SeasonsSettings);
         while (!runSeason.IsCompleted)
         {
             yield return endOfFrame;
@@ -353,13 +352,13 @@ public abstract class BaseGameController
     {
         FikaBackendUtils.GroupPlayers.Clear();
 
-        int timeBeforeDeployLocal = FikaBackendUtils.IsReconnect ? 3 : Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal;
+        var timeBeforeDeployLocal = FikaBackendUtils.IsReconnect ? 3 : Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal;
 #if DEBUG
         timeBeforeDeployLocal = 3;
 #endif
         yield return WaitForHostInit(timeBeforeDeployLocal);
 
-        DateTime dateTime = EFTDateTimeClass.Now.AddSeconds(timeBeforeDeployLocal);
+        var dateTime = EFTDateTimeClass.Now.AddSeconds(timeBeforeDeployLocal);
         new MatchmakerFinalCountdown.FinalCountdownScreenClass(profile, dateTime).ShowScreen(EScreenState.Root);
         if (MonoBehaviourSingleton<AmbientAudioSystem>.Instantiated)
         {
@@ -387,9 +386,9 @@ public abstract class BaseGameController
         yield return new WaitForSeconds(1);
         DissonanceComms.Instance.IsMuted = true;
 
-        for (int i = 0; i < _coopHandler.HumanPlayers.Count; i++)
+        for (var i = 0; i < _coopHandler.HumanPlayers.Count; i++)
         {
-            FikaPlayer player = _coopHandler.HumanPlayers[i];
+            var player = _coopHandler.HumanPlayers[i];
             if (player.IsYourPlayer)
             {
                 continue;
@@ -404,9 +403,9 @@ public abstract class BaseGameController
 
         yield return new WaitForSeconds(2);
 
-        for (int i = 0; i < _coopHandler.HumanPlayers.Count; i++)
+        for (var i = 0; i < _coopHandler.HumanPlayers.Count; i++)
         {
-            FikaPlayer player = _coopHandler.HumanPlayers[i];
+            var player = _coopHandler.HumanPlayers[i];
             if (player.IsYourPlayer)
             {
                 continue;
@@ -422,7 +421,7 @@ public abstract class BaseGameController
 
     private void SyncTransitControllers(string profileId)
     {
-        TransitControllerAbstractClass transitController = Singleton<GameWorld>.Instance.TransitController;
+        var transitController = Singleton<GameWorld>.Instance.TransitController;
         if (transitController == null)
         {
             if (FikaPlugin.Instance.EnableTransits)
@@ -432,7 +431,7 @@ public abstract class BaseGameController
             return;
         }
 
-        if (transitController.summonedTransits.TryGetValue(profileId, out TransitDataClass transitData))
+        if (transitController.summonedTransits.TryGetValue(profileId, out var transitData))
         {
             SyncTransitControllersPacket packet = new()
             {
@@ -474,7 +473,7 @@ public abstract class BaseGameController
             Logger.LogWarning("Spawning halloween prefabs");
 #endif
             gameWorld.HalloweenEventController = new HalloweenEventControllerClass();
-            GameObject gameObject = (GameObject)Resources.Load("Prefabs/HALLOWEEN_CONTROLLER");
+            var gameObject = (GameObject)Resources.Load("Prefabs/HALLOWEEN_CONTROLLER");
             if (gameObject != null)
             {
                 _abstractGame.transform.InstantiatePrefab(gameObject);
@@ -492,7 +491,7 @@ public abstract class BaseGameController
     }
 
     public void InitBTRController(BackendConfigSettingsClass instance, GameWorld gameWorld, LocationSettingsClass.Location location)
-    {        
+    {
         if (FikaPlugin.Instance.UseBTR)
         {
             if (instance != null)
@@ -502,9 +501,9 @@ public abstract class BaseGameController
                     Logger.LogInfo("Loading BTR data...");
 #if DEBUG
                     Logger.LogWarning("Spawning BTR controller and setting spawn chance to 100%");
-                    JsonType.BTRServerSettings settings = Singleton<BackendConfigSettingsClass>.Instance.BTRLocalSettings;
-                    KeyValuePair<string, GStruct140> mapSettings = settings.ServerMapBTRSettings.First(x => x.Value.MapID == gameWorld.LocationId);
-                    GStruct140 btrSettings = mapSettings.Value;
+                    var settings = Singleton<BackendConfigSettingsClass>.Instance.BTRLocalSettings;
+                    var mapSettings = settings.ServerMapBTRSettings.First(x => x.Value.MapID == gameWorld.LocationId);
+                    var btrSettings = mapSettings.Value;
                     btrSettings.ChanceSpawn = 100;
                     btrSettings.SpawnPeriod = new(5, 10);
                     btrSettings.MoveSpeed = 32f;
@@ -550,7 +549,7 @@ public abstract class BaseGameController
         }
         else
         {
-            BackendConfigSettingsClass.TransitSettingsClass transitSettings = instance.transitSettings;
+            var transitSettings = instance.transitSettings;
             transitActive = transitSettings != null && transitSettings.active;
         }
         if (transitActive)
@@ -581,7 +580,7 @@ public abstract class BaseGameController
         }
         else
         {
-            BackendConfigSettingsClass.GClass1748 runddansSettings = instance.runddansSettings;
+            var runddansSettings = instance.runddansSettings;
             runddansActive = runddansSettings != null && runddansSettings.active;
         }
         if (runddansActive)
@@ -599,10 +598,10 @@ public abstract class BaseGameController
 
     public Task SetupRaidCode()
     {
-        string raidCode = FikaBackendUtils.RaidCode;
+        var raidCode = FikaBackendUtils.RaidCode;
         if (!string.IsNullOrEmpty(raidCode))
         {
-            Traverse preloaderUiTraverse = Traverse.Create(MonoBehaviourSingleton<PreloaderUI>.Instance);
+            var preloaderUiTraverse = Traverse.Create(MonoBehaviourSingleton<PreloaderUI>.Instance);
             // Raid code
             preloaderUiTraverse.Field("string_3").SetValue($"{raidCode}");
             // Update version label
@@ -677,9 +676,15 @@ public abstract class BaseGameController
 
     public abstract Task StartBotSystemsAndCountdown(BotControllerSettings controllerSettings, GameWorld gameWorld);
 
-    public void SetClientTime(DateTime gameTime, TimeSpan sessionTime)
+    public void SetClientTime(DateTime gameTime, TimeSpan sessionTime, GameDateTime gameDateTime)
     {
         GameTime = gameTime;
         SessionTime = sessionTime;
+        if (_abstractGame is CoopGame coopGame)
+        {
+            Logger.LogInfo($"Received date from server, was [{coopGame.GameDateTime.Calculate():G}] - new [{gameDateTime.Calculate():G}]");
+            coopGame.GameDateTime = gameDateTime;
+            coopGame.GameWorld_0.GameDateTime = gameDateTime;
+        }
     }
 }

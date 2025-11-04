@@ -5,6 +5,7 @@ using EFT;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Player;
+using System.Threading.Tasks;
 
 namespace Fika.Core.Main.PacketHandlers;
 
@@ -25,9 +26,9 @@ public class BotPacketSender : MonoBehaviour, IPacketSender
         }
     }
 
-    public static BotPacketSender Create(FikaBot bot)
+    public static Task<BotPacketSender> Create(FikaBot bot)
     {
-        BotPacketSender sender = bot.gameObject.AddComponent<BotPacketSender>();
+        var sender = bot.gameObject.AddComponent<BotPacketSender>();
         sender._player = bot;
         sender.NetworkManager = Singleton<FikaServer>.Instance;
         sender._state = new()
@@ -36,7 +37,7 @@ public class BotPacketSender : MonoBehaviour, IPacketSender
         };
         sender._animHash = PlayerAnimator.INERT_PARAM_HASH;
         sender.SendState = true;
-        return sender;
+        return Task.FromResult(sender);
     }
 
     public void Init()

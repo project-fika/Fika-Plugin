@@ -51,9 +51,9 @@ public class FikaBot : FikaPlayer
         CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity,
         Func<float> getAimingSensitivity, IViewFilter filter, MongoID currentId, ushort nextOperationId)
     {
-        bool useSimpleAnimator = profile.Info.Settings.UseSimpleAnimator;
-        ResourceKey resourceKey = useSimpleAnimator ? ResourceKeyManagerAbstractClass.ZOMBIE_BUNDLE_NAME : ResourceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME;
-        FikaBot player = Create<FikaBot>(gameWorld, resourceKey, playerId, position, updateQueue, armsUpdateMode,
+        var useSimpleAnimator = profile.Info.Settings.UseSimpleAnimator;
+        var resourceKey = useSimpleAnimator ? ResourceKeyManagerAbstractClass.ZOMBIE_BUNDLE_NAME : ResourceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME;
+        var player = Create<FikaBot>(gameWorld, resourceKey, playerId, position, updateQueue, armsUpdateMode,
             bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix, aiControl, useSimpleAnimator);
 
         player._isHeadless = FikaBackendUtils.IsHeadless;
@@ -66,7 +66,7 @@ public class FikaBot : FikaPlayer
 
         BotInventoryController inventoryController = new(player, profile, true, currentId, nextOperationId);
 
-        BotPacketSender sender = BotPacketSender.Create(player);
+        var sender = await BotPacketSender.Create(player);
         player.BotPacketSender = sender;
         player.PacketSender = sender;
 
@@ -84,7 +84,7 @@ public class FikaBot : FikaPlayer
             IsAI = true
         };
 
-        Traverse botTraverse = Traverse.Create(player);
+        var botTraverse = Traverse.Create(player);
         botTraverse.Field<LocalPlayerCullingHandlerClass>("localPlayerCullingHandlerClass").Value = new();
         botTraverse.Field<LocalPlayerCullingHandlerClass>("localPlayerCullingHandlerClass").Value.Initialize(player, player.PlayerBones);
 
@@ -171,7 +171,7 @@ public class FikaBot : FikaPlayer
 
         if (aggressor.GroupId == "Fika" && !aggressor.IsYourPlayer)
         {
-            FikaPlayer mainPlayer = (FikaPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+            var mainPlayer = (FikaPlayer)Singleton<GameWorld>.Instance.MainPlayer;
             if (mainPlayer == null)
             {
                 return;
@@ -182,10 +182,10 @@ public class FikaBot : FikaPlayer
                 return;
             }
 
-            WildSpawnType role = Profile.Info.Settings.Role;
-            bool countAsBoss = role.CountAsBossForStatistics() && !(role is WildSpawnType.pmcUSEC or WildSpawnType.pmcBEAR);
-            int experience = Profile.Info.Settings.Experience;
-            SessionCountersClass sessionCounters = mainPlayer.Profile.EftStats.SessionCounters;
+            var role = Profile.Info.Settings.Role;
+            var countAsBoss = role.CountAsBossForStatistics() && !(role is WildSpawnType.pmcUSEC or WildSpawnType.pmcBEAR);
+            var experience = Profile.Info.Settings.Experience;
+            var sessionCounters = mainPlayer.Profile.EftStats.SessionCounters;
             HandleSharedExperience(countAsBoss, experience, sessionCounters);
 
             if (FikaPlugin.Instance.SharedQuestProgression && FikaPlugin.EasyKillConditions.Value)
@@ -194,7 +194,7 @@ public class FikaBot : FikaPlayer
                 FikaPlugin.Instance.FikaLogger.LogInfo("Handling teammate kill from teammate: " + aggressor.Profile.Nickname);
 #endif
 
-                float distance = Vector3.Distance(aggressor.Position, Position);
+                var distance = Vector3.Distance(aggressor.Position, Position);
                 mainPlayer.HandleTeammateKill(damageInfo, bodyPart, Side, role, ProfileId,
                     distance, Inventory.EquippedInSlotsTemplateIds, HealthController.BodyPartEffects, TriggerZones,
                     (FikaPlayer)aggressor);
@@ -204,16 +204,16 @@ public class FikaBot : FikaPlayer
 
     public override ShotInfoClass ApplyShot(DamageInfoStruct damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, ShotIdStruct shotId)
     {
-        ActiveHealthController activeHealthController = ActiveHealthController;
+        var activeHealthController = ActiveHealthController;
         if (activeHealthController != null && !activeHealthController.IsAlive)
         {
             return null;
         }
-        bool flag = damageInfo.DeflectedBy != null;
-        float damage = damageInfo.Damage;
-        List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
+        var flag = damageInfo.DeflectedBy != null;
+        var damage = damageInfo.Damage;
+        var list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
         method_97(list);
-        MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1)
+        var materialType = flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1)
             ? MaterialType.Body : list[0].Material);
         ShotInfoClass hitInfo = new()
         {
@@ -221,7 +221,7 @@ public class FikaBot : FikaPlayer
             Penetrated = damageInfo.Penetrated,
             Material = materialType
         };
-        float num = damage - damageInfo.Damage;
+        var num = damage - damageInfo.Damage;
         if (num > 0)
         {
             damageInfo.DidArmorDamage = num;
@@ -252,10 +252,10 @@ public class FikaBot : FikaPlayer
         _preAllocatedArmorComponents.Clear();
         List<ArmorComponent> listTocheck = [];
         Inventory.GetPutOnArmorsNonAlloc(listTocheck);
-        foreach (ArmorComponent armorComponent in listTocheck)
+        foreach (var armorComponent in listTocheck)
         {
-            float num = 0f;
-            foreach (KeyValuePair<ExplosiveHitArmorColliderStruct, float> keyValuePair in armorDamage)
+            var num = 0f;
+            foreach (var keyValuePair in armorDamage)
             {
                 if (armorComponent.ShotMatches(keyValuePair.Key.BodyPartColliderType, keyValuePair.Key.ArmorPlateCollider))
                 {
@@ -276,7 +276,7 @@ public class FikaBot : FikaPlayer
     {
         BotFirearmControllerHandler handler = new(this, weapon);
 
-        bool flag = false;
+        var flag = false;
         FirearmController firearmController;
         if ((firearmController = _handsController as FirearmController) != null)
         {
@@ -290,13 +290,13 @@ public class FikaBot : FikaPlayer
 
     public override void OnDead(EDamageType damageType)
     {
-        float num = EFTHardSettings.Instance.HIT_FORCE;
-        num *= 0.3f + 0.7f * Mathf.InverseLerp(50f, 20f, LastDamageInfo.PenetrationPower);
+        var num = EFTHardSettings.Instance.HIT_FORCE;
+        num *= 0.3f + (0.7f * Mathf.InverseLerp(50f, 20f, LastDamageInfo.PenetrationPower));
         _corpseAppliedForce = num;
 
         if (FikaPlugin.ShowNotifications.Value)
         {
-            if (LocaleUtils.IsBoss(Profile.Info.Settings.Role, out string name) && LastAggressor != null)
+            if (LocaleUtils.IsBoss(Profile.Info.Settings.Role, out var name) && LastAggressor != null)
             {
                 if (LastAggressor is FikaPlayer aggressor)
                 {
@@ -320,7 +320,7 @@ public class FikaBot : FikaPlayer
 
     protected void OnEnable()
     {
-        IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
+        var fikaGame = Singleton<IFikaGame>.Instance;
         if (fikaGame != null && fikaGame.GameController.GameInstance.Status == GameStatus.Started)
         {
             BotStatePacket packet = new()
@@ -337,7 +337,7 @@ public class FikaBot : FikaPlayer
 
     protected void OnDisable()
     {
-        IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
+        var fikaGame = Singleton<IFikaGame>.Instance;
         if (fikaGame != null && fikaGame.GameController.GameInstance.Status == GameStatus.Started)
         {
             BotStatePacket packet = new()
@@ -359,10 +359,10 @@ public class FikaBot : FikaPlayer
 #endif
         if (Singleton<FikaServer>.Instantiated)
         {
-            IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
+            var fikaGame = Singleton<IFikaGame>.Instance;
             if (fikaGame != null && fikaGame.GameController.GameInstance.Status == GameStatus.Started)
             {
-                FikaServer server = Singleton<FikaServer>.Instance;
+                var server = Singleton<FikaServer>.Instance;
                 BotStatePacket packet = new()
                 {
                     NetId = NetId,
@@ -373,7 +373,7 @@ public class FikaBot : FikaPlayer
                 fikaGame.GameController.Bots.Remove(ProfileId);
             }
         }
-        if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
+        if (CoopHandler.TryGetCoopHandler(out var coopHandler))
         {
             coopHandler.Players.Remove(NetId);
         }

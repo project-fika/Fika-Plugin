@@ -182,17 +182,8 @@ public partial class FreeCamera : MonoBehaviour
     /// </param>
     public void CycleSpectatePlayers(bool reverse = false)
     {
-        _players.Clear();
+        ClearAndAddPlayers();
 
-        var humanPlayers = _coopHandler.HumanPlayers;
-        for (var i = 0; i < humanPlayers.Count; i++)
-        {
-            var player = humanPlayers[i];
-            if (!player.IsYourPlayer && player.HealthController.IsAlive)
-            {
-                _players.Add(player);
-            }
-        }
         // If no alive players, add bots to spectate pool if enabled
 #if DEBUG
         if (FikaPlugin.AllowSpectateBots.Value)
@@ -295,6 +286,21 @@ public partial class FreeCamera : MonoBehaviour
         SwitchSpectateMode();
     }
 
+    private void ClearAndAddPlayers()
+    {
+        _players.Clear();
+
+        var humanPlayers = _coopHandler.HumanPlayers;
+        for (var i = 0; i < humanPlayers.Count; i++)
+        {
+            var player = humanPlayers[i];
+            if (!player.IsYourPlayer && player.HealthController.IsAlive)
+            {
+                _players.Add(player);
+            }
+        }
+    }
+
     protected void Update()
     {
         if (!IsActive)
@@ -371,9 +377,11 @@ public partial class FreeCamera : MonoBehaviour
 
         if (Input.GetKeyDown(_detachKey))
         {
+            ClearAndAddPlayers();
+
             if (_isFollowing)
             {
-                DetachCamera();
+                DetachCamera(_players.Count == 0);
             }
             else
             {

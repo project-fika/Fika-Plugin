@@ -7,7 +7,6 @@ using EFT.AssetsManager;
 using EFT.Bots;
 using EFT.CameraControl;
 using EFT.EnvironmentEffect;
-using EFT.HealthSystem;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.UI;
@@ -93,11 +92,11 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
 
         Singleton<IFikaNetworkManager>.Instance.RaidSide = localRaidSettings.playerSide;
 
-        GameDateTime gameTime = backendDateTime;
+        var gameTime = backendDateTime;
         if (timeAndWeather.HourOfDay != -1)
         {
             _logger.LogInfo($"Using custom time, hour of day: {timeAndWeather.HourOfDay}");
-            DateTime currentTime = backendDateTime.DateTime_1;
+            var currentTime = backendDateTime.DateTime_1;
             DateTime newTime = new(currentTime.Year, currentTime.Month, currentTime.Day, timeAndWeather.HourOfDay,
                 currentTime.Minute, currentTime.Second, currentTime.Millisecond);
             gameTime = new(backendDateTime.DateTime_0, newTime, backendDateTime.TimeFactor);
@@ -105,7 +104,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
             dateTime = EDateTime.CURR;
         }
 
-        CoopGame coopGame = smethod_0<CoopGame>(inputTree, profile, gameWorld, gameTime, insurance, gameUI,
+        var coopGame = smethod_0<CoopGame>(inputTree, profile, gameWorld, gameTime, insurance, gameUI,
             location, timeAndWeather, wavesSettings, dateTime, callback, fixedDeltaTime, updateQueue, backEndSession,
             new TimeSpan?(sessionTime), metricsEvents, metricsCollector, localRaidSettings);
         coopGame.GameController = FikaBackendUtils.IsServer ? new HostGameController(coopGame, updateQueue, gameWorld, backEndSession, location, wavesSettings, coopGame.GameDateTime)
@@ -124,7 +123,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
 
         if (timeAndWeather.TimeFlowType != ETimeFlowType.x1)
         {
-            float newFlow = timeAndWeather.TimeFlowType.ToTimeFlow();
+            var newFlow = timeAndWeather.TimeFlowType.ToTimeFlow();
             coopGame.GameWorld_0.GameDateTime.TimeFactor = newFlow;
             _logger.LogInfo($"Using custom time flow: {newFlow}");
         }
@@ -141,8 +140,8 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         Singleton<IFikaGame>.Create(coopGame);
         FikaEventDispatcher.DispatchEvent(new FikaGameCreatedEvent(coopGame));
 
-        EndByExitTrigerScenario endByExitTrigger = coopGame.GetComponent<EndByExitTrigerScenario>();
-        EndByTimerScenario endByTimerScenario = coopGame.GetComponent<EndByTimerScenario>();
+        var endByExitTrigger = coopGame.GetComponent<EndByExitTrigerScenario>();
+        var endByTimerScenario = coopGame.GetComponent<EndByTimerScenario>();
 
         if (endByExitTrigger != null)
         {
@@ -181,7 +180,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         public EftGamePlayerOwner HandleSetup(LocalPlayer player)
         {
             _game.LocalPlayer_0 = player;
-            EftGamePlayerOwner gamePlayerOwner = EftGamePlayerOwner.Create(player, _inputTree, _insurance, _backEndSession,
+            var gamePlayerOwner = EftGamePlayerOwner.Create(player, _inputTree, _insurance, _backEndSession,
                 _gameUI, _game.GameDateTime, _location);
             gamePlayerOwner.OnLeave += _game.vmethod_4;
             return gamePlayerOwner;
@@ -214,13 +213,13 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
             profile.SetSpawnedInSession(false);
         }
 
-        FikaPlayer fikaPlayer = await FikaPlayer.Create(gameWorld, playerId, position, rotation, "Player", "Main_", EPointOfView.FirstPerson,
+        var fikaPlayer = await FikaPlayer.Create(gameWorld, playerId, position, rotation, "Player", "Main_", EPointOfView.FirstPerson,
             profile, false, UpdateQueue, armsUpdateMode, Player.EUpdateMode.Auto,
             BackendConfigAbstractClass.Config.CharacterController.ClientPlayerMode, getSensitivity, getAimingSensitivity,
             statisticsManager, new ClientViewFilter(), session, playerId);
 
         fikaPlayer.Location = Location_0.Id;
-        CoopHandler coopHandler = GameController.CoopHandler;
+        var coopHandler = GameController.CoopHandler;
 
         if (coopHandler == null)
         {
@@ -250,13 +249,13 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
 
         if (!GameController.IsServer && !FikaBackendUtils.IsReconnect)
         {
-            SendCharacterPacket packet = SendCharacterPacket.FromValue(new PlayerInfoPacket()
+            var packet = SendCharacterPacket.FromValue(new PlayerInfoPacket()
             {
                 Profile = fikaPlayer.Profile,
                 ControllerId = fikaPlayer.InventoryController.CurrentId,
                 FirstOperationId = fikaPlayer.InventoryController.NextOperationId
             }, fikaPlayer.HealthController.IsAlive, false, fikaPlayer.Transform.position, fikaPlayer.NetId);
-            FikaClient client = Singleton<FikaClient>.Instance;
+            var client = Singleton<FikaClient>.Instance;
 
             if (fikaPlayer.ActiveHealthController != null)
             {
@@ -301,18 +300,18 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
 
         if (MenuUI.Instantiated)
         {
-            MenuUI menuUI = MenuUI.Instance;
-            DefaultUIButton backButton = Traverse.Create(menuUI.MatchmakerTimeHasCome).Field<DefaultUIButton>("_cancelButton").Value;
+            var menuUI = MenuUI.Instance;
+            var backButton = Traverse.Create(menuUI.MatchmakerTimeHasCome).Field<DefaultUIButton>("_cancelButton").Value;
             customButton = Instantiate(backButton.gameObject, backButton.gameObject.transform.parent);
             customButton.gameObject.name = "FikaBackButton";
             customButton.gameObject.SetActive(true);
-            DefaultUIButton backButtonComponent = customButton.GetComponent<DefaultUIButton>();
+            var backButtonComponent = customButton.GetComponent<DefaultUIButton>();
             backButtonComponent.SetHeaderText("Cancel", 32);
             backButtonComponent.SetEnabledTooltip("EXPERIMENTAL: Cancels the matchmaking and returns to the menu.");
             UnityEngine.Events.UnityEvent newEvent = new();
             newEvent.AddListener(() =>
             {
-                GClass3835 errorScreen = Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("WARNING",
+                var errorScreen = Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("WARNING",
                     message: "Backing out from this stage is currently experimental. It is recommended to ALT+F4 instead. Do you still want to continue?",
                     ErrorScreen.EButtonType.OkButton, 15f);
                 errorScreen.OnAccept += StopFromCancel(myPlayer);
@@ -336,12 +335,6 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
     /// </summary>
     public async Task InitPlayer(BotControllerSettings botsSettings)
     {
-        if (FikaBackendUtils.IsHeadless)
-        {
-            _logger.LogWarning("Unloading resources");
-            await Resources.UnloadUnusedAssets().Await();
-        }
-
         Status = GameStatus.Running;
         UnityEngine.Random.InitState((int)EFTDateTimeClass.Now.Ticks);
 
@@ -352,14 +345,14 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
 
         await GameController.SetupCoopHandler(this);
 
-        GameWorld gameWorld = Singleton<GameWorld>.Instance;
+        var gameWorld = Singleton<GameWorld>.Instance;
         gameWorld.LocationId = Location_0.Id;
 
         ExfiltrationControllerClass.Instance.InitAllExfiltrationPoints(Location_0._Id, Location_0.exits, Location_0.SecretExits,
             !GameController.IsServer, Location_0.DisabledScavExits);
 
         _logger.LogInfo($"Location: {Location_0.Name}");
-        BackendConfigSettingsClass instance = Singleton<BackendConfigSettingsClass>.Instance;
+        var instance = Singleton<BackendConfigSettingsClass>.Instance;
 
         GameController.InitShellingController(instance, gameWorld, Location_0);
         GameController.InitHalloweenEvent(instance, gameWorld, Location_0);
@@ -374,7 +367,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
 
         gameWorld.ClientBroadcastSyncController = new ClientBroadcastSyncControllerClass();
 
-        ApplicationConfigClass config = BackendConfigAbstractClass.Config;
+        var config = BackendConfigAbstractClass.Config;
         if (config.FixedFrameRate > 0f)
         {
             FixedDeltaTime = 1f / config.FixedFrameRate;
@@ -387,7 +380,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
 
         try
         {
-            LocalPlayer player = await CreateLocalPlayer()
+            var player = await CreateLocalPlayer()
                 ?? throw new NullReferenceException("InitPlayer: Player was null!");
             dictionary_0.Add(player.ProfileId, player);
             gparam_0 = _func_1(player);
@@ -405,7 +398,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
 
         await GameController.WaitForHostToStart();
 
-        LocationSettingsClass.Location location = localRaidSettings_0.selectedLocation;
+        var location = localRaidSettings_0.selectedLocation;
         await GameController.InitializeLoot(location);
         await method_12(location);
 
@@ -414,7 +407,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         if (FikaBackendUtils.IsReconnect)
         {
             await Reconnect();
-            foreach (KeyValuePair<EBodyPart, GClass3009<ActiveHealthController.GClass3008>.BodyPartState> item in gparam_0.Player.ActiveHealthController.Dictionary_0)
+            foreach (var item in gparam_0.Player.ActiveHealthController.Dictionary_0)
             {
                 if (item.Value.Health.AtMinimum)
                 {
@@ -451,7 +444,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
             InitialRequest = true,
             ProfileId = profileId
         };
-        FikaClient client = Singleton<FikaClient>.Instance;
+        var client = Singleton<FikaClient>.Instance;
         client.SendData(ref reconnectPacket, DeliveryMethod.ReliableOrdered);
 
         do
@@ -472,7 +465,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
             IsRequest = true,
             ProfileId = ProfileId
         };
-        FikaClient client = Singleton<FikaClient>.Instance;
+        var client = Singleton<FikaClient>.Instance;
         client.SendData(ref reconnectPacket, DeliveryMethod.ReliableOrdered);
 
         do
@@ -491,9 +484,9 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
     {
         Status = GameStatus.Running;
 
-        int num = Singleton<IFikaNetworkManager>.Instance.NetId;
+        var num = Singleton<IFikaNetworkManager>.Instance.NetId;
 
-        Player.EUpdateMode eupdateMode = Player.EUpdateMode.Auto;
+        var eupdateMode = Player.EUpdateMode.Auto;
         if (BackendConfigAbstractClass.Config.UseHandsFastAnimator)
         {
             eupdateMode = Player.EUpdateMode.Manual;
@@ -512,7 +505,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
                 GameController.CreateSpawnSystem(Profile_0);
             }
 
-            ClientGameController clientGameController = (ClientGameController)GameController;
+            var clientGameController = (ClientGameController)GameController;
             await clientGameController.InitInteractables();
             await clientGameController.InitExfils();
         }
@@ -521,14 +514,14 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
 
         if (Location_0.AccessKeys?.Length > 0)
         {
-            IEnumerable<Item> items = Profile_0.Inventory.GetPlayerItems(EPlayerItems.Equipment);
+            var items = Profile_0.Inventory.GetPlayerItems(EPlayerItems.Equipment);
             if (items != null)
             {
                 Class1634 keyFinder = new()
                 {
                     accessKeys = Location_0.AccessKeys
                 };
-                Item accessKey = items.FirstOrDefault(keyFinder.method_0);
+                var accessKey = items.FirstOrDefault(keyFinder.method_0);
                 if (accessKey != null)
                 {
                     method_6(Profile_0, accessKey.Id);
@@ -551,8 +544,8 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
 
         IStatisticsManager statisticsManager = new ClientStatisticsManager();
 
-        Vector3 spawnPos = GameController.GetSpawnPosition();
-        Quaternion spawnRot = GameController.GetSpawnRotation();
+        var spawnPos = GameController.GetSpawnPosition();
+        var spawnRot = GameController.GetSpawnRotation();
 
         LocalPlayer myPlayer;
         try
@@ -592,7 +585,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
     /// </summary>
     private void GenerateNewDogTagId()
     {
-        Item dogTag = Profile_0.Inventory.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem;
+        var dogTag = Profile_0.Inventory.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem;
         if (dogTag != null)
         {
             Traverse.Create(dogTag).Field<string>("<Id>k__BackingField").Value = MongoID.Generate(true);
@@ -679,7 +672,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
     public override void Dispose()
     {
         ClientHearingTable.Instance = null;
-        foreach (Player player in dictionary_0.Values)
+        foreach (var player in dictionary_0.Values)
         {
             try
             {
@@ -716,7 +709,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
     /// <param name="damageType"></param>
     private async void HealthController_DiedEvent(EDamageType damageType)
     {
-        Player player = gparam_0.Player;
+        var player = gparam_0.Player;
         if (player.AbstractQuestControllerClass is ClientSharedQuestController sharedQuestController)
         {
             sharedQuestController.ToggleQuestSharing(false);
@@ -757,7 +750,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
 
         if (FikaBackendUtils.IsTransit)
         {
-            RaidTransitionInfoClass data = FikaBackendUtils.TransitData;
+            var data = FikaBackendUtils.TransitData;
             data.transitionType = ELocationTransition.Common;
             data.transitionCount++;
             data.visitedLocations = [.. data.visitedLocations, Location_0.Id];
@@ -774,14 +767,14 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
 
         GameController.DestroyDebugComponent();
 
-        FikaPlayer myPlayer = (FikaPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+        var myPlayer = (FikaPlayer)Singleton<GameWorld>.Instance.MainPlayer;
         myPlayer.PacketSender.DestroyThis();
 
         if (myPlayer.Side != EPlayerSide.Savage)
         {
             if (myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem != null)
             {
-                GStruct154<GClass3410> result = InteractionsHandlerClass.Remove(myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag)
+                var result = InteractionsHandlerClass.Remove(myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag)
                     .ContainedItem, myPlayer.InventoryController, false);
                 if (result.Error != null)
                 {
@@ -808,7 +801,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         if (GameController.CoopHandler != null)
         {
             // Create a copy to prevent errors when the dictionary is being modified (which happens when using spawn mods)
-            foreach (FikaPlayer player in (FikaPlayer[])[.. GameController.CoopHandler.Players.Values])
+            foreach (var player in (FikaPlayer[])[.. GameController.CoopHandler.Players.Values])
             {
                 if (player == null || player.IsYourPlayer)
                 {
@@ -846,7 +839,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
             delay = delay
         };
 
-        GameUI gameUI = GameUI.Instance;
+        var gameUI = GameUI.Instance;
 
         GameController.ExfilManager.Stop();
 
@@ -882,7 +875,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
             player.CheckAndResetControllers(exitStatus, PastTime, Location_0.Id, exitName);
         }
 
-        TimeSpan playTimeDuration = EFTDateTimeClass.Now - dateTime_0;
+        var playTimeDuration = EFTDateTimeClass.Now - dateTime_0;
 
         RaidEndDescriptorClass parameters = new()
         {
@@ -918,14 +911,14 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
     /// dictionary is empty if no matching containers are found.</returns>
     public Dictionary<string, FlatItemsDataClass[]> GetOwnSentItems(string profileId)
     {
-        GameWorld instance = Singleton<GameWorld>.Instance;
+        var instance = Singleton<GameWorld>.Instance;
         Dictionary<string, FlatItemsDataClass[]> dictionary = [];
-        BTRControllerClass btrController = instance.BtrController;
+        var btrController = instance.BtrController;
         if ((btrController?.TransferItemsController.Stash) != null)
         {
-            StashItemClass stash = btrController.TransferItemsController.Stash;
-            string stashName = stash.Id + "_btr";
-            foreach (EFT.InventoryLogic.IContainer item in stash.Containers)
+            var stash = btrController.TransferItemsController.Stash;
+            var stashName = stash.Id + "_btr";
+            foreach (var item in stash.Containers)
             {
                 if (item.ID == profileId && !dictionary.ContainsKey(stashName))
                 {
@@ -945,14 +938,14 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
             }
             else
             {
-                TransferItemsControllerAbstractClass transferItemsController = controller.TransferItemsController;
+                var transferItemsController = controller.TransferItemsController;
                 flag = (transferItemsController?.Stash) != null;
             }
             if (flag)
             {
-                StashItemClass stash2 = controller.TransferItemsController.Stash;
-                string stashName = stash2.Id + "_transit";
-                foreach (EFT.InventoryLogic.IContainer item in stash2.Containers)
+                var stash2 = controller.TransferItemsController.Stash;
+                var stashName = stash2.Id + "_transit";
+                foreach (var item in stash2.Containers)
                 {
                     if (item.ID == profileId && !dictionary.ContainsKey(stashName))
                     {
@@ -978,14 +971,14 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
 
         _logger.LogWarning("Game init was cancelled!");
 
-        FikaPlayer myPlayer = (FikaPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+        var myPlayer = (FikaPlayer)Singleton<GameWorld>.Instance.MainPlayer;
         myPlayer.PacketSender.DestroyThis();
 
         if (myPlayer.Side != EPlayerSide.Savage)
         {
             if (myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem != null)
             {
-                GStruct154<GClass3410> result = InteractionsHandlerClass.Remove(myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem,
+                var result = InteractionsHandlerClass.Remove(myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem,
                     myPlayer.InventoryController, false);
                 if (result.Error != null)
                 {
@@ -999,7 +992,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
 
         if (GameController.CoopHandler != null)
         {
-            foreach (FikaPlayer player in GameController.CoopHandler.Players.Values)
+            foreach (var player in GameController.CoopHandler.Players.Values)
             {
                 if (player == null)
                 {
@@ -1035,7 +1028,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
             delay = delay
         };
 
-        GameUI gameUI = GameUI.Instance;
+        var gameUI = GameUI.Instance;
 
         if (GameController.ExfilManager != null)
         {
@@ -1094,7 +1087,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
     /// </summary>
     public override void CleanUp()
     {
-        foreach (Player player in dictionary_0.Values)
+        foreach (var player in dictionary_0.Values)
         {
             try
             {
@@ -1161,7 +1154,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
     {
         public void ExitOverride()
         {
-            CurrentScreenSingletonClass instance = CurrentScreenSingletonClass.Instance;
+            var instance = CurrentScreenSingletonClass.Instance;
             if (instance != null && instance.CheckCurrentScreen(EEftScreenType.Reconnect))
             {
                 instance.CloseAllScreensForced();
@@ -1189,7 +1182,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         {
             return true;
         }
-        bool flag = TalkClass.IsTalkDetected();
+        var flag = TalkClass.IsTalkDetected();
         _localPlayer.TalkDateTime = flag ? EFTDateTimeClass.UtcNow : default;
         bool flag2;
         bool flag3;
@@ -1202,17 +1195,17 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         {
             flag2 = false;
             flag3 = false;
-            Vector3 position = _localPlayer.Position;
-            foreach (FikaPlayer humanPlayer in GameController.CoopHandler.HumanPlayers)
+            var position = _localPlayer.Position;
+            foreach (var humanPlayer in GameController.CoopHandler.HumanPlayers)
             {
                 if (humanPlayer.IsYourPlayer)
                 {
                     continue;
                 }
 
-                ValueTuple<bool, bool> valueTuple = humanPlayer.IsHeard(in position, _voipDistance);
-                bool item = valueTuple.Item1;
-                bool item2 = valueTuple.Item2;
+                var valueTuple = humanPlayer.IsHeard(in position, _voipDistance);
+                var item = valueTuple.Item1;
+                var item2 = valueTuple.Item2;
                 flag2 = flag2 || item;
                 flag3 = flag3 || item2;
                 if (flag2 && flag3)

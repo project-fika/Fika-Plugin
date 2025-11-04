@@ -188,9 +188,9 @@ public static class FikaRequestHandler
         return await PostJsonAsync<RaidSettingsRequest, RaidSettingsResponse>("/fika/raid/getsettings", data);
     }
 
-    public static async Task<JObject> GetProfile()
+    public static async Task<DownloadProfileResponse> GetProfile()
     {
-        return await GetJsonAsync<JObject>("/fika/profile/download");
+        return await GetJsonAsync<DownloadProfileResponse>("/fika/profile/download");
     }
 
     public static async Task<StartHeadlessResponse> StartHeadless(StartHeadlessRequest request)

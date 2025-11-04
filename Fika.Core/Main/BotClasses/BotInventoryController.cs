@@ -8,6 +8,7 @@ using Fika.Core.Main.Players;
 using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
 using JetBrains.Annotations;
+using System;
 using System.Threading.Tasks;
 using static EFT.Player;
 
@@ -48,17 +49,27 @@ public class BotInventoryController : PlayerInventoryController
 
     public override void vmethod_1(BaseInventoryOperationClass operation, [CanBeNull] Callback callback)
     {
-        // Check for GClass increments
-        // Tripwire kit is always null on AI so we cannot use ToDescriptor as it throws a nullref
-        if (operation is not GClass3492)
-        {
 #if DEBUG
-            FikaPlugin.Instance.FikaLogger.LogInfo($"Sending bot operation {operation.GetType()} from {_fikaBot.Profile.Nickname}");
+        FikaPlugin.Instance.FikaLogger.LogInfo($"Sending bot operation {operation.GetType()} from {_fikaBot.Profile.Nickname}");
 #endif
-            _fikaBot.PacketSender.NetworkManager.SendGenericPacket(EGenericSubPacketType.InventoryOperation,
-                InventoryPacket.FromValue(_fikaBot.NetId, operation), true);
-        }
+        _fikaBot.PacketSender.NetworkManager.SendGenericPacket(EGenericSubPacketType.InventoryOperation,
+            InventoryPacket.FromValue(_fikaBot.NetId, operation), true);
         HandleOperation(operation, callback).HandleExceptions();
+    }
+
+    /// <summary>
+    /// Override to not replicate the tripwire
+    /// </summary>
+    public override void PlantTripwire(ThrowWeapItemClass grenade, PlantingKitsItemClass plantingKit, Vector3 fromPosition, Vector3 toPosition, Callback callback = null)
+    {
+        var gstruct = InteractionsHandlerClass.SimulatePlantTripwire(this, grenade, plantingKit);
+        if (!gstruct.Failed)
+        {
+            HandleOperation(new GClass3492(method_12(), this, gstruct.Value, fromPosition, toPosition, _fikaBot), callback)
+                .HandleExceptions();
+            return;
+        }
+        callback?.Invoke(gstruct.ToResult());
     }
 
     private async Task HandleOperation(BaseInventoryOperationClass operation, Callback callback)

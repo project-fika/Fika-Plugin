@@ -71,7 +71,7 @@ public class FikaClientGameWorld : ClientLocalGameWorld
 
     public override GrenadeFactoryClass CreateGrenadeFactory()
     {
-        return new ClientNetworkGrenadeFactoryClass();
+        return new FikaClientGrenadeFactory();
     }
 
     public override void PlayerTick(float dt)

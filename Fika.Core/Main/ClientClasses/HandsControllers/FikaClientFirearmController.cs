@@ -218,7 +218,7 @@ public class FikaClientFirearmController : Player.FirearmController
         bool isAiming = IsAiming;
         bool aimingInterruptedByOverlap = AimingInterruptedByOverlap;
         base.SetAim(value);
-        if (IsAiming != isAiming || aimingInterruptedByOverlap && _fikaPlayer.HealthController.IsAlive)
+        if (IsAiming != isAiming || (aimingInterruptedByOverlap && _fikaPlayer.HealthController.IsAlive))
         {
             _packet.Type = EFirearmSubPacketType.ToggleAim;
             _packet.SubPacket = ToggleAimPacket.FromValue(IsAiming ? Item.AimIndex.Value : -1);

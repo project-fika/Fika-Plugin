@@ -69,7 +69,7 @@ public class ItemPositionSyncer : MonoBehaviour
         _client.FikaClientWorld.WorldPacket.LootSyncStructs.Add(_data);
     }
 
-    public void Update()
+    public void FixedUpdate()
     {
         if (Rigidbody == null)
         {
@@ -89,6 +89,21 @@ public class ItemPositionSyncer : MonoBehaviour
             _client.FikaClientWorld.WorldPacket.LootSyncStructs.Add(_data);
             _client.FikaClientWorld.SetCritical();
             Destroy(this);
+        }
+        else
+        {
+            _data.Position = _lootItem.transform.position;
+            _data.Rotation = _lootItem.transform.rotation;
+            _data.Velocity = Rigidbody.velocity;
+            _data.AngularVelocity = Rigidbody.angularVelocity;
+
+            if (_isServer)
+            {
+                _server.FikaHostWorld.WorldPacket.LootSyncStructs.Add(_data);
+                return;
+            }
+
+            _client.FikaClientWorld.WorldPacket.LootSyncStructs.Add(_data);
         }
     }
 }

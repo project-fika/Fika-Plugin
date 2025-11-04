@@ -46,13 +46,15 @@ public class FikaPlayer : LocalPlayer
 {
     #region Fields and Properties
     public IPacketSender PacketSender;
-    public float ObservedOverlap = 0f;
-    public CorpseSyncPackets CorpseSyncPacket = default;
+    public float ObservedOverlap;
+    public CorpseSyncPackets CorpseSyncPacket;
     public int NetId;
     public bool IsObservedAI;
     public Dictionary<uint, Action<ServerOperationStatus>> OperationCallbacks = [];
     public Snapshotter Snapshotter;
     public CommonPlayerPacket CommonPacket;
+    public virtual bool LeftStanceDisabled { get; internal set; }
+    public DateTime TalkDateTime { get; internal set; }
     public bool WaitingForCallback
     {
         get
@@ -60,13 +62,6 @@ public class FikaPlayer : LocalPlayer
             return OperationCallbacks.Count > 0;
         }
     }
-
-    protected MongoID? _lastWeaponId;
-    private bool _hasSkilledScav;
-    private bool _shouldSendSideEffect;
-    private VoipSettingsClass _voipHandler;
-    private FikaVOIPController _voipController;
-
     public ClientMovementContext ClientMovementContext
     {
         get
@@ -81,9 +76,13 @@ public class FikaPlayer : LocalPlayer
             return PlayerBones.LootRaycastOrigin;
         }
     }
-    public virtual bool LeftStanceDisabled { get; internal set; }
-    public DateTime TalkDateTime { get; internal set; }
 
+    protected MongoID? _lastWeaponId;
+
+    private bool _hasSkilledScav;
+    private bool _shouldSendSideEffect;
+    private VoipSettingsClass _voipHandler;
+    private FikaVOIPController _voipController;
     #endregion
 
     public static async Task<FikaPlayer> Create(GameWorld gameWorld, int playerId, Vector3 position,
@@ -93,9 +92,9 @@ public class FikaPlayer : LocalPlayer
         Func<float> getAimingSensitivity, IStatisticsManager statisticsManager, IViewFilter filter, ISession session,
         int netId)
     {
-        bool useSimpleAnimator = profile.Info.Settings.UseSimpleAnimator;
-        ResourceKey resourceKey = useSimpleAnimator ? ResourceKeyManagerAbstractClass.ZOMBIE_BUNDLE_NAME : ResourceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME;
-        FikaPlayer player = Create<FikaPlayer>(gameWorld, resourceKey, playerId, position, updateQueue, armsUpdateMode,
+        var useSimpleAnimator = profile.Info.Settings.UseSimpleAnimator;
+        var resourceKey = useSimpleAnimator ? ResourceKeyManagerAbstractClass.ZOMBIE_BUNDLE_NAME : ResourceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME;
+        var player = Create<FikaPlayer>(gameWorld, resourceKey, playerId, position, updateQueue, armsUpdateMode,
                     bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix, false, useSimpleAnimator);
 
         player.IsYourPlayer = true;
@@ -129,27 +128,28 @@ public class FikaPlayer : LocalPlayer
 
         if (FikaBackendUtils.IsServer)
         {
-            player.PacketSender = ServerPacketSender.Create(player);
+            player.PacketSender = await ServerPacketSender.Create(player);
         }
         else if (FikaBackendUtils.IsClient)
         {
-            player.PacketSender = ClientPacketSender.Create(player);
+            player.PacketSender = await ClientPacketSender.Create(player);
         }
 
-        EVoipState voipState = (!FikaBackendUtils.IsHeadless && Singleton<IFikaNetworkManager>.Instance.AllowVOIP && SoundSettingsControllerClass.CheckMicrophone()) ? EVoipState.Available : EVoipState.NotAvailable;
+        var voipState = (!FikaBackendUtils.IsHeadless && Singleton<IFikaNetworkManager>.Instance.AllowVOIP && SoundSettingsControllerClass.CheckMicrophone())
+            ? EVoipState.Available : EVoipState.NotAvailable;
 
         await player.Init(rotation, layerName, pointOfView, profile, inventoryController,
             new ClientHealthController(profile.Health, player, inventoryController, profile.Skills, aiControl),
             statisticsManager, questController, achievementsController, prestigeController, dialogController, filter,
             voipState, false, false);
 
-        foreach (MagazineItemClass magazineClass in player.Inventory.GetPlayerItems(EPlayerItems.NonQuestItems).OfType<MagazineItemClass>())
+        foreach (var magazineClass in player.Inventory.GetPlayerItems(EPlayerItems.NonQuestItems).OfType<MagazineItemClass>())
         {
             player.InventoryController.StrictCheckMagazine(magazineClass, true, player.Profile.MagDrillsMastering, false, false);
         }
 
-        HashSet<ETraderServiceType> services = Traverse.Create(player).Field<HashSet<ETraderServiceType>>("hashSet_0").Value;
-        foreach (ETraderServiceType etraderServiceType in Singleton<BackendConfigSettingsClass>.Instance.ServicesData.Keys)
+        var services = Traverse.Create(player).Field<HashSet<ETraderServiceType>>("hashSet_0").Value;
+        foreach (var etraderServiceType in Singleton<BackendConfigSettingsClass>.Instance.ServicesData.Keys)
         {
             services.Add(etraderServiceType);
         }
@@ -160,7 +160,7 @@ public class FikaPlayer : LocalPlayer
         player.AggressorFound = false;
         player._animators[0].enabled = true;
 
-        RadioTransmitterRecodableComponent radioTransmitterRecodableComponent = player.FindRadioTransmitter();
+        var radioTransmitterRecodableComponent = player.FindRadioTransmitter();
         if (radioTransmitterRecodableComponent != null)
         {
             //Todo: (Archangel) method_131 refers to 'singlePlayerInventoryController_0' which is null in our case
@@ -194,7 +194,7 @@ public class FikaPlayer : LocalPlayer
     {
         if (_voipHandler.VoipEnabled && voipState != EVoipState.NotAvailable)
         {
-            SoundSettingsControllerClass settings = Singleton<SharedGameSettingsClass>.Instance.Sound.Settings;
+            var settings = Singleton<SharedGameSettingsClass>.Instance.Sound.Settings;
             if (!settings.VoipEnabled)
             {
                 voipState = EVoipState.Off;
@@ -217,7 +217,7 @@ public class FikaPlayer : LocalPlayer
 
     public override void CreateMovementContext()
     {
-        LayerMask movement_MASK = EFTHardSettings.Instance.MOVEMENT_MASK;
+        var movement_MASK = EFTHardSettings.Instance.MOVEMENT_MASK;
         if (FikaPlugin.Instance.UseInertia)
         {
             MovementContext = ClientMovementContext.Create(this, GetBodyAnimatorCommon,
@@ -282,16 +282,16 @@ public class FikaPlayer : LocalPlayer
 
     private ShotInfoClass SimulatedApplyShot(DamageInfoStruct damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider)
     {
-        ActiveHealthController activeHealthController = ActiveHealthController;
+        var activeHealthController = ActiveHealthController;
         if (activeHealthController != null && !activeHealthController.IsAlive)
         {
             return null;
         }
-        bool flag = damageInfo.DeflectedBy != null;
-        float damage = damageInfo.Damage;
-        List<ArmorComponent> list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
+        var flag = damageInfo.DeflectedBy != null;
+        var damage = damageInfo.Damage;
+        var list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
         method_97(list);
-        MaterialType materialType = flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1)
+        var materialType = flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1)
             ? MaterialType.Body : list[0].Material);
         ShotInfoClass hitInfo = new()
         {
@@ -299,7 +299,7 @@ public class FikaPlayer : LocalPlayer
             Penetrated = damageInfo.Penetrated,
             Material = materialType
         };
-        float num = damage - damageInfo.Damage;
+        var num = damage - damageInfo.Damage;
         if (num > 0)
         {
             damageInfo.DidArmorDamage = num;
@@ -415,7 +415,7 @@ public class FikaPlayer : LocalPlayer
     public override void Proceed(Weapon weapon, Callback<IFirearmHandsController> callback, bool scheduled = true)
     {
         FirearmControllerHandler handler = new(this, weapon);
-        bool flag = false;
+        var flag = false;
         if (_handsController is FirearmController firearmController)
         {
             flag = firearmController.CheckForFastWeaponSwitch(handler.Weapon);
@@ -469,13 +469,13 @@ public class FikaPlayer : LocalPlayer
 #if DEBUG
         FikaPlugin.Instance.FikaLogger.LogWarning($"Finding weapon '{_lastWeaponId}'!");
 #endif
-        GStruct156<Item> itemResult = FindItemById(_lastWeaponId.Value, false, false);
-        Item item = itemResult.Value;
+        var itemResult = FindItemById(_lastWeaponId.Value, false, false);
+        var item = itemResult.Value;
         if (!itemResult.Succeeded)
         {
-            for (int i = 0; i < Singleton<IFikaGame>.Instance.GameController.ThrownGrenades.Count; i++)
+            for (var i = 0; i < Singleton<IFikaGame>.Instance.GameController.ThrownGrenades.Count; i++)
             {
-                ThrowWeapItemClass grenadeClass = Singleton<IFikaGame>.Instance.GameController.ThrownGrenades[i];
+                var grenadeClass = Singleton<IFikaGame>.Instance.GameController.ThrownGrenades[i];
                 if (grenadeClass.Id == _lastWeaponId)
                 {
                     item = grenadeClass;
@@ -486,7 +486,7 @@ public class FikaPlayer : LocalPlayer
 
         if (item == null)
         {
-            StationaryWeapon stationaryWeapon = GameWorld.FindStationaryWeaponByItemId(_lastWeaponId);
+            var stationaryWeapon = GameWorld.FindStationaryWeaponByItemId(_lastWeaponId);
             if (stationaryWeapon != null)
             {
                 item = stationaryWeapon.Item;
@@ -512,7 +512,7 @@ public class FikaPlayer : LocalPlayer
             return;
         }
 
-        Item item = FindWeapon();
+        var item = FindWeapon();
         if (item == null)
         {
             FikaGlobals.LogError($"Could not find killer weapon: {_lastWeaponId}!");
@@ -566,9 +566,9 @@ public class FikaPlayer : LocalPlayer
                 break;
         }
 
-        for (int i = 0; i < list.Count; i++)
+        for (var i = 0; i < list.Count; i++)
         {
-            string value = list[i];
+            var value = list[i];
             AbstractQuestControllerClass.CheckKillConditionCounter(value, playerProfileId, targetEquipment, damage.Weapon,
                             bodyPart, Location, distance, role.ToStringNoBox(), CurrentHour, enemyEffects,
                             killer.HealthController.BodyPartEffects, zoneIds, killer.HealthController.ActiveBuffsNames());
@@ -584,7 +584,7 @@ public class FikaPlayer : LocalPlayer
 
         if (FikaPlugin.SharedKillExperience.Value && !countAsBoss)
         {
-            int toReceive = experience / 2;
+            var toReceive = experience / 2;
 #if DEBUG
             FikaPlugin.Instance.FikaLogger.LogInfo($"Received shared kill XP of {toReceive}");
 #endif
@@ -594,7 +594,7 @@ public class FikaPlayer : LocalPlayer
 
         if (FikaPlugin.SharedBossExperience.Value && countAsBoss)
         {
-            int toReceive = experience / 2;
+            var toReceive = experience / 2;
 #if DEBUG
             FikaPlugin.Instance.FikaLogger.LogInfo($"Received shared boss XP of {toReceive}");
 #endif
@@ -680,13 +680,13 @@ public class FikaPlayer : LocalPlayer
     {
         if (FikaBackendUtils.IsServer)
         {
-            Corpse corpse = base.CreateCorpse();
+            var corpse = base.CreateCorpse();
             corpse.IsZombieCorpse = UsedSimplifiedSkeleton;
             //CorpsePositionSyncer.Create(corpse.gameObject, corpse, NetId);
             return corpse;
         }
 
-        ObservedCorpse observedCorpse = CreateCorpse<ObservedCorpse>(CorpseSyncPacket.OverallVelocity);
+        var observedCorpse = CreateCorpse<ObservedCorpse>(CorpseSyncPacket.OverallVelocity);
         observedCorpse.IsZombieCorpse = UsedSimplifiedSkeleton;
         observedCorpse.SetSpecificSettings(PlayerBones.RightPalm);
         Singleton<GameWorld>.Instance.ObservedPlayersCorpses.Add(NetId, observedCorpse);
@@ -747,15 +747,21 @@ public class FikaPlayer : LocalPlayer
 
     public override void HealthControllerUpdate(float deltaTime)
     {
-        _healthController.ManualUpdate(deltaTime);
+        _healthController?.ManualUpdate(deltaTime);
+    }
+
+    public override void UpdateTriggerColliderSearcher(float deltaTime, bool isCloseToCamera = true)
+    {
+        _triggerColliderSearcher.ManualUpdate(deltaTime);
     }
 
     public override void OnMounting(MountingPacketStruct.EMountingCommand command)
     {
-        MountingPacket packet = MountingPacket.FromValue(command, MovementContext.IsInMountedState, MovementContext.IsInMountedState ? MovementContext.PlayerMountingPointData.MountPointData.MountDirection : default,
+        var packet = MountingPacket.FromValue(command, MovementContext.IsInMountedState, MovementContext.IsInMountedState ? MovementContext.PlayerMountingPointData.MountPointData.MountDirection : default,
             MovementContext.IsInMountedState ? MovementContext.PlayerMountingPointData.MountPointData.MountPoint : default,
             MovementContext.IsInMountedState ? MovementContext.PlayerMountingPointData.CurrentMountingPointVerticalOffset : 0f,
            MovementContext.IsInMountedState ? (short)MovementContext.PlayerMountingPointData.MountPointData.MountSideDirection : (short)0);
+
         if (command == MountingPacketStruct.EMountingCommand.Enter)
         {
             packet.TransitionTime = MovementContext.PlayerMountingPointData.CurrentApproachTime;
@@ -770,12 +776,14 @@ public class FikaPlayer : LocalPlayer
 
         CommonPacket.Type = ECommonSubPacketType.Mounting;
         CommonPacket.SubPacket = packet;
-        PacketSender.NetworkManager.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
+        PacketSender.NetworkManager.SendNetReusable(ref CommonPacket,
+            command is MountingPacketStruct.EMountingCommand.Update ? DeliveryMethod.Unreliable : DeliveryMethod.ReliableOrdered,
+            true);
     }
 
     public override void vmethod_3(TransitControllerAbstractClass controller, int transitPointId, string keyId, EDateTime time)
     {
-        TransitInteractionPacketStruct packet = controller.GetInteractPacket(transitPointId, keyId, time);
+        var packet = controller.GetInteractPacket(transitPointId, keyId, time);
         if (FikaBackendUtils.IsServer)
         {
             controller.InteractWithTransit(this, packet);
@@ -822,7 +830,7 @@ public class FikaPlayer : LocalPlayer
 
     public override void vmethod_5(GClass2282 controller, int objectId, EventObject.EInteraction interaction)
     {
-        InteractPacketStruct packet = controller.GetInteractPacket(objectId, interaction);
+        var packet = controller.GetInteractPacket(objectId, interaction);
         if (FikaBackendUtils.IsServer)
         {
             controller.InteractWithEventObject(this, packet);
@@ -846,7 +854,7 @@ public class FikaPlayer : LocalPlayer
 
     public void SetupCorpseSyncPacket(NetworkHealthSyncPacketStruct packet)
     {
-        float num = EFTHardSettings.Instance.HIT_FORCE;
+        var num = EFTHardSettings.Instance.HIT_FORCE;
         num *= 0.3f + 0.7f * Mathf.InverseLerp(50f, 20f, LastDamageInfo.PenetrationPower);
         _corpseAppliedForce = num;
 
@@ -858,9 +866,9 @@ public class FikaPlayer : LocalPlayer
             }
         }
 
-        InventoryDescriptorClass inventoryDescriptor = EFTItemSerializerClass.SerializeItem(Inventory.Equipment, FikaGlobals.SearchControllerSerializer);
+        var inventoryDescriptor = EFTItemSerializerClass.SerializeItem(Inventory.Equipment, FikaGlobals.SearchControllerSerializer);
 
-        HealthSyncPacket packets = HealthSyncPacket.FromValue(packet);
+        var packets = HealthSyncPacket.FromValue(packet);
         packets.BodyPart = LastBodyPart;
         packets.CorpseSyncPacket = new()
         {
@@ -890,10 +898,10 @@ public class FikaPlayer : LocalPlayer
 
         if (HandsController.Item != null)
         {
-            Item heldItem = HandsController.Item;
-            for (int i = 0; i < FikaGlobals.WeaponSlots.Count; i++)
+            var heldItem = HandsController.Item;
+            for (var i = 0; i < FikaGlobals.WeaponSlots.Count; i++)
             {
-                EquipmentSlot weaponSlot = FikaGlobals.WeaponSlots[i];
+                var weaponSlot = FikaGlobals.WeaponSlots[i];
                 if (heldItem == Equipment.GetSlot(weaponSlot).ContainedItem)
                 {
                     packets.CorpseSyncPacket.ItemSlot = weaponSlot;
@@ -950,23 +958,23 @@ public class FikaPlayer : LocalPlayer
 #endif
         }
 
-        string accountId = AccountId;
-        string profileId = ProfileId;
-        string nickname = Profile.Nickname;
-        bool hasAggressor = LastAggressor != null;
-        string killerAccountId = hasAggressor ? LastAggressor.AccountId : string.Empty;
-        string killerProfileId = hasAggressor ? LastAggressor.ProfileId : string.Empty;
-        string killerNickname = (hasAggressor && !string.IsNullOrEmpty(LastAggressor.Profile.Nickname)) ? LastAggressor.Profile.Nickname : string.Empty;
-        EPlayerSide side = Side;
-        int level = Profile.Info.Level;
-        DateTime time = EFTDateTimeClass.UtcNow.ToLocalTime();
-        string weaponName = LastAggressor != null ? (LastDamageInfo.Weapon != null ? LastDamageInfo.Weapon.ShortName : string.Empty) : "-";
-        string groupId = GroupId;
+        var accountId = AccountId;
+        var profileId = ProfileId;
+        var nickname = Profile.Nickname;
+        var hasAggressor = LastAggressor != null;
+        var killerAccountId = hasAggressor ? LastAggressor.AccountId : string.Empty;
+        var killerProfileId = hasAggressor ? LastAggressor.ProfileId : string.Empty;
+        var killerNickname = (hasAggressor && !string.IsNullOrEmpty(LastAggressor.Profile.Nickname)) ? LastAggressor.Profile.Nickname : string.Empty;
+        var side = Side;
+        var level = Profile.Info.Level;
+        var time = EFTDateTimeClass.UtcNow.ToLocalTime();
+        var weaponName = LastAggressor != null ? (LastDamageInfo.Weapon != null ? LastDamageInfo.Weapon.ShortName : string.Empty) : "-";
+        var groupId = GroupId;
 
-        Item item = Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem;
+        var item = Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem;
         if (item != null)
         {
-            DogtagComponent dogtagComponent = item.GetItemComponent<DogtagComponent>();
+            var dogtagComponent = item.GetItemComponent<DogtagComponent>();
             if (dogtagComponent != null)
             {
                 dogtagComponent.Item.SpawnedInSession = true;
@@ -992,7 +1000,7 @@ public class FikaPlayer : LocalPlayer
     private IEnumerator LocalPlayerDied()
     {
         AddPlayerRequest request = new(FikaBackendUtils.GroupId, ProfileId, FikaBackendUtils.IsSpectator);
-        Task diedTask = FikaRequestHandler.PlayerDied(request);
+        var diedTask = FikaRequestHandler.PlayerDied(request);
         WaitForEndOfFrame waitForEndOfFrame = new();
         while (!diedTask.IsCompleted)
         {
@@ -1018,7 +1026,7 @@ public class FikaPlayer : LocalPlayer
             return;
         }
 
-        FikaClient client = Singleton<FikaClient>.Instance;
+        var client = Singleton<FikaClient>.Instance;
         BTRInteractionPacket packet = new(NetId)
         {
             Data = btr.GetInteractWithBtrPacket(placeId, interaction)
@@ -1039,7 +1047,7 @@ public class FikaPlayer : LocalPlayer
         {
             if (_helmetLightControllers != null)
             {
-                for (int i = 0; i < _helmetLightControllers.Count(); i++)
+                for (var i = 0; i < _helmetLightControllers.Count(); i++)
                 {
                     _helmetLightControllers.ElementAt(i)?.LightMod?.SetLightState(packet.LightStates[i]);
                 }
@@ -1127,7 +1135,7 @@ public class FikaPlayer : LocalPlayer
 
     public void HandleCallbackFromServer(OperationCallbackPacket operationCallbackPacket)
     {
-        if (OperationCallbacks.TryGetValue(operationCallbackPacket.CallbackId, out Action<ServerOperationStatus> callback))
+        if (OperationCallbacks.TryGetValue(operationCallbackPacket.CallbackId, out var callback))
         {
             if (operationCallbackPacket.Status != EOperationStatus.Started)
             {
@@ -1149,11 +1157,11 @@ public class FikaPlayer : LocalPlayer
             _preAllocatedArmorComponents.Clear();
             List<ArmorComponent> listTocheck = [];
             Inventory.GetPutOnArmorsNonAlloc(listTocheck);
-            for (int i = 0; i < listTocheck.Count; i++)
+            for (var i = 0; i < listTocheck.Count; i++)
             {
-                ArmorComponent armorComponent = listTocheck[i];
-                float num = 0f;
-                foreach ((ExplosiveHitArmorColliderStruct colliderStruct, float amount) in armorDamage)
+                var armorComponent = listTocheck[i];
+                var num = 0f;
+                foreach ((var colliderStruct, var amount) in armorDamage)
                 {
                     if (armorComponent.ShotMatches(colliderStruct.BodyPartColliderType, colliderStruct.ArmorPlateCollider))
                     {
@@ -1243,7 +1251,7 @@ public class FikaPlayer : LocalPlayer
 
         if (damageInfo.DamageType == EDamageType.Melee && _lastWeaponId != null)
         {
-            Item item = FindWeapon();
+            var item = FindWeapon();
             if (item != null)
             {
                 damageInfo.Weapon = item;
@@ -1280,9 +1288,9 @@ public class FikaPlayer : LocalPlayer
     {
         _preAllocatedArmorComponents.Clear();
         Inventory.GetPutOnArmorsNonAlloc(_preAllocatedArmorComponents);
-        for (int i = 0; i < _preAllocatedArmorComponents.Count; i++)
+        for (var i = 0; i < _preAllocatedArmorComponents.Count; i++)
         {
-            ArmorComponent armorComponent = _preAllocatedArmorComponents[i];
+            var armorComponent = _preAllocatedArmorComponents[i];
             if (armorComponent.Item.Id == packet.ItemId)
             {
                 armorComponent.Repairable.Durability = packet.Durability;
@@ -1292,14 +1300,14 @@ public class FikaPlayer : LocalPlayer
             }
         }
 
-        GStruct156<Item> gstruct = Singleton<GameWorld>.Instance.FindItemById(packet.ItemId);
+        var gstruct = Singleton<GameWorld>.Instance.FindItemById(packet.ItemId);
         if (gstruct.Failed)
         {
             FikaPlugin.Instance.FikaLogger.LogError("HandleArmorDamagePacket: " + gstruct.Error);
             return;
         }
 
-        ArmorComponent itemComponent = gstruct.Value.GetItemComponent<ArmorComponent>();
+        var itemComponent = gstruct.Value.GetItemComponent<ArmorComponent>();
         if (itemComponent != null)
         {
             itemComponent.Repairable.Durability = packet.Durability;
@@ -1360,11 +1368,11 @@ public class FikaPlayer : LocalPlayer
             return;
         }
 
-        Dictionary<ETraderServiceType, BackendConfigSettingsClass.ServiceData> servicesData = Singleton<BackendConfigSettingsClass>.Instance.ServicesData;
+        var servicesData = Singleton<BackendConfigSettingsClass>.Instance.ServicesData;
 
-        for (int i = 0; i < services.Count; i++)
+        for (var i = 0; i < services.Count; i++)
         {
-            TraderServicesClass service = services[i];
+            var service = services[i];
             BackendConfigSettingsClass.ServiceData serviceData = new(service, null);
             if (servicesData.ContainsKey(serviceData.ServiceType))
             {
@@ -1374,7 +1382,7 @@ public class FikaPlayer : LocalPlayer
             {
                 servicesData.Add(serviceData.ServiceType, serviceData);
             }
-            if (!Profile.TradersInfo.TryGetValue(serviceData.TraderId, out Profile.TraderInfo traderInfo))
+            if (!Profile.TradersInfo.TryGetValue(serviceData.TraderId, out var traderInfo))
             {
                 FikaPlugin.Instance.FikaLogger.LogWarning($"Can't find trader with id: {serviceData.TraderId}!");
             }
@@ -1387,9 +1395,9 @@ public class FikaPlayer : LocalPlayer
 
     public Item FindQuestItem(MongoID templateId)
     {
-        for (int i = 0; i < Singleton<GameWorld>.Instance.LootList.Count; i++)
+        for (var i = 0; i < Singleton<GameWorld>.Instance.LootList.Count; i++)
         {
-            IKillableLootItem lootItem = Singleton<GameWorld>.Instance.LootList[i];
+            var lootItem = Singleton<GameWorld>.Instance.LootList[i];
             if (lootItem is LootItem observedLootItem && observedLootItem.Item.TemplateId == templateId && observedLootItem.isActiveAndEnabled)
             {
                 return observedLootItem.Item;

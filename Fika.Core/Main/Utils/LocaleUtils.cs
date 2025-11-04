@@ -24,6 +24,8 @@ public static class LocaleUtils
         { WildSpawnType.sectantPriest, "Cultist Priest" },
         { WildSpawnType.bossKolontay, "Kollontay" },
         { WildSpawnType.bossPartisan, "Partisan" },
+        { WildSpawnType.bossTagillaAgro, "Shadow of Tagilla" },
+        { WildSpawnType.bossKillaAgro, "Vengeful Killa" }
     };
 
     /// <summary>

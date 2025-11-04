@@ -419,33 +419,4 @@ public static class FikaGlobals
             _ => JobPriorityClass.Low,
         };
     }
-
-    public static void ApplyFikaNetPacket(this Throwable throwable, GrenadeDataPacketStruct packet)
-    {
-        const float smoothSpeed = 10f; // set higher for a faster response
-        var t = 1f - Mathf.Exp(-smoothSpeed * Time.deltaTime);
-
-        throwable.CollisionNumber = packet.CollisionNumber;
-        var vector = Vector3.Lerp(throwable.transform.position, packet.Position, t);
-        var quaternion = Quaternion.Lerp(throwable.transform.rotation, packet.Rotation, t);
-        throwable.transform.SetPositionAndRotation(vector, quaternion);
-        /*if (throwable.CollisionNumber == packet.CollisionNumber)
-        {
-            if (throwable.Rigidbody != null)
-            {
-                throwable.Rigidbody.velocity = Vector3.Lerp(this.Rigidbody.velocity, packet.Velocity, 0.2f);
-                throwable.Rigidbody.angularVelocity = Vector3.Lerp(this.Rigidbody.angularVelocity, packet.AngularVelocity, 0.2f);
-            }
-        }
-        else
-        {
-            throwable.method_1(packet);
-        }*/
-        if (packet.Done)
-        {
-            throwable.transform.SetPositionAndRotation(packet.Position, packet.Rotation);
-            throwable.method_1(packet);
-            throwable.OnDoneFromNet();
-        }
-    }
 }

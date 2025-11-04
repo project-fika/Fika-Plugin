@@ -1,5 +1,6 @@
 ﻿// © 2025 Lacyway All Rights Reserved
 
+using EFT;
 using System;
 
 namespace Fika.Core.Networking.Packets.Backend;
@@ -14,6 +15,7 @@ public struct InformationPacket : INetSerializable
     public bool HostLoaded;
     public DateTime GameTime;
     public TimeSpan SessionTime;
+    public GameDateTime GameDateTime;
 
     public void Deserialize(NetDataReader reader)
     {
@@ -26,6 +28,7 @@ public struct InformationPacket : INetSerializable
         {
             GameTime = reader.GetDateTime();
             SessionTime = TimeSpan.FromTicks(reader.GetLong());
+            GameDateTime = reader.GetGameDateTime();
         }
         HostLoaded = reader.GetBool();
     }
@@ -41,6 +44,7 @@ public struct InformationPacket : INetSerializable
         {
             writer.PutDateTime(GameTime);
             writer.Put(SessionTime.Ticks);
+            writer.PutGameDateTime(GameDateTime);
         }
         writer.Put(HostLoaded);
     }

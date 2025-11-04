@@ -273,7 +273,7 @@ public class ObservedMovementContext : MovementContext
     public override void Init()
     {
         base.Init();
-        RotationAction = Rotate;
+        RotationAction = _player.UsedSimplifiedSkeleton ? SimpleRotate : Rotate;
 
         // Fix base game bug where idle animations are not playing
         PlayerAnimator.SetIsThirdPerson(true);
@@ -284,10 +284,15 @@ public class ObservedMovementContext : MovementContext
     {
         if (player.HandsController != null)
         {
-            Quaternion handsRotation = Quaternion.Euler(Pitch, Yaw, 0);
+            var handsRotation = Quaternion.Euler(Pitch, Yaw, 0);
             player.HandsController.ControllerGameObject.transform.SetPositionAndRotation(player.PlayerBones.Ribcage.Original.position, handsRotation);
             player.CameraContainer.transform.rotation = handsRotation;
         }
+    }
+
+    private void SimpleRotate(Player player)
+    {
+        // do nothing
     }
 
     public void ObservedStartExitingMountedState()

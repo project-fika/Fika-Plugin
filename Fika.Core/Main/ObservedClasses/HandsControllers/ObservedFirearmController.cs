@@ -153,10 +153,6 @@ public class ObservedFirearmController : FirearmController
 
     private void SetObservedAim(bool isAiming)
     {
-        if (_player.UsedSimplifiedSkeleton)
-        {
-            _player.MovementContext.PlayerAnimator.SetAiming(isAiming);
-        }
         IsAiming = isAiming;
         _player.method_60(0.2f, false);
         if (isAiming)
