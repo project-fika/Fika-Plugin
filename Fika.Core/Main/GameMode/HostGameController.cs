@@ -945,7 +945,7 @@ public class HostGameController : BaseGameController, IBotGame
             num = (short)Array.IndexOf(gameWorld.Platforms, lootItem.Platform);
         }
         /*Corpse corpse;*/
-        LootItemPositionClass lootItemPositionClass;
+        //LootItemPositionClass lootItemPositionClass;
         // TODO: Send corpses instead of killing the players...
         /*if ((corpse = lootItem as Corpse) != null)
         {
