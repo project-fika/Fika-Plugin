@@ -983,7 +983,7 @@ public class HostGameController : BaseGameController, IBotGame
 
     private int LootCompare(LootItemPositionClass a, LootItemPositionClass b)
     {
-        return string.Compare(a.Id, b.Id, StringComparison.Ordinal);
+        return string.CompareOrdinal(a.Id, b.Id);
     }
 
     public void StopBotsSystem(bool fromCancel)
