@@ -805,10 +805,7 @@ public class HostGameController : BaseGameController, IBotGame
             _coopHandler.ExtractedPlayers.Add(fikaPlayer.NetId);
             _coopHandler.Players.Remove(fikaPlayer.NetId);
 
-            preloaderUI.StartBlackScreenShow(2f, 2f, () =>
-            {
-                preloaderUI.FadeBlackScreen(2f, -2f);
-            });
+            preloaderUI.StartBlackScreenShow(2f, 2f, () => preloaderUI.FadeBlackScreen(2f, -2f));
 
             player.ActiveHealthController.SetDamageCoeff(0);
             player.ActiveHealthController.DamageMultiplier = 0;
