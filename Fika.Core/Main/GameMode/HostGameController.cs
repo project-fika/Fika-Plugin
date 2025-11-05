@@ -963,7 +963,7 @@ public class HostGameController : BaseGameController, IBotGame
             lootItemPositionClass = new LootItemPositionClass();
         }*/
         var transform = lootItem.transform;
-        lootItemPositionClass = new LootItemPositionClass
+        return new LootItemPositionClass
         {
             Position = (num > -1) ? transform.localPosition : transform.position,
             Rotation = (num > -1) ? transform.localRotation.eulerAngles : transform.rotation.eulerAngles,
@@ -974,8 +974,6 @@ public class HostGameController : BaseGameController, IBotGame
             Shift = lootItem.Shift,
             PlatformId = num
         };
-
-        return lootItemPositionClass;
     }
 
     private int LootCompare(LootItemPositionClass a, LootItemPositionClass b)
