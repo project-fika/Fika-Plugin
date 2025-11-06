@@ -148,6 +148,7 @@ public static class LocaleUtils
     public const string UI_PLAYER_CONNECTED = "F_UI_PlayerConnected";
     public const string UI_PLAYER_DISCONNECTED = "F_UI_PlayerDisconnected";
     public const string UI_DISABLED_BY_HOST = "F_UI_DisabledByServerHost";
+    public const string UI_ERROR_RAID_INIT = "F_UI_ErrorRaidInit";
 
     // Main Menu UI
     public const string UI_MMUI_ONLINE_PLAYERS = "F_MMUI_OnlinePlayers";

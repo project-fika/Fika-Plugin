@@ -807,4 +807,14 @@ public partial class FikaClient
 
         packet.SyncEvent.Invoke();
     }
+
+    /// <summary>
+    /// Used by server to notify of important events, usually errors
+    /// </summary>
+    /// <param name="packet">The packet containing the data</param>
+    private void OnMessagePacketReceived(MessagePacket packet)
+    {
+        NotificationManagerClass.DisplayMessageNotification(packet.Message.Localized(), packet.NotificationDurationType,
+            packet.NotificationIconType, packet.Color);
+    }
 }

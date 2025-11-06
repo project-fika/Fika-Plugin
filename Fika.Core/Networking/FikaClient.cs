@@ -268,6 +268,7 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
         RegisterPacket<EventControllerInteractPacket>(OnEventControllerInteractPacketReceived);
         RegisterPacket<SyncTrapsPacket>(OnSyncTrapsPacketReceived);
         RegisterPacket<StashesPacket>(OnStashesPacketReceived);
+        RegisterPacket<MessagePacket>(OnMessagePacketReceived);
 
         RegisterReusable<WorldPacket>(OnWorldPacketReceived);
 
