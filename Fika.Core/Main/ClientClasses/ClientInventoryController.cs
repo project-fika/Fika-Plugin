@@ -176,7 +176,7 @@ public sealed class ClientInventoryController : Player.PlayerOwnerInventoryContr
         return new SearchContentOperationResultClass(method_12(), this, PlayerSearchController, Profile, item);
     }
 
-    private class ClientInventoryOperationHandler
+    public class ClientInventoryOperationHandler
     {
         public BaseInventoryOperationClass Operation;
         public Callback Callback;
