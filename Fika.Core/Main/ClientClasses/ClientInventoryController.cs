@@ -164,7 +164,7 @@ public sealed class ClientInventoryController : Player.PlayerOwnerInventoryContr
         return false;
     }
 
-    private ushort AddOperationCallback(BaseInventoryOperationClass operation, Action<ServerOperationStatus> callback)
+    public ushort AddOperationCallback(BaseInventoryOperationClass operation, Action<ServerOperationStatus> callback)
     {
         var id = operation.Id;
         _fikaPlayer.OperationCallbacks.Add(id, callback);
