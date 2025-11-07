@@ -668,7 +668,7 @@ public partial class FikaServer
         }
     }
 
-    private class InventoryOperationHandler(OperationDataStruct operationResult, ushort operationId, int netId, NetPeer peer, FikaServer server)
+    public class InventoryOperationHandler(OperationDataStruct operationResult, ushort operationId, int netId, NetPeer peer, FikaServer server)
     {
         public OperationDataStruct OperationResult = operationResult;
         private readonly ushort _operationId = operationId;
