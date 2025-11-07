@@ -100,6 +100,13 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
             _coopHandler = value;
         }
     }
+    public Queue<BaseInventoryOperationClass> InventoryOperations
+    {
+        get
+        {
+            return _inventoryOperations;
+        }
+    }
 
     internal FikaVOIPClient VOIPClient { get; set; }
 
