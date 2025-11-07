@@ -186,7 +186,7 @@ public sealed class FikaHostInventoryController : Player.PlayerOwnerInventoryCon
         return new SearchContentOperationResultClass(method_12(), this, PlayerSearchController, Profile, item);
     }
 
-    private class HostInventoryOperationHandler(FikaHostInventoryController inventoryController, BaseInventoryOperationClass operation, Callback callback)
+    public class HostInventoryOperationHandler(FikaHostInventoryController inventoryController, BaseInventoryOperationClass operation, Callback callback)
     {
         public readonly FikaHostInventoryController inventoryController = inventoryController;
         public BaseInventoryOperationClass operation = operation;
