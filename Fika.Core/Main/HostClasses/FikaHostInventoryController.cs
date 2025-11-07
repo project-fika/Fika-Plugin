@@ -22,6 +22,13 @@ namespace Fika.Core.Main.HostClasses;
 
 public sealed class FikaHostInventoryController : Player.PlayerOwnerInventoryController
 {
+    public FikaPlayer FikaPlayer
+    {
+        get
+        {
+            return _fikaPlayer;
+        }
+    }
     public override bool HasDiscardLimits
     {
         get
