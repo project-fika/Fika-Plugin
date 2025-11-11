@@ -805,10 +805,7 @@ public class HostGameController : BaseGameController, IBotGame
             _coopHandler.ExtractedPlayers.Add(fikaPlayer.NetId);
             _coopHandler.Players.Remove(fikaPlayer.NetId);
 
-            preloaderUI.StartBlackScreenShow(2f, 2f, () =>
-            {
-                preloaderUI.FadeBlackScreen(2f, -2f);
-            });
+            preloaderUI.StartBlackScreenShow(2f, 2f, () => preloaderUI.FadeBlackScreen(2f, -2f));
 
             player.ActiveHealthController.SetDamageCoeff(0);
             player.ActiveHealthController.DamageMultiplier = 0;
@@ -948,7 +945,7 @@ public class HostGameController : BaseGameController, IBotGame
             num = (short)Array.IndexOf(gameWorld.Platforms, lootItem.Platform);
         }
         /*Corpse corpse;*/
-        LootItemPositionClass lootItemPositionClass;
+        //LootItemPositionClass lootItemPositionClass;
         // TODO: Send corpses instead of killing the players...
         /*if ((corpse = lootItem as Corpse) != null)
         {
@@ -966,7 +963,7 @@ public class HostGameController : BaseGameController, IBotGame
             lootItemPositionClass = new LootItemPositionClass();
         }*/
         var transform = lootItem.transform;
-        lootItemPositionClass = new LootItemPositionClass
+        return new LootItemPositionClass
         {
             Position = (num > -1) ? transform.localPosition : transform.position,
             Rotation = (num > -1) ? transform.localRotation.eulerAngles : transform.rotation.eulerAngles,
@@ -977,13 +974,11 @@ public class HostGameController : BaseGameController, IBotGame
             Shift = lootItem.Shift,
             PlatformId = num
         };
-
-        return lootItemPositionClass;
     }
 
     private int LootCompare(LootItemPositionClass a, LootItemPositionClass b)
     {
-        return string.Compare(a.Id, b.Id, StringComparison.Ordinal);
+        return string.CompareOrdinal(a.Id, b.Id);
     }
 
     public void StopBotsSystem(bool fromCancel)

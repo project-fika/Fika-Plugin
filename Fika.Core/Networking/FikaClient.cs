@@ -100,6 +100,13 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
             _coopHandler = value;
         }
     }
+    public Queue<BaseInventoryOperationClass> InventoryOperations
+    {
+        get
+        {
+            return _inventoryOperations;
+        }
+    }
 
     internal FikaVOIPClient VOIPClient { get; set; }
 
@@ -268,6 +275,7 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
         RegisterPacket<EventControllerInteractPacket>(OnEventControllerInteractPacketReceived);
         RegisterPacket<SyncTrapsPacket>(OnSyncTrapsPacketReceived);
         RegisterPacket<StashesPacket>(OnStashesPacketReceived);
+        RegisterPacket<MessagePacket>(OnMessagePacketReceived);
 
         RegisterReusable<WorldPacket>(OnWorldPacketReceived);
 

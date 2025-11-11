@@ -668,7 +668,7 @@ public partial class FikaServer
         }
     }
 
-    private class InventoryOperationHandler(OperationDataStruct operationResult, ushort operationId, int netId, NetPeer peer, FikaServer server)
+    public class InventoryOperationHandler(OperationDataStruct operationResult, ushort operationId, int netId, NetPeer peer, FikaServer server)
     {
         public OperationDataStruct OperationResult = operationResult;
         private readonly ushort _operationId = operationId;
@@ -676,7 +676,7 @@ public partial class FikaServer
         private readonly NetPeer _peer = peer;
         private readonly FikaServer _server = server;
 
-        internal void HandleResult(IResult result)
+        public void HandleResult(IResult result)
         {
             if (!result.Succeed)
             {

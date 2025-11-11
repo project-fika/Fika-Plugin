@@ -73,7 +73,7 @@ public static class WorldToScreen
             return 1f;
         }
 
-        return (sight.ScopeZoomValue != 0) ? sight.ScopeZoomValue : sight.GetCurrentOpticZoom();
+        return (sight.ScopeZoomValue > 1f) ? sight.ScopeZoomValue : sight.GetCurrentOpticZoom();
     }
 
     /// <summary>

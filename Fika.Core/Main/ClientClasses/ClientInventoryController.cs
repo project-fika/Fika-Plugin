@@ -19,6 +19,13 @@ namespace Fika.Core.Main.ClientClasses;
 
 public sealed class ClientInventoryController : Player.PlayerOwnerInventoryController
 {
+    public FikaPlayer FikaPlayer
+    {
+        get
+        {
+            return _fikaPlayer;
+        }
+    }
     public override bool HasDiscardLimits
     {
         get
@@ -28,7 +35,7 @@ public sealed class ClientInventoryController : Player.PlayerOwnerInventoryContr
     }
     private readonly ManualLogSource _logger;
     private readonly Player _player;
-    private readonly FikaPlayer _fikaPlayer;
+    public readonly FikaPlayer _fikaPlayer;
 
     public ClientInventoryController(Player player, Profile profile, bool examined) : base(player, profile, examined)
     {
@@ -164,7 +171,7 @@ public sealed class ClientInventoryController : Player.PlayerOwnerInventoryContr
         return false;
     }
 
-    private ushort AddOperationCallback(BaseInventoryOperationClass operation, Action<ServerOperationStatus> callback)
+    public ushort AddOperationCallback(BaseInventoryOperationClass operation, Action<ServerOperationStatus> callback)
     {
         var id = operation.Id;
         _fikaPlayer.OperationCallbacks.Add(id, callback);
@@ -176,7 +183,7 @@ public sealed class ClientInventoryController : Player.PlayerOwnerInventoryContr
         return new SearchContentOperationResultClass(method_12(), this, PlayerSearchController, Profile, item);
     }
 
-    private class ClientInventoryOperationHandler
+    public class ClientInventoryOperationHandler
     {
         public BaseInventoryOperationClass Operation;
         public Callback Callback;
