@@ -15,6 +15,7 @@ using Fika.Core.Main.Components;
 using Fika.Core.Main.FreeCamera;
 using Fika.Core.Main.HostClasses;
 using Fika.Core.Main.ObservedClasses;
+using Fika.Core.Main.Patches.BTR;
 using Fika.Core.Main.Patches.Overrides;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
@@ -862,6 +863,9 @@ public class HostGameController : BaseGameController, IBotGame
         {
             Singleton<FikaServer>.Instance.HostReady = false;
         }
+
+        _btrSpawn?.Invoke();
+        _btrSpawn = null;
     }
 
     public override Task InitializeLoot(LocationSettingsClass.Location location)

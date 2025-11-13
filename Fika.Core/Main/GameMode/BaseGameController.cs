@@ -123,14 +123,14 @@ public abstract class BaseGameController
             return _spawnPoint;
         }
     }
-    protected SpawnPointManagerClass _spawnPoints;
-    protected ISpawnPoint _spawnPoint;
 
     private FikaHalloweenEventManager _halloweenEventManager;
     private DebugUI _debugUi;
-
     private ESeason _season;
 
+    protected SpawnPointManagerClass _spawnPoints;
+    protected ISpawnPoint _spawnPoint;
+    protected Action _btrSpawn;
     protected CoopHandler _coopHandler;
     protected FikaPlayer _localPlayer;
     protected EUpdateQueue _updateQueue;
@@ -513,7 +513,7 @@ public abstract class BaseGameController
                     gameWorld.BtrController = new BTRControllerClass(gameWorld);
                     if (IsServer)
                     {
-                        GlobalEventHandlerClass.Instance.SubscribeOnEvent<BtrSpawnOnThePathEvent>(OnBtrSpawn);
+                        _btrSpawn = GlobalEventHandlerClass.Instance.SubscribeOnEvent<BtrSpawnOnThePathEvent>(OnBtrSpawn);
                     }
                 }
             }
