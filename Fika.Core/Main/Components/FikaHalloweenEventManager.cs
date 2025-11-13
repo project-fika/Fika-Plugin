@@ -33,6 +33,19 @@ internal class FikaHalloweenEventManager : MonoBehaviour
         _syncExitsEvent = GlobalEventHandlerClass.Instance.SubscribeOnEvent<HalloweenSyncExitsEvent>(OnHalloweenSyncExitsEvent);
     }
 
+    protected void OnDestroy()
+    {
+        _logger.LogInfo("Destroying CoopHalloweenEventManager");
+
+        _summonStartedAction?.Invoke();
+        _syncStateEvent?.Invoke();
+        _syncExitsEvent?.Invoke();
+
+        _summonStartedAction = null;
+        _syncStateEvent = null;
+        _syncExitsEvent = null;
+    }
+
     private void OnHalloweenSummonStarted(HalloweenSummonStartedEvent summonStartedEvent)
     {
 #if DEBUG
