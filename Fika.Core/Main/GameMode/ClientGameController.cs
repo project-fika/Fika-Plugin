@@ -488,6 +488,8 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
             await GenerateWeathers();
         }
 
+        _abstractGame.SetMatchmakerStatus(LocaleUtils.UI_FINISHING_RAID_INIT.Localized());
+
         gameWorld.RegisterRestrictableZones();
         gameWorld.RegisterBorderZones();
 

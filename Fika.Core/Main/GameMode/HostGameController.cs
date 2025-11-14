@@ -389,6 +389,8 @@ public class HostGameController : BaseGameController, IBotGame
             await GenerateWeathers();
         }
 
+        _abstractGame.SetMatchmakerStatus(LocaleUtils.UI_FINISHING_RAID_INIT.Localized());
+
         gameWorld.RegisterRestrictableZones();
         gameWorld.RegisterBorderZones();
 
