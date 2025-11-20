@@ -15,7 +15,8 @@ public class ServerShellingControllerClass_method_0_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(ServerShellingControllerClass).GetMethod(nameof(ServerShellingControllerClass.method_0));
+        return typeof(ServerShellingControllerClass)
+            .GetMethod(nameof(ServerShellingControllerClass.method_0));
     }
 
     [PatchPrefix]
