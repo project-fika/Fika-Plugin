@@ -37,7 +37,7 @@ jobs:
           cache-dependency-path: 'Fika.Core/packages.lock.json'
 
       - name: Restore dependencies
-        run: dotnet restore Fika-Plugin.sln
+        run: dotnet restore Fika-Plugin.slnx
 
       - name: Build the project
         run: dotnet build Fika.Core/Fika.Core.csproj --configuration ${{ inputs.build_type }} --no-restore --output output/
