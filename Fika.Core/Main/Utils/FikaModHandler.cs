@@ -32,7 +32,7 @@ public class FikaModHandler
 
     public FikaModHandler()
     {
-        Chainloader.PluginInfos.TryGetValue("com.SPT.core", out PluginInfo pluginInfo);
+        Chainloader.PluginInfos.TryGetValue("com.SPT.core", out var pluginInfo);
         SPTCoreVersion = pluginInfo.Metadata.Version;
     }
 
@@ -43,7 +43,7 @@ public class FikaModHandler
         // Set capacity to avoid unnecessarily resizing for people who have a lot of mods loaded
         Dictionary<string, uint> loadedMods = new(pluginInfos.Length);
 
-        foreach (PluginInfo pluginInfo in pluginInfos)
+        foreach (var pluginInfo in pluginInfos)
         {
             string location = pluginInfo.Location;
             byte[] fileBytes = File.ReadAllBytes(location);
@@ -64,7 +64,7 @@ public class FikaModHandler
         string validationJson = RequestHandler.PostJson("/fika/client/check/mods", modValidationRequestJson);
         _logger.LogDebug(validationJson);
 
-        ModValidationResponse validationResult = JsonConvert.DeserializeObject<ModValidationResponse>(validationJson);
+        var validationResult = JsonConvert.DeserializeObject<ModValidationResponse>(validationJson);
         if (validationResult.Forbidden == null || validationResult.MissingRequired == null || validationResult.HashMismatch == null)
         {
             FikaPlugin.Instance.FikaLogger.LogError("FikaModHandler::VerifyMods: Response was invalid!");
@@ -131,7 +131,7 @@ public class FikaModHandler
         const string message = "Your client doesn't meet server requirements, check logs for more details";
 
         // -1f time makes the message permanent
-        GClass3835 errorScreen = Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("INSTALLATION ERROR", message,
+        var errorScreen = Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("INSTALLATION ERROR", message,
             ErrorScreen.EButtonType.QuitButton, -1f);
 
         Action quitAction = Application.Quit;
@@ -139,6 +139,12 @@ public class FikaModHandler
         errorScreen.OnDecline += quitAction;
         errorScreen.OnClose += quitAction;
         errorScreen.OnCloseSilent += quitAction;
+
+        _ = Task.Run(async () =>
+        {
+            await Task.Delay(TimeSpan.FromSeconds(15));
+            AsyncWorker.RunInMainTread(Application.Quit);
+        });
     }
 
     private void CheckSpecialMods(string key)

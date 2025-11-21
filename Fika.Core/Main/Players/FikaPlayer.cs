@@ -461,7 +461,7 @@ public class FikaPlayer : LocalPlayer
 
     public override void MouseLook(bool forceApplyToOriginalRibcage = false)
     {
-        MovementContext.RotationAction.Invoke(this);
+        MovementContext.RotationAction?.Invoke(this);
     }
 
     protected Item FindWeapon()

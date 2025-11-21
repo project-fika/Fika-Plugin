@@ -1,0 +1,8 @@
+<Solution>
+  <Configurations>
+    <BuildType Name="Debug" />
+    <BuildType Name="GoldMaster" />
+    <BuildType Name="Release" />
+  </Configurations>
+  <Project Path="Fika.Core/Fika.Core.csproj" />
+</Solution>
