@@ -5,7 +5,6 @@ using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
 using Fika.Core.Networking.Packets.World;
-using System;
 using System.Collections.Generic;
 
 namespace Fika.Core.Main.HostClasses;
@@ -22,6 +21,8 @@ public class FikaHostWorld : World
     private GameWorld _gameWorld;
     private List<GrenadeDataPacketStruct> _grenadeData;
     private bool _hasCriticalData;
+    private float _grenadeTimer;
+    private float _grenadeInterval;
 
     public static FikaHostWorld Create(FikaHostGameWorld gameWorld)
     {
@@ -38,6 +39,7 @@ public class FikaHostWorld : World
             LootSyncStructs = new(8)
         };
         hostWorld._grenadeData = new(16);
+        hostWorld._grenadeInterval = 1f;
         WindowBreaker.OnWindowHitAction += hostWorld.WindowBreaker_OnWindowHitAction;
         return hostWorld;
     }
@@ -69,19 +71,28 @@ public class FikaHostWorld : World
 
     protected void LateUpdate()
     {
-        var grenadesCount = _gameWorld.Grenades.Count;
-        for (var i = 0; i < grenadesCount; i++)
+        _grenadeTimer += Time.deltaTime;
+
+        if (_grenadeTimer > _grenadeInterval)
         {
-            var throwable = _gameWorld.Grenades.GetByIndex(i);
-            if (throwable.HasNetData)
+            var grenadesCount = _gameWorld.Grenades.Count;
+            for (var i = 0; i < grenadesCount; i++)
             {
-                var packet = throwable.GetNetPacket();
-                if (packet.Done)
+                var throwable = _gameWorld.Grenades.GetByIndex(i);
+                if (throwable.HasNetData)
                 {
-                    SetCritical();
+                    _grenadeData.Add(throwable.GetNetPacket());
                 }
-                _grenadeData.Add(packet);
             }
+
+            _grenadeTimer -= _grenadeInterval;
+        }
+
+        if (_gameWorld.GrenadesCriticalStates.Count > 0)
+        {
+            _grenadeData.AddRange(_gameWorld.GrenadesCriticalStates);
+            _gameWorld.GrenadesCriticalStates.Clear();
+            SetCritical();
         }
 
         WorldPacket.GrenadePackets.AddRange(_grenadeData);
@@ -120,7 +131,7 @@ public class FikaHostWorld : World
     /// </summary>
     public override void SubscribeToBorderZones(BorderZone[] zones)
     {
-        foreach (BorderZone borderZone in zones)
+        foreach (var borderZone in zones)
         {
             borderZone.PlayerShotEvent += OnBorderZoneShot;
         }
