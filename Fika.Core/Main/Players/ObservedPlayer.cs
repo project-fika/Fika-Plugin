@@ -143,6 +143,22 @@ public class ObservedPlayer : FikaPlayer
             return Mathf.Max(1f, Singleton<BetterAudio>.Instance.ProtagonistHearing + 1f);
         }
     }
+    public override bool IsVisible
+    {
+        get
+        {
+            if (FikaBackendUtils.IsHeadless)
+            {
+                return true;
+            }
+            return _followerCullingObject != null && _followerCullingObject.IsVisible;
+        }
+
+        set
+        {
+
+        }
+    }
     public float TurnOffFbbikAt;
     private float _lastDistance;
     private LocalPlayerCullingHandlerClass _cullingHandler;
@@ -154,6 +170,7 @@ public class ObservedPlayer : FikaPlayer
     private readonly List<ObservedSlotViewHandler> _observedSlotViewHandlers = [];
     private ObservedCorpseCulling _observedCorpseCulling;
     private bool _compassLoaded;
+    private FollowerCullingObject _followerCullingObject;
     #endregion
 
     public static async Task<ObservedPlayer> CreateObservedPlayer(GameWorld gameWorld, int playerId, Vector3 position, Quaternion rotation, string layerName,
@@ -256,7 +273,22 @@ public class ObservedPlayer : FikaPlayer
 
         CameraClass.Instance.FoVUpdateAction -= player.OnFovUpdatedEvent;
 
+        if (!FikaBackendUtils.IsHeadless)
+        {
+            player._followerCullingObject = player.gameObject.AddComponent<FollowerCullingObject>();
+            player._followerCullingObject.enabled = true;
+            player._followerCullingObject.CullByDistanceOnly = false;
+            player._followerCullingObject.Init(player.GetCullingTransform);
+            player._followerCullingObject.SetParams(EFTHardSettings.Instance.CULLING_PLAYER_SPHERE_RADIUS,
+                EFTHardSettings.Instance.CULLING_PLAYER_SPHERE_SHIFT, EFTHardSettings.Instance.CULLING_PLAYER_DISTANCE);
+        }
+
         return player;
+    }
+
+    private Transform GetCullingTransform()
+    {
+        return PlayerBones.BodyTransform.Original;
     }
 
     /// <summary>
@@ -1509,6 +1541,10 @@ public class ObservedPlayer : FikaPlayer
 
     public override void OnDestroy()
     {
+        if (_followerCullingObject != null)
+        {
+            _followerCullingObject.enabled = false;
+        }
         if (HandsController != null)
         {
             var handsController = HandsController;
