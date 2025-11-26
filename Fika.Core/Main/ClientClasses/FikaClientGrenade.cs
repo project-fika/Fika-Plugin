@@ -1,4 +1,4 @@
-﻿using EFT;
+﻿using System.Collections;
 
 namespace Fika.Core.Main.ClientClasses;
 
@@ -6,32 +6,55 @@ public class FikaClientGrenade : ObservedGrenade
 {
     private const float _smoothSpeed = 10f;
 
+    private GrenadeDataPacketStruct _packet;
+    private bool _hasPacket;
+
+    private Coroutine _interpolationRoutine;
+
     public override void ApplyNetPacket(GrenadeDataPacketStruct packet)
     {
-        var t = 1f - Mathf.Exp(-_smoothSpeed * Time.deltaTime);
+        _packet = packet;
+        _hasPacket = true;
 
-        CollisionNumber = packet.CollisionNumber;
-        var vector = Vector3.Lerp(transform.position, packet.Position, t);
-        var quaternion = Quaternion.Lerp(transform.rotation, packet.Rotation, t);
-        transform.SetPositionAndRotation(vector, quaternion);
-        if (CollisionNumber == packet.CollisionNumber)
+        CollisionNumber = _packet.CollisionNumber;
+
+        _interpolationRoutine ??= StartCoroutine(SmoothingCoroutine());
+
+        if (_packet.Done)
         {
+            transform.SetPositionAndRotation(_packet.Position, _packet.Rotation);
+            method_1(_packet);
+            OnDoneFromNet();
+
+            _hasPacket = false;
+        }
+    }
+
+    private IEnumerator SmoothingCoroutine()
+    {
+        var wait = new WaitForFixedUpdate();
+        while (_hasPacket)
+        {
+            yield return wait;
+
+            var t = 1f - Mathf.Exp(-_smoothSpeed * Time.fixedDeltaTime);
+
+            transform.SetPositionAndRotation(Vector3.Lerp(transform.position, _packet.Position, t),
+                Quaternion.Lerp(transform.rotation, _packet.Rotation, t));
+
             if (Rigidbody != null)
             {
-                Rigidbody.velocity = Vector3.Lerp(Rigidbody.velocity, packet.Velocity, t);
-                Rigidbody.angularVelocity = Vector3.Lerp(Rigidbody.angularVelocity, packet.AngularVelocity, t);
-            }
-        }
-        else
-        {
-            method_1(packet);
-        }
+                if (CollisionNumber == _packet.CollisionNumber)
+                {
+                    Rigidbody.velocity = Vector3.Lerp(Rigidbody.velocity, _packet.Velocity, t);
 
-        if (packet.Done)
-        {
-            transform.SetPositionAndRotation(packet.Position, packet.Rotation);
-            method_1(packet);
-            OnDoneFromNet();
+                    Rigidbody.angularVelocity = Vector3.Lerp(Rigidbody.angularVelocity, _packet.AngularVelocity, t);
+                }
+                else
+                {
+                    method_1(_packet);
+                }
+            }
         }
     }
 }

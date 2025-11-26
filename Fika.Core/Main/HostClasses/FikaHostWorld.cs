@@ -21,8 +21,6 @@ public class FikaHostWorld : World
     private GameWorld _gameWorld;
     private List<GrenadeDataPacketStruct> _grenadeData;
     private bool _hasCriticalData;
-    private float _grenadeTimer;
-    private float _grenadeInterval;
 
     public static FikaHostWorld Create(FikaHostGameWorld gameWorld)
     {
@@ -39,7 +37,6 @@ public class FikaHostWorld : World
             LootSyncStructs = new(8)
         };
         hostWorld._grenadeData = new(16);
-        hostWorld._grenadeInterval = 1f;
         WindowBreaker.OnWindowHitAction += hostWorld.WindowBreaker_OnWindowHitAction;
         return hostWorld;
     }
@@ -69,23 +66,16 @@ public class FikaHostWorld : World
         _hasCriticalData = true;
     }
 
-    protected void LateUpdate()
+    protected void FixedUpdate()
     {
-        _grenadeTimer += Time.deltaTime;
-
-        if (_grenadeTimer > _grenadeInterval)
+        var grenadesCount = _gameWorld.Grenades.Count;
+        for (var i = 0; i < grenadesCount; i++)
         {
-            var grenadesCount = _gameWorld.Grenades.Count;
-            for (var i = 0; i < grenadesCount; i++)
+            var throwable = _gameWorld.Grenades.GetByIndex(i);
+            if (throwable.HasNetData)
             {
-                var throwable = _gameWorld.Grenades.GetByIndex(i);
-                if (throwable.HasNetData)
-                {
-                    _grenadeData.Add(throwable.GetNetPacket());
-                }
+                _grenadeData.Add(throwable.GetNetPacket());
             }
-
-            _grenadeTimer -= _grenadeInterval;
         }
 
         if (_gameWorld.GrenadesCriticalStates.Count > 0)
