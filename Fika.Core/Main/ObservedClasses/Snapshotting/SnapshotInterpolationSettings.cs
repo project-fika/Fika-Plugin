@@ -49,7 +49,7 @@ public class SnapshotInterpolationSettings
     /// <summary>
     /// Catchup/Slowdown is adjusted over n-second exponential moving average.
     /// </summary>
-    public int driftEmaDuration = 1;
+    public int driftEmaDuration = 3;
     #endregion
 
     #region Dynamic Adjustment
@@ -67,6 +67,6 @@ public class SnapshotInterpolationSettings
     /// <summary>
     /// Dynamic adjustment is computed over n-second exponential moving average standard deviation.
     /// </summary>
-    public int deliveryTimeEmaDuration = 2;
+    public int deliveryTimeEmaDuration = 4;
     #endregion
 }
