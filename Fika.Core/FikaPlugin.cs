@@ -1169,7 +1169,6 @@ public class FikaPlugin : BaseUnityPlugin
         }*/
 
         new VersionLabelPatch().Disable();
-        new AmmoUsedCounterPatch().Disable();
         new ScavRepAdjustmentPatch().Disable();
         new GetProfileAtEndOfRaidPatch().Disable();
         new ScavExfilPatch().Disable();
