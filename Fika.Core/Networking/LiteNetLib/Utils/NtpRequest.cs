@@ -1,41 +1,42 @@
 ﻿using System.Net;
 using System.Net.Sockets;
 
-namespace Fika.Core.Networking.LiteNetLib.Utils;
-
-internal sealed class NtpRequest
+namespace Fika.Core.Networking.LiteNetLib.Utils
 {
-    private const int ResendTimer = 1000;
-    private const int KillTimer = 10000;
-    public const int DefaultPort = 123;
-    private readonly IPEndPoint _ntpEndPoint;
-    private float _resendTime = ResendTimer;
-    private float _killTime = 0;
-
-    public NtpRequest(IPEndPoint endPoint)
+    internal sealed class NtpRequest
     {
-        _ntpEndPoint = endPoint;
-    }
+        private const int ResendTimer = 1000;
+        private const int KillTimer = 10000;
+        public const int DefaultPort = 123;
+        private readonly IPEndPoint _ntpEndPoint;
+        private float _resendTime = ResendTimer;
+        private float _killTime = 0;
 
-    public bool NeedToKill => _killTime >= KillTimer;
+        public NtpRequest(IPEndPoint endPoint)
+        {
+            _ntpEndPoint = endPoint;
+        }
 
-    public bool Send(Socket socket, float time)
-    {
-        _resendTime += time;
-        _killTime += time;
-        if (_resendTime < ResendTimer)
+        public bool NeedToKill => _killTime >= KillTimer;
+
+        public bool Send(Socket socket, float time)
         {
-            return false;
-        }
-        var packet = new NtpPacket();
-        try
-        {
-            int sendCount = socket.SendTo(packet.Bytes, 0, packet.Bytes.Length, SocketFlags.None, _ntpEndPoint);
-            return sendCount == packet.Bytes.Length;
-        }
-        catch
-        {
-            return false;
+            _resendTime += time;
+            _killTime += time;
+            if (_resendTime < ResendTimer)
+            {
+                return false;
+            }
+            var packet = new NtpPacket();
+            try
+            {
+                int sendCount = socket.SendTo(packet.Bytes, 0, packet.Bytes.Length, SocketFlags.None, _ntpEndPoint);
+                return sendCount == packet.Bytes.Length;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

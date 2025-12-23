@@ -50,8 +50,7 @@ using Fika.Core.Networking.Models;
 using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Player.Common;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
-using EFT.WeaponMounting;
-using UnityEngine.SocialPlatforms;
+using System.Linq;
 
 namespace Fika.Core.Networking;
 
@@ -296,8 +295,9 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
             EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
 
         List<string> ipAddresses = [];
-        foreach (var ip in FikaPlugin.Instance.LocalIPs)
+        for (var i = 1; i < FikaPlugin.Instance.LocalIPs.Length; i++) // we skip the first (0.0.0.0)
         {
+            var ip = FikaPlugin.Instance.LocalIPs[i];
             if (ValidateIP(ip))
             {
                 ipAddresses.Add(ip);
@@ -489,6 +489,11 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
     private bool ValidateIP(string ip)
     {
         if (string.IsNullOrWhiteSpace(ip))
+        {
+            return false;
+        }
+
+        if (string.Equals(ip, "0.0.0.0")) // safe check in case skip fails
         {
             return false;
         }

@@ -1,20 +1,18 @@
 ﻿#if UNITY_2018_3_OR_NEWER
 #define UNITY_SOCKET_FIX
 #endif
+using System.Runtime.InteropServices;
 using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace Fika.Core.Networking.LiteNetLib;
 
-public partial class NetManager
+public partial class LiteNetManager
 {
-    private const int ReceivePollingTime = 500000; //0.5 second
-
-    private Socket _udpSocketv4;
+    protected Socket _udpSocketv4;
     private Socket _udpSocketv6;
     private Thread _receiveThread;
     private IPEndPoint _bufferEndPointv4;
@@ -36,6 +34,11 @@ public partial class NetManager
     // special case in iOS (and possibly android that should be resolved in unity)
     internal bool NotConnected;
 
+    /// <summary>
+    /// Poll timeout in microseconds. Increasing can slightly increase performance in cost of slow NetManager.Stop(Socket.Close)
+    /// </summary>
+    public int ReceivePollingTime = 50000; //0.05 second
+
     public short Ttl
     {
         get
@@ -54,7 +57,7 @@ public partial class NetManager
         }
     }
 
-    static NetManager()
+    static LiteNetManager()
     {
 #if DISABLE_IPV6
         IPv6Support = false;
@@ -92,19 +95,14 @@ public partial class NetManager
         return false;
     }
 
-    private void ManualReceive(Socket socket, EndPoint bufferEndPoint, int maxReceive)
+    private void ManualReceive(Socket socket, EndPoint bufferEndPoint)
     {
         //Reading data
         try
         {
-            int packetsReceived = 0;
-            while (socket.Available > 0)
-            {
-                ReceiveFrom(socket, ref bufferEndPoint);
-                packetsReceived++;
-                if (packetsReceived == maxReceive)
-                    break;
-            }
+            int available = socket.Available;
+            while (available > 0)
+                available -= ReceiveFrom(socket, ref bufferEndPoint);
         }
         catch (SocketException ex)
         {
@@ -133,7 +131,7 @@ public partial class NetManager
         var socketV6 = _udpSocketv6;
         var packet = PoolGetPacket(NetConstants.MaxPacketSize);
 
-        while (IsRunning)
+        while (_isRunning)
         {
             try
             {
@@ -213,13 +211,7 @@ public partial class NetManager
                     (address[26] << 16) +
                     (address[25] << 8) +
                     (address[24])));
-#if NETCOREAPP || NETSTANDARD2_1 || NETSTANDARD2_1_OR_GREATER
                 tempEndPoint.Address = new IPAddress(new ReadOnlySpan<byte>(address, 8, 16), scope);
-#else
-					byte[] addrBuffer = new byte[16];
-					Buffer.BlockCopy(address, 8, addrBuffer, 0, 16);
-					tempEndPoint.Address = new IPAddress(addrBuffer, scope);
-#endif
             }
             else //IPv4
             {
@@ -245,7 +237,7 @@ public partial class NetManager
         }
     }
 
-    private void ReceiveFrom(Socket s, ref EndPoint bufferEndPoint)
+    private int ReceiveFrom(Socket s, ref EndPoint bufferEndPoint)
     {
         var packet = PoolGetPacket(NetConstants.MaxPacketSize);
 #if NET8_0_OR_GREATER
@@ -256,6 +248,7 @@ public partial class NetManager
         packet.Size = s.ReceiveFrom(packet.RawData, 0, NetConstants.MaxPacketSize, SocketFlags.None, ref bufferEndPoint);
         OnMessageReceived(packet, (IPEndPoint)bufferEndPoint);
 #endif
+        return packet.Size;
     }
 
     private void ReceiveLogic()
@@ -266,7 +259,7 @@ public partial class NetManager
         var socketv4 = _udpSocketv4;
         var socketV6 = _udpSocketv6;
 
-        while (IsRunning)
+        while (_isRunning)
         {
             //Reading data
             try
@@ -351,7 +344,7 @@ public partial class NetManager
             _pausedSocketFix = new PausedSocketFix(this, addressIPv4, addressIPv6, port, manualMode);
 #endif
 
-        IsRunning = true;
+        _isRunning = true;
         if (_manualMode)
         {
             _bufferEndPointv4 = new IPEndPoint(IPAddress.Any, 0);
@@ -508,14 +501,12 @@ public partial class NetManager
         return result;
     }
 
-    internal int SendRaw(NetPacket packet, IPEndPoint remoteEndPoint)
-    {
-        return SendRaw(packet.RawData, 0, packet.Size, remoteEndPoint);
-    }
+    internal int SendRaw(NetPacket packet, IPEndPoint remoteEndPoint) =>
+        SendRaw(packet.RawData, 0, packet.Size, remoteEndPoint);
 
     internal int SendRaw(byte[] message, int start, int length, IPEndPoint remoteEndPoint)
     {
-        if (!IsRunning)
+        if (!_isRunning)
             return 0;
 
         NetPacket expandedPacket = null;
@@ -528,6 +519,44 @@ public partial class NetManager
             message = expandedPacket.RawData;
         }
 
+#if DEBUG || SIMULATE_NETWORK
+        if (HandleSimulateOutboundPacketLoss())
+        {
+            if (expandedPacket != null)
+                PoolRecycle(expandedPacket);
+            return 0; // Simulate successful send to avoid triggering error handling
+        }
+
+        if (HandleSimulateOutboundLatency(message, start, length, remoteEndPoint))
+        {
+            if (expandedPacket != null)
+                PoolRecycle(expandedPacket);
+            return length; // Simulate successful send
+        }
+#endif
+
+        return SendRawCoreWithCleanup(message, start, length, remoteEndPoint, expandedPacket);
+    }
+
+    private int SendRawCoreWithCleanup(byte[] message, int start, int length, IPEndPoint remoteEndPoint, NetPacket expandedPacket)
+    {
+        try
+        {
+            return SendRawCore(message, start, length, remoteEndPoint);
+        }
+        finally
+        {
+            if (expandedPacket != null)
+                PoolRecycle(expandedPacket);
+        }
+    }
+
+    // Core socket sending logic without simulation - used by both SendRaw and delayed packet processing
+    internal int SendRawCore(byte[] message, int start, int length, IPEndPoint remoteEndPoint)
+    {
+        if (!_isRunning)
+            return 0;
+
         var socket = _udpSocketv4;
         if (remoteEndPoint.AddressFamily == AddressFamily.InterNetworkV6 && IPv6Support)
         {
@@ -539,7 +568,7 @@ public partial class NetManager
         int result;
         try
         {
-            if (UseNativeSockets && remoteEndPoint is NetPeer peer)
+            if (UseNativeSockets && remoteEndPoint is LiteNetPeer peer)
             {
                 unsafe
                 {
@@ -572,7 +601,7 @@ public partial class NetManager
 
                 case SocketError.HostUnreachable:
                 case SocketError.NetworkUnreachable:
-                    if (DisconnectOnUnreachable && remoteEndPoint is NetPeer peer)
+                    if (DisconnectOnUnreachable && remoteEndPoint is LiteNetPeer peer)
                     {
                         DisconnectPeerForce(
                             peer,
@@ -600,11 +629,6 @@ public partial class NetManager
             NetDebug.WriteError($"[S] {ex}");
             return 0;
         }
-        finally
-        {
-            if (expandedPacket != null)
-                PoolRecycle(expandedPacket);
-        }
 
         if (result <= 0)
             return 0;
@@ -618,15 +642,11 @@ public partial class NetManager
         return result;
     }
 
-    public bool SendBroadcast(NetDataWriter writer, int port)
-    {
-        return SendBroadcast(writer.Data, 0, writer.Length, port);
-    }
+    public bool SendBroadcast(NetDataWriter writer, int port) =>
+        SendBroadcast(writer.Data, 0, writer.Length, port);
 
-    public bool SendBroadcast(byte[] data, int port)
-    {
-        return SendBroadcast(data, 0, data.Length, port);
-    }
+    public bool SendBroadcast(byte[] data, int port) =>
+        SendBroadcast(data, 0, data.Length, port);
 
     public bool SendBroadcast(byte[] data, int start, int length, int port)
     {
@@ -693,13 +713,13 @@ public partial class NetManager
 
     private void CloseSocket()
     {
-        IsRunning = false;
+        _isRunning = false;
+        if (_receiveThread != null && _receiveThread != Thread.CurrentThread)
+            _receiveThread.Join();
+        _receiveThread = null;
         _udpSocketv4?.Close();
         _udpSocketv6?.Close();
         _udpSocketv4 = null;
         _udpSocketv6 = null;
-        if (_receiveThread != null && _receiveThread != Thread.CurrentThread)
-            _receiveThread.Join();
-        _receiveThread = null;
     }
 }

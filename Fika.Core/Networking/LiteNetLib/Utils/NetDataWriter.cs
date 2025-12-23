@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Net;
+using System.Net.Sockets;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading;
 
 namespace Fika.Core.Networking.LiteNetLib.Utils;
 
@@ -41,7 +40,10 @@ public unsafe class NetDataWriter
         }
     }
 
-    public static readonly ThreadLocal<UTF8Encoding> UTF8Encoding = new(() => new UTF8Encoding(false, true));
+    [ThreadStatic]
+    private static UTF8Encoding _utf8EncodingInternal;
+
+    public static UTF8Encoding UTF8Encoding => _utf8EncodingInternal ??= new UTF8Encoding(false, true);
 
     public NetDataWriter() : this(true, _initialSize)
     {
@@ -86,7 +88,6 @@ public unsafe class NetDataWriter
         return netDataWriter;
     }
 
-#if LITENETLIB_SPANS || NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1 || NETCOREAPP3_1 || NET5_0 || NETSTANDARD2_1
     /// <summary>
     /// Creates NetDataWriter from the given <paramref name="bytes"/>.
     /// </summary>
@@ -96,7 +97,6 @@ public unsafe class NetDataWriter
         netDataWriter.Put(bytes);
         return netDataWriter;
     }
-#endif
 
     public static NetDataWriter FromString(string value)
     {
@@ -156,154 +156,109 @@ public unsafe class NetDataWriter
     public void Put(float value)
     {
         PutUnmanaged(value);
-        /*if (_autoResize)
-            ResizeIfNeed(_position + 4);
-        FastBitConverter.GetBytes(_data, _position, value);
-        _position += 4;*/
     }
 
     public void Put(double value)
     {
         PutUnmanaged(value);
-        /*if (_autoResize)
-            ResizeIfNeed(_position + 8);
-        FastBitConverter.GetBytes(_data, _position, value);
-        _position += 8;*/
     }
 
     public void Put(long value)
     {
         PutUnmanaged(value);
-        /*if (_autoResize)
-            ResizeIfNeed(_position + 8);
-        FastBitConverter.GetBytes(_data, _position, value);
-        _position += 8;*/
     }
 
     public void Put(ulong value)
     {
         PutUnmanaged(value);
-        /*if (_autoResize)
-            ResizeIfNeed(_position + 8);
-        FastBitConverter.GetBytes(_data, _position, value);
-        _position += 8;*/
     }
 
     public void Put(int value)
     {
         PutUnmanaged(value);
-        /*if (_autoResize)
-            ResizeIfNeed(_position + 4);
-        FastBitConverter.GetBytes(_data, _position, value);
-        _position += 4;*/
     }
 
     public void Put(uint value)
     {
         PutUnmanaged(value);
-        /*if (_autoResize)
-            ResizeIfNeed(_position + 4);
-        FastBitConverter.GetBytes(_data, _position, value);
-        _position += 4;*/
     }
 
     public void Put(char value)
     {
         PutUnmanaged((ushort)value);
-        /*Put((ushort)value);*/
     }
 
     public void Put(ushort value)
     {
         PutUnmanaged(value);
-        /*if (_autoResize)
-            ResizeIfNeed(_position + 2);
-        FastBitConverter.GetBytes(_data, _position, value);
-        _position += 2;*/
     }
 
     public void Put(short value)
     {
         PutUnmanaged(value);
-        /*if (_autoResize)
-            ResizeIfNeed(_position + 2);
-        FastBitConverter.GetBytes(_data, _position, value);
-        _position += 2;*/
     }
 
     public void Put(sbyte value)
     {
         if (_autoResize)
+        {
             ResizeIfNeed(_position + 1);
+        }
+
         _data[_position] = (byte)value;
         _position++;
-
-        /*if (_autoResize)
-            ResizeIfNeed(_position + 1);
-        FastBitConverter.GetBytes(_data, _position, value);
-        _position += 1;*/
     }
 
     public void Put(byte value)
     {
         if (_autoResize)
+        {
             ResizeIfNeed(_position + 1);
+        }
+
         _data[_position] = value;
         _position++;
-
-        /*if (_autoResize)
-            ResizeIfNeed(_position + 1);
-        FastBitConverter.GetBytes(_data, _position, value);
-        _position += 1;*/
     }
 
     public void Put(Guid value)
     {
-#if LITENETLIB_SPANS || NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1 || NETCOREAPP3_1 || NET5_0 || NETSTANDARD2_1
         if (_autoResize)
+        {
             ResizeIfNeed(_position + 16);
+        }
+
         value.TryWriteBytes(_data.AsSpan(_position));
         _position += 16;
-#else
-        PutBytesWithLength(value.ToByteArray());
-#endif
     }
 
     public void Put(byte[] data, int offset, int length)
     {
         Put(data.AsSpan(offset, length));
-
-        /*if (_autoResize)
-            ResizeIfNeed(_position + length);
-        Buffer.BlockCopy(data, offset, _data, _position, length);
-        _position += length;*/
     }
 
     public void Put(byte[] data)
     {
         Put(data.AsSpan());
-
-        /*if (_autoResize)
-            ResizeIfNeed(_position + data.Length);
-        Buffer.BlockCopy(data, 0, _data, _position, data.Length);
-        _position += data.Length;*/
     }
 
-#if LITENETLIB_SPANS || NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1 || NETCOREAPP3_1 || NET5_0 || NETSTANDARD2_1
     public void Put(ReadOnlySpan<byte> data)
     {
         if (_autoResize)
+        {
             ResizeIfNeed(_position + data.Length);
+        }
 
         data.CopyTo(_data.AsSpan(_position));
         _position += data.Length;
     }
-#endif
 
     public void PutSBytesWithLength(sbyte[] data, int offset, ushort length)
     {
         if (_autoResize)
+        {
             ResizeIfNeed(_position + 2 + length);
+        }
+
         FastBitConverter.GetBytes(_data, _position, length);
         Buffer.BlockCopy(data, offset, _data, _position + 2, length);
         _position += 2 + length;
@@ -317,18 +272,14 @@ public unsafe class NetDataWriter
     public void PutBytesWithLength(byte[] data, int offset, ushort length)
     {
         PutBytesWithLength(data.AsSpan(offset, length));
-
-        /*if (_autoResize)
-            ResizeIfNeed(_position + 2 + length);
-        FastBitConverter.GetBytes(_data, _position, length);
-        Buffer.BlockCopy(data, offset, _data, _position + 2, length);
-        _position += 2 + length;*/
     }
 
     public void PutBytesWithLength(ReadOnlySpan<byte> data)
     {
         if (_autoResize)
+        {
             ResizeIfNeed(_position + 2 + data.Length);
+        }
 
         FastBitConverter.GetBytes(_data, _position, (ushort)data.Length);
 
@@ -353,10 +304,16 @@ public unsafe class NetDataWriter
         var length = arr == null ? (ushort)0 : (ushort)arr.Length;
         sz *= length;
         if (_autoResize)
+        {
             ResizeIfNeed(_position + sz + 2);
+        }
+
         FastBitConverter.GetBytes(_data, _position, length);
         if (arr != null)
+        {
             Buffer.BlockCopy(arr, 0, _data, _position + 2, sz);
+        }
+
         _position += sz + 2;
     }
 
@@ -410,7 +367,9 @@ public unsafe class NetDataWriter
         var strArrayLength = value == null ? (ushort)0 : (ushort)value.Length;
         Put(strArrayLength);
         for (var i = 0; i < strArrayLength; i++)
+        {
             Put(value[i]);
+        }
     }
 
     public void PutArray(string[] value, int strMaxLength)
@@ -418,7 +377,9 @@ public unsafe class NetDataWriter
         var strArrayLength = value == null ? (ushort)0 : (ushort)value.Length;
         Put(strArrayLength);
         for (var i = 0; i < strArrayLength; i++)
+        {
             Put(value[i], strMaxLength);
+        }
     }
 
     public void PutArray<T>(T[] value) where T : INetSerializable, new()
@@ -426,13 +387,28 @@ public unsafe class NetDataWriter
         var strArrayLength = (ushort)(value?.Length ?? 0);
         Put(strArrayLength);
         for (var i = 0; i < strArrayLength; i++)
+        {
             value[i].Serialize(this);
+        }
     }
 
     public void Put(IPEndPoint endPoint)
     {
-        Put(endPoint.Address.ToString());
-        Put(endPoint.Port);
+        if (endPoint.AddressFamily == AddressFamily.InterNetwork)
+        {
+            Put((byte)0);
+        }
+        else if (endPoint.AddressFamily == AddressFamily.InterNetworkV6)
+        {
+            Put((byte)1);
+        }
+        else
+        {
+            throw new ArgumentException("Unsupported address family: " + endPoint.AddressFamily);
+        }
+
+        Put(endPoint.Address.GetAddressBytes());
+        Put((ushort)endPoint.Port);
     }
 
     public void PutLargeString(string value)
@@ -442,7 +418,7 @@ public unsafe class NetDataWriter
             Put(0);
             return;
         }
-        var size = UTF8Encoding.Value.GetByteCount(value);
+        var size = UTF8Encoding.GetByteCount(value);
         if (size == 0)
         {
             Put(0);
@@ -450,8 +426,11 @@ public unsafe class NetDataWriter
         }
         Put(size);
         if (_autoResize)
+        {
             ResizeIfNeed(_position + size);
-        UTF8Encoding.Value.GetBytes(value, 0, size, _data, _position);
+        }
+
+        UTF8Encoding.GetBytes(value, 0, size, _data, _position);
         _position += size;
     }
 
@@ -472,10 +451,13 @@ public unsafe class NetDataWriter
         }
 
         var length = maxLength > 0 && value.Length > maxLength ? maxLength : value.Length;
-        var maxSize = UTF8Encoding.Value.GetMaxByteCount(length);
+        var maxSize = UTF8Encoding.GetMaxByteCount(length);
         if (_autoResize)
+        {
             ResizeIfNeed(_position + maxSize + sizeof(ushort));
-        var size = UTF8Encoding.Value.GetBytes(value, 0, length, _data, _position + sizeof(ushort));
+        }
+
+        var size = UTF8Encoding.GetBytes(value, 0, length, _data, _position + sizeof(ushort));
         if (size == 0)
         {
             Put((ushort)0);

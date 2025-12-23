@@ -5,7 +5,7 @@ using System.Threading;
 namespace Fika.Core.Networking.LiteNetLib;
 
 //minimal hashset class from dotnet with some optimizations
-public partial class NetManager
+public partial class LiteNetManager
 {
     private const int MaxPrimeArrayLength = 0x7FFFFFC3;
     private const int HashPrime = 101;
@@ -55,7 +55,7 @@ public partial class NetManager
     {
         internal int HashCode;
         internal int Next;
-        internal NetPeer Value;
+        internal LiteNetPeer Value;
     }
 
     private int[] _buckets;
@@ -63,9 +63,10 @@ public partial class NetManager
     private int _count;
     private int _lastIndex;
     private int _freeList = -1;
-    private NetPeer[] _peersArray = new NetPeer[32];
-    private readonly ReaderWriterLockSlim _peersLock = new(LockRecursionPolicy.NoRecursion);
-    private volatile NetPeer _headPeer;
+    private LiteNetPeer[] _peersArray = new LiteNetPeer[32];
+
+    protected readonly ReaderWriterLockSlim _peersLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
+    protected volatile LiteNetPeer _headPeer;
 
     private void ClearPeerSet()
     {
@@ -79,11 +80,11 @@ public partial class NetManager
             _count = 0;
             _freeList = -1;
         }
-        _peersArray = new NetPeer[32];
+        _peersArray = new LiteNetPeer[32];
         _peersLock.ExitWriteLock();
     }
 
-    private bool ContainsPeer(NetPeer item)
+    protected bool ContainsPeer(LiteNetPeer item)
     {
         if (item == null)
         {
@@ -107,7 +108,7 @@ public partial class NetManager
     /// </summary>
     /// <param name="id">id of peer</param>
     /// <returns>Peer if peer with id exist, otherwise null</returns>
-    public NetPeer GetPeerById(int id)
+    public LiteNetPeer GetPeerById(int id)
     {
         return id >= 0 && id < _peersArray.Length ? _peersArray[id] : null;
     }
@@ -118,13 +119,13 @@ public partial class NetManager
     /// <param name="id">id of peer</param>
     /// <param name="peer">resulting peer</param>
     /// <returns>True if peer with id exist, otherwise false</returns>
-    public bool TryGetPeerById(int id, out NetPeer peer)
+    public bool TryGetPeerById(int id, out LiteNetPeer peer)
     {
         peer = GetPeerById(id);
         return peer != null;
     }
 
-    private void AddPeer(NetPeer peer)
+    private void AddPeer(LiteNetPeer peer)
     {
         if (peer == null)
         {
@@ -150,13 +151,13 @@ public partial class NetManager
         _peersLock.ExitWriteLock();
     }
 
-    private void RemovePeer(NetPeer peer, bool enableWriteLock)
+    private void RemovePeer(LiteNetPeer peer, bool enableWriteLock)
     {
-        if (enableWriteLock)
+        if(enableWriteLock)
             _peersLock.EnterWriteLock();
         if (!RemovePeerFromSet(peer))
         {
-            if (enableWriteLock)
+            if(enableWriteLock)
                 _peersLock.ExitWriteLock();
             return;
         }
@@ -172,11 +173,11 @@ public partial class NetManager
         _peersArray[peer.Id] = null;
         _peerIds.Enqueue(peer.Id);
 
-        if (enableWriteLock)
+        if(enableWriteLock)
             _peersLock.ExitWriteLock();
     }
 
-    private bool RemovePeerFromSet(NetPeer peer)
+    protected bool RemovePeerFromSet(LiteNetPeer peer)
     {
         if (_buckets == null || peer == null)
             return false;
@@ -211,7 +212,7 @@ public partial class NetManager
         return false;
     }
 
-    private bool TryGetPeer(IPEndPoint endPoint, out NetPeer actualValue)
+    private bool TryGetPeer(IPEndPoint endPoint, out LiteNetPeer actualValue)
     {
         if (_buckets != null)
         {
@@ -238,7 +239,7 @@ public partial class NetManager
     }
 
     //only used for NET8
-    private bool TryGetPeer(SocketAddress saddr, out NetPeer actualValue)
+    private bool TryGetPeer(SocketAddress saddr, out LiteNetPeer actualValue)
     {
         if (_buckets != null)
         {
@@ -259,7 +260,7 @@ public partial class NetManager
         return false;
     }
 
-    private bool AddPeerToSet(NetPeer value)
+    protected bool AddPeerToSet(LiteNetPeer value)
     {
         if (_buckets == null)
         {

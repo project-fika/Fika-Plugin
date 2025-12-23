@@ -1,16 +1,17 @@
 ﻿using System.Net;
 
-namespace Fika.Core.Networking.LiteNetLib.Layers;
-
-public abstract class PacketLayerBase
+namespace Fika.Core.Networking.LiteNetLib.Layers
 {
-    public readonly int ExtraPacketSizeForLayer;
-
-    protected PacketLayerBase(int extraPacketSizeForLayer)
+    public abstract class PacketLayerBase
     {
-        ExtraPacketSizeForLayer = extraPacketSizeForLayer;
-    }
+        public readonly int ExtraPacketSizeForLayer;
 
-    public abstract void ProcessInboundPacket(ref IPEndPoint endPoint, ref byte[] data, ref int length);
-    public abstract void ProcessOutBoundPacket(ref IPEndPoint endPoint, ref byte[] data, ref int offset, ref int length);
+        protected PacketLayerBase(int extraPacketSizeForLayer)
+        {
+            ExtraPacketSizeForLayer = extraPacketSizeForLayer;
+        }
+
+        public abstract void ProcessInboundPacket(ref IPEndPoint endPoint, ref byte[] data, ref int length);
+        public abstract void ProcessOutBoundPacket(ref IPEndPoint endPoint, ref byte[] data, ref int offset, ref int length);
+    }
 }

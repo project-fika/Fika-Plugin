@@ -1,47 +1,45 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
 
-namespace Fika.Core.Networking.LiteNetLib;
-
-internal abstract class BaseChannel
+namespace Fika.Core.Networking.LiteNetLib
 {
-    protected readonly NetPeer Peer;
-    protected readonly Queue<NetPacket> OutgoingQueue = new(NetConstants.DefaultWindowSize);
-    private int _isAddedToPeerChannelSendQueue;
-
-    public int PacketsInQueue => OutgoingQueue.Count;
-
-    protected BaseChannel(NetPeer peer)
+    internal abstract class BaseChannel
     {
-        Peer = peer;
-    }
+        protected readonly LiteNetPeer Peer;
+        protected readonly Queue<NetPacket> OutgoingQueue = new Queue<NetPacket>(NetConstants.DefaultWindowSize);
+        private int _isAddedToPeerChannelSendQueue;
 
-    public void AddToQueue(NetPacket packet)
-    {
-        lock (OutgoingQueue)
+        public int PacketsInQueue => OutgoingQueue.Count;
+
+        protected BaseChannel(LiteNetPeer peer) =>
+            Peer = peer;
+
+        public void AddToQueue(NetPacket packet)
         {
-            OutgoingQueue.Enqueue(packet);
+            lock (OutgoingQueue)
+            {
+                OutgoingQueue.Enqueue(packet);
+            }
+            AddToPeerChannelSendQueue();
         }
-        AddToPeerChannelSendQueue();
-    }
 
-    protected void AddToPeerChannelSendQueue()
-    {
-        if (Interlocked.CompareExchange(ref _isAddedToPeerChannelSendQueue, 1, 0) == 0)
+        protected void AddToPeerChannelSendQueue()
         {
-            Peer.AddToReliableChannelSendQueue(this);
+            if (Interlocked.CompareExchange(ref _isAddedToPeerChannelSendQueue, 1, 0) == 0)
+                Peer.AddToReliableChannelSendQueue(this);
         }
+
+        public bool SendAndCheckQueue()
+        {
+            bool hasPacketsToSend = SendNextPackets();
+            if (!hasPacketsToSend)
+                Interlocked.Exchange(ref _isAddedToPeerChannelSendQueue, 0);
+
+            return hasPacketsToSend;
+        }
+
+        public abstract bool SendNextPackets();
+
+        public abstract bool ProcessPacket(NetPacket packet);
     }
-
-    public bool SendAndCheckQueue()
-    {
-        bool hasPacketsToSend = SendNextPackets();
-        if (!hasPacketsToSend)
-            Interlocked.Exchange(ref _isAddedToPeerChannelSendQueue, 0);
-
-        return hasPacketsToSend;
-    }
-
-    protected abstract bool SendNextPackets();
-    public abstract bool ProcessPacket(NetPacket packet);
 }
