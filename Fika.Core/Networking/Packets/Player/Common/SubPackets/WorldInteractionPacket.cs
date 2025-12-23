@@ -75,7 +75,7 @@ public sealed class WorldInteractionPacket : IPoolSubPacket
                     }
 
 #if DEBUG
-                    FikaGlobals.LogInfo($"Using key with {keyComponent.NumberOfUsages}/{keyComponent.Template.MaximumNumberOfUsage} uses");
+                    FikaGlobals.LogInfo($"Using key with {keyComponent.NumberOfUsages} current uses, {keyComponent.Template.MaximumNumberOfUsage} maximum");
 #endif
 
                     keyHandler.UnlockResult = worldInteractiveObject.UnlockOperation(keyComponent, player, worldInteractiveObject);
