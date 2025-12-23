@@ -713,12 +713,12 @@ public class FikaPlayer : LocalPlayer
     // Start
     public override void vmethod_0(WorldInteractiveObject interactiveObject, InteractionResult interactionResult, Action callback)
     {
-        base.vmethod_0(interactiveObject, interactionResult, callback);
-
         CommonPacket.Type = ECommonSubPacketType.WorldInteraction;
         CommonPacket.SubPacket = WorldInteractionPacket.FromValue(interactiveObject.Id, interactionResult.InteractionType,
             EInteractionStage.Start, (interactionResult is KeyInteractionResultClass keyInteractionResult) ? keyInteractionResult.Key.Item.Id : null);
         PacketSender.NetworkManager.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
+        CurrentManagedState.StartDoorInteraction(interactiveObject, interactionResult, callback);
+        UpdateInteractionCast();
     }
 
     // Execute
@@ -1412,12 +1412,12 @@ public class FikaPlayer : LocalPlayer
     #region handlers
     public class KeyHandler(FikaPlayer player)
     {
-        private readonly FikaPlayer player = player;
-        public GStruct156<KeyInteractionResultClass> unlockResult;
+        public GStruct156<KeyInteractionResultClass> UnlockResult;
+        private readonly FikaPlayer _player = player;
 
         internal void HandleKeyEvent()
         {
-            unlockResult.Value.RaiseEvents(player._inventoryController, CommandStatus.Succeed);
+            UnlockResult.Value.RaiseEvents(_player._inventoryController, CommandStatus.Succeed);
         }
     }
 

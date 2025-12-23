@@ -1,10 +1,11 @@
-﻿using Comfort.Common;
+﻿using System;
+using Comfort.Common;
 using EFT;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using Fika.Core.Main.Players;
+using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Pooling;
-using System;
 using static Fika.Core.Main.Players.FikaPlayer;
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
@@ -23,7 +24,7 @@ public sealed class WorldInteractionPacket : IPoolSubPacket
 
     public static WorldInteractionPacket FromValue(string interactiveId, EInteractionType interactionType, EInteractionStage interactionStage, string itemId = null)
     {
-        WorldInteractionPacket packet = CommonSubPacketPoolManager.Instance.GetPacket<WorldInteractionPacket>(ECommonSubPacketType.WorldInteraction);
+        var packet = CommonSubPacketPoolManager.Instance.GetPacket<WorldInteractionPacket>(ECommonSubPacketType.WorldInteraction);
         packet.InteractiveId = interactiveId;
         packet.InteractionType = interactionType;
         packet.InteractionStage = interactionStage;
@@ -38,46 +39,54 @@ public sealed class WorldInteractionPacket : IPoolSubPacket
 
     public void Execute(FikaPlayer player)
     {
-        WorldInteractiveObject worldInteractiveObject = Singleton<GameWorld>.Instance.FindDoor(InteractiveId);
+        var worldInteractiveObject = Singleton<GameWorld>.Instance.FindDoor(InteractiveId);
         if (worldInteractiveObject != null)
         {
             if (worldInteractiveObject.isActiveAndEnabled && !worldInteractiveObject.ForceLocalInteraction)
             {
+#if DEBUG
+                FikaGlobals.LogInfo($"Interacting with door, type: {InteractionType}, stage: {InteractionStage}");
+#endif
+
                 InteractionResult interactionResult;
                 Action action;
-                if (InteractionType == EInteractionType.Unlock)
+                if (InteractionType == EInteractionType.Unlock && InteractionStage == EInteractionStage.Start)
                 {
                     KeyHandler keyHandler = new(player);
 
                     if (string.IsNullOrEmpty(ItemId))
                     {
-                        FikaPlugin.Instance.FikaLogger.LogWarning("WorldInteractionPacket: ItemID was null!");
+                        FikaGlobals.LogWarning("WorldInteractionPacket: ItemID was null!");
                         return;
                     }
 
-                    GStruct156<Item> result = player.FindItemById(ItemId, false, false);
+                    var result = player.FindItemById(ItemId, false, false);
                     if (!result.Succeeded)
                     {
-                        FikaPlugin.Instance.FikaLogger.LogWarning("WorldInteractionPacket: Could not find item: " + ItemId);
+                        FikaGlobals.LogWarning("WorldInteractionPacket: Could not find item: " + ItemId);
                         return;
                     }
 
-                    KeyComponent keyComponent = result.Value.GetItemComponent<KeyComponent>();
+                    var keyComponent = result.Value.GetItemComponent<KeyComponent>();
                     if (keyComponent == null)
                     {
-                        FikaPlugin.Instance.FikaLogger.LogWarning("WorldInteractionPacket: keyComponent was null!");
+                        FikaGlobals.LogWarning("WorldInteractionPacket: keyComponent was null!");
                         return;
                     }
 
-                    keyHandler.unlockResult = worldInteractiveObject.UnlockOperation(keyComponent, player, worldInteractiveObject);
-                    if (keyHandler.unlockResult.Error != null)
+#if DEBUG
+                    FikaGlobals.LogInfo($"Using key with {keyComponent.NumberOfUsages}/{keyComponent.Template.MaximumNumberOfUsage} uses");
+#endif
+
+                    keyHandler.UnlockResult = worldInteractiveObject.UnlockOperation(keyComponent, player, worldInteractiveObject);
+                    if (keyHandler.UnlockResult.Error != null)
                     {
-                        FikaPlugin.Instance.FikaLogger.LogWarning("WorldInteractionPacket: Error when processing unlockResult: " + keyHandler.unlockResult.Error);
+                        FikaGlobals.LogWarning("WorldInteractionPacket: Error when processing unlockResult: " + keyHandler.UnlockResult.Error);
                         return;
                     }
 
-                    interactionResult = keyHandler.unlockResult.Value;
-                    keyHandler.unlockResult.Value.RaiseEvents(player.InventoryController, CommandStatus.Begin);
+                    interactionResult = keyHandler.UnlockResult.Value;
+                    keyHandler.UnlockResult.Value.RaiseEvents(player.InventoryController, CommandStatus.Begin);
                     action = new(keyHandler.HandleKeyEvent);
                 }
                 else
@@ -104,7 +113,7 @@ public sealed class WorldInteractionPacket : IPoolSubPacket
         }
         else
         {
-            FikaPlugin.Instance.FikaLogger.LogError("WorldInteractionPacket: WorldInteractiveObject was null or disabled!");
+            FikaGlobals.LogError("WorldInteractionPacket: WorldInteractiveObject was null or disabled!");
         }
     }
 
