@@ -900,6 +900,8 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
                 }
             }
         }
+
+        FikaEventDispatcher.DispatchEvent(new PeerDisconnectedEvent(peer, this));
     }
 
     private async Task WaitBeforeStopping()
