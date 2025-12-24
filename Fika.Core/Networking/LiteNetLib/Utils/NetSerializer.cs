@@ -1,7 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Net;
 using System.Reflection;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Net;
 using System.Runtime.Serialization;
 
 namespace Fika.Core.Networking.LiteNetLib.Utils;
@@ -223,7 +224,7 @@ public class NetSerializer
             {
                 var itm = default(TProperty);
                 itm.Deserialize(r);
-                if (i < listCount)
+                if(i < listCount)
                     list[i] = itm;
                 else
                     list.Add(itm);
@@ -419,7 +420,7 @@ public class NetSerializer
     private class IPEndPointSerializer<T> : FastCallSpecificAuto<T, IPEndPoint>
     {
         protected override void ElementWrite(NetDataWriter w, ref IPEndPoint prop) { w.Put(prop); }
-        protected override void ElementRead(NetDataReader r, out IPEndPoint prop) { prop = r.GetNetEndPoint(); }
+        protected override void ElementRead(NetDataReader r, out IPEndPoint prop) { prop = r.GetIPEndPoint(); }
     }
 
     private class GuidSerializer<T> : FastCallSpecificAuto<T, Guid>
@@ -495,7 +496,7 @@ public class NetSerializer
                 var s = _serializers[i];
                 if (s.Type == CallType.Basic)
                     s.Read(obj, reader);
-                else if (s.Type == CallType.Array)
+                else if(s.Type == CallType.Array)
                     s.ReadArray(obj, reader);
                 else
                     s.ReadList(obj, reader);
@@ -563,7 +564,7 @@ public class NetSerializer
 
     private NetDataWriter _writer;
     private readonly int _maxStringLength;
-    private readonly Dictionary<Type, CustomType> _registeredTypes = [];
+    private readonly Dictionary<Type, CustomType> _registeredTypes = new Dictionary<Type, CustomType>();
 
     public NetSerializer() : this(0)
     {

@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace Fika.Core.Networking.LiteNetLib.Utils;
@@ -81,7 +82,7 @@ public static class FastBitConverter
         buffer[offset + 1] = (byte)(data >> 48);
         buffer[offset    ] = (byte)(data >> 56);
 #else
-        buffer[offset] = (byte)data;
+        buffer[offset] = (byte)(data);
         buffer[offset + 1] = (byte)(data >> 8);
         buffer[offset + 2] = (byte)(data >> 16);
         buffer[offset + 3] = (byte)(data >> 24);
@@ -101,7 +102,7 @@ public static class FastBitConverter
         buffer[offset + 1] = (byte)(data >> 16);
         buffer[offset    ] = (byte)(data >> 24);
 #else
-        buffer[offset] = (byte)data;
+        buffer[offset] = (byte)(data);
         buffer[offset + 1] = (byte)(data >> 8);
         buffer[offset + 2] = (byte)(data >> 16);
         buffer[offset + 3] = (byte)(data >> 24);
@@ -115,7 +116,7 @@ public static class FastBitConverter
         buffer[offset + 1] = (byte)(data);
         buffer[offset    ] = (byte)(data >> 8);
 #else
-        buffer[offset] = (byte)data;
+        buffer[offset] = (byte)(data);
         buffer[offset + 1] = (byte)(data >> 8);
 #endif
     }
@@ -123,14 +124,14 @@ public static class FastBitConverter
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void GetBytes(byte[] bytes, int startIndex, double value)
     {
-        ConverterHelperDouble ch = new() { Adouble = value };
+        ConverterHelperDouble ch = new ConverterHelperDouble { Adouble = value };
         WriteLittleEndian(bytes, startIndex, ch.Along);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void GetBytes(byte[] bytes, int startIndex, float value)
     {
-        ConverterHelperFloat ch = new() { Afloat = value };
+        ConverterHelperFloat ch = new ConverterHelperFloat { Afloat = value };
         WriteLittleEndian(bytes, startIndex, ch.Aint);
     }
 

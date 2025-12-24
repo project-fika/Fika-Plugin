@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Net;
 
 namespace Fika.Core.Networking.LiteNetLib;
@@ -21,10 +21,8 @@ internal sealed class NetConnectRequestPacket
         PeerId = localId;
     }
 
-    public static int GetProtocolId(NetPacket packet)
-    {
-        return BitConverter.ToInt32(packet.RawData, 1);
-    }
+    public static int GetProtocolId(NetPacket packet) =>
+        BitConverter.ToInt32(packet.RawData, 1);
 
     public static NetConnectRequestPacket FromData(NetPacket packet)
     {
@@ -38,7 +36,7 @@ internal sealed class NetConnectRequestPacket
         int peerId = BitConverter.ToInt32(packet.RawData, 13);
 
         //Get target address
-        int addrSize = packet.RawData[HeaderSize - 1];
+        int addrSize = packet.RawData[HeaderSize-1];
         if (addrSize != 16 && addrSize != 28)
             return null;
         byte[] addressBytes = new byte[addrSize];
@@ -46,33 +44,16 @@ internal sealed class NetConnectRequestPacket
 
         // Read data and create request
         var reader = new NetDataReader(null, 0, 0);
-        if (packet.Size > HeaderSize + addrSize)
+        if (packet.Size > HeaderSize+addrSize)
             reader.SetSource(packet.RawData, HeaderSize + addrSize, packet.Size);
 
         return new NetConnectRequestPacket(connectionTime, packet.ConnectionNumber, peerId, addressBytes, reader);
     }
 
-    public static NetPacket Make(NetDataWriter connectData, SocketAddress addressBytes, long connectTime, int localId)
-    {
-        //Make initial packet
-        var packet = new NetPacket(PacketProperty.ConnectRequest, connectData.Length + addressBytes.Size);
-
-        //Add data
-        FastBitConverter.GetBytes(packet.RawData, 1, NetConstants.ProtocolId);
-        FastBitConverter.GetBytes(packet.RawData, 5, connectTime);
-        FastBitConverter.GetBytes(packet.RawData, 13, localId);
-        packet.RawData[HeaderSize - 1] = (byte)addressBytes.Size;
-        for (int i = 0; i < addressBytes.Size; i++)
-            packet.RawData[HeaderSize + i] = addressBytes[i];
-        Buffer.BlockCopy(connectData.Data, 0, packet.RawData, HeaderSize + addressBytes.Size, connectData.Length);
-        return packet;
-    }
-
-#if LITENETLIB_SPANS || NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1 || NETCOREAPP3_1 || NET5_0 || NETSTANDARD2_1
     public static NetPacket Make(ReadOnlySpan<byte> connectData, SocketAddress addressBytes, long connectTime, int localId)
     {
         //Make initial packet
-        var packet = new NetPacket(PacketProperty.ConnectRequest, connectData.Length + addressBytes.Size);
+        var packet = new NetPacket(PacketProperty.ConnectRequest, connectData.Length+addressBytes.Size);
 
         //Add data
         FastBitConverter.GetBytes(packet.RawData, 1, NetConstants.ProtocolId);
@@ -84,7 +65,6 @@ internal sealed class NetConnectRequestPacket
         connectData.CopyTo(packet.RawData.AsSpan(HeaderSize + addressBytes.Size));
         return packet;
     }
-#endif
 }
 
 internal sealed class NetConnectAcceptPacket
@@ -137,9 +117,9 @@ internal sealed class NetConnectAcceptPacket
         return packet;
     }
 
-    public static NetPacket MakeNetworkChanged(NetPeer peer)
+    public static NetPacket MakeNetworkChanged(LiteNetPeer peer)
     {
-        var packet = new NetPacket(PacketProperty.PeerNotFound, Size - 1);
+        var packet = new NetPacket(PacketProperty.PeerNotFound, Size-1);
         FastBitConverter.GetBytes(packet.RawData, 1, peer.ConnectTime);
         packet.RawData[9] = peer.ConnectionNum;
         packet.RawData[10] = 1;

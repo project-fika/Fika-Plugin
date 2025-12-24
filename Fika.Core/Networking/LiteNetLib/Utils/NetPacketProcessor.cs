@@ -1,6 +1,6 @@
-﻿using Fika.Core.Networking.Packets;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using Fika.Core.Networking.Packets;
 
 namespace Fika.Core.Networking.LiteNetLib.Utils;
 
@@ -14,9 +14,9 @@ public class NetPacketProcessor
         // FNV-1 64 bit hash
         static HashCache()
         {
-            ulong hash = 14695981039346656037UL; //offset
-            string typeName = typeof(T).ToString();
-            for (int i = 0; i < typeName.Length; i++)
+            var hash = 14695981039346656037UL; //offset
+            var typeName = typeof(T).ToString();
+            for (var i = 0; i < typeName.Length; i++)
             {
                 hash ^= typeName[i];
                 hash *= 1099511628211UL; //prime
@@ -33,14 +33,14 @@ public class NetPacketProcessor
         // CRC-16-CCITT
         static ShortHashCache()
         {
-            string typeName = typeof(T).ToString();
+            var typeName = typeof(T).ToString();
             const ushort poly = 0x1021;
             ushort crc = 0xFFFF;
 
-            foreach (char c in typeName)
+            foreach (var c in typeName)
             {
                 crc ^= (ushort)(c << 8);
-                for (int i = 0; i < 8; i++)
+                for (var i = 0; i < 8; i++)
                 {
                     if ((crc & 0x8000) != 0)
                     {

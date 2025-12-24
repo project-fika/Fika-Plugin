@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Net;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 
 namespace Fika.Core.Networking.LiteNetLib.Utils;
 
@@ -10,7 +9,7 @@ public unsafe class NetDataReader
     protected byte[] _data;
     protected int _position;
     protected int _dataSize;
-    private int _offset;
+    protected int _offset;
 
     public byte[] RawData
     {
@@ -123,7 +122,25 @@ public unsafe class NetDataReader
 
     public void Get(out IPEndPoint result)
     {
-        result = GetNetEndPoint();
+        result = GetIPEndPoint();
+    }
+
+    public IPEndPoint GetIPEndPoint()
+    {
+        IPAddress address;
+        //IPv4
+        if (GetByte() == 0)
+        {
+            address = new IPAddress(new ReadOnlySpan<byte>(_data, _position, 4));
+            _position += 4;
+        }
+        //IPv6
+        else
+        {
+            address = new IPAddress(new ReadOnlySpan<byte>(_data, _position, 16));
+            _position += 16;
+        }
+        return new IPEndPoint(address, GetUShort());
     }
 
     public void Get(out byte result)
@@ -201,13 +218,6 @@ public unsafe class NetDataReader
         result = GetGuid();
     }
 
-    public IPEndPoint GetNetEndPoint()
-    {
-        var host = GetString(1000);
-        var port = GetInt();
-        return NetUtils.MakeEndPoint(host, port);
-    }
-
     public byte GetByte()
     {
         var res = _data[_position];
@@ -224,7 +234,7 @@ public unsafe class NetDataReader
     {
         var length = BitConverter.ToUInt16(_data, _position);
         _position += 2;
-        T[] result = new T[length];
+        var result = new T[length];
         length *= size;
         Buffer.BlockCopy(_data, _position, result, 0, length);
         _position += length;
@@ -235,7 +245,7 @@ public unsafe class NetDataReader
     {
         var length = BitConverter.ToUInt16(_data, _position);
         _position += 2;
-        T[] result = new T[length];
+        var result = new T[length];
         for (var i = 0; i < length; i++)
         {
             var item = new T();
@@ -249,9 +259,12 @@ public unsafe class NetDataReader
     {
         var length = BitConverter.ToUInt16(_data, _position);
         _position += 2;
-        T[] result = new T[length];
+        var result = new T[length];
         for (var i = 0; i < length; i++)
+        {
             Get(out result[i], constructor);
+        }
+
         return result;
     }
 
@@ -441,14 +454,16 @@ public unsafe class NetDataReader
     {
         var size = GetUShort();
         if (size == 0)
+        {
             return string.Empty;
+        }
 
         var actualSize = size - 1;
 #if LITENETLIB_SPANS || NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1 || NETCOREAPP3_1 || NET5_0 || NETSTANDARD2_1
         ReadOnlySpan<byte> slice = _data.AsSpan(_position, actualSize);
-        var result = maxLength > 0 && NetDataWriter.UTF8Encoding.Value.GetCharCount(slice) > maxLength ?
+        var result = maxLength > 0 && NetDataWriter.UTF8Encoding.GetCharCount(slice) > maxLength ?
             string.Empty :
-            NetDataWriter.UTF8Encoding.Value.GetString(slice);
+            NetDataWriter.UTF8Encoding.GetString(slice);
 #else
         string result = maxLength > 0 && NetDataWriter.UTF8Encoding.Value.GetCharCount(_data, _position, actualSize) > maxLength ?
             string.Empty :
@@ -463,12 +478,14 @@ public unsafe class NetDataReader
     {
         var size = GetUShort();
         if (size == 0)
+        {
             return string.Empty;
+        }
 
         var actualSize = size - 1;
 #if LITENETLIB_SPANS || NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1 || NETCOREAPP3_1 || NET5_0 || NETSTANDARD2_1
         ReadOnlySpan<byte> slice = _data.AsSpan(_position, actualSize);
-        var result = NetDataWriter.UTF8Encoding.Value.GetString(slice);
+        var result = NetDataWriter.UTF8Encoding.GetString(slice);
         _position += actualSize;
 #else
         string result = NetDataWriter.UTF8Encoding.Value.GetString(_data, _position, actualSize);
@@ -481,21 +498,20 @@ public unsafe class NetDataReader
     {
         var size = GetInt();
         if (size <= 0)
+        {
             return string.Empty;
-        var result = NetDataWriter.UTF8Encoding.Value.GetString(_data, _position, size);
+        }
+
+        var result = NetDataWriter.UTF8Encoding.GetString(_data, _position, size);
         _position += size;
         return result;
     }
 
     public Guid GetGuid()
     {
-#if LITENETLIB_SPANS || NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1 || NETCOREAPP3_1 || NET5_0 || NETSTANDARD2_1
         var result = new Guid(_data.AsSpan(_position, 16));
         _position += 16;
         return result;
-#else
-        return new Guid(GetBytesWithLength());
-#endif
     }
 
     public ArraySegment<byte> GetBytesSegment(int count)
@@ -758,22 +774,26 @@ public unsafe class NetDataReader
     {
         var size = PeekUShort();
         if (size == 0)
+        {
             return string.Empty;
+        }
 
         var actualSize = size - 1;
-        return maxLength > 0 && NetDataWriter.UTF8Encoding.Value.GetCharCount(_data, _position + 2, actualSize) > maxLength ?
+        return maxLength > 0 && NetDataWriter.UTF8Encoding.GetCharCount(_data, _position + 2, actualSize) > maxLength ?
             string.Empty :
-            NetDataWriter.UTF8Encoding.Value.GetString(_data, _position + 2, actualSize);
+            NetDataWriter.UTF8Encoding.GetString(_data, _position + 2, actualSize);
     }
 
     public string PeekString()
     {
         var size = PeekUShort();
         if (size == 0)
+        {
             return string.Empty;
+        }
 
         var actualSize = size - 1;
-        return NetDataWriter.UTF8Encoding.Value.GetString(_data, _position + 2, actualSize);
+        return NetDataWriter.UTF8Encoding.GetString(_data, _position + 2, actualSize);
     }
     #endregion
 

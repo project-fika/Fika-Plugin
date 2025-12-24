@@ -2,11 +2,11 @@
 
 namespace Fika.Core.Networking.LiteNetLib;
 
-public partial class NetManager
+public partial class LiteNetManager
 {
     private NetPacket _poolHead;
     private int _poolCount;
-    private readonly object _poolLock = new();
+    private readonly object _poolLock = new object();
 
     /// <summary>
     /// Maximum packet pool size (increase if you have tons of packets sending)
@@ -14,7 +14,7 @@ public partial class NetManager
     public int PacketPoolSize = 1000;
 
     public int PoolCount => _poolCount;
-
+    
     private NetPacket PoolGetWithData(PacketProperty property, byte[] data, int start, int length)
     {
         int headerSize = NetPacket.GetHeaderSize(property);
@@ -50,11 +50,11 @@ public partial class NetManager
             packet = _poolHead;
             if (packet == null)
                 return new NetPacket(size);
-
+            
             _poolHead = _poolHead.Next;
             _poolCount--;
         }
-
+        
         packet.Size = size;
         if (packet.RawData.Length < size)
             packet.RawData = new byte[size];
@@ -68,7 +68,7 @@ public partial class NetManager
             //Don't pool big packets. Save memory
             return;
         }
-
+        
         //Clean fragmented flag
         packet.RawData[0] = 0;
         lock (_poolLock)

@@ -1,4 +1,8 @@
-﻿using Comfort.Common;
+﻿using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Threading.Tasks;
+using Comfort.Common;
 using EFT;
 using EFT.UI;
 using EFT.UI.Matchmaker;
@@ -7,10 +11,6 @@ using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Models;
 using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Threading.Tasks;
 
 namespace Fika.Core.Main.Utils;
 
@@ -57,7 +57,6 @@ public static class FikaBackendUtils
     public static int RemotePort { get; internal set; }
     public static int LocalPort { get; internal set; } = 0;
     public static string HostLocationId { get; internal set; }
-    public static IPAddress VPNIP { get; internal set; }
     public static RaidSettings CachedRaidSettings { get; set; }
     public static GClass1628<GroupPlayerViewModelClass> GroupPlayers { get; set; } = [];
 
@@ -112,18 +111,13 @@ public static class FikaBackendUtils
     {
         get
         {
-            if (_transitData == null)
+            return _transitData ?? new()
             {
-                return new()
-                {
-                    transitionType = ELocationTransition.None,
-                    transitionCount = 0,
-                    transitionRaidId = FikaGlobals.DefaultTransitId,
-                    visitedLocations = []
-                };
-            }
-
-            return _transitData;
+                transitionType = ELocationTransition.None,
+                transitionCount = 0,
+                transitionRaidId = FikaGlobals.DefaultTransitId,
+                visitedLocations = []
+            };
         }
         set
         {
@@ -141,7 +135,7 @@ public static class FikaBackendUtils
     public static bool JoinMatch(string profileId, string serverId, out CreateMatch result, out string errorMessage)
     {
         result = new CreateMatch();
-        errorMessage = $"No server matches the data provided or the server no longer exists";
+        errorMessage = "No server matches the data provided or the server no longer exists";
 
         if (MatchMakerAcceptScreenInstance == null)
         {
@@ -171,9 +165,9 @@ public static class FikaBackendUtils
     public static async Task CreateMatch(string profileId, string hostUsername, RaidSettings raidSettings)
     {
         NotificationManagerClass.DisplayWarningNotification(LocaleUtils.STARTING_RAID.Localized());
-        long timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
-        string raidCode = GenerateRaidCode(6);
-        Guid serverGuid = Guid.NewGuid();
+        var timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
+        var raidCode = GenerateRaidCode(6);
+        var serverGuid = Guid.NewGuid();
         CreateMatch body = new(raidCode, profileId, serverGuid, hostUsername, IsSpectator, timestamp, raidSettings, FikaPlugin.Crc32,
             raidSettings.Side, raidSettings.SelectedDateTime);
 
@@ -189,11 +183,11 @@ public static class FikaBackendUtils
     internal static string GenerateRaidCode(int length)
     {
         System.Random random = new();
-        char[] chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".ToCharArray();
-        string raidCode = "";
-        for (int i = 0; i < length; i++)
+        var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".ToCharArray();
+        var raidCode = "";
+        for (var i = 0; i < length; i++)
         {
-            int charIndex = random.Next(chars.Length);
+            var charIndex = random.Next(chars.Length);
             raidCode += chars[charIndex];
         }
 
@@ -214,9 +208,9 @@ public static class FikaBackendUtils
         }
 
         GroupPlayers.Clear();
-        foreach ((Profile profile, bool isLeader) in profiles)
+        foreach ((var profile, var isLeader) in profiles)
         {
-            InfoClass info = profile.Info;
+            var info = profile.Info;
             GroupPlayerDataClass infoSet = new()
             {
                 AccountId = profile.AccountId,
@@ -241,15 +235,15 @@ public static class FikaBackendUtils
             GroupPlayers.Add(visualProfile);
         }
 
-        if (TarkovApplication.Exist(out TarkovApplication app))
+        if (TarkovApplication.Exist(out var app))
         {
-            MatchmakerPlayerControllerClass controller = app.MatchmakerPlayerControllerClass;
+            var controller = app.MatchmakerPlayerControllerClass;
             if (controller != null)
             {
-                MenuUI menuUi = Singleton<MenuUI>.Instance;
+                var menuUi = Singleton<MenuUI>.Instance;
                 if (menuUi != null)
                 {
-                    PartyInfoPanel panel = Traverse.Create(menuUi.MatchmakerTimeHasCome).Field<PartyInfoPanel>("_partyInfoPanel").Value;
+                    var panel = Traverse.Create(menuUi.MatchmakerTimeHasCome).Field<PartyInfoPanel>("_partyInfoPanel").Value;
                     panel.Close();
                     panel.Show(GroupPlayers, Profile, false);
                     return;

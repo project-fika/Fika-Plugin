@@ -268,9 +268,10 @@ public class HostGameController : BaseGameController, IBotGame
         if (profile.Info.Settings.Role != WildSpawnType.shooterBTR)
         {
             _botStateManager.AddBot(fikaBot);
-            var spawnPacket = SpawnAI.FromValue(netId, position);
-            server.SendGenericPacket(EGenericSubPacketType.SpawnAI, spawnPacket);
         }
+
+        var spawnPacket = SpawnAI.FromValue(netId, position);
+        server.SendGenericPacket(EGenericSubPacketType.SpawnAI, spawnPacket);
 
         return fikaBot;
     }

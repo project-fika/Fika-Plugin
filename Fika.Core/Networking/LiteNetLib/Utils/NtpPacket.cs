@@ -7,16 +7,16 @@ namespace Fika.Core.Networking.LiteNetLib.Utils;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Most applications should just use the <see cref="CorrectionOffset" /> property.
+/// Most applications should just use the <see cref="NtpPacket.CorrectionOffset" /> property.
 /// </para>
 /// <para>
 /// The same data structure represents both request and reply packets.
 /// Request and reply differ in which properties are set and to what values.
 /// </para>
 /// <para>
-/// The only real property is <see cref="Bytes" />.
+/// The only real property is <see cref="NtpPacket.Bytes" />.
 /// All other properties read from and write to the underlying byte array
-/// with the exception of <see cref="DestinationTimestamp" />,
+/// with the exception of <see cref="NtpPacket.DestinationTimestamp" />,
 /// which is not part of the packet on network and it is instead set locally after receiving the packet.
 /// </para>
 /// <para>
@@ -26,7 +26,7 @@ namespace Fika.Core.Networking.LiteNetLib.Utils;
 /// </remarks>
 public class NtpPacket
 {
-    private static readonly DateTime Epoch = new(1900, 1, 1);
+    private static readonly DateTime Epoch = new DateTime(1900, 1, 1);
 
     /// <summary>
     /// Gets RFC4330-encoded SNTP packet.
@@ -36,7 +36,7 @@ public class NtpPacket
     /// </value>
     /// <remarks>
     /// This is the only real property. All other properties except
-    /// <see cref="DestinationTimestamp" /> read from or write to this byte array.
+    /// <see cref="NtpPacket.DestinationTimestamp" /> read from or write to this byte array.
     /// </remarks>
     public byte[] Bytes { get; }
 
@@ -66,7 +66,7 @@ public class NtpPacket
     public int VersionNumber
     {
         get => (Bytes[0] & 0x38) >> 3;
-        private set => Bytes[0] = (byte)(Bytes[0] & ~0x38 | value << 3);
+        private set => Bytes[0] = (byte)((Bytes[0] & ~0x38) | value << 3);
     }
 
     /// <summary>
@@ -79,7 +79,7 @@ public class NtpPacket
     public NtpMode Mode
     {
         get => (NtpMode)(Bytes[0] & 0x07);
-        private set => Bytes[0] = (byte)(Bytes[0] & ~0x07 | (int)value);
+        private set => Bytes[0] = (byte)((Bytes[0] & ~0x07) | (int)value);
     }
 
     /// <summary>
@@ -93,7 +93,7 @@ public class NtpPacket
     /// </para>
     /// <para>
     /// Special value 0 indicates that this packet is a Kiss-o'-Death message
-    /// with kiss code stored in <see cref="ReferenceId" />.
+    /// with kiss code stored in <see cref="NtpPacket.ReferenceId" />.
     /// </para>
     /// </value>
     public int Stratum => Bytes[1];
@@ -136,7 +136,7 @@ public class NtpPacket
     /// <value>
     /// <para>
     /// ID of server's time source or Kiss-o'-Death code.
-    /// Purpose of this property depends on value of <see cref="Stratum" /> property.
+    /// Purpose of this property depends on value of <see cref="NtpPacket.Stratum" /> property.
     /// </para>
     /// <para>
     /// Stratum 1 servers write here one of several special values that describe the kind of hardware clock they use.
@@ -146,7 +146,7 @@ public class NtpPacket
     /// If upstream server has IPv6 address, the address is hashed, because it doesn't fit in this property.
     /// </para>
     /// <para>
-    /// When server sets <see cref="Stratum" /> to special value 0,
+    /// When server sets <see cref="NtpPacket.Stratum" /> to special value 0,
     /// this property contains so called kiss code that instructs the client to stop querying the server.
     /// </para>
     /// </value>
@@ -170,11 +170,11 @@ public class NtpPacket
     /// <value>
     /// This property is <c>null</c> in request packets.
     /// In reply packets, it is the time when the client sent its request.
-    /// Servers copy this value from <see cref="TransmitTimestamp" />
+    /// Servers copy this value from <see cref="NtpPacket.TransmitTimestamp" />
     /// that they find in received request packet.
     /// </value>
-    /// <seealso cref="CorrectionOffset" />
-    /// <seealso cref="RoundTripTime" />
+    /// <seealso cref="NtpPacket.CorrectionOffset" />
+    /// <seealso cref="NtpPacket.RoundTripTime" />
     public DateTime? OriginTimestamp => GetDateTime64(24);
 
     /// <summary>
@@ -184,8 +184,8 @@ public class NtpPacket
     /// This property is <c>null</c> in request packets.
     /// In reply packets, it is the time when the server received client request.
     /// </value>
-    /// <seealso cref="CorrectionOffset" />
-    /// <seealso cref="RoundTripTime" />
+    /// <seealso cref="NtpPacket.CorrectionOffset" />
+    /// <seealso cref="NtpPacket.RoundTripTime" />
     public DateTime? ReceiveTimestamp => GetDateTime64(32);
 
     /// <summary>
@@ -193,13 +193,13 @@ public class NtpPacket
     /// </summary>
     /// <value>
     /// Time when the packet was sent. It should never be <c>null</c>.
-    /// Default value is <see cref="DateTime.UtcNow" />.
+    /// Default value is <see cref="System.DateTime.UtcNow" />.
     /// </value>
     /// <remarks>
     /// This property must be set by both clients and servers.
     /// </remarks>
-    /// <seealso cref="CorrectionOffset" />
-    /// <seealso cref="RoundTripTime" />
+    /// <seealso cref="NtpPacket.CorrectionOffset" />
+    /// <seealso cref="NtpPacket.RoundTripTime" />
     public DateTime? TransmitTimestamp { get { return GetDateTime64(40); } private set { SetDateTime64(40, value); } }
 
     /// <summary>
@@ -211,8 +211,8 @@ public class NtpPacket
     /// <remarks>
     /// This property is not part of the protocol and has to be set when reply packet is received.
     /// </remarks>
-    /// <seealso cref="CorrectionOffset" />
-    /// <seealso cref="RoundTripTime" />
+    /// <seealso cref="NtpPacket.CorrectionOffset" />
+    /// <seealso cref="NtpPacket.RoundTripTime" />
     public DateTime? DestinationTimestamp { get; private set; }
 
     /// <summary>
@@ -221,10 +221,10 @@ public class NtpPacket
     /// <value>
     /// Time the request spent traveling to the server plus the time the reply spent traveling back.
     /// This is calculated from timestamps in the packet as <c>(t1 - t0) + (t3 - t2)</c>
-    /// where t0 is <see cref="OriginTimestamp" />,
-    /// t1 is <see cref="ReceiveTimestamp" />,
-    /// t2 is <see cref="TransmitTimestamp" />,
-    /// and t3 is <see cref="DestinationTimestamp" />.
+    /// where t0 is <see cref="NtpPacket.OriginTimestamp" />,
+    /// t1 is <see cref="NtpPacket.ReceiveTimestamp" />,
+    /// t2 is <see cref="NtpPacket.TransmitTimestamp" />,
+    /// and t3 is <see cref="NtpPacket.DestinationTimestamp" />.
     /// This property throws an exception in request packets.
     /// </value>
     public TimeSpan RoundTripTime
@@ -232,7 +232,7 @@ public class NtpPacket
         get
         {
             CheckTimestamps();
-            return ReceiveTimestamp.Value - OriginTimestamp.Value + (DestinationTimestamp.Value - TransmitTimestamp.Value);
+            return (ReceiveTimestamp.Value - OriginTimestamp.Value) + (DestinationTimestamp.Value - TransmitTimestamp.Value);
         }
     }
 
@@ -242,10 +242,10 @@ public class NtpPacket
     /// <value>
     /// Time difference between server and client. It should be added to local time to get server time.
     /// It is calculated from timestamps in the packet as <c>0.5 * ((t1 - t0) - (t3 - t2))</c>
-    /// where t0 is <see cref="OriginTimestamp" />,
-    /// t1 is <see cref="ReceiveTimestamp" />,
-    /// t2 is <see cref="TransmitTimestamp" />,
-    /// and t3 is <see cref="DestinationTimestamp" />.
+    /// where t0 is <see cref="NtpPacket.OriginTimestamp" />,
+    /// t1 is <see cref="NtpPacket.ReceiveTimestamp" />,
+    /// t2 is <see cref="NtpPacket.TransmitTimestamp" />,
+    /// and t3 is <see cref="NtpPacket.DestinationTimestamp" />.
     /// This property throws an exception in request packets.
     /// </value>
     public TimeSpan CorrectionOffset
@@ -253,7 +253,7 @@ public class NtpPacket
         get
         {
             CheckTimestamps();
-            return TimeSpan.FromTicks((ReceiveTimestamp.Value - OriginTimestamp.Value - (DestinationTimestamp.Value - TransmitTimestamp.Value)).Ticks / 2);
+            return TimeSpan.FromTicks(((ReceiveTimestamp.Value - OriginTimestamp.Value) - (DestinationTimestamp.Value - TransmitTimestamp.Value)).Ticks / 2);
         }
     }
 
@@ -261,9 +261,9 @@ public class NtpPacket
     /// Initializes default request packet.
     /// </summary>
     /// <remarks>
-    /// Properties <see cref="Mode" /> and <see cref="VersionNumber" />
-    /// are set appropriately for request packet. Property <see cref="TransmitTimestamp" />
-    /// is set to <see cref="DateTime.UtcNow" />.
+    /// Properties <see cref="NtpPacket.Mode" /> and <see cref="NtpPacket.VersionNumber" />
+    /// are set appropriately for request packet. Property <see cref="NtpPacket.TransmitTimestamp" />
+    /// is set to <see cref="System.DateTime.UtcNow" />.
     /// </remarks>
     public NtpPacket() : this(new byte[48])
     {
@@ -368,12 +368,12 @@ public class NtpPacket
 
     private static uint SwapEndianness(uint x)
     {
-        return (x & 0xff) << 24 | (x & 0xff00) << 8 | (x & 0xff0000) >> 8 | (x & 0xff000000) >> 24;
+        return ((x & 0xff) << 24) | ((x & 0xff00) << 8) | ((x & 0xff0000) >> 8) | ((x & 0xff000000) >> 24);
     }
 
     private static ulong SwapEndianness(ulong x)
     {
-        return (ulong)SwapEndianness((uint)x) << 32 | SwapEndianness((uint)(x >> 32));
+        return ((ulong)SwapEndianness((uint)x) << 32) | SwapEndianness((uint)(x >> 32));
     }
 }
 

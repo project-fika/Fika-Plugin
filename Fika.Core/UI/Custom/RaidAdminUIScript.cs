@@ -1,10 +1,10 @@
-﻿using EFT.InputSystem;
+﻿using System.Collections;
+using System.Collections.Generic;
+using EFT.InputSystem;
 using EFT.UI;
 using Fika.Core.Bundles;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 
 namespace Fika.Core.UI.Custom;
@@ -14,7 +14,7 @@ public class RaidAdminUIScript : InputNode
     private RaidAdminUI _raidAdminUI;
     private FikaServer _server;
     private NetManager _netManager;
-    private NetPeer _currentPeer;
+    private LiteNetPeer _currentPeer;
     private float _counter;
     private float _counterThreshold;
 
@@ -54,7 +54,7 @@ public class RaidAdminUIScript : InputNode
 
     private void UpdatePeerData()
     {
-        NetStatistics statistics = _currentPeer.Statistics;
+        var statistics = _currentPeer.Statistics;
 
         _raidAdminUI.SentDataText.text = $"Sent Data: {FormatBytes(statistics.BytesSent)}";
         _raidAdminUI.ReceivedDataText.text = $"Received Data: {FormatBytes(statistics.BytesReceived)}";
@@ -72,15 +72,15 @@ public class RaidAdminUIScript : InputNode
         }
         else if (bytes < 1024 * 1024)
         {
-            return $"{(bytes / 1024f):F2} KB";
+            return $"{bytes / 1024f:F2} KB";
         }
         else if (bytes < 1024 * 1024 * 1024)
         {
-            return $"{(bytes / 1024f / 1024f):F2} MB";
+            return $"{bytes / 1024f / 1024f:F2} MB";
         }
         else
         {
-            return $"{(bytes / 1024f / 1024f / 1024f):F2} GB";
+            return $"{bytes / 1024f / 1024f / 1024f:F2} GB";
         }
     }
 
@@ -147,11 +147,11 @@ public class RaidAdminUIScript : InputNode
     {
         ResetInfoPane();
         _raidAdminUI.InfoPane.SetActive(false);
-        TMP_Dropdown clientSelection = _raidAdminUI.ClientSelection;
+        var clientSelection = _raidAdminUI.ClientSelection;
         clientSelection.ClearOptions();
         List<TMP_Dropdown.OptionData> options = [];
 
-        for (int i = 0; i < _netManager.ConnectedPeerList.Count; i++)
+        for (var i = 0; i < _netManager.ConnectedPeerList.Count; i++)
         {
             options.Add(new($"Client {i}"));
         }
@@ -179,11 +179,11 @@ public class RaidAdminUIScript : InputNode
 
     public static RaidAdminUIScript Create(FikaServer server, NetManager manager)
     {
-        GameObject gameObject = InternalBundleLoader.Instance.GetFikaAsset(InternalBundleLoader.EFikaAsset.RaidAdminUI);
-        GameObject obj = Instantiate(gameObject);
-        RaidAdminUIScript uiScript = obj.AddComponent<RaidAdminUIScript>();
+        var gameObject = InternalBundleLoader.Instance.GetFikaAsset(InternalBundleLoader.EFikaAsset.RaidAdminUI);
+        var obj = Instantiate(gameObject);
+        var uiScript = obj.AddComponent<RaidAdminUIScript>();
 
-        RectTransform rectTransform = obj.transform.GetChild(0).GetChild(0).RectTransform();
+        var rectTransform = obj.transform.GetChild(0).GetChild(0).RectTransform();
         if (rectTransform == null)
         {
             FikaGlobals.LogError("Could not get the RectTransform!");

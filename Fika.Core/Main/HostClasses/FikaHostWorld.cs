@@ -5,7 +5,6 @@ using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
 using Fika.Core.Networking.Packets.World;
-using System;
 using System.Collections.Generic;
 
 namespace Fika.Core.Main.HostClasses;
@@ -67,7 +66,7 @@ public class FikaHostWorld : World
         _hasCriticalData = true;
     }
 
-    protected void LateUpdate()
+    protected void FixedUpdate()
     {
         var grenadesCount = _gameWorld.Grenades.Count;
         for (var i = 0; i < grenadesCount; i++)
@@ -75,13 +74,15 @@ public class FikaHostWorld : World
             var throwable = _gameWorld.Grenades.GetByIndex(i);
             if (throwable.HasNetData)
             {
-                var packet = throwable.GetNetPacket();
-                if (packet.Done)
-                {
-                    SetCritical();
-                }
-                _grenadeData.Add(packet);
+                _grenadeData.Add(throwable.GetNetPacket());
             }
+        }
+
+        if (_gameWorld.GrenadesCriticalStates.Count > 0)
+        {
+            _grenadeData.AddRange(_gameWorld.GrenadesCriticalStates);
+            _gameWorld.GrenadesCriticalStates.Clear();
+            SetCritical();
         }
 
         WorldPacket.GrenadePackets.AddRange(_grenadeData);
@@ -120,7 +121,7 @@ public class FikaHostWorld : World
     /// </summary>
     public override void SubscribeToBorderZones(BorderZone[] zones)
     {
-        foreach (BorderZone borderZone in zones)
+        foreach (var borderZone in zones)
         {
             borderZone.PlayerShotEvent += OnBorderZoneShot;
         }

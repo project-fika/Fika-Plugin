@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
-using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Net.NetworkInformation;
 
 namespace Fika.Core.Networking.LiteNetLib;
 
@@ -23,21 +23,19 @@ public enum LocalAddrType
 /// </summary>
 public static class NetUtils
 {
-    private static readonly NetworkSorter NetworkSorter = new();
+    private static readonly NetworkSorter NetworkSorter = new NetworkSorter();
 
-    public static IPEndPoint MakeEndPoint(string hostStr, int port)
-    {
-        return new IPEndPoint(ResolveAddress(hostStr), port);
-    }
+    public static IPEndPoint MakeEndPoint(string hostStr, int port) =>
+        new IPEndPoint(ResolveAddress(hostStr), port);
 
     public static IPAddress ResolveAddress(string hostStr)
     {
-        if (hostStr == "localhost")
+        if(hostStr == "localhost")
             return IPAddress.Loopback;
 
         if (!IPAddress.TryParse(hostStr, out var ipAddress))
         {
-            if (NetManager.IPv6Support)
+            if (LiteNetManager.IPv6Support)
                 ipAddress = ResolveAddress(hostStr, AddressFamily.InterNetworkV6);
             if (ipAddress == null)
                 ipAddress = ResolveAddress(hostStr, AddressFamily.InterNetwork);
@@ -68,7 +66,7 @@ public static class NetUtils
     /// <returns>List with all local ip addresses</returns>
     public static List<string> GetLocalIpList(LocalAddrType addrType)
     {
-        List<string> targetList = [];
+        List<string> targetList = new List<string>();
         GetLocalIpList(targetList, addrType);
         return targetList;
     }
@@ -105,23 +103,23 @@ public static class NetUtils
                 foreach (UnicastIPAddressInformation ip in ipProps.UnicastAddresses)
                 {
                     var address = ip.Address;
-                    if (ipv4 && address.AddressFamily == AddressFamily.InterNetwork ||
-                        ipv6 && address.AddressFamily == AddressFamily.InterNetworkV6)
+                    if ((ipv4 && address.AddressFamily == AddressFamily.InterNetwork) ||
+                        (ipv6 && address.AddressFamily == AddressFamily.InterNetworkV6))
                         targetList.Add(address.ToString());
                 }
             }
 
-            //Fallback mode (unity android)
-            if (targetList.Count == 0)
-            {
-                IPAddress[] addresses = Dns.GetHostEntry(Dns.GetHostName()).AddressList;
-                foreach (IPAddress ip in addresses)
-                {
-                    if (ipv4 && ip.AddressFamily == AddressFamily.InterNetwork ||
-                       ipv6 && ip.AddressFamily == AddressFamily.InterNetworkV6)
-                        targetList.Add(ip.ToString());
-                }
-            }
+	            //Fallback mode (unity android)
+	            if (targetList.Count == 0)
+	            {
+	                IPAddress[] addresses = Dns.GetHostEntry(Dns.GetHostName()).AddressList;
+	                foreach (IPAddress ip in addresses)
+	                {
+	                    if((ipv4 && ip.AddressFamily == AddressFamily.InterNetwork) ||
+	                       (ipv6 && ip.AddressFamily == AddressFamily.InterNetworkV6))
+	                        targetList.Add(ip.ToString());
+	                }
+	            }
         }
         catch
         {
@@ -130,14 +128,14 @@ public static class NetUtils
 
         if (targetList.Count == 0)
         {
-            if (ipv4)
+            if(ipv4)
                 targetList.Add("127.0.0.1");
-            if (ipv6)
+            if(ipv6)
                 targetList.Add("::1");
         }
     }
 
-    private static readonly List<string> IpList = [];
+    private static readonly List<string> IpList = new List<string>();
     /// <summary>
     /// Get first detected local ip address
     /// </summary>
@@ -158,7 +156,7 @@ public static class NetUtils
     // ===========================================
     internal static void PrintInterfaceInfos()
     {
-        NetDebug.WriteForce(NetLogLevel.Info, $"IPv6Support: {NetManager.IPv6Support}");
+        NetDebug.WriteForce(NetLogLevel.Info, $"IPv6Support: { LiteNetManager.IPv6Support}");
         try
         {
             foreach (NetworkInterface ni in NetworkInterface.GetAllNetworkInterfaces())
@@ -181,10 +179,8 @@ public static class NetUtils
         }
     }
 
-    internal static int RelativeSequenceNumber(int number, int expected)
-    {
-        return (number - expected + NetConstants.MaxSequence + NetConstants.HalfMaxSequence) % NetConstants.MaxSequence - NetConstants.HalfMaxSequence;
-    }
+    internal static int RelativeSequenceNumber(int number, int expected) =>
+        (number - expected + NetConstants.MaxSequence + NetConstants.HalfMaxSequence) % NetConstants.MaxSequence - NetConstants.HalfMaxSequence;
 
     internal static T[] AllocatePinnedUninitializedArray<T>(int count) where T : unmanaged
     {
@@ -211,8 +207,8 @@ internal class NetworkSorter : IComparer<NetworkInterface>
                           b.NetworkInterfaceType == NetworkInterfaceType.Wwanpp ||
                           b.NetworkInterfaceType == NetworkInterfaceType.Wwanpp2;
 
-        var isWifiA = a.NetworkInterfaceType == NetworkInterfaceType.Wireless80211;
-        var isWifiB = b.NetworkInterfaceType == NetworkInterfaceType.Wireless80211;
+        var isWifiA     = a.NetworkInterfaceType == NetworkInterfaceType.Wireless80211;
+        var isWifiB     = b.NetworkInterfaceType == NetworkInterfaceType.Wireless80211;
 
         var isEthernetA = a.NetworkInterfaceType == NetworkInterfaceType.Ethernet ||
                           a.NetworkInterfaceType == NetworkInterfaceType.Ethernet3Megabit ||
@@ -226,8 +222,8 @@ internal class NetworkSorter : IComparer<NetworkInterface>
                           b.NetworkInterfaceType == NetworkInterfaceType.FastEthernetFx ||
                           b.NetworkInterfaceType == NetworkInterfaceType.FastEthernetT;
 
-        var isOtherA = !isCellularA && !isWifiA && !isEthernetA;
-        var isOtherB = !isCellularB && !isWifiB && !isEthernetB;
+        var isOtherA    = !isCellularA && !isWifiA && !isEthernetA;
+        var isOtherB    = !isCellularB && !isWifiB && !isEthernetB;
 
         var priorityA = isEthernetA ? 3 : isWifiA ? 2 : isOtherA ? 1 : 0;
         var priorityB = isEthernetB ? 3 : isWifiB ? 2 : isOtherB ? 1 : 0;

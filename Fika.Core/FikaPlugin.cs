@@ -47,7 +47,7 @@ namespace Fika.Core;
 [BepInDependency("com.SPT.debugging", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after spt-debugging, that way we can disable its patches
 public class FikaPlugin : BaseUnityPlugin
 {
-    public const string FikaVersion = "2.0.8";
+    public const string FikaVersion = "2.0.9";
     public static FikaPlugin Instance { get; private set; }
     public static string EFTVersionMajor { get; internal set; }
     public ManualLogSource FikaLogger
@@ -1081,12 +1081,6 @@ public class FikaPlugin : BaseUnityPlugin
         }
 
         SetupConfigEventHandlers();
-
-        if (ForceBindIP.Value == "Disabled" && FikaBackendUtils.VPNIP != null)
-        {
-            ForceBindIP.Value = FikaBackendUtils.VPNIP.ToString();
-            Logger.LogInfo($"Auto-detected VPN IP: {FikaBackendUtils.VPNIP}, setting as ForceBindIP");
-        }
     }
 
     private void OfficialVersion_SettingChanged(object sender, EventArgs e)
@@ -1106,11 +1100,6 @@ public class FikaPlugin : BaseUnityPlugin
             {
                 foreach (var ip in networkInterface.GetIPProperties().UnicastAddresses)
                 {
-                    if (networkInterface.Description.Contains("Radmin VPN") || networkInterface.Description.Contains("ZeroTier"))
-                    {
-                        FikaBackendUtils.VPNIP = ip.Address;
-                    }
-
                     if (!ip.IsDnsEligible)
                     {
                         continue;
