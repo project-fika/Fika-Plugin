@@ -294,8 +294,8 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.SERVER_STARTED.Localized(), _port),
             EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
 
-        List<string> ipAddresses = [];
-        for (var i = 1; i < FikaPlugin.Instance.LocalIPs.Length; i++) // we skip the first (0.0.0.0)
+        List<string> ipAddresses = [_externalIp];
+        for (var i = 0; i < FikaPlugin.Instance.LocalIPs.Length; i++)
         {
             var ip = FikaPlugin.Instance.LocalIPs[i];
             if (ValidateIP(ip))
@@ -493,7 +493,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
             return false;
         }
 
-        if (string.Equals(ip, "0.0.0.0")) // safe check in case skip fails
+        if (string.Equals(ip, "0.0.0.0")) // ignore default
         {
             return false;
         }

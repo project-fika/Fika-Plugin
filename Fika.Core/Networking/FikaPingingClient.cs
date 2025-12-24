@@ -36,8 +36,7 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
     public bool InProgress;
 
     private ManualLogSource _logger;
-    private IPEndPoint _remoteEndPoint;
-    private List<IPEndPoint> _localEndPoints;
+    private List<IPEndPoint> _endPoints;
 
     /// <summary>
     /// Initializes the logger for the pinging client.
@@ -60,7 +59,7 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
             NatPunchEnabled = true
         };
 
-        _localEndPoints = [];
+        _endPoints = [];
 
         GetHostRequest body = new(serverId);
         var result = FikaRequestHandler.GetHost(body);
@@ -88,13 +87,10 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
         {
             var ip = result.Ips[0];
             var port = result.Port;
-            if (result.Ips.Length > 1)
+            _endPoints = new List<IPEndPoint>(result.Ips.Length);
+            foreach (var address in result.Ips)
             {
-                _localEndPoints = new List<IPEndPoint>(result.Ips.Length - 1);
-                for (var i = 1; i < result.Ips.Length; i++)
-                {
-                    _localEndPoints[i] = new(IPAddress.Parse(result.Ips[i]), port);
-                }
+                _endPoints.Add(ResolveRemoteAddress(address, port));
             }
 
             if (string.IsNullOrEmpty(ip))
@@ -108,8 +104,6 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
                 _logger.LogError("Port was empty when pinging!");
                 return false;
             }
-
-            _remoteEndPoint = ResolveRemoteAddress(ip, port);
         }
 
         return true;
@@ -149,13 +143,9 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
         writer.Put(message);
         writer.Put(reconnect);
 
-        foreach (var ipEndPoint in _localEndPoints)
+        foreach (var ipEndPoint in _endPoints)
         {
             NetClient.SendUnconnectedMessage(writer.AsReadOnlySpan, ipEndPoint);
-        }
-        if (_remoteEndPoint != null)
-        {
-            NetClient.SendUnconnectedMessage(writer.AsReadOnlySpan, _remoteEndPoint);
         }
     }
 
@@ -255,10 +245,8 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
     /// <param name="token">The NAT punch token.</param>
     public void OnNatIntroductionResponse(IPEndPoint natLocalEndPoint, IPEndPoint natRemoteEndPoint, string token)
     {
-        _logger.LogInfo($"OnNatIntroductionResponse: {_remoteEndPoint}");
-
-        _localEndPoints.Add(natLocalEndPoint);
-        _remoteEndPoint = natRemoteEndPoint;
+        _logger.LogInfo($"OnNatIntroductionResponse: {natRemoteEndPoint}");
+        _endPoints.Add(natLocalEndPoint);
 
         Task.Run(async () =>
         {
