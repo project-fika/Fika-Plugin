@@ -20,11 +20,6 @@ public class MatchmakerAcceptScreen_Show_Patch : ModulePatch
     [PatchPrefix]
     public static void Prefix(MatchMakerAcceptScreen __instance, ref RaidSettings raidSettings, DefaultUIButton ____acceptButton, DefaultUIButton ____backButton)
     {
-        if (raidSettings.Side == ESideType.Savage)
-        {
-            raidSettings.RaidMode = ERaidMode.Local;
-        }
-
         FikaBackendUtils.IsScav = raidSettings.IsScav;
 
         MatchMakerUIScript newMatchMaker = __instance.gameObject.GetOrAddComponent<MatchMakerUIScript>();
