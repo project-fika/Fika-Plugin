@@ -57,7 +57,6 @@ public static class FikaBackendUtils
     public static int RemotePort { get; internal set; }
     public static int LocalPort { get; internal set; } = 0;
     public static string HostLocationId { get; internal set; }
-    public static IPAddress VPNIP { get; internal set; }
     public static RaidSettings CachedRaidSettings { get; set; }
     public static GClass1628<GroupPlayerViewModelClass> GroupPlayers { get; set; } = [];
 

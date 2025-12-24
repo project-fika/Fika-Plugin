@@ -1081,12 +1081,6 @@ public class FikaPlugin : BaseUnityPlugin
         }
 
         SetupConfigEventHandlers();
-
-        if (ForceBindIP.Value == "Disabled" && FikaBackendUtils.VPNIP != null)
-        {
-            ForceBindIP.Value = FikaBackendUtils.VPNIP.ToString();
-            Logger.LogInfo($"Auto-detected VPN IP: {FikaBackendUtils.VPNIP}, setting as ForceBindIP");
-        }
     }
 
     private void OfficialVersion_SettingChanged(object sender, EventArgs e)
@@ -1106,11 +1100,6 @@ public class FikaPlugin : BaseUnityPlugin
             {
                 foreach (var ip in networkInterface.GetIPProperties().UnicastAddresses)
                 {
-                    if (networkInterface.Description.Contains("Radmin VPN") || networkInterface.Description.Contains("ZeroTier"))
-                    {
-                        FikaBackendUtils.VPNIP = ip.Address;
-                    }
-
                     if (!ip.IsDnsEligible)
                     {
                         continue;
