@@ -98,6 +98,7 @@ public class TarkovApplication_LocalGameCreator_Patch : ModulePatch
 
 #if DEBUG
         Logger.LogInfo("TarkovApplication_LocalGameCreator_Patch:Postfix: Attempt to set Raid Settings");
+        Logger.LogInfo($"RaidSettings TransitType: {raidSettings.transitionType}");
 #endif
 
         if (!raidSettings.isInTransition)
@@ -126,6 +127,9 @@ public class TarkovApplication_LocalGameCreator_Patch : ModulePatch
         raidSettingsToUpdate.serverId = localSettings.serverId;
         raidSettingsToUpdate.selectedLocation = localSettings.locationLoot;
         raidSettingsToUpdate.selectedLocation.EscapeTimeLimit = escapeTimeLimit;
+
+        var transitData = FikaBackendUtils.TransitData;
+        transitData.transitionType = raidSettings.transitionType;
         raidSettingsToUpdate.transition = FikaBackendUtils.TransitData;
 
         var profileInsurance = localSettings.profileInsurance;
