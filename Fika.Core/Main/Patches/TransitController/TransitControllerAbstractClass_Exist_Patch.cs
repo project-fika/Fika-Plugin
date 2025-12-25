@@ -1,8 +1,8 @@
-﻿using Comfort.Common;
+﻿using System.Reflection;
+using Comfort.Common;
 using EFT;
 using Fika.Core.Main.Utils;
 using SPT.Reflection.Patching;
-using System.Reflection;
 
 namespace Fika.Core.Main.Patches.TransitController;
 
@@ -20,7 +20,7 @@ public class TransitControllerAbstractClass_Exist_Patch : ModulePatch
     {
         if (FikaGlobals.IsInRaid)
         {
-            GameWorld gameWorld = Singleton<GameWorld>.Instance;
+            var gameWorld = Singleton<GameWorld>.Instance;
             if (gameWorld != null)
             {
                 transitController = gameWorld.TransitController;

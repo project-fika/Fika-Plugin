@@ -1,4 +1,8 @@
-﻿using Comfort.Common;
+﻿using System;
+using System.IO;
+using System.Reflection;
+using System.Threading.Tasks;
+using Comfort.Common;
 using EFT;
 using EFT.InputSystem;
 using EFT.UI;
@@ -11,13 +15,8 @@ using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Models;
 using Fika.Core.UI.Custom;
 using HarmonyLib;
-using JsonType;
 using SPT.Reflection.Patching;
 using SPT.SinglePlayer.Utils.InRaid;
-using System;
-using System.IO;
-using System.Reflection;
-using System.Threading.Tasks;
 
 namespace Fika.Core.Main.Patches.LocalGame;
 
@@ -52,8 +51,8 @@ public class TarkovApplication_LocalGameCreator_Patch : ModulePatch
         RaidSettings raidSettings, InputTree inputTree, GameDateTime localGameDateTime, float fixedDeltaTime, string backendUrl, MetricsEventsClass metricsEvents, MetricsConfigClass metricsConfig,
         GameWorld gameWorld, MainMenuControllerClass ___mainMenuController, CompositeDisposableClass compositeDisposableClass, BundleLockClass bundleLock)
     {
-        bool isServer = FikaBackendUtils.IsServer;
-        bool isTransit = FikaBackendUtils.IsTransit;
+        var isServer = FikaBackendUtils.IsServer;
+        var isTransit = FikaBackendUtils.IsTransit;
 
         if (FikaPlugin.NoAI.Value)
         {
@@ -70,7 +69,7 @@ public class TarkovApplication_LocalGameCreator_Patch : ModulePatch
         else if (isServer && isTransit && FikaBackendUtils.CachedRaidSettings != null)
         {
             Logger.LogInfo("Applying cached raid settings from previous raid");
-            RaidSettings cachedSettings = FikaBackendUtils.CachedRaidSettings;
+            var cachedSettings = FikaBackendUtils.CachedRaidSettings;
             raidSettings.WavesSettings = cachedSettings.WavesSettings;
             raidSettings.BotSettings = cachedSettings.BotSettings;
             raidSettings.MetabolismDisabled = cachedSettings.MetabolismDisabled;
@@ -84,14 +83,14 @@ public class TarkovApplication_LocalGameCreator_Patch : ModulePatch
             Singleton<NotificationManagerClass>.Instance.Deactivate();
         }
 
-        ISession session = instance.Session;
+        var session = instance.Session;
 
         if (session == null)
         {
             throw new NullReferenceException("Backend session was null when initializing game!");
         }
 
-        Profile profile = session.GetProfileBySide(raidSettings.Side);
+        var profile = session.GetProfileBySide(raidSettings.Side);
 
         profile.Inventory.Stash = null;
         profile.Inventory.QuestStashItems = null;
@@ -101,21 +100,24 @@ public class TarkovApplication_LocalGameCreator_Patch : ModulePatch
         Logger.LogInfo("TarkovApplication_LocalGameCreator_Patch:Postfix: Attempt to set Raid Settings");
 #endif
 
-        await session.SendRaidSettings(raidSettings);
+        if (!raidSettings.isInTransition)
+        {
+            await session.SendRaidSettings(raidSettings);
+        }
         LocalRaidSettings localRaidSettings = new()
         {
             location = raidSettings.LocationId,
             timeVariant = raidSettings.SelectedDateTime,
             mode = ELocalMode.PVE_OFFLINE,
             playerSide = raidSettings.Side,
-            transitionType = FikaBackendUtils.TransitData.visitedLocations.Length > 0 ? ELocationTransition.Common : ELocationTransition.None
+            transitionType = FikaBackendUtils.TransitData.visitedLocations.Length > 0 ? ELocationTransition.Common : raidSettings.transitionType
         };
-        Traverse applicationTraverse = Traverse.Create(instance);
+        var applicationTraverse = Traverse.Create(instance);
         applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value = localRaidSettings;
 
-        LocalSettings localSettings = await instance.Session.LocalRaidStarted(localRaidSettings);
-        LocalRaidSettings raidSettingsToUpdate = applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value;
-        int escapeTimeLimit = raidSettings.IsScav ? RaidChangesUtil.NewEscapeTimeMinutes : raidSettings.SelectedLocation.EscapeTimeLimit;
+        var localSettings = await instance.Session.LocalRaidStarted(localRaidSettings);
+        var raidSettingsToUpdate = applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value;
+        var escapeTimeLimit = raidSettings.IsScav ? RaidChangesUtil.NewEscapeTimeMinutes : raidSettings.SelectedLocation.EscapeTimeLimit;
         if (isServer)
         {
             raidSettings.SelectedLocation = localSettings.locationLoot;
@@ -126,7 +128,7 @@ public class TarkovApplication_LocalGameCreator_Patch : ModulePatch
         raidSettingsToUpdate.selectedLocation.EscapeTimeLimit = escapeTimeLimit;
         raidSettingsToUpdate.transition = FikaBackendUtils.TransitData;
 
-        ProfileInsuranceClass profileInsurance = localSettings.profileInsurance;
+        var profileInsurance = localSettings.profileInsurance;
         if ((profileInsurance?.insuredItems) != null)
         {
             profile.InsuredItems = localSettings.profileInsurance.insuredItems;
@@ -137,7 +139,7 @@ public class TarkovApplication_LocalGameCreator_Patch : ModulePatch
             instance.MatchmakerPlayerControllerClass.UpdateMatchingStatus("Joining coop game...");
 
             RaidSettingsRequest data = new();
-            RaidSettingsResponse raidSettingsResponse = await FikaRequestHandler.GetRaidSettings(data);
+            var raidSettingsResponse = await FikaRequestHandler.GetRaidSettings(data);
 
             if (!raidSettingsResponse.Received)
             {
@@ -162,9 +164,9 @@ public class TarkovApplication_LocalGameCreator_Patch : ModulePatch
 
         StartHandler startHandler = new(instance, session.Profile, session.ProfileOfPet, raidSettings.SelectedLocation);
 
-        TimeSpan raidLimits = GetRaidMinutes(raidSettings.SelectedLocation.EscapeTimeLimit);
+        var raidLimits = GetRaidMinutes(raidSettings.SelectedLocation.EscapeTimeLimit);
 
-        CoopGame coopGame = CoopGame.Create(inputTree, profile, gameWorld, localGameDateTime, instance.Session.InsuranceCompany,
+        var coopGame = CoopGame.Create(inputTree, profile, gameWorld, localGameDateTime, instance.Session.InsuranceCompany,
             MonoBehaviourSingleton<GameUI>.Instance, raidSettings.SelectedLocation,
             timeAndWeather, raidSettings.WavesSettings, raidSettings.SelectedDateTime, startHandler.HandleStop,
             fixedDeltaTime, instance.PlayerUpdateQueue, instance.Session, raidLimits, metricsEvents,
@@ -230,10 +232,10 @@ public class TarkovApplication_LocalGameCreator_Patch : ModulePatch
 
     private static async Task HandleJoinAsSpectator()
     {
-        Player MainPlayer = Singleton<GameWorld>.Instance.MainPlayer;
+        var MainPlayer = Singleton<GameWorld>.Instance.MainPlayer;
 
         // Teleport the player underground to avoid it from being looted
-        Vector3 currentPosition = MainPlayer.Position;
+        var currentPosition = MainPlayer.Position;
         MainPlayer.Teleport(new(currentPosition.x, currentPosition.y - 75, currentPosition.z));
 
         // Small delay to ensure the teleport command is processed first

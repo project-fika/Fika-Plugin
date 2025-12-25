@@ -1,6 +1,5 @@
 ﻿using Comfort.Common;
 using EFT;
-using EFT.InventoryLogic;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Communication;
@@ -12,17 +11,17 @@ public class HostRunddansController(BackendConfigSettingsClass.GClass1748 settin
 {
     public override void InteractWithEventObject(Player player, InteractPacketStruct packet)
     {
-        if (!IsValid(player, out LocalGameTransitControllerClass gclass, out TransitDataClass transitDataClass)
+        if (!IsValid(player, out LocalGameTransitControllerClass gclass, out var transitDataClass)
             || !transitDataClass.events)
         {
             return;
         }
-        if (!Objects.TryGetValue(packet.objectId, out EventObject eventObject))
+        if (!Objects.TryGetValue(packet.objectId, out var eventObject))
         {
             FikaGlobals.LogError($"EventObject with id {packet.objectId} not found)");
             return;
         }
-        EventObject.EInteraction interaction = packet.interaction;
+        var interaction = packet.interaction;
         if (interaction != EventObject.EInteraction.Run)
         {
             if (interaction != EventObject.EInteraction.Repair)
@@ -32,7 +31,7 @@ public class HostRunddansController(BackendConfigSettingsClass.GClass1748 settin
         }
         else
         {
-            if (!method_5(player, out Item item))
+            if (!method_5(player, out var item))
             {
                 NoRequiredItemNotification(player);
                 return;
@@ -56,7 +55,7 @@ public class HostRunddansController(BackendConfigSettingsClass.GClass1748 settin
             PlayerId = 0,
             Objects = []
         };
-        foreach ((int id, EventObject eventObject) in Objects)
+        foreach ((var id, var eventObject) in Objects)
         {
             stateEvent.Objects.Add(id, eventObject.State);
         }
