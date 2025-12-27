@@ -135,6 +135,16 @@ public partial class FikaClient
 
     private void OnEventControllerEventPacketReceived(EventControllerEventPacket packet)
     {
+        if (packet.Type == EventControllerEventPacket.EEventType.StartedEvent)
+        {
+            var clientTransitController = (ClientTransitController)Singleton<GameWorld>.Instance.TransitController;
+            if (clientTransitController != null)
+            {
+                clientTransitController.EnablePoints(false);
+                clientTransitController.UpdateTimers();
+            }
+        }
+
         var gameWorld = Singleton<GameWorld>.Instance;
         if (gameWorld != null && gameWorld.RunddansController is ClientRunddansController)
         {

@@ -11,9 +11,22 @@ public class HostRunddansController(BackendConfigSettingsClass.GClass1748 settin
 {
     public override void InteractWithEventObject(Player player, InteractPacketStruct packet)
     {
-        if (!IsValid(player, out LocalGameTransitControllerClass gclass, out var transitDataClass)
-            || !transitDataClass.events)
+        LocalGameTransitControllerClass transitController = null;
+        if (player.IsYourPlayer)
         {
+            if (!IsValid(player, out transitController, out var transitDataClass)
+                || !transitDataClass.events)
+            {
+                return;
+            }
+        }
+        if (transitController == null)
+        {
+            transitController = (FikaHostTransitController)Singleton<GameWorld>.Instance.TransitController;
+        }
+        if (transitController == null)
+        {
+            FikaGlobals.LogError("TransitController was null");
             return;
         }
         if (!Objects.TryGetValue(packet.objectId, out var eventObject))
@@ -43,8 +56,14 @@ public class HostRunddansController(BackendConfigSettingsClass.GClass1748 settin
             }
         }
         method_4(packet.objectId, EventObject.EState.Running);
-        gclass.EnablePoints(false);
-        gclass.UpdateTimers();
+        transitController.EnablePoints(false);
+        transitController.UpdateTimers();
+
+        var startPacket = new EventControllerEventPacket
+        {
+            Type = EventControllerEventPacket.EEventType.StartedEvent
+        };
+        Singleton<IFikaNetworkManager>.Instance.SendData(ref startPacket, DeliveryMethod.ReliableOrdered);
     }
 
     public override void OnTriggerStateChanged(EventObject.EState state)

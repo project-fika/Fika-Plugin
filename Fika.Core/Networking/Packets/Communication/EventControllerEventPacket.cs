@@ -3,7 +3,7 @@ using EFT.GlobalEvents;
 
 namespace Fika.Core.Networking.Packets.Communication;
 
-public class EventControllerEventPacket : INetSerializable
+public struct EventControllerEventPacket : INetSerializable
 {
     public EEventType Type;
     public SyncEventFromServer Event;
@@ -24,8 +24,9 @@ public class EventControllerEventPacket : INetSerializable
                 stateEvent.Objects.Add(reader.GetInt(),
                     (EventObject.EState)reader.GetByte());
             }
+            Event = stateEvent;
         }
-        else
+        else if (Type == EEventType.MessageEvent)
         {
             Event = new RunddansMessagesEvent()
             {
@@ -49,7 +50,7 @@ public class EventControllerEventPacket : INetSerializable
                 writer.Put((byte)state);
             }
         }
-        else
+        else if (Type == EEventType.MessageEvent)
         {
             var messagesEvent = (RunddansMessagesEvent)Event;
             writer.Put(messagesEvent.PlayerId);
@@ -59,6 +60,7 @@ public class EventControllerEventPacket : INetSerializable
 
     public enum EEventType
     {
+        StartedEvent,
         StateEvent,
         MessageEvent
     }
