@@ -27,13 +27,36 @@ using System.Linq;
 using static Fika.Core.Networking.Packets.World.ReconnectPacket;
 #if DEBUG
 using static Fika.Core.Networking.Packets.Debug.CommandPacket;
-using Fika.Core.ConsoleCommands; 
+using Fika.Core.ConsoleCommands;
 #endif
 
 namespace Fika.Core.Networking;
 
 public partial class FikaServer
 {
+    private void OnLoadingScreenPlayersPacketReceived(LoadingScreenPlayersPacket packet, NetPeer peer)
+    {
+        if (LoadingScreenUI.Instance != null)
+        {
+            for (var i = 0; i < packet.NetIds.Length; i++)
+            {
+                LoadingScreenUI.Instance.AddPlayer(packet.NetIds[i], packet.Nicknames[i]);
+            }
+        }
+
+        SendData(ref packet, DeliveryMethod.ReliableUnordered, peer);
+    }
+
+    private void OnLoadingScreenPacketReceived(LoadingScreenPacket packet, NetPeer peer)
+    {
+        if (LoadingScreenUI.Instance != null)
+        {
+            LoadingScreenUI.Instance.SetProgress(packet.NetId, packet.Progress);
+        }
+
+        SendData(ref packet, DeliveryMethod.Unreliable, peer);
+    }
+
 #if DEBUG
     private void OnCommandPacketReceived(CommandPacket packet, NetPeer peer)
     {
@@ -182,7 +205,7 @@ public partial class FikaServer
         packet.Profiles = _visualProfiles;
         SendData(ref packet, DeliveryMethod.ReliableOrdered);
 
-        ClientConnected clientConnected = ClientConnected.FromValue(profile.Info.MainProfileNickname);
+        var clientConnected = ClientConnected.FromValue(profile.Info.MainProfileNickname);
         if (!FikaBackendUtils.IsHeadless)
         {
             clientConnected.Execute();
@@ -313,7 +336,7 @@ public partial class FikaServer
             }
 
             var gameWorld = Singleton<GameWorld>.Instance;
-            Traverse worldTraverse = Traverse.Create(gameWorld.World_0);
+            var worldTraverse = Traverse.Create(gameWorld.World_0);
 
             var grenades = gameWorld.Grenades.GetValuesEnumerator();
             List<SmokeGrenadeDataPacketStruct> smokeData = [];
@@ -404,7 +427,7 @@ public partial class FikaServer
                     continue;
                 }
 
-                SendCharacterPacket characterPacket = SendCharacterPacket.FromValue(new()
+                var characterPacket = SendCharacterPacket.FromValue(new()
                 {
                     Profile = player.Profile,
                     ControllerId = player.InventoryController.CurrentId,

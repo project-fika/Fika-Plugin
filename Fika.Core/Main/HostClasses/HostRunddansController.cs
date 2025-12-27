@@ -49,6 +49,9 @@ public class HostRunddansController(BackendConfigSettingsClass.GClass1748 settin
 
     public override void OnTriggerStateChanged(EventObject.EState state)
     {
+#if DEBUG
+        FikaGlobals.LogInfo($"RunddansStateChanged: {state}");
+#endif
         base.OnTriggerStateChanged(state);
         RunddansStateEvent stateEvent = new()
         {
@@ -78,7 +81,7 @@ public class HostRunddansController(BackendConfigSettingsClass.GClass1748 settin
         EventControllerEventPacket packet = new()
         {
             Type = EventControllerEventPacket.EEventType.MessageEvent,
-            Event = new RunddansMessagesEvent()
+            Event = new RunddansMessagesEvent
             {
                 PlayerId = player.Id,
                 Type = RunddansMessagesEvent.EType.NoRequiredItem

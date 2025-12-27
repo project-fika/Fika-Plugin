@@ -195,7 +195,6 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
     /// <summary>
     /// The countdown deploy screen
     /// </summary>
-    /// <returns></returns>
     public override IEnumerator vmethod_2()
     {
         yield return GameController.CountdownScreen(Profile_0, ProfileId);
@@ -415,7 +414,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
                 }
             }
         }
-
+        
         await vmethod_1(botsSettings, null);
 
         if (GameController.IsServer)
@@ -428,8 +427,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
             airdropEventClass.Init(true);
             (Singleton<GameWorld>.Instance as ClientGameWorld).ClientSynchronizableObjectLogicProcessor.ServerAirdropManager = airdropEventClass;
             GameWorld_0.SynchronizableObjectLogicProcessor.Ginterface279_0 = Singleton<FikaServer>.Instance;
-        }
-
+        }        
         await method_7();
         FikaEventDispatcher.DispatchEvent(new GameWorldStartedEvent(GameWorld_0));
     }

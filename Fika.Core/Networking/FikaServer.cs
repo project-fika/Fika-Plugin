@@ -208,6 +208,8 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         PlayerSnapshots.Init();
 
         RegisterPacketsAndTypes();
+        var pmcName = FikaBackendUtils.IsHeadless ? "Headless" : FikaBackendUtils.PMCName;
+        LoadingScreenUI.Instance.AddPlayer(NetId, pmcName);
 
 #if DEBUG
         AddDebugPackets();
@@ -418,6 +420,8 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         RegisterPacket<NetworkSettingsPacket, NetPeer>(OnNetworkSettingsPacketReceived);
         RegisterPacket<InRaidQuestPacket, NetPeer>(OnInraidQuestPacketReceived);
         RegisterPacket<EventControllerInteractPacket, NetPeer>(OnEventControllerInteractPacketReceived);
+        RegisterPacket<LoadingScreenPacket, NetPeer>(OnLoadingScreenPacketReceived);
+        RegisterPacket<LoadingScreenPlayersPacket, NetPeer>(OnLoadingScreenPlayersPacketReceived);
 
         RegisterReusable<WorldPacket, NetPeer>(OnWorldPacketReceived);
 
@@ -813,6 +817,17 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
 
         SendGenericPacket(EGenericSubPacketType.UpdateBackendData,
             UpdateBackendData.FromValue(PlayerAmount), true);
+
+        var loadingPacket = LoadingScreenUI.Instance.GetPlayersPacket();
+        SendDataToPeer(ref loadingPacket, DeliveryMethod.ReliableUnordered, peer);
+
+        // force update
+        var updatePackets = LoadingScreenUI.Instance.GetLatestStates();
+        for (var i = 0; i < updatePackets.Length; i++)
+        {
+            var updatePacket = updatePackets[i];
+            SendDataToPeer(ref updatePacket, DeliveryMethod.ReliableUnordered, peer);
+        }
     }
 
     public void OnNetworkError(IPEndPoint endPoint, SocketError socketErrorCode)

@@ -1,5 +1,5 @@
-﻿using EFT;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using EFT;
 
 namespace Fika.Core.Networking.Packets.Backend;
 
@@ -9,14 +9,14 @@ public class LoadingProfilePacket : INetSerializable
 
     public void Deserialize(NetDataReader reader)
     {
-        int count = reader.GetInt();
+        var count = reader.GetInt();
         if (count > 0)
         {
             Profiles = new(count);
-            for (int i = 0; i < count; i++)
+            for (var i = 0; i < count; i++)
             {
-                Profile profile = reader.GetProfile();
-                bool isLeader = reader.GetBool();
+                var profile = reader.GetProfile();
+                var isLeader = reader.GetBool();
                 Profiles.Add(profile, isLeader);
             }
         }
@@ -26,11 +26,11 @@ public class LoadingProfilePacket : INetSerializable
     {
         if (Profiles != null)
         {
-            int count = Profiles.Count;
+            var count = Profiles.Count;
             writer.Put(count);
             if (count > 0)
             {
-                foreach (KeyValuePair<Profile, bool> kvp in Profiles)
+                foreach (var kvp in Profiles)
                 {
                     writer.PutProfile(kvp.Key);
                     writer.Put(kvp.Value);

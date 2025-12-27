@@ -31,6 +31,25 @@ namespace Fika.Core.Networking;
 
 public partial class FikaClient
 {
+    private void OnLoadingScreenPlayersPacketReceived(LoadingScreenPlayersPacket packet)
+    {
+        if (LoadingScreenUI.Instance != null)
+        {
+            for (var i = 0; i < packet.NetIds.Length; i++)
+            {
+                LoadingScreenUI.Instance.AddPlayer(packet.NetIds[i], packet.Nicknames[i]);
+            }
+        }
+    }
+
+    private void OnLoadingScreenPacketReceived(LoadingScreenPacket packet)
+    {
+        if (LoadingScreenUI.Instance != null)
+        {
+            LoadingScreenUI.Instance.SetProgress(packet.NetId, packet.Progress);
+        }
+    }
+
     private void OnStashesPacketReceived(StashesPacket packet)
     {
 #if DEBUG
@@ -119,6 +138,9 @@ public partial class FikaClient
         var gameWorld = Singleton<GameWorld>.Instance;
         if (gameWorld != null && gameWorld.RunddansController is ClientRunddansController)
         {
+#if DEBUG
+            _logger.LogInfo($"Received event: {packet.Event}");
+#endif
             (packet.Event as RunddansStateEvent).PlayerId = MyPlayer.NetId;
             packet.Event.Invoke();
         }
@@ -387,6 +409,14 @@ public partial class FikaClient
         AllowVOIP = packet.AllowVOIP;
 
         _genericPacket.NetId = packet.NetId;
+
+        LoadingScreenUI.Instance.AddPlayer(NetId, FikaBackendUtils.PMCName);
+        var loadingPacket = new LoadingScreenPlayersPacket
+        {
+            NetIds = [NetId],
+            Nicknames = [FikaBackendUtils.PMCName]
+        };
+        SendData(ref loadingPacket, DeliveryMethod.ReliableUnordered, true);
     }
 
     private void OnResyncInventoryIdPacketReceived(ResyncInventoryIdPacket packet)

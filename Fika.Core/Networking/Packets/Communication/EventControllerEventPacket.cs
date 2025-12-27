@@ -17,9 +17,9 @@ public class EventControllerEventPacket : INetSerializable
             {
                 PlayerId = reader.GetInt()
             };
-            int amount = reader.GetInt();
+            var amount = reader.GetInt();
             stateEvent.Objects = new(amount);
-            for (int i = 0; i < amount; i++)
+            for (var i = 0; i < amount; i++)
             {
                 stateEvent.Objects.Add(reader.GetInt(),
                     (EventObject.EState)reader.GetByte());
@@ -40,10 +40,10 @@ public class EventControllerEventPacket : INetSerializable
         writer.Put((byte)Type);
         if (Type == EEventType.StateEvent)
         {
-            RunddansStateEvent stateEvent = (RunddansStateEvent)Event;
+            var stateEvent = (RunddansStateEvent)Event;
             writer.Put(stateEvent.PlayerId);
             writer.Put(stateEvent.Objects.Count);
-            foreach ((int objectId, EventObject.EState state) in stateEvent.Objects)
+            foreach ((var objectId, var state) in stateEvent.Objects)
             {
                 writer.Put(objectId);
                 writer.Put((byte)state);
@@ -51,7 +51,7 @@ public class EventControllerEventPacket : INetSerializable
         }
         else
         {
-            RunddansMessagesEvent messagesEvent = (RunddansMessagesEvent)Event;
+            var messagesEvent = (RunddansMessagesEvent)Event;
             writer.Put(messagesEvent.PlayerId);
             writer.Put((byte)messagesEvent.Type);
         }
