@@ -595,6 +595,7 @@ public abstract class BaseGameController
         {
             gameWorld.RunddansController = IsServer ? new HostRunddansController(instance.runddansSettings, location)
                 : new ClientRunddansController(instance.runddansSettings, location);
+            Logger.LogInfo("Created RunddansController");
         }
         else
         {

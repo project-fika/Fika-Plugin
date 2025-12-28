@@ -28,6 +28,7 @@ using static Fika.Core.Networking.Packets.World.ReconnectPacket;
 #if DEBUG
 using static Fika.Core.Networking.Packets.Debug.CommandPacket;
 using Fika.Core.ConsoleCommands;
+using Fika.Core.Main.HostClasses;
 #endif
 
 namespace Fika.Core.Networking;
@@ -95,10 +96,13 @@ public partial class FikaServer
         var gameWorld = Singleton<GameWorld>.Instance;
         if (_coopHandler.Players.TryGetValue(packet.NetId, out var player))
         {
-            if (gameWorld.RunddansController != null)
+            if (gameWorld.RunddansController is HostRunddansController controller)
             {
-                gameWorld.RunddansController.InteractWithEventObject(player, packet.Data);
+                controller.ObservedInteractWithEventObject(player, packet.Data, peer);
+                return;
             }
+
+            _logger.LogError("Could not find the RunddansController when player interacted");
         }
     }
 

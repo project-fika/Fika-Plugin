@@ -379,6 +379,8 @@ public class HostGameController : BaseGameController, IBotGame
 
     public override async Task StartBotSystemsAndCountdown(BotControllerSettings controllerSettings, GameWorld gameWorld)
     {
+        LoadingScreenUI.Instance.UpdateAndBroadcast(80f);
+
         if (Location.Id == "laboratory")
         {
             Logger.LogInfo("Location is 'Laboratory', skipping weather generation");
@@ -415,6 +417,8 @@ public class HostGameController : BaseGameController, IBotGame
         }
 
         await SetupRaidCode();
+
+        LoadingScreenUI.Instance.UpdateAndBroadcast(85f);
 
         Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal = Math.Max(Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal, 3);
     }

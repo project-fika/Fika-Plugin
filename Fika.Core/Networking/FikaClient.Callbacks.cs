@@ -145,6 +145,26 @@ public partial class FikaClient
             }
         }
 
+        if (packet.Type == EventControllerEventPacket.EEventType.RemoveItem)
+        {
+            var runddansController = (ClientRunddansController)Singleton<GameWorld>.Instance.RunddansController;
+            if (runddansController != null)
+            {
+                if (_coopHandler.Players.TryGetValue(packet.NetId, out var player))
+                {
+                    if (!runddansController.method_5(player, out var item))
+                    {
+                        _logger.LogError("Could not find item to remove on player");
+                    }
+
+                    if (!runddansController.method_10(item))
+                    {
+                        _logger.LogError("Remove consumable error");
+                    }
+                }
+            }
+        }
+
         var gameWorld = Singleton<GameWorld>.Instance;
         if (gameWorld != null && gameWorld.RunddansController is ClientRunddansController)
         {

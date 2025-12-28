@@ -5,6 +5,7 @@ namespace Fika.Core.Networking.Packets.Communication;
 
 public struct EventControllerEventPacket : INetSerializable
 {
+    public int NetId;
     public EEventType Type;
     public SyncEventFromServer Event;
 
@@ -34,6 +35,10 @@ public struct EventControllerEventPacket : INetSerializable
                 Type = (RunddansMessagesEvent.EType)reader.GetByte()
             };
         }
+        else if (Type == EEventType.RemoveItem)
+        {
+            NetId = reader.GetInt();
+        }
     }
 
     public void Serialize(NetDataWriter writer)
@@ -56,11 +61,16 @@ public struct EventControllerEventPacket : INetSerializable
             writer.Put(messagesEvent.PlayerId);
             writer.Put((byte)messagesEvent.Type);
         }
+        else if (Type == EEventType.RemoveItem)
+        {
+            writer.Put(NetId);
+        }
     }
 
     public enum EEventType
     {
         StartedEvent,
+        RemoveItem,
         StateEvent,
         MessageEvent
     }

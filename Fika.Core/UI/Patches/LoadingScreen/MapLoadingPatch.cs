@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Fika.Core.Main.Utils;
 using HarmonyLib;
 using SPT.Reflection.Patching;
 using static EFT.TarkovApplication;
@@ -16,7 +17,7 @@ public class MapLoadingPatch : ModulePatch
     [PatchPrefix]
     public static void Postfix(float pr)
     {
-        var progress = 0f + (pr * 25f);
+        var progress = 0f + (pr * (FikaBackendUtils.IsHeadless ? 50f : 25f)); // headless doesn't cache culling
         LoadingScreenUI.Instance.UpdateAndBroadcast(progress);
     }
 }
