@@ -1,4 +1,6 @@
-﻿using Fika.Core.UI.Custom;
+﻿using Comfort.Common;
+using Fika.Core.Networking;
+using Fika.Core.UI.Custom;
 using SPT.Reflection.Patching;
 using System.Reflection;
 using static EFT.UI.InventoryScreen;
@@ -17,7 +19,7 @@ public class GClass3871_ShowAction_Patch : ModulePatch
     [PatchPostfix]
     public static void Postfix(GClass3871 __instance)
     {
-        if (!__instance.InRaid)
+        if (!__instance.InRaid && !Singleton<IFikaNetworkManager>.Instantiated)
         {
             if (MainMenuUIScript.Exist)
             {
