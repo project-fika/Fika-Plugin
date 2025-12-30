@@ -76,7 +76,8 @@ public class FikaHostTransitController : LocalGameTransitControllerClass
         {
             if (player is FikaPlayer fikaPlayer)
             {
-                fikaPlayer.UpdateBtrTraderServiceData().HandleExceptions();
+                fikaPlayer.UpdateBtrTraderServiceData()
+                    .HandleExceptions();
             }
 
             if (player.IsYourPlayer)
@@ -374,12 +375,5 @@ public class FikaHostTransitController : LocalGameTransitControllerClass
         EnablePoints(true);
         method_8(Dictionary_0.Values, GamePlayerOwner.MyPlayer, false);
         method_2(Dictionary_0.Values, GamePlayerOwner.MyPlayer);
-
-        /*TransitEventPacket packet = new()
-			{
-				EventType = TransitEventPacket.ETransitEventType.Init
-			};
-
-			server.SendDataToAll(ref packet, DeliveryMethod.ReliableOrdered);*/
     }
 }

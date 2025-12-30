@@ -31,6 +31,25 @@ namespace Fika.Core.Networking;
 
 public partial class FikaClient
 {
+    private void OnSyncEventPacketReceived(SyncEventPacket packet)
+    {
+        _logger.LogInfo("Received sync event");
+        var reader = NetworkUtils.EventDataReader;
+        reader.Reset();
+        Array.Copy(packet.Data, reader.Buffer, packet.Data.Length);
+        /*GClass3670.Instance.Deserialize(reader, null);*/
+        switch (packet.Type)
+        {
+            case 0:
+                var initEvent = new TransitInitEvent();
+                initEvent.Deserialize(ref reader);
+                initEvent.Invoke();
+                break;
+            default:
+                break;
+        }
+    }
+
     private void OnLoadingScreenPlayersPacketReceived(LoadingScreenPlayersPacket packet)
     {
         if (LoadingScreenUI.Instance != null)
@@ -416,7 +435,7 @@ public partial class FikaClient
         var transitController = Singleton<GameWorld>.Instance.TransitController;
         if (transitController != null)
         {
-            transitController.summonedTransits[packet.ProfileId] = new(packet.RaidId, packet.Count, packet.Maps, false);
+            transitController.summonedTransits[packet.ProfileId] = new(packet.RaidId, packet.Count, packet.Maps, packet.Events);
             return;
         }
 

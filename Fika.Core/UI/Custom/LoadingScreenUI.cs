@@ -1,5 +1,8 @@
+using System;
 using System.Collections.Generic;
 using Comfort.Common;
+using EFT.InventoryLogic;
+using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Backend;
 
@@ -15,6 +18,23 @@ public class LoadingScreenUI : MonoBehaviour
     private void Awake()
     {
         _loadingPlayers = [];
+    }
+
+    public void ReInitAfterTransit()
+    {
+        FikaGlobals.LogInfo("Restarting LoadingScreenUI");
+        var netId = Singleton<IFikaNetworkManager>.Instance.NetId;
+        var pmcName = FikaBackendUtils.IsHeadless ? "Headless" : FikaBackendUtils.PMCName;
+
+        AddPlayer(netId, pmcName);
+
+        var loadingPacket = new LoadingScreenPlayersPacket
+        {
+            NetIds = [netId],
+            Nicknames = [pmcName]
+        };
+
+        Singleton<IFikaNetworkManager>.Instance.SendData(ref loadingPacket, DeliveryMethod.ReliableUnordered, true);
     }
 
     public LoadingScreenPlayersPacket GetPlayersPacket()
@@ -100,6 +120,11 @@ public class LoadingScreenUI : MonoBehaviour
     }
 
     private void OnDestroy()
+    {
+        ClearData();
+    }
+
+    public void ClearData()
     {
         foreach (var item in _loadingPlayers)
         {

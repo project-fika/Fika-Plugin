@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Comfort.Common;
 using EFT;
+using EFT.GlobalEvents;
 using EFT.Interactive;
 using Fika.Core.Main.GameMode;
 using Fika.Core.Main.Players;
@@ -17,11 +18,45 @@ public class ClientTransitController : GClass1906
     {
         OnPlayerEnter += OnClientPlayerEnter;
         OnPlayerExit += OnClientPlayerExit;
-        var array = localRaidSettings.transition.visitedLocations.EmptyIfNull().Append(localRaidSettings.location).ToArray();
+        var array = localRaidSettings.transition.visitedLocations.EmptyIfNull()
+            .Append(localRaidSettings.location)
+            .ToArray();
         summonedTransits[profile.Id] = new TransitDataClass(localRaidSettings.transition.transitionRaidId, localRaidSettings.transition.transitionCount, array,
             localRaidSettings.transitionType.HasFlagNoBox(ELocationTransition.Event));
         TransferItemsController.InitItemControllerServer(FikaGlobals.TransitTraderId, FikaGlobals.TransitTraderName);
         _localRaidSettings = localRaidSettings;
+
+        Action_0();
+
+        Action_0 = GlobalEventHandlerClass.Instance.SubscribeOnEvent(new Action<TransitInitEvent>(OnInitEvent));
+
+        ReEnablePoints();
+    }
+
+    private void ReEnablePoints()
+    {
+        foreach (var transitPoint in Dictionary_0.Values)
+        {
+            transitPoint.gameObject.SetActive(true);
+        }
+    }
+
+    private void OnInitEvent(TransitInitEvent initEvent)
+    {
+        FikaGlobals.LogInfo($"Received TransitInitEvent from server with {initEvent.Points.Count} points");
+        if (!smethod_2(initEvent.PlayerId, out var player))
+        {
+#if DEBUG
+            FikaGlobals.LogWarning($"[{initEvent.PlayerId}] was not my player");
+#endif
+            return;
+        }
+
+        /*var transit = summonedTransits[player.ProfileId];
+        summonedTransits[player.ProfileId].events = initEvent.EventPlayer;*/
+        var list = method_21(initEvent.Points, player.Side);
+        method_8(list, player, false);
+        method_2(list, player);
     }
 
     public TransitInteractionPacketStruct InteractPacket { get; set; }
@@ -35,7 +70,8 @@ public class ClientTransitController : GClass1906
             //TransferItemsController.InitPlayerStash(player);
             if (player is FikaPlayer fikaPlayer)
             {
-                fikaPlayer.UpdateBtrTraderServiceData().HandleExceptions();
+                fikaPlayer.UpdateBtrTraderServiceData()
+                    .HandleExceptions();
             }
         }
     }
@@ -47,8 +83,8 @@ public class ClientTransitController : GClass1906
 
     public void Init()
     {
-        EnablePoints(true);
-        method_8(Dictionary_0.Values, GamePlayerOwner.MyPlayer, false);
+        /*EnablePoints(true);
+        method_8(Dictionary_0.Values, GamePlayerOwner.MyPlayer, false);*/
     }
 
     public override void Dispose()

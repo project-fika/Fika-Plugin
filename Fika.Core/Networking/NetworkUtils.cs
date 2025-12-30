@@ -1,7 +1,7 @@
-﻿#if DEBUG
+﻿/*#if DEBUG
 using Fika.Core.Main.Utils;
 using System.Diagnostics;
-#endif
+#endif*/
 using Fika.Core.Networking.LZ4;
 using System;
 
@@ -9,6 +9,15 @@ namespace Fika.Core.Networking;
 
 public static class NetworkUtils
 {
+    public static IDataReader EventDataReader { get; private set; } = new GClass1364(new byte[16_384]);
+    public static GInterface131 EventDataWriter { get; private set; } = new GClass1368(new byte[10_000]);
+
+    internal static void ResetReaderAndWriter()
+    {
+        EventDataReader = new GClass1364(new byte[16_384]);
+        EventDataWriter = new GClass1368(new byte[10_000]);
+    }
+
     /// <summary>
     /// Compresses the given byte array using LZ4 compression
     /// </summary>
@@ -16,18 +25,18 @@ public static class NetworkUtils
     /// <returns>The compressed byte array</returns>
     public static ReadOnlySpan<byte> CompressBytes(byte[] input)
     {
-#if DEBUG
-        Stopwatch sw = Stopwatch.StartNew();
-#endif
+/*#if DEBUG
+        var sw = Stopwatch.StartNew();
+#endif*/
 
-        byte[] buffer = new byte[LZ4Codec.MaximumOutputSize(input.Length)];
-        int encoded = LZ4Codec.Encode(input, 0, input.Length, buffer, 0, buffer.Length, LZ4Level.L04_HC);
+        var buffer = new byte[LZ4Codec.MaximumOutputSize(input.Length)];
+        var encoded = LZ4Codec.Encode(input, 0, input.Length, buffer, 0, buffer.Length, LZ4Level.L04_HC);
 
-#if DEBUG
+/*#if DEBUG
         sw.Stop();
-        double compressionRate = 100.0 * (1.0 - (encoded / (double)input.Length));
+        var compressionRate = 100.0 * (1.0 - (encoded / (double)input.Length));
         FikaGlobals.LogWarning($"Compression reduced size by {compressionRate:F2}%, took {sw.Elapsed.TotalMilliseconds:F2} ms");
-#endif
+#endif*/
 
         // Return exact compressed data slice without extra ToArray allocation
         if (encoded == buffer.Length)
@@ -50,21 +59,21 @@ public static class NetworkUtils
     /// <returns>The decompressed byte array</returns>
     public static byte[] DecompressBytes(byte[] compressedData, int originalLength)
     {
-#if DEBUG
-        Stopwatch sw = Stopwatch.StartNew();
-#endif
-        byte[] result = new byte[originalLength];
-        int decoded = LZ4Codec.Decode(compressedData, 0, compressedData.Length, result, 0, originalLength);
+/*#if DEBUG
+        var sw = Stopwatch.StartNew();
+#endif*/
+        var result = new byte[originalLength];
+        var decoded = LZ4Codec.Decode(compressedData, 0, compressedData.Length, result, 0, originalLength);
         if (decoded != originalLength)
         {
             throw new InvalidOperationException("LZ4 decompression failed: length mismatch.");
         }
 
-#if DEBUG
+/*#if DEBUG
         sw.Stop();
-        double reverseRate = 100.0 * ((originalLength - compressedData.Length) / (double)compressedData.Length);
+        var reverseRate = 100.0 * ((originalLength - compressedData.Length) / (double)compressedData.Length);
         FikaGlobals.LogWarning($"Original is {reverseRate:F2}% larger than compressed, took {sw.Elapsed.TotalMilliseconds:F2} ms");
-#endif
+#endif*/
 
         return result;
     }

@@ -41,9 +41,7 @@ public static class NetManagerUtils
             CreateFikaGameObject();
         }
 
-        var loadingPrefab = InternalBundleLoader.Instance.GetFikaAsset(InternalBundleLoader.EFikaAsset.LoadingScreenUI);
-        var loadingUi = GameObject.Instantiate(loadingPrefab, FikaGameObject.transform);
-        LoadingScreenUI.Instance = loadingUi.GetComponent<LoadingScreenUI>();
+        CreateLoadingScreenUI();
 
         if (isServer)
         {
@@ -60,6 +58,43 @@ public static class NetManagerUtils
         Singleton<IFikaNetworkManager>.Create(client);
     }
 
+    public static void CreateLoadingScreenUI()
+    {
+        if (LoadingScreenUI.Instance != null)
+        {
+            LoadingScreenUI.Instance.gameObject.SetActive(true);
+            return;
+        }
+
+        var loadingPrefab = InternalBundleLoader.Instance.GetFikaAsset(InternalBundleLoader.EFikaAsset.LoadingScreenUI);
+        var loadingUi = GameObject.Instantiate(loadingPrefab, FikaGameObject.transform);
+        LoadingScreenUI.Instance = loadingUi.GetComponent<LoadingScreenUI>();
+    }
+
+    /// <summary>
+    /// Disables the <see cref="LoadingScreenUI"/> and clears all data in it
+    /// </summary>
+    public static void DisableLoadingScreenUI()
+    {
+        if (LoadingScreenUI.Instance != null)
+        {
+            LoadingScreenUI.Instance.ClearData();
+            LoadingScreenUI.Instance.gameObject.SetActive(false);
+        }
+    }
+
+    /// <summary>
+    /// Destroys the <see cref="LoadingScreenUI"/>
+    /// </summary>
+    public static void DestroyLoadingScreenUI()
+    {
+        if (LoadingScreenUI.Instance != null)
+        {
+            GameObject.Destroy(LoadingScreenUI.Instance);
+            LoadingScreenUI.Instance = null;
+        }
+    }
+
     public static void CreatePingingClient()
     {
         if (FikaGameObject == null)
@@ -74,12 +109,18 @@ public static class NetManagerUtils
 
     public static void DestroyNetManager(bool isServer)
     {
+        NetworkUtils.ResetReaderAndWriter();
+
         if (FikaBackendUtils.IsTransit)
         {
+            CreateLoadingScreenUI();
+            LoadingScreenUI.Instance.ReInitAfterTransit();
+
             Singleton<IFikaNetworkManager>.Instance.CoopHandler.CleanUpForTransit();
             if (isServer)
             {
                 var server = Singleton<FikaServer>.Instance;
+                server.HostReady = false;
                 server.RaidInitialized = false;
                 server.ReadyClients = 0;
                 return;
@@ -89,8 +130,11 @@ public static class NetManagerUtils
             client.HostReady = false;
             client.HostLoaded = false;
             client.ReadyClients = 0;
+
             return;
         }
+
+        DestroyLoadingScreenUI();
 
         FikaBackendUtils.ClientType = EClientType.None;
 

@@ -5,6 +5,7 @@ using EFT.InventoryLogic;
 using Fika.Core.Main.ClientClasses;
 using Fika.Core.Main.Factories;
 using Fika.Core.Main.GameMode;
+using Fika.Core.Main.HostClasses;
 using Fika.Core.Main.ObservedClasses;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
@@ -45,7 +46,8 @@ public partial class FikaServer
             }
         }
 
-        SendData(ref packet, DeliveryMethod.ReliableUnordered, peer);
+        var newPacket = LoadingScreenUI.Instance.GetPlayersPacket();
+        SendData(ref newPacket, DeliveryMethod.ReliableUnordered, peer);
     }
 
     private void OnLoadingScreenPacketReceived(LoadingScreenPacket packet, NetPeer peer)
@@ -267,7 +269,7 @@ public partial class FikaServer
         var transitController = Singleton<GameWorld>.Instance.TransitController;
         if (transitController != null)
         {
-            transitController.summonedTransits[packet.ProfileId] = new(packet.RaidId, packet.Count, packet.Maps, false);
+            transitController.summonedTransits[packet.ProfileId] = new(packet.RaidId, packet.Count, packet.Maps, packet.Events);
             return;
         }
 

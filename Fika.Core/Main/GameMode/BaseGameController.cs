@@ -360,11 +360,7 @@ public abstract class BaseGameController
 #endif
         yield return WaitForHostInit(timeBeforeDeployLocal);
 
-        if (LoadingScreenUI.Instance != null)
-        {
-            GameObject.Destroy(LoadingScreenUI.Instance);
-            LoadingScreenUI.Instance = null;
-        }
+        NetManagerUtils.DisableLoadingScreenUI();
 
         var dateTime = EFTDateTimeClass.Now.AddSeconds(timeBeforeDeployLocal);
         new MatchmakerFinalCountdown.FinalCountdownScreenClass(profile, dateTime).ShowScreen(EScreenState.Root);
@@ -446,7 +442,8 @@ public abstract class BaseGameController
                 ProfileId = profileId,
                 RaidId = transitData.raidId,
                 Count = transitData.count,
-                Maps = transitData.maps
+                Maps = transitData.maps,
+                Events = transitData.events
             };
 
             Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);

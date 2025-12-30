@@ -1,4 +1,9 @@
-﻿using BepInEx.Logging;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using BepInEx.Logging;
 using Comfort.Common;
 using CommonAssets.Scripts.Game;
 using Dissonance.Networking.Client;
@@ -28,11 +33,6 @@ using Fika.Core.Networking.Packets.World;
 using Fika.Core.UI.Models;
 using HarmonyLib;
 using JsonType;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Fika.Core.Main.GameMode;
 
@@ -364,6 +364,11 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
 
         GameController.InitializeRunddans(instance, gameWorld, Location_0);
 
+        if (GameController.IsServer)
+        {
+            Singleton<FikaServer>.Instance.RaidInitialized = true;
+        }
+
         gameWorld.ClientBroadcastSyncController = new ClientBroadcastSyncControllerClass();
 
         var config = BackendConfigAbstractClass.Config;
@@ -414,7 +419,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
                 }
             }
         }
-        
+
         await vmethod_1(botsSettings, null);
 
         if (GameController.IsServer)
@@ -427,7 +432,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
             airdropEventClass.Init(true);
             (Singleton<GameWorld>.Instance as ClientGameWorld).ClientSynchronizableObjectLogicProcessor.ServerAirdropManager = airdropEventClass;
             GameWorld_0.SynchronizableObjectLogicProcessor.Ginterface279_0 = Singleton<FikaServer>.Instance;
-        }        
+        }
         await method_7();
         FikaEventDispatcher.DispatchEvent(new GameWorldStartedEvent(GameWorld_0));
     }
@@ -635,6 +640,10 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         }
         gparam_0.Player.HealthController.DiedEvent += HealthController_DiedEvent;
         gparam_0.vmethod_0();
+#if DEBUG
+        FikaGlobals.LogWarning("Forcing god mode on DEBUG build, use 'god f' console command to disable");
+        gparam_0.Player.ActiveHealthController.SetDamageCoeff(0f); 
+#endif
     }
 
     /// <summary>

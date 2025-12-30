@@ -236,8 +236,14 @@ public class FikaPlugin : BaseUnityPlugin
         if (AllowItemSending)
         {
             _patchManager.EnablePatch(new ItemContext_Patch());
-        }
+        }        
+    }
 
+    /// <summary>
+    /// Run these at start to hopefully ensure that all mods are loaded
+    /// </summary>
+    protected void Start()
+    {
         _ = Task.Run(RunChecks);
         _ = Task.Run(GetTarkovApp);
     }

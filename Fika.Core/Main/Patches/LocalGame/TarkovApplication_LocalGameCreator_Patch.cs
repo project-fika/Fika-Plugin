@@ -111,7 +111,7 @@ public class TarkovApplication_LocalGameCreator_Patch : ModulePatch
             timeVariant = raidSettings.SelectedDateTime,
             mode = ELocalMode.PVE_OFFLINE,
             playerSide = raidSettings.Side,
-            transitionType = FikaBackendUtils.TransitData.visitedLocations.Length > 0 ? ELocationTransition.Common : raidSettings.transitionType
+            transitionType = raidSettings.transitionType
         };
         var applicationTraverse = Traverse.Create(instance);
         applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value = localRaidSettings;
@@ -119,11 +119,8 @@ public class TarkovApplication_LocalGameCreator_Patch : ModulePatch
         var localSettings = await instance.Session.LocalRaidStarted(localRaidSettings);
         var raidSettingsToUpdate = applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value;
         var escapeTimeLimit = raidSettings.IsScav ? RaidChangesUtil.NewEscapeTimeMinutes : raidSettings.SelectedLocation.EscapeTimeLimit;
-        if (isServer)
-        {
-            raidSettings.SelectedLocation = localSettings.locationLoot;
-            raidSettings.SelectedLocation.EscapeTimeLimit = escapeTimeLimit;
-        }
+        raidSettings.SelectedLocation = localSettings.locationLoot;
+        raidSettings.SelectedLocation.EscapeTimeLimit = escapeTimeLimit;
         raidSettingsToUpdate.serverId = localSettings.serverId;
         raidSettingsToUpdate.selectedLocation = localSettings.locationLoot;
         raidSettingsToUpdate.selectedLocation.EscapeTimeLimit = escapeTimeLimit;

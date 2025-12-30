@@ -36,6 +36,7 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
 
     public override IEnumerator WaitForHostInit(int timeBeforeDeployLocal)
     {
+        Logger.LogInfo("Waiting for host init");
         _abstractGame.SetMatchmakerStatus(LocaleUtils.UI_WAIT_FOR_HOST_FINISH_INIT.Localized());
 
         var client = Singleton<FikaClient>.Instance;
@@ -45,6 +46,8 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
             yield return waitForEndOfFrame;
         } while (!client.HostReady);
         LootItems = null;
+
+        Logger.LogInfo("Host init complete");
     }
 
     public override async Task WaitForHostToStart()
@@ -395,13 +398,11 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
         {
             exfiltrationPoint.Disable();
 
-            if (exfiltrationPoint.HasRequirements && exfiltrationPoint.TransferItemRequirement != null)
+            if (exfiltrationPoint.HasRequirements && exfiltrationPoint.TransferItemRequirement != null
+                && exfiltrationPoint.TransferItemRequirement.Met(player, exfiltrationPoint) && player.IsYourPlayer)
             {
-                if (exfiltrationPoint.TransferItemRequirement.Met(player, exfiltrationPoint) && player.IsYourPlayer)
-                {
-                    // Seems to already be handled by SPT so we only add it visibly
-                    player.Profile.EftStats.SessionCounters.AddDouble(0.2, [CounterTag.FenceStanding, EFenceStandingSource.ExitStanding]);
-                }
+                // Seems to already be handled by SPT so we only add it visibly
+                player.Profile.EftStats.SessionCounters.AddDouble(0.2, [CounterTag.FenceStanding, EFenceStandingSource.ExitStanding]);
             }
         }
 
@@ -419,6 +420,10 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
                 coopGame.ExitStatus = ExitStatus.Transit;
                 coopGame.ExitLocation = transitPoint.parameters.name;
                 FikaBackendUtils.IsTransit = true;
+            }
+            else
+            {
+                Logger.LogError("Exit was transit, but could not find alreadyTransits data");
             }
         }
 
@@ -439,10 +444,7 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
             _coopHandler.ExtractedPlayers.Add(fikaPlayer.NetId);
             _coopHandler.Players.Remove(fikaPlayer.NetId);
 
-            preloaderUI.StartBlackScreenShow(2f, 2f, () =>
-            {
-                preloaderUI.FadeBlackScreen(2f, -2f);
-            });
+            preloaderUI.StartBlackScreenShow(2f, 2f, () => preloaderUI.FadeBlackScreen(2f, -2f));
 
             player.ActiveHealthController.SetDamageCoeff(0);
             player.ActiveHealthController.DamageMultiplier = 0;
@@ -454,7 +456,7 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
             // Prevents players from looting after extracting
             CurrentScreenSingletonClass.Instance.CloseAllScreensForced();
 
-            // Detroys session timer
+            // Destroys session timer
             if (TimeManager != null)
             {
                 UnityEngine.Object.Destroy(TimeManager);
