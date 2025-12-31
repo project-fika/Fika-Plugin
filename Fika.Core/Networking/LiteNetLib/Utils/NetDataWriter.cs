@@ -123,12 +123,18 @@ public unsafe class NetDataWriter
         }
     }
 
+    /// <summary>
+    /// Resets the writer by setting <see cref="_position"/> to 0, and resizes to <paramref name="size"/> if needed
+    /// </summary>
     public void Reset(int size)
     {
         ResizeIfNeed(size);
         _position = 0;
     }
 
+    /// <summary>
+    /// Resets the writer by setting <see cref="_position"/> to 0
+    /// </summary>
     public void Reset()
     {
         _position = 0;
