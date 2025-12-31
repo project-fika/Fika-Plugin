@@ -221,6 +221,8 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
     {
         var client = Singleton<FikaClient>.Instance;
 
+        Logger.LogInfo("Waiting for host to init");
+
         InformationPacket packet = new();
         do
         {

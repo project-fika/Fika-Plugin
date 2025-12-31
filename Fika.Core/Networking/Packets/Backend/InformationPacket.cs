@@ -13,6 +13,7 @@ public struct InformationPacket : INetSerializable
     public int AmountOfPeers;
     public bool HostReady;
     public bool HostLoaded;
+    public bool HostReceivedLocation;
     public DateTime GameTime;
     public TimeSpan SessionTime;
     public GameDateTime GameDateTime;
@@ -30,6 +31,7 @@ public struct InformationPacket : INetSerializable
             SessionTime = TimeSpan.FromTicks(reader.GetLong());
             GameDateTime = reader.GetGameDateTime();
         }
+        HostReceivedLocation = reader.GetBool();
         HostLoaded = reader.GetBool();
     }
 
@@ -46,6 +48,7 @@ public struct InformationPacket : INetSerializable
             writer.Put(SessionTime.Ticks);
             writer.PutGameDateTime(GameDateTime);
         }
+        writer.Put(HostReceivedLocation);
         writer.Put(HostLoaded);
     }
 }

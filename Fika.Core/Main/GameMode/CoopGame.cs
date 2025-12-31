@@ -342,10 +342,13 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
             await (GameController as ClientGameController).WaitForHostToLoad();
         }
 
+        _logger.LogInfo("Creating CoopHandler");
         await GameController.SetupCoopHandler(this);
 
         var gameWorld = Singleton<GameWorld>.Instance;
         gameWorld.LocationId = Location_0.Id;
+
+        _logger.LogInfo($"Initializing Exfils: Id {Location_0.Id}, Exits: {Location_0.exits?.Length ?? 0}, SecretExits: {Location_0.SecretExits?.Length ?? 0}");
 
         ExfiltrationControllerClass.Instance.InitAllExfiltrationPoints(Location_0._Id, Location_0.exits, Location_0.SecretExits,
             !GameController.IsServer, Location_0.DisabledScavExits);

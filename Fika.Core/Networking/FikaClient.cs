@@ -52,6 +52,7 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
     public int ReadyClients;
     public bool HostReady;
     public bool HostLoaded;
+    public bool HostReceivedLocation;
     public bool ReconnectDone;
     public NetPeer ServerConnection { get; private set; }
     public NetManager NetClient

@@ -123,6 +123,7 @@ public static class NetManagerUtils
                 server.HostReady = false;
                 server.RaidInitialized = false;
                 server.ReadyClients = 0;
+                server.LocationReceived = false;
                 return;
             }
 

@@ -10,7 +10,7 @@ using Fika.Core.Networking.Packets.Generic.SubPackets;
 
 namespace Fika.Core.Networking.Packets.World;
 
-public class RequestSubPackets
+public static class RequestSubPackets
 {
     public class SpawnPointRequest : IRequestPacket
     {

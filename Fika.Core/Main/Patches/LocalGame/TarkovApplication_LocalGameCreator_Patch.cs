@@ -11,8 +11,10 @@ using Fika.Core.Main.GameMode;
 using Fika.Core.Main.Utils;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
+using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Models;
+using Fika.Core.Networking.Packets.Backend;
 using Fika.Core.UI.Custom;
 using HarmonyLib;
 using SPT.Reflection.Patching;
@@ -98,8 +100,19 @@ public class TarkovApplication_LocalGameCreator_Patch : ModulePatch
 
 #if DEBUG
         Logger.LogInfo("TarkovApplication_LocalGameCreator_Patch:Postfix: Attempt to set Raid Settings");
-        Logger.LogInfo($"RaidSettings TransitType: {raidSettings.transitionType}");
+        Logger.LogInfo($"RaidSettings Location: {raidSettings.LocationId}, TransitType: {raidSettings.transitionType}");
 #endif
+
+        if (!isServer)
+        {
+#if DEBUG
+            Logger.LogInfo("Waiting for host to receive location"); 
+#endif
+            await WaitForServerToReceiveLocation();
+#if DEBUG
+            Logger.LogInfo("Host has received location, continuing");
+#endif
+        }
 
         if (!raidSettings.isInTransition)
         {
@@ -154,7 +167,8 @@ public class TarkovApplication_LocalGameCreator_Patch : ModulePatch
         }
         else
         {
-            instance.MatchmakerPlayerControllerClass.UpdateMatchingStatus("Creating coop game...");
+            instance.MatchmakerPlayerControllerClass.UpdateMatchingStatus("Hosting coop game...");
+            Singleton<FikaServer>.Instance.LocationReceived = true;
         }
 
         // This gets incorrectly reset by the server, update it manually here during transit
@@ -203,6 +217,19 @@ public class TarkovApplication_LocalGameCreator_Patch : ModulePatch
             Logger.LogInfo("Starting game as spectator");
             await HandleJoinAsSpectator();
         }
+    }
+
+    private static async Task WaitForServerToReceiveLocation()
+    {
+        var packet = new InformationPacket();
+        var client = Singleton<FikaClient>.Instance;
+        var span = TimeSpan.FromSeconds(1);
+
+        do
+        {
+            client.SendData(ref packet, DeliveryMethod.ReliableUnordered);
+            await Task.Delay(span);
+        } while (!client.HostReceivedLocation);
     }
 
     private static TimeSpan GetRaidMinutes(int defaultMinutes)

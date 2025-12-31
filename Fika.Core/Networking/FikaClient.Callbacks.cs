@@ -838,6 +838,7 @@ public partial class FikaClient
         ReadyClients = packet.ReadyPlayers;
         HostReady = packet.HostReady;
         HostLoaded = packet.HostLoaded;
+        HostReceivedLocation = packet.HostReceivedLocation;
         if (packet.AmountOfPeers > 0)
         {
             Singleton<IFikaNetworkManager>.Instance.PlayerAmount = packet.AmountOfPeers;

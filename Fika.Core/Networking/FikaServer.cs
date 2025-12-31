@@ -50,7 +50,6 @@ using Fika.Core.Networking.Models;
 using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Player.Common;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
-using System.Linq;
 
 namespace Fika.Core.Networking;
 
@@ -64,12 +63,13 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
     public bool HasHadPeer;
     public bool RaidInitialized;
     public bool HostReady;
+    public bool LocationReceived;
     public FikaHostWorld FikaHostWorld { get; set; }
     public bool Started
     {
         get
         {
-            return _netServer != null && _netServer.IsRunning;
+            return _netServer?.IsRunning == true;
         }
     }
     public DateTime? GameStartTime

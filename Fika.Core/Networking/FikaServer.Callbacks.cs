@@ -29,7 +29,6 @@ using static Fika.Core.Networking.Packets.World.ReconnectPacket;
 #if DEBUG
 using static Fika.Core.Networking.Packets.Debug.CommandPacket;
 using Fika.Core.ConsoleCommands;
-using Fika.Core.Main.HostClasses;
 #endif
 
 namespace Fika.Core.Networking;
@@ -47,7 +46,7 @@ public partial class FikaServer
         }
 
         var newPacket = LoadingScreenUI.Instance.GetPlayersPacket();
-        SendData(ref newPacket, DeliveryMethod.ReliableUnordered, peer);
+        SendData(ref newPacket, DeliveryMethod.ReliableUnordered);
     }
 
     private void OnLoadingScreenPacketReceived(LoadingScreenPacket packet, NetPeer peer)
@@ -609,6 +608,7 @@ public partial class FikaServer
             ReadyPlayers = ReadyClients,
             HostReady = HostReady,
             HostLoaded = RaidInitialized,
+            HostReceivedLocation = LocationReceived,
             AmountOfPeers = _netServer.ConnectedPeersCount + 1
         };
 

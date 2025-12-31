@@ -103,11 +103,12 @@ public class ClientTransitController : GClass1906
 
         if (!Dictionary_0.TryGetValue(transitId, out var transitPoint))
         {
-            FikaPlugin.Instance.FikaLogger.LogError("FikaClientTransitController::HandleClientExtract: Could not find transit point with id: " + transitId);
+            FikaGlobals.LogError("FikaClientTransitController::HandleClientExtract: Could not find transit point with id: " + transitId);
             return;
         }
 
         var location = transitPoint.parameters.location;
+        FikaGlobals.LogInfo($"Using transit to {location}");
         var eraidMode = ERaidMode.Local;
         if (TarkovApplication.Exist(out var tarkovApplication))
         {
