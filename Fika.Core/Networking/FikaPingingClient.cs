@@ -195,7 +195,7 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
         FikaBackendUtils.RemotePort = ep.Port;
         FikaBackendUtils.LocalPort = NetClient.LocalPort;
 
-        _logger.LogInfo($"Got response from {ep.Address}:{ep.Port}, using LocalPort: {NetClient.LocalPort}");
+        _logger.LogInfo($"Picked candidate {ep.Address}:{ep.Port}, using LocalPort: {NetClient.LocalPort}");
     }
 
     private IPEndPoint SelectBestCandidate()
@@ -266,7 +266,7 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
                         c.Port == remoteEndPoint.Port))
                     {
                         _candidates.Add(remoteEndPoint);
-                        _logger.LogInfo($"Candidate: {remoteEndPoint}");
+                        _logger.LogInfo($"Received candidate: {remoteEndPoint}");
                     }
 
                     break;
