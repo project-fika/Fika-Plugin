@@ -19,9 +19,10 @@ public class FikaHostTransitController : LocalGameTransitControllerClass
         : base(settings, parameters, profile, localRaidSettings)
     {
         _localRaidSettings = localRaidSettings;
+        IsEvent = localRaidSettings.transitionType.HasFlagNoBox(ELocationTransition.Event);
         string[] array = [.. localRaidSettings.transition.visitedLocations.EmptyIfNull(), localRaidSettings.location];
-        summonedTransits[profile.Id] = new(localRaidSettings.transition.transitionRaidId, localRaidSettings.transition.transitionCount, array,
-            localRaidSettings.transitionType.HasFlagNoBox(ELocationTransition.Event));
+        summonedTransits[profile.Id] = new(localRaidSettings.transition.transitionRaidId, localRaidSettings.transition.transitionCount,
+            array, IsEvent);
         TransferItemsController.InitItemControllerServer(FikaGlobals.TransitTraderId, FikaGlobals.TransitTraderName);
         _server = Singleton<FikaServer>.Instance;
         _playersInTransitZone = [];
@@ -40,6 +41,8 @@ public class FikaHostTransitController : LocalGameTransitControllerClass
     private readonly FikaServer _server;
     private readonly Dictionary<Player, int> _playersInTransitZone;
     private readonly List<int> _transittedPlayers;
+
+    public bool IsEvent { get; }
 
     public int AliveTransitPlayers
     {

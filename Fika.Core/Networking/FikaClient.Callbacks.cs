@@ -33,11 +33,10 @@ public partial class FikaClient
 {
     private void OnSyncEventPacketReceived(SyncEventPacket packet)
     {
-        _logger.LogInfo("Received sync event");
+        _logger.LogInfo($"Received sync event: {packet.Type}");
         var reader = NetworkUtils.EventDataReader;
         reader.Reset();
         Array.Copy(packet.Data, reader.Buffer, packet.Data.Length);
-        /*GClass3670.Instance.Deserialize(reader, null);*/
         switch (packet.Type)
         {
             case 0:
@@ -45,7 +44,10 @@ public partial class FikaClient
                 initEvent.Deserialize(ref reader);
                 initEvent.Invoke();
                 break;
-            default:
+            case 1:
+                var updateEvent = new TransitUpdateEvent();
+                updateEvent.Deserialize(ref reader);
+                updateEvent.Invoke();
                 break;
         }
     }

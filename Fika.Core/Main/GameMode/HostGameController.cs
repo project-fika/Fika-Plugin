@@ -710,7 +710,7 @@ public class HostGameController : BaseGameController, IBotGame
                     PlayerId = activePlayer.Id,
                     Points = Location.transitParameters.Where(x => x.active).ToDictionary(k => k.id),
                     TransitionCount = (ushort)transitController.LocalRaidSettings_0.transition.transitionCount,
-                    EventPlayer = transitController.LocalRaidSettings_0.transition.transitionType.HasFlagNoBox(ELocationTransition.Event)
+                    EventPlayer = transitController.IsEvent
                 };
 
                 var writer = NetworkUtils.EventDataWriter;
@@ -723,6 +723,21 @@ public class HostGameController : BaseGameController, IBotGame
                     Type = 0,
                     Data = new byte[writer.BytesWritten]
                 };
+                Array.Copy(writer.Buffer, syncPacket.Data, writer.BytesWritten);
+                _server.SendData(ref syncPacket, DeliveryMethod.ReliableOrdered);
+
+                var updateEvent = new TransitUpdateEvent
+                {
+                    PlayerId = activePlayer.Id,
+                    EventOnly = transitController.IsEvent,
+                    Points = Location.transitParameters.Where(x => x.active).ToDictionary(k => k.id)
+                };
+
+                writer.Reset();
+                updateEvent.Serialize(ref writer);
+                writer.Flush();
+
+                syncPacket.Type = 1;
                 Array.Copy(writer.Buffer, syncPacket.Data, writer.BytesWritten);
                 _server.SendData(ref syncPacket, DeliveryMethod.ReliableOrdered);
             }
