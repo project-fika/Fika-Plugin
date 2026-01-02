@@ -1,10 +1,16 @@
-﻿using Comfort.Common;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Comfort.Common;
 using CommonAssets.Scripts.Game.LabyrinthEvent;
 using EFT;
 using EFT.AssetsManager;
 using EFT.Bots;
 using EFT.Counters;
 using EFT.Game.Spawning;
+using EFT.GlobalEvents;
 using EFT.Interactive;
 using EFT.Interactive.SecretExfiltrations;
 using EFT.InventoryLogic;
@@ -15,7 +21,6 @@ using Fika.Core.Main.Components;
 using Fika.Core.Main.FreeCamera;
 using Fika.Core.Main.HostClasses;
 using Fika.Core.Main.ObservedClasses;
-using Fika.Core.Main.Patches.BTR;
 using Fika.Core.Main.Patches.Overrides;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
@@ -23,15 +28,12 @@ using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Models;
 using Fika.Core.Networking.Packets.Backend;
+using Fika.Core.Networking.Packets.Communication;
 using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
 using Fika.Core.Networking.Packets.World;
 using Fika.Core.Networking.Pooling;
 using Fika.Core.UI.Models;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using static LocationSettingsClass;
 
 namespace Fika.Core.Main.GameMode;
@@ -62,6 +64,8 @@ public class HostGameController : BaseGameController, IBotGame
         // Boss Scenario setup
         var bossSpawns = LocalGame.smethod_8(true, wavesSettings, location.BossLocationSpawn);
         _bossSpawnScenario = BossSpawnScenario.smethod_0(bossSpawns, _botsController.ActivateBotsByWave);
+
+        _server = Singleton<FikaServer>.Instance;
     }
 
     public byte[] LootData { get; set; }
@@ -72,6 +76,7 @@ public class HostGameController : BaseGameController, IBotGame
     protected readonly WavesSpawnScenario _wavesSpawnScenario;
     protected readonly BossSpawnScenario _bossSpawnScenario;
     protected readonly Dictionary<int, int> _botQueue = [];
+    protected readonly FikaServer _server;
     protected GameDateTime _gameDateTime;
 
     /// <summary>
@@ -157,25 +162,24 @@ public class HostGameController : BaseGameController, IBotGame
             throw new NullReferenceException("AbstractGame was missing");
         }
 
-        var server = Singleton<FikaServer>.Instance;
-        server.HostReady = true;
+        _server.HostReady = true;
 
         var startTime = EFTDateTimeClass.UtcNow.AddSeconds((double)timeBeforeDeployLocal);
         GameTime = startTime;
-        server.GameStartTime = startTime;
+        _server.GameStartTime = startTime;
         SessionTime = abstractGame.GameTimer.SessionTime;
 
         InformationPacket packet = new()
         {
             RaidStarted = RaidStarted,
-            ReadyPlayers = server.ReadyClients,
-            HostReady = server.HostReady,
+            ReadyPlayers = _server.ReadyClients,
+            HostReady = _server.HostReady,
             GameTime = GameTime.Value,
             SessionTime = SessionTime.Value,
             GameDateTime = GameDateTime
         };
 
-        server.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+        _server.SendData(ref packet, DeliveryMethod.ReliableOrdered);
         LootData = null;
 
         yield break;
@@ -209,8 +213,7 @@ public class HostGameController : BaseGameController, IBotGame
 
         profile.SetSpawnedInSession(profile.Info.Side == EPlayerSide.Savage);
 
-        var server = Singleton<FikaServer>.Instance;
-        netId = server.PopNetId();
+        netId = _server.PopNetId();
 
         var mongoId = MongoID.Generate(true);
         const ushort nextOperationId = 0;
@@ -222,9 +225,9 @@ public class HostGameController : BaseGameController, IBotGame
             IsZombie = profile.Info.Settings.UseSimpleAnimator
         }, true, true, position, netId);
         packet.PlayerInfoPacket.HealthByteArray = profile.Health.SerializeHealthInfo();
-        server.SendGenericPacket(EGenericSubPacketType.SendCharacter, packet, true);
+        _server.SendGenericPacket(EGenericSubPacketType.SendCharacter, packet, true);
 
-        if (server.NetServer.ConnectedPeersCount > 0)
+        if (_server.NetServer.ConnectedPeersCount > 0)
         {
             await WaitForPlayersToLoadBotProfile(netId);
         }
@@ -271,7 +274,7 @@ public class HostGameController : BaseGameController, IBotGame
         }
 
         var spawnPacket = SpawnAI.FromValue(netId, position);
-        server.SendGenericPacket(EGenericSubPacketType.SpawnAI, spawnPacket);
+        _server.SendGenericPacket(EGenericSubPacketType.SpawnAI, spawnPacket);
 
         return fikaBot;
     }
@@ -300,8 +303,7 @@ public class HostGameController : BaseGameController, IBotGame
     private async Task WaitForPlayersToLoadBotProfile(int netId)
     {
         _botQueue.Add(netId, 0);
-        var server = Singleton<FikaServer>.Instance;
-        var connectedPeers = server.NetServer.ConnectedPeersCount;
+        var connectedPeers = _server.NetServer.ConnectedPeersCount;
 
         var elapsedSeconds = 0f;
 
@@ -316,7 +318,7 @@ public class HostGameController : BaseGameController, IBotGame
 
             await Task.Delay((int)(_botTimeoutDelay * 1000)); // multiply 0.X * 1000 to get milliseconds
             elapsedSeconds += _botTimeoutDelay;
-            connectedPeers = server.NetServer.ConnectedPeersCount;
+            connectedPeers = _server.NetServer.ConnectedPeersCount;
         }
 
         if (elapsedSeconds > 30f)
@@ -379,6 +381,8 @@ public class HostGameController : BaseGameController, IBotGame
 
     public override async Task StartBotSystemsAndCountdown(BotControllerSettings controllerSettings, GameWorld gameWorld)
     {
+        LoadingScreenUI.Instance.UpdateAndBroadcast(80f);
+
         if (Location.Id == "laboratory")
         {
             Logger.LogInfo("Location is 'Laboratory', skipping weather generation");
@@ -416,6 +420,8 @@ public class HostGameController : BaseGameController, IBotGame
 
         await SetupRaidCode();
 
+        LoadingScreenUI.Instance.UpdateAndBroadcast(85f);
+
         Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal = Math.Max(Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal, 3);
     }
 
@@ -428,8 +434,6 @@ public class HostGameController : BaseGameController, IBotGame
         {
             startButton = CreateStartButton() ?? throw new NullReferenceException("Start button could not be created!");
         }
-        var server = Singleton<FikaServer>.Instance;
-        server.RaidInitialized = true;
 
         if (FikaPlugin.DevMode.Value)
         {
@@ -447,7 +451,7 @@ public class HostGameController : BaseGameController, IBotGame
 
         if (FikaPlugin.UseNatPunching.Value)
         {
-            server.StopNatIntroduceRoutine();
+            _server.StopNatIntroduceRoutine();
         }
 
         if (startButton != null)
@@ -457,19 +461,19 @@ public class HostGameController : BaseGameController, IBotGame
 
         InformationPacket continuePacket = new()
         {
-            AmountOfPeers = server.NetServer.ConnectedPeersCount + 1
+            AmountOfPeers = _server.NetServer.ConnectedPeersCount + 1
         };
-        server.SendData(ref continuePacket, DeliveryMethod.ReliableOrdered);
+        _server.SendData(ref continuePacket, DeliveryMethod.ReliableOrdered);
         SetStatusModel status = new(FikaBackendUtils.GroupId, LobbyEntry.ELobbyStatus.IN_GAME);
         await FikaRequestHandler.UpdateSetStatus(status);
     }
 
     public override async Task WaitForOtherPlayersToLoad()
     {
-        float expectedPlayers = Singleton<IFikaNetworkManager>.Instance.PlayerAmount;
+        float expectedPlayers = _server.PlayerAmount;
         if (expectedPlayers <= 1)
         {
-            Singleton<FikaServer>.Instance.ReadyClients++;
+            _server.ReadyClients++;
             return;
         }
 
@@ -480,8 +484,7 @@ public class HostGameController : BaseGameController, IBotGame
 #if DEBUG
         Logger.LogWarning("Server: Waiting for coopHandler.AmountOfHumans < expected players, expected: " + expectedPlayers);
 #endif
-        var server = Singleton<FikaServer>.Instance;
-        server.ReadyClients++;
+        _server.ReadyClients++;
         do
         {
             await Task.Delay(100);
@@ -491,10 +494,10 @@ public class HostGameController : BaseGameController, IBotGame
         InformationPacket packet = new()
         {
             RaidStarted = RaidStarted,
-            ReadyPlayers = server.ReadyClients
+            ReadyPlayers = _server.ReadyClients
         };
 
-        server.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+        _server.SendData(ref packet, DeliveryMethod.ReliableOrdered);
 
 #if DEBUG
         Logger.LogWarning("Server: Waiting for server.ReadyClients < expected players, expected: " + expectedPlayers);
@@ -507,16 +510,16 @@ public class HostGameController : BaseGameController, IBotGame
         do
         {
             await Task.Delay(100);
-            _abstractGame.SetMatchmakerStatus(LocaleUtils.UI_WAIT_FOR_OTHER_PLAYERS.Localized(), (float)server.ReadyClients / expectedPlayers);
-        } while (server.ReadyClients < expectedPlayers);
+            _abstractGame.SetMatchmakerStatus(LocaleUtils.UI_WAIT_FOR_OTHER_PLAYERS.Localized(), (float)_server.ReadyClients / expectedPlayers);
+        } while (_server.ReadyClients < expectedPlayers);
 
         InformationPacket finalPacket = new()
         {
             RaidStarted = RaidStarted,
-            ReadyPlayers = server.ReadyClients
+            ReadyPlayers = _server.ReadyClients
         };
 
-        server.SendData(ref finalPacket, DeliveryMethod.ReliableOrdered);
+        _server.SendData(ref finalPacket, DeliveryMethod.ReliableOrdered);
     }
 
     public override async Task GenerateWeathers()
@@ -700,7 +703,44 @@ public class HostGameController : BaseGameController, IBotGame
         if (TransitControllerAbstractClass.Exist(out FikaHostTransitController transitController))
         {
             transitController.Init();
-            // TODO: Sync to clients!!!
+            foreach (var activePlayer in CoopHandler.HumanPlayers)
+            {
+                var initEvent = new TransitInitEvent
+                {
+                    PlayerId = activePlayer.Id,
+                    Points = Location.transitParameters.Where(x => x.active).ToDictionary(k => k.id),
+                    TransitionCount = (ushort)transitController.LocalRaidSettings_0.transition.transitionCount,
+                    EventPlayer = transitController.IsEvent
+                };
+
+                var writer = NetworkUtils.EventDataWriter;
+                writer.Reset();
+                initEvent.Serialize(ref writer);
+                writer.Flush();
+
+                var syncPacket = new SyncEventPacket
+                {
+                    Type = 0,
+                    Data = new byte[writer.BytesWritten]
+                };
+                Array.Copy(writer.Buffer, syncPacket.Data, writer.BytesWritten);
+                _server.SendData(ref syncPacket, DeliveryMethod.ReliableOrdered);
+
+                var updateEvent = new TransitUpdateEvent
+                {
+                    PlayerId = activePlayer.Id,
+                    EventOnly = transitController.IsEvent,
+                    Points = Location.transitParameters.Where(x => x.active).ToDictionary(k => k.id)
+                };
+
+                writer.Reset();
+                updateEvent.Serialize(ref writer);
+                writer.Flush();
+
+                syncPacket.Type = 1;
+                Array.Copy(writer.Buffer, syncPacket.Data, writer.BytesWritten);
+                _server.SendData(ref syncPacket, DeliveryMethod.ReliableOrdered);
+            }
         }
 
         if (Location.EventTrapsData != null)
@@ -786,7 +826,7 @@ public class HostGameController : BaseGameController, IBotGame
             }
             if (transitController is FikaHostTransitController hostController)
             {
-                Singleton<IFikaNetworkManager>.Instance.SendGenericPacket(EGenericSubPacketType.UpdateBackendData,
+                _server.SendGenericPacket(EGenericSubPacketType.UpdateBackendData,
                     UpdateBackendData.FromValue(hostController.AliveTransitPlayers), true);
             }
         }
@@ -795,7 +835,7 @@ public class HostGameController : BaseGameController, IBotGame
         {
             try // This is to allow clients to extract if they lose connection
             {
-                Singleton<IFikaNetworkManager>.Instance.SendGenericPacket(EGenericSubPacketType.ClientExtract,
+                _server.SendGenericPacket(EGenericSubPacketType.ClientExtract,
                     ClientExtract.FromValue(player.NetId), true);
                 ClearHostAI(player);
             }
@@ -864,7 +904,7 @@ public class HostGameController : BaseGameController, IBotGame
         }
         else
         {
-            Singleton<FikaServer>.Instance.HostReady = false;
+            _server.HostReady = false;
         }
 
         _btrSpawn?.Invoke();
@@ -1041,7 +1081,7 @@ public class HostGameController : BaseGameController, IBotGame
         };
         Buffer.BlockCopy(writer.Buffer, 0, packet.Data, 0, writer.BytesWritten);
 
-        Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+        _server.SendData(ref packet, DeliveryMethod.ReliableOrdered);
     }
 
     private bool IsBarbedWireTrap(TrapSyncable trap)

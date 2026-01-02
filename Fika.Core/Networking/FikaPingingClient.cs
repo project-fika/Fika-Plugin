@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
@@ -37,6 +38,13 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
 
     private ManualLogSource _logger;
     private List<IPEndPoint> _endPoints;
+    private NetDataWriter _writer;
+
+    private List<IPEndPoint> _candidates;
+    private float _firstResponseTime;
+    private bool _hasResponse;
+
+    private const float _responseWaitSeconds = 1f;
 
     /// <summary>
     /// Initializes the logger for the pinging client.
@@ -60,6 +68,8 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
         };
 
         _endPoints = [];
+        _candidates = [];
+        _writer = new();
 
         GetHostRequest body = new(serverId);
         var result = FikaRequestHandler.GetHost(body);
@@ -109,6 +119,20 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
         return true;
     }
 
+    private void RemoveEndpointIfExists(IPEndPoint remote)
+    {
+        for (var i = _endPoints.Count - 1; i >= 0; i--)
+        {
+            var ep = _endPoints[i];
+            if (ep.Address.Equals(remote.Address) && ep.Port == remote.Port)
+            {
+                _endPoints.RemoveAt(i);
+                _logger.LogInfo($"Stopped pinging {ep}");
+                return;
+            }
+        }
+    }
+
     /// <summary>
     /// Resolves a remote address from a string IP or hostname and port.
     /// </summary>
@@ -139,14 +163,57 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
     /// <param name="reconnect">Whether this is a reconnect attempt.</param>
     public void PingEndPoint(string message, bool reconnect = false)
     {
-        NetDataWriter writer = new();
-        writer.Put(message);
-        writer.Put(reconnect);
+        // Finalize selection after wait window
+        if (!Received && _hasResponse && Time.realtimeSinceStartup - _firstResponseTime >= _responseWaitSeconds)
+        {
+            var selected = SelectBestCandidate();
+
+            if (selected != null)
+            {
+                CommitEndpoint(selected);
+                Received = true;
+                _endPoints.Clear(); // stop all further pings
+                return;
+            }
+
+            _logger.LogError($"{_responseWaitSeconds} seconds has passed, but no candidate could be found?");
+        }
+
+        _writer.Reset();
+        _writer.Put(message);
+        _writer.Put(reconnect);
 
         foreach (var ipEndPoint in _endPoints)
         {
-            NetClient.SendUnconnectedMessage(writer.AsReadOnlySpan, ipEndPoint);
+            NetClient.SendUnconnectedMessage(_writer.AsReadOnlySpan, ipEndPoint);
         }
+    }
+
+    private void CommitEndpoint(IPEndPoint ep)
+    {
+        FikaBackendUtils.RemoteIp = ep.Address.ToString();
+        FikaBackendUtils.RemotePort = ep.Port;
+        FikaBackendUtils.LocalPort = NetClient.LocalPort;
+
+        _logger.LogInfo($"Picked candidate {ep.Address}:{ep.Port}, using LocalPort: {NetClient.LocalPort}");
+    }
+
+    private IPEndPoint SelectBestCandidate()
+    {
+        if (_candidates.Count == 0)
+        {
+            return null;
+        }
+
+        // prefer LAN
+        var lan = _candidates.FirstOrDefault(c => IsPrivate(c.Address));
+        if (lan != null)
+        {
+            return lan;
+        }
+
+        // otherwise first responder WAN
+        return _candidates[0];
     }
 
     /// <inheritdoc/>
@@ -186,15 +253,22 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
             switch (result)
             {
                 case "fika.hello":
-                    if (Received)
+                    RemoveEndpointIfExists(remoteEndPoint);
+
+                    if (!_hasResponse)
                     {
-                        break;
+                        _firstResponseTime = Time.realtimeSinceStartup;
+                        _hasResponse = true;
                     }
-                    Received = true;
-                    FikaBackendUtils.RemoteIp = remoteEndPoint.Address.ToString();
-                    FikaBackendUtils.RemotePort = remoteEndPoint.Port;
-                    FikaBackendUtils.LocalPort = NetClient.LocalPort;
-                    _logger.LogInfo($"Got response from {FikaBackendUtils.RemoteIp}:{FikaBackendUtils.RemotePort}, using LocalPort: {NetClient.LocalPort}");
+
+                    if (!_candidates.Any(c =>
+                        c.Address.Equals(remoteEndPoint.Address) &&
+                        c.Port == remoteEndPoint.Port))
+                    {
+                        _candidates.Add(remoteEndPoint);
+                        _logger.LogInfo($"Received candidate: {remoteEndPoint}");
+                    }
+
                     break;
                 case "fika.inprogress":
                     InProgress = true;
@@ -211,6 +285,18 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
         {
             _logger.LogError("Could not parse string");
         }
+    }
+
+    private static bool IsPrivate(IPAddress ip)
+    {
+        if (ip.AddressFamily != AddressFamily.InterNetwork)
+        {
+            return false;
+        }
+
+        var b = ip.GetAddressBytes();
+
+        return b[0] == 10 || (b[0] == 172 && b[1] >= 16 && b[1] <= 31) || (b[0] == 192 && b[1] == 168);
     }
 
     /// <inheritdoc/>
@@ -256,5 +342,15 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
                 await Task.Delay(250);
             }
         });
+    }
+
+    public void OnDestroy()
+    {
+        _endPoints.Clear();
+        _candidates.Clear();
+        _endPoints = null;
+        _candidates = null;
+        _writer.Reset();
+        _writer = null;
     }
 }

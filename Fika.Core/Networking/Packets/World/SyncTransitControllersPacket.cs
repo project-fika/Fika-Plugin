@@ -6,6 +6,7 @@ public struct SyncTransitControllersPacket : INetSerializable
     public string RaidId;
     public int Count;
     public string[] Maps;
+    public bool Events;
 
     public void Deserialize(NetDataReader reader)
     {
@@ -13,6 +14,7 @@ public struct SyncTransitControllersPacket : INetSerializable
         RaidId = reader.GetString();
         Count = reader.GetInt();
         Maps = reader.GetStringArray();
+        Events = reader.GetBool();
     }
 
     public readonly void Serialize(NetDataWriter writer)
@@ -21,5 +23,6 @@ public struct SyncTransitControllersPacket : INetSerializable
         writer.Put(RaidId);
         writer.Put(Count);
         writer.PutArray(Maps);
+        writer.Put(Events);
     }
 }

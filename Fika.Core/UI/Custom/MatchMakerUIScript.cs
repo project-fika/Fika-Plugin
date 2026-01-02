@@ -1,4 +1,8 @@
-﻿using Comfort.Common;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Net;
+using Comfort.Common;
 using EFT;
 using EFT.UI;
 using Fika.Core.Bundles;
@@ -11,10 +15,6 @@ using Fika.Core.Networking.Models.Headless;
 using Fika.Core.Networking.Websocket;
 using Fika.Core.UI.Models;
 using HarmonyLib;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Net;
 using TMPro;
 using UnityEngine.UI;
 using static Fika.Core.UI.FikaUIGlobals;
@@ -83,8 +83,8 @@ public class MatchMakerUIScript : MonoBehaviour
 
         if (_fikaMatchMakerUi.LoadingScreen.activeSelf)
         {
-            string text = _fikaMatchMakerUi.LoadingAnimationText.text;
-            TextMeshProUGUI tmpText = _fikaMatchMakerUi.LoadingAnimationText;
+            var text = _fikaMatchMakerUi.LoadingAnimationText.text;
+            var tmpText = _fikaMatchMakerUi.LoadingAnimationText;
 
             _loadingTextTick++;
 
@@ -129,15 +129,15 @@ public class MatchMakerUIScript : MonoBehaviour
     {
         FikaBackendUtils.IsHeadlessRequester = false;
 
-        AvailableHeadlessClientsRequest[] availableHeadlesses = FikaRequestHandler.GetAvailableHeadlesses();
+        var availableHeadlesses = FikaRequestHandler.GetAvailableHeadlesses();
 
-        GameObject matchMakerUiPrefab = InternalBundleLoader.Instance.GetFikaAsset(InternalBundleLoader.EFikaAsset.MatchmakerUI);
-        GameObject uiGameObj = Instantiate(matchMakerUiPrefab);
+        var matchMakerUiPrefab = InternalBundleLoader.Instance.GetFikaAsset(InternalBundleLoader.EFikaAsset.MatchmakerUI);
+        var uiGameObj = Instantiate(matchMakerUiPrefab);
         _mmGameObject = uiGameObj;
         _fikaMatchMakerUi = uiGameObj.GetComponent<MatchMakerUI>();
         _fikaMatchMakerUi.transform.parent = transform;
 
-        RectTransform rectTransform = _fikaMatchMakerUi.transform.GetChild(0).RectTransform();
+        var rectTransform = _fikaMatchMakerUi.transform.GetChild(0).RectTransform();
         rectTransform.gameObject.AddComponent<UIDragComponent>().Init(rectTransform, true);
 
         if (_fikaMatchMakerUi.RaidGroupDefaultToClone.active)
@@ -171,13 +171,13 @@ public class MatchMakerUIScript : MonoBehaviour
         if (availableHeadlesses.Length == 0)
         {
             _fikaMatchMakerUi.DedicatedToggle.interactable = false;
-            TextMeshProUGUI dedicatedText = _fikaMatchMakerUi.DedicatedToggle.gameObject.GetComponentInChildren<TextMeshProUGUI>();
+            var dedicatedText = _fikaMatchMakerUi.DedicatedToggle.gameObject.GetComponentInChildren<TextMeshProUGUI>();
             if (dedicatedText != null)
             {
                 dedicatedText.color = new(1f, 1f, 1f, 0.5f);
             }
 
-            HoverTooltipArea dediTooltipArea = _fikaMatchMakerUi.DedicatedToggle.GetOrAddComponent<HoverTooltipArea>();
+            var dediTooltipArea = _fikaMatchMakerUi.DedicatedToggle.GetOrAddComponent<HoverTooltipArea>();
             dediTooltipArea.enabled = true;
             dediTooltipArea.SetMessageText(LocaleUtils.UI_NO_DEDICATED_CLIENTS.Localized());
         }
@@ -198,9 +198,9 @@ public class MatchMakerUIScript : MonoBehaviour
 
             // Sort availableHeadlesses alphabetically by Alias
             Array.Sort(availableHeadlesses, (x, y) => string.Compare(x.Alias, y.Alias, StringComparison.OrdinalIgnoreCase));
-            for (int i = 0; i < availableHeadlesses.Length; i++)
+            for (var i = 0; i < availableHeadlesses.Length; i++)
             {
-                AvailableHeadlessClientsRequest user = availableHeadlesses[i];
+                var user = availableHeadlesses[i];
                 optionDatas.Add(new()
                 {
                     text = user.Alias
@@ -210,7 +210,7 @@ public class MatchMakerUIScript : MonoBehaviour
             _fikaMatchMakerUi.HeadlessSelection.AddOptions(optionDatas);
         }
 
-        HoverTooltipArea hostTooltipArea = _fikaMatchMakerUi.RaidGroupHostButton.GetOrAddComponent<HoverTooltipArea>();
+        var hostTooltipArea = _fikaMatchMakerUi.RaidGroupHostButton.GetOrAddComponent<HoverTooltipArea>();
         hostTooltipArea.enabled = true;
         hostTooltipArea.SetMessageText(LocaleUtils.UI_HOST_RAID_TOOLTIP.Localized());
 
@@ -245,8 +245,8 @@ public class MatchMakerUIScript : MonoBehaviour
         {
             ToggleLoading(true);
 
-            TarkovApplication tarkovApplication = (TarkovApplication)Singleton<ClientApplication<ISession>>.Instance;
-            ISession session = tarkovApplication.Session;
+            var tarkovApplication = (TarkovApplication)Singleton<ClientApplication<ISession>>.Instance;
+            var session = tarkovApplication.Session;
 
             Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
 
@@ -255,10 +255,10 @@ public class MatchMakerUIScript : MonoBehaviour
                 if (FikaPlugin.ForceIP.Value != "")
                 {
                     // We need to handle DNS entries as well
-                    string ip = FikaPlugin.ForceIP.Value;
+                    var ip = FikaPlugin.ForceIP.Value;
                     try
                     {
-                        IPAddress[] dnsAddress = Dns.GetHostAddresses(FikaPlugin.ForceIP.Value);
+                        var dnsAddress = Dns.GetHostAddresses(FikaPlugin.ForceIP.Value);
                         if (dnsAddress.Length > 0)
                         {
                             ip = dnsAddress[0].ToString();
@@ -305,14 +305,14 @@ public class MatchMakerUIScript : MonoBehaviour
                     FikaPlugin.HeadlessRequesterWebSocket.Connect();
                 }
 
-                RaidSettings raidSettings = Traverse.Create(tarkovApplication).Field<RaidSettings>("_raidSettings").Value;
+                var raidSettings = Traverse.Create(tarkovApplication).Field<RaidSettings>("_raidSettings").Value;
 
-                string headlessSessionId = availableHeadlesses[0].HeadlessSessionID;
-                bool multipleHeadlesses = availableHeadlesses.Length > 1;
+                var headlessSessionId = availableHeadlesses[0].HeadlessSessionID;
+                var multipleHeadlesses = availableHeadlesses.Length > 1;
 
                 if (multipleHeadlesses)
                 {
-                    int selectedHeadless = _fikaMatchMakerUi.HeadlessSelection.value;
+                    var selectedHeadless = _fikaMatchMakerUi.HeadlessSelection.value;
                     headlessSessionId = availableHeadlesses[selectedHeadless].HeadlessSessionID;
                 }
 
@@ -327,10 +327,11 @@ public class MatchMakerUIScript : MonoBehaviour
                     Side = raidSettings.Side,
                     TimeAndWeatherSettings = raidSettings.TimeAndWeatherSettings,
                     WavesSettings = raidSettings.WavesSettings,
-                    CustomWeather = OfflineRaidSettingsMenuPatch_Override.UseCustomWeather
+                    CustomWeather = OfflineRaidSettingsMenuPatch_Override.UseCustomWeather,
+                    UseEvent = raidSettings.transitionType.HasFlagNoBox(ELocationTransition.Event)
                 };
 
-                StartHeadlessResponse response = await FikaRequestHandler.StartHeadless(request);
+                var response = await FikaRequestHandler.StartHeadless(request);
                 FikaBackendUtils.IsHeadlessRequester = true;
 
                 if (!string.IsNullOrEmpty(response.Error))
@@ -348,7 +349,7 @@ public class MatchMakerUIScript : MonoBehaviour
 
         _fikaMatchMakerUi.RefreshButton.onClick.AddListener(ManualRefresh);
 
-        HoverTooltipArea tooltipArea = _fikaMatchMakerUi.RefreshButton.GetOrAddComponent<HoverTooltipArea>();
+        var tooltipArea = _fikaMatchMakerUi.RefreshButton.GetOrAddComponent<HoverTooltipArea>();
         tooltipArea.enabled = true;
         tooltipArea.SetMessageText(LocaleUtils.UI_REFRESH_RAIDS.Localized());
 
@@ -362,7 +363,7 @@ public class MatchMakerUIScript : MonoBehaviour
         {
             BackButton.OnClick.Invoke();
         });
-        DefaultUIButton newButtonComponent = _newBackButton.GetComponent<DefaultUIButton>();
+        var newButtonComponent = _newBackButton.GetComponent<DefaultUIButton>();
         Traverse.Create(newButtonComponent).Field("OnClick").SetValue(newEvent);
 
         if (!_newBackButton.active)
@@ -424,19 +425,19 @@ public class MatchMakerUIScript : MonoBehaviour
         FikaBackendUtils.IsReconnect = reconnect;
         NotificationManagerClass.DisplayMessageNotification(LocaleUtils.CONNECTING_TO_SESSION.Localized(), iconType: EFT.Communications.ENotificationIconType.EntryPoint);
         NetManagerUtils.CreatePingingClient();
-        FikaPingingClient pingingClient = Singleton<FikaPingingClient>.Instance;
+        var pingingClient = Singleton<FikaPingingClient>.Instance;
 
         WaitForSeconds waitForSeconds = new(0.1f);
 
         if (pingingClient.Init(serverId))
         {
-            int attempts = 0;
+            var attempts = 0;
             bool success;
             bool rejected;
             bool inProgress;
 
             FikaPlugin.Instance.FikaLogger.LogInfo("Attempting to connect to host session...");
-            string knockMessage = FikaBackendUtils.ServerGuid.ToString();
+            var knockMessage = FikaBackendUtils.ServerGuid.ToString();
 
             do
             {
@@ -458,7 +459,7 @@ public class MatchMakerUIScript : MonoBehaviour
                 LocaleUtils.UI_UNABLE_TO_CONNECT.Localized(),
                 ErrorScreen.EButtonType.OkButton, 10f);
 
-                string logError = "Unable to connect to the session!";
+                var logError = "Unable to connect to the session!";
                 if (rejected)
                 {
                     logError += $" Connection was rejected! [{FikaBackendUtils.ServerGuid}] did not match the server's Guid or data was malformed.";
@@ -487,7 +488,7 @@ public class MatchMakerUIScript : MonoBehaviour
             yield break;
         }
 
-        if (FikaBackendUtils.JoinMatch(profileId, serverId, out CreateMatch result, out string errorMessage))
+        if (FikaBackendUtils.JoinMatch(profileId, serverId, out var result, out var errorMessage))
         {
             FikaBackendUtils.GroupId = result.ServerId;
             FikaBackendUtils.ClientType = EClientType.Client;
@@ -518,16 +519,16 @@ public class MatchMakerUIScript : MonoBehaviour
         if (_matchesListObjects != null)
         {
             // cleanup old objects
-            foreach (GameObject match in _matchesListObjects)
+            foreach (var match in _matchesListObjects)
             {
                 Destroy(match);
             }
         }
 
         // create lobby listings
-        for (int i = 0; i < _matches.Length; ++i)
+        for (var i = 0; i < _matches.Length; ++i)
         {
-            LobbyEntry entry = _matches[i];
+            var entry = _matches[i];
 
             if (entry.ServerId == _profileId)
             {
@@ -535,15 +536,15 @@ public class MatchMakerUIScript : MonoBehaviour
             }
 
             // server object
-            GameObject server = Instantiate(_fikaMatchMakerUi.RaidGroupDefaultToClone, _fikaMatchMakerUi.RaidGroupDefaultToClone.transform.parent);
+            var server = Instantiate(_fikaMatchMakerUi.RaidGroupDefaultToClone, _fikaMatchMakerUi.RaidGroupDefaultToClone.transform.parent);
             server.SetActive(true);
             _matchesListObjects.Add(server);
 
             server.name = entry.ServerId;
 
-            bool localPlayerInRaid = false;
-            bool localPlayerDead = false;
-            foreach ((MongoID profileId, bool player) in entry.Players)
+            var localPlayerInRaid = false;
+            var localPlayerDead = false;
+            foreach ((MongoID profileId, var player) in entry.Players)
             {
                 if (profileId == _profileId)
                 {
@@ -553,21 +554,21 @@ public class MatchMakerUIScript : MonoBehaviour
             }
 
             // player label
-            GameObject playerLabel = GameObject.Find("PlayerLabel");
+            var playerLabel = GameObject.Find("PlayerLabel");
             playerLabel.name = "PlayerLabel" + i;
-            string sessionName = entry.HostUsername;
+            var sessionName = entry.HostUsername;
             playerLabel.GetComponentInChildren<TextMeshProUGUI>().text = sessionName;
 
             // players count label
-            GameObject playerCountLabel = GameObject.Find("PlayerCountLabel");
+            var playerCountLabel = GameObject.Find("PlayerCountLabel");
             playerCountLabel.name = "PlayerCountLabel" + i;
-            int playerCount = entry.IsHeadless ? entry.PlayerCount - 1 : entry.PlayerCount;
+            var playerCount = entry.IsHeadless ? entry.PlayerCount - 1 : entry.PlayerCount;
             playerCountLabel.GetComponentInChildren<TextMeshProUGUI>().text = playerCount.ToString();
 
             // player join button
-            GameObject joinButton = GameObject.Find("JoinButton");
+            var joinButton = GameObject.Find("JoinButton");
             joinButton.name = "JoinButton" + i;
-            Button button = joinButton.GetComponent<Button>();
+            var button = joinButton.GetComponent<Button>();
             button.onClick.AddListener(() =>
             {
                 if (_fikaMatchMakerUi.DediSelection.activeSelf)
@@ -590,7 +591,7 @@ public class MatchMakerUIScript : MonoBehaviour
             });
 
             HoverTooltipArea tooltipArea;
-            Image image = server.GetComponent<Image>();
+            var image = server.GetComponent<Image>();
 
             if (RaidSettings.LocationId != entry.Location && !(RaidSettings.LocationId.ToLower().StartsWith("sandbox") && entry.Location.ToLower().StartsWith("sandbox")))
             {
@@ -625,7 +626,7 @@ public class MatchMakerUIScript : MonoBehaviour
 
             if (RaidSettings.Side != entry.Side)
             {
-                string errorText = "ERROR";
+                var errorText = "ERROR";
                 if (RaidSettings.Side == ESideType.Pmc)
                 {
                     errorText = LocaleUtils.UI_CANNOT_JOIN_RAID_SCAV_AS_PMC.Localized();

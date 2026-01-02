@@ -299,15 +299,15 @@ public abstract class BaseGameController
     /// <summary>
     /// This task ensures that all players are joined and loaded before continuing
     /// </summary>
-    /// <returns></returns>
     public abstract Task WaitForOtherPlayersToLoad();
 
     /// <summary>
     /// Runs a few last changes to the raid setup
     /// </summary>
-    /// <returns></returns>
     public virtual IEnumerator FinishRaidSetup()
     {
+        LoadingScreenUI.Instance.UpdateAndBroadcast(90f);
+
         _abstractGame.SetMatchmakerStatus(LocaleUtils.UI_FINISHING_RAID_INIT.Localized());
 
         WaitForEndOfFrame endOfFrame = new();
@@ -330,6 +330,8 @@ public abstract class BaseGameController
 
         Class444 seasonController = new();
         _gameWorld.GInterface29_0 = seasonController;
+
+        LoadingScreenUI.Instance.UpdateAndBroadcast(100f);
 
 #if DEBUG
         Logger.LogWarning($"Running season handler for season: {Season}");
@@ -357,6 +359,8 @@ public abstract class BaseGameController
         timeBeforeDeployLocal = 3;
 #endif
         yield return WaitForHostInit(timeBeforeDeployLocal);
+
+        NetManagerUtils.DisableLoadingScreenUI();
 
         var dateTime = EFTDateTimeClass.Now.AddSeconds(timeBeforeDeployLocal);
         new MatchmakerFinalCountdown.FinalCountdownScreenClass(profile, dateTime).ShowScreen(EScreenState.Root);
@@ -438,7 +442,8 @@ public abstract class BaseGameController
                 ProfileId = profileId,
                 RaidId = transitData.raidId,
                 Count = transitData.count,
-                Maps = transitData.maps
+                Maps = transitData.maps,
+                Events = transitData.events
             };
 
             Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
@@ -587,6 +592,7 @@ public abstract class BaseGameController
         {
             gameWorld.RunddansController = IsServer ? new HostRunddansController(instance.runddansSettings, location)
                 : new ClientRunddansController(instance.runddansSettings, location);
+            Logger.LogInfo("Created RunddansController");
         }
         else
         {

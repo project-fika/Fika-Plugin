@@ -1,4 +1,7 @@
-﻿using EFT;
+﻿using System;
+using System.Linq;
+using System.Reflection;
+using EFT;
 using EFT.Communications;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
@@ -6,9 +9,6 @@ using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Models;
 using Fika.Core.UI.Models;
 using SPT.Reflection.Patching;
-using System;
-using System.Linq;
-using System.Reflection;
 
 namespace Fika.Core.Main.Patches.LocalGame;
 
@@ -29,7 +29,7 @@ internal class TarkovApplication_LocalGamePreparer_Patch : ModulePatch
 
         FikaBackendUtils.RequestFikaWorld = true;
 
-        bool isServer = FikaBackendUtils.IsServer;
+        var isServer = FikaBackendUtils.IsServer;
         if (!isServer)
         {
             if (!string.IsNullOrEmpty(FikaBackendUtils.HostLocationId))

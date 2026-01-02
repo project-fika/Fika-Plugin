@@ -1,7 +1,7 @@
-﻿using Comfort.Common;
+﻿using System;
+using Comfort.Common;
 using EFT;
 using EFT.Console.Core;
-using EFT.InventoryLogic;
 using EFT.UI;
 using Fika.Core.Main.Components;
 using Fika.Core.Main.GameMode;
@@ -11,8 +11,6 @@ using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Debug;
 using HarmonyLib;
-using System;
-using System.Collections.Generic;
 using static Fika.Core.Networking.Packets.Debug.CommandPacket;
 
 namespace Fika.Core.ConsoleCommands;
@@ -28,11 +26,11 @@ public class FikaCommands
             return;
         }
 
-        if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
+        if (CoopHandler.TryGetCoopHandler(out var coopHandler))
         {
             if (!FikaBackendUtils.IsServer)
             {
-                int myId = Singleton<IFikaNetworkManager>.Instance.NetId;
+                var myId = Singleton<IFikaNetworkManager>.Instance.NetId;
                 CommandPacket commandPacket = new(ECommandType.Bring)
                 {
                     NetId = myId
@@ -42,9 +40,9 @@ public class FikaCommands
                 return;
             }
 
-            int count = 0;
-            BifacialTransform targetPosition = coopHandler.MyPlayer.Transform;
-            foreach (FikaPlayer player in coopHandler.Players.Values)
+            var count = 0;
+            var targetPosition = coopHandler.MyPlayer.Transform;
+            foreach (var player in coopHandler.Players.Values)
             {
                 if (player.IsAI && player.HealthController.IsAlive)
                 {
@@ -75,11 +73,11 @@ public class FikaCommands
             return;
         }
 
-        if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
+        if (CoopHandler.TryGetCoopHandler(out var coopHandler))
         {
-            int count = 0;
+            var count = 0;
             BifacialTransform targetPosition;
-            if (coopHandler.Players.TryGetValue(netId, out FikaPlayer target))
+            if (coopHandler.Players.TryGetValue(netId, out var target))
             {
                 targetPosition = target.Transform;
             }
@@ -89,7 +87,7 @@ public class FikaCommands
                 return;
             }
 
-            foreach (FikaPlayer player in coopHandler.Players.Values)
+            foreach (var player in coopHandler.Players.Values)
             {
                 if (player.IsAI && player.HealthController.IsAlive)
                 {
@@ -98,7 +96,7 @@ public class FikaCommands
                 }
             }
 
-            string output = $"Teleported {count} AI to requester.";
+            var output = $"Teleported {count} AI to requester.";
             LogInfo(output);
         }
         else
@@ -115,9 +113,9 @@ public class FikaCommands
             return;
         }
 
-        if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
+        if (CoopHandler.TryGetCoopHandler(out var coopHandler))
         {
-            int value = state ? 0 : 1;
+            var value = state ? 0 : 1;
             coopHandler.MyPlayer.ActiveHealthController.SetDamageCoeff(value);
             if (value == 0)
             {
@@ -137,7 +135,7 @@ public class FikaCommands
     [ConsoleCommand("extract", "", null, "Extract from raid", [])]
     public static void Extract()
     {
-        IFikaGame game = Singleton<IFikaGame>.Instance;
+        var game = Singleton<IFikaGame>.Instance;
         if (game == null)
         {
             LogWarning("You are not in a game.");
@@ -156,7 +154,7 @@ public class FikaCommands
             return;
         }
 
-        FikaPlayer localPlayer = (FikaPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+        var localPlayer = (FikaPlayer)Singleton<GameWorld>.Instance.MainPlayer;
 
         coopGame.Extract(localPlayer, null);
     }
@@ -164,7 +162,7 @@ public class FikaCommands
     [ConsoleCommand("despawnAllAi", "", null, "Despawns all AI bots", [])]
     public static void DespawnAllAI()
     {
-        IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
+        var fikaGame = Singleton<IFikaGame>.Instance;
         if (fikaGame != null)
         {
             if (!FikaBackendUtils.IsServer)
@@ -175,9 +173,9 @@ public class FikaCommands
                 return;
             }
 
-            if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
+            if (CoopHandler.TryGetCoopHandler(out var coopHandler))
             {
-                foreach (Player bot in fikaGame.GameController.Bots.Values)
+                foreach (var bot in fikaGame.GameController.Bots.Values)
                 {
                     if (bot.AIData.BotOwner == null)
                     {
@@ -198,7 +196,7 @@ public class FikaCommands
     [ConsoleCommand("stoptimer", "", null, "Stops the game timer", [])]
     public static void StopTimer()
     {
-        IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
+        var fikaGame = Singleton<IFikaGame>.Instance;
         if (fikaGame == null || fikaGame is not CoopGame coopGame)
         {
             LogError("Game was null or not a CoopGame");
@@ -223,7 +221,7 @@ public class FikaCommands
     [ConsoleCommand("goToBTR", "", null, "Teleports you to the BTR if active", [])]
     public static void GoToBTR()
     {
-        IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
+        var fikaGame = Singleton<IFikaGame>.Instance;
         if (fikaGame == null || fikaGame is not CoopGame coopGame)
         {
             LogError("Game was null or not a CoopGame");
@@ -232,15 +230,15 @@ public class FikaCommands
 
         if (coopGame != null)
         {
-            GameWorld gameWorld = coopGame.GameWorld_0;
+            var gameWorld = coopGame.GameWorld_0;
             if (gameWorld != null)
             {
                 if (gameWorld.BtrController != null)
                 {
-                    Transform btrTransform = Traverse.Create(gameWorld.BtrController.BtrView).Field<Transform>("_cachedTransform").Value;
+                    var btrTransform = Traverse.Create(gameWorld.BtrController.BtrView).Field<Transform>("_cachedTransform").Value;
                     if (btrTransform != null)
                     {
-                        Player myPlayer = gameWorld.MainPlayer;
+                        var myPlayer = gameWorld.MainPlayer;
                         if (myPlayer != null)
                         {
                             myPlayer.Teleport(btrTransform.position + (Vector3.forward * 3));
@@ -264,22 +262,22 @@ public class FikaCommands
             return;
         }
 
-        GameWorld gameWorld = Singleton<GameWorld>.Instance;
-        FikaPlayer player = (FikaPlayer)gameWorld.MainPlayer;
+        var gameWorld = Singleton<GameWorld>.Instance;
+        var player = (FikaPlayer)gameWorld.MainPlayer;
         if (!player.HealthController.IsAlive)
         {
             LogError("You cannot spawn an item while dead!");
             return;
         }
 
-        ItemFactoryClass itemFactory = Singleton<ItemFactoryClass>.Instance;
+        var itemFactory = Singleton<ItemFactoryClass>.Instance;
         if (itemFactory == null)
         {
             LogError("ItemFactory was null!");
             return;
         }
 
-        Item item = itemFactory.GetPresetItem(templateId);
+        var item = itemFactory.GetPresetItem(templateId);
         if (amount > 1 && item.StackMaxSize > 1)
         {
             item.StackObjectsCount = Mathf.Clamp(amount, 1, item.StackMaxSize);
@@ -359,7 +357,7 @@ public class FikaCommands
             WithCheckMinMax = false
         };
 
-        BotsController botController = (Singleton<IFikaGame>.Instance.GameController as HostGameController).BotsController;
+        var botController = (Singleton<IFikaGame>.Instance.GameController as HostGameController).BotsController;
         if (botController == null)
         {
             LogError("BotsController was null!");
@@ -386,14 +384,14 @@ public class FikaCommands
             return;
         }
 
-        FikaHostGameWorld gameWorld = (FikaHostGameWorld)Singleton<GameWorld>.Instance;
+        var gameWorld = (FikaHostGameWorld)Singleton<GameWorld>.Instance;
         if (gameWorld == null)
         {
             LogError("GameWorld does not exist or you are a client!");
             return;
         }
 
-        AirdropEventClass serverAirdropManager = gameWorld.ClientSynchronizableObjectLogicProcessor.ServerAirdropManager;
+        var serverAirdropManager = gameWorld.ClientSynchronizableObjectLogicProcessor.ServerAirdropManager;
         if (serverAirdropManager == null)
         {
             LogError("ServerAirdropManager was null!");
@@ -406,10 +404,10 @@ public class FikaCommands
             return;
         }
 
-        List<Vector3> dropPoints = serverAirdropManager.List_2;
+        var dropPoints = serverAirdropManager.List_2;
         if (dropPoints != null && dropPoints.Count > 0)
         {
-            string templateId = serverAirdropManager.String_0;
+            var templateId = serverAirdropManager.String_0;
             serverAirdropManager.method_5(serverAirdropManager.Single_0);
             gameWorld.InitAirdrop(templateId, true, serverAirdropManager.method_6());
             serverAirdropManager.String_0 = null;
@@ -427,7 +425,7 @@ public class FikaCommands
     [ConsoleCommand("debug", "", null, "Toggle debug window", [])]
     public static void Debug(bool state)
     {
-        IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
+        var fikaGame = Singleton<IFikaGame>.Instance;
         if (fikaGame == null || fikaGame is not CoopGame coopGame)
         {
             LogError("Game was null or not a CoopGame");
@@ -469,7 +467,7 @@ public class FikaCommands
 
     private static bool CheckForGame()
     {
-        IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
+        var fikaGame = Singleton<IFikaGame>.Instance;
         if (fikaGame == null)
         {
             LogError("Game was null");

@@ -52,6 +52,7 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
     public int ReadyClients;
     public bool HostReady;
     public bool HostLoaded;
+    public bool HostReceivedLocation;
     public bool ReconnectDone;
     public NetPeer ServerConnection { get; private set; }
     public NetManager NetClient
@@ -146,7 +147,7 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
 
         _packetProcessor = new();
         _dataWriter = new();
-        _logger = BepInEx.Logging.Logger.CreateLogSource("Fika.Client");
+        _logger = Logger.CreateLogSource("Fika.Client");
         _inventoryOperations = new(8);
         _missingIds = [];
         _snapshotCount = 0;
@@ -273,6 +274,9 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
         RegisterPacket<SyncTrapsPacket>(OnSyncTrapsPacketReceived);
         RegisterPacket<StashesPacket>(OnStashesPacketReceived);
         RegisterPacket<MessagePacket>(OnMessagePacketReceived);
+        RegisterPacket<LoadingScreenPacket>(OnLoadingScreenPacketReceived);
+        RegisterPacket<LoadingScreenPlayersPacket>(OnLoadingScreenPlayersPacketReceived);
+        RegisterPacket<SyncEventPacket>(OnSyncEventPacketReceived);
 
         RegisterReusable<WorldPacket>(OnWorldPacketReceived);
 
@@ -314,7 +318,8 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
             {
                 return;
             }
-            _inventoryOperations.Dequeue().method_1(HandleResult);
+            _inventoryOperations.Dequeue()
+                .method_1(HandleResult);
         }
 
         if (Input.GetKeyDown(FikaPlugin.ChatKey.Value.MainKey))

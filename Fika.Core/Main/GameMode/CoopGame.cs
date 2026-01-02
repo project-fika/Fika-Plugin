@@ -1,4 +1,9 @@
-﻿using BepInEx.Logging;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using BepInEx.Logging;
 using Comfort.Common;
 using CommonAssets.Scripts.Game;
 using Dissonance.Networking.Client;
@@ -28,11 +33,6 @@ using Fika.Core.Networking.Packets.World;
 using Fika.Core.UI.Models;
 using HarmonyLib;
 using JsonType;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Fika.Core.Main.GameMode;
 
@@ -195,7 +195,6 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
     /// <summary>
     /// The countdown deploy screen
     /// </summary>
-    /// <returns></returns>
     public override IEnumerator vmethod_2()
     {
         yield return GameController.CountdownScreen(Profile_0, ProfileId);
@@ -343,10 +342,13 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
             await (GameController as ClientGameController).WaitForHostToLoad();
         }
 
+        _logger.LogInfo("Creating CoopHandler");
         await GameController.SetupCoopHandler(this);
 
         var gameWorld = Singleton<GameWorld>.Instance;
         gameWorld.LocationId = Location_0.Id;
+
+        _logger.LogInfo($"Initializing Exfils: Id {Location_0.Id}, Exits: {Location_0.exits?.Length ?? 0}, SecretExits: {Location_0.SecretExits?.Length ?? 0}");
 
         ExfiltrationControllerClass.Instance.InitAllExfiltrationPoints(Location_0._Id, Location_0.exits, Location_0.SecretExits,
             !GameController.IsServer, Location_0.DisabledScavExits);
@@ -364,6 +366,11 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         }
 
         GameController.InitializeRunddans(instance, gameWorld, Location_0);
+
+        if (GameController.IsServer)
+        {
+            Singleton<FikaServer>.Instance.RaidInitialized = true;
+        }
 
         gameWorld.ClientBroadcastSyncController = new ClientBroadcastSyncControllerClass();
 
@@ -429,7 +436,6 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
             (Singleton<GameWorld>.Instance as ClientGameWorld).ClientSynchronizableObjectLogicProcessor.ServerAirdropManager = airdropEventClass;
             GameWorld_0.SynchronizableObjectLogicProcessor.Ginterface279_0 = Singleton<FikaServer>.Instance;
         }
-
         await method_7();
         FikaEventDispatcher.DispatchEvent(new GameWorldStartedEvent(GameWorld_0));
     }
@@ -637,6 +643,10 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         }
         gparam_0.Player.HealthController.DiedEvent += HealthController_DiedEvent;
         gparam_0.vmethod_0();
+#if DEBUG
+        FikaGlobals.LogWarning("Forcing god mode on DEBUG build, use 'god f' console command to disable");
+        gparam_0.Player.ActiveHealthController.SetDamageCoeff(0f); 
+#endif
     }
 
     /// <summary>

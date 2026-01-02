@@ -156,11 +156,12 @@ public partial class FreeCamera : MonoBehaviour
     {
         if (!_isFollowing)
         {
-            if (FikaPlugin.Instance.AllowSpectateFreeCam || _isSpectator)
+            if ((FikaPlugin.Instance.AllowSpectateFreeCam || _isSpectator) && CheckAndAssignPlayer())
             {
-                JumpToPlayer();
-                return;
+                JumpToPlayer();                
             }
+
+            return;
         }
 
         switch (_cameraState)
@@ -619,6 +620,10 @@ public partial class FreeCamera : MonoBehaviour
         _cameraState = ECameraState.FollowHeadcam;
     }
 
+    /// <summary>
+    /// Checks if there is an active player, and if not assigns the last spectated
+    /// </summary>
+    /// <returns><see langword="true"/> if a player was assigned</returns>
     private bool CheckAndAssignPlayer()
     {
         if (_currentPlayer == null && _lastSpectatingPlayer != null)
@@ -626,12 +631,7 @@ public partial class FreeCamera : MonoBehaviour
             _currentPlayer = _lastSpectatingPlayer;
         }
 
-        if (_currentPlayer == null)
-        {
-            return false;
-        }
-
-        return true;
+        return _currentPlayer != null;
     }
 
     public void AttachToMap()

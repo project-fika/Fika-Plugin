@@ -36,4 +36,7 @@ public struct StartHeadlessRequest
 
     [DataMember(Name = "customWeather")]
     public bool CustomWeather { readonly get; set; }
+
+    [DataMember(Name = "useEvent")]
+    public bool UseEvent { readonly get; set; }
 }
