@@ -1,4 +1,4 @@
-﻿// © 2025 Lacyway All Rights Reserved
+﻿// © 2026 Lacyway All Rights Reserved
 
 using Comfort.Common;
 using Diz.LanguageExtensions;
