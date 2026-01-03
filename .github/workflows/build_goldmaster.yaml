@@ -3,11 +3,8 @@ name: Build And Publish
 on:
   workflow_dispatch:
     inputs:
-      release_tag:
-        description: 'Release Tag (e.g., v1.0.0)'
-        required: true
-      release_name:
-        description: 'Release Title (e.g., Fika Release 1.0.0)'
+      release_version:
+        description: 'Release version (e.g., 1.0.0)'
         required: true
       build_type:
         type: choice
@@ -17,9 +14,10 @@ on:
         - GoldMaster
         - Release
         - Debug
-      release_notes:
-        description: 'Release Notes (optional)'
+      eft_version:
+        description: 'EFT Version'
         required: false
+        default: "EFT 0.16.9.40087"
 
 jobs:
   build-and-release:
@@ -49,16 +47,16 @@ jobs:
           cp Licenses/* BepInEx/plugins/Fika
 
       - name: Zip the build and loose files
-        run: zip -r "${{ inputs.release_name }}.zip" BepInEx/plugins/Fika
+        run: zip -r "Fika Release ${{ inputs.release_version }}.zip" BepInEx/plugins/Fika
 
       - name: Create GitHub Release Draft
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ inputs.release_tag }}
-          name: ${{ inputs.release_name }}
-          body: ${{ inputs.release_notes }}
+          tag_name: "v${{ inputs.release_version }}"
+          name: "Fika Release ${{ inputs.release_version }}"
+          body: "# Compatible with ${{ inputs.eft_version }}"
           draft: true
           files: |
-            ${{ inputs.release_name }}.zip
+            "Fika Release ${{ inputs.release_version }}.zip"
         env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
