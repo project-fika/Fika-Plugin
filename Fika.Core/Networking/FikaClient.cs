@@ -137,7 +137,7 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
             UpdateTime = 50,
             NatPunchEnabled = false,
             AutoRecycle = true,
-            IPv6Enabled = false,
+            IPv6Enabled = true,
             DisconnectTimeout = FikaPlugin.ConnectionTimeout.Value * 1000,
             EnableStatistics = true,
             MaxConnectAttempts = 5,

@@ -100,7 +100,7 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
             _endPoints = new List<IPEndPoint>(result.Ips.Length);
             foreach (var address in result.Ips)
             {
-                _endPoints.Add(ResolveRemoteAddress(address, port));
+                _endPoints.Add(NetworkUtils.ResolveRemoteAddress(address, port));
             }
 
             if (string.IsNullOrEmpty(ip))
@@ -131,29 +131,6 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
                 return;
             }
         }
-    }
-
-    /// <summary>
-    /// Resolves a remote address from a string IP or hostname and port.
-    /// </summary>
-    /// <param name="ip">The IP address or hostname.</param>
-    /// <param name="port">The port number.</param>
-    /// <returns>The resolved <see cref="IPEndPoint"/>.</returns>
-    /// <exception cref="ParseException">Thrown if the address cannot be resolved.</exception>
-    private IPEndPoint ResolveRemoteAddress(string ip, int port)
-    {
-        if (IPAddress.TryParse(ip, out var address))
-        {
-            return new(address, port);
-        }
-
-        var hostEntry = Dns.GetHostEntry(ip);
-        if (hostEntry?.AddressList.Length > 0)
-        {
-            return new(hostEntry.AddressList[0], port);
-        }
-
-        throw new ParseException($"ResolveRemoteAddress::Could not parse the address {ip}");
     }
 
     /// <summary>
@@ -287,16 +264,30 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
         }
     }
 
-    private static bool IsPrivate(IPAddress ip)
+    private bool IsPrivate(IPAddress ip)
     {
-        if (ip.AddressFamily != AddressFamily.InterNetwork)
+        switch (ip.AddressFamily)
         {
-            return false;
+            case AddressFamily.InterNetwork: // IPv4
+                {
+#if DEBUG
+                    _logger.LogInfo($"Checking {ip} which is IPv4");
+#endif
+                    var b = ip.GetAddressBytes();
+                    return b[0] == 10 || (b[0] == 172 && b[1] >= 16 && b[1] <= 31) || (b[0] == 192 && b[1] == 168);
+                }
+            case AddressFamily.InterNetworkV6: // IPv6
+                {
+#if DEBUG
+                    _logger.LogInfo($"Checking {ip} which is IPv6");
+#endif
+                    var b = ip.GetAddressBytes();
+                    // fc00::/7 > check top 7 bits of first byte (0b1111_1100 = 0xfc)
+                    return (b[0] & 0b1111_1100) == 0b1111_1100;
+                }
+            default:
+                return false;
         }
-
-        var b = ip.GetAddressBytes();
-
-        return b[0] == 10 || (b[0] == 172 && b[1] >= 16 && b[1] <= 31) || (b[0] == 192 && b[1] == 168);
     }
 
     /// <inheritdoc/>

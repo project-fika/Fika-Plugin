@@ -998,7 +998,7 @@ public class FikaPlugin : BaseUnityPlugin
             }),
             "Force IP", ref failed, headers);
 
-        ForceBindIP = SetupSetting(networkDefaultHeader, "Force Bind IP", "0.0.0.0",
+        ForceBindIP = SetupSetting(networkDefaultHeader, "Force Bind IP", "Disabled",
             new ConfigDescription(LocaleUtils.BEPINEX_FORCE_BIND_IP_D.Localized(),
             new AcceptableValueList<string>(GetLocalAddresses()), new ConfigurationManagerAttributes()
             {
@@ -1099,25 +1099,52 @@ public class FikaPlugin : BaseUnityPlugin
         List<string> ips = [];
         ips.Add("Disabled");
         ips.Add("0.0.0.0");
+        ips.Add("::");
 
         try
         {
-            foreach (var networkInterface in NetworkInterface.GetAllNetworkInterfaces())
+            foreach (var ni in NetworkInterface.GetAllNetworkInterfaces())
             {
-                foreach (var ip in networkInterface.GetIPProperties().UnicastAddresses)
+                if (ni.OperationalStatus != OperationalStatus.Up)
                 {
-                    if (!ip.IsDnsEligible)
+                    continue;
+                }
+
+                if (ni.NetworkInterfaceType is NetworkInterfaceType.Loopback or NetworkInterfaceType.Tunnel)
+                {
+                    continue;
+                }
+
+                foreach (var ua in ni.GetIPProperties().UnicastAddresses)
+                {
+                    if (!ua.IsDnsEligible)
                     {
                         continue;
                     }
 
-                    if (ip.Address.AddressFamily == AddressFamily.InterNetwork)
+                    var addr = ua.Address;
+
+                    if (IPAddress.IsLoopback(addr))
                     {
-                        var stringIp = ip.Address.ToString();
-                        if (stringIp != "127.0.0.1")
+                        continue;
+                    }
+
+                    if (addr.AddressFamily == AddressFamily.InterNetworkV6)
+                    {
+                        if (addr.IsIPv6LinkLocal || addr.IsIPv6SiteLocal)
                         {
-                            ips.Add(stringIp);
+                            continue;
                         }
+
+                        if (ua.AddressPreferredLifetime == 0)
+                        {
+                            continue;
+                        }
+                    }
+
+                    if (addr.AddressFamily is AddressFamily.InterNetwork or AddressFamily.InterNetworkV6)
+                    {
+                        ips.Add(addr.ToString());
                     }
                 }
             }

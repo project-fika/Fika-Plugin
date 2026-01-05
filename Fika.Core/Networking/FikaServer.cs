@@ -153,7 +153,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
             UnconnectedMessagesEnabled = true,
             UpdateTime = 50,
             AutoRecycle = true,
-            IPv6Enabled = false,
+            IPv6Enabled = true,
             DisconnectTimeout = FikaPlugin.ConnectionTimeout.Value * 1000,
             EnableStatistics = true,
             NatPunchEnabled = true,
@@ -274,15 +274,28 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         {
             if (FikaPlugin.ForceBindIP.Value != "Disabled")
             {
-                if (IPAddress.TryParse(FikaPlugin.ForceBindIP.Value, out var ipv4))
-                {
-                    _netServer.Start(ipv4, IPAddress.IPv6Any, _port);
-                }
-                else
+                if (!IPAddress.TryParse(FikaPlugin.ForceBindIP.Value, out var bindAddress))
                 {
                     var error = $"{FikaPlugin.ForceBindIP.Value} could not be parsed into a valid IP, raid will not start";
-                    NotificationManagerClass.DisplayWarningNotification(error, EFT.Communications.ENotificationDurationType.Long);
+                    NotificationManagerClass.DisplayWarningNotification(
+                        error,
+                        EFT.Communications.ENotificationDurationType.Long);
+
                     throw new ParseException(error);
+                }
+
+                switch (bindAddress.AddressFamily)
+                {
+                    case AddressFamily.InterNetwork: // IPv4
+                        _logger.LogInfo("Hosting on IPv4");
+                        _netServer.Start(bindAddress, IPAddress.IPv6Any, _port);
+                        break;
+                    case AddressFamily.InterNetworkV6: // IPv6
+                        _logger.LogInfo("Hosting on IPv4");
+                        _netServer.Start(IPAddress.Any, bindAddress, _port);
+                        break;
+                    default:
+                        throw new NotSupportedException($"Unsupported address family: {bindAddress.AddressFamily}");
                 }
             }
             else
@@ -300,7 +313,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         for (var i = 0; i < FikaPlugin.Instance.LocalIPs.Length; i++)
         {
             var ip = FikaPlugin.Instance.LocalIPs[i];
-            if (ValidateIP(ip))
+            if (ValidateIP(ip) && !ipAddresses.Contains(ip))
             {
                 ipAddresses.Add(ip);
             }
@@ -488,58 +501,6 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
     {
         FlareSuccessPacket packet = new(profileId, canSendAirdrop);
         SendData(ref packet, DeliveryMethod.ReliableOrdered);
-    }
-
-    private bool ValidateIP(string ip)
-    {
-        if (string.IsNullOrWhiteSpace(ip))
-        {
-            return false;
-        }
-
-        if (string.Equals(ip, "0.0.0.0")) // ignore default
-        {
-            return false;
-        }
-
-        if (!IPAddress.TryParse(ip, out var address))
-        {
-            return false;
-        }
-
-        // Only check IPv4
-        if (address.AddressFamily != AddressFamily.InterNetwork)
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    private bool ValidateLocalIP(string localIP)
-    {
-        if (string.IsNullOrWhiteSpace(localIP))
-        {
-            return false;
-        }
-
-        if (!IPAddress.TryParse(localIP, out var address))
-        {
-            return false;
-        }
-
-        // Only check IPv4
-        if (address.AddressFamily != AddressFamily.InterNetwork)
-        {
-            return false;
-        }
-
-        var bytes = address.GetAddressBytes();
-
-        return
-            bytes[0] == 10 ||                                       // 10.0.0.0/8
-            (bytes[0] == 192 && bytes[1] == 168) ||                 // 192.168.0.0/16
-            (bytes[0] == 172 && bytes[1] >= 16 && bytes[1] <= 31);  // 172.16.0.0/12
     }
 
     public int PopNetId()
