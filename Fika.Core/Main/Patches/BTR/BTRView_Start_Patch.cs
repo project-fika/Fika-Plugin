@@ -22,5 +22,9 @@ public class BTRView_Start_Patch : ModulePatch
         {
             BTRViewSynchronizer.CreateInstance(__instance);
         }
+        else
+        {
+            __instance.moveLerpValue = 0.18f;
+        }
     }
 }
