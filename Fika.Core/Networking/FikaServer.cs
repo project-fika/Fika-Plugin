@@ -313,7 +313,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
                 iconType: EFT.Communications.ENotificationIconType.Alert);
         }
 
-        SetHostRequest body = new([.. ipAddresses], _port, FikaPlugin.UseNatPunching.Value, FikaBackendUtils.IsHeadlessGame);
+        SetHostRequest body = new([.. ipAddresses], _port, FikaPlugin.UseNatPunching.Value, FikaBackendUtils.IsHeadless);
         FikaRequestHandler.UpdateSetHost(body);
 
         if (!FikaBackendUtils.IsHeadless)
