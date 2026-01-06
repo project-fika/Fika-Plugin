@@ -1,3 +1,9 @@
+using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading.Tasks;
 using EFT;
 using Fika.Core.Main.Custom;
 using Fika.Core.Main.Utils;
@@ -7,15 +13,7 @@ using Fika.Core.Networking.Models.Headless;
 using Fika.Core.Networking.Models.Presence;
 using Fika.Core.UI.Models;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using SPT.Common.Http;
-using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Net.Http;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fika.Core.Networking.Http;
 
@@ -30,20 +28,20 @@ public static class FikaRequestHandler
 
     public static async Task<IPAddress> GetPublicIP()
     {
-        HttpClient client = _httpClient.HttpClient;
+        var client = _httpClient.HttpClient;
         string[] urls = [
             "https://api.ipify.org/",
             "https://checkip.amazonaws.com/",
             "https://ipv4.icanhazip.com/"
         ];
 
-        foreach (string url in urls)
+        foreach (var url in urls)
         {
             try
             {
-                string ipString = await client.GetStringAsync(url);
+                var ipString = await client.GetStringAsync(url);
                 ipString = ipString.Trim();
-                if (IPAddress.TryParse(ipString, out IPAddress ipAddress))
+                if (IPAddress.TryParse(ipString, out var ipAddress))
                 {
                     if (ipAddress.AddressFamily == AddressFamily.InterNetwork)
                     {
@@ -54,8 +52,7 @@ public static class FikaRequestHandler
             }
             catch (Exception ex)
             {
-                FikaGlobals.LogWarning($"Could not get public IP address by [{url}], Error message: {ex.Message}");
-                continue;
+                FikaGlobals.LogWarning($"Could not get public IP address from [{url}], Error message: {ex.Message}");
             }
         }
 
@@ -64,48 +61,54 @@ public static class FikaRequestHandler
 
     private static byte[] EncodeBody<T>(T o)
     {
-        string serialized = JsonConvert.SerializeObject(o);
+        var serialized = JsonConvert.SerializeObject(o);
         return Encoding.UTF8.GetBytes(serialized);
     }
 
     private static T DecodeBody<T>(byte[] data)
     {
-        string json = Encoding.UTF8.GetString(data);
+        var json = Encoding.UTF8.GetString(data);
         return JsonConvert.DeserializeObject<T>(json);
     }
 
     private static async Task<T> GetJsonAsync<T>(string path)
     {
-        byte[] response = await _httpClient.GetAsync(path);
+        var response = await _httpClient.GetAsync(path);
         return DecodeBody<T>(response);
     }
 
     private static T GetJson<T>(string path)
     {
-        return Task.Run(() => GetJsonAsync<T>(path)).Result;
+        return GetJsonAsync<T>(path)
+            .GetAwaiter()
+            .GetResult();
     }
 
     private static async Task<T2> PostJsonAsync<T1, T2>(string path, T1 o)
     {
-        byte[] data = EncodeBody<T1>(o);
-        byte[] response = await _httpClient.PostAsync(path, data);
+        var data = EncodeBody(o);
+        var response = await _httpClient.PostAsync(path, data);
         return DecodeBody<T2>(response);
     }
 
     private static T2 PostJson<T1, T2>(string path, T1 o)
     {
-        return Task.Run(() => PostJsonAsync<T1, T2>(path, o)).Result;
+        return PostJsonAsync<T1, T2>(path, o)
+            .GetAwaiter()
+            .GetResult();
     }
 
     private static async Task<byte[]> PutJsonAsync<T>(string path, T o)
     {
-        byte[] data = EncodeBody(o);
+        var data = EncodeBody(o);
         return await _httpClient.PutAsync(path, data);
     }
 
     private static byte[] PutJson<T>(string path, T o)
     {
-        return Task.Run(() => PutJsonAsync<T>(path, o)).Result;
+        return PutJsonAsync(path, o)
+            .GetAwaiter()
+            .GetResult();
     }
 
     public static BotDifficulties GetBotDifficulties()
