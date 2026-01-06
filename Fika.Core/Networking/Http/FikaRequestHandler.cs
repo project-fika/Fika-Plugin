@@ -79,7 +79,7 @@ public static class FikaRequestHandler
 
     private static T GetJson<T>(string path)
     {
-        return GetJsonAsync<T>(path)
+        return Task.Run(() => GetJsonAsync<T>(path))
             .GetAwaiter()
             .GetResult();
     }
@@ -93,7 +93,7 @@ public static class FikaRequestHandler
 
     private static T2 PostJson<T1, T2>(string path, T1 o)
     {
-        return PostJsonAsync<T1, T2>(path, o)
+        return Task.Run(() => PostJsonAsync<T1, T2>(path, o))
             .GetAwaiter()
             .GetResult();
     }
@@ -106,7 +106,7 @@ public static class FikaRequestHandler
 
     private static byte[] PutJson<T>(string path, T o)
     {
-        return PutJsonAsync(path, o)
+        return Task.Run(() => PutJsonAsync(path, o))
             .GetAwaiter()
             .GetResult();
     }
