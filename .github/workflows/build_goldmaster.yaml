@@ -57,6 +57,6 @@ jobs:
           body: "# Compatible with ${{ inputs.eft_version }}"
           draft: true
           files: |
-            "Fika Release ${{ inputs.release_version }}.zip"
+            Fika Release ${{ inputs.release_version }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
