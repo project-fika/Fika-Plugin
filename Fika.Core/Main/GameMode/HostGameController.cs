@@ -576,13 +576,14 @@ public class HostGameController : BaseGameController, IBotGame
 
         var useWaveControl = controllerSettings.BotAmount == EBotAmount.Horde;
 
+        var limits = SetMaxBotsLimit(location);
         if (FikaPlugin.NoAI.Value)
         {
             FikaGlobals.LogWarning("No AI enabled - stopping bot spawns");
             controllerSettings.BotAmount = EBotAmount.NoBots;
+            limits = 0;
         }
 
-        var limits = SetMaxBotsLimit(location);
         var numberOfBots = controllerSettings.BotAmount switch
         {
             EBotAmount.AsOnline => _backendSession.BackEndConfig.Config.MaxBotsAliveOnMap,
