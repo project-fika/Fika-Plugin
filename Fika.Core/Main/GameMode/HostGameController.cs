@@ -605,12 +605,9 @@ public class HostGameController : BaseGameController, IBotGame
         }
         _botStateManager.AssignBotsController(_botsController);
 
-        if (!FikaBackendUtils.IsHeadless)
+        if (!FikaBackendUtils.IsHeadless && Singleton<IFikaGame>.Instance is CoopGame coopGame)
         {
-            if (Singleton<IFikaGame>.Instance is CoopGame coopGame)
-            {
-                _botsController.AddActivePLayer(coopGame.LocalPlayer_0);
-            }
+            _botsController.AddActivePLayer(coopGame.LocalPlayer_0);
         }
     }
 
