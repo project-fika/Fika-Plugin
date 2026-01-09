@@ -582,16 +582,7 @@ public class HostGameController : BaseGameController, IBotGame
             controllerSettings.BotAmount = EBotAmount.NoBots;
         }
 
-        _botsController.Init(this, botCreator, botZones, SpawnSystem, _wavesSpawnScenario.BotLocationModifier,
-            controllerSettings.IsEnabled, controllerSettings.IsScavWars, useWaveControl, false,
-        _bossSpawnScenario.HaveSectants, gameWorld, location.OpenZones, location.Events);
-        UpdateByUnity -= _botsController.method_0;
-        if (controllerSettings.ExcludedBosses != null)
-        {
-            _botsController.BotSpawner.SetBlockedRoles(controllerSettings.ExcludedBosses);
-        }
-        _botStateManager.AssignBotsController(_botsController);
-
+        var limits = SetMaxBotsLimit(location);
         var numberOfBots = controllerSettings.BotAmount switch
         {
             EBotAmount.AsOnline => _backendSession.BackEndConfig.Config.MaxBotsAliveOnMap,
@@ -603,19 +594,23 @@ public class HostGameController : BaseGameController, IBotGame
             _ => 15,
         };
 
-        _botsController.SetSettings(numberOfBots, _backendSession.BackEndConfig.BotPresets, _backendSession.BackEndConfig.BotWeaponScatterings);
+        _botsController.SetSettings(limits > 0 ? limits : numberOfBots, _backendSession.BackEndConfig.BotPresets, _backendSession.BackEndConfig.BotWeaponScatterings);
+        _botsController.Init(this, botCreator, botZones, SpawnSystem, _wavesSpawnScenario.BotLocationModifier,
+            controllerSettings.IsEnabled, controllerSettings.IsScavWars, useWaveControl, false,
+            _bossSpawnScenario.HaveSectants, gameWorld, location.OpenZones, location.Events);
+        UpdateByUnity -= _botsController.method_0;
+        if (controllerSettings.ExcludedBosses != null)
+        {
+            _botsController.BotSpawner.SetBlockedRoles(controllerSettings.ExcludedBosses);
+        }
+        _botStateManager.AssignBotsController(_botsController);
+
         if (!FikaBackendUtils.IsHeadless)
         {
             if (Singleton<IFikaGame>.Instance is CoopGame coopGame)
             {
                 _botsController.AddActivePLayer(coopGame.LocalPlayer_0);
             }
-        }
-
-        var limits = SetMaxBotsLimit(location);
-        if (limits > 0)
-        {
-            _botsController.BotSpawner.SetMaxBots(limits);
         }
     }
 
