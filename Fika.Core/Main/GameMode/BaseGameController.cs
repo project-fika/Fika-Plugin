@@ -336,7 +336,7 @@ public abstract class BaseGameController
 #if DEBUG
         Logger.LogWarning($"Running season handler for season: {Season}");
 #endif
-        var runSeason = seasonController.Run(Season, seasonsSettings: SeasonsSettings);
+        var runSeason = seasonController.Run(Season, SeasonsSettings);
         while (!runSeason.IsCompleted)
         {
             yield return endOfFrame;
