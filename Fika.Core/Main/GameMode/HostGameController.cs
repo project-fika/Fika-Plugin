@@ -529,8 +529,8 @@ public class HostGameController : BaseGameController, IBotGame
             _abstractGame.SetMatchmakerStatus(LocaleUtils.UI_INIT_WEATHER.Localized());
             Logger.LogInfo("Generating and initializing weather...");
             var weather = await _backendSession.WeatherRequest();
-            Season = weather.Season;
-            SeasonsSettings = weather.SeasonsSettings;
+            Season = _backendSession.Season;
+            SeasonsSettings = _backendSession.SeasonsSettings;
             if (!OfflineRaidSettingsMenuPatch_Override.UseCustomWeather)
             {
                 WeatherClasses = weather.Weathers;
