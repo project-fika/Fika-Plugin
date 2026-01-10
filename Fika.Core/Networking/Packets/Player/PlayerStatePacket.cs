@@ -1,11 +1,17 @@
-﻿using Fika.Core.Main.ObservedClasses.Snapshotting;
-using Fika.Core.Main.Players;
-using System;
+﻿using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Fika.Core.Main.ObservedClasses.Snapshotting;
+using Fika.Core.Main.Players;
 
 namespace Fika.Core.Networking.Packets.Player;
 
+/// <summary>
+/// State packet for a player
+/// </summary>
+/// <remarks>
+/// Assumes little-endian architecture
+/// </remarks>
 [StructLayout(LayoutKind.Sequential, Pack = 1)]
 public struct PlayerStatePacket
 {
@@ -271,58 +277,65 @@ public struct PlayerStatePacket
         }
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static byte PackFloatToByte(float value, float min, float max)
     {
-        float clamped = Mathf.Clamp(value, min, max);
+        var clamped = Mathf.Clamp(value, min, max);
         const int maxInt = 255;
-        int quantized = Mathf.RoundToInt((clamped - min) / (max - min) * maxInt);
+        var quantized = Mathf.RoundToInt((clamped - min) / (max - min) * maxInt);
         return (byte)quantized;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static ushort PackFloatToUShort(float value, float min, float max)
     {
-        float clamped = Mathf.Clamp(value, min, max);
+        var clamped = Mathf.Clamp(value, min, max);
         const int maxInt = ushort.MaxValue;
-        int quantized = Mathf.RoundToInt((clamped - min) / (max - min) * maxInt);
+        var quantized = Mathf.RoundToInt((clamped - min) / (max - min) * maxInt);
         return (ushort)quantized;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static byte PackIntToByte(int value, int minValue, int maxValue)
     {
         const int minTarget = 0;
         const int maxTarget = byte.MaxValue;
 
-        int clampedValue = Mathf.Clamp(value, minValue, maxValue) - minValue;
-        int rangeInput = maxValue - minValue;
+        var clampedValue = Mathf.Clamp(value, minValue, maxValue) - minValue;
+        var rangeInput = maxValue - minValue;
 
-        float normalized = (float)clampedValue / rangeInput;
-        int scaled = (int)(minTarget + (normalized * (maxTarget - minTarget)));
+        var normalized = (float)clampedValue / rangeInput;
+        var scaled = (int)(minTarget + (normalized * (maxTarget - minTarget)));
 
         return (byte)Mathf.Clamp(scaled, minTarget, maxTarget);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static float UnpackByteToFloat(byte packed, float min, float max)
     {
-        float normalized = packed / (float)byte.MaxValue;
+        var normalized = packed / (float)byte.MaxValue;
         return min + (normalized * (max - min));
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static float UnpackUShortToFloat(ushort packed, float min, float max)
     {
-        float normalized = packed / (float)ushort.MaxValue;
+        var normalized = packed / (float)ushort.MaxValue;
         return min + (normalized * (max - min));
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int UnpackByteToInt(byte packed, int minValue, int maxValue)
     {
-        float normalized = packed / (float)byte.MaxValue;
+        var normalized = packed / (float)byte.MaxValue;
         return (int)(minValue + (normalized * (maxValue - minValue)));
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static byte PackBools(params bool[] bools)
     {
         byte flags = 0;
-        for (int i = 0; i < 7; i++)
+        for (var i = 0; i < 7; i++)
         {
             if (bools[i])
             {
@@ -334,7 +347,7 @@ public struct PlayerStatePacket
 
     public static PlayerStatePacket FromBuffer(in ArraySegment<byte> buffer)
     {
-        ref byte firstByte = ref buffer.Array[buffer.Offset];
+        ref var firstByte = ref buffer.Array[buffer.Offset];
         return Unsafe.ReadUnaligned<PlayerStatePacket>(ref firstByte);
     }
 
