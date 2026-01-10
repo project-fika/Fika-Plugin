@@ -529,8 +529,8 @@ public class HostGameController : BaseGameController, IBotGame
             _abstractGame.SetMatchmakerStatus(LocaleUtils.UI_INIT_WEATHER.Localized());
             Logger.LogInfo("Generating and initializing weather...");
             var weather = await _backendSession.WeatherRequest();
-            Season = weather.Season;
-            SeasonsSettings = weather.SeasonsSettings;
+            Season = _backendSession.Season;
+            SeasonsSettings = _backendSession.SeasonsSettings;
             if (!OfflineRaidSettingsMenuPatch_Override.UseCustomWeather)
             {
                 WeatherClasses = weather.Weathers;
@@ -576,21 +576,13 @@ public class HostGameController : BaseGameController, IBotGame
 
         var useWaveControl = controllerSettings.BotAmount == EBotAmount.Horde;
 
+        var limits = SetMaxBotsLimit(location);
         if (FikaPlugin.NoAI.Value)
         {
             FikaGlobals.LogWarning("No AI enabled - stopping bot spawns");
             controllerSettings.BotAmount = EBotAmount.NoBots;
+            limits = 0;
         }
-
-        _botsController.Init(this, botCreator, botZones, SpawnSystem, _wavesSpawnScenario.BotLocationModifier,
-            controllerSettings.IsEnabled, controllerSettings.IsScavWars, useWaveControl, false,
-        _bossSpawnScenario.HaveSectants, gameWorld, location.OpenZones, location.Events);
-        UpdateByUnity -= _botsController.method_0;
-        if (controllerSettings.ExcludedBosses != null)
-        {
-            _botsController.BotSpawner.SetBlockedRoles(controllerSettings.ExcludedBosses);
-        }
-        _botStateManager.AssignBotsController(_botsController);
 
         var numberOfBots = controllerSettings.BotAmount switch
         {
@@ -603,19 +595,20 @@ public class HostGameController : BaseGameController, IBotGame
             _ => 15,
         };
 
-        _botsController.SetSettings(numberOfBots, _backendSession.BackEndConfig.BotPresets, _backendSession.BackEndConfig.BotWeaponScatterings);
-        if (!FikaBackendUtils.IsHeadless)
+        _botsController.SetSettings(limits > 0 ? limits : numberOfBots, _backendSession.BackEndConfig.BotPresets, _backendSession.BackEndConfig.BotWeaponScatterings);
+        _botsController.Init(this, botCreator, botZones, SpawnSystem, _wavesSpawnScenario.BotLocationModifier,
+            controllerSettings.IsEnabled, controllerSettings.IsScavWars, useWaveControl, false,
+            _bossSpawnScenario.HaveSectants, gameWorld, location.OpenZones, location.Events);
+        UpdateByUnity -= _botsController.method_0;
+        if (controllerSettings.ExcludedBosses != null)
         {
-            if (Singleton<IFikaGame>.Instance is CoopGame coopGame)
-            {
-                _botsController.AddActivePLayer(coopGame.LocalPlayer_0);
-            }
+            _botsController.BotSpawner.SetBlockedRoles(controllerSettings.ExcludedBosses);
         }
+        _botStateManager.AssignBotsController(_botsController);
 
-        var limits = SetMaxBotsLimit(location);
-        if (limits > 0)
+        if (!FikaBackendUtils.IsHeadless && Singleton<IFikaGame>.Instance is CoopGame coopGame)
         {
-            _botsController.BotSpawner.SetMaxBots(limits);
+            _botsController.AddActivePLayer(coopGame.LocalPlayer_0);
         }
     }
 

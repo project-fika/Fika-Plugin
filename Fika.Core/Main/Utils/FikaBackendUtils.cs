@@ -73,6 +73,7 @@ public static class FikaBackendUtils
         {
             IsSpectator = false;
             IsHeadlessRequester = false;
+            IsHeadlessGame = false;
         }
 
         RequestFikaWorld = false;

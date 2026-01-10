@@ -1,12 +1,12 @@
 ﻿// © 2026 Lacyway All Rights Reserved
 
-using Diz.Utils;
-using Fika.Core.Main.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
+using Diz.Utils;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Bundles;
 
@@ -28,19 +28,19 @@ internal class InternalBundleLoader
 
     public async Task LoadBundles()
     {
-        Assembly assembly = Assembly.GetExecutingAssembly();
-        foreach (string name in assembly.GetManifestResourceNames())
+        var assembly = Assembly.GetExecutingAssembly();
+        foreach (var name in assembly.GetManifestResourceNames())
         {
-            await using Stream stream = assembly.GetManifestResourceStream(name);
+            await using var stream = assembly.GetManifestResourceStream(name);
             await using MemoryStream memoryStream = new();
 
-            string bundleName = name.Replace("Fika.Core.Bundles.Files.", "")
+            var bundleName = name.Replace("Fika.Core.Bundles.Files.", "")
                 .Replace(".bundle", "");
 
             if (bundleName == "masterbundle")
             {
                 await stream.CopyToAsync(memoryStream);
-                AssetBundleCreateRequest assetBundle = AssetBundle.LoadFromMemoryAsync(memoryStream.ToArray());
+                var assetBundle = AssetBundle.LoadFromMemoryAsync(memoryStream.ToArray());
                 while (!assetBundle.isDone)
                 {
                     await Task.Yield();
