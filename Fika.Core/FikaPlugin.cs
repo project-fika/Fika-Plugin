@@ -357,7 +357,16 @@ public class FikaPlugin : BaseUnityPlugin
         var natPunchServerConfig = FikaRequestHandler.GetNatPunchServerConfig();
 
         NatPunchServerEnable = natPunchServerConfig.Enable;
-        NatPunchServerIP = RequestHandler.Host.Replace("https://", "").Split(':')[0];
+        
+        if (natPunchServerConfig.Ip == "")
+        {
+            NatPunchServerIP = RequestHandler.Host.Replace("https://", "").Split(':')[0];
+        }
+        else
+        {
+            NatPunchServerIP = natPunchServerConfig.Ip;
+        }
+        
         NatPunchServerPort = natPunchServerConfig.Port;
         NatPunchServerNatIntroduceAmount = natPunchServerConfig.NatIntroduceAmount;
 
