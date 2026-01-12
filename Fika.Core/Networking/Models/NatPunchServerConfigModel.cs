@@ -10,15 +10,19 @@ public struct NatPunchServerConfigModel
     [DataMember(Name = "enable")]
     public bool Enable;
 
+    [DataMember(Name = "ip")]
+    public string Ip;
+
     [DataMember(Name = "port")]
     public int Port;
 
     [DataMember(Name = "natIntroduceAmount")]
     public int NatIntroduceAmount;
 
-    public NatPunchServerConfigModel(bool enable, int port, int natIntroduceAmount)
+    public NatPunchServerConfigModel(bool enable, string ip, int port, int natIntroduceAmount)
     {
         Enable = enable;
+        Ip = ip;
         Port = port;
         NatIntroduceAmount = natIntroduceAmount;
     }
