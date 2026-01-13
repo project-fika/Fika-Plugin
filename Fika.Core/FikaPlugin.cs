@@ -19,7 +19,6 @@ using SPT.Common.Http;
 using SPT.Custom.Patches;
 using SPT.Custom.Utils;
 using SPT.Reflection.Patching;
-using SPT.SinglePlayer.Patches.MainMenu;
 using SPT.SinglePlayer.Patches.RaidFix;
 using SPT.SinglePlayer.Patches.ScavMode;
 using System;
@@ -236,7 +235,7 @@ public class FikaPlugin : BaseUnityPlugin
         if (AllowItemSending)
         {
             _patchManager.EnablePatch(new ItemContext_Patch());
-        }        
+        }
     }
 
     /// <summary>
@@ -360,7 +359,7 @@ public class FikaPlugin : BaseUnityPlugin
         var natPunchServerConfig = FikaRequestHandler.GetNatPunchServerConfig();
 
         NatPunchServerEnable = natPunchServerConfig.Enable;
-        
+
         if (natPunchServerConfig.Ip == "")
         {
             NatPunchServerIP = RequestHandler.Host.Replace("https://", "").Split(':')[0];
@@ -369,7 +368,7 @@ public class FikaPlugin : BaseUnityPlugin
         {
             NatPunchServerIP = natPunchServerConfig.Ip;
         }
-        
+
         NatPunchServerPort = natPunchServerConfig.Port;
         NatPunchServerNatIntroduceAmount = natPunchServerConfig.NatIntroduceAmount;
 
