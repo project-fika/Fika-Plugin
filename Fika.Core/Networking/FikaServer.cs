@@ -583,10 +583,10 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
             return;
         }
 
-        var fps = (int)(1f / Time.unscaledDeltaTime);
+        var fps = Mathf.CeilToInt(1f / Time.unscaledDeltaTime);
         StatisticsPacket packet = new(fps);
 
-        SendData(ref packet, DeliveryMethod.ReliableUnordered);
+        SendData(ref packet, DeliveryMethod.Unreliable);
     }
 
     protected void OnDestroy()
