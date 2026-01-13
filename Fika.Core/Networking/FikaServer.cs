@@ -266,7 +266,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
 
             var natPunchServerIP = FikaPlugin.Instance.NatPunchServerIP;
             var natPunchServerPort = FikaPlugin.Instance.NatPunchServerPort;
-            var token = $"Server:{RequestHandler.SessionId}";
+            var token = $"Server:{FikaBackendUtils.ServerGuid}";
 
             var natIntroduceTask = Task.Run(() => NatIntroduceRoutine(natPunchServerIP, natPunchServerPort, token, _natIntroduceRoutineCts.Token));
         }

@@ -87,7 +87,7 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
 
             var natPunchServerIP = FikaPlugin.Instance.NatPunchServerIP;
             var natPunchServerPort = FikaPlugin.Instance.NatPunchServerPort;
-            var token = $"Client:{serverId}";
+            var token = $"Client:{FikaBackendUtils.ServerGuid}";
 
             NetClient.NatPunchModule.SendNatIntroduceRequest(natPunchServerIP, natPunchServerPort, token);
 
