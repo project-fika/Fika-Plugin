@@ -1,5 +1,9 @@
 ﻿// © 2026 Lacyway All Rights Reserved
 
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Audio.SpatialSystem;
 using Comfort.Common;
 using Dissonance;
@@ -24,10 +28,6 @@ using Fika.Core.Networking.Packets.Player.Common.SubPackets;
 using HarmonyLib;
 using JsonType;
 using RootMotion.FinalIK;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using static Fika.Core.UI.FikaUIGlobals;
 
 namespace Fika.Core.Main.Players;
@@ -47,7 +47,9 @@ public class ObservedPlayer : FikaPlayer
             return _healthBar;
         }
     }
+
     public bool ShouldOverlap { get; internal set; }
+
     public override bool LeftStanceDisabled
     {
         get
@@ -64,17 +66,8 @@ public class ObservedPlayer : FikaPlayer
             ShouldOverlap = true;
         }
     }
-    public BetterSource VoipEftSource { get; set; }
-    internal ObservedState CurrentPlayerState;
 
-    private bool _leftStancedDisabled;
-    private FikaHealthBar _healthBar;
-    private Coroutine _waitForStartRoutine;
-    private bool _isServer;
-    private VoiceBroadcastTrigger _voiceBroadcastTrigger;
-    private SoundSettingsControllerClass _soundSettings;
-    private bool _voipAssigned;
-    private int _frameSkip;
+    public BetterSource VoipEftSource { get; set; }
 
     public ObservedHealthController NetworkHealthController
     {
@@ -83,7 +76,7 @@ public class ObservedPlayer : FikaPlayer
             return HealthController as ObservedHealthController;
         }
     }
-    private readonly ObservedVaultingParametersClass _observedVaultingParameters = new();
+
     public override bool CanBeSnapped
     {
         get
@@ -91,6 +84,7 @@ public class ObservedPlayer : FikaPlayer
             return false;
         }
     }
+
     public override EPointOfView PointOfView
     {
         get
@@ -114,6 +108,7 @@ public class ObservedPlayer : FikaPlayer
             ProceduralWeaponAnimation.PointOfView = value;
         }
     }
+
     public override AbstractHandsController HandsController
     {
         get
@@ -128,6 +123,7 @@ public class ObservedPlayer : FikaPlayer
             MovementContext.PlayerAnimatorSetWeaponId(weaponAnimationType);
         }
     }
+
     public override Ray InteractionRay
     {
         get
@@ -136,6 +132,7 @@ public class ObservedPlayer : FikaPlayer
             return new(_playerLookRaycastTransform.position, vector);
         }
     }
+
     public override float ProtagonistHearing
     {
         get
@@ -143,6 +140,7 @@ public class ObservedPlayer : FikaPlayer
             return Mathf.Max(1f, Singleton<BetterAudio>.Instance.ProtagonistHearing + 1f);
         }
     }
+
     public override bool IsVisible
     {
         get
@@ -159,7 +157,19 @@ public class ObservedPlayer : FikaPlayer
 
         }
     }
+
+    public GClass782 ObservedCharacterController
+    {
+        get
+        {
+            return MovementContext.GClass782_0;
+        }
+    }
+
     public float TurnOffFbbikAt;
+
+    internal ObservedState CurrentPlayerState;
+
     private float _lastDistance;
     private LocalPlayerCullingHandlerClass _cullingHandler;
     private float _rightHand;
@@ -171,6 +181,15 @@ public class ObservedPlayer : FikaPlayer
     private ObservedCorpseCulling _observedCorpseCulling;
     private bool _compassLoaded;
     private FollowerCullingObject _followerCullingObject;
+    private readonly ObservedVaultingParametersClass _observedVaultingParameters = new();
+    private bool _leftStancedDisabled;
+    private FikaHealthBar _healthBar;
+    private Coroutine _waitForStartRoutine;
+    private bool _isServer;
+    private VoiceBroadcastTrigger _voiceBroadcastTrigger;
+    private SoundSettingsControllerClass _soundSettings;
+    private bool _voipAssigned;
+    private int _frameSkip;
     #endregion
 
     public static async Task<ObservedPlayer> CreateObservedPlayer(GameWorld gameWorld, int playerId, Vector3 position, Quaternion rotation, string layerName,
@@ -848,6 +867,7 @@ public class ObservedPlayer : FikaPlayer
         {
             Position = CurrentPlayerState.Position;
             Rotation = CurrentPlayerState.Rotation;
+            ObservedCharacterController.Vector3_0 = CurrentPlayerState.Velocity;
 
             return;
         }
@@ -928,6 +948,9 @@ public class ObservedPlayer : FikaPlayer
         }
 
         LeftStanceDisabled = CurrentPlayerState.LeftStanceDisabled;
+
+        // hacky way to set velocity
+        ObservedCharacterController.Vector3_0 = CurrentPlayerState.Velocity;
 
         CurrentPlayerState.ShouldUpdate = false;
     }
@@ -1379,8 +1402,6 @@ public class ObservedPlayer : FikaPlayer
             yield return null;
         }
         Singleton<GameWorld>.Instance.MainPlayer.StatisticsManager.OnGroupMemberConnected(Inventory);
-
-        yield break;
     }
 
     public override void LateUpdate()
