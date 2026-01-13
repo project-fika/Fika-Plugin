@@ -303,8 +303,11 @@ public class FikaPlugin : BaseUnityPlugin
     }
 
     /// <summary>
-    /// Coroutine to ensure all mods are loaded by waiting 5 seconds
+    /// Task that ensure all mods are loaded by waiting 5 seconds
     /// </summary>
+    /// <remarks>
+    /// The wait is most likely redundant as it runs inside <see cref="Start"/>, however it is kept as last safety check
+    /// </remarks>
     private async Task RunChecks()
     {
         try
