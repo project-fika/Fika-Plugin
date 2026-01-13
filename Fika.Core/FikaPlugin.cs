@@ -47,7 +47,7 @@ namespace Fika.Core;
 [BepInDependency("com.SPT.debugging", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after spt-debugging, that way we can disable its patches
 public class FikaPlugin : BaseUnityPlugin
 {
-    public const string FikaVersion = "2.1.1";
+    public const string FikaVersion = "2.2.0";
     public static FikaPlugin Instance { get; private set; }
     public static string EFTVersionMajor { get; internal set; }
     public ManualLogSource FikaLogger
@@ -67,7 +67,7 @@ public class FikaPlugin : BaseUnityPlugin
     internal InternalBundleLoader BundleLoaderPlugin { get; private set; }
     internal FikaNotificationManager NotificationManager { get; set; }
 
-    private static readonly Version _requiredServerVersion = new("2.1.0");
+    private static readonly Version _requiredServerVersion = new("2.2.0");
     private PatchManager _patchManager;
     private TarkovApplication _tarkovApp;
 
