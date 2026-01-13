@@ -412,7 +412,7 @@ public class FikaClientFirearmController : Player.FirearmController
             _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
         }
 
-        return base.SetLightsState(lightsStates, force);
+        return base.SetLightsState(lightsStates, force, animated);
     }
 
     public override void SetScopeMode(FirearmScopeStateStruct[] scopeStates)
