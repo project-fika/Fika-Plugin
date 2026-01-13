@@ -66,6 +66,18 @@ public class BotPacketSender : MonoBehaviour, IPacketSender
         NetworkManager.SendPlayerState(ref _state);
     }
 
+    public bool WriteState(NetDataWriter writer)
+    {
+        if (!_sendPackets)
+        {
+            return false;
+        }
+
+        _state.UpdateFromPlayer(_player, IsMoving);
+        writer.PutUnmanaged(_state);
+        return true;
+    }
+
     public void DestroyThis()
     {
         NetworkManager = null;

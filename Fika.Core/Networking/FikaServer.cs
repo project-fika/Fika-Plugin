@@ -26,7 +26,6 @@ using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.Backend;
 using Fika.Core.Networking.VOIP;
 using Fika.Core.UI.Custom;
-using SPT.Common.Http;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -113,6 +112,10 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
             _coopHandler = value;
         }
     }
+    /// <summary>
+    /// Max MTU used for <see cref="DeliveryMethod.Unreliable"/> batching
+    /// </summary>
+    public int MaxMTU { get; private set; }
 
     public int NetId { get; set; }
     public ESideType RaidSide { get; set; }
@@ -174,6 +177,8 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         PlayerAmount = 1;
 
         ReadyClients = 0;
+
+        MaxMTU = NetConstants.PossibleMtu[0] - NetConstants.HeaderSize; // we assume minimum MTU + unreliable header size
 
         TimeSinceLastPeerDisconnected = DateTime.Now.AddDays(1);
 
@@ -677,7 +682,18 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
     {
         _dataWriter.Reset();
         _dataWriter.PutEnum(EPacketType.PlayerState);
+        _dataWriter.Put((byte)1); // we're sending one packet
         _dataWriter.PutUnmanaged(packet);
+
+        _netServer.SendToAll(_dataWriter.AsReadOnlySpan, DeliveryMethod.Unreliable);
+    }
+
+    public void BatchSendStates(NetDataWriter writer, byte writtenPackets)
+    {
+        _dataWriter.Reset();
+        _dataWriter.PutEnum(EPacketType.PlayerState);
+        _dataWriter.Put(writtenPackets);
+        _dataWriter.Put(writer.AsReadOnlySpan);
 
         _netServer.SendToAll(_dataWriter.AsReadOnlySpan, DeliveryMethod.Unreliable);
     }
@@ -942,9 +958,13 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
                 _packetProcessor.ReadAllPackets(reader, peer);
                 break;
             case EPacketType.PlayerState:
-                if (_snapshotCount < PlayerSnapshots.Snapshots.Length)
+                var count = reader.GetByte();
+                for (byte i = 0; i < count; i++)
                 {
-                    PlayerSnapshots.Snapshots[_snapshotCount++] = ArraySegmentPooling.Get(reader.GetRemainingBytesSpan());
+                    if (_snapshotCount < PlayerSnapshots.Snapshots.Length)
+                    {
+                        PlayerSnapshots.Snapshots[_snapshotCount++] = ArraySegmentPooling.Get(reader.GetSpan(PlayerStatePacket.PacketSize));
+                    }
                 }
                 break;
             case EPacketType.VOIP:

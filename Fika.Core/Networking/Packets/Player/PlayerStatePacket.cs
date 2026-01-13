@@ -15,6 +15,11 @@ namespace Fika.Core.Networking.Packets.Player;
 [StructLayout(LayoutKind.Sequential, Pack = 1)]
 public struct PlayerStatePacket
 {
+    /// <summary>
+    /// Size in bytes of a <see cref="PlayerStatePacket"/>
+    /// </summary>
+    public static readonly byte PacketSize = (byte)Unsafe.SizeOf<PlayerStatePacket>();
+
     /// <summary>8 bytes, offset 0</summary>
     public double RemoteTime;
 
