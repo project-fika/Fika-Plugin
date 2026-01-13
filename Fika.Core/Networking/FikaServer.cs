@@ -273,7 +273,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
             var natPunchServerPort = FikaPlugin.Instance.NatPunchServerPort;
             var token = $"Server:{FikaBackendUtils.ServerGuid}";
 
-            var natIntroduceTask = Task.Run(() => NatIntroduceRoutine(natPunchServerIP, natPunchServerPort, token, _natIntroduceRoutineCts.Token));
+            var natIntroduceTask = Task.Run(() => NatIntroduceTask(natPunchServerIP, natPunchServerPort, token, _natIntroduceRoutineCts.Token));
         }
         else
         {
@@ -1043,7 +1043,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
     }
     public void OnNatIntroductionResponse(IPEndPoint localEndPoint, IPEndPoint remoteEndPoint, string token)
     {
-        _logger.LogInfo($"OnNatIntroductionResponse: {remoteEndPoint}");
+        _logger.LogInfo($"OnNATIntroductionResponse: {remoteEndPoint}");
 
         Task.Run(async () =>
         {
@@ -1067,19 +1067,19 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         }
     }
 
-    private async void NatIntroduceRoutine(string natPunchServerIP, int natPunchServerPort, string token, CancellationToken ct)
+    private async Task NatIntroduceTask(string natPunchServerIP, int natPunchServerPort, string token, CancellationToken ct = default)
     {
-        _logger.LogInfo("NatIntroduceRoutine started.");
+        _logger.LogInfo("NATIntroduceRoutine started.");
 
         while (!ct.IsCancellationRequested)
         {
-            _logger.LogInfo($"SendNatIntroduceRequest: {natPunchServerIP}:{natPunchServerPort}");
+            _logger.LogInfo($"SendNATIntroduceRequest: {natPunchServerIP}:{natPunchServerPort}");
 
             _netServer.NatPunchModule.SendNatIntroduceRequest(natPunchServerIP, natPunchServerPort, token);
 
             await Task.Delay(TimeSpan.FromSeconds(15));
         }
 
-        _logger.LogInfo("NatIntroduceRoutine ended.");
+        _logger.LogInfo("NATIntroduceRoutine ended.");
     }
 }

@@ -91,7 +91,7 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
 
             NetClient.NatPunchModule.SendNatIntroduceRequest(natPunchServerIP, natPunchServerPort, token);
 
-            _logger.LogInfo($"SendNatIntroduceRequest: {natPunchServerIP}:{natPunchServerPort}");
+            _logger.LogInfo($"SendNATIntroduceRequest: {natPunchServerIP}:{natPunchServerPort}");
         }
         else
         {
@@ -322,7 +322,7 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
     /// <param name="token">The NAT punch token.</param>
     public void OnNatIntroductionResponse(IPEndPoint natLocalEndPoint, IPEndPoint natRemoteEndPoint, string token)
     {
-        _logger.LogInfo($"OnNatIntroductionResponse: {natRemoteEndPoint}");
+        _logger.LogInfo($"OnNATIntroductionResponse: {natRemoteEndPoint}");
         _endPoints.Add(natLocalEndPoint);
 
         Task.Run(async () =>

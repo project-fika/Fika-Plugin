@@ -221,7 +221,9 @@ public class FikaPlugin : BaseUnityPlugin
 
         GetClientConfig();
 
-        var fikaVersion = Assembly.GetAssembly(typeof(FikaPlugin)).GetName().Version.ToString();
+        var fikaVersion = Assembly.GetAssembly(typeof(FikaPlugin))
+            .GetName()
+            .Version.ToString();
 
         Logger.LogInfo($"Fika is loaded! Running version: {fikaVersion}");
 
@@ -360,13 +362,14 @@ public class FikaPlugin : BaseUnityPlugin
 
         NatPunchServerEnable = natPunchServerConfig.Enable;
 
-        if (natPunchServerConfig.Ip == "")
+        if (string.IsNullOrEmpty(natPunchServerConfig.IP))
         {
-            NatPunchServerIP = RequestHandler.Host.Replace("https://", "").Split(':')[0];
+            NatPunchServerIP = RequestHandler.Host.Replace("https://", "")
+                .Split(':')[0];
         }
         else
         {
-            NatPunchServerIP = natPunchServerConfig.Ip;
+            NatPunchServerIP = natPunchServerConfig.IP;
         }
 
         NatPunchServerPort = natPunchServerConfig.Port;

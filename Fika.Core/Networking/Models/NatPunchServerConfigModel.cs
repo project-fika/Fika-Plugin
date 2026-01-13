@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reflection;
 using System.Runtime.Serialization;
 
 namespace Fika.Core.Networking.Models;
@@ -11,7 +10,7 @@ public struct NatPunchServerConfigModel
     public bool Enable;
 
     [DataMember(Name = "ip")]
-    public string Ip;
+    public string IP;
 
     [DataMember(Name = "port")]
     public int Port;
@@ -22,7 +21,7 @@ public struct NatPunchServerConfigModel
     public NatPunchServerConfigModel(bool enable, string ip, int port, int natIntroduceAmount)
     {
         Enable = enable;
-        Ip = ip;
+        IP = ip;
         Port = port;
         NatIntroduceAmount = natIntroduceAmount;
     }
@@ -30,21 +29,20 @@ public struct NatPunchServerConfigModel
     public readonly void LogValues()
     {
         FikaPlugin.Instance.FikaLogger.LogInfo("Received NatPunchServer config from server:");
-        FieldInfo[] fields = typeof(NatPunchServerConfigModel).GetFields();
-        foreach (FieldInfo field in fields)
+        foreach (var field in typeof(NatPunchServerConfigModel).GetFields())
         {
-            object value = field.GetValue(this);
+            var value = field.GetValue(this);
             if (value is Array valueArray)
             {
-                string values = "";
-                for (int i = 0; i < valueArray.Length; i++)
+                var values = "";
+                for (var i = 0; i < valueArray.Length; i++)
                 {
                     if (i == 0)
                     {
                         values = valueArray.GetValue(i).ToString();
                         continue;
                     }
-                    values = values + ", " + valueArray.GetValue(i).ToString();
+                    values = values + ", " + valueArray.GetValue(i);
                 }
                 FikaPlugin.Instance.FikaLogger.LogInfo(field.Name + ": " + values);
                 continue;

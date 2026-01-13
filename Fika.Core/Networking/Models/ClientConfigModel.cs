@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.Serialization;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Networking.Models;
 
@@ -50,7 +51,7 @@ public struct ClientConfigModel
 
     public readonly void LogValues()
     {
-        FikaPlugin.Instance.FikaLogger.LogInfo("Received config from server:");
+        FikaGlobals.LogInfo("Received config from server:");
         foreach (var field in typeof(ClientConfigModel).GetFields())
         {
             var value = field.GetValue(this);
@@ -64,7 +65,7 @@ public struct ClientConfigModel
                         values = valueArray.GetValue(i).ToString();
                         continue;
                     }
-                    values = values + ", " + valueArray.GetValue(i).ToString();
+                    values = values + ", " + valueArray.GetValue(i);
                 }
                 FikaPlugin.Instance.FikaLogger.LogInfo(field.Name + ": " + values);
                 continue;
