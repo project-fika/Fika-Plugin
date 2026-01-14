@@ -148,7 +148,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
     internal FikaVOIPServer VOIPServer { get; set; }
     internal FikaVOIPClient VOIPClient { get; set; }
 
-    public async void Init()
+    public async Task Init()
     {
         _netServer = new(this)
         {

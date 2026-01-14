@@ -129,7 +129,7 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
     private int _snapshotCount;
     private GenericPacket _genericPacket;
 
-    public async void Init()
+    public async Task Init()
     {
         _netClient = new(this)
         {

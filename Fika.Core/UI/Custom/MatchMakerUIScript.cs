@@ -423,9 +423,9 @@ public class MatchMakerUIScript : MonoBehaviour
         }
 
         FikaBackendUtils.IsReconnect = reconnect;
-        NotificationManagerClass.DisplayMessageNotification(LocaleUtils.CONNECTING_TO_SESSION.Localized(), iconType: EFT.Communications.ENotificationIconType.EntryPoint);
-        NetManagerUtils.CreatePingingClient();
-        var pingingClient = Singleton<FikaPingingClient>.Instance;
+        NotificationManagerClass.DisplayMessageNotification(LocaleUtils.CONNECTING_TO_SESSION.Localized(),
+            iconType: EFT.Communications.ENotificationIconType.EntryPoint);
+        using var pingingClient = NetManagerUtils.CreatePingingClient();
 
         WaitForSeconds waitForSeconds = new(0.1f);
 
@@ -496,13 +496,10 @@ public class MatchMakerUIScript : MonoBehaviour
             AddPlayerRequest data = new(FikaBackendUtils.GroupId, profileId, FikaBackendUtils.IsSpectator);
             FikaRequestHandler.UpdateAddPlayer(data);
 
-            NetManagerUtils.DestroyPingingClient();
-
             callback?.Invoke(true);
         }
         else
         {
-            NetManagerUtils.DestroyPingingClient();
             Singleton<PreloaderUI>.Instance.ShowErrorScreen("ERROR JOINING", errorMessage, null);
             callback?.Invoke(false);
         }
@@ -593,7 +590,8 @@ public class MatchMakerUIScript : MonoBehaviour
             HoverTooltipArea tooltipArea;
             var image = server.GetComponent<Image>();
 
-            if (RaidSettings.LocationId != entry.Location && !(RaidSettings.LocationId.ToLower().StartsWith("sandbox") && entry.Location.ToLower().StartsWith("sandbox")))
+            if (RaidSettings.LocationId != entry.Location && !(RaidSettings.LocationId.StartsWith("sandbox", StringComparison.OrdinalIgnoreCase) &&
+                entry.Location.StartsWith("sandbox", StringComparison.OrdinalIgnoreCase)))
             {
                 button.enabled = false;
                 if (image != null)

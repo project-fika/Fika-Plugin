@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using BepInEx.Logging;
+using Comfort.Common;
 using Fika.Core.Main.GameMode;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Http;
@@ -14,7 +16,7 @@ namespace Fika.Core.Networking;
 /// <summary>
 /// Client used to verify that a connection can be established before initializing the <see cref="FikaClient"/> and <see cref="CoopGame"/>
 /// </summary>
-public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchListener
+public class FikaPingingClient : INetEventListener, INatPunchListener, IDisposable
 {
     /// <summary>
     /// The network client manager instance.
@@ -36,7 +38,7 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
     /// </summary>
     public bool InProgress;
 
-    private ManualLogSource _logger;
+    private readonly ManualLogSource _logger;
     private List<IPEndPoint> _endPoints;
     private NetDataWriter _writer;
 
@@ -46,10 +48,7 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
 
     private const float _responseWaitSeconds = 1f;
 
-    /// <summary>
-    /// Initializes the logger for the pinging client.
-    /// </summary>
-    public void Awake()
+    public FikaPingingClient()
     {
         _logger = Logger.CreateLogSource("Fika.PingingClient");
     }
@@ -335,7 +334,7 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
         });
     }
 
-    public void OnDestroy()
+    public void Dispose()
     {
         _endPoints.Clear();
         _candidates.Clear();
@@ -343,5 +342,12 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
         _candidates = null;
         _writer.Reset();
         _writer = null;
+
+        NetClient.Stop();
+        if (!Singleton<FikaPingingClient>.TryRelease(this))
+        {
+            _logger.LogError("Failed to release FikaPingingClient Singleton!");
+        }
+        _logger.LogInfo("Stopped FikaPingingClient");
     }
 }
