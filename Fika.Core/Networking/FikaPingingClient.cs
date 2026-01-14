@@ -43,6 +43,7 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
     private List<IPEndPoint> _candidates;
     private float _firstResponseTime;
     private bool _hasResponse;
+    private bool _reconnect;
 
     private const float _responseWaitSeconds = 1f;
 
@@ -59,13 +60,15 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
     /// </summary>
     /// <param name="serverId">The server identifier to connect to.</param>
     /// <returns>True if initialization was successful, otherwise false.</returns>
-    public bool Init(string serverId)
+    public bool Init(string serverId, bool reconnect)
     {
         NetClient = new(this)
         {
             UnconnectedMessagesEnabled = true,
             NatPunchEnabled = true
         };
+
+        _reconnect = reconnect;
 
         _endPoints = [];
         _candidates = [];
@@ -89,31 +92,30 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
             var natPunchServerPort = FikaPlugin.Instance.NatPunchServerPort;
             var token = $"Client:{FikaBackendUtils.ServerGuid}";
 
+            _logger.LogInfo("Sending NAT Introduce Request to NAT Punch Server...");
             NetClient.NatPunchModule.SendNatIntroduceRequest(natPunchServerIP, natPunchServerPort, token);
-
-            _logger.LogInfo($"SendNATIntroduceRequest: {natPunchServerIP}:{natPunchServerPort}");
         }
-        else
+
+        var ip = result.Ips[0];
+        var port = result.Port;
+
+        _endPoints = [];
+
+        foreach (var address in result.Ips)
         {
-            var ip = result.Ips[0];
-            var port = result.Port;
-            _endPoints = new List<IPEndPoint>(result.Ips.Length);
-            foreach (var address in result.Ips)
-            {
-                _endPoints.Add(NetworkUtils.ResolveRemoteAddress(address, port));
-            }
+            _endPoints.Add(NetworkUtils.ResolveRemoteAddress(address, port));
+        }
 
-            if (string.IsNullOrEmpty(ip))
-            {
-                _logger.LogError("IP was empty when pinging!");
-                return false;
-            }
+        if (string.IsNullOrEmpty(ip))
+        {
+            _logger.LogError("IP was empty when pinging!");
+            return false;
+        }
 
-            if (port == default)
-            {
-                _logger.LogError("Port was empty when pinging!");
-                return false;
-            }
+        if (port == default)
+        {
+            _logger.LogError("Port was empty when pinging!");
+            return false;
         }
 
         return true;
@@ -138,7 +140,7 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
     /// </summary>
     /// <param name="message">The message to send.</param>
     /// <param name="reconnect">Whether this is a reconnect attempt.</param>
-    public void PingEndPoint(string message, bool reconnect = false)
+    public void PingEndPoint(string message)
     {
         // Finalize selection after wait window
         if (!Received && _hasResponse && Time.realtimeSinceStartup - _firstResponseTime >= _responseWaitSeconds)
@@ -158,7 +160,7 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
 
         _writer.Reset();
         _writer.Put(message);
-        _writer.Put(reconnect);
+        _writer.Put(_reconnect);
 
         foreach (var ipEndPoint in _endPoints)
         {
@@ -315,23 +317,38 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
     }
 
     /// <summary>
-    /// Handles the NAT introduction response and sends hello messages to both local and remote endpoints.
+    /// Handles the NAT introduction response from NAT Punch Server and proceeds to NAT Punch the host endpoint.
     /// </summary>
-    /// <param name="natLocalEndPoint">The local NAT endpoint.</param>
-    /// <param name="natRemoteEndPoint">The remote NAT endpoint.</param>
+    /// <param name="localEndPoint">The local NAT endpoint.</param>
+    /// <param name="remoteEndPoint">The remote NAT endpoint.</param>
     /// <param name="token">The NAT punch token.</param>
-    public void OnNatIntroductionResponse(IPEndPoint natLocalEndPoint, IPEndPoint natRemoteEndPoint, string token)
+    public void OnNatIntroductionResponse(IPEndPoint localEndPoint, IPEndPoint remoteEndPoint, string token)
     {
-        _logger.LogInfo($"OnNATIntroductionResponse: {natRemoteEndPoint}");
-        _endPoints.Add(natLocalEndPoint);
+        _logger.LogInfo($"Received server endpoints from Nat Punch Server. Local: {localEndPoint}, Remote: {remoteEndPoint}.");
+        
+        // Add received server endpoints
+        _endPoints.Add(localEndPoint);
+        _endPoints.Add(remoteEndPoint);
 
-        Task.Run(async () =>
+        // Nat Punch
+        Task.Run(async () => 
         {
-            for (var i = 0; i < 20; i++)
+            NetDataWriter _natPunchWriter = new();
+
+            _natPunchWriter.Put(FikaBackendUtils.ServerGuid.ToString());
+            _writer.Put(_reconnect);
+
+            _logger.LogInfo($"Punching server endpoints. Local: {localEndPoint}, Remote: {remoteEndPoint}.");
+
+            for (var i = 0; i < 50; i++)
             {
-                PingEndPoint("fika.hello");
-                await Task.Delay(250);
+                NetClient.SendUnconnectedMessage(_writer.AsReadOnlySpan, localEndPoint);
+                NetClient.SendUnconnectedMessage(_writer.AsReadOnlySpan, remoteEndPoint);
+
+                await Task.Delay(50);
             }
+
+            _natPunchWriter.Reset();
         });
     }
 

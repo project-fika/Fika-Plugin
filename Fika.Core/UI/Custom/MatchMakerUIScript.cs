@@ -429,7 +429,7 @@ public class MatchMakerUIScript : MonoBehaviour
 
         WaitForSeconds waitForSeconds = new(0.1f);
 
-        if (pingingClient.Init(serverId))
+        if (pingingClient.Init(serverId, reconnect))
         {
             var attempts = 0;
             bool success;
@@ -443,8 +443,9 @@ public class MatchMakerUIScript : MonoBehaviour
             {
                 attempts++;
 
-                pingingClient.PingEndPoint(knockMessage, reconnect);
+                pingingClient.PingEndPoint(knockMessage);
                 pingingClient.NetClient.PollEvents();
+                pingingClient.NetClient.NatPunchModule.PollEvents();
                 success = pingingClient.Received;
                 rejected = pingingClient.Rejected;
                 inProgress = pingingClient.InProgress;

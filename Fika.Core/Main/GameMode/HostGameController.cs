@@ -451,7 +451,7 @@ public class HostGameController : BaseGameController, IBotGame
 
         if (FikaPlugin.UseNatPunching.Value)
         {
-            _server.StopNatIntroduceRoutine();
+            _server.StopNatIntroduceTask();
         }
 
         if (startButton != null)

@@ -1041,25 +1041,38 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
     {
         // Do nothing
     }
+
+    /// <summary>
+    /// Handles the NAT introduction response from NAT Punch Server and proceeds to NAT Punch the client endpoint.
+    /// </summary>
     public void OnNatIntroductionResponse(IPEndPoint localEndPoint, IPEndPoint remoteEndPoint, string token)
     {
-        _logger.LogInfo($"OnNATIntroductionResponse: {remoteEndPoint}");
-
+        _logger.LogInfo($"Received client endpoints from Nat Punch Server. Local: {localEndPoint}, Remote: {remoteEndPoint}.");
+        
+        // Nat Punch
         Task.Run(async () =>
         {
-            NetDataWriter data = new();
-            data.Put("fika.hello");
+            _logger.LogInfo($"Punching client endpoints. Local: {localEndPoint}, Remote: {remoteEndPoint}.");
 
-            for (var i = 0; i < 20; i++)
+            NetDataWriter _natPunchWriter = new();
+            _natPunchWriter.Put("fika.hello");
+
+            for (var i = 0; i < 50; i++)
             {
-                _netServer.SendUnconnectedMessage(data, localEndPoint);
-                _netServer.SendUnconnectedMessage(data, remoteEndPoint);
-                await Task.Delay(250);
+                _netServer.SendUnconnectedMessage(_natPunchWriter.AsReadOnlySpan, localEndPoint);
+                _netServer.SendUnconnectedMessage(_natPunchWriter.AsReadOnlySpan, remoteEndPoint);
+                
+                await Task.Delay(50);
             }
+
+            _natPunchWriter.Reset();
         });
     }
 
-    public void StopNatIntroduceRoutine()
+    /// <summary>
+    /// Stops the NatIntroduceTask routine. Used when host starts the raid.
+    /// </summary>
+    public void StopNatIntroduceTask()
     {
         if (_natIntroduceRoutineCts != null)
         {
@@ -1067,19 +1080,18 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         }
     }
 
+    /// <summary>
+    /// Periodically sends a NAT Introduce Request to the NAT Punch Server, creating an external route that will eventually be NAT punched by clients.
+    /// This also lets the NAT Punch Server know that this server can be NAT punched. The server's GUID is provided in the token and used as the unique identifier.
+    /// This route must be kept alive until a client connects, hence why a request (packet) is sent every 15 seconds.
+    /// </summary>
     private async Task NatIntroduceTask(string natPunchServerIP, int natPunchServerPort, string token, CancellationToken ct = default)
     {
-        _logger.LogInfo("NATIntroduceRoutine started.");
-
         while (!ct.IsCancellationRequested)
         {
-            _logger.LogInfo($"SendNATIntroduceRequest: {natPunchServerIP}:{natPunchServerPort}");
-
             _netServer.NatPunchModule.SendNatIntroduceRequest(natPunchServerIP, natPunchServerPort, token);
 
             await Task.Delay(TimeSpan.FromSeconds(15));
         }
-
-        _logger.LogInfo("NATIntroduceRoutine ended.");
     }
 }
