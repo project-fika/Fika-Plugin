@@ -37,7 +37,7 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
     public bool InProgress;
 
     private ManualLogSource _logger;
-    private List<IPEndPoint> _endPoints;
+    private List<IPEndPoint> _endPoints = [];
     private NetDataWriter _writer;
 
     private List<IPEndPoint> _candidates;
@@ -98,8 +98,6 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
 
         var ip = result.Ips[0];
         var port = result.Port;
-
-        _endPoints = [];
 
         foreach (var address in result.Ips)
         {
