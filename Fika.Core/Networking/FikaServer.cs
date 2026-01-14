@@ -1054,7 +1054,6 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         if (id != FikaBackendUtils.ServerGuid)
         {
             Console.WriteLine($"Incorrect GUID: {id}");
-            return;
         }
 
         _logger.LogInfo($"Received endpoint {targetEndPoint} from the NAT punching server.");

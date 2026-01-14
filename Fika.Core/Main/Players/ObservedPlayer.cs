@@ -987,14 +987,14 @@ public class ObservedPlayer : FikaPlayer
         }
         if (FikaBackendUtils.IsClient)
         {
-            var observedCorpse = CreateCorpse<ObservedCorpse>(CorpseSyncPacket.OverallVelocity);
+            var observedCorpse = CreateCorpse<ObservedCorpse>(Velocity);
             observedCorpse.IsZombieCorpse = UsedSimplifiedSkeleton;
             observedCorpse.SetSpecificSettings(PlayerBones.RightPalm);
             Singleton<GameWorld>.Instance.ObservedPlayersCorpses.Add(NetId, observedCorpse);
             return observedCorpse;
         }
 
-        var corpse = CreateCorpse<Corpse>(CorpseSyncPacket.OverallVelocity);
+        var corpse = CreateCorpse<Corpse>(Velocity);
         corpse.IsZombieCorpse = UsedSimplifiedSkeleton;
         //CorpsePositionSyncer.Create(corpse.gameObject, corpse, NetId);
         return corpse;

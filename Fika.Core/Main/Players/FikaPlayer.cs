@@ -686,7 +686,7 @@ public class FikaPlayer : LocalPlayer
             return corpse;
         }
 
-        var observedCorpse = CreateCorpse<ObservedCorpse>(CorpseSyncPacket.OverallVelocity);
+        var observedCorpse = CreateCorpse<ObservedCorpse>(Velocity);
         observedCorpse.IsZombieCorpse = UsedSimplifiedSkeleton;
         observedCorpse.SetSpecificSettings(PlayerBones.RightPalm);
         Singleton<GameWorld>.Instance.ObservedPlayersCorpses.Add(NetId, observedCorpse);
@@ -876,7 +876,6 @@ public class FikaPlayer : LocalPlayer
             Direction = LastDamageInfo.Direction,
             Point = LastDamageInfo.HitPoint,
             Force = _corpseAppliedForce,
-            OverallVelocity = Velocity,
             InventoryDescriptor = inventoryDescriptor,
             ItemSlot = EquipmentSlot.ArmBand
         };
