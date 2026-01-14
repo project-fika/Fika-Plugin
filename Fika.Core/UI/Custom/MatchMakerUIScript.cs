@@ -445,6 +445,7 @@ public class MatchMakerUIScript : MonoBehaviour
 
                 pingingClient.PingEndPoint(knockMessage, reconnect);
                 pingingClient.NetClient.PollEvents();
+                pingingClient.NetClient.NatPunchModule?.PollEvents();
                 success = pingingClient.Received;
                 rejected = pingingClient.Rejected;
                 inProgress = pingingClient.InProgress;
