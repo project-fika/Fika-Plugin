@@ -130,7 +130,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
     private NetManager _netServer;
     private DateTime? _gameStartTime;
     private NetDataWriter _dataWriter;
-    private int _port;
+    private ushort _port;
     private CoopHandler _coopHandler;
     private ManualLogSource _logger;
     private int _currentNetId;

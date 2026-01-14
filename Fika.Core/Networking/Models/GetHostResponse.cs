@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace Fika.Core.Networking.Models;
 
 [DataContract]
-public struct GetHostResponse(string[] ips, Guid serverGuid, int port, bool natPunch, bool isHeadless)
+public struct GetHostResponse(string[] ips, Guid serverGuid, ushort port, bool natPunch, bool isHeadless)
 {
     [DataMember(Name = "ips")]
     public string[] Ips = ips;
@@ -13,7 +13,7 @@ public struct GetHostResponse(string[] ips, Guid serverGuid, int port, bool natP
     public Guid ServerGuid = serverGuid;
 
     [DataMember(Name = "port")]
-    public int Port = port;
+    public ushort Port = port;
 
     [DataMember(Name = "natPunch")]
     public bool NatPunch = natPunch;
