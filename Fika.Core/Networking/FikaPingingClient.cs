@@ -309,6 +309,7 @@ public class FikaPingingClient : INetEventListener, INatPunchListener, IDisposab
     /// <inheritdoc/>
     public void OnNatIntroductionSuccess(IPEndPoint targetEndPoint, NatAddressType type, string token)
     {
+        _logger.LogInfo($"Received endpoint {targetEndPoint} from the NAT punching master server.");
         CommitEndpoint(targetEndPoint);
         Received = true;
         _endPoints.Clear(); // stop all further pings

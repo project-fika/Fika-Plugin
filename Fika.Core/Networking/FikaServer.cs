@@ -1031,7 +1031,6 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
     }
 
     // NAT Punching
-
     public void OnNatIntroductionRequest(IPEndPoint localEndPoint, IPEndPoint remoteEndPoint, string token)
     {
         // Do nothing
