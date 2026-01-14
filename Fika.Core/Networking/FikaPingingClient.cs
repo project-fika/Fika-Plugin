@@ -167,9 +167,8 @@ public class FikaPingingClient : INetEventListener, INatPunchListener, IDisposab
 
     private void CommitEndpoint(IPEndPoint ep)
     {
-        FikaBackendUtils.RemoteIp = ep.Address.ToString();
-        FikaBackendUtils.RemotePort = ep.Port;
-        FikaBackendUtils.LocalPort = NetClient.LocalPort;
+        FikaBackendUtils.RemoteEndPoint = ep;
+        FikaBackendUtils.LocalPort = (ushort)NetClient.LocalPort;
 
         _logger.LogInfo($"Picked candidate {ep.Address}:{ep.Port}, using LocalPort: {NetClient.LocalPort}");
     }
@@ -310,28 +309,9 @@ public class FikaPingingClient : INetEventListener, INatPunchListener, IDisposab
     /// <inheritdoc/>
     public void OnNatIntroductionSuccess(IPEndPoint targetEndPoint, NatAddressType type, string token)
     {
-        // Do nothing
-    }
-
-    /// <summary>
-    /// Handles the NAT introduction response and sends hello messages to both local and remote endpoints.
-    /// </summary>
-    /// <param name="natLocalEndPoint">The local NAT endpoint.</param>
-    /// <param name="natRemoteEndPoint">The remote NAT endpoint.</param>
-    /// <param name="token">The NAT punch token.</param>
-    public void OnNatIntroductionResponse(IPEndPoint natLocalEndPoint, IPEndPoint natRemoteEndPoint, string token)
-    {
-        _logger.LogInfo($"OnNATIntroductionResponse: {natRemoteEndPoint}");
-        _endPoints.Add(natLocalEndPoint);
-
-        Task.Run(async () =>
-        {
-            for (var i = 0; i < 20; i++)
-            {
-                PingEndPoint("fika.hello");
-                await Task.Delay(250);
-            }
-        });
+        CommitEndpoint(targetEndPoint);
+        Received = true;
+        _endPoints.Clear(); // stop all further pings
     }
 
     public void Dispose()

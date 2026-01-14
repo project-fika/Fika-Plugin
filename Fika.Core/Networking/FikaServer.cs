@@ -1041,6 +1041,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
     {
         // Do nothing
     }
+
     public void OnNatIntroductionResponse(IPEndPoint localEndPoint, IPEndPoint remoteEndPoint, string token)
     {
         _logger.LogInfo($"OnNATIntroductionResponse: {remoteEndPoint}");

@@ -183,17 +183,16 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
             _netClient.Start();
         }
 
-        var ip = FikaBackendUtils.RemoteIp;
-        var port = FikaBackendUtils.RemotePort;
+        var endPoint = FikaBackendUtils.RemoteEndPoint;
         var connectString = FikaBackendUtils.IsReconnect ? "fika.reconnect" : "fika.core";
 
-        if (string.IsNullOrEmpty(ip))
+        if (endPoint.Address == null)
         {
             Singleton<PreloaderUI>.Instance.ShowErrorScreen("Network Error", "Unable to connect to the raid server. IP and/or Port was empty when requesting data!");
         }
         else
         {
-            ServerConnection = _netClient.Connect(ip, port, connectString);
+            ServerConnection = _netClient.Connect(FikaBackendUtils.RemoteEndPoint, connectString);
         }
     }
 

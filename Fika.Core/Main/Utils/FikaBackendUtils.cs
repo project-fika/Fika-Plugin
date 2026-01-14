@@ -53,9 +53,8 @@ public static class FikaBackendUtils
     public static bool IsTransit { get; set; }
     public static bool IsSpectator { get; internal set; }
     public static bool IsHostNatPunch { get; internal set; }
-    public static string RemoteIp { get; internal set; }
-    public static int RemotePort { get; internal set; }
-    public static int LocalPort { get; internal set; } = 0;
+    public static IPEndPoint RemoteEndPoint { get; internal set; }
+    public static ushort LocalPort { get; internal set; }
     public static string HostLocationId { get; internal set; }
     public static RaidSettings CachedRaidSettings { get; set; }
     public static GClass1628<GroupPlayerViewModelClass> GroupPlayers { get; set; } = [];
