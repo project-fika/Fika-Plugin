@@ -115,6 +115,7 @@ public class FikaSettings : SettingsTab
     private SettingFloatSlider _udpPort;
     private SettingToggle _useUpnp;
     private SettingToggle _useNatPunching;
+    private SettingToggle _useFikaNatPunchServer;
     private SettingFloatSlider _connectionTimeout;
     private SettingDropDown _sendRate;
     private SettingToggle _allowVoip;
@@ -228,6 +229,8 @@ public class FikaSettings : SettingsTab
         advancedOptions.Add(_useUpnp);
         _useNatPunching = CreateToggle(content);
         advancedOptions.Add(_useNatPunching);
+        _useFikaNatPunchServer = CreateToggle(content);
+
         _connectionTimeout = CreateFloatSlider(content);
         _sendRate = CreateDropDown(content);
         _allowVoip = CreateToggle(content);
@@ -338,6 +341,7 @@ public class FikaSettings : SettingsTab
         SetupUshortSlider(_udpPort, FikaPlugin.UDPPort);
         SetupToggle(_useUpnp, FikaPlugin.UseUPnP);
         SetupToggle(_useNatPunching, FikaPlugin.UseNatPunching);
+        SetupToggle(_useFikaNatPunchServer, FikaPlugin.UseFikaNatPunchServer);
         SetupIntSlider(_connectionTimeout, FikaPlugin.ConnectionTimeout);
         SetupDropDown(_sendRate, FikaPlugin.SendRate);
         SetupToggle(_allowVoip, FikaPlugin.AllowVOIP);

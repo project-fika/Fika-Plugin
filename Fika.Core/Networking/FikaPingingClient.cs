@@ -86,11 +86,18 @@ public class FikaPingingClient : INetEventListener, INatPunchListener, IDisposab
 
             var natPunchServerIP = FikaPlugin.Instance.NatPunchServerIP;
             var natPunchServerPort = FikaPlugin.Instance.NatPunchServerPort;
+
+            if (result.UseFikaNatPunchServer)
+            {
+                natPunchServerIP = FikaPlugin.Instance.FikaNatPunchServerIP;
+                natPunchServerPort = FikaPlugin.Instance.FikaNatPunchServerPort;
+            }
+
             var token = $"Client:{FikaBackendUtils.ServerGuid}";
 
             NetClient.NatPunchModule.SendNatIntroduceRequest(natPunchServerIP, natPunchServerPort, token);
 
-            _logger.LogInfo($"SendNATIntroduceRequest: {natPunchServerIP}:{natPunchServerPort}");
+            _logger.LogInfo($"Sent NAT Introduce Request to Nat Punch Server: {natPunchServerIP}:{natPunchServerPort}.");
         }
         else
         {
@@ -309,7 +316,8 @@ public class FikaPingingClient : INetEventListener, INatPunchListener, IDisposab
     /// <inheritdoc/>
     public void OnNatIntroductionSuccess(IPEndPoint targetEndPoint, NatAddressType type, string token)
     {
-        _logger.LogInfo($"Received endpoint {targetEndPoint} from the NAT punching master server.");
+        _logger.LogInfo($"Received endpoint {targetEndPoint} from the NAT punching server.");
+
         CommitEndpoint(targetEndPoint);
         Received = true;
         _endPoints.Clear(); // stop all further pings

@@ -311,6 +311,8 @@ public static class LocaleUtils
     public const string BEPINEX_USE_UPNP_D = "F_BepInEx_UseUPnP_D";
     public const string BEPINEX_USE_NAT_PUNCH_T = "F_BepInEx_UseNatPunch_T";
     public const string BEPINEX_USE_NAT_PUNCH_D = "F_BepInEx_UseNatPunch_D";
+    public const string BEPINEX_USE_FIKA_NAT_PUNCH_SERVER_T = "F_BepInEx_UseFikaNatPunchServer_T";
+    public const string BEPINEX_USE_FIKA_NAT_PUNCH_SERVER_D = "F_BepInEx_UseFikaNatPunchServer_D";
     public const string BEPINEX_CONNECTION_TIMEOUT_T = "F_BepInEx_ConnectionTimeout_T";
     public const string BEPINEX_CONNECTION_TIMEOUT_D = "F_BepInEx_ConnectionTimeout_D";
     public const string BEPINEX_SEND_RATE_T = "F_BepInEx_SendRate_T";

@@ -271,8 +271,14 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
 
             var natPunchServerIP = FikaPlugin.Instance.NatPunchServerIP;
             var natPunchServerPort = FikaPlugin.Instance.NatPunchServerPort;
-            var token = $"Server:{FikaBackendUtils.ServerGuid}";
 
+            if (FikaPlugin.UseFikaNatPunchServer.Value)
+            {
+                natPunchServerIP = FikaPlugin.Instance.FikaNatPunchServerIP;
+                natPunchServerPort = FikaPlugin.Instance.FikaNatPunchServerPort;
+            }
+
+            var token = $"Server:{FikaBackendUtils.ServerGuid}";
             var natIntroduceTask = Task.Run(() => NatIntroduceTask(natPunchServerIP, natPunchServerPort, token, _natIntroduceRoutineCts.Token));
         }
         else
@@ -331,7 +337,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
                 iconType: EFT.Communications.ENotificationIconType.Alert);
         }
 
-        SetHostRequest body = new([.. ipAddresses], _port, FikaPlugin.UseNatPunching.Value, FikaBackendUtils.IsHeadless);
+        SetHostRequest body = new([.. ipAddresses], _port, FikaPlugin.UseNatPunching.Value, FikaPlugin.UseFikaNatPunchServer.Value, FikaBackendUtils.IsHeadless);
         FikaRequestHandler.UpdateSetHost(body);
 
         if (!FikaBackendUtils.IsHeadless)
@@ -1051,25 +1057,9 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
             return;
         }
 
+        _logger.LogInfo($"Received endpoint {targetEndPoint} from the NAT punching server.");
+
         //_netServer.Connect(targetEndPoint, id.ToString());
-    }
-
-    public void OnNatIntroductionResponse(IPEndPoint localEndPoint, IPEndPoint remoteEndPoint, string token)
-    {
-        _logger.LogInfo($"OnNATIntroductionResponse: {remoteEndPoint}");
-
-        Task.Run(async () =>
-        {
-            NetDataWriter data = new();
-            data.Put("fika.hello");
-
-            for (var i = 0; i < 20; i++)
-            {
-                _netServer.SendUnconnectedMessage(data, localEndPoint);
-                _netServer.SendUnconnectedMessage(data, remoteEndPoint);
-                await Task.Delay(250);
-            }
-        });
     }
 
     public void StopNatIntroduceRoutine()
@@ -1082,17 +1072,15 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
 
     private async Task NatIntroduceTask(string natPunchServerIP, int natPunchServerPort, string token, CancellationToken ct = default)
     {
-        _logger.LogInfo("NATIntroduceRoutine started.");
+        _logger.LogInfo("Send NAT Introduce Request routine started.");
 
         while (!ct.IsCancellationRequested)
         {
-            _logger.LogInfo($"SendNATIntroduceRequest: {natPunchServerIP}:{natPunchServerPort}");
-
             _netServer.NatPunchModule.SendNatIntroduceRequest(natPunchServerIP, natPunchServerPort, token);
 
             await Task.Delay(TimeSpan.FromSeconds(15));
         }
 
-        _logger.LogInfo("NATIntroduceRoutine ended.");
+        _logger.LogInfo("Send NAT Introduce Request routine stopped.");
     }
 }
