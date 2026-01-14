@@ -144,6 +144,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
     private JobHandle _stateHandle;
     private int _snapshotCount;
     private GenericPacket _genericPacket;
+    private bool _isNatIntoduceSuccess;
 
     internal FikaVOIPServer VOIPServer { get; set; }
     internal FikaVOIPClient VOIPClient { get; set; }
@@ -1031,42 +1032,27 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
     }
 
     // NAT Punching
-
     public void OnNatIntroductionRequest(IPEndPoint localEndPoint, IPEndPoint remoteEndPoint, string token)
     {
-        // Do nothing
+        _logger.LogInfo($"NAT Introduction request received. Local: {localEndPoint}, Remote: {remoteEndPoint}.");
     }
 
     public void OnNatIntroductionSuccess(IPEndPoint targetEndPoint, NatAddressType type, string token)
     {
-        // Do nothing
-    }
-
-    /// <summary>
-    /// Handles the NAT introduction response from NAT Punch Server and proceeds to NAT Punch the client endpoint.
-    /// </summary>
-    public void OnNatIntroductionResponse(IPEndPoint localEndPoint, IPEndPoint remoteEndPoint, string token)
-    {
-        _logger.LogInfo($"Received client endpoints from Nat Punch Server. Local: {localEndPoint}, Remote: {remoteEndPoint}.");
-        
-        // Nat Punch
-        Task.Run(async () =>
+        if (_isNatIntoduceSuccess)
         {
-            _logger.LogInfo($"Punching client endpoints. Local: {localEndPoint}, Remote: {remoteEndPoint}.");
+            return;
+        }
 
-            NetDataWriter _natPunchWriter = new();
-            _natPunchWriter.Put("fika.hello");
+        _logger.LogInfo($"NAT Introduction successful: {targetEndPoint}");
+        _isNatIntoduceSuccess = true;
 
-            for (var i = 0; i < 50; i++)
-            {
-                _netServer.SendUnconnectedMessage(_natPunchWriter.AsReadOnlySpan, localEndPoint);
-                _netServer.SendUnconnectedMessage(_natPunchWriter.AsReadOnlySpan, remoteEndPoint);
-                
-                await Task.Delay(50);
-            }
+        NetDataWriter _natPunchWriter = new();
+        _natPunchWriter.Put("fika.hello");
 
-            _natPunchWriter.Reset();
-        });
+        _netServer.SendUnconnectedMessage(_natPunchWriter.AsReadOnlySpan, targetEndPoint);
+
+        _natPunchWriter.Reset();
     }
 
     /// <summary>

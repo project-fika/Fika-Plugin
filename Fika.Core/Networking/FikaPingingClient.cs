@@ -44,6 +44,7 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
     private float _firstResponseTime;
     private bool _hasResponse;
     private bool _reconnect;
+    private bool _isNatIntoduceSuccess = false;
 
     private const float _responseWaitSeconds = 1f;
 
@@ -305,49 +306,41 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
     /// <inheritdoc/>
     public void OnNatIntroductionRequest(IPEndPoint localEndPoint, IPEndPoint remoteEndPoint, string token)
     {
-        // Do nothing
+        _logger.LogInfo($"NAT Introduction request received. Local: {localEndPoint}, Remote: {remoteEndPoint}.");
+
+        if (!_endPoints.Contains(localEndPoint))
+        {
+            _endPoints.Add(targetEndPoint);
+        }
+
+
     }
 
     /// <inheritdoc/>
     public void OnNatIntroductionSuccess(IPEndPoint targetEndPoint, NatAddressType type, string token)
     {
-        // Do nothing
-    }
-
-    /// <summary>
-    /// Handles the NAT introduction response from NAT Punch Server and proceeds to NAT Punch the host endpoint.
-    /// </summary>
-    /// <param name="localEndPoint">The local NAT endpoint.</param>
-    /// <param name="remoteEndPoint">The remote NAT endpoint.</param>
-    /// <param name="token">The NAT punch token.</param>
-    public void OnNatIntroductionResponse(IPEndPoint localEndPoint, IPEndPoint remoteEndPoint, string token)
-    {
-        _logger.LogInfo($"Received server endpoints from Nat Punch Server. Local: {localEndPoint}, Remote: {remoteEndPoint}.");
-        
-        // Add received server endpoints
-        _endPoints.Add(localEndPoint);
-        _endPoints.Add(remoteEndPoint);
-
-        // Nat Punch
-        Task.Run(async () => 
+        if (_isNatIntoduceSuccess)
         {
-            NetDataWriter _natPunchWriter = new();
+            return;
+        }
 
-            _natPunchWriter.Put(FikaBackendUtils.ServerGuid.ToString());
-            _writer.Put(_reconnect);
+        _logger.LogInfo($"NAT Introduction successful: {targetEndPoint}");
+        _isNatIntoduceSuccess = true;
 
-            _logger.LogInfo($"Punching server endpoints. Local: {localEndPoint}, Remote: {remoteEndPoint}.");
+        // Add received server endpoint
+        if (!_endPoints.Contains(targetEndPoint))
+        {
+            _endPoints.Add(targetEndPoint);
+        }
 
-            for (var i = 0; i < 50; i++)
-            {
-                NetClient.SendUnconnectedMessage(_writer.AsReadOnlySpan, localEndPoint);
-                NetClient.SendUnconnectedMessage(_writer.AsReadOnlySpan, remoteEndPoint);
+        NetDataWriter _natPunchWriter = new();
 
-                await Task.Delay(50);
-            }
+        _natPunchWriter.Put(FikaBackendUtils.ServerGuid.ToString());
+        _writer.Put(_reconnect);
 
-            _natPunchWriter.Reset();
-        });
+        NetClient.SendUnconnectedMessage(_writer.AsReadOnlySpan, targetEndPoint);
+
+        _natPunchWriter.Reset();
     }
 
     public void OnDestroy()
