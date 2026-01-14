@@ -307,13 +307,6 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
     public void OnNatIntroductionRequest(IPEndPoint localEndPoint, IPEndPoint remoteEndPoint, string token)
     {
         _logger.LogInfo($"NAT Introduction request received. Local: {localEndPoint}, Remote: {remoteEndPoint}.");
-
-        if (!_endPoints.Contains(localEndPoint))
-        {
-            _endPoints.Add(targetEndPoint);
-        }
-
-
     }
 
     /// <inheritdoc/>
