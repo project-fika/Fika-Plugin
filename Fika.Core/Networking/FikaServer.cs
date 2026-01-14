@@ -1058,6 +1058,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
 
         _logger.LogInfo($"Received endpoint {targetEndPoint} from the NAT punching server.");
 
+        // todo: proper connect
         //_netServer.Connect(targetEndPoint, id.ToString());
     }
 
