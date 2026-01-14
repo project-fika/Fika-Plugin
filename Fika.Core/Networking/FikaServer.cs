@@ -1050,7 +1050,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
             return;
         }
 
-        _netServer.Connect(targetEndPoint, id.ToString());
+        //_netServer.Connect(targetEndPoint, id.ToString());
     }
 
     public void OnNatIntroductionResponse(IPEndPoint localEndPoint, IPEndPoint remoteEndPoint, string token)
