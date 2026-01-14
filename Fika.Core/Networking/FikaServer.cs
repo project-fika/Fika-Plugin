@@ -1039,7 +1039,19 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
 
     public void OnNatIntroductionSuccess(IPEndPoint targetEndPoint, NatAddressType type, string token)
     {
-        // Do nothing
+        var message = token.Split(":")[1];
+        if (!Guid.TryParse(message, out var id))
+        {
+            Console.WriteLine($"Could not parse token: {message}");
+        }
+
+        if (id != FikaBackendUtils.ServerGuid)
+        {
+            Console.WriteLine($"Incorrect GUID: {id}");
+            return;
+        }
+
+        _netServer.Connect(targetEndPoint, id.ToString());
     }
 
     public void OnNatIntroductionResponse(IPEndPoint localEndPoint, IPEndPoint remoteEndPoint, string token)
