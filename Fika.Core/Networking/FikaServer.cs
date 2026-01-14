@@ -1038,6 +1038,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
 
     public void OnNatIntroductionSuccess(IPEndPoint targetEndPoint, NatAddressType type, string token)
     {
+        _logger.LogInfo($"Received NAT introduction from master server for [{targetEndPoint}]: {token}");
         var message = token.Split(":")[1];
         if (!Guid.TryParse(message, out var id))
         {
