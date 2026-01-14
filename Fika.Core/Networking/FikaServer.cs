@@ -1048,28 +1048,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         if (id != FikaBackendUtils.ServerGuid)
         {
             Console.WriteLine($"Incorrect GUID: {id}");
-            return;
         }
-
-        //_netServer.Connect(targetEndPoint, id.ToString());
-    }
-
-    public void OnNatIntroductionResponse(IPEndPoint localEndPoint, IPEndPoint remoteEndPoint, string token)
-    {
-        _logger.LogInfo($"OnNATIntroductionResponse: {remoteEndPoint}");
-
-        Task.Run(async () =>
-        {
-            NetDataWriter data = new();
-            data.Put("fika.hello");
-
-            for (var i = 0; i < 20; i++)
-            {
-                _netServer.SendUnconnectedMessage(data, localEndPoint);
-                _netServer.SendUnconnectedMessage(data, remoteEndPoint);
-                await Task.Delay(250);
-            }
-        });
     }
 
     public void StopNatIntroduceRoutine()

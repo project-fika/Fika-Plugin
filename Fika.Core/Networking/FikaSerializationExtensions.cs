@@ -876,7 +876,6 @@ public static class FikaSerializationExtensions
 
         writer.PutUnmanaged(packet.Direction);
         writer.PutUnmanaged(packet.Point);
-        writer.PutUnmanaged(packet.OverallVelocity);
         writer.Put(packet.Force);
 
         writer.PutEnum(packet.BodyPartColliderType);
@@ -896,7 +895,6 @@ public static class FikaSerializationExtensions
 
             Direction = reader.GetUnmanaged<Vector3>(),
             Point = reader.GetUnmanaged<Vector3>(),
-            OverallVelocity = reader.GetUnmanaged<Vector3>(),
             Force = reader.GetFloat(),
 
             BodyPartColliderType = reader.GetEnum<EBodyPartColliderType>(),
