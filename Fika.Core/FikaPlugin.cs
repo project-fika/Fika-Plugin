@@ -180,6 +180,7 @@ public class FikaPlugin : BaseUnityPlugin
     public static ConfigEntry<bool> UseNatPunching { get; set; }
     public static ConfigEntry<int> ConnectionTimeout { get; set; }
     public static ConfigEntry<ESendRate> SendRate { get; set; }
+    public static ConfigEntry<bool> UseFikaNatPunchServer { get; set; }
     public static ConfigEntry<bool> AllowVOIP { get; set; }
 
     // Gameplay
@@ -208,6 +209,11 @@ public class FikaPlugin : BaseUnityPlugin
     public string NatPunchServerIP;
     public int NatPunchServerPort;
     public int NatPunchServerNatIntroduceAmount;
+    #endregion
+
+    #region fikanatpunchserver config
+    public string FikaNatPunchServerIP = "";
+    public int FikaNatPunchServerPort = 6790;
     #endregion
 
     protected void Awake()
@@ -361,19 +367,11 @@ public class FikaPlugin : BaseUnityPlugin
         var natPunchServerConfig = FikaRequestHandler.GetNatPunchServerConfig();
 
         NatPunchServerEnable = natPunchServerConfig.Enable;
-
-        if (string.IsNullOrEmpty(natPunchServerConfig.IP))
-        {
-            NatPunchServerIP = RequestHandler.Host.Replace("https://", "")
-                .Split(':')[0];
-        }
-        else
-        {
-            NatPunchServerIP = natPunchServerConfig.IP;
-        }
+        
+        NatPunchServerIP = RequestHandler.Host.Replace("https://", "")
+            .Split(':')[0];
 
         NatPunchServerPort = natPunchServerConfig.Port;
-        NatPunchServerNatIntroduceAmount = natPunchServerConfig.NatIntroduceAmount;
 
         natPunchServerConfig.LogValues();
     }
@@ -1028,7 +1026,7 @@ public class FikaPlugin : BaseUnityPlugin
             {
                 Category = networkHeader,
                 DispName = LocaleUtils.BEPINEX_UDP_PORT_T.Localized(),
-                Order = 5
+                Order = 6
             }),
             "UDP Port", ref failed, headers);
 
@@ -1037,7 +1035,7 @@ public class FikaPlugin : BaseUnityPlugin
             {
                 Category = networkHeader,
                 DispName = LocaleUtils.BEPINEX_USE_UPNP_T.Localized(),
-                Order = 4,
+                Order = 5,
                 IsAdvanced = true
             }),
             "Use UPnP", ref failed, headers);
@@ -1047,10 +1045,20 @@ public class FikaPlugin : BaseUnityPlugin
             {
                 Category = networkHeader,
                 DispName = LocaleUtils.BEPINEX_USE_NAT_PUNCH_T.Localized(),
-                Order = 3,
+                Order = 4,
                 IsAdvanced = true
             }),
             "Use NAT Punching", ref failed, headers);
+
+        UseFikaNatPunchServer = SetupSetting(networkDefaultHeader, "Use Fika NAT Punch Server", false,
+            new ConfigDescription(LocaleUtils.BEPINEX_USE_FIKA_NAT_PUNCH_SERVER_D.Localized(), tags: new ConfigurationManagerAttributes()
+            {
+                Category = networkHeader,
+                DispName = LocaleUtils.BEPINEX_USE_FIKA_NAT_PUNCH_SERVER_T.Localized(),
+                Order = 3,
+                IsAdvanced = true
+            }),
+            "Use Fika NAT Punch Server", ref failed, headers);
 
         ConnectionTimeout = SetupSetting(networkDefaultHeader, "Connection Timeout", 30,
             new ConfigDescription(LocaleUtils.BEPINEX_CONNECTION_TIMEOUT_D.Localized(),

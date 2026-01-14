@@ -271,8 +271,14 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
 
             var natPunchServerIP = FikaPlugin.Instance.NatPunchServerIP;
             var natPunchServerPort = FikaPlugin.Instance.NatPunchServerPort;
-            var token = $"Server:{FikaBackendUtils.ServerGuid}";
 
+            if (FikaPlugin.UseFikaNatPunchServer.Value)
+            {
+                natPunchServerIP = FikaPlugin.Instance.FikaNatPunchServerIP;
+                natPunchServerPort = FikaPlugin.Instance.FikaNatPunchServerPort;
+            }
+
+            var token = $"Server:{FikaBackendUtils.ServerGuid}";
             var natIntroduceTask = Task.Run(() => NatIntroduceTask(natPunchServerIP, natPunchServerPort, token, _natIntroduceRoutineCts.Token));
         }
         else
@@ -331,7 +337,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
                 iconType: EFT.Communications.ENotificationIconType.Alert);
         }
 
-        SetHostRequest body = new([.. ipAddresses], _port, FikaPlugin.UseNatPunching.Value, FikaBackendUtils.IsHeadless);
+        SetHostRequest body = new([.. ipAddresses], _port, FikaPlugin.UseNatPunching.Value, FikaPlugin.UseFikaNatPunchServer.Value, FikaBackendUtils.IsHeadless);
         FikaRequestHandler.UpdateSetHost(body);
 
         if (!FikaBackendUtils.IsHeadless)
@@ -1049,6 +1055,11 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         {
             Console.WriteLine($"Incorrect GUID: {id}");
         }
+
+        _logger.LogInfo($"Received endpoint {targetEndPoint} from the NAT punching server.");
+
+        // todo: proper connect
+        //_netServer.Connect(targetEndPoint, id.ToString());
     }
 
     public void StopNatIntroduceRoutine()
@@ -1061,17 +1072,15 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
 
     private async Task NatIntroduceTask(string natPunchServerIP, int natPunchServerPort, string token, CancellationToken ct = default)
     {
-        _logger.LogInfo("NATIntroduceRoutine started.");
+        _logger.LogInfo("Send NAT Introduce Request routine started.");
 
         while (!ct.IsCancellationRequested)
         {
-            _logger.LogInfo($"SendNATIntroduceRequest: {natPunchServerIP}:{natPunchServerPort}");
-
             _netServer.NatPunchModule.SendNatIntroduceRequest(natPunchServerIP, natPunchServerPort, token);
 
             await Task.Delay(TimeSpan.FromSeconds(15));
         }
 
-        _logger.LogInfo("NATIntroduceRoutine ended.");
+        _logger.LogInfo("Send NAT Introduce Request routine stopped.");
     }
 }
