@@ -102,27 +102,25 @@ public class FikaPingingClient : INetEventListener, INatPunchListener, IDisposab
 
             _logger.LogInfo($"Sent NAT Introduce Request to Nat Punch Server: {endPoint}");
         }
-        else
+
+        var ip = result.IPs[0];
+        var port = result.Port;
+        _endPoints = new List<IPEndPoint>(result.IPs.Length);
+        foreach (var address in result.IPs)
         {
-            var ip = result.IPs[0];
-            var port = result.Port;
-            _endPoints = new List<IPEndPoint>(result.IPs.Length);
-            foreach (var address in result.IPs)
-            {
-                _endPoints.Add(NetworkUtils.ResolveRemoteAddress(address, port));
-            }
+            _endPoints.Add(NetworkUtils.ResolveRemoteAddress(address, port));
+        }
 
-            if (string.IsNullOrEmpty(ip))
-            {
-                _logger.LogError("IP was empty when pinging!");
-                return false;
-            }
+        if (string.IsNullOrEmpty(ip))
+        {
+            _logger.LogError("IP was empty when pinging!");
+            return false;
+        }
 
-            if (port == default)
-            {
-                _logger.LogError("Port was empty when pinging!");
-                return false;
-            }
+        if (port == default)
+        {
+            _logger.LogError("Port was empty when pinging!");
+            return false;
         }
 
         return true;
