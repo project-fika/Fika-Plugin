@@ -93,18 +93,21 @@ public class FikaPingingClient : INetEventListener, INatPunchListener, IDisposab
                 natPunchServerPort = FikaPlugin.Instance.FikaNatPunchServerPort;
             }
 
+            var resolved = NetUtils.ResolveAddress(natPunchServerIP);
+            var endPoint = new IPEndPoint(resolved, natPunchServerPort);
+
             var token = $"Client:{FikaBackendUtils.ServerGuid}";
 
-            NetClient.NatPunchModule.SendNatIntroduceRequest(natPunchServerIP, natPunchServerPort, token);
+            NetClient.NatPunchModule.SendNatIntroduceRequest(endPoint, token);
 
-            _logger.LogInfo($"Sent NAT Introduce Request to Nat Punch Server: {natPunchServerIP}:{natPunchServerPort}.");
+            _logger.LogInfo($"Sent NAT Introduce Request to Nat Punch Server: {endPoint}");
         }
         else
         {
-            var ip = result.Ips[0];
+            var ip = result.IPs[0];
             var port = result.Port;
-            _endPoints = new List<IPEndPoint>(result.Ips.Length);
-            foreach (var address in result.Ips)
+            _endPoints = new List<IPEndPoint>(result.IPs.Length);
+            foreach (var address in result.IPs)
             {
                 _endPoints.Add(NetworkUtils.ResolveRemoteAddress(address, port));
             }
@@ -317,10 +320,7 @@ public class FikaPingingClient : INetEventListener, INatPunchListener, IDisposab
     public void OnNatIntroductionSuccess(IPEndPoint targetEndPoint, NatAddressType type, string token)
     {
         _logger.LogInfo($"Received endpoint {targetEndPoint} from the NAT punching server.");
-
-        CommitEndpoint(targetEndPoint);
-        Received = true;
-        _endPoints.Clear(); // stop all further pings
+        _endPoints.Add(targetEndPoint);
     }
 
     public void Dispose()

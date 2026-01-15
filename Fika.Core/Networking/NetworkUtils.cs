@@ -188,21 +188,8 @@ public static class NetworkUtils
     /// <exception cref="ParseException">Thrown if the address cannot be resolved.</exception>
     public static IPEndPoint ResolveRemoteAddress(string ip, int port)
     {
-        if (IPAddress.TryParse(ip, out var address))
-        {
-#if DEBUG
-            FikaGlobals.LogInfo($"Successfully parsed {address}");
-#endif
-            return new(address, port);
-        }
-
-        var hostEntry = Dns.GetHostEntry(ip);
-        if (hostEntry?.AddressList.Length > 0)
-        {
-            return new(hostEntry.AddressList[0], port);
-        }
-
-        throw new ParseException($"ResolveRemoteAddress::Could not parse the address {ip}");
+        var resolved = NetUtils.ResolveAddress(ip);
+        return new IPEndPoint(resolved, port);
     }
 
     /// <summary>

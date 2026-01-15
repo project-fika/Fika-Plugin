@@ -188,7 +188,8 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
 
         if (endPoint.Address == null)
         {
-            Singleton<PreloaderUI>.Instance.ShowErrorScreen("Network Error", "Unable to connect to the raid server. IP and/or Port was empty when requesting data!");
+            Singleton<PreloaderUI>.Instance.ShowErrorScreen("Network Error",
+                "Unable to connect to the raid server. IP and/or Port was empty when requesting data!");
         }
         else
         {
