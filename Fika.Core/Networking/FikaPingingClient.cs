@@ -136,7 +136,7 @@ public class FikaPingingClient : INetEventListener, INatPunchListener, IDisposab
         {
             NetClient?.NatPunchModule?.SendNatIntroduceRequest(endPoint, token);
 
-            await Task.Delay(TimeSpan.FromSeconds(15));
+            await Task.Delay(TimeSpan.FromSeconds(1));
         }
 
         _logger.LogInfo("Send NAT Introduce Request task stopped.");
@@ -174,8 +174,6 @@ public class FikaPingingClient : INetEventListener, INatPunchListener, IDisposab
             }
             FikaGlobals.LogError(logError);
         }
-
-        _cts.Cancel();
 
         return Received;
     }
@@ -379,6 +377,7 @@ public class FikaPingingClient : INetEventListener, INatPunchListener, IDisposab
         _logger.LogInfo($"Received endpoint {targetEndPoint} from the NAT punching server.");
         _endPoints.Add(targetEndPoint);
         _receivedNatPunchIntroduction = true;
+        _cts?.Cancel();
     }
 
     public void Dispose()
