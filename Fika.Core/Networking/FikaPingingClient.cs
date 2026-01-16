@@ -45,8 +45,8 @@ public class FikaPingingClient : INetEventListener, INatPunchListener, IDisposab
     private List<IPEndPoint> _candidates;
     private float _firstResponseTime;
     private bool _hasResponse;
-    private CancellationTokenSource _cts;
-
+    private readonly CancellationTokenSource _cts;
+    private bool _receivedNatPunchIntroduction;
     private const float _responseWaitSeconds = 1f;
 
     public FikaPingingClient()
@@ -371,8 +371,14 @@ public class FikaPingingClient : INetEventListener, INatPunchListener, IDisposab
     /// <inheritdoc/>
     public void OnNatIntroductionSuccess(IPEndPoint targetEndPoint, NatAddressType type, string token)
     {
+        if (_receivedNatPunchIntroduction)
+        {
+            return;
+        }
+
         _logger.LogInfo($"Received endpoint {targetEndPoint} from the NAT punching server.");
         _endPoints.Add(targetEndPoint);
+        _receivedNatPunchIntroduction = true;
     }
 
     public void Dispose()
