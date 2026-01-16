@@ -57,7 +57,7 @@ public class FikaVersionLabel_Patch : ModulePatch
         else
         {
 #if DEBUG
-            preloaderUiTraverse.Field("string_2").SetValue($"FIKA {FikaPlugin.FikaVersion} (DEBUG) | {versionLabel}");
+            preloaderUiTraverse.Field("string_2").SetValue($"FIKA {FikaPlugin.FikaVersion} (DEBUG) | {_versionLabel}");
 #else
             preloaderUiTraverse.Field("string_2").SetValue($"FIKA {FikaPlugin.FikaVersion} | {_versionLabel}");
 #endif
