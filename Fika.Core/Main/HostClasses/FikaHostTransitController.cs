@@ -145,7 +145,7 @@ public class FikaHostTransitController : LocalGameTransitControllerClass
 #if DEBUG
         foreach (KeyValuePair<int, byte> item in sizes)
         {
-            FikaPlugin.Instance.FikaLogger.LogWarning($"int: {item.Key}, byte: {item.Value}");
+            FikaGlobals.LogWarning($"int: {item.Key}, byte: {item.Value}");
         }
 #endif
 
@@ -175,7 +175,7 @@ public class FikaHostTransitController : LocalGameTransitControllerClass
 #if DEBUG
         foreach (KeyValuePair<int, ushort> item in timers)
         {
-            FikaPlugin.Instance.FikaLogger.LogWarning($"int: {item.Key}, ushort: {item.Value}");
+            FikaGlobals.LogWarning($"int: {item.Key}, ushort: {item.Value}");
         }
 #endif
 

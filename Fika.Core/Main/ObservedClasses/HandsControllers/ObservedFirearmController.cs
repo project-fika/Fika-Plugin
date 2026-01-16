@@ -290,7 +290,7 @@ public class ObservedFirearmController : FirearmController
         }
         catch (Exception ex)
         {
-            FikaPlugin.Instance.FikaLogger.LogError("CoopObservedFirearmController::OnPlayerDead: Exception was caught: " + ex.Message);
+            FikaGlobals.LogError("CoopObservedFirearmController::OnPlayerDead: Exception was caught: " + ex.Message);
         }
     }
 
@@ -493,7 +493,7 @@ public class ObservedFirearmController : FirearmController
                         }
                         else
                         {
-                            FikaPlugin.Instance.FikaLogger.LogError("HandleShotInfoPacket: Could not find ammo when setting up feed malfunction!");
+                            FikaGlobals.LogError("HandleShotInfoPacket: Could not find ammo when setting up feed malfunction!");
                         }
                     }
                 }
@@ -566,7 +566,7 @@ public class ObservedFirearmController : FirearmController
             var removeOperation = cylinderMagazine.RemoveAmmoInCamora(cylinderAmmo, inventoryController);
             if (removeOperation.Failed)
             {
-                FikaPlugin.Instance.FikaLogger.LogError($"Error removing ammo from cylinderMagazine on netId [{_observedPlayer.NetId}], error: {removeOperation.Error}");
+                FikaGlobals.LogError($"Error removing ammo from cylinderMagazine on netId [{_observedPlayer.NetId}], error: {removeOperation.Error}");
             }
             inventoryController.CheckChamber(revolver, false);
             cylinderAmmo.IsUsed = true;

@@ -203,7 +203,7 @@ public static class FikaBackendUtils
 
         if (Profile == null)
         {
-            FikaPlugin.Instance.FikaLogger.LogError("AddPartyMembers: Own profile was null!");
+            FikaGlobals.LogError("AddPartyMembers: Own profile was null!");
             return;
         }
 
@@ -248,11 +248,11 @@ public static class FikaBackendUtils
                     panel.Show(GroupPlayers, Profile, false);
                     return;
                 }
-                FikaPlugin.Instance.FikaLogger.LogWarning("AddPartyMembers: MenuUI was null!");
+                FikaGlobals.LogWarning("AddPartyMembers: MenuUI was null!");
                 return;
             }
-            FikaPlugin.Instance.FikaLogger.LogWarning("AddPartyMembers: MatchmakerPlayerControllerClass was null!");
+            FikaGlobals.LogWarning("AddPartyMembers: MatchmakerPlayerControllerClass was null!");
         }
-        FikaPlugin.Instance.FikaLogger.LogWarning("AddPartyMembers: TarkovApplication was null!");
+        FikaGlobals.LogWarning("AddPartyMembers: TarkovApplication was null!");
     }
 }

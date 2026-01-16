@@ -58,7 +58,7 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
         if (FikaBackendUtils.IsHeadlessRequester || FikaPlugin.Instance.AnyoneCanStartRaid)
         {
             startButton = CreateStartButton() ?? throw new NullReferenceException("Start button could not be created!");
-            if (FikaPlugin.DevMode.Value)
+            if (FikaPlugin.Instance.Settings.DevMode.Value)
             {
                 Logger.LogWarning("DevMode is enabled, skipping wait...");
                 NotificationManagerClass.DisplayMessageNotification("DevMode enabled, starting automatically...", iconType: EFT.Communications.ENotificationIconType.Note);
@@ -468,7 +468,7 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
                 coopGame.GameUi.TimerPanel.Close();
             }
 
-            if (FikaPlugin.AutoExtract.Value || FikaBackendUtils.IsTransit)
+            if (FikaPlugin.Instance.Settings.AutoExtract.Value || FikaBackendUtils.IsTransit)
             {
                 coopGame.Stop(_localPlayer.ProfileId, coopGame.ExitStatus, _localPlayer.ActiveHealthController.IsAlive ? coopGame.ExitLocation : null, 0);
             }

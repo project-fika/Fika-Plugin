@@ -331,7 +331,7 @@ public partial class FikaClient
 
     private void OnPingPacketReceived(PingPacket packet)
     {
-        if (FikaPlugin.UsePingSystem.Value)
+        if (FikaPlugin.Instance.Settings.UsePingSystem.Value)
         {
             PingFactory.ReceivePing(packet.PingLocation, packet.PingType, packet.PingColor, packet.Nickname, packet.LocaleId);
         }

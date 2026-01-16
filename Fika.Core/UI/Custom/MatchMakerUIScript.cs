@@ -184,7 +184,7 @@ public class MatchMakerUIScript : MonoBehaviour
 
         if (availableHeadlesses.Length >= 1)
         {
-            if (FikaPlugin.UseHeadlessIfAvailable.Value)
+            if (FikaPlugin.Instance.Settings.UseHeadlessIfAvailable.Value)
             {
                 _fikaMatchMakerUi.DedicatedToggle.isOn = true;
             }
@@ -252,13 +252,13 @@ public class MatchMakerUIScript : MonoBehaviour
 
             if (!_fikaMatchMakerUi.DedicatedToggle.isOn)
             {
-                if (FikaPlugin.ForceIP.Value != "")
+                if (FikaPlugin.Instance.Settings.ForceIP.Value != "")
                 {
                     // We need to handle DNS entries as well
-                    var ip = FikaPlugin.ForceIP.Value;
+                    var ip = FikaPlugin.Instance.Settings.ForceIP.Value;
                     try
                     {
-                        var dnsAddress = Dns.GetHostAddresses(FikaPlugin.ForceIP.Value);
+                        var dnsAddress = Dns.GetHostAddresses(FikaPlugin.Instance.Settings.ForceIP.Value);
                         if (dnsAddress.Length > 0)
                         {
                             ip = dnsAddress[0].ToString();
@@ -280,12 +280,12 @@ public class MatchMakerUIScript : MonoBehaviour
                     }
                 }
 
-                if (FikaPlugin.ForceBindIP.Value != "Disabled")
+                if (FikaPlugin.Instance.Settings.ForceBindIP.Value != "Disabled")
                 {
-                    if (!IPAddress.TryParse(FikaPlugin.ForceBindIP.Value, out _))
+                    if (!IPAddress.TryParse(FikaPlugin.Instance.Settings.ForceBindIP.Value, out _))
                     {
                         Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen(LocaleUtils.UI_ERROR_BIND_IP_HEADER.Localized(),
-                            string.Format(LocaleUtils.UI_ERROR_BIND_IP.Localized(), FikaPlugin.ForceBindIP.Value),
+                            string.Format(LocaleUtils.UI_ERROR_BIND_IP.Localized(), FikaPlugin.Instance.Settings.ForceBindIP.Value),
                             ErrorScreen.EButtonType.OkButton, 10f);
 
                         ToggleLoading(false);
@@ -427,31 +427,19 @@ public class MatchMakerUIScript : MonoBehaviour
             iconType: EFT.Communications.ENotificationIconType.EntryPoint);
         using var pingingClient = NetManagerUtils.CreatePingingClient();
 
-        WaitForSeconds waitForSeconds = new(0.1f);
-
         if (pingingClient.Init(serverId))
         {
-            var attempts = 0;
-            bool success;
-            bool rejected;
-            bool inProgress;
-
-            FikaPlugin.Instance.FikaLogger.LogInfo("Attempting to connect to host session...");
+            FikaGlobals.LogInfo("Attempting to connect to host session...");
             var knockMessage = FikaBackendUtils.ServerGuid.ToString();
+            var pingTask = pingingClient.AttemptToPingHost(knockMessage, reconnect)
+                .GetAwaiter();
 
-            do
+            while (!pingTask.IsCompleted)
             {
-                attempts++;
+                yield return null;
+            }
 
-                pingingClient.PingEndPoint(knockMessage, reconnect);
-                pingingClient.NetClient.PollEvents();
-                pingingClient.NetClient.NatPunchModule?.PollEvents();
-                success = pingingClient.Received;
-                rejected = pingingClient.Rejected;
-                inProgress = pingingClient.InProgress;
-
-                yield return waitForSeconds;
-            } while (!rejected && !success && attempts < 50);
+            var success = pingTask.GetResult();
 
             if (!success)
             {
@@ -459,17 +447,6 @@ public class MatchMakerUIScript : MonoBehaviour
                 LocaleUtils.UI_ERROR_CONNECTING.Localized(),
                 LocaleUtils.UI_UNABLE_TO_CONNECT.Localized(),
                 ErrorScreen.EButtonType.OkButton, 10f);
-
-                var logError = "Unable to connect to the session!";
-                if (rejected)
-                {
-                    logError += $" Connection was rejected! [{FikaBackendUtils.ServerGuid}] did not match the server's Guid or data was malformed.";
-                }
-                if (inProgress)
-                {
-                    logError += " Session already in progress and you are not active in the session!";
-                }
-                FikaPlugin.Instance.FikaLogger.LogError(logError);
 
                 if (button != null)
                 {

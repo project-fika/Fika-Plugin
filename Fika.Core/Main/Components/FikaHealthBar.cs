@@ -43,7 +43,7 @@ public class FikaHealthBar : MonoBehaviour
     {
         if (player == null)
         {
-            FikaPlugin.Instance.FikaLogger.LogError("FikaHealthBar::Create: Player was null!");
+            FikaGlobals.LogError("FikaHealthBar::Create: Player was null!");
             return null;
         }
 
@@ -71,7 +71,7 @@ public class FikaHealthBar : MonoBehaviour
         if (_currentPlayer != null)
         {
             UpdateScreenSpacePosition();
-            if (FikaPlugin.UseOcclusion.Value)
+            if (FikaPlugin.Instance.Settings.UseOcclusion.Value)
             {
                 _counter += Time.deltaTime;
                 if (_counter > 1)
@@ -123,20 +123,20 @@ public class FikaHealthBar : MonoBehaviour
         var proceduralWeaponAnimation = _mainPlayer.ProceduralWeaponAnimation;
         if (_mainPlayer.HealthController.IsAlive && proceduralWeaponAnimation.IsAiming)
         {
-            if (proceduralWeaponAnimation.CurrentScope.IsOptic && FikaPlugin.HideNamePlateInOptic.Value)
+            if (proceduralWeaponAnimation.CurrentScope.IsOptic && FikaPlugin.Instance.Settings.HideNamePlateInOptic.Value)
             {
                 _playerPlate.ScalarObjectScreen.SetActive(false);
                 return;
             }
 
-            opacityMultiplier = FikaPlugin.OpacityInADS.Value;
+            opacityMultiplier = FikaPlugin.Instance.Settings.OpacityInADS.Value;
         }
 
         var cameraInstance = CameraClass.Instance;
         var camera = cameraInstance.Camera;
 
         var distance = Vector3.Distance(camera.transform.position, _currentPlayer.Position);
-        if (distance > FikaPlugin.MaxDistanceToShow.Value)
+        if (distance > FikaPlugin.Instance.Settings.MaxDistanceToShow.Value)
         {
             _playerPlate.ScalarObjectScreen.SetActive(false);
             return;
@@ -146,7 +146,7 @@ public class FikaHealthBar : MonoBehaviour
 
         var targetPosition = _currentPlayer.PlayerBones.Neck.position + (Vector3.up * 1f);
 
-        if (!WorldToScreen.ProjectToCanvas(targetPosition, _mainPlayer, _canvasRect, out var canvasPos, FikaPlugin.NamePlateUseOpticZoom.Value, false))
+        if (!WorldToScreen.ProjectToCanvas(targetPosition, _mainPlayer, _canvasRect, out var canvasPos, FikaPlugin.Instance.Settings.NamePlateUseOpticZoom.Value, false))
         {
             // behind camera, hide all elements
             UpdateColorTextMeshProUGUI(_playerPlate.playerNameScreen, 0);
@@ -171,23 +171,23 @@ public class FikaHealthBar : MonoBehaviour
         _playerPlate.ScalarObjectScreen.GetComponent<RectTransform>().anchoredPosition = canvasPos;
 
         var distFromCenterMultiplier = 1f;
-        if (FikaPlugin.DecreaseOpacityNotLookingAt.Value)
+        if (FikaPlugin.Instance.Settings.DecreaseOpacityNotLookingAt.Value)
         {
             var sqrDistFromCenter = canvasPos.sqrMagnitude;
             var maxSqrDistFromCenter = Mathf.Pow(Mathf.Min(_canvasRect.sizeDelta.x, _canvasRect.sizeDelta.y) / 2f, 2);
             distFromCenterMultiplier = Mathf.Clamp01(1 - (sqrDistFromCenter / maxSqrDistFromCenter));
         }
 
-        var t = Mathf.InverseLerp(2f, FikaPlugin.MaxDistanceToShow.Value, distance);
+        var t = Mathf.InverseLerp(2f, FikaPlugin.Instance.Settings.MaxDistanceToShow.Value, distance);
         var scaleMultiplier = Mathf.Lerp(0.48f, 0.075f, Mathf.Pow(t, 1.5f)); // a = near player, b = far player
-        scaleMultiplier *= FikaPlugin.NamePlateScale.Value;
+        scaleMultiplier *= FikaPlugin.Instance.Settings.NamePlateScale.Value;
         _playerPlate.ScalarObjectScreen.transform.localScale = Vector3.one * scaleMultiplier;
 
         var distanceAlpha = Mathf.Lerp(1f, 0.3f, t);
-        var finalAlpha = Mathf.Max(FikaPlugin.MinimumOpacity.Value, distanceAlpha * opacityMultiplier * distFromCenterMultiplier);
+        var finalAlpha = Mathf.Max(FikaPlugin.Instance.Settings.MinimumOpacity.Value, distanceAlpha * opacityMultiplier * distFromCenterMultiplier);
 
         var backgroundAlpha = Mathf.Clamp(finalAlpha * 0.44f, 0.1f, 0.44f);
-        var healthAlphaMultiplier = FikaPlugin.HideHealthBar.Value ? 0f : 1f;
+        var healthAlphaMultiplier = FikaPlugin.Instance.Settings.HideHealthBar.Value ? 0f : 1f;
 
         UpdateColorTextMeshProUGUI(_playerPlate.playerNameScreen, finalAlpha);
         UpdateColorImage(_playerPlate.healthBarScreen, Mathf.Max(finalAlpha * healthAlphaMultiplier, 0.15f));
@@ -235,29 +235,29 @@ public class FikaHealthBar : MonoBehaviour
         }
         else
         {
-            _playerPlate.playerNameScreen.color = FikaPlugin.NamePlateTextColor.Value;
+            _playerPlate.playerNameScreen.color = FikaPlugin.Instance.Settings.NamePlateTextColor.Value;
         }
         // Start the plates both disabled, the visibility will be set in the update loop
         _playerPlate.usecPlateScreen.gameObject.SetActive(false);
         _playerPlate.bearPlateScreen.gameObject.SetActive(false);
 
-        SetPlayerPlateFactionVisibility(FikaPlugin.UsePlateFactionSide.Value);
-        SetPlayerPlateHealthVisibility(FikaPlugin.HideHealthBar.Value);
+        SetPlayerPlateFactionVisibility(FikaPlugin.Instance.Settings.UsePlateFactionSide.Value);
+        SetPlayerPlateHealthVisibility(FikaPlugin.Instance.Settings.HideHealthBar.Value);
 
-        _playerPlate.gameObject.SetActive(FikaPlugin.UseNamePlates.Value);
+        _playerPlate.gameObject.SetActive(FikaPlugin.Instance.Settings.UseNamePlates.Value);
 
-        if (FikaPlugin.ShowEffects.Value)
+        if (FikaPlugin.Instance.Settings.ShowEffects.Value)
         {
             _currentPlayer.HealthController.EffectAddedEvent += HealthController_EffectAddedEvent;
             _currentPlayer.HealthController.EffectRemovedEvent += HealthController_EffectRemovedEvent;
             AddAllActiveEffects();
         }
 
-        FikaPlugin.UsePlateFactionSide.SettingChanged += UsePlateFactionSide_SettingChanged;
-        FikaPlugin.HideHealthBar.SettingChanged += HideHealthBar_SettingChanged;
-        FikaPlugin.UseNamePlates.SettingChanged += UseNamePlates_SettingChanged;
-        FikaPlugin.UseHealthNumber.SettingChanged += UseHealthNumber_SettingChanged;
-        FikaPlugin.ShowEffects.SettingChanged += ShowEffects_SettingChanged;
+        FikaPlugin.Instance.Settings.UsePlateFactionSide.SettingChanged += UsePlateFactionSide_SettingChanged;
+        FikaPlugin.Instance.Settings.HideHealthBar.SettingChanged += HideHealthBar_SettingChanged;
+        FikaPlugin.Instance.Settings.UseNamePlates.SettingChanged += UseNamePlates_SettingChanged;
+        FikaPlugin.Instance.Settings.UseHealthNumber.SettingChanged += UseHealthNumber_SettingChanged;
+        FikaPlugin.Instance.Settings.ShowEffects.SettingChanged += ShowEffects_SettingChanged;
 
         _currentPlayer.HealthController.HealthChangedEvent += HealthController_HealthChangedEvent;
         _currentPlayer.HealthController.BodyPartDestroyedEvent += HealthController_BodyPartDestroyedEvent;
@@ -333,7 +333,7 @@ public class FikaHealthBar : MonoBehaviour
 
     private void ShowEffects_SettingChanged(object sender, EventArgs e)
     {
-        if (FikaPlugin.ShowEffects.Value)
+        if (FikaPlugin.Instance.Settings.ShowEffects.Value)
         {
             _currentPlayer.HealthController.EffectAddedEvent += HealthController_EffectAddedEvent;
             _currentPlayer.HealthController.EffectRemovedEvent += HealthController_EffectRemovedEvent;
@@ -386,17 +386,17 @@ public class FikaHealthBar : MonoBehaviour
 
     private void UsePlateFactionSide_SettingChanged(object sender, EventArgs e)
     {
-        SetPlayerPlateFactionVisibility(FikaPlugin.UsePlateFactionSide.Value);
+        SetPlayerPlateFactionVisibility(FikaPlugin.Instance.Settings.UsePlateFactionSide.Value);
     }
 
     private void HideHealthBar_SettingChanged(object sender, EventArgs e)
     {
-        SetPlayerPlateHealthVisibility(FikaPlugin.HideHealthBar.Value);
+        SetPlayerPlateHealthVisibility(FikaPlugin.Instance.Settings.HideHealthBar.Value);
     }
 
     private void UseNamePlates_SettingChanged(object sender, EventArgs e)
     {
-        _playerPlate.gameObject.SetActive(FikaPlugin.UseNamePlates.Value);
+        _playerPlate.gameObject.SetActive(FikaPlugin.Instance.Settings.UseNamePlates.Value);
     }
     #endregion
 
@@ -407,7 +407,7 @@ public class FikaHealthBar : MonoBehaviour
     {
         var currentHealth = _currentPlayer.HealthController.GetBodyPartHealth(EBodyPart.Common, true).Current;
         var maxHealth = _currentPlayer.HealthController.GetBodyPartHealth(EBodyPart.Common, true).Maximum;
-        if (FikaPlugin.UseHealthNumber.Value)
+        if (FikaPlugin.Instance.Settings.UseHealthNumber.Value)
         {
             if (!_playerPlate.healthNumberBackgroundScreen.gameObject.activeSelf)
             {
@@ -432,8 +432,8 @@ public class FikaHealthBar : MonoBehaviour
 
     private void UpdateHealthBarColor(float normalizedHealth)
     {
-        var color = Color.Lerp(FikaPlugin.LowHealthColor.Value,
-            FikaPlugin.FullHealthColor.Value, normalizedHealth);
+        var color = Color.Lerp(FikaPlugin.Instance.Settings.LowHealthColor.Value,
+            FikaPlugin.Instance.Settings.FullHealthColor.Value, normalizedHealth);
         color.a = _playerPlate.healthBarScreen.color.a; // Keep the alpha value unchanged
         _playerPlate.healthBarScreen.color = color;
     }
@@ -460,10 +460,10 @@ public class FikaHealthBar : MonoBehaviour
 
     private void SetPlayerPlateHealthVisibility(bool hidden)
     {
-        _playerPlate.healthNumberScreen.gameObject.SetActive(!hidden && FikaPlugin.UseHealthNumber.Value);
-        _playerPlate.healthNumberBackgroundScreen.gameObject.SetActive(!hidden && FikaPlugin.UseHealthNumber.Value);
-        _playerPlate.healthBarScreen.gameObject.SetActive(!hidden && !FikaPlugin.UseHealthNumber.Value);
-        _playerPlate.healthBarBackgroundScreen.gameObject.SetActive(!hidden && !FikaPlugin.UseHealthNumber.Value);
+        _playerPlate.healthNumberScreen.gameObject.SetActive(!hidden && FikaPlugin.Instance.Settings.UseHealthNumber.Value);
+        _playerPlate.healthNumberBackgroundScreen.gameObject.SetActive(!hidden && FikaPlugin.Instance.Settings.UseHealthNumber.Value);
+        _playerPlate.healthBarScreen.gameObject.SetActive(!hidden && !FikaPlugin.Instance.Settings.UseHealthNumber.Value);
+        _playerPlate.healthBarBackgroundScreen.gameObject.SetActive(!hidden && !FikaPlugin.Instance.Settings.UseHealthNumber.Value);
     }
 
 
@@ -481,11 +481,11 @@ public class FikaHealthBar : MonoBehaviour
 
     protected void OnDestroy()
     {
-        FikaPlugin.UsePlateFactionSide.SettingChanged -= UsePlateFactionSide_SettingChanged;
-        FikaPlugin.HideHealthBar.SettingChanged -= HideHealthBar_SettingChanged;
-        FikaPlugin.UseNamePlates.SettingChanged -= UseNamePlates_SettingChanged;
-        FikaPlugin.UseHealthNumber.SettingChanged -= UseHealthNumber_SettingChanged;
-        FikaPlugin.ShowEffects.SettingChanged -= ShowEffects_SettingChanged;
+        FikaPlugin.Instance.Settings.UsePlateFactionSide.SettingChanged -= UsePlateFactionSide_SettingChanged;
+        FikaPlugin.Instance.Settings.HideHealthBar.SettingChanged -= HideHealthBar_SettingChanged;
+        FikaPlugin.Instance.Settings.UseNamePlates.SettingChanged -= UseNamePlates_SettingChanged;
+        FikaPlugin.Instance.Settings.UseHealthNumber.SettingChanged -= UseHealthNumber_SettingChanged;
+        FikaPlugin.Instance.Settings.ShowEffects.SettingChanged -= ShowEffects_SettingChanged;
 
         _currentPlayer.HealthController.HealthChangedEvent -= HealthController_HealthChangedEvent;
         _currentPlayer.HealthController.BodyPartDestroyedEvent -= HealthController_BodyPartDestroyedEvent;

@@ -906,7 +906,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         }
         catch (Exception ex)
         {
-            FikaPlugin.Instance.FikaLogger.LogError("Exception caught when saving: " + ex.Message);
+            FikaGlobals.LogError("Exception caught when saving: " + ex.Message);
         }
 
         _hasSaved = true;

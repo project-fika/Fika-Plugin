@@ -188,10 +188,10 @@ public class FikaBot : FikaPlayer
             var sessionCounters = mainPlayer.Profile.EftStats.SessionCounters;
             HandleSharedExperience(countAsBoss, experience, sessionCounters);
 
-            if (FikaPlugin.Instance.SharedQuestProgression && FikaPlugin.EasyKillConditions.Value)
+            if (FikaPlugin.Instance.SharedQuestProgression && FikaPlugin.Instance.Settings.EasyKillConditions.Value)
             {
 #if DEBUG
-                FikaPlugin.Instance.FikaLogger.LogInfo("Handling teammate kill from teammate: " + aggressor.Profile.Nickname);
+                FikaGlobals.LogInfo("Handling teammate kill from teammate: " + aggressor.Profile.Nickname);
 #endif
 
                 var distance = Vector3.Distance(aggressor.Position, Position);
@@ -294,7 +294,7 @@ public class FikaBot : FikaPlayer
         num *= 0.3f + (0.7f * Mathf.InverseLerp(50f, 20f, LastDamageInfo.PenetrationPower));
         _corpseAppliedForce = num;
 
-        if (FikaPlugin.ShowNotifications.Value)
+        if (FikaPlugin.Instance.Settings.ShowNotifications.Value)
         {
             if (LocaleUtils.IsBoss(Profile.Info.Settings.Role, out var name) && LastAggressor != null)
             {
@@ -355,7 +355,7 @@ public class FikaBot : FikaPlayer
     public override void OnDestroy()
     {
 #if DEBUG
-        FikaPlugin.Instance.FikaLogger.LogInfo("Destroying " + Profile.Info.Nickname);
+        FikaGlobals.LogInfo("Destroying " + Profile.Info.Nickname);
 #endif
         if (Singleton<FikaServer>.Instantiated)
         {

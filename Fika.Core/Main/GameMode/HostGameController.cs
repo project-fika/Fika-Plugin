@@ -262,7 +262,7 @@ public class HostGameController : BaseGameController, IBotGame
         fikaBot.Location = Location.Id;
         Bots.Add(fikaBot.ProfileId, fikaBot);
 
-        if (FikaPlugin.DisableBotMetabolism.Value)
+        if (FikaPlugin.Instance.Settings.DisableBotMetabolism.Value)
         {
             fikaBot.HealthController.DisableMetabolism();
         }
@@ -435,7 +435,7 @@ public class HostGameController : BaseGameController, IBotGame
             startButton = CreateStartButton() ?? throw new NullReferenceException("Start button could not be created!");
         }
 
-        if (FikaPlugin.DevMode.Value)
+        if (FikaPlugin.Instance.Settings.DevMode.Value)
         {
             Logger.LogWarning("DevMode is enabled, skipping wait...");
             NotificationManagerClass.DisplayMessageNotification("DevMode enabled, starting automatically...", iconType: EFT.Communications.ENotificationIconType.Note);
@@ -449,7 +449,7 @@ public class HostGameController : BaseGameController, IBotGame
 
         Logger.LogInfo("Raid has been started...");
 
-        if (FikaPlugin.UseNatPunching.Value)
+        if (FikaPlugin.Instance.Settings.UseNATPunching.Value)
         {
             _server.StopNatIntroduceRoutine();
         }
@@ -577,7 +577,7 @@ public class HostGameController : BaseGameController, IBotGame
         var useWaveControl = controllerSettings.BotAmount == EBotAmount.Horde;
 
         var limits = SetMaxBotsLimit(location);
-        if (FikaPlugin.NoAI.Value)
+        if (FikaPlugin.Instance.Settings.NoAI.Value)
         {
             FikaGlobals.LogWarning("No AI enabled - stopping bot spawns");
             controllerSettings.BotAmount = EBotAmount.NoBots;
@@ -906,7 +906,7 @@ public class HostGameController : BaseGameController, IBotGame
 
     public override Task InitializeLoot(LocationSettingsClass.Location location)
     {
-        if (FikaPlugin.NoLoot.Value)
+        if (FikaPlugin.Instance.Settings.NoLoot.Value)
         {
             location.Loot = [];
         }

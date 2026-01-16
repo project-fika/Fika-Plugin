@@ -50,7 +50,7 @@ public class SpawnSyncObjectSubPackets
 
             if (Singleton<ItemFactoryClass>.Instance.CreateItem(GrenadeId, GrenadeTemplate, null) is not ThrowWeapItemClass grenadeClass)
             {
-                FikaPlugin.Instance.FikaLogger.LogError("OnSpawnSyncObjectPacketReceived: Item with id " + GrenadeId + " is not a grenade!");
+                FikaGlobals.LogError("OnSpawnSyncObjectPacketReceived: Item with id " + GrenadeId + " is not a grenade!");
                 return;
             }
 

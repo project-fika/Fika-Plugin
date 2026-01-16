@@ -94,7 +94,7 @@ internal class Minefield_method_2_Patch : ModulePatch
         }
         else
         {
-            FikaPlugin.Instance.FikaLogger.LogError($"DoReplicatedMineDamage: Could not find player with ProfileId: {player.ProfileId}, Nickname: {player.Profile.Nickname}!");
+            FikaGlobals.LogError($"DoReplicatedMineDamage: Could not find player with ProfileId: {player.ProfileId}, Nickname: {player.Profile.Nickname}!");
         }
     }
 }

@@ -1,10 +1,10 @@
-﻿using EFT.UI;
+﻿using System.Reflection;
+using EFT.UI;
 using HarmonyLib;
 using SPT.Common.Http;
 using SPT.Common.Utils;
 using SPT.Custom.Models;
 using SPT.Reflection.Patching;
-using System.Reflection;
 
 namespace Fika.Core.UI.Patches;
 
@@ -13,9 +13,9 @@ namespace Fika.Core.UI.Patches;
 /// </summary>
 public class FikaVersionLabel_Patch : ModulePatch
 {
-    private static string versionLabel;
-    private static Traverse versionNumberTraverse;
-    private static string officialVersion;
+    private static string _versionLabel;
+    private static Traverse _versionNumberTraverse;
+    private static string _officialVersion;
 
     protected override MethodBase GetTargetMethod()
     {
@@ -28,40 +28,40 @@ public class FikaVersionLabel_Patch : ModulePatch
     {
         FikaPlugin.EFTVersionMajor = major;
 
-        if (string.IsNullOrEmpty(versionLabel))
+        if (string.IsNullOrEmpty(_versionLabel))
         {
-            string json = RequestHandler.GetJson("/singleplayer/settings/version");
-            versionLabel = Json.Deserialize<VersionResponse>(json).Version;
-            Logger.LogInfo($"Server version: {versionLabel}");
+            var json = RequestHandler.GetJson("/singleplayer/settings/version");
+            _versionLabel = Json.Deserialize<VersionResponse>(json).Version;
+            Logger.LogInfo($"Server version: {_versionLabel}");
         }
 
-        Traverse preloaderUiTraverse = Traverse.Create(MonoBehaviourSingleton<PreloaderUI>.Instance);
+        var preloaderUiTraverse = Traverse.Create(MonoBehaviourSingleton<PreloaderUI>.Instance);
 
         preloaderUiTraverse.Field("_alphaVersionLabel").Property("LocalizationKey").SetValue("{0}");
 
-        versionNumberTraverse = Traverse.Create(__result);
+        _versionNumberTraverse = Traverse.Create(__result);
 
-        officialVersion = versionNumberTraverse.Field<string>("Major").Value;
+        _officialVersion = _versionNumberTraverse.Field<string>("Major").Value;
 
         UpdateVersionLabel();
     }
 
     public static void UpdateVersionLabel()
     {
-        Traverse preloaderUiTraverse = Traverse.Create(MonoBehaviourSingleton<PreloaderUI>.Instance);
-        if (FikaPlugin.OfficialVersion != null && FikaPlugin.OfficialVersion.Value)
+        var preloaderUiTraverse = Traverse.Create(MonoBehaviourSingleton<PreloaderUI>.Instance);
+        if (FikaPlugin.Instance.Settings.OfficialVersion != null && FikaPlugin.Instance.Settings.OfficialVersion.Value)
         {
-            preloaderUiTraverse.Field("string_2").SetValue($"{officialVersion} Beta version");
-            versionNumberTraverse.Field("Major").SetValue(officialVersion);
+            preloaderUiTraverse.Field("string_2").SetValue($"{_officialVersion} Beta version");
+            _versionNumberTraverse.Field("Major").SetValue(_officialVersion);
         }
         else
         {
 #if DEBUG
             preloaderUiTraverse.Field("string_2").SetValue($"FIKA {FikaPlugin.FikaVersion} (DEBUG) | {versionLabel}");
 #else
-            preloaderUiTraverse.Field("string_2").SetValue($"FIKA {FikaPlugin.FikaVersion} | {versionLabel}");
+            preloaderUiTraverse.Field("string_2").SetValue($"FIKA {FikaPlugin.FikaVersion} | {_versionLabel}");
 #endif
-            versionNumberTraverse.Field("Major").SetValue($"{FikaPlugin.FikaVersion} {versionLabel}");
+            _versionNumberTraverse.Field("Major").SetValue($"{FikaPlugin.FikaVersion} {_versionLabel}");
         }
 
         // Game mode

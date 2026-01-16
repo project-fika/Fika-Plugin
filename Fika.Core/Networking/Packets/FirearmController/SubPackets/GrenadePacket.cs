@@ -1,6 +1,7 @@
 ﻿using EFT.InventoryLogic;
 using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
+using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
@@ -104,7 +105,7 @@ public sealed class GrenadePacket : IPoolSubPacket
         }
         else
         {
-            FikaPlugin.Instance.FikaLogger.LogError($"GrenadePacket: HandsController was not of type CoopObservedGrenadeController! Was {player.HandsController.GetType().Name}");
+            FikaGlobals.LogError($"GrenadePacket: HandsController was not of type CoopObservedGrenadeController! Was {player.HandsController.GetType().Name}");
         }
     }
 

@@ -43,8 +43,8 @@ public class ClientPacketSender : MonoBehaviour, IPacketSender
     {
         get
         {
-            return FikaPlugin.UsePingSystem.Value && _player.IsYourPlayer && Input.GetKey(FikaPlugin.PingButton.Value.MainKey)
-                && FikaPlugin.PingButton.Value.Modifiers.All(Input.GetKey) && !MonoBehaviourSingleton<PreloaderUI>.Instance.Console.IsConsoleVisible
+            return FikaPlugin.Instance.Settings.UsePingSystem.Value && _player.IsYourPlayer && Input.GetKey(FikaPlugin.Instance.Settings.PingButton.Value.MainKey)
+                && FikaPlugin.Instance.Settings.PingButton.Value.Modifiers.All(Input.GetKey) && !MonoBehaviourSingleton<PreloaderUI>.Instance.Console.IsConsoleVisible
                 && _lastPingTime < DateTime.Now.AddSeconds(-3) && !FikaChatUIScript.IsActive && Singleton<IFikaGame>.Instance is CoopGame coopGame && coopGame.Status is GameStatus.Started
                 && !_player.IsInventoryOpened;
         }
@@ -196,7 +196,7 @@ public class ClientPacketSender : MonoBehaviour, IPacketSender
             GameObject basePing = GameObject.Instantiate(basePingPrefab);
             Vector3 hitPoint = hit.point;
             PingFactory.AbstractPing abstractPing = PingFactory.FromPingType(pingType, basePing);
-            Color pingColor = FikaPlugin.PingColor.Value;
+            Color pingColor = FikaPlugin.Instance.Settings.PingColor.Value;
             pingColor = new(pingColor.r, pingColor.g, pingColor.b, 1);
             // ref so that we can mutate it if we want to, ex: if I ping a switch I want it at the switch.gameObject.position + Vector3.up
             abstractPing.Initialize(ref hitPoint, userData, pingColor);
@@ -204,7 +204,7 @@ public class ClientPacketSender : MonoBehaviour, IPacketSender
             NetworkManager.SendGenericPacket(Networking.Packets.Generic.EGenericSubPacketType.Ping,
                 PingPacket.FromValue(hitPoint, pingType, pingColor, _player.Profile.Info.MainProfileNickname, localeId), true);
 
-            if (FikaPlugin.PlayPingAnimation.Value && _player.HealthController.IsAlive)
+            if (FikaPlugin.Instance.Settings.PlayPingAnimation.Value && _player.HealthController.IsAlive)
             {
                 _player.vmethod_7(EInteraction.ThereGesture);
             }

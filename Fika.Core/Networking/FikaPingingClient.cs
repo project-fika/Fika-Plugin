@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 using BepInEx.Logging;
 using Comfort.Common;
@@ -89,11 +90,11 @@ public class FikaPingingClient : INetEventListener, INatPunchListener, IDisposab
 
             if (result.UseFikaNatPunchServer)
             {
-                natPunchServerIP = FikaPlugin.Instance.FikaNatPunchServerIP;
-                natPunchServerPort = FikaPlugin.Instance.FikaNatPunchServerPort;
+                natPunchServerIP = FikaPlugin.FikaNATPunchMasterServer;
+                natPunchServerPort = FikaPlugin.FikaNATPunchMasterPort;
             }
 
-            var resolved = NetUtils.ResolveAddress(natPunchServerIP);
+            var resolved = NetUtils.ResolveAddress(natPunchServerIP, AddressFamily.InterNetwork); // no ipv6 for natpunch master
             var endPoint = new IPEndPoint(resolved, natPunchServerPort);
 
             var token = $"Client:{FikaBackendUtils.ServerGuid}";
@@ -124,6 +125,42 @@ public class FikaPingingClient : INetEventListener, INatPunchListener, IDisposab
         }
 
         return true;
+    }
+
+    public async Task<bool> AttemptToPingHost(string knockMessage, bool reconnect, CancellationToken ct = default)
+    {
+        var attempts = 0;
+
+        do
+        {
+            ct.ThrowIfCancellationRequested();
+
+            attempts++;
+            PingEndPoint(knockMessage, reconnect);
+            if (NetClient != null)
+            {
+                NetClient.PollEvents();
+                NetClient.NatPunchModule?.PollEvents();
+            }
+
+            await Task.Delay(250, ct);
+        } while (!Rejected && !Received && attempts < 50);
+
+        if (!Received)
+        {
+            var logError = "Unable to connect to the session!";
+            if (Rejected)
+            {
+                logError += $" Connection was rejected! [{FikaBackendUtils.ServerGuid}] did not match the server's Guid or data was malformed.";
+            }
+            if (InProgress)
+            {
+                logError += " Session already in progress and you are not active in the session!";
+            }
+            FikaGlobals.LogError(logError);
+        }
+
+        return Received;
     }
 
     private void RemoveEndpointIfExists(IPEndPoint remote)

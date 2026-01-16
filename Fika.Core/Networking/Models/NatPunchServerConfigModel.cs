@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.Serialization;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Networking.Models;
 
@@ -20,7 +21,7 @@ public struct NatPunchServerConfigModel
 
     public readonly void LogValues()
     {
-        FikaPlugin.Instance.FikaLogger.LogInfo("Received NatPunchServer config from server:");
+        FikaGlobals.LogInfo("Received NatPunchServer config from server:");
         foreach (var field in typeof(NatPunchServerConfigModel).GetFields())
         {
             var value = field.GetValue(this);
@@ -36,10 +37,10 @@ public struct NatPunchServerConfigModel
                     }
                     values = values + ", " + valueArray.GetValue(i);
                 }
-                FikaPlugin.Instance.FikaLogger.LogInfo(field.Name + ": " + values);
+                FikaGlobals.LogInfo(field.Name + ": " + values);
                 continue;
             }
-            FikaPlugin.Instance.FikaLogger.LogInfo(field.Name + ": " + value);
+            FikaGlobals.LogInfo(field.Name + ": " + value);
         }
     }
 }

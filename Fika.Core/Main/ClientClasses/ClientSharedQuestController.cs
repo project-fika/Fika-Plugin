@@ -1,12 +1,12 @@
-﻿using EFT;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using EFT;
 using EFT.InventoryLogic;
 using EFT.Quests;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Packets.Communication;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using static Fika.Core.UI.FikaUIGlobals;
 
 namespace Fika.Core.Main.ClientClasses;
@@ -23,16 +23,16 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
     public override void Init()
     {
         base.Init();
-        FikaPlugin.EQuestSharingTypes[] array = (FikaPlugin.EQuestSharingTypes[])Enum.GetValues(typeof(FikaPlugin.EQuestSharingTypes));
+        var array = (FikaPlugin.EQuestSharingTypes[])Enum.GetValues(typeof(FikaPlugin.EQuestSharingTypes));
         for (var i = 0; i < array.Length; i++)
         {
             var shareType = array[i];
-            if (FikaPlugin.QuestTypesToShareAndReceive.Value.HasFlag(shareType))
+            if (FikaPlugin.Instance.Settings.QuestTypesToShareAndReceive.Value.HasFlag(shareType))
             {
                 switch (shareType)
                 {
                     case FikaPlugin.EQuestSharingTypes.Kills:
-                        if (!FikaPlugin.EasyKillConditions.Value)
+                        if (!FikaPlugin.Instance.Settings.EasyKillConditions.Value)
                         {
                             _acceptedTypes.Add("Elimination");
                             _acceptedTypes.Add(shareType.ToString());
@@ -80,7 +80,7 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
 
         QuestDropItemPacket packet = new(_player.Profile.Info.MainProfileNickname, itemId, zoneId);
 #if DEBUG
-        FikaPlugin.Instance.FikaLogger.LogInfo($"Profile_OnItemZoneDropped: Sending quest progress itemId:{itemId} zoneId:{zoneId}");
+        FikaGlobals.LogInfo($"Profile_OnItemZoneDropped: Sending quest progress itemId:{itemId} zoneId:{zoneId}");
 #endif
         _player.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
     }
@@ -156,7 +156,7 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
                     SourceId = counter.SourceId
                 };
 #if DEBUG
-                FikaPlugin.Instance.FikaLogger.LogInfo("SendQuestPacket: Sending quest progress");
+                FikaGlobals.LogInfo("SendQuestPacket: Sending quest progress");
 #endif
                 _player.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
             }
@@ -183,7 +183,7 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
             if (quest.Id == packet.SourceId)
             {
 #if DEBUG
-                FikaGlobals.LogInfo($"Quest id matched sourceId, status: {quest.QuestStatus}, name: {quest.Template.Name.ParseLocalization()}"); 
+                FikaGlobals.LogInfo($"Quest id matched sourceId, status: {quest.QuestStatus}, name: {quest.Template.Name.ParseLocalization()}");
 #endif
                 var counter = quest.ConditionCountersManager.GetCounter(packet.Id);
                 if (counter != null && !quest.CompletedConditions.Contains(counter.Id))
@@ -191,13 +191,13 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
                     if (!ValidateQuestType(counter))
                     {
 #if DEBUG
-                        FikaGlobals.LogInfo($"Failed to verify quest type for {quest.Template.Name.ParseLocalization()}"); 
+                        FikaGlobals.LogInfo($"Failed to verify quest type for {quest.Template.Name.ParseLocalization()}");
 #endif
                         return;
                     }
 
                     counter.Value++;
-                    if (FikaPlugin.QuestSharingNotifications.Value)
+                    if (FikaPlugin.Instance.Settings.QuestSharingNotifications.Value)
                     {
                         NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.RECEIVED_SHARED_QUEST_PROGRESS.Localized(),
                             [ColorizeText(EColor.GREEN, packet.Nickname), ColorizeText(EColor.BROWN, quest.Template.Name)]),
@@ -229,7 +229,7 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
                 {
                     AddLootedTemplateId(item.TemplateId);
                     playerInventory.RunNetworkTransaction(pickupResult.Value);
-                    if (FikaPlugin.QuestSharingNotifications.Value)
+                    if (FikaPlugin.Instance.Settings.QuestSharingNotifications.Value)
                     {
                         NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.RECEIVED_SHARED_ITEM_PICKUP.Localized(),
                             [ColorizeText(EColor.GREEN, packet.Nickname), ColorizeText(EColor.BLUE, item.Name.Localized())]),
@@ -269,7 +269,7 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
         FikaGlobals.LogInfo($"Had quest for item {itemId}, zoneId {zoneId}");
 #endif
 
-        if (FikaPlugin.QuestSharingNotifications.Value)
+        if (FikaPlugin.Instance.Settings.QuestSharingNotifications.Value)
         {
             NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.RECEIVED_SHARED_ITEM_PLANT.Localized(),
                 [ColorizeText(EColor.GREEN, packet.Nickname), ColorizeText(EColor.BROWN, questName)]),
@@ -285,7 +285,7 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
                 {
                     if (!result.Succeed)
                     {
-                        FikaPlugin.Instance.FikaLogger.LogError("ReceiveQuestDropItemPacket: Discard failed: " + result.Error);
+                        FikaGlobals.LogError("ReceiveQuestDropItemPacket: Discard failed: " + result.Error);
                     }
                 });
             }
@@ -316,7 +316,7 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
                     if (!quest.CompletedConditions.Contains(conditionPlaceBeacon.id) && quest.CheckVisibilityStatus(conditionPlaceBeacon))
                     {
 #if DEBUG
-                        FikaPlugin.Instance.FikaLogger.LogWarning($"Found quest for Placed Beacon, itemId: {itemId}, zoneId: {zoneId}, quest: {quest.Template.Name}");
+                        FikaGlobals.LogWarning($"Found quest for Placed Beacon, itemId: {itemId}, zoneId: {zoneId}, quest: {quest.Template.Name}");
 #endif
                         questName = quest.Template.Name;
                         return true;
@@ -324,7 +324,7 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
 #if DEBUG
                     else
                     {
-                        FikaPlugin.Instance.FikaLogger.LogWarning($"Found quest for Placed Beacon, itemId: {itemId}, zoneId: {zoneId}, quest: {quest.Template.Name}, but it was COMPLETED");
+                        FikaGlobals.LogWarning($"Found quest for Placed Beacon, itemId: {itemId}, zoneId: {zoneId}, quest: {quest.Template.Name}, but it was COMPLETED");
                     }
 #endif
                 }
@@ -337,7 +337,7 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
                     if (!quest.CompletedConditions.Contains(conditionLeaveItemAtLocation.id) && quest.CheckVisibilityStatus(conditionLeaveItemAtLocation))
                     {
 #if DEBUG
-                        FikaPlugin.Instance.FikaLogger.LogWarning($"Found quest for Placed Item, itemId: {itemId}, zoneId: {zoneId}, quest: {quest.Template.Name}");
+                        FikaGlobals.LogWarning($"Found quest for Placed Item, itemId: {itemId}, zoneId: {zoneId}, quest: {quest.Template.Name}");
 #endif
                         questName = quest.Template.Name;
                         return true;
@@ -345,7 +345,7 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
 #if DEBUG
                     else
                     {
-                        FikaPlugin.Instance.FikaLogger.LogWarning($"Found quest for Placed Item, itemId: {itemId}, zoneId: {zoneId}, quest: {quest.Template.Name}, but it was COMPLETED");
+                        FikaGlobals.LogWarning($"Found quest for Placed Item, itemId: {itemId}, zoneId: {zoneId}, quest: {quest.Template.Name}, but it was COMPLETED");
                     }
 #endif
                 }
@@ -353,7 +353,7 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
         }
 
 #if DEBUG
-        FikaPlugin.Instance.FikaLogger.LogWarning($"Did not have quest for Place Beacon/Item, itemId: {itemId}, zoneId: {zoneId}");
+        FikaGlobals.LogWarning($"Did not have quest for Place Beacon/Item, itemId: {itemId}, zoneId: {zoneId}");
 #endif
         questName = null;
         return false;
@@ -376,7 +376,7 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
 
         if (counter.Type == "CounterCreator")
         {
-            ConditionCounterCreator CounterCreator = (ConditionCounterCreator)counter.Template;
+            var CounterCreator = (ConditionCounterCreator)counter.Template;
 #if DEBUG
             FikaGlobals.LogInfo($"CounterCreator Type {CounterCreator.type}");
 #endif

@@ -1251,7 +1251,7 @@ public static class FikaSerializationExtensions
             case EFirearmSubPacketType.Loot:
                 break;
             default:
-                FikaPlugin.Instance.FikaLogger.LogError("PutFirearmSubPacket: type was outside of bounds!");
+                FikaGlobals.LogError("PutFirearmSubPacket: type was outside of bounds!");
                 break;
         }
     }
@@ -1270,7 +1270,7 @@ public static class FikaSerializationExtensions
             case ERequestSubPacketType.CharacterSync:
                 return new RequestCharactersPacket(reader);
             default:
-                FikaPlugin.Instance.FikaLogger.LogError("GetRequestSubPacket: type was outside of bounds!");
+                FikaGlobals.LogError("GetRequestSubPacket: type was outside of bounds!");
                 return null;
         }
     }

@@ -1,14 +1,15 @@
 ﻿// © 2026 Lacyway All Rights Reserved
 
+using System;
+using System.Collections.Generic;
+using System.Reflection;
 using Diz.Utils;
 using EFT;
 using EFT.InputSystem;
 using EFT.UI;
+using Fika.Core.Main.Utils;
 using HarmonyLib;
 using JsonType;
-using System;
-using System.Collections.Generic;
-using System.Reflection;
 using TMPro;
 
 namespace Fika.Core.UI;
@@ -38,22 +39,22 @@ public static class FikaUIGlobals
     /// <returns>The created <see cref="TextMeshProUGUI"/> component.</returns>
     public static TextMeshProUGUI CreateOverlayText(string overlayText)
     {
-        GameObject obj = GameObject.Find("/Preloader UI/Preloader UI/Watermark");
-        GameObject labelObj = GameObject.Find("/Preloader UI/Preloader UI/Watermark/Label");
+        var obj = GameObject.Find("/Preloader UI/Preloader UI/Watermark");
+        var labelObj = GameObject.Find("/Preloader UI/Preloader UI/Watermark/Label");
 
         if (labelObj != null)
         {
             UnityEngine.Object.Destroy(labelObj);
         }
 
-        ClientWatermark watermarkText = obj.GetComponent<ClientWatermark>();
+        var watermarkText = obj.GetComponent<ClientWatermark>();
         if (watermarkText != null)
         {
             UnityEngine.Object.Destroy(watermarkText);
         }
 
         obj.SetActive(true);
-        TextMeshProUGUI text = obj.AddComponent<TextMeshProUGUI>();
+        var text = obj.AddComponent<TextMeshProUGUI>();
         text.horizontalAlignment = HorizontalAlignmentOptions.Center;
         text.verticalAlignment = VerticalAlignmentOptions.Bottom;
         text.margin = new Vector4(0, 0, 0, -350);
@@ -76,7 +77,7 @@ public static class FikaUIGlobals
     public static GClass3835 ShowFikaMessage(this PreloaderUI preloaderUI, string header, string message,
         ErrorScreen.EButtonType buttonType, float waitingTime, Action acceptCallback, Action endTimeCallback)
     {
-        Traverse preloaderUiTraverse = Traverse.Create(preloaderUI);
+        var preloaderUiTraverse = Traverse.Create(preloaderUI);
 
         PreloaderUI.Class2988 messageHandler = new()
         {
@@ -85,12 +86,12 @@ public static class FikaUIGlobals
 
         if (!AsyncWorker.CheckIsMainThread())
         {
-            FikaPlugin.Instance.FikaLogger.LogError("You are trying to show error screen from non-main thread!");
+            FikaGlobals.LogError("You are trying to show error screen from non-main thread!");
             return new GClass3835();
         }
 
-        ErrorScreen errorScreenTemplate = preloaderUiTraverse.Field("_criticalErrorScreenTemplate").GetValue<ErrorScreen>();
-        EmptyInputNode errorScreenContainer = preloaderUiTraverse.Field("_criticalErrorScreenContainer").GetValue<EmptyInputNode>();
+        var errorScreenTemplate = preloaderUiTraverse.Field("_criticalErrorScreenTemplate").GetValue<ErrorScreen>();
+        var errorScreenContainer = preloaderUiTraverse.Field("_criticalErrorScreenContainer").GetValue<EmptyInputNode>();
 
         messageHandler.errorScreen = UnityEngine.Object.Instantiate(errorScreenTemplate, errorScreenContainer.transform, false);
         errorScreenContainer.AddChildNode(messageHandler.errorScreen);
@@ -113,7 +114,7 @@ public static class FikaUIGlobals
         Action closeManuallyCallback = null, float waitingTime = 0f, Action timeOutCallback = null,
         ErrorScreen.EButtonType buttonType = ErrorScreen.EButtonType.OkButton, bool removeHtml = true)
     {
-        Traverse errorScreenTraverse = Traverse.Create(errorScreen);
+        var errorScreenTraverse = Traverse.Create(errorScreen);
 
         ErrorScreen.Class2741 errorScreenHandler = new()
         {
@@ -129,7 +130,7 @@ public static class FikaUIGlobals
         }
         ItemUiContext.Instance.CloseAllWindows();
 
-        Action action_1 = timeOutCallback ?? closeManuallyCallback;
+        var action_1 = timeOutCallback ?? closeManuallyCallback;
         errorScreenTraverse.Field("action_1").SetValue(action_1);
         MethodBase baseShow = typeof(ErrorScreen).BaseType.GetMethod("Show");
 
@@ -143,10 +144,10 @@ public static class FikaUIGlobals
         errorScreenHandler.context.OnDecline += Application.Quit;
         errorScreenHandler.context.OnCloseSilent += errorScreen.method_4;
 
-        CompositeDisposableClass ui = Traverse.Create(errorScreen).Field<CompositeDisposableClass>("UI").Value;
+        var ui = Traverse.Create(errorScreen).Field<CompositeDisposableClass>("UI").Value;
 
         ui.AddDisposable(errorScreenHandler.method_0);
-        string text = buttonType switch
+        var text = buttonType switch
         {
             ErrorScreen.EButtonType.OkButton => "I UNDERSTAND",
             ErrorScreen.EButtonType.CancelButton => "CANCEL",
@@ -154,20 +155,20 @@ public static class FikaUIGlobals
             _ => throw new ArgumentOutOfRangeException()
         };
 
-        DefaultUIButton exitButton = errorScreenTraverse.Field("_exitButton").GetValue<DefaultUIButton>();
+        var exitButton = errorScreenTraverse.Field("_exitButton").GetValue<DefaultUIButton>();
 
         exitButton.SetHeaderText(text, exitButton.HeaderSize);
         errorScreen.RectTransform.anchoredPosition = Vector2.zero;
 
         errorScreen.Caption.SetText(string.IsNullOrEmpty(title) ? "ERROR" : title);
 
-        string string_1 = message.SubstringIfNecessary(500);
+        var string_1 = message.SubstringIfNecessary(500);
         errorScreenTraverse.Field("string_1").SetValue(string_1);
 
-        TextMeshProUGUI errorDescription = Traverse.Create(errorScreen).Field<TextMeshProUGUI>("_errorDescription").Value;
+        var errorDescription = Traverse.Create(errorScreen).Field<TextMeshProUGUI>("_errorDescription").Value;
         errorDescription.text = string_1;
 
-        Coroutine coroutine_0 = errorScreenTraverse.Field("coroutine_0").GetValue<Coroutine>();
+        var coroutine_0 = errorScreenTraverse.Field("coroutine_0").GetValue<Coroutine>();
         if (coroutine_0 != null)
         {
             errorScreen.StopCoroutine(coroutine_0);
@@ -186,7 +187,7 @@ public static class FikaUIGlobals
     /// <returns>The hex color code as a string.</returns>
     private static string GetHexByColor(EColor color)
     {
-        return _keyValuePairs.TryGetValue(color, out string value) ? value : "ffffff";
+        return _keyValuePairs.TryGetValue(color, out var value) ? value : "ffffff";
     }
 
     /// <summary>
@@ -229,19 +230,19 @@ public static class FikaUIGlobals
     /// <returns>The formatted time string, or an empty string if unavailable.</returns>
     public static string FormattedTime(EDateTime time, bool staticTime)
     {
-        if (TarkovApplication.Exist(out TarkovApplication tarkovApplication))
+        if (TarkovApplication.Exist(out var tarkovApplication))
         {
             if (tarkovApplication.Session != null)
             {
-                ISession session = tarkovApplication.Session;
+                var session = tarkovApplication.Session;
 
                 if (staticTime)
                 {
-                    DateTime staticDate = StaticTime;
+                    var staticDate = StaticTime;
                     return time == EDateTime.CURR ? staticDate.ToString("HH:mm:ss") : staticDate.AddHours(-12).ToString("HH:mm:ss");
                 }
 
-                DateTime backendTime = session.GetCurrentLocationTime;
+                var backendTime = session.GetCurrentLocationTime;
                 if (backendTime == DateTime.MinValue)
                 {
                     return "";

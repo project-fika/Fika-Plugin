@@ -1,8 +1,7 @@
-﻿using EFT;
-using EFT.HealthSystem;
+﻿using System.Collections.Generic;
+using EFT;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
-using System.Collections.Generic;
 
 namespace Fika.Core.Main.FreeCamera;
 
@@ -59,7 +58,7 @@ public partial class FreeCamera
 
     private static void DrawRect(Rect r, Color c, Texture2D white)
     {
-        Color prev = GUI.color; GUI.color = c;
+        var prev = GUI.color; GUI.color = c;
         GUI.DrawTexture(r, white);
         GUI.color = prev;
     }
@@ -74,24 +73,24 @@ public partial class FreeCamera
 
     private void DrawPlayerRow(FikaPlayer p)
     {
-        string playerName = string.IsNullOrWhiteSpace(p.Profile.Info.MainProfileNickname)
+        var playerName = string.IsNullOrWhiteSpace(p.Profile.Info.MainProfileNickname)
             ? p.Profile.GetCorrectedNickname()
             : p.Profile.Info.MainProfileNickname;
 
-        ValueStruct health = p.HealthController.GetBodyPartHealth(EBodyPart.Common);
-        float hpCur = health.Current;
-        float hpMax = health.Maximum;
+        var health = p.HealthController.GetBodyPartHealth(EBodyPart.Common);
+        var hpCur = health.Current;
+        var hpMax = health.Maximum;
 
-        string kind = GetPlayerKind(p);
-        Color kindColor = GetKindColor(kind);
+        var kind = GetPlayerKind(p);
+        var kindColor = GetKindColor(kind);
 
         const float hpWidth = 100f;
         const float pad = 6f;
-        Rect row = GUILayoutUtility.GetRect(0, 24, GUILayout.ExpandWidth(true));
+        var row = GUILayoutUtility.GetRect(0, 24, GUILayout.ExpandWidth(true));
 
-        Vector2 nameSize = _nameGuiStyle.CalcSize(new GUIContent(playerName));
-        Vector2 kindSize = _badgeGuiStyle.CalcSize(new GUIContent(kind));
-        float rowWidth = hpWidth + 24f + nameSize.x + kindSize.x;
+        var nameSize = _nameGuiStyle.CalcSize(new GUIContent(playerName));
+        var kindSize = _badgeGuiStyle.CalcSize(new GUIContent(kind));
+        var rowWidth = hpWidth + 24f + nameSize.x + kindSize.x;
         Rect rowRect = new(row.x, row.y + 1, rowWidth + 28, row.height);
 
         if (p == _currentPlayer)
@@ -105,9 +104,9 @@ public partial class FreeCamera
             DrawRectBorder(rowRect, 1f, Color.grey, _texWhite);
         }
 
-        float x = row.x + pad;
-        float y = row.y + 3f;
-        float healthPercent = Mathf.Clamp01(hpMax > 0 ? hpCur / hpMax : 0);
+        var x = row.x + pad;
+        var y = row.y + 3f;
+        var healthPercent = Mathf.Clamp01(hpMax > 0 ? hpCur / hpMax : 0);
 
         Rect hpRect = new(x, y + 2f, hpWidth, row.height - 8f);
         DrawRect(hpRect, Color.black, _texWhite);
@@ -126,8 +125,8 @@ public partial class FreeCamera
 
     private string GetPlayerKind(FikaPlayer p)
     {
-        WildSpawnType role = p.Profile.Info.Settings.Role;
-        string kind = role switch
+        var role = p.Profile.Info.Settings.Role;
+        var kind = role switch
         {
             WildSpawnType.pmcUSEC => "USEC",
             WildSpawnType.pmcBEAR => "BEAR",
@@ -146,7 +145,7 @@ public partial class FreeCamera
 
         if (kind == "Savage")
         {
-            string roleName = p.Profile.Info.Settings?.Role.ToString() ?? "NoRole";
+            var roleName = p.Profile.Info.Settings?.Role.ToString() ?? "NoRole";
             kind = roleName switch
             {
                 "marksman" => "Sniper Scav",
@@ -182,7 +181,7 @@ public partial class FreeCamera
 
     private Color GetHealthBarColor(float current, float max)
     {
-        float percent = Mathf.Clamp01(max > 0 ? current / max : 0);
+        var percent = Mathf.Clamp01(max > 0 ? current / max : 0);
         float r, g;
 
         if (percent > 0.5f)
@@ -203,7 +202,7 @@ public partial class FreeCamera
     {
         DrawRect(rect, bgColor, _texWhite);
         DrawRectBorder(rect, 1f, Color.black, _texWhite);
-        Texture2D prevBg = style.normal.background;
+        var prevBg = style.normal.background;
         style.normal.background = null;
         GUI.Label(rect, text, style);
         style.normal.background = prevBg;
@@ -213,10 +212,10 @@ public partial class FreeCamera
     private void DrawPlayerList()
     {
         List<FikaPlayer> players = [];
-        List<FikaPlayer> humanPlayers = _coopHandler.HumanPlayers;
-        for (int i = 0; i < humanPlayers.Count; i++)
+        var humanPlayers = _coopHandler.HumanPlayers;
+        for (var i = 0; i < humanPlayers.Count; i++)
         {
-            FikaPlayer player = humanPlayers[i];
+            var player = humanPlayers[i];
             if (!player.IsYourPlayer && player.HealthController.IsAlive)
             {
                 players.Add(player);
@@ -224,16 +223,15 @@ public partial class FreeCamera
         }
         // If no alive players, add bots to spectate pool if enabled
 #if DEBUG
-        if (FikaPlugin.AllowSpectateBots.Value)
+        if (FikaPlugin.Instance.Settings.AllowSpectateBots.Value)
 #else
 
-        if (players.Count == 0 && FikaPlugin.AllowSpectateBots.Value)
+        if (players.Count == 0 && FikaPlugin.Instance.Settings.AllowSpectateBots.Value)
 #endif
         {
-            _isSpectatingBots = true;
             if (FikaBackendUtils.IsServer)
             {
-                foreach (FikaPlayer player in _coopHandler.Players.Values)
+                foreach (var player in _coopHandler.Players.Values)
                 {
                     if (player.IsAI && player.HealthController.IsAlive)
                     {
@@ -243,7 +241,7 @@ public partial class FreeCamera
             }
             else
             {
-                foreach (FikaPlayer player in _coopHandler.Players.Values)
+                foreach (var player in _coopHandler.Players.Values)
                 {
                     if (player.IsObservedAI && player.HealthController.IsAlive)
                     {
@@ -258,7 +256,7 @@ public partial class FreeCamera
             return;
         }
 
-        for (int i = 0; i < players.Count; i++)
+        for (var i = 0; i < players.Count; i++)
         {
             DrawPlayerRow(players[i]);
         }
@@ -266,7 +264,7 @@ public partial class FreeCamera
 
     protected void OnGUI()
     {
-        if (!IsActive || !_showOverlay || _hidePlayerList || !FikaPlugin.ShowPlayerList.Value)
+        if (!IsActive || !_showOverlay || _hidePlayerList || !FikaPlugin.Instance.Settings.ShowPlayerList.Value)
         {
             return;
         }

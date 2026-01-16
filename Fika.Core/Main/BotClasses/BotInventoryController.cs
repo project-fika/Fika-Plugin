@@ -1,15 +1,15 @@
 ﻿// © 2026 Lacyway All Rights Reserved
 
+using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
 using EFT.InventoryLogic.Operations;
 using Fika.Core.Main.Players;
+using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
 using JetBrains.Annotations;
-using System;
-using System.Threading.Tasks;
 using static EFT.Player;
 
 namespace Fika.Core.Main.BotClasses;
@@ -50,7 +50,7 @@ public class BotInventoryController : PlayerInventoryController
     public override void vmethod_1(BaseInventoryOperationClass operation, [CanBeNull] Callback callback)
     {
 #if DEBUG
-        FikaPlugin.Instance.FikaLogger.LogInfo($"Sending bot operation {operation.GetType()} from {_fikaBot.Profile.Nickname}");
+        FikaGlobals.LogInfo($"Sending bot operation {operation.GetType()} from {_fikaBot.Profile.Nickname}");
 #endif
         _fikaBot.PacketSender.NetworkManager.SendGenericPacket(EGenericSubPacketType.InventoryOperation,
             InventoryPacket.FromValue(_fikaBot.NetId, operation), true);
@@ -108,7 +108,7 @@ public class BotInventoryController : PlayerInventoryController
         {
             if (result.Failed)
             {
-                FikaPlugin.Instance.FikaLogger.LogWarning($"BotInventoryOperationHandler: Operation has failed! Controller: {controller.Name}, Operation ID: {Operation.Id}, Operation: {Operation}, Error: {result.Error}");
+                FikaGlobals.LogWarning($"BotInventoryOperationHandler: Operation has failed! Controller: {controller.Name}, Operation ID: {Operation.Id}, Operation: {Operation}, Error: {result.Error}");
             }
 
             Callback?.Invoke(result);

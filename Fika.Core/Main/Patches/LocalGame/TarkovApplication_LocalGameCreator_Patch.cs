@@ -56,7 +56,7 @@ public class TarkovApplication_LocalGameCreator_Patch : ModulePatch
         var isServer = FikaBackendUtils.IsServer;
         var isTransit = FikaBackendUtils.IsTransit;
 
-        if (FikaPlugin.NoAI.Value)
+        if (FikaPlugin.Instance.Settings.NoAI.Value)
         {
             FikaGlobals.LogWarning("No AI enabled - stopping bot spawns");
             raidSettings.BotSettings.BotAmount = EFT.Bots.EBotAmount.NoBots;
@@ -208,7 +208,7 @@ public class TarkovApplication_LocalGameCreator_Patch : ModulePatch
         await coopGame.InitPlayer(raidSettings.BotSettings);
         UnityEngine.Object.DestroyImmediate(MonoBehaviourSingleton<MenuUI>.Instance.gameObject);
         ___mainMenuController?.Unsubscribe();
-        bundleLock.MaxConcurrentOperations = FikaPlugin.MaxBundleLock.Value;
+        bundleLock.MaxConcurrentOperations = FikaPlugin.Instance.Settings.MaxBundleLock.Value;
         gameWorld.OnGameStarted();
         updater.Dispose();
 

@@ -1,6 +1,7 @@
 ﻿using EFT.InventoryLogic;
 using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
+using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Pooling;
 using System.Collections.Generic;
 
@@ -50,7 +51,7 @@ public sealed class ReloadBarrelsPacket : IPoolSubPacket
             }
             catch (GException4 exception2)
             {
-                FikaPlugin.Instance.FikaLogger.LogError(exception2);
+                FikaGlobals.LogError(exception2);
             }
 
             if (ammoPack != null)
@@ -60,7 +61,7 @@ public sealed class ReloadBarrelsPacket : IPoolSubPacket
             }
             else
             {
-                FikaPlugin.Instance.FikaLogger.LogError($"ReloadBarrelsPacket: final variables were null! Ammo: {ammoPack}, Address: {gridItemAddress}");
+                FikaGlobals.LogError($"ReloadBarrelsPacket: final variables were null! Ammo: {ammoPack}, Address: {gridItemAddress}");
             }
         }
     }

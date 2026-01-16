@@ -4,6 +4,7 @@ using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.Factories;
 
@@ -34,7 +35,7 @@ internal class HandsControllerFactory(ObservedPlayer player, Item item = null, K
             return ObservedFirearmController.Create(Player, weapon);
         }
 
-        FikaPlugin.Instance.FikaLogger.LogError($"HandsControllerFactory::CreateObservedFirearmController: item was not of type Weapon, was: {Item.GetType()}");
+        FikaGlobals.LogError($"item was not of type Weapon, was: {Item.GetType()}");
         return null;
     }
 
@@ -49,7 +50,7 @@ internal class HandsControllerFactory(ObservedPlayer player, Item item = null, K
             return ObservedGrenadeController.Create(Player, grenade);
         }
 
-        FikaPlugin.Instance.FikaLogger.LogError($"HandsControllerFactory::CoopObservedGrenadeController: item was not of type GrenadeClass, was: {Item.GetType()}");
+        FikaGlobals.LogError($"item was not of type GrenadeClass, was: {Item.GetType()}");
         return null;
     }
 
@@ -64,7 +65,7 @@ internal class HandsControllerFactory(ObservedPlayer player, Item item = null, K
             return ObservedQuickGrenadeController.Create(Player, grenade);
         }
 
-        FikaPlugin.Instance.FikaLogger.LogError($"HandsControllerFactory::CreateObservedQuickGrenadeController: item was not of type GrenadeClass, was: {Item.GetType()}");
+        FikaGlobals.LogError($"item was not of type GrenadeClass, was: {Item.GetType()}");
         return null;
     }
 
@@ -79,7 +80,7 @@ internal class HandsControllerFactory(ObservedPlayer player, Item item = null, K
             return ObservedKnifeController.Create(Player, KnifeComponent);
         }
 
-        FikaPlugin.Instance.FikaLogger.LogError($"HandsControllerFactory::CoopObservedKnifeController: knifeComponent was null!");
+        FikaGlobals.LogError("knifeComponent was null!");
         return null;
     }
 
@@ -98,7 +99,7 @@ internal class HandsControllerFactory(ObservedPlayer player, Item item = null, K
             return ObservedMedsController.Create(Player, MedsItem, BodyParts, 1f, AnimationVariant);
         }
 
-        FikaPlugin.Instance.FikaLogger.LogError($"HandsControllerFactory::CreateObservedMedsController: meds or food was null!");
+        FikaGlobals.LogError("meds or food was null!");
         return null;
     }
 }

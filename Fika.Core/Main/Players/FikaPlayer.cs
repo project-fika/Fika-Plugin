@@ -467,7 +467,7 @@ public class FikaPlayer : LocalPlayer
     protected Item FindWeapon()
     {
 #if DEBUG
-        FikaPlugin.Instance.FikaLogger.LogWarning($"Finding weapon '{_lastWeaponId}'!");
+        FikaGlobals.LogWarning($"Finding weapon '{_lastWeaponId}'!");
 #endif
         var itemResult = FindItemById(_lastWeaponId.Value, false, false);
         var item = itemResult.Value;
@@ -532,7 +532,7 @@ public class FikaPlayer : LocalPlayer
         }
 
 #if DEBUG
-        FikaPlugin.Instance.FikaLogger.LogWarning($"HandleTeammateKill: Weapon {(damage.Weapon != null ? damage.Weapon.Name.Localized() : "None")}");
+        FikaGlobals.LogWarning($"HandleTeammateKill: Weapon {(damage.Weapon != null ? damage.Weapon.Name.Localized() : "None")}");
 #endif
 
         if (role != WildSpawnType.pmcBEAR)
@@ -582,21 +582,21 @@ public class FikaPlayer : LocalPlayer
             experience = Singleton<BackendConfigSettingsClass>.Instance.Experience.Kill.VictimBotLevelExp;
         }
 
-        if (FikaPlugin.SharedKillExperience.Value && !countAsBoss)
+        if (FikaPlugin.Instance.Settings.SharedKillExperience.Value && !countAsBoss)
         {
             var toReceive = experience / 2;
 #if DEBUG
-            FikaPlugin.Instance.FikaLogger.LogInfo($"Received shared kill XP of {toReceive}");
+            FikaGlobals.LogInfo($"Received shared kill XP of {toReceive}");
 #endif
             sessionCounters.AddLong(1L, SessionCounterTypesAbstractClass.Kills);
             sessionCounters.AddInt(toReceive, SessionCounterTypesAbstractClass.ExpKillBase);
         }
 
-        if (FikaPlugin.SharedBossExperience.Value && countAsBoss)
+        if (FikaPlugin.Instance.Settings.SharedBossExperience.Value && countAsBoss)
         {
             var toReceive = experience / 2;
 #if DEBUG
-            FikaPlugin.Instance.FikaLogger.LogInfo($"Received shared boss XP of {toReceive}");
+            FikaGlobals.LogInfo($"Received shared boss XP of {toReceive}");
 #endif
             sessionCounters.AddLong(1L, SessionCounterTypesAbstractClass.Kills);
             sessionCounters.AddInt(toReceive, SessionCounterTypesAbstractClass.ExpKillBase);
@@ -609,7 +609,7 @@ public class FikaPlayer : LocalPlayer
         if (IsYourPlayer)
         {
             EFT.UI.ConsoleScreen.Log(message);
-            FikaPlugin.Instance.FikaLogger.LogInfo(message);
+            FikaGlobals.LogInfo(message);
         }
     }
 #endif
@@ -922,7 +922,7 @@ public class FikaPlayer : LocalPlayer
 #if DEBUG
             if (LastDamageInfo.Weapon != null)
             {
-                FikaPlugin.Instance.FikaLogger.LogWarning($"Found weapon '{LastDamageInfo.Weapon.Name.Localized()}'!");
+                FikaGlobals.LogWarning($"Found weapon '{LastDamageInfo.Weapon.Name.Localized()}'!");
             }
 #endif
         }
@@ -952,7 +952,7 @@ public class FikaPlayer : LocalPlayer
 #if DEBUG
             if (LastDamageInfo.Weapon != null)
             {
-                FikaPlugin.Instance.FikaLogger.LogWarning($"Found weapon '{LastDamageInfo.Weapon.Name.Localized()}'!");
+                FikaGlobals.LogWarning($"Found weapon '{LastDamageInfo.Weapon.Name.Localized()}'!");
             }
 #endif
         }
@@ -993,7 +993,7 @@ public class FikaPlayer : LocalPlayer
             }
         }
 
-        FikaPlugin.Instance.FikaLogger.LogError($"GenerateAndSendDogTagPacket: Item or Dogtagcomponent was null on player {Profile.Nickname}, id {NetId}");
+        FikaGlobals.LogError($"GenerateAndSendDogTagPacket: Item or Dogtagcomponent was null on player {Profile.Nickname}, id {NetId}");
     }
 
     private IEnumerator LocalPlayerDied()
@@ -1145,7 +1145,7 @@ public class FikaPlayer : LocalPlayer
         }
         else
         {
-            FikaPlugin.Instance.FikaLogger.LogError($"Could not find CallbackId: {operationCallbackPacket.CallbackId}!");
+            FikaGlobals.LogError($"Could not find CallbackId: {operationCallbackPacket.CallbackId}!");
         }
     }
 
@@ -1256,7 +1256,7 @@ public class FikaPlayer : LocalPlayer
                 damageInfo.Weapon = item;
                 (damageInfo.Player.iPlayer as FikaPlayer)._shouldSendSideEffect = true;
 #if DEBUG
-                FikaPlugin.Instance.FikaLogger.LogWarning("Found weapon for knife damage: " + item.Name.Localized());
+                FikaGlobals.LogWarning("Found weapon for knife damage: " + item.Name.Localized());
 #endif
             }
         }
@@ -1302,7 +1302,7 @@ public class FikaPlayer : LocalPlayer
         var gstruct = Singleton<GameWorld>.Instance.FindItemById(packet.ItemId);
         if (gstruct.Failed)
         {
-            FikaPlugin.Instance.FikaLogger.LogError("HandleArmorDamagePacket: " + gstruct.Error);
+            FikaGlobals.LogError("HandleArmorDamagePacket: " + gstruct.Error);
             return;
         }
 
@@ -1383,7 +1383,7 @@ public class FikaPlayer : LocalPlayer
             }
             if (!Profile.TradersInfo.TryGetValue(serviceData.TraderId, out var traderInfo))
             {
-                FikaPlugin.Instance.FikaLogger.LogWarning($"Can't find trader with id: {serviceData.TraderId}!");
+                FikaGlobals.LogWarning($"Can't find trader with id: {serviceData.TraderId}!");
             }
             else
             {

@@ -67,7 +67,7 @@ public class FikaModHandler
         var validationResult = JsonConvert.DeserializeObject<ModValidationResponse>(validationJson);
         if (validationResult.Forbidden == null || validationResult.MissingRequired == null || validationResult.HashMismatch == null)
         {
-            FikaPlugin.Instance.FikaLogger.LogError("FikaModHandler::VerifyMods: Response was invalid!");
+            FikaGlobals.LogError("FikaModHandler::VerifyMods: Response was invalid!");
             MessageBoxHelper.Show("Failed to verify mods with server.\nMake sure that the server mod is installed!", "FIKA ERROR", MessageBoxHelper.MessageBoxType.OK);
             AsyncWorker.RunInMainTread(Application.Quit);
             return;

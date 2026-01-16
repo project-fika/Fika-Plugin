@@ -52,7 +52,7 @@ public sealed class ClientExtract : IPoolSubPacket
                         (fikaGame.GameController as HostGameController).ClearHostAI(playerToApply);
                     }
 
-                    if (FikaPlugin.ShowNotifications.Value)
+                    if (FikaPlugin.Instance.Settings.ShowNotifications.Value)
                     {
                         string nickname = !string.IsNullOrEmpty(playerToApply.Profile.Info.MainProfileNickname) ? playerToApply.Profile.Info.MainProfileNickname : playerToApply.Profile.Nickname;
                         NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.GROUP_MEMBER_EXTRACTED.Localized(),

@@ -157,13 +157,13 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
             UpdateTime = 50,
             AutoRecycle = true,
             IPv6Enabled = true,
-            DisconnectTimeout = FikaPlugin.ConnectionTimeout.Value * 1000,
+            DisconnectTimeout = FikaPlugin.Instance.Settings.ConnectionTimeout.Value * 1000,
             EnableStatistics = true,
             NatPunchEnabled = true,
             ChannelsCount = 2
         };
 
-        AllowVOIP = FikaPlugin.AllowVOIP.Value;
+        AllowVOIP = FikaPlugin.Instance.Settings.AllowVOIP.Value;
 
         _packetProcessor = new();
         _dataWriter = new();
@@ -196,9 +196,9 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
             }
         }
 
-        _sendRate = FikaPlugin.SendRate.Value.ToNumber();
+        _sendRate = FikaPlugin.Instance.Settings.SendRate.Value.ToNumber();
         _logger.LogInfo($"Starting server with SendRate: {_sendRate}");
-        _port = FikaPlugin.UDPPort.Value;
+        _port = FikaPlugin.Instance.Settings.UDPPort.Value;
 
         NetworkGameSession.Rtt = 0;
         NetworkGameSession.LossPercent = 0;
@@ -221,7 +221,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
 #endif            
         await NetManagerUtils.CreateCoopHandler();
 
-        if (FikaPlugin.UseUPnP.Value && !FikaPlugin.UseNatPunching.Value)
+        if (FikaPlugin.Instance.Settings.UseUPnP.Value && !FikaPlugin.Instance.Settings.UseNATPunching.Value)
         {
             var upnpFailed = false;
 
@@ -247,9 +247,9 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
                 throw new MappingException("Error during mapping. Check log file for more information.");
             }
         }
-        else if (FikaPlugin.ForceIP.Value != "")
+        else if (FikaPlugin.Instance.Settings.ForceIP.Value != "")
         {
-            _externalIp = FikaPlugin.ForceIP.Value;
+            _externalIp = FikaPlugin.Instance.Settings.ForceIP.Value;
         }
         else
         {
@@ -261,7 +261,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
             _externalIp = FikaPlugin.Instance.WanIP.ToString();
         }
 
-        if (FikaPlugin.UseNatPunching.Value)
+        if (FikaPlugin.Instance.Settings.UseNATPunching.Value)
         {
             _netServer.NatPunchModule.UnsyncedEvents = true;
             _netServer.NatPunchModule.Init(this);
@@ -272,10 +272,10 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
             var natPunchServerIP = FikaPlugin.Instance.NatPunchServerIP;
             var natPunchServerPort = FikaPlugin.Instance.NatPunchServerPort;
 
-            if (FikaPlugin.UseFikaNatPunchServer.Value)
+            if (FikaPlugin.Instance.Settings.UseFikaNATPunchServer.Value)
             {
-                natPunchServerIP = FikaPlugin.Instance.FikaNatPunchServerIP;
-                natPunchServerPort = FikaPlugin.Instance.FikaNatPunchServerPort;
+                natPunchServerIP = FikaPlugin.FikaNATPunchMasterServer;
+                natPunchServerPort = FikaPlugin.FikaNATPunchMasterPort;
             }
 
             var token = $"Server:{FikaBackendUtils.ServerGuid}";
@@ -283,11 +283,11 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         }
         else
         {
-            if (FikaPlugin.ForceBindIP.Value != "Disabled")
+            if (FikaPlugin.Instance.Settings.ForceBindIP.Value != "Disabled")
             {
-                if (!IPAddress.TryParse(FikaPlugin.ForceBindIP.Value, out var bindAddress))
+                if (!IPAddress.TryParse(FikaPlugin.Instance.Settings.ForceBindIP.Value, out var bindAddress))
                 {
-                    var error = $"{FikaPlugin.ForceBindIP.Value} could not be parsed into a valid IP, raid will not start";
+                    var error = $"{FikaPlugin.Instance.Settings.ForceBindIP.Value} could not be parsed into a valid IP, raid will not start";
                     NotificationManagerClass.DisplayWarningNotification(
                         error,
                         EFT.Communications.ENotificationDurationType.Long);
@@ -337,7 +337,8 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
                 iconType: EFT.Communications.ENotificationIconType.Alert);
         }
 
-        SetHostRequest body = new([.. ipAddresses], _port, FikaPlugin.UseNatPunching.Value, FikaPlugin.UseFikaNatPunchServer.Value, FikaBackendUtils.IsHeadless);
+        SetHostRequest body = new([.. ipAddresses], _port, FikaPlugin.Instance.Settings.UseNATPunching.Value,
+            FikaPlugin.Instance.Settings.UseFikaNATPunchServer.Value, FikaBackendUtils.IsHeadless);
         FikaRequestHandler.UpdateSetHost(body);
 
         if (!FikaBackendUtils.IsHeadless)
@@ -529,7 +530,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
 
     public void CreateFikaChat()
     {
-        if (FikaPlugin.EnableChat.Value)
+        if (FikaPlugin.Instance.Settings.EnableChat.Value)
         {
             _fikaChat = FikaChatUIScript.Create();
         }
@@ -549,7 +550,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
             SendStatisticsPacket();
         }
 
-        if (!FikaBackendUtils.IsHeadless && Input.GetKeyDown(FikaPlugin.ChatKey.Value.MainKey))
+        if (!FikaBackendUtils.IsHeadless && Input.GetKeyDown(FikaPlugin.Instance.Settings.ChatKey.Value.MainKey))
         {
             if (_fikaChat != null)
             {

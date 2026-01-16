@@ -67,10 +67,10 @@ public struct ClientConfigModel
                     }
                     values = values + ", " + valueArray.GetValue(i);
                 }
-                FikaPlugin.Instance.FikaLogger.LogInfo(field.Name + ": " + values);
+                FikaGlobals.LogInfo(field.Name + ": " + values);
                 continue;
             }
-            FikaPlugin.Instance.FikaLogger.LogInfo(field.Name + ": " + value);
+            FikaGlobals.LogInfo(field.Name + ": " + value);
         }
     }
 }

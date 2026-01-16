@@ -202,7 +202,7 @@ public class ObservedPlayer : FikaPlayer
 #if DEBUG
         if (useSimpleAnimator)
         {
-            FikaPlugin.Instance.FikaLogger.LogWarning("Using SimpleAnimator!");
+            FikaGlobals.LogWarning("Using SimpleAnimator!");
         }
 #endif
         var resourceKey = useSimpleAnimator ? ResourceKeyManagerAbstractClass.ZOMBIE_BUNDLE_NAME : ResourceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME;
@@ -1023,7 +1023,7 @@ public class ObservedPlayer : FikaPlayer
             Destroy(HealthBar);
         }
 
-        if (FikaPlugin.ShowNotifications.Value)
+        if (FikaPlugin.Instance.Settings.ShowNotifications.Value)
         {
             if (!IsObservedAI)
             {
@@ -1149,10 +1149,10 @@ public class ObservedPlayer : FikaPlayer
             var sessionCounters = mainPlayer.Profile.EftStats.SessionCounters;
             HandleSharedExperience(countAsBoss, experience, sessionCounters);
 
-            if (FikaPlugin.Instance.SharedQuestProgression && FikaPlugin.EasyKillConditions.Value)
+            if (FikaPlugin.Instance.SharedQuestProgression && FikaPlugin.Instance.Settings.EasyKillConditions.Value)
             {
 #if DEBUG
-                FikaPlugin.Instance.FikaLogger.LogInfo("Handling teammate kill from teammate: " + aggressor.Profile.Nickname);
+                FikaGlobals.LogInfo("Handling teammate kill from teammate: " + aggressor.Profile.Nickname);
 #endif
 
                 var distance = Vector3.Distance(aggressor.Position, Position);
@@ -1370,7 +1370,7 @@ public class ObservedPlayer : FikaPlayer
 
             InitVaultingAudioControllers(_observedVaultingParameters);
 
-            if (FikaPlugin.ShowNotifications.Value)
+            if (FikaPlugin.Instance.Settings.ShowNotifications.Value)
             {
                 NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.GROUP_MEMBER_SPAWNED.Localized(),
                     ColorizeText(EColor.GREEN, Profile.Info.MainProfileNickname)),
@@ -1875,7 +1875,7 @@ public class ObservedPlayer : FikaPlayer
                 CreateUsableItemController(itemId);
                 break;
             default:
-                FikaPlugin.Instance.FikaLogger.LogWarning($"ObservedPlayer::SpawnHandsController: Unhandled ControllerType, was {controllerType}");
+                FikaGlobals.LogWarning($"ObservedPlayer::SpawnHandsController: Unhandled ControllerType, was {controllerType}");
                 break;
         }
     }
@@ -1915,7 +1915,7 @@ public class ObservedPlayer : FikaPlayer
         var result = FindItemById(itemId, false, false);
         if (!result.Succeeded)
         {
-            FikaPlugin.Instance.FikaLogger.LogError(result.Error);
+            FikaGlobals.LogError(result.Error);
             return;
         }
         handler.item = result.Value;
@@ -1929,7 +1929,7 @@ public class ObservedPlayer : FikaPlayer
         var result = FindItemById(itemId, false, false);
         if (!result.Succeeded)
         {
-            FikaPlugin.Instance.FikaLogger.LogError(result.Error);
+            FikaGlobals.LogError(result.Error);
             return;
         }
         handler.Item = result.Value;
@@ -1939,7 +1939,7 @@ public class ObservedPlayer : FikaPlayer
         }
         else
         {
-            FikaPlugin.Instance.FikaLogger.LogError($"CreateGrenadeController: Item was not of type GrenadeClass, was {handler.Item.GetType()}!");
+            FikaGlobals.LogError($"CreateGrenadeController: Item was not of type GrenadeClass, was {handler.Item.GetType()}!");
         }
     }
 
@@ -1948,7 +1948,7 @@ public class ObservedPlayer : FikaPlayer
         var result = FindItemById(itemId, false, false);
         if (!result.Succeeded)
         {
-            FikaPlugin.Instance.FikaLogger.LogError(result.Error);
+            FikaGlobals.LogError(result.Error);
             return;
         }
         CreateMedsControllerHandler handler = new(this, result.Value, bodyParts, amount, animationVariant);
@@ -1961,7 +1961,7 @@ public class ObservedPlayer : FikaPlayer
         var result = FindItemById(itemId, false, false);
         if (!result.Succeeded)
         {
-            FikaPlugin.Instance.FikaLogger.LogError(result.Error);
+            FikaGlobals.LogError(result.Error);
             return;
         }
         handler.Knife = result.Value.GetItemComponent<KnifeComponent>();
@@ -1971,7 +1971,7 @@ public class ObservedPlayer : FikaPlayer
         }
         else
         {
-            FikaPlugin.Instance.FikaLogger.LogError($"CreateKnifeController: Item did not contain a KnifeComponent, was of type {handler.Knife.GetType()}!");
+            FikaGlobals.LogError($"CreateKnifeController: Item did not contain a KnifeComponent, was of type {handler.Knife.GetType()}!");
         }
     }
 
@@ -1981,7 +1981,7 @@ public class ObservedPlayer : FikaPlayer
         var result = FindItemById(itemId, false, false);
         if (!result.Succeeded)
         {
-            FikaPlugin.Instance.FikaLogger.LogError(result.Error);
+            FikaGlobals.LogError(result.Error);
             return;
         }
         handler.tem = result.Value;
@@ -1991,7 +1991,7 @@ public class ObservedPlayer : FikaPlayer
         }
         else
         {
-            FikaPlugin.Instance.FikaLogger.LogError($"CreateQuickGrenadeController: Item was not of type GrenadeClass, was {handler.tem.GetType()}!");
+            FikaGlobals.LogError($"CreateQuickGrenadeController: Item was not of type GrenadeClass, was {handler.tem.GetType()}!");
         }
     }
 
@@ -2001,7 +2001,7 @@ public class ObservedPlayer : FikaPlayer
         var result = FindItemById(itemId, false, false);
         if (!result.Succeeded)
         {
-            FikaPlugin.Instance.FikaLogger.LogError(result.Error);
+            FikaGlobals.LogError(result.Error);
             return;
         }
         handler.Knife = result.Value.GetItemComponent<KnifeComponent>();
@@ -2011,7 +2011,7 @@ public class ObservedPlayer : FikaPlayer
         }
         else
         {
-            FikaPlugin.Instance.FikaLogger.LogError($"CreateQuickKnifeController: Item did not contain a KnifeComponent, was of type {handler.Knife.GetType()}!");
+            FikaGlobals.LogError($"CreateQuickKnifeController: Item did not contain a KnifeComponent, was of type {handler.Knife.GetType()}!");
         }
     }
 
@@ -2020,7 +2020,7 @@ public class ObservedPlayer : FikaPlayer
         var result = FindItemById(itemId, false, false);
         if (!result.Succeeded)
         {
-            FikaPlugin.Instance.FikaLogger.LogError(result.Error);
+            FikaGlobals.LogError(result.Error);
             return;
         }
         CreateUsableItemControllerHandler handler = new(this, result.Value);
@@ -2032,7 +2032,7 @@ public class ObservedPlayer : FikaPlayer
         var result = FindItemById(itemId, false, false);
         if (!result.Succeeded)
         {
-            FikaPlugin.Instance.FikaLogger.LogError(result.Error);
+            FikaGlobals.LogError(result.Error);
             return;
         }
         CreateQuickUseItemControllerHandler handler = new(this, result.Value);
