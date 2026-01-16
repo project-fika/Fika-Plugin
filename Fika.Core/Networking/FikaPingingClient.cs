@@ -42,16 +42,17 @@ public class FikaPingingClient : INetEventListener, INatPunchListener, IDisposab
     private readonly ManualLogSource _logger;
     private List<IPEndPoint> _endPoints;
     private NetDataWriter _writer;
-
     private List<IPEndPoint> _candidates;
     private float _firstResponseTime;
     private bool _hasResponse;
+    private CancellationTokenSource _cts;
 
     private const float _responseWaitSeconds = 1f;
 
     public FikaPingingClient()
     {
         _logger = Logger.CreateLogSource("Fika.PingingClient");
+        _cts = new();
     }
 
     /// <summary>
@@ -99,7 +100,7 @@ public class FikaPingingClient : INetEventListener, INatPunchListener, IDisposab
 
             var token = $"Client:{FikaBackendUtils.ServerGuid}";
 
-            NetClient.NatPunchModule.SendNatIntroduceRequest(endPoint, token);
+            _ = Task.Run(() => NatIntroduceTask(endPoint, token, _cts.Token));
 
             _logger.LogInfo($"Sent NAT Introduce Request to Nat Punch Server: {endPoint}");
         }
@@ -125,6 +126,20 @@ public class FikaPingingClient : INetEventListener, INatPunchListener, IDisposab
         }
 
         return true;
+    }
+
+    private async Task NatIntroduceTask(IPEndPoint endPoint, string token, CancellationToken ct = default)
+    {
+        _logger.LogInfo("Send NAT Introduce Request task started.");
+
+        while (!ct.IsCancellationRequested)
+        {
+            NetClient?.NatPunchModule?.SendNatIntroduceRequest(endPoint, token);
+
+            await Task.Delay(TimeSpan.FromSeconds(15));
+        }
+
+        _logger.LogInfo("Send NAT Introduce Request task stopped.");
     }
 
     public async Task<bool> AttemptToPingHost(string knockMessage, bool reconnect, CancellationToken ct = default)
@@ -159,6 +174,8 @@ public class FikaPingingClient : INetEventListener, INatPunchListener, IDisposab
             }
             FikaGlobals.LogError(logError);
         }
+
+        _cts.Cancel();
 
         return Received;
     }

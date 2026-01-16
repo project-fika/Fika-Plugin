@@ -136,7 +136,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
     private int _currentNetId;
     private FikaChatUIScript _fikaChat;
     private RaidAdminUIScript _raidAdminUIScript;
-    private CancellationTokenSource _natIntroduceRoutineCts;
+    private CancellationTokenSource _cts;
     private float _statisticsCounter;
     private float _sendThreshold;
     private Dictionary<Profile, bool> _visualProfiles;
@@ -267,7 +267,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
             _netServer.NatPunchModule.Init(this);
             _netServer.Start();
 
-            _natIntroduceRoutineCts = new CancellationTokenSource();
+            _cts = new CancellationTokenSource();
 
             var natPunchServerIP = FikaPlugin.Instance.NatPunchServerIP;
             var natPunchServerPort = FikaPlugin.Instance.NatPunchServerPort;
@@ -279,7 +279,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
             }
 
             var token = $"Server:{FikaBackendUtils.ServerGuid}";
-            var natIntroduceTask = Task.Run(() => NatIntroduceTask(natPunchServerIP, natPunchServerPort, token, _natIntroduceRoutineCts.Token));
+            var natIntroduceTask = Task.Run(() => NatIntroduceTask(natPunchServerIP, natPunchServerPort, token, _cts.Token));
         }
         else
         {
@@ -1065,15 +1065,15 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
 
     public void StopNatIntroduceRoutine()
     {
-        if (_natIntroduceRoutineCts != null)
+        if (_cts != null)
         {
-            _natIntroduceRoutineCts.Cancel();
+            _cts.Cancel();
         }
     }
 
     private async Task NatIntroduceTask(string natPunchServerIP, int natPunchServerPort, string token, CancellationToken ct = default)
     {
-        _logger.LogInfo("Send NAT Introduce Request routine started.");
+        _logger.LogInfo("Send NAT Introduce Request task started.");
 
         while (!ct.IsCancellationRequested)
         {
@@ -1082,6 +1082,6 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
             await Task.Delay(TimeSpan.FromSeconds(15));
         }
 
-        _logger.LogInfo("Send NAT Introduce Request routine stopped.");
+        _logger.LogInfo("Send NAT Introduce Request task stopped.");
     }
 }
