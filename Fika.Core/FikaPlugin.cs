@@ -212,7 +212,7 @@ public class FikaPlugin : BaseUnityPlugin
     #endregion
 
     #region fikanatpunchserver config
-    public string FikaNatPunchServerIP = "";
+    public string FikaNatPunchServerIP = "natpunch.project-fika.com";
     public int FikaNatPunchServerPort = 6790;
     #endregion
 
