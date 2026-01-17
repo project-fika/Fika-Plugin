@@ -95,7 +95,7 @@ public static class NetManagerUtils
         }
     }
 
-    public static FikaPingingClient CreatePingingClient()
+    public static Task<FikaPingingClient> CreatePingingClient()
     {
         if (FikaGameObject == null)
         {
@@ -105,7 +105,7 @@ public static class NetManagerUtils
         var pingingClient = new FikaPingingClient();
         Singleton<FikaPingingClient>.Create(pingingClient);
         _logger.LogInfo("FikaPingingClient has started!");
-        return pingingClient;
+        return Task.FromResult(pingingClient);
     }
 
     public static void DestroyNetManager(bool isServer)

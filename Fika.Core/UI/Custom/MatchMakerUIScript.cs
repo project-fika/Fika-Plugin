@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Net;
+using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
 using EFT.UI;
@@ -402,7 +403,65 @@ public class MatchMakerUIScript : MonoBehaviour
         RefreshUI();
     }
 
-    public static IEnumerator JoinMatch(string profileId, string serverId, Button button, Action<bool> callback, bool reconnect)
+    public static async Task<bool> JoinMatch(string profileId, string serverId, Button button, bool reconnect)
+    {
+        if (button != null)
+        {
+            button.enabled = false;
+        }
+
+        FikaBackendUtils.IsReconnect = reconnect;
+        NotificationManagerClass.DisplayMessageNotification(LocaleUtils.CONNECTING_TO_SESSION.Localized(),
+            iconType: EFT.Communications.ENotificationIconType.EntryPoint);
+        using var pingingClient = await NetManagerUtils.CreatePingingClient();
+
+        if (pingingClient.Init(serverId))
+        {
+            FikaGlobals.LogInfo("Attempting to connect to host session...");
+            var knockMessage = FikaBackendUtils.ServerGuid.ToString();
+            var success = await pingingClient.AttemptToPingHost(knockMessage, reconnect);
+
+            if (!success)
+            {
+                Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen(
+                LocaleUtils.UI_ERROR_CONNECTING.Localized(),
+                LocaleUtils.UI_UNABLE_TO_CONNECT.Localized(),
+                ErrorScreen.EButtonType.OkButton, 10f);
+
+                if (button != null)
+                {
+                    button.enabled = true;
+                }
+                return false;
+            }
+        }
+        else
+        {
+            Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen(
+                LocaleUtils.UI_ERROR_CONNECTING.Localized(),
+                LocaleUtils.UI_PINGER_START_FAIL.Localized(),
+                ErrorScreen.EButtonType.OkButton, 10f);
+            return false;
+        }
+
+        if (FikaBackendUtils.JoinMatch(profileId, serverId, out var result, out var errorMessage))
+        {
+            FikaBackendUtils.GroupId = result.ServerId;
+            FikaBackendUtils.ClientType = EClientType.Client;
+
+            AddPlayerRequest data = new(FikaBackendUtils.GroupId, profileId, FikaBackendUtils.IsSpectator);
+            FikaRequestHandler.UpdateAddPlayer(data);
+
+            return true;
+        }
+        else
+        {
+            Singleton<PreloaderUI>.Instance.ShowErrorScreen("ERROR JOINING", errorMessage, null);
+            return true;
+        }
+    }
+
+    /*public static IEnumerator JoinMatch(string profileId, string serverId, Button button, Action<bool> callback, bool reconnect)
     {
         if (button != null)
         {
@@ -468,7 +527,7 @@ public class MatchMakerUIScript : MonoBehaviour
             Singleton<PreloaderUI>.Instance.ShowErrorScreen("ERROR JOINING", errorMessage, null);
             callback?.Invoke(false);
         }
-    }
+    }*/
 
     private void RefreshUI()
     {
@@ -531,7 +590,7 @@ public class MatchMakerUIScript : MonoBehaviour
             var joinButton = GameObject.Find("JoinButton");
             joinButton.name = "JoinButton" + i;
             var button = joinButton.GetComponent<Button>();
-            button.onClick.AddListener(() =>
+            button.onClick.AddListener(async () =>
             {
                 if (_fikaMatchMakerUi.DediSelection.activeSelf)
                 {
@@ -541,15 +600,13 @@ public class MatchMakerUIScript : MonoBehaviour
                 Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
                 FikaBackendUtils.HostLocationId = entry.Location;
                 ToggleLoading(true);
-                StartCoroutine(JoinMatch(_profileId, server.name, button, (bool success) =>
+                var success = await JoinMatch(_profileId, server.name, button, localPlayerInRaid);
+                if (success)
                 {
-                    if (success)
-                    {
-                        AcceptButton.OnClick.Invoke();
-                        return;
-                    }
-                    ToggleLoading(false);
-                }, localPlayerInRaid));
+                    AcceptButton.OnClick.Invoke();
+                    return;
+                }
+                ToggleLoading(false);
             });
 
             HoverTooltipArea tooltipArea;
