@@ -156,7 +156,7 @@ public class MatchMakerUIScript : MonoBehaviour
             Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuCheckBox);
         });
 
-        _fikaMatchMakerUi.LoadingAnimationText.text = "";
+        _fikaMatchMakerUi.LoadingAnimationText.SetText(string.Empty);
 
         _fikaMatchMakerUi.DedicatedToggle.isOn = false;
         _fikaMatchMakerUi.DedicatedToggle.onValueChanged.AddListener((_) => Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuCheckBox));

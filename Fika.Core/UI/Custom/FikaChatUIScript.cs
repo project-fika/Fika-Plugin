@@ -110,7 +110,7 @@ public class FikaChatUIScript : InputNode
         Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
         Singleton<GUISounds>.Instance.PlayChatSound(ESocialNetworkSoundType.OutgoingMessage);
         _fikaChatUI.InputField.DeactivateInputField();
-        _fikaChatUI.InputField.text = string.Empty;
+        _fikaChatUI.InputField.SetTextWithoutNotify(string.Empty);
     }
 
     public void OpenChat(bool autoClose = false)
