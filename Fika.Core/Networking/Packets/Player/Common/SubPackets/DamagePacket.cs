@@ -1,7 +1,6 @@
 ﻿using EFT;
 using EFT.Ballistics;
 using Fika.Core.Main.Players;
-using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
@@ -40,7 +39,7 @@ public sealed class DamagePacket : IPoolSubPacket
     public static DamagePacket FromValue(int netId, DamageInfoStruct damageInfo, EBodyPart bodyPartType,
         EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider = default, MaterialType materialType = default, float absorbed = default)
     {
-        DamagePacket packet = CommonSubPacketPoolManager.Instance.GetPacket<DamagePacket>(ECommonSubPacketType.Damage);
+        var packet = CommonSubPacketPoolManager.Instance.GetPacket<DamagePacket>(ECommonSubPacketType.Damage);
 
         packet.NetId = netId;
         packet.Damage = damageInfo.Damage;

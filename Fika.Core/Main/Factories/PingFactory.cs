@@ -198,7 +198,7 @@ public static class PingFactory
 
             if (_displayRange)
             {
-                _rangeText.text = $"[{CameraClass.Instance.Distance(_hitPoint):F1}m]";
+                _rangeText.SetText("[{0:0.0}m]", CameraClass.Instance.Distance(_hitPoint));
             }
         }
 

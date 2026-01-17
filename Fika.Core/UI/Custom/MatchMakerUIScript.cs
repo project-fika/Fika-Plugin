@@ -26,14 +26,17 @@ public class MatchMakerUIScript : MonoBehaviour
     private MatchMakerUI _fikaMatchMakerUi;
     private LobbyEntry[] _matches;
     private readonly List<GameObject> _matchesListObjects = [];
-    private bool _stopQuery = false;
+    private bool _stopQuery;
     private GameObject _newBackButton;
     private string _profileId;
     private float _lastRefreshed;
     private bool _started;
     private Coroutine _serverQueryRoutine;
-    private float _loadingTextTick = 0f;
+    private float _dotTimer;
+    private int _dotCount;
     private GameObject _mmGameObject;
+
+    private const float _dotInterval = 0.5f;
 
     internal DefaultUIButton AcceptButton;
     internal RaidSettings RaidSettings;
@@ -72,33 +75,26 @@ public class MatchMakerUIScript : MonoBehaviour
 
     protected void Update()
     {
-        if (_stopQuery)
+        if (_stopQuery && _serverQueryRoutine != null)
         {
-            if (_serverQueryRoutine != null)
-            {
-                StopCoroutine(_serverQueryRoutine);
-                _serverQueryRoutine = null;
-            }
+            StopCoroutine(_serverQueryRoutine);
+            _serverQueryRoutine = null;
         }
 
-        if (_fikaMatchMakerUi.LoadingScreen.activeSelf)
+        if (!_fikaMatchMakerUi.LoadingScreen.activeSelf)
         {
-            var text = _fikaMatchMakerUi.LoadingAnimationText.text;
-            var tmpText = _fikaMatchMakerUi.LoadingAnimationText;
+            return;
+        }
 
-            _loadingTextTick++;
+        _dotTimer += Time.deltaTime;
 
-            if (_loadingTextTick > 30)
-            {
-                _loadingTextTick = 0;
+        if (_dotTimer >= _dotInterval)
+        {
+            _dotTimer = 0f;
+            _dotCount = (_dotCount % 3) + 1;
 
-                text += ".";
-                if (text == "....")
-                {
-                    text = ".";
-                }
-                tmpText.text = text;
-            }
+            _fikaMatchMakerUi.LoadingAnimationText.text =
+                new string('.', _dotCount);
         }
     }
 
@@ -163,10 +159,7 @@ public class MatchMakerUIScript : MonoBehaviour
         _fikaMatchMakerUi.LoadingAnimationText.text = "";
 
         _fikaMatchMakerUi.DedicatedToggle.isOn = false;
-        _fikaMatchMakerUi.DedicatedToggle.onValueChanged.AddListener((arg) =>
-        {
-            Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuCheckBox);
-        });
+        _fikaMatchMakerUi.DedicatedToggle.onValueChanged.AddListener((_) => Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuCheckBox));
 
         if (availableHeadlesses.Length == 0)
         {
@@ -236,10 +229,7 @@ public class MatchMakerUIScript : MonoBehaviour
             }
         });
 
-        _fikaMatchMakerUi.DedicatedToggle.onValueChanged.AddListener((arg) =>
-        {
-            Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuCheckBox);
-        });
+        _fikaMatchMakerUi.DedicatedToggle.onValueChanged.AddListener((_) => Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuCheckBox));
 
         _fikaMatchMakerUi.StartButton.onClick.AddListener(async () =>
         {
@@ -359,10 +349,7 @@ public class MatchMakerUIScript : MonoBehaviour
 
         _newBackButton = Instantiate(BackButton.gameObject, BackButton.transform.parent);
         UnityEngine.Events.UnityEvent newEvent = new();
-        newEvent.AddListener(() =>
-        {
-            BackButton.OnClick.Invoke();
-        });
+        newEvent.AddListener(BackButton.OnClick.Invoke);
         var newButtonComponent = _newBackButton.GetComponent<DefaultUIButton>();
         Traverse.Create(newButtonComponent).Field("OnClick").SetValue(newEvent);
 
@@ -532,13 +519,13 @@ public class MatchMakerUIScript : MonoBehaviour
             var playerLabel = GameObject.Find("PlayerLabel");
             playerLabel.name = "PlayerLabel" + i;
             var sessionName = entry.HostUsername;
-            playerLabel.GetComponentInChildren<TextMeshProUGUI>().text = sessionName;
+            playerLabel.GetComponentInChildren<TextMeshProUGUI>().SetText(sessionName);
 
             // players count label
             var playerCountLabel = GameObject.Find("PlayerCountLabel");
             playerCountLabel.name = "PlayerCountLabel" + i;
             var playerCount = entry.IsHeadless ? entry.PlayerCount - 1 : entry.PlayerCount;
-            playerCountLabel.GetComponentInChildren<TextMeshProUGUI>().text = playerCount.ToString();
+            playerCountLabel.GetComponentInChildren<TextMeshProUGUI>().SetText("{0}", playerCount);
 
             // player join button
             var joinButton = GameObject.Find("JoinButton");

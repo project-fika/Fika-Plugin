@@ -517,7 +517,7 @@ public class FikaHealthBar : MonoBehaviour
             EffectImage.sprite = effectSprite;
             TMPText = _effectObject.transform.GetChild(1).GetComponent<TextMeshProUGUI>();
             Amount = 1;
-            TMPText.text = Amount.ToString();
+            TMPText.SetText("{0}", Amount);
             TMPText.enabled = false;
             EffectType = effect.Type;
         }
@@ -532,7 +532,7 @@ public class FikaHealthBar : MonoBehaviour
         public void IncreaseAmount()
         {
             Amount++;
-            TMPText.text = Amount.ToString();
+            TMPText.SetText("{0}", Amount);
 
             if (Amount > 1)
             {
@@ -556,7 +556,7 @@ public class FikaHealthBar : MonoBehaviour
                 TMPText.enabled = false;
             }
 
-            TMPText.text = Amount.ToString();
+            TMPText.SetText("{0}", Amount);
         }
     }
 }

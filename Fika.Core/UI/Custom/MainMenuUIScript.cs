@@ -40,9 +40,10 @@ public class MainMenuUIScript : MonoBehaviour
     private List<GameObject> _players;
     private DateTime _lastRefresh;
     private DateTime _lastSet;
-    private int _minSecondsToWait;
     private RectTransform _transformToScale;
     private GInterface225<RaidSettings> _backendSession;
+
+    private const int _minSecondsToWait = 2;
 
     private DateTime BackendTime
     {
@@ -67,16 +68,12 @@ public class MainMenuUIScript : MonoBehaviour
     protected void Start()
     {
         _instance = this;
-        _minSecondsToWait = 2;
         _players = [];
         _lastRefresh = DateTime.Now;
         _lastSet = DateTime.Now;
-        if (TarkovApplication.Exist(out var tarkovApplication))
+        if (TarkovApplication.Exist(out var tarkovApplication) && tarkovApplication.Session != null)
         {
-            if (tarkovApplication.Session != null)
-            {
-                _backendSession = tarkovApplication.Session;
-            }
+            _backendSession = tarkovApplication.Session;
         }
         CreateMainMenuUI();
     }

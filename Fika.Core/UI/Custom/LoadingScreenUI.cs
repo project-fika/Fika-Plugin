@@ -15,7 +15,7 @@ public class LoadingScreenUI : MonoBehaviour
 
     private Dictionary<int, LoadingScreenPlayer> _loadingPlayers;
 
-    private void Awake()
+    protected void Awake()
     {
         _loadingPlayers = [];
     }
@@ -119,7 +119,7 @@ public class LoadingScreenUI : MonoBehaviour
         }
     }
 
-    private void OnDestroy()
+    protected void OnDestroy()
     {
         ClearData();
     }

@@ -1,13 +1,13 @@
-﻿using Comfort.Common;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using Comfort.Common;
 using EFT.InputSystem;
 using EFT.UI;
 using Fika.Core.Bundles;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Communication;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using UnityEngine.EventSystems;
 
 namespace Fika.Core.UI.Custom;
@@ -35,7 +35,7 @@ public class FikaChatUIScript : InputNode
     private bool _isActive;
     private GameObject _mainScreen;
 
-    private void Update()
+    protected void Update()
     {
         if (_shouldClose)
         {
@@ -48,7 +48,7 @@ public class FikaChatUIScript : InputNode
         }
     }
 
-    private void Awake()
+    protected void Awake()
     {
         _fikaChatUI = GetComponent<FikaChatUI>();
         if (_fikaChatUI == null)
@@ -69,7 +69,7 @@ public class FikaChatUIScript : InputNode
         _fikaChatUI.CloseButton.onClick.AddListener(CloseChat);
     }
 
-    private void Start()
+    protected void Start()
     {
         FikaGlobals.InputTree.Add(this);
 
@@ -118,7 +118,7 @@ public class FikaChatUIScript : InputNode
         _mainScreen.SetActive(true);
         _closeTimer = 0f;
 
-        bool shouldAutoClose = autoClose && !_isActive;
+        var shouldAutoClose = autoClose && !_isActive;
         if (!_isActive && !autoClose)
         {
             _isActive = true;
@@ -149,7 +149,7 @@ public class FikaChatUIScript : InputNode
 
     public void ToggleChat()
     {
-        bool isActive = _mainScreen.activeSelf;
+        var isActive = _mainScreen.activeSelf;
         if (!isActive)
         {
             OpenAndSelectInput();
@@ -178,7 +178,7 @@ public class FikaChatUIScript : InputNode
         EventSystem.current.SetSelectedGameObject(_mainScreen);
     }
 
-    private void OnDestroy()
+    protected void OnDestroy()
     {
         FikaGlobals.InputTree.Remove(this);
         _stringBuilder.Clear();
@@ -187,10 +187,10 @@ public class FikaChatUIScript : InputNode
 
     internal static FikaChatUIScript Create()
     {
-        GameObject gameObject = InternalBundleLoader.Instance.GetFikaAsset(InternalBundleLoader.EFikaAsset.FikaChatUI);
-        GameObject obj = Instantiate(gameObject);
-        FikaChatUIScript uiScript = obj.AddComponent<FikaChatUIScript>();
-        RectTransform rectTransform = obj.transform.GetChild(0).GetChild(0).RectTransform();
+        var gameObject = InternalBundleLoader.Instance.GetFikaAsset(InternalBundleLoader.EFikaAsset.FikaChatUI);
+        var obj = Instantiate(gameObject);
+        var uiScript = obj.AddComponent<FikaChatUIScript>();
+        var rectTransform = obj.transform.GetChild(0).GetChild(0).RectTransform();
         if (rectTransform == null)
         {
             FikaGlobals.LogError("Could not get the RectTransform!");

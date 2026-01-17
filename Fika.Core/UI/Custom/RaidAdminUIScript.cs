@@ -56,12 +56,12 @@ public class RaidAdminUIScript : InputNode
     {
         var statistics = _currentPeer.Statistics;
 
-        _raidAdminUI.SentDataText.text = $"Sent Data: {FormatBytes(statistics.BytesSent)}";
-        _raidAdminUI.ReceivedDataText.text = $"Received Data: {FormatBytes(statistics.BytesReceived)}";
-        _raidAdminUI.SentPacketsText.text = $"Sent Packets: {statistics.PacketsSent}";
-        _raidAdminUI.ReceivedPacketsText.text = $"Received Packets: {statistics.PacketsReceived}";
-        _raidAdminUI.PacketLossText.text = $"Packet Loss: {statistics.PacketLoss}";
-        _raidAdminUI.PacketLossPercentText.text = $"Packet Loss %: {statistics.PacketLossPercent}%";
+        _raidAdminUI.SentDataText.SetText($"Sent Data: {FormatBytes(statistics.BytesSent)}");
+        _raidAdminUI.ReceivedDataText.SetText($"Received Data: {FormatBytes(statistics.BytesReceived)}");
+        _raidAdminUI.SentPacketsText.SetText("Sent Packets: {0}", statistics.PacketsSent);
+        _raidAdminUI.ReceivedPacketsText.SetText("Received Packets: {0}", statistics.PacketsReceived);
+        _raidAdminUI.PacketLossText.SetText("Packet Loss: {0}", statistics.PacketLoss);
+        _raidAdminUI.PacketLossPercentText.SetText("Packet Loss %: {0}%", statistics.PacketLossPercent);
     }
 
     private string FormatBytes(long bytes)
@@ -105,7 +105,7 @@ public class RaidAdminUIScript : InputNode
         {
             _currentPeer = _netManager.ConnectedPeerList[index];
             _raidAdminUI.InfoPane.SetActive(true);
-            _raidAdminUI.HeaderText.text = $"Client {index}";
+            _raidAdminUI.HeaderText.SetText("Client {0}", index);
         }
         else
         {
@@ -115,13 +115,13 @@ public class RaidAdminUIScript : InputNode
 
     private void ResetInfoPane()
     {
-        _raidAdminUI.HeaderText.text = string.Empty;
-        _raidAdminUI.SentDataText.text = string.Empty;
-        _raidAdminUI.ReceivedDataText.text = string.Empty;
-        _raidAdminUI.SentPacketsText.text = string.Empty;
-        _raidAdminUI.ReceivedPacketsText.text = string.Empty;
-        _raidAdminUI.PacketLossText.text = string.Empty;
-        _raidAdminUI.PacketLossPercentText.text = string.Empty;
+        _raidAdminUI.HeaderText.SetText(string.Empty);
+        _raidAdminUI.SentDataText.SetText(string.Empty);
+        _raidAdminUI.ReceivedDataText.SetText(string.Empty);
+        _raidAdminUI.SentPacketsText.SetText(string.Empty);
+        _raidAdminUI.ReceivedPacketsText.SetText(string.Empty);
+        _raidAdminUI.PacketLossText.SetText(string.Empty);
+        _raidAdminUI.PacketLossPercentText.SetText(string.Empty);
     }
 
     public void Show()

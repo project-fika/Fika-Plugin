@@ -10,6 +10,6 @@ public class MainMenuUI : MonoBehaviour
 
     public void UpdateLabel(int amount)
     {
-        Label.text = string.Format(LocaleUtils.UI_MMUI_ONLINE_PLAYERS.Localized(), amount);
+        Label.SetText(LocaleUtils.UI_MMUI_ONLINE_PLAYERS.Localized(), amount);
     }
 }

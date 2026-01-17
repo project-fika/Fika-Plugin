@@ -23,13 +23,13 @@ public class LoadingScreenPlayer : MonoBehaviour
 
     public void SetNickname(string nickname)
     {
-        Nickname.text = nickname;
+        Nickname.SetText(nickname);
     }
 
     public void SetProgress(float progress)
     {
         _progress = progress;
         ProgressBar.DOFillAmount(progress / _division, _tweenDuration);
-        Percentage.text = $"{Mathf.CeilToInt(progress)}%";
+        Percentage.SetText("{0}%", Mathf.CeilToInt(progress));
     }
 }

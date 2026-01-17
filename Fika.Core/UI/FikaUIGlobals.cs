@@ -58,7 +58,7 @@ public static class FikaUIGlobals
         text.horizontalAlignment = HorizontalAlignmentOptions.Center;
         text.verticalAlignment = VerticalAlignmentOptions.Bottom;
         text.margin = new Vector4(0, 0, 0, -350);
-        text.text = overlayText;
+        text.SetText(overlayText);
 
         return text;
     }
@@ -166,7 +166,7 @@ public static class FikaUIGlobals
         errorScreenTraverse.Field("string_1").SetValue(string_1);
 
         var errorDescription = Traverse.Create(errorScreen).Field<TextMeshProUGUI>("_errorDescription").Value;
-        errorDescription.text = string_1;
+        errorDescription.SetText(string_1);
 
         var coroutine_0 = errorScreenTraverse.Field("coroutine_0").GetValue<Coroutine>();
         if (coroutine_0 != null)
