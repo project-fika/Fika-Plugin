@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Fika.Core.Main.Utils;
 
 namespace Fika.Core;
 
 public static class TaskExtensions
 {
+    /// <summary>
+    /// Extension method to safely ignore an async Task while still logging exceptions. <br/>
+    /// This is similar to “fire-and-forget” but avoids silently swallowing errors.
+    /// </summary>
+    /// <param name="task">The Task to run and ignore.</param>
     public static async void Forget(this Task task)
     {
         try
@@ -14,7 +18,7 @@ public static class TaskExtensions
         }
         catch (Exception e)
         {
-            FikaGlobals.LogError(e);
+            Debug.LogException(e);
         }
     }
 }

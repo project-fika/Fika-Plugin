@@ -16,7 +16,7 @@ namespace Fika.Core.Networking.Websocket;
 
 public class HeadlessRequesterWebSocket
 {
-    private static readonly ManualLogSource _logger = BepInEx.Logging.Logger.CreateLogSource("Fika.HeadlessWebSocket");
+    private static readonly ManualLogSource _logger = Logger.CreateLogSource("Fika.HeadlessWebSocket");
 
     public string Host { get; set; }
     public string Url { get; set; }

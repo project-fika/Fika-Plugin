@@ -17,7 +17,7 @@ namespace Fika.Core.Networking.Websocket;
 
 internal class FikaNotificationManager
 {
-    private static readonly ManualLogSource _logger = BepInEx.Logging.Logger.CreateLogSource("FikaNotificationManager");
+    private static readonly ManualLogSource _logger = Logger.CreateLogSource("FikaNotificationManager");
     public static FikaNotificationManager Instance;
     public static bool Exists
     {
@@ -98,14 +98,14 @@ internal class FikaNotificationManager
             return;
         }
 
-        JObject jsonObject = JObject.Parse(e.Data);
+        var jsonObject = JObject.Parse(e.Data);
 
         if (!jsonObject.ContainsKey("type"))
         {
             return;
         }
 
-        EFikaNotification type = (EFikaNotification)Enum.Parse(typeof(EFikaNotification), jsonObject.Value<string>("type"));
+        var type = (EFikaNotification)Enum.Parse(typeof(EFikaNotification), jsonObject.Value<string>("type"));
 
 #if DEBUG
         _logger.LogDebug($"Received type: {type}");
@@ -161,10 +161,7 @@ internal class FikaNotificationManager
 
     private void HandleNotification(NotificationAbstractClass notification)
     {
-        AsyncWorker.RunInMainTread(() =>
-        {
-            Singleton<PreloaderUI>.Instance.NotifierView.method_5(notification);
-        });
+        AsyncWorker.RunInMainTread(() => Singleton<PreloaderUI>.Instance.NotifierView.method_5(notification));
     }
 
     private async Task ReconnectWebSocket()
@@ -199,7 +196,7 @@ internal class FikaNotificationManager
     public static void TestNotification(EFikaNotification type)
     {
         // Ugly ass one-liner, who cares. It's for debug purposes
-        string Username = FikaPlugin.DevelopersList.ToList()[new System.Random().Next(FikaPlugin.DevelopersList.Count)].Key;
+        var Username = FikaPlugin.DevelopersList.ToList()[new System.Random().Next(FikaPlugin.DevelopersList.Count)].Key;
 
         switch (type)
         {

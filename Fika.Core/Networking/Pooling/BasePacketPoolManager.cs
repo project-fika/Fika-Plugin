@@ -110,10 +110,8 @@ public abstract class BasePacketPoolManager<TEnum, TType>
     private PacketPool<TType> WithdrawPacket(TEnum type)
     {
 #if DEBUG
-        PacketPool<TType> instance = _pool[ToInt(type)]
+        return _pool[ToInt(type)]
             ?? throw new ArgumentException("Could not find given type in the packet pool manager!", nameof(type));
-
-        return instance;
 #else
         return _pool[ToInt(type)];
 #endif
