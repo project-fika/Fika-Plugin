@@ -38,6 +38,8 @@ public class FikaHealthBar : MonoBehaviour
     private float _counter;
     private bool _updatePos = true;
     private RectTransform _canvasRect;
+    private static readonly int _checkLayers = LayerMask.GetMask(["HighPolyCollider", "Terrain", "Player"]);
+    private static readonly int _playerLayer = LayerMask.NameToLayer("Player");
 
     public static FikaHealthBar Create(ObservedPlayer player)
     {
@@ -91,11 +93,10 @@ public class FikaHealthBar : MonoBehaviour
     {
         var camPos = CameraClass.Instance.Camera.transform.position;
         var targetPos = _currentPlayer.PlayerBones.Neck.position;
-        var layer = LayerMask.GetMask(["HighPolyCollider", "Terrain", "Player"]);
 
-        if (Physics.Raycast(camPos, targetPos - camPos, out var hitinfo, 800f, layer))
+        if (Physics.Raycast(camPos, targetPos - camPos, out var hitinfo, 800f, _checkLayers))
         {
-            if (LayerMask.LayerToName(hitinfo.collider.gameObject.layer) != "Player")
+            if (hitinfo.collider.gameObject.layer != _playerLayer)
             {
                 _playerPlate.ScalarObjectScreen.SetActive(false);
                 _updatePos = false;
