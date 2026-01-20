@@ -140,6 +140,10 @@ internal class FikaNotificationManager
                 notification = e.Data.ParseJsonTo<ShutdownClientNotification>([]);
                 HandleShutdown(notification);
                 break;
+            case EFikaNotification.HeadlessConnected:
+                notification = e.Data.ParseJsonTo<HeadlessConnectedNotification>([]);
+                HandleNotification(notification);
+                break;
         }
     }
 

@@ -8,5 +8,6 @@ public enum EFikaNotification
     SentItem = 2,
     PushNotification = 3,
     OpenAdminSettings = 4,
-    ShutdownClient = 5
+    ShutdownClient = 5,
+    HeadlessConnected = 6
 }
