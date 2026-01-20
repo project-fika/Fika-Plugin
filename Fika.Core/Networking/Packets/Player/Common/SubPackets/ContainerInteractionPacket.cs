@@ -2,6 +2,7 @@
 using EFT;
 using EFT.Interactive;
 using Fika.Core.Main.Players;
+using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
@@ -20,7 +21,7 @@ public sealed class ContainerInteractionPacket : IPoolSubPacket
 
     public static ContainerInteractionPacket FromValue(string interactiveId, EInteractionType interactionType)
     {
-        ContainerInteractionPacket packet = CommonSubPacketPoolManager.Instance.GetPacket<ContainerInteractionPacket>(ECommonSubPacketType.ContainerInteraction);
+        var packet = CommonSubPacketPoolManager.Instance.GetPacket<ContainerInteractionPacket>(ECommonSubPacketType.ContainerInteraction);
         packet.InteractiveId = interactiveId;
         packet.InteractionType = interactionType;
         return packet;
@@ -31,7 +32,7 @@ public sealed class ContainerInteractionPacket : IPoolSubPacket
 
     public void Execute(FikaPlayer player)
     {
-        WorldInteractiveObject lootableContainer = Singleton<GameWorld>.Instance.FindDoor(InteractiveId);
+        var lootableContainer = Singleton<GameWorld>.Instance.FindDoor(InteractiveId);
         if (lootableContainer != null)
         {
             if (lootableContainer.isActiveAndEnabled)
@@ -42,7 +43,7 @@ public sealed class ContainerInteractionPacket : IPoolSubPacket
         }
         else
         {
-            FikaPlugin.Instance.FikaLogger.LogError("ContainerInteractionPacket: LootableContainer was null!");
+            FikaGlobals.LogError("ContainerInteractionPacket: LootableContainer was null!");
         }
     }
 

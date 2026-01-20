@@ -1,4 +1,5 @@
 ﻿using EFT;
+using Fika.Core.Main.Utils;
 using SPT.Reflection.Patching;
 using System.Reflection;
 
@@ -18,22 +19,22 @@ public class TestHalloweenPatch : ModulePatch
     {
         if (__instance == null)
         {
-            FikaPlugin.Instance.FikaLogger.LogError("INSTANCE WAS NULL");
+            FikaGlobals.LogError("INSTANCE WAS NULL");
             return;
         }
 
         if (____container == null)
         {
-            FikaPlugin.Instance.FikaLogger.LogError("CONTAINER WAS NULL");
+            FikaGlobals.LogError("CONTAINER WAS NULL");
             return;
         }
 
         if (positions == null)
         {
-            FikaPlugin.Instance.FikaLogger.LogError("POSITIONS WAS NULL");
+            FikaGlobals.LogError("POSITIONS WAS NULL");
             return;
         }
 
-        FikaPlugin.Instance.FikaLogger.LogWarning($"Halloween Test Patch: transform: {__instance.transform + " " + __instance.transform.name}, bool: {___bool_0}, container: {____container}, positions: {positions}; {positions.Length}; {positions[0].ToStringHighResolution()}");
+        FikaGlobals.LogWarning($"Halloween Test Patch: transform: {__instance.transform + " " + __instance.transform.name}, bool: {___bool_0}, container: {____container}, positions: {positions}; {positions.Length}; {positions[0].ToStringHighResolution()}");
     }
 }

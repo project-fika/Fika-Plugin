@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Net;
+using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
 using EFT.UI;
@@ -26,14 +27,17 @@ public class MatchMakerUIScript : MonoBehaviour
     private MatchMakerUI _fikaMatchMakerUi;
     private LobbyEntry[] _matches;
     private readonly List<GameObject> _matchesListObjects = [];
-    private bool _stopQuery = false;
+    private bool _stopQuery;
     private GameObject _newBackButton;
     private string _profileId;
     private float _lastRefreshed;
     private bool _started;
     private Coroutine _serverQueryRoutine;
-    private float _loadingTextTick = 0f;
+    private float _dotTimer;
+    private int _dotCount;
     private GameObject _mmGameObject;
+
+    private const float _dotInterval = 0.5f;
 
     internal DefaultUIButton AcceptButton;
     internal RaidSettings RaidSettings;
@@ -72,33 +76,26 @@ public class MatchMakerUIScript : MonoBehaviour
 
     protected void Update()
     {
-        if (_stopQuery)
+        if (_stopQuery && _serverQueryRoutine != null)
         {
-            if (_serverQueryRoutine != null)
-            {
-                StopCoroutine(_serverQueryRoutine);
-                _serverQueryRoutine = null;
-            }
+            StopCoroutine(_serverQueryRoutine);
+            _serverQueryRoutine = null;
         }
 
-        if (_fikaMatchMakerUi.LoadingScreen.activeSelf)
+        if (!_fikaMatchMakerUi.LoadingScreen.activeSelf)
         {
-            var text = _fikaMatchMakerUi.LoadingAnimationText.text;
-            var tmpText = _fikaMatchMakerUi.LoadingAnimationText;
+            return;
+        }
 
-            _loadingTextTick++;
+        _dotTimer += Time.deltaTime;
 
-            if (_loadingTextTick > 30)
-            {
-                _loadingTextTick = 0;
+        if (_dotTimer >= _dotInterval)
+        {
+            _dotTimer = 0f;
+            _dotCount = (_dotCount % 3) + 1;
 
-                text += ".";
-                if (text == "....")
-                {
-                    text = ".";
-                }
-                tmpText.text = text;
-            }
+            _fikaMatchMakerUi.LoadingAnimationText.text =
+                new string('.', _dotCount);
         }
     }
 
@@ -160,13 +157,10 @@ public class MatchMakerUIScript : MonoBehaviour
             Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuCheckBox);
         });
 
-        _fikaMatchMakerUi.LoadingAnimationText.text = "";
+        _fikaMatchMakerUi.LoadingAnimationText.SetText(string.Empty);
 
         _fikaMatchMakerUi.DedicatedToggle.isOn = false;
-        _fikaMatchMakerUi.DedicatedToggle.onValueChanged.AddListener((arg) =>
-        {
-            Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuCheckBox);
-        });
+        _fikaMatchMakerUi.DedicatedToggle.onValueChanged.AddListener((_) => Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuCheckBox));
 
         if (availableHeadlesses.Length == 0)
         {
@@ -184,7 +178,7 @@ public class MatchMakerUIScript : MonoBehaviour
 
         if (availableHeadlesses.Length >= 1)
         {
-            if (FikaPlugin.UseHeadlessIfAvailable.Value)
+            if (FikaPlugin.Instance.Settings.UseHeadlessIfAvailable.Value)
             {
                 _fikaMatchMakerUi.DedicatedToggle.isOn = true;
             }
@@ -236,10 +230,7 @@ public class MatchMakerUIScript : MonoBehaviour
             }
         });
 
-        _fikaMatchMakerUi.DedicatedToggle.onValueChanged.AddListener((arg) =>
-        {
-            Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuCheckBox);
-        });
+        _fikaMatchMakerUi.DedicatedToggle.onValueChanged.AddListener((_) => Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuCheckBox));
 
         _fikaMatchMakerUi.StartButton.onClick.AddListener(async () =>
         {
@@ -252,13 +243,13 @@ public class MatchMakerUIScript : MonoBehaviour
 
             if (!_fikaMatchMakerUi.DedicatedToggle.isOn)
             {
-                if (FikaPlugin.ForceIP.Value != "")
+                if (FikaPlugin.Instance.Settings.ForceIP.Value != "")
                 {
                     // We need to handle DNS entries as well
-                    var ip = FikaPlugin.ForceIP.Value;
+                    var ip = FikaPlugin.Instance.Settings.ForceIP.Value;
                     try
                     {
-                        var dnsAddress = Dns.GetHostAddresses(FikaPlugin.ForceIP.Value);
+                        var dnsAddress = Dns.GetHostAddresses(FikaPlugin.Instance.Settings.ForceIP.Value);
                         if (dnsAddress.Length > 0)
                         {
                             ip = dnsAddress[0].ToString();
@@ -280,12 +271,12 @@ public class MatchMakerUIScript : MonoBehaviour
                     }
                 }
 
-                if (FikaPlugin.ForceBindIP.Value != "Disabled")
+                if (FikaPlugin.Instance.Settings.ForceBindIP.Value != "Disabled")
                 {
-                    if (!IPAddress.TryParse(FikaPlugin.ForceBindIP.Value, out _))
+                    if (!IPAddress.TryParse(FikaPlugin.Instance.Settings.ForceBindIP.Value, out _))
                     {
                         Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen(LocaleUtils.UI_ERROR_BIND_IP_HEADER.Localized(),
-                            string.Format(LocaleUtils.UI_ERROR_BIND_IP.Localized(), FikaPlugin.ForceBindIP.Value),
+                            string.Format(LocaleUtils.UI_ERROR_BIND_IP.Localized(), FikaPlugin.Instance.Settings.ForceBindIP.Value),
                             ErrorScreen.EButtonType.OkButton, 10f);
 
                         ToggleLoading(false);
@@ -359,10 +350,7 @@ public class MatchMakerUIScript : MonoBehaviour
 
         _newBackButton = Instantiate(BackButton.gameObject, BackButton.transform.parent);
         UnityEngine.Events.UnityEvent newEvent = new();
-        newEvent.AddListener(() =>
-        {
-            BackButton.OnClick.Invoke();
-        });
+        newEvent.AddListener(BackButton.OnClick.Invoke);
         var newButtonComponent = _newBackButton.GetComponent<DefaultUIButton>();
         Traverse.Create(newButtonComponent).Field("OnClick").SetValue(newEvent);
 
@@ -415,7 +403,7 @@ public class MatchMakerUIScript : MonoBehaviour
         RefreshUI();
     }
 
-    public static IEnumerator JoinMatch(string profileId, string serverId, Button button, Action<bool> callback, bool reconnect)
+    public static async Task<bool> JoinMatch(string profileId, string serverId, Button button, bool reconnect)
     {
         if (button != null)
         {
@@ -423,34 +411,15 @@ public class MatchMakerUIScript : MonoBehaviour
         }
 
         FikaBackendUtils.IsReconnect = reconnect;
-        NotificationManagerClass.DisplayMessageNotification(LocaleUtils.CONNECTING_TO_SESSION.Localized(), iconType: EFT.Communications.ENotificationIconType.EntryPoint);
-        NetManagerUtils.CreatePingingClient();
-        var pingingClient = Singleton<FikaPingingClient>.Instance;
-
-        WaitForSeconds waitForSeconds = new(0.1f);
+        NotificationManagerClass.DisplayMessageNotification(LocaleUtils.CONNECTING_TO_SESSION.Localized(),
+            iconType: EFT.Communications.ENotificationIconType.EntryPoint);
+        using var pingingClient = await NetManagerUtils.CreatePingingClient();
 
         if (pingingClient.Init(serverId))
         {
-            var attempts = 0;
-            bool success;
-            bool rejected;
-            bool inProgress;
-
-            FikaPlugin.Instance.FikaLogger.LogInfo("Attempting to connect to host session...");
+            FikaGlobals.LogInfo("Attempting to connect to host session...");
             var knockMessage = FikaBackendUtils.ServerGuid.ToString();
-
-            do
-            {
-                attempts++;
-
-                pingingClient.PingEndPoint(knockMessage, reconnect);
-                pingingClient.NetClient.PollEvents();
-                success = pingingClient.Received;
-                rejected = pingingClient.Rejected;
-                inProgress = pingingClient.InProgress;
-
-                yield return waitForSeconds;
-            } while (!rejected && !success && attempts < 50);
+            var success = await pingingClient.AttemptToPingHost(knockMessage, reconnect);
 
             if (!success)
             {
@@ -459,16 +428,71 @@ public class MatchMakerUIScript : MonoBehaviour
                 LocaleUtils.UI_UNABLE_TO_CONNECT.Localized(),
                 ErrorScreen.EButtonType.OkButton, 10f);
 
-                var logError = "Unable to connect to the session!";
-                if (rejected)
+                if (button != null)
                 {
-                    logError += $" Connection was rejected! [{FikaBackendUtils.ServerGuid}] did not match the server's Guid or data was malformed.";
+                    button.enabled = true;
                 }
-                if (inProgress)
-                {
-                    logError += " Session already in progress and you are not active in the session!";
-                }
-                FikaPlugin.Instance.FikaLogger.LogError(logError);
+                return false;
+            }
+        }
+        else
+        {
+            Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen(
+                LocaleUtils.UI_ERROR_CONNECTING.Localized(),
+                LocaleUtils.UI_PINGER_START_FAIL.Localized(),
+                ErrorScreen.EButtonType.OkButton, 10f);
+            return false;
+        }
+
+        if (FikaBackendUtils.JoinMatch(profileId, serverId, out var result, out var errorMessage))
+        {
+            FikaBackendUtils.GroupId = result.ServerId;
+            FikaBackendUtils.ClientType = EClientType.Client;
+
+            AddPlayerRequest data = new(FikaBackendUtils.GroupId, profileId, FikaBackendUtils.IsSpectator);
+            FikaRequestHandler.UpdateAddPlayer(data);
+
+            return true;
+        }
+        else
+        {
+            Singleton<PreloaderUI>.Instance.ShowErrorScreen("ERROR JOINING", errorMessage, null);
+            return true;
+        }
+    }
+
+    /*public static IEnumerator JoinMatch(string profileId, string serverId, Button button, Action<bool> callback, bool reconnect)
+    {
+        if (button != null)
+        {
+            button.enabled = false;
+        }
+
+        FikaBackendUtils.IsReconnect = reconnect;
+        NotificationManagerClass.DisplayMessageNotification(LocaleUtils.CONNECTING_TO_SESSION.Localized(),
+            iconType: EFT.Communications.ENotificationIconType.EntryPoint);
+        using var pingingClient = NetManagerUtils.CreatePingingClient();
+
+        if (pingingClient.Init(serverId))
+        {
+            FikaGlobals.LogInfo("Attempting to connect to host session...");
+            var knockMessage = FikaBackendUtils.ServerGuid.ToString();
+            var pingTask = pingingClient.AttemptToPingHost(knockMessage, reconnect)
+                .GetAwaiter();
+
+            while (!pingTask.IsCompleted)
+            {
+                yield return null;
+            }
+
+            var success = pingTask.GetResult();
+
+            if (!success)
+            {
+                Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen(
+                LocaleUtils.UI_ERROR_CONNECTING.Localized(),
+                LocaleUtils.UI_UNABLE_TO_CONNECT.Localized(),
+                ErrorScreen.EButtonType.OkButton, 10f);
 
                 if (button != null)
                 {
@@ -496,17 +520,14 @@ public class MatchMakerUIScript : MonoBehaviour
             AddPlayerRequest data = new(FikaBackendUtils.GroupId, profileId, FikaBackendUtils.IsSpectator);
             FikaRequestHandler.UpdateAddPlayer(data);
 
-            NetManagerUtils.DestroyPingingClient();
-
             callback?.Invoke(true);
         }
         else
         {
-            NetManagerUtils.DestroyPingingClient();
             Singleton<PreloaderUI>.Instance.ShowErrorScreen("ERROR JOINING", errorMessage, null);
             callback?.Invoke(false);
         }
-    }
+    }*/
 
     private void RefreshUI()
     {
@@ -557,19 +578,19 @@ public class MatchMakerUIScript : MonoBehaviour
             var playerLabel = GameObject.Find("PlayerLabel");
             playerLabel.name = "PlayerLabel" + i;
             var sessionName = entry.HostUsername;
-            playerLabel.GetComponentInChildren<TextMeshProUGUI>().text = sessionName;
+            playerLabel.GetComponentInChildren<TextMeshProUGUI>().SetText(sessionName);
 
             // players count label
             var playerCountLabel = GameObject.Find("PlayerCountLabel");
             playerCountLabel.name = "PlayerCountLabel" + i;
             var playerCount = entry.IsHeadless ? entry.PlayerCount - 1 : entry.PlayerCount;
-            playerCountLabel.GetComponentInChildren<TextMeshProUGUI>().text = playerCount.ToString();
+            playerCountLabel.GetComponentInChildren<TextMeshProUGUI>().SetText("{0}", playerCount);
 
             // player join button
             var joinButton = GameObject.Find("JoinButton");
             joinButton.name = "JoinButton" + i;
             var button = joinButton.GetComponent<Button>();
-            button.onClick.AddListener(() =>
+            button.onClick.AddListener(async () =>
             {
                 if (_fikaMatchMakerUi.DediSelection.activeSelf)
                 {
@@ -579,21 +600,20 @@ public class MatchMakerUIScript : MonoBehaviour
                 Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
                 FikaBackendUtils.HostLocationId = entry.Location;
                 ToggleLoading(true);
-                StartCoroutine(JoinMatch(_profileId, server.name, button, (bool success) =>
+                var success = await JoinMatch(_profileId, server.name, button, localPlayerInRaid);
+                if (success)
                 {
-                    if (success)
-                    {
-                        AcceptButton.OnClick.Invoke();
-                        return;
-                    }
-                    ToggleLoading(false);
-                }, localPlayerInRaid));
+                    AcceptButton.OnClick.Invoke();
+                    return;
+                }
+                ToggleLoading(false);
             });
 
             HoverTooltipArea tooltipArea;
             var image = server.GetComponent<Image>();
 
-            if (RaidSettings.LocationId != entry.Location && !(RaidSettings.LocationId.ToLower().StartsWith("sandbox") && entry.Location.ToLower().StartsWith("sandbox")))
+            if (RaidSettings.LocationId != entry.Location && !(RaidSettings.LocationId.StartsWith("sandbox", StringComparison.OrdinalIgnoreCase) &&
+                entry.Location.StartsWith("sandbox", StringComparison.OrdinalIgnoreCase)))
             {
                 button.enabled = false;
                 if (image != null)

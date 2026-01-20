@@ -1,10 +1,10 @@
 ﻿// © 2026 Lacyway All Rights Reserved
 
+using System;
 using Diz.LanguageExtensions;
 using EFT;
 using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.ObservedClasses.MovementStates;
-using System;
 
 namespace Fika.Core.Main.ObservedClasses;
 
@@ -57,7 +57,30 @@ public class ObservedMovementContext : MovementContext
 
     public override void ApplyApproachMotion(Vector3 motion, float deltaTime)
     {
-        base.DirectApplyMotion(motion, deltaTime);
+        DirectApplyMotion(motion, deltaTime);
+    }
+
+    public override void DirectApplyMotion(Vector3 motion, float deltaTime)
+    {
+        InputMotion = motion / deltaTime;
+        Flash(ref motion);
+        var speedLimit = CharacterController.SpeedLimit;
+        var flag = PlatformMotion != Vector3.zero;
+        if (flag)
+        {
+            CharacterController.SpeedLimit = -1f;
+        }
+
+        CharacterController.Move(motion + PlatformMotion, deltaTime);
+        if (flag)
+        {
+            CharacterController.SpeedLimit = speedLimit;
+        }
+        if (Platform == null)
+        {
+            method_8(deltaTime);
+        }
+        method_1(motion);
     }
 
     public override void Flash(ref Vector3 motion)
@@ -157,7 +180,7 @@ public class ObservedMovementContext : MovementContext
         {
             return;
         }
-        float num = 1f;
+        var num = 1f;
         if (IsGrounded)
         {
             num = 0f;
@@ -174,11 +197,11 @@ public class ObservedMovementContext : MovementContext
 
     public override void CheckFlying(float deltaTime)
     {
-        float y = TransformPosition.y;
+        var y = TransformPosition.y;
         if (IsGrounded)
         {
-            float fallHeight = StartFallingHeight - y;
-            float jumpHeight = y - StartFlyHeight;
+            var fallHeight = StartFallingHeight - y;
+            var jumpHeight = y - StartFlyHeight;
             StartFallingHeight = y;
             if (!PreviousGroundResult)
             {
@@ -231,13 +254,12 @@ public class ObservedMovementContext : MovementContext
 
     public new static ObservedMovementContext Create(Player player, Func<IAnimator> animatorGetter, Func<ICharacterController> characterControllerGetter, LayerMask groundMask)
     {
-        ObservedMovementContext movementContext = Create<ObservedMovementContext>(player, animatorGetter, characterControllerGetter, groundMask);
-        return movementContext;
+        return Create<ObservedMovementContext>(player, animatorGetter, characterControllerGetter, groundMask);
     }
 
     public override void SmoothPoseLevel(float deltaTime)
     {
-        float num = Math.Abs(SmoothedPoseLevel - PoseLevel_1);
+        var num = Math.Abs(SmoothedPoseLevel - PoseLevel_1);
         if (num < 1E-45f)
         {
             return;
@@ -304,7 +326,7 @@ public class ObservedMovementContext : MovementContext
         _player.ProceduralWeaponAnimation.SetMountingData(false, false);
         observedMountedState.StartExiting();
         PlayerMountingPointData.OnStartExitMountedState -= StartExitingMountedState;
-        Player.AbstractHandsController handsController = _player.HandsController;
+        var handsController = _player.HandsController;
         if (handsController == null)
         {
             return;

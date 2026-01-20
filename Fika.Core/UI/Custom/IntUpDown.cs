@@ -19,7 +19,7 @@ public class IntUpDown : MonoBehaviour
         _amountOfPlayers++;
         _amountOfPlayers = Mathf.Clamp(_amountOfPlayers, 1, 32);
 
-        _amountText.text = _amountOfPlayers.ToString();
+        _amountText.SetText("{0}", _amountOfPlayers);
     }
 
     public void DecreaseAmount()
@@ -27,6 +27,6 @@ public class IntUpDown : MonoBehaviour
         _amountOfPlayers--;
         _amountOfPlayers = Mathf.Clamp(_amountOfPlayers, 1, 32);
 
-        _amountText.text = _amountOfPlayers.ToString();
+        _amountText.SetText("{0}", _amountOfPlayers);
     }
 }

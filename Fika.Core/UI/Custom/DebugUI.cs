@@ -23,8 +23,9 @@ public class DebugUI : MonoBehaviour
     private const float _serverHeight = 90f;
     private const float _clientHeight = 130f;
 
+    private FikaServer _server;
     private CoopHandler _coopHandler;
-    private int _frameCounter;
+    private float _frameCounter;
     private bool _isServer;
     private List<FikaPlayer> _alivePlayers;
     private List<FikaPlayer> _aliveBots;
@@ -56,6 +57,10 @@ public class DebugUI : MonoBehaviour
     protected void Awake()
     {
         _isServer = FikaBackendUtils.IsServer;
+        if (_isServer)
+        {
+            _server = Singleton<FikaServer>.Instance;
+        }
 
         if (CoopHandler.TryGetCoopHandler(out var coopHandler))
         {
@@ -95,24 +100,24 @@ public class DebugUI : MonoBehaviour
 
     protected void Update()
     {
-        _frameCounter++;
-        if (_frameCounter % 300 == 0)
+        _frameCounter += Time.unscaledDeltaTime;
+        if (_frameCounter >= 5f)
         {
-            _frameCounter = 0;
+            _frameCounter = 0f;
             CheckAndAdd();
         }
 
-        AlivePlayersText.SetText($"Alive Players: {_alivePlayers.Count}");
-        AliveBotsText.SetText($"Alive Bots: {_aliveBots.Count}");
+        AlivePlayersText.SetText("Alive Players: {0}", _alivePlayers.Count);
+        AliveBotsText.SetText("Alive Bots: {0}", _aliveBots.Count);
         if (_isServer)
         {
-            ClientsText.SetText($"Clients: {Singleton<FikaServer>.Instance.NetServer.ConnectedPeersCount}");
+            ClientsText.SetText("Clients: {0}", _server.NetServer.ConnectedPeersCount);
         }
         else
         {
-            PingText.SetText($"Ping: {Ping}");
-            RTTText.SetText($"RTT: {RTT}");
-            ServerFPSText.SetText($"Server FPS: {ServerFPS}");
+            PingText.SetText("Ping: {0}", Ping);
+            RTTText.SetText("RTT: {0}", RTT);
+            ServerFPSText.SetText("Server FPS: {0}", ServerFPS);
         }
     }
 

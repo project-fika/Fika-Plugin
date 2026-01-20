@@ -455,7 +455,6 @@ public struct CorpseSyncPackets
 
     public Vector3 Direction;
     public Vector3 Point;
-    public Vector3 OverallVelocity;
 
     public float Force;
 

@@ -378,6 +378,11 @@ public static class FikaGlobals
         Instance.FikaLogger.LogError($"[{caller}]: {message}");
     }
 
+    public static void LogError(object obj, [CallerMemberName] string caller = "")
+    {
+        Instance.FikaLogger.LogError($"[{caller}]: {obj}");
+    }
+
     public static void LogFatal(string message, [CallerMemberName] string caller = "")
     {
         if (string.IsNullOrEmpty(message))

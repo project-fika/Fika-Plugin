@@ -1,5 +1,6 @@
-﻿using EFT.GlobalEvents;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using EFT.GlobalEvents;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Networking.Packets.Communication;
 
@@ -39,14 +40,14 @@ public class TransitEventPacket : INetSerializable
                     {
                         PointId = reader.GetInt()
                     };
-                    int timerAmount = reader.GetInt();
+                    var timerAmount = reader.GetInt();
                     Dictionary<int, ushort> timers = [];
-                    for (int i = 0; i < timerAmount; i++)
+                    for (var i = 0; i < timerAmount; i++)
                     {
-                        int key = reader.GetInt();
-                        ushort value = reader.GetUShort();
+                        var key = reader.GetInt();
+                        var value = reader.GetUShort();
 #if DEBUG
-                        FikaPlugin.Instance.FikaLogger.LogWarning($"GroupTimer: int: {key}, ushort: {value}");
+                        FikaGlobals.LogWarning($"GroupTimer: int: {key}, ushort: {value}");
 #endif
                         timers.Add(key, value);
                     }
@@ -57,14 +58,14 @@ public class TransitEventPacket : INetSerializable
             case ETransitEventType.GroupSize:
                 {
                     TransitGroupSizeEvent sizeEvent = new();
-                    int sizeAmount = reader.GetInt();
+                    var sizeAmount = reader.GetInt();
                     Dictionary<int, byte> sizes = [];
-                    for (int i = 0; i < sizeAmount; i++)
+                    for (var i = 0; i < sizeAmount; i++)
                     {
-                        int key = reader.GetInt();
-                        byte value = reader.GetByte();
+                        var key = reader.GetInt();
+                        var value = reader.GetByte();
 #if DEBUG
-                        FikaPlugin.Instance.FikaLogger.LogWarning($"GroupSize: int: {key}, byte: {value}");
+                        FikaGlobals.LogWarning($"GroupSize: int: {key}, byte: {value}");
 #endif
                         sizes.Add(key, value);
                     }
@@ -74,24 +75,23 @@ public class TransitEventPacket : INetSerializable
                 break;
             case ETransitEventType.Interaction:
                 {
-                    TransitInteractionEvent interactionEvent = new()
+                    TransitEvent = (TransitInteractionEvent)new()
                     {
                         PlayerId = reader.GetInt(),
                         PointId = reader.GetInt(),
                         Type = (TransitInteractionEvent.EType)reader.GetByte()
                     };
-                    TransitEvent = interactionEvent;
                 }
                 break;
             case ETransitEventType.Messages:
                 {
                     TransitMessagesEvent messagesEvent = new();
-                    int messagesAmount = reader.GetInt();
+                    var messagesAmount = reader.GetInt();
                     Dictionary<int, TransitMessagesEvent.EType> messages = [];
-                    for (int i = 0; i < messagesAmount; i++)
+                    for (var i = 0; i < messagesAmount; i++)
                     {
-                        int key = reader.GetInt();
-                        TransitMessagesEvent.EType value = (TransitMessagesEvent.EType)reader.GetByte();
+                        var key = reader.GetInt();
+                        var value = (TransitMessagesEvent.EType)reader.GetByte();
                         messages.Add(key, value);
                     }
                     messagesEvent.Messages = messages;
@@ -132,7 +132,7 @@ public class TransitEventPacket : INetSerializable
                     {
                         writer.Put(timerEvent.PointId);
                         writer.Put(timerEvent.Timers.Count);
-                        foreach (KeyValuePair<int, ushort> timer in timerEvent.Timers)
+                        foreach (var timer in timerEvent.Timers)
                         {
                             writer.Put(timer.Key);
                             writer.Put(timer.Value);
@@ -145,7 +145,7 @@ public class TransitEventPacket : INetSerializable
                     if (TransitEvent is TransitGroupSizeEvent sizeEvent)
                     {
                         writer.Put(sizeEvent.Sizes.Count);
-                        foreach (KeyValuePair<int, byte> size in sizeEvent.Sizes)
+                        foreach (var size in sizeEvent.Sizes)
                         {
                             writer.Put(size.Key);
                             writer.Put(size.Value);
@@ -168,7 +168,7 @@ public class TransitEventPacket : INetSerializable
                     if (TransitEvent is TransitMessagesEvent messagesEvent)
                     {
                         writer.Put(messagesEvent.Messages.Count);
-                        foreach (KeyValuePair<int, TransitMessagesEvent.EType> message in messagesEvent.Messages)
+                        foreach (var message in messagesEvent.Messages)
                         {
                             writer.Put(message.Key);
                             writer.Put((byte)message.Value);

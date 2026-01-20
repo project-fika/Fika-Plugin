@@ -1,9 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 using BepInEx.Logging;
+using Comfort.Common;
 using Fika.Core.Main.GameMode;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Http;
@@ -14,7 +17,7 @@ namespace Fika.Core.Networking;
 /// <summary>
 /// Client used to verify that a connection can be established before initializing the <see cref="FikaClient"/> and <see cref="CoopGame"/>
 /// </summary>
-public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchListener
+public class FikaPingingClient : INetEventListener, INatPunchListener, IDisposable
 {
     /// <summary>
     /// The network client manager instance.
@@ -36,22 +39,20 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
     /// </summary>
     public bool InProgress;
 
-    private ManualLogSource _logger;
+    private readonly ManualLogSource _logger;
     private List<IPEndPoint> _endPoints;
     private NetDataWriter _writer;
-
     private List<IPEndPoint> _candidates;
     private float _firstResponseTime;
     private bool _hasResponse;
-
+    private readonly CancellationTokenSource _cts;
+    private bool _receivedNatPunchIntroduction;
     private const float _responseWaitSeconds = 1f;
 
-    /// <summary>
-    /// Initializes the logger for the pinging client.
-    /// </summary>
-    public void Awake()
+    public FikaPingingClient()
     {
         _logger = Logger.CreateLogSource("Fika.PingingClient");
+        _cts = new();
     }
 
     /// <summary>
@@ -87,36 +88,94 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
 
             var natPunchServerIP = FikaPlugin.Instance.NatPunchServerIP;
             var natPunchServerPort = FikaPlugin.Instance.NatPunchServerPort;
-            var token = $"Client:{serverId}";
 
-            NetClient.NatPunchModule.SendNatIntroduceRequest(natPunchServerIP, natPunchServerPort, token);
+            if (result.UseFikaNatPunchServer)
+            {
+                natPunchServerIP = FikaPlugin.FikaNATPunchMasterServer;
+                natPunchServerPort = FikaPlugin.FikaNATPunchMasterPort;
+            }
 
-            _logger.LogInfo($"SendNatIntroduceRequest: {natPunchServerIP}:{natPunchServerPort}");
+            var resolved = NetUtils.ResolveAddress(natPunchServerIP, AddressFamily.InterNetwork); // no ipv6 for natpunch master
+            var endPoint = new IPEndPoint(resolved, natPunchServerPort);
+
+            var token = $"Client:{FikaBackendUtils.ServerGuid}";
+
+            _ = Task.Run(() => NatIntroduceTask(endPoint, token, _cts.Token));
+
+            _logger.LogInfo($"Sent NAT Introduce Request to Nat Punch Server: {endPoint}");
         }
-        else
+
+        var ip = result.IPs[0];
+        var port = result.Port;
+        _endPoints = new List<IPEndPoint>(result.IPs.Length);
+        foreach (var address in result.IPs)
         {
-            var ip = result.Ips[0];
-            var port = result.Port;
-            _endPoints = new List<IPEndPoint>(result.Ips.Length);
-            foreach (var address in result.Ips)
-            {
-                _endPoints.Add(NetworkUtils.ResolveRemoteAddress(address, port));
-            }
+            _endPoints.Add(NetworkUtils.ResolveRemoteAddress(address, port));
+        }
 
-            if (string.IsNullOrEmpty(ip))
-            {
-                _logger.LogError("IP was empty when pinging!");
-                return false;
-            }
+        if (string.IsNullOrEmpty(ip))
+        {
+            _logger.LogError("IP was empty when pinging!");
+            return false;
+        }
 
-            if (port == default)
-            {
-                _logger.LogError("Port was empty when pinging!");
-                return false;
-            }
+        if (port == default)
+        {
+            _logger.LogError("Port was empty when pinging!");
+            return false;
         }
 
         return true;
+    }
+
+    private async Task NatIntroduceTask(IPEndPoint endPoint, string token, CancellationToken ct = default)
+    {
+        _logger.LogInfo("Send NAT Introduce Request task started.");
+
+        while (!ct.IsCancellationRequested)
+        {
+            NetClient?.NatPunchModule?.SendNatIntroduceRequest(endPoint, token);
+
+            await Task.Delay(TimeSpan.FromSeconds(1));
+        }
+
+        _logger.LogInfo("Send NAT Introduce Request task stopped.");
+    }
+
+    public async Task<bool> AttemptToPingHost(string knockMessage, bool reconnect, CancellationToken ct = default)
+    {
+        var attempts = 0;
+
+        do
+        {
+            ct.ThrowIfCancellationRequested();
+
+            attempts++;
+            PingEndPoint(knockMessage, reconnect);
+            if (NetClient != null)
+            {
+                NetClient.PollEvents();
+                NetClient.NatPunchModule?.PollEvents();
+            }
+
+            await Task.Delay(250, ct);
+        } while (!Rejected && !Received && attempts < 50);
+
+        if (!Received)
+        {
+            var logError = "Unable to connect to the session!";
+            if (Rejected)
+            {
+                logError += $" Connection was rejected! [{FikaBackendUtils.ServerGuid}] did not match the server's Guid or data was malformed.";
+            }
+            if (InProgress)
+            {
+                logError += " Session already in progress and you are not active in the session!";
+            }
+            FikaGlobals.LogError(logError);
+        }
+
+        return Received;
     }
 
     private void RemoveEndpointIfExists(IPEndPoint remote)
@@ -168,9 +227,8 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
 
     private void CommitEndpoint(IPEndPoint ep)
     {
-        FikaBackendUtils.RemoteIp = ep.Address.ToString();
-        FikaBackendUtils.RemotePort = ep.Port;
-        FikaBackendUtils.LocalPort = NetClient.LocalPort;
+        FikaBackendUtils.RemoteEndPoint = ep;
+        FikaBackendUtils.LocalPort = (ushort)NetClient.LocalPort;
 
         _logger.LogInfo($"Picked candidate {ep.Address}:{ep.Port}, using LocalPort: {NetClient.LocalPort}");
     }
@@ -311,31 +369,18 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
     /// <inheritdoc/>
     public void OnNatIntroductionSuccess(IPEndPoint targetEndPoint, NatAddressType type, string token)
     {
-        // Do nothing
-    }
-
-    /// <summary>
-    /// Handles the NAT introduction response and sends hello messages to both local and remote endpoints.
-    /// </summary>
-    /// <param name="natLocalEndPoint">The local NAT endpoint.</param>
-    /// <param name="natRemoteEndPoint">The remote NAT endpoint.</param>
-    /// <param name="token">The NAT punch token.</param>
-    public void OnNatIntroductionResponse(IPEndPoint natLocalEndPoint, IPEndPoint natRemoteEndPoint, string token)
-    {
-        _logger.LogInfo($"OnNatIntroductionResponse: {natRemoteEndPoint}");
-        _endPoints.Add(natLocalEndPoint);
-
-        Task.Run(async () =>
+        if (_receivedNatPunchIntroduction)
         {
-            for (var i = 0; i < 20; i++)
-            {
-                PingEndPoint("fika.hello");
-                await Task.Delay(250);
-            }
-        });
+            return;
+        }
+
+        _logger.LogInfo($"Received endpoint {targetEndPoint} from the NAT punching server.");
+        _endPoints.Add(targetEndPoint);
+        _receivedNatPunchIntroduction = true;
+        _cts?.Cancel();
     }
 
-    public void OnDestroy()
+    public void Dispose()
     {
         _endPoints.Clear();
         _candidates.Clear();
@@ -343,5 +388,12 @@ public class FikaPingingClient : MonoBehaviour, INetEventListener, INatPunchList
         _candidates = null;
         _writer.Reset();
         _writer = null;
+
+        NetClient.Stop();
+        if (!Singleton<FikaPingingClient>.TryRelease(this))
+        {
+            _logger.LogError("Failed to release FikaPingingClient Singleton!");
+        }
+        _logger.LogInfo("Stopped FikaPingingClient");
     }
 }

@@ -127,7 +127,7 @@ public class OfflineRaidSettingsMenuPatch_Override : ModulePatch
                 CustomTextMeshProUGUI customTmp = weatherToggle.GetComponentInChildren<CustomTextMeshProUGUI>();
                 if (customTmp != null)
                 {
-                    customTmp.text = "Use custom weather";
+                    customTmp.SetText("Use custom weather");
                 }
             }
         }

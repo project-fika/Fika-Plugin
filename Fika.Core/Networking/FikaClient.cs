@@ -129,7 +129,7 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
     private int _snapshotCount;
     private GenericPacket _genericPacket;
 
-    public async void Init()
+    public async Task Init()
     {
         _netClient = new(this)
         {
@@ -138,7 +138,7 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
             NatPunchEnabled = false,
             AutoRecycle = true,
             IPv6Enabled = true,
-            DisconnectTimeout = FikaPlugin.ConnectionTimeout.Value * 1000,
+            DisconnectTimeout = FikaPlugin.Instance.Settings.ConnectionTimeout.Value * 1000,
             EnableStatistics = true,
             MaxConnectAttempts = 5,
             ReconnectDelay = 1 * 1000,
@@ -183,17 +183,17 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
             _netClient.Start();
         }
 
-        var ip = FikaBackendUtils.RemoteIp;
-        var port = FikaBackendUtils.RemotePort;
+        var endPoint = FikaBackendUtils.RemoteEndPoint;
         var connectString = FikaBackendUtils.IsReconnect ? "fika.reconnect" : "fika.core";
 
-        if (string.IsNullOrEmpty(ip))
+        if (endPoint.Address == null)
         {
-            Singleton<PreloaderUI>.Instance.ShowErrorScreen("Network Error", "Unable to connect to the raid server. IP and/or Port was empty when requesting data!");
+            Singleton<PreloaderUI>.Instance.ShowErrorScreen("Network Error",
+                "Unable to connect to the raid server. IP and/or Port was empty when requesting data!");
         }
         else
         {
-            ServerConnection = _netClient.Connect(ip, port, connectString);
+            ServerConnection = _netClient.Connect(FikaBackendUtils.RemoteEndPoint, connectString);
         }
     }
 
@@ -299,7 +299,7 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
 
     public void CreateFikaChat()
     {
-        if (FikaPlugin.EnableChat.Value)
+        if (FikaPlugin.Instance.Settings.EnableChat.Value)
         {
             _fikaChat = FikaChatUIScript.Create();
         }
@@ -322,7 +322,7 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
                 .method_1(HandleResult);
         }
 
-        if (Input.GetKeyDown(FikaPlugin.ChatKey.Value.MainKey))
+        if (Input.GetKeyDown(FikaPlugin.Instance.Settings.ChatKey.Value.MainKey))
         {
             if (_fikaChat != null)
             {
@@ -402,6 +402,7 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
         _dataWriter.Reset();
         _dataWriter.Put(true);
         _dataWriter.PutEnum(EPacketType.PlayerState);
+        _dataWriter.Put((byte)1); // we're sending one packet
         _dataWriter.PutUnmanaged(packet);
 
         _netClient.SendToAll(_dataWriter.AsReadOnlySpan, DeliveryMethod.Unreliable);
@@ -519,9 +520,13 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
                 _packetProcessor.ReadAllPackets(reader, peer);
                 break;
             case EPacketType.PlayerState:
-                if (_snapshotCount < PlayerSnapshots.Snapshots.Length)
+                var count = reader.GetByte();
+                for (byte i = 0; i < count; i++)
                 {
-                    PlayerSnapshots.Snapshots[_snapshotCount++] = ArraySegmentPooling.Get(reader.GetRemainingBytesSpan());
+                    if (_snapshotCount < PlayerSnapshots.Snapshots.Length)
+                    {
+                        PlayerSnapshots.Snapshots[_snapshotCount++] = ArraySegmentPooling.Get(reader.GetSpan(PlayerStatePacket.PacketSize));
+                    }
                 }
                 break;
             case EPacketType.BTR:
@@ -636,7 +641,7 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
     {
         if (packet.OperationBytes.Length == 0)
         {
-            FikaPlugin.Instance.FikaLogger.LogError($"ConvertInventoryPacket::Bytes were null!");
+            FikaGlobals.LogError($"ConvertInventoryPacket::Bytes were null!");
             return;
         }
 
@@ -652,7 +657,7 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
                     var result = networkController.CreateOperationFromDescriptor(descriptor);
                     if (!result.Succeeded)
                     {
-                        FikaPlugin.Instance.FikaLogger.LogError($"ConvertInventoryPacket::Unable to process descriptor from netId {packet.NetId}, error: {result.Error}");
+                        FikaGlobals.LogError($"ConvertInventoryPacket::Unable to process descriptor from netId {packet.NetId}, error: {result.Error}");
                         return;
                     }
 
@@ -661,12 +666,12 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
             }
             catch (Exception exception)
             {
-                FikaPlugin.Instance.FikaLogger.LogError($"ConvertInventoryPacket::Exception thrown: {exception}");
+                FikaGlobals.LogError($"ConvertInventoryPacket::Exception thrown: {exception}");
             }
         }
         else
         {
-            FikaPlugin.Instance.FikaLogger.LogError("ConvertInventoryPacket: inventory was null!");
+            FikaGlobals.LogError("ConvertInventoryPacket: inventory was null!");
         }
     }
 
@@ -674,7 +679,7 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
     {
         if (result.Failed)
         {
-            FikaPlugin.Instance.FikaLogger.LogError($"Error in operation: {result.Error}");
+            FikaGlobals.LogError($"Error in operation: {result.Error}");
         }
     }
 }

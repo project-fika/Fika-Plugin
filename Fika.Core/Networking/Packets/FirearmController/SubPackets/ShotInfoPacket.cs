@@ -1,6 +1,7 @@
 ﻿using EFT;
 using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
+using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
@@ -70,7 +71,7 @@ public sealed class ShotInfoPacket : IPoolSubPacket
     {
         if (!player.HealthController.IsAlive)
         {
-            FikaPlugin.Instance.FikaLogger.LogError("ShotInfoPacket::Execute: Player was not alive, can not process!");
+            FikaGlobals.LogError("ShotInfoPacket::Execute: Player was not alive, can not process!");
             return;
         }
 

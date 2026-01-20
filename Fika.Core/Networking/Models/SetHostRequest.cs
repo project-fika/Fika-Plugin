@@ -13,20 +13,24 @@ public struct SetHostRequest
     public string[] Ips;
 
     [DataMember(Name = "port")]
-    public int Port;
+    public ushort Port;
 
     [DataMember(Name = "natPunch")]
     public bool NatPunch;
 
+    [DataMember(Name = "useFikaNatPunchServer")]
+    public bool UseFikaNatPunchServer;
+
     [DataMember(Name = "isHeadless")]
     public bool IsHeadless;
 
-    public SetHostRequest(string[] ips, int port, bool natPunch, bool isHeadless)
+    public SetHostRequest(string[] ips, ushort port, bool natPunch, bool useFikaNatPunchServer, bool isHeadless)
     {
         ServerId = CoopHandler.GetServerId();
         Ips = ips;
         Port = port;
         NatPunch = natPunch;
+        UseFikaNatPunchServer = useFikaNatPunchServer;
         IsHeadless = isHeadless;
     }
 }

@@ -1,22 +1,22 @@
-﻿using BepInEx.Logging;
+﻿using System;
+using System.Threading.Tasks;
+using BepInEx.Logging;
 using Comfort.Common;
 using Diz.Utils;
 using EFT;
 using EFT.UI;
-using EFT.UI.Matchmaker;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Websocket.Headless;
 using Fika.Core.UI.Custom;
 using Newtonsoft.Json.Linq;
 using SPT.Common.Http;
-using System;
 using WebSocketSharp;
 
 namespace Fika.Core.Networking.Websocket;
 
 public class HeadlessRequesterWebSocket
 {
-    private static readonly ManualLogSource _logger = BepInEx.Logging.Logger.CreateLogSource("Fika.HeadlessWebSocket");
+    private static readonly ManualLogSource _logger = Logger.CreateLogSource("Fika.HeadlessWebSocket");
 
     public string Host { get; set; }
     public string Url { get; set; }
@@ -76,51 +76,54 @@ public class HeadlessRequesterWebSocket
 
     private void WebSocket_OnMessage(object sender, MessageEventArgs e)
     {
-        if (e == null)
+        if (string.IsNullOrEmpty(e?.Data))
         {
             return;
         }
 
-        if (string.IsNullOrEmpty(e.Data))
-        {
-            return;
-        }
+        var jsonObject = JObject.Parse(e.Data);
 
-        JObject jsonObject = JObject.Parse(e.Data);
         if (!jsonObject.ContainsKey("Type"))
         {
             return;
         }
 
-        EFikaHeadlessWSMessageType type = (EFikaHeadlessWSMessageType)Enum.Parse(typeof(EFikaHeadlessWSMessageType), jsonObject.Value<string>("Type"));
+        var type = Enum.Parse<EFikaHeadlessWSMessageType>(jsonObject.Value<string>("Type"));
 
         switch (type)
         {
             case EFikaHeadlessWSMessageType.RequesterJoinRaid:
-
-                RequesterJoinRaid data = e.Data.ParseJsonTo<RequesterJoinRaid>();
-                MatchMakerAcceptScreen matchMakerAcceptScreen = FikaBackendUtils.MatchMakerAcceptScreenInstance;
-
-                if (!string.IsNullOrEmpty(data.MatchId))
                 {
-                    TarkovApplication tarkovApplication = (TarkovApplication)Singleton<ClientApplication<ISession>>.Instance;
-                    tarkovApplication.StartCoroutine(MatchMakerUIScript.JoinMatch(tarkovApplication.Session.Profile.Id, data.MatchId, null, (bool success) =>
-                    {
-                        if (success)
-                        {
-                            // Matchmaker next screen (accept)
-                            matchMakerAcceptScreen.method_22().HandleExceptions();
-                        }
-                    }, false));
+                    HandleRequesterJoinRaidAsync(e.Data)
+                        .Forget();
+                    break;
                 }
-                else
-                {
-                    PreloaderUI.Instance.ShowErrorScreen("Fika Headless Error", "Received RequesterJoinRaid WS event but there was no matchId");
-                }
-
-                FikaPlugin.HeadlessRequesterWebSocket.Close();
-
-                break;
         }
+    }
+
+    private async Task HandleRequesterJoinRaidAsync(string json)
+    {
+        var data = json.ParseJsonTo<RequesterJoinRaid>();
+
+        if (string.IsNullOrEmpty(data.MatchId))
+        {
+            PreloaderUI.Instance.ShowErrorScreen("Fika Headless Error",
+                "Received RequesterJoinRaid WS event but there was no matchId");
+            return;
+        }
+
+        var tarkovApplication = (TarkovApplication)Singleton<ClientApplication<ISession>>.Instance;
+
+        var success = await MatchMakerUIScript.JoinMatch(tarkovApplication.Session.Profile.Id, data.MatchId,
+            null, false);
+
+        if (success)
+        {
+            FikaBackendUtils.MatchMakerAcceptScreenInstance
+                .method_22()
+                .HandleExceptions();
+        }
+
+        FikaPlugin.HeadlessRequesterWebSocket.Close();
     }
 }

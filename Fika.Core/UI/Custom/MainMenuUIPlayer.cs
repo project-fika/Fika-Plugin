@@ -12,9 +12,9 @@ public class MainMenuUIPlayer : MonoBehaviour
 
     public void SetActivity(string nickname, int level, EFikaPlayerPresence presence)
     {
-        PlayerName.text = nickname;
-        PlayerLevel.text = $"({level})";
-        PlayerStatus.text = presence switch
+        PlayerName.SetText(nickname);
+        PlayerLevel.SetText("({0})", level);
+        var status = presence switch
         {
             EFikaPlayerPresence.IN_MENU => LocaleUtils.UI_MMUI_IN_MENU.Localized(),
             EFikaPlayerPresence.IN_RAID => LocaleUtils.UI_MMUI_IN_RAID.Localized(),
@@ -23,6 +23,7 @@ public class MainMenuUIPlayer : MonoBehaviour
             EFikaPlayerPresence.IN_FLEA => LocaleUtils.UI_MMUI_IN_FLEA.Localized(),
             _ => LocaleUtils.UI_MMUI_IN_MENU.Localized(),
         };
+        PlayerStatus.SetText(status);
         SetImageColor(presence);
     }
 

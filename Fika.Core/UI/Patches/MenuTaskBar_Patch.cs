@@ -132,7 +132,7 @@ public class MenuTaskBar_Patch : ModulePatch
                         catch (Exception ex)
                         {
                             NotificationManagerClass.DisplayWarningNotification(LocaleUtils.UNKNOWN_ERROR.Localized());
-                            FikaPlugin.Instance.FikaLogger.LogError(ex.Message);
+                            FikaGlobals.LogError(ex.Message);
                         }
 
                         _lastDownload = DateTime.Now;

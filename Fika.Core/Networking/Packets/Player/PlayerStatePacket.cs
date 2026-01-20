@@ -15,6 +15,11 @@ namespace Fika.Core.Networking.Packets.Player;
 [StructLayout(LayoutKind.Sequential, Pack = 1)]
 public struct PlayerStatePacket
 {
+    /// <summary>
+    /// Size in bytes of a <see cref="PlayerStatePacket"/>
+    /// </summary>
+    public static readonly byte PacketSize = (byte)Unsafe.SizeOf<PlayerStatePacket>();
+
     /// <summary>8 bytes, offset 0</summary>
     public double RemoteTime;
 
@@ -72,6 +77,15 @@ public struct PlayerStatePacket
     /// <summary>1 byte, offset 51</summary>
     private byte _boolFlags;    // 7 bools packed into 1 byte
 
+    /// <summary>1 byte, offset 52</summary>
+    private byte _velocityDirXPacked;
+
+    /// <summary>1 byte, offset 53</summary>
+    private byte _velocityDirYPacked;
+
+    /// <summary>1 byte, offset 54</summary>
+    private byte _velocityDirZPacked;
+
     public BasePhysicalClass.PhysicalStateStruct Physical
     {
         get
@@ -82,6 +96,23 @@ public struct PlayerStatePacket
                 OxygenExhausted = OxygenExhausted,
                 HandsExhausted = HandsExhausted
             };
+        }
+    }
+
+    public Vector3 Velocity
+    {
+        readonly get
+        {
+            return new Vector3(UnpackByteToFloat(_velocityDirXPacked, -25f, 25f),
+                UnpackByteToFloat(_velocityDirYPacked, -25f, 25f),
+                UnpackByteToFloat(_velocityDirZPacked, -25f, 25f));
+        }
+
+        set
+        {
+            _velocityDirXPacked = PackFloatToByte(value.x, -25f, 25f);
+            _velocityDirYPacked = PackFloatToByte(value.y, -25f, 25f);
+            _velocityDirZPacked = PackFloatToByte(value.z, -25f, 25f);
         }
     }
 
@@ -386,6 +417,8 @@ public struct PlayerStatePacket
             player.Physical.SerializationStruct.OxygenExhausted,
             player.Physical.SerializationStruct.HandsExhausted
         );
+
+        Velocity = player.Velocity;
     }
 
     public static PlayerStatePacket CreateFromPlayer(FikaPlayer player, bool isMoving)
@@ -427,7 +460,9 @@ public struct PlayerStatePacket
                 player.Physical.SerializationStruct.StaminaExhausted,
                 player.Physical.SerializationStruct.OxygenExhausted,
                 player.Physical.SerializationStruct.HandsExhausted
-            )
+            ),
+
+            Velocity = player.Velocity
         };
     }
 }

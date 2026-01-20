@@ -12,9 +12,6 @@ using SPT.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.LocalGame;
 
-/// <summary>
-/// Created by: Lacyway
-/// </summary>
 internal class TarkovApplication_LocalGamePreparer_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
@@ -30,26 +27,23 @@ internal class TarkovApplication_LocalGamePreparer_Patch : ModulePatch
         FikaBackendUtils.RequestFikaWorld = true;
 
         var isServer = FikaBackendUtils.IsServer;
-        if (!isServer)
+        if (!isServer && !string.IsNullOrEmpty(FikaBackendUtils.HostLocationId))
         {
-            if (!string.IsNullOrEmpty(FikaBackendUtils.HostLocationId))
+            if (string.Equals(____raidSettings.LocationId, "sandbox", System.StringComparison.OrdinalIgnoreCase)
+                && string.Equals(FikaBackendUtils.HostLocationId, "sandbox_high", System.StringComparison.OrdinalIgnoreCase))
             {
-                if (string.Equals(____raidSettings.LocationId, "sandbox", System.StringComparison.OrdinalIgnoreCase)
-                    && string.Equals(FikaBackendUtils.HostLocationId, "sandbox_high", System.StringComparison.OrdinalIgnoreCase))
-                {
-                    ____raidSettings.SelectedLocation = __instance.Session.LocationSettings.locations.Values
-                        .FirstOrDefault(IsSandboxHigh);
+                ____raidSettings.SelectedLocation = __instance.Session.LocationSettings.locations.Values
+                    .FirstOrDefault(IsSandboxHigh);
 
-                    NotificationManagerClass.DisplayMessageNotification("Notification/HighLevelQueue".Localized(null),
-                        ENotificationDurationType.Default, ENotificationIconType.Default, null);
-                }
+                NotificationManagerClass.DisplayMessageNotification("Notification/HighLevelQueue".Localized(null),
+                    ENotificationDurationType.Default, ENotificationIconType.Default, null);
+            }
 
-                if (string.Equals(____raidSettings.LocationId, "sandbox_high", StringComparison.OrdinalIgnoreCase)
-                    && string.Equals(FikaBackendUtils.HostLocationId, "sandbox", StringComparison.OrdinalIgnoreCase))
-                {
-                    ____raidSettings.SelectedLocation = __instance.Session.LocationSettings.locations.Values
-                        .FirstOrDefault(IsSandbox);
-                }
+            if (string.Equals(____raidSettings.LocationId, "sandbox_high", StringComparison.OrdinalIgnoreCase)
+                && string.Equals(FikaBackendUtils.HostLocationId, "sandbox", StringComparison.OrdinalIgnoreCase))
+            {
+                ____raidSettings.SelectedLocation = __instance.Session.LocationSettings.locations.Values
+                    .FirstOrDefault(IsSandbox);
             }
         }
 
@@ -67,7 +61,7 @@ internal class TarkovApplication_LocalGamePreparer_Patch : ModulePatch
 
             if (isServer)
             {
-                SetStatusModel status = new(FikaBackendUtils.GroupId, LobbyEntry.ELobbyStatus.COMPLETE);
+                var status = new SetStatusModel(FikaBackendUtils.GroupId, LobbyEntry.ELobbyStatus.COMPLETE);
                 await FikaRequestHandler.UpdateSetStatus(status);
             }
         }

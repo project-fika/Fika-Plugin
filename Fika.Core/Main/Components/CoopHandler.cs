@@ -214,7 +214,7 @@ public class CoopHandler : MonoBehaviour
     /// </summary>
     private void ProcessQuitting()
     {
-        if (!FikaPlugin.ExtractKey.Value.IsDown())
+        if (!FikaPlugin.Instance.Settings.ExtractKey.Value.IsDown())
         {
             return;
         }
@@ -225,7 +225,7 @@ public class CoopHandler : MonoBehaviour
             return;
         }
 
-        var keyName = FikaPlugin.ExtractKey.Value.ToString();
+        var keyName = FikaPlugin.Instance.Settings.ExtractKey.Value.ToString();
         ConsoleScreen.Log($"{keyName} pressed, attempting to extract!");
         _logger.LogInfo($"{keyName} pressed, attempting to extract!");
 
@@ -298,7 +298,7 @@ public class CoopHandler : MonoBehaviour
         try
         {
             await Singleton<PoolManagerClass>.Instance.LoadBundlesAndCreatePools(PoolManagerClass.PoolsCategory.Raid,
-                PoolManagerClass.AssemblyType.Local, allPrefabPaths, FikaPlugin.LoadPriority.Value.ToLoadPriorty());
+                PoolManagerClass.AssemblyType.Local, allPrefabPaths, FikaPlugin.Instance.Settings.LoadPriority.Value.ToLoadPriorty());
         }
         catch (OperationCanceledException)
         {

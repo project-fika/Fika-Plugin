@@ -2,6 +2,7 @@
 using EFT;
 using EFT.Interactive;
 using Fika.Core.Main.HostClasses;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.Components;
 
@@ -28,14 +29,14 @@ internal class CorpsePositionSyncer : MonoBehaviour
     {
         if (_corpse == null)
         {
-            FikaPlugin.Instance.FikaLogger.LogError("CorpsePositionSyncer::Start: Corpse was null!");
+            FikaGlobals.LogError("CorpsePositionSyncer::Start: Corpse was null!");
             Destroy(this);
             return;
         }
 
         if (!_corpse.HasRagdoll)
         {
-            FikaPlugin.Instance.FikaLogger.LogError("CorpsePositionSyncer::Start: Ragdoll was null!");
+            FikaGlobals.LogError("CorpsePositionSyncer::Start: Ragdoll was null!");
             Destroy(this);
             return;
         }

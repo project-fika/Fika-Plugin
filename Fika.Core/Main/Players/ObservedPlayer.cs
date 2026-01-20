@@ -1,5 +1,9 @@
 ﻿// © 2026 Lacyway All Rights Reserved
 
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Audio.SpatialSystem;
 using Comfort.Common;
 using Dissonance;
@@ -24,10 +28,6 @@ using Fika.Core.Networking.Packets.Player.Common.SubPackets;
 using HarmonyLib;
 using JsonType;
 using RootMotion.FinalIK;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using static Fika.Core.UI.FikaUIGlobals;
 
 namespace Fika.Core.Main.Players;
@@ -47,7 +47,9 @@ public class ObservedPlayer : FikaPlayer
             return _healthBar;
         }
     }
+
     public bool ShouldOverlap { get; internal set; }
+
     public override bool LeftStanceDisabled
     {
         get
@@ -64,17 +66,8 @@ public class ObservedPlayer : FikaPlayer
             ShouldOverlap = true;
         }
     }
-    public BetterSource VoipEftSource { get; set; }
-    internal ObservedState CurrentPlayerState;
 
-    private bool _leftStancedDisabled;
-    private FikaHealthBar _healthBar;
-    private Coroutine _waitForStartRoutine;
-    private bool _isServer;
-    private VoiceBroadcastTrigger _voiceBroadcastTrigger;
-    private SoundSettingsControllerClass _soundSettings;
-    private bool _voipAssigned;
-    private int _frameSkip;
+    public BetterSource VoipEftSource { get; set; }
 
     public ObservedHealthController NetworkHealthController
     {
@@ -83,7 +76,7 @@ public class ObservedPlayer : FikaPlayer
             return HealthController as ObservedHealthController;
         }
     }
-    private readonly ObservedVaultingParametersClass _observedVaultingParameters = new();
+
     public override bool CanBeSnapped
     {
         get
@@ -91,6 +84,7 @@ public class ObservedPlayer : FikaPlayer
             return false;
         }
     }
+
     public override EPointOfView PointOfView
     {
         get
@@ -114,6 +108,7 @@ public class ObservedPlayer : FikaPlayer
             ProceduralWeaponAnimation.PointOfView = value;
         }
     }
+
     public override AbstractHandsController HandsController
     {
         get
@@ -128,6 +123,7 @@ public class ObservedPlayer : FikaPlayer
             MovementContext.PlayerAnimatorSetWeaponId(weaponAnimationType);
         }
     }
+
     public override Ray InteractionRay
     {
         get
@@ -136,6 +132,7 @@ public class ObservedPlayer : FikaPlayer
             return new(_playerLookRaycastTransform.position, vector);
         }
     }
+
     public override float ProtagonistHearing
     {
         get
@@ -143,6 +140,7 @@ public class ObservedPlayer : FikaPlayer
             return Mathf.Max(1f, Singleton<BetterAudio>.Instance.ProtagonistHearing + 1f);
         }
     }
+
     public override bool IsVisible
     {
         get
@@ -159,7 +157,19 @@ public class ObservedPlayer : FikaPlayer
 
         }
     }
+
+    public GClass782 ObservedCharacterController
+    {
+        get
+        {
+            return MovementContext.GClass782_0;
+        }
+    }
+
     public float TurnOffFbbikAt;
+
+    internal ObservedState CurrentPlayerState;
+
     private float _lastDistance;
     private LocalPlayerCullingHandlerClass _cullingHandler;
     private float _rightHand;
@@ -171,6 +181,15 @@ public class ObservedPlayer : FikaPlayer
     private ObservedCorpseCulling _observedCorpseCulling;
     private bool _compassLoaded;
     private FollowerCullingObject _followerCullingObject;
+    private readonly ObservedVaultingParametersClass _observedVaultingParameters = new();
+    private bool _leftStancedDisabled;
+    private FikaHealthBar _healthBar;
+    private Coroutine _waitForStartRoutine;
+    private bool _isServer;
+    private VoiceBroadcastTrigger _voiceBroadcastTrigger;
+    private SoundSettingsControllerClass _soundSettings;
+    private bool _voipAssigned;
+    private int _frameSkip;
     #endregion
 
     public static async Task<ObservedPlayer> CreateObservedPlayer(GameWorld gameWorld, int playerId, Vector3 position, Quaternion rotation, string layerName,
@@ -183,7 +202,7 @@ public class ObservedPlayer : FikaPlayer
 #if DEBUG
         if (useSimpleAnimator)
         {
-            FikaPlugin.Instance.FikaLogger.LogWarning("Using SimpleAnimator!");
+            FikaGlobals.LogWarning("Using SimpleAnimator!");
         }
 #endif
         var resourceKey = useSimpleAnimator ? ResourceKeyManagerAbstractClass.ZOMBIE_BUNDLE_NAME : ResourceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME;
@@ -848,6 +867,7 @@ public class ObservedPlayer : FikaPlayer
         {
             Position = CurrentPlayerState.Position;
             Rotation = CurrentPlayerState.Rotation;
+            ObservedCharacterController.Vector3_0 = CurrentPlayerState.Velocity;
 
             return;
         }
@@ -929,6 +949,9 @@ public class ObservedPlayer : FikaPlayer
 
         LeftStanceDisabled = CurrentPlayerState.LeftStanceDisabled;
 
+        // hacky way to set velocity
+        ObservedCharacterController.Vector3_0 = CurrentPlayerState.Velocity;
+
         CurrentPlayerState.ShouldUpdate = false;
     }
 
@@ -964,14 +987,14 @@ public class ObservedPlayer : FikaPlayer
         }
         if (FikaBackendUtils.IsClient)
         {
-            var observedCorpse = CreateCorpse<ObservedCorpse>(CorpseSyncPacket.OverallVelocity);
+            var observedCorpse = CreateCorpse<ObservedCorpse>(Velocity);
             observedCorpse.IsZombieCorpse = UsedSimplifiedSkeleton;
             observedCorpse.SetSpecificSettings(PlayerBones.RightPalm);
             Singleton<GameWorld>.Instance.ObservedPlayersCorpses.Add(NetId, observedCorpse);
             return observedCorpse;
         }
 
-        var corpse = CreateCorpse<Corpse>(CorpseSyncPacket.OverallVelocity);
+        var corpse = CreateCorpse<Corpse>(Velocity);
         corpse.IsZombieCorpse = UsedSimplifiedSkeleton;
         //CorpsePositionSyncer.Create(corpse.gameObject, corpse, NetId);
         return corpse;
@@ -1000,7 +1023,7 @@ public class ObservedPlayer : FikaPlayer
             Destroy(HealthBar);
         }
 
-        if (FikaPlugin.ShowNotifications.Value)
+        if (FikaPlugin.Instance.Settings.ShowNotifications.Value)
         {
             if (!IsObservedAI)
             {
@@ -1126,10 +1149,10 @@ public class ObservedPlayer : FikaPlayer
             var sessionCounters = mainPlayer.Profile.EftStats.SessionCounters;
             HandleSharedExperience(countAsBoss, experience, sessionCounters);
 
-            if (FikaPlugin.Instance.SharedQuestProgression && FikaPlugin.EasyKillConditions.Value)
+            if (FikaPlugin.Instance.SharedQuestProgression && FikaPlugin.Instance.Settings.EasyKillConditions.Value)
             {
 #if DEBUG
-                FikaPlugin.Instance.FikaLogger.LogInfo("Handling teammate kill from teammate: " + aggressor.Profile.Nickname);
+                FikaGlobals.LogInfo("Handling teammate kill from teammate: " + aggressor.Profile.Nickname);
 #endif
 
                 var distance = Vector3.Distance(aggressor.Position, Position);
@@ -1347,7 +1370,7 @@ public class ObservedPlayer : FikaPlayer
 
             InitVaultingAudioControllers(_observedVaultingParameters);
 
-            if (FikaPlugin.ShowNotifications.Value)
+            if (FikaPlugin.Instance.Settings.ShowNotifications.Value)
             {
                 NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.GROUP_MEMBER_SPAWNED.Localized(),
                     ColorizeText(EColor.GREEN, Profile.Info.MainProfileNickname)),
@@ -1379,8 +1402,6 @@ public class ObservedPlayer : FikaPlayer
             yield return null;
         }
         Singleton<GameWorld>.Instance.MainPlayer.StatisticsManager.OnGroupMemberConnected(Inventory);
-
-        yield break;
     }
 
     public override void LateUpdate()
@@ -1854,7 +1875,7 @@ public class ObservedPlayer : FikaPlayer
                 CreateUsableItemController(itemId);
                 break;
             default:
-                FikaPlugin.Instance.FikaLogger.LogWarning($"ObservedPlayer::SpawnHandsController: Unhandled ControllerType, was {controllerType}");
+                FikaGlobals.LogWarning($"ObservedPlayer::SpawnHandsController: Unhandled ControllerType, was {controllerType}");
                 break;
         }
     }
@@ -1894,7 +1915,7 @@ public class ObservedPlayer : FikaPlayer
         var result = FindItemById(itemId, false, false);
         if (!result.Succeeded)
         {
-            FikaPlugin.Instance.FikaLogger.LogError(result.Error);
+            FikaGlobals.LogError(result.Error);
             return;
         }
         handler.item = result.Value;
@@ -1908,7 +1929,7 @@ public class ObservedPlayer : FikaPlayer
         var result = FindItemById(itemId, false, false);
         if (!result.Succeeded)
         {
-            FikaPlugin.Instance.FikaLogger.LogError(result.Error);
+            FikaGlobals.LogError(result.Error);
             return;
         }
         handler.Item = result.Value;
@@ -1918,7 +1939,7 @@ public class ObservedPlayer : FikaPlayer
         }
         else
         {
-            FikaPlugin.Instance.FikaLogger.LogError($"CreateGrenadeController: Item was not of type GrenadeClass, was {handler.Item.GetType()}!");
+            FikaGlobals.LogError($"CreateGrenadeController: Item was not of type GrenadeClass, was {handler.Item.GetType()}!");
         }
     }
 
@@ -1927,7 +1948,7 @@ public class ObservedPlayer : FikaPlayer
         var result = FindItemById(itemId, false, false);
         if (!result.Succeeded)
         {
-            FikaPlugin.Instance.FikaLogger.LogError(result.Error);
+            FikaGlobals.LogError(result.Error);
             return;
         }
         CreateMedsControllerHandler handler = new(this, result.Value, bodyParts, amount, animationVariant);
@@ -1940,7 +1961,7 @@ public class ObservedPlayer : FikaPlayer
         var result = FindItemById(itemId, false, false);
         if (!result.Succeeded)
         {
-            FikaPlugin.Instance.FikaLogger.LogError(result.Error);
+            FikaGlobals.LogError(result.Error);
             return;
         }
         handler.Knife = result.Value.GetItemComponent<KnifeComponent>();
@@ -1950,7 +1971,7 @@ public class ObservedPlayer : FikaPlayer
         }
         else
         {
-            FikaPlugin.Instance.FikaLogger.LogError($"CreateKnifeController: Item did not contain a KnifeComponent, was of type {handler.Knife.GetType()}!");
+            FikaGlobals.LogError($"CreateKnifeController: Item did not contain a KnifeComponent, was of type {handler.Knife.GetType()}!");
         }
     }
 
@@ -1960,7 +1981,7 @@ public class ObservedPlayer : FikaPlayer
         var result = FindItemById(itemId, false, false);
         if (!result.Succeeded)
         {
-            FikaPlugin.Instance.FikaLogger.LogError(result.Error);
+            FikaGlobals.LogError(result.Error);
             return;
         }
         handler.tem = result.Value;
@@ -1970,7 +1991,7 @@ public class ObservedPlayer : FikaPlayer
         }
         else
         {
-            FikaPlugin.Instance.FikaLogger.LogError($"CreateQuickGrenadeController: Item was not of type GrenadeClass, was {handler.tem.GetType()}!");
+            FikaGlobals.LogError($"CreateQuickGrenadeController: Item was not of type GrenadeClass, was {handler.tem.GetType()}!");
         }
     }
 
@@ -1980,7 +2001,7 @@ public class ObservedPlayer : FikaPlayer
         var result = FindItemById(itemId, false, false);
         if (!result.Succeeded)
         {
-            FikaPlugin.Instance.FikaLogger.LogError(result.Error);
+            FikaGlobals.LogError(result.Error);
             return;
         }
         handler.Knife = result.Value.GetItemComponent<KnifeComponent>();
@@ -1990,7 +2011,7 @@ public class ObservedPlayer : FikaPlayer
         }
         else
         {
-            FikaPlugin.Instance.FikaLogger.LogError($"CreateQuickKnifeController: Item did not contain a KnifeComponent, was of type {handler.Knife.GetType()}!");
+            FikaGlobals.LogError($"CreateQuickKnifeController: Item did not contain a KnifeComponent, was of type {handler.Knife.GetType()}!");
         }
     }
 
@@ -1999,7 +2020,7 @@ public class ObservedPlayer : FikaPlayer
         var result = FindItemById(itemId, false, false);
         if (!result.Succeeded)
         {
-            FikaPlugin.Instance.FikaLogger.LogError(result.Error);
+            FikaGlobals.LogError(result.Error);
             return;
         }
         CreateUsableItemControllerHandler handler = new(this, result.Value);
@@ -2011,7 +2032,7 @@ public class ObservedPlayer : FikaPlayer
         var result = FindItemById(itemId, false, false);
         if (!result.Succeeded)
         {
-            FikaPlugin.Instance.FikaLogger.LogError(result.Error);
+            FikaGlobals.LogError(result.Error);
             return;
         }
         CreateQuickUseItemControllerHandler handler = new(this, result.Value);

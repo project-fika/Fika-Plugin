@@ -34,7 +34,7 @@ public sealed class ClearEffects : IPoolSubPacket
         CoopHandler coopHandler = Singleton<IFikaNetworkManager>.Instance.CoopHandler;
         if (coopHandler == null)
         {
-            FikaPlugin.Instance.FikaLogger.LogError("ClientExtract: CoopHandler was null!");
+            FikaGlobals.LogError("ClientExtract: CoopHandler was null!");
             return;
         }
 

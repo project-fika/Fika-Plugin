@@ -1,4 +1,4 @@
-using TMPro;
+/*using TMPro;
 using UnityEngine.UI;
 
 public class ListPlayer : MonoBehaviour
@@ -15,14 +15,17 @@ public class ListPlayer : MonoBehaviour
     [SerializeField]
     private TMP_Text FactionText;
 
+#pragma warning disable RCS1213, CS0649
     [SerializeField]
     private Image HPBackground;
 
     [SerializeField]
+
     private Image NameBackground;
 
     [SerializeField]
     private Image FactionBackground;
+#pragma warning restore RCS1213, CS0649
 
     public void Init(string name, string faction, int hp, int maxHp)
     {
@@ -41,3 +44,4 @@ public class ListPlayer : MonoBehaviour
         HPText.text = $"{hp}/{maxHp}";
     }
 }
+*/

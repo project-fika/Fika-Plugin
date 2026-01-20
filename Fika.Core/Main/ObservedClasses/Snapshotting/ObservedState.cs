@@ -29,4 +29,5 @@ internal class ObservedState
     public bool LeftStanceDisabled;
     public bool IsGrounded;
     public bool IsMoving;
+    public Vector3 Velocity;
 }

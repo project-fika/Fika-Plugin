@@ -110,7 +110,7 @@ public class FikaHostGameWorld : ClientLocalGameWorld
         GameObject gameObject = method_20(takeNearbyPoint, position);
         if (gameObject == null)
         {
-            FikaPlugin.Instance.FikaLogger.LogError("There are no airdrop points here!");
+            FikaGlobals.LogError("There are no airdrop points here!");
             return;
         }
         SynchronizableObject synchronizableObject = ClientSynchronizableObjectLogicProcessor.TakeFromPool(SynchronizableObjectType.AirPlane);
@@ -139,7 +139,7 @@ public class FikaHostGameWorld : ClientLocalGameWorld
 
         if (SynchronizableObjectLogicProcessor.TripwireManager == null)
         {
-            FikaPlugin.Instance.FikaLogger.LogError("TripwireManager was null! Creating new...");
+            FikaGlobals.LogError("TripwireManager was null! Creating new...");
             SynchronizableObjectLogicProcessor.TripwireManager = new GClass2649(this);
         }
 

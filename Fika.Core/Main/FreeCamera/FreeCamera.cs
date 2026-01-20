@@ -29,7 +29,6 @@ public partial class FreeCamera : MonoBehaviour
     private FikaPlayer _currentPlayer;
     private Vector3 _lastKnownPlayerPosition;
     private bool _isFollowing;
-    private bool _isSpectatingBots;
     private bool _leftMode;
     private bool _disableInput;
     private bool _showOverlay;
@@ -83,7 +82,7 @@ public partial class FreeCamera : MonoBehaviour
 
     protected void Start()
     {
-        if (FikaPlugin.AZERTYMode.Value)
+        if (FikaPlugin.Instance.Settings.AZERTYMode.Value)
         {
             _forwardKey = KeyCode.Z;
             _backKey = KeyCode.S;
@@ -94,8 +93,8 @@ public partial class FreeCamera : MonoBehaviour
             _relDownKey = KeyCode.A;
         }
 
-        _showOverlay = FikaPlugin.KeybindOverlay.Value;
-        FikaPlugin.KeybindOverlay.SettingChanged += KeybindOverlay_SettingChanged;
+        _showOverlay = FikaPlugin.Instance.Settings.KeybindOverlay.Value;
+        FikaPlugin.Instance.Settings.KeybindOverlay.SettingChanged += KeybindOverlay_SettingChanged;
 
         _nightVision = CameraClass.Instance.NightVision;
         _thermalVision = CameraClass.Instance.ThermalVision;
@@ -117,7 +116,7 @@ public partial class FreeCamera : MonoBehaviour
 
     private void KeybindOverlay_SettingChanged(object sender, EventArgs e)
     {
-        _showOverlay = FikaPlugin.KeybindOverlay.Value;
+        _showOverlay = FikaPlugin.Instance.Settings.KeybindOverlay.Value;
         if (IsActive)
         {
             _freecamUI.gameObject.SetActive(_showOverlay);
@@ -128,7 +127,7 @@ public partial class FreeCamera : MonoBehaviour
     {
         _currentPlayer = player;
 #if DEBUG
-        FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: Setting player to {_currentPlayer}");
+        FikaGlobals.LogInfo($"Freecam: Setting player to {_currentPlayer}");
 #endif
     }
 
@@ -187,13 +186,12 @@ public partial class FreeCamera : MonoBehaviour
 
         // If no alive players, add bots to spectate pool if enabled
 #if DEBUG
-        if (FikaPlugin.AllowSpectateBots.Value)
+        if (FikaPlugin.Instance.Settings.AllowSpectateBots.Value)
 #else
 
-        if (_players.Count == 0 && FikaPlugin.AllowSpectateBots.Value)
+        if (_players.Count == 0 && FikaPlugin.Instance.Settings.AllowSpectateBots.Value)
 #endif
         {
-            _isSpectatingBots = true;
             if (FikaBackendUtils.IsServer)
             {
                 foreach (var player in _coopHandler.Players.Values)
@@ -216,7 +214,7 @@ public partial class FreeCamera : MonoBehaviour
             }
         }
 #if DEBUG
-        FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: There are {_players.Count} players");
+        FikaGlobals.LogInfo($"Freecam: There are {_players.Count} players");
 #endif
 
         if (_players.Count == 0)
@@ -240,7 +238,7 @@ public partial class FreeCamera : MonoBehaviour
             }
 
 #if DEBUG
-            FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: currentPlayer was null, setting to first player {_players[0].Profile.GetCorrectedNickname()}");
+            FikaGlobals.LogInfo($"Freecam: currentPlayer was null, setting to first player {_players[0].Profile.GetCorrectedNickname()}");
 #endif
             SwitchSpectateMode();
             return;
@@ -253,7 +251,7 @@ public partial class FreeCamera : MonoBehaviour
             if (nextIndex <= _players.Count - 1)
             {
 #if DEBUG
-                FikaPlugin.Instance.FikaLogger.LogInfo("Freecam: Setting to next player");
+                FikaGlobals.LogInfo("Freecam: Setting to next player");
 #endif
                 _currentPlayer = _players[nextIndex];
             }
@@ -261,7 +259,7 @@ public partial class FreeCamera : MonoBehaviour
             {
                 // hit end of list, loop from start
 #if DEBUG
-                FikaPlugin.Instance.FikaLogger.LogInfo("Freecam: Looping back to start player");
+                FikaGlobals.LogInfo("Freecam: Looping back to start player");
 #endif
                 _currentPlayer = _players[0];
             }
@@ -271,7 +269,7 @@ public partial class FreeCamera : MonoBehaviour
             if (nextIndex >= 0)
             {
 #if DEBUG
-                FikaPlugin.Instance.FikaLogger.LogInfo("Freecam: Setting to previous player");
+                FikaGlobals.LogInfo("Freecam: Setting to previous player");
 #endif
                 _currentPlayer = _players[nextIndex];
             }
@@ -279,7 +277,7 @@ public partial class FreeCamera : MonoBehaviour
             {
                 // hit beginning of list, loop from end
 #if DEBUG
-                FikaPlugin.Instance.FikaLogger.LogInfo("Freecam: Looping back to end player");
+                FikaGlobals.LogInfo("Freecam: Looping back to end player");
 #endif
                 _currentPlayer = _players[^1];
             }
@@ -399,14 +397,14 @@ public partial class FreeCamera : MonoBehaviour
                 if (_currentPlayer.MovementContext.LeftStanceEnabled && !_leftMode)
                 {
 #if DEBUG
-                    FikaPlugin.Instance.FikaLogger.LogInfo("Setting left shoulder mode");
+                    FikaGlobals.LogInfo("Setting left shoulder mode");
 #endif
                     SetLeftShoulderMode(true);
                 }
                 else if (!_currentPlayer.MovementContext.LeftStanceEnabled && _leftMode)
                 {
 #if DEBUG
-                    FikaPlugin.Instance.FikaLogger.LogInfo("Unsetting left shoulder mode");
+                    FikaGlobals.LogInfo("Unsetting left shoulder mode");
 #endif
                     SetLeftShoulderMode(false);
                 }
@@ -414,7 +412,7 @@ public partial class FreeCamera : MonoBehaviour
             else
             {
 #if DEBUG
-                FikaPlugin.Instance.FikaLogger.LogInfo("Freecam: currentPlayer vanished while we were following, finding next player to attach to");
+                FikaGlobals.LogInfo("Freecam: currentPlayer vanished while we were following, finding next player to attach to");
 #endif
                 CycleSpectatePlayers();
                 if (_currentPlayer == null)
@@ -445,7 +443,7 @@ public partial class FreeCamera : MonoBehaviour
             transform.position += transform.right * (movementSpeed * deltaTime);
         }
 
-        if (FikaPlugin.DroneMode.Value)
+        if (FikaPlugin.Instance.Settings.DroneMode.Value)
         {
             if (Input.GetKey(_forwardKey))
             {
@@ -611,7 +609,7 @@ public partial class FreeCamera : MonoBehaviour
 
         CheckAndResetFov();
 #if DEBUG
-        FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: Attaching to helmet cam current player {_currentPlayer.Profile.GetCorrectedNickname()}");
+        FikaGlobals.LogInfo($"Freecam: Attaching to helmet cam current player {_currentPlayer.Profile.GetCorrectedNickname()}");
 #endif
         transform.SetParent(_currentPlayer.PlayerBones.Head.Original);
         transform.localPosition = new Vector3(-0.1f, -0.07f, -0.17f);
@@ -639,7 +637,7 @@ public partial class FreeCamera : MonoBehaviour
         if (_lastKnownPlayerPosition != default)
         {
 #if DEBUG
-            FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: Attaching to last tracked player position {_lastKnownPlayerPosition}");
+            FikaGlobals.LogInfo($"Freecam: Attaching to last tracked player position {_lastKnownPlayerPosition}");
 #endif
             transform.position = _lastKnownPlayerPosition;
         }
@@ -654,7 +652,7 @@ public partial class FreeCamera : MonoBehaviour
 
         CheckAndResetFov();
 #if DEBUG
-        FikaPlugin.Instance.FikaLogger.LogInfo($"Freecam: Attaching to 3rd person current player {_currentPlayer.Profile.GetCorrectedNickname()}");
+        FikaGlobals.LogInfo($"Freecam: Attaching to 3rd person current player {_currentPlayer.Profile.GetCorrectedNickname()}");
 #endif
         transform.SetParent(_currentPlayer.SpectateTransform);
         transform.localPosition = new Vector3(0.3f, 0.2f, -0.65f);
@@ -790,7 +788,7 @@ public partial class FreeCamera : MonoBehaviour
 
     protected void OnDestroy()
     {
-        FikaPlugin.KeybindOverlay.SettingChanged -= KeybindOverlay_SettingChanged;
+        FikaPlugin.Instance.Settings.KeybindOverlay.SettingChanged -= KeybindOverlay_SettingChanged;
         Destroy(_freecamUI.gameObject);
         Destroy(this);
     }

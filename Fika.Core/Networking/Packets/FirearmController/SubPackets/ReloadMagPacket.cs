@@ -2,6 +2,7 @@
 using EFT.InventoryLogic;
 using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
+using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Pooling;
 using System;
 
@@ -42,7 +43,7 @@ public sealed class ReloadMagPacket : IPoolSubPacket
                 GStruct156<Item> result = player.FindItemById(MagId);
                 if (!result.Succeeded)
                 {
-                    FikaPlugin.Instance.FikaLogger.LogError(result.Error);
+                    FikaGlobals.LogError(result.Error.ToString());
                     return;
                 }
                 if (result.Value is MagazineItemClass magazineClass)
@@ -51,13 +52,13 @@ public sealed class ReloadMagPacket : IPoolSubPacket
                 }
                 else
                 {
-                    FikaPlugin.Instance.FikaLogger.LogError($"ReloadMagPacket: Item was not MagazineClass, it was {result.Value.GetType()}");
+                    FikaGlobals.LogError($"ReloadMagPacket: Item was not MagazineClass, it was {result.Value.GetType()}");
                 }
             }
             catch (Exception ex)
             {
-                FikaPlugin.Instance.FikaLogger.LogError(ex);
-                FikaPlugin.Instance.FikaLogger.LogError($"ReloadMagPacket: There is no item {MagId} in profile {player.ProfileId}");
+                FikaGlobals.LogError(ex);
+                FikaGlobals.LogError($"ReloadMagPacket: There is no item {MagId} in profile {player.ProfileId}");
                 throw;
             }
             ItemAddress gridItemAddress = null;
@@ -74,7 +75,7 @@ public sealed class ReloadMagPacket : IPoolSubPacket
                 }
                 catch (GException4 exception2)
                 {
-                    FikaPlugin.Instance.FikaLogger.LogError(exception2);
+                    FikaGlobals.LogError(exception2);
                 }
             }
             if (magazine != null)
@@ -84,7 +85,7 @@ public sealed class ReloadMagPacket : IPoolSubPacket
             }
             else
             {
-                FikaPlugin.Instance.FikaLogger.LogError($"ReloadMagPacket: final variables were null! Mag: {magazine}, Address: {gridItemAddress}");
+                FikaGlobals.LogError($"ReloadMagPacket: final variables were null! Mag: {magazine}, Address: {gridItemAddress}");
             }
         }
     }

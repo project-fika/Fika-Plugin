@@ -19,8 +19,10 @@ public class Snapshotter
     private double _bufferTimeMultiplier;
     private readonly object _bufferLock;
     private readonly ObservedPlayer _player;
-    private readonly float _deadZone;
     private readonly bool _isZombie;
+
+    private const float _movementDeadZoneSqr = 0.05f * 0.05f;
+    private const float _velocityDeadZoneSqr = 0.20f * 0.20f;
 
     internal Snapshotter(ObservedPlayer observedPlayer)
     {
@@ -34,7 +36,6 @@ public class Snapshotter
         _sendInterval = 1f / _sendRate;
         _bufferLock = new();
         _player = observedPlayer;
-        _deadZone = 0.05f * 0.05f;
         _isZombie = observedPlayer.UsedSimplifiedSkeleton;
     }
 
@@ -79,7 +80,7 @@ public class Snapshotter
         currentState.Position = Vector3.LerpUnclamped(from.Position, to.Position, ratio);
 
         var newDir = currentState.MovementDirection = Vector2.LerpUnclamped(from.MovementDirection, to.MovementDirection, ratio);
-        if (!_isZombie && (to.State is EPlayerState.Idle or EPlayerState.Transition || newDir.sqrMagnitude < _deadZone))
+        if (!_isZombie && (to.State is EPlayerState.Idle or EPlayerState.Transition || newDir.sqrMagnitude < _movementDeadZoneSqr))
         {
             currentState.MovementDirection = Vector2.zero;
             currentState.IsMoving = false;
@@ -103,12 +104,19 @@ public class Snapshotter
         currentState.WeaponOverlap = Mathf.LerpUnclamped(from.WeaponOverlap, to.WeaponOverlap, ratio);
         currentState.LeftStanceDisabled = to.LeftStanceDisabled;
         currentState.IsGrounded = to.IsGrounded;
+        var velocity = Vector3.LerpUnclamped(from.Velocity, to.Velocity, ratio);
+        if (velocity.sqrMagnitude < _velocityDeadZoneSqr)
+        {
+            velocity = Vector3.zero;
+        }
+
+        currentState.Velocity = velocity;
     }
 
     /// <summary>
     /// Inserts a snapshot to the <see cref="_buffer"/>
     /// </summary>
-    /// <param name="snapshot"></param>
+    /// <param name="snapshot">The snapshot to insert</param>
     public void Insert(PlayerStatePacket snapshot, double networkTime)
     {
         lock (_bufferLock)

@@ -26,7 +26,6 @@ using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.Backend;
 using Fika.Core.Networking.VOIP;
 using Fika.Core.UI.Custom;
-using SPT.Common.Http;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -113,6 +112,10 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
             _coopHandler = value;
         }
     }
+    /// <summary>
+    /// Max MTU used for <see cref="DeliveryMethod.Unreliable"/> batching
+    /// </summary>
+    public int MaxMTU { get; private set; }
 
     public int NetId { get; set; }
     public ESideType RaidSide { get; set; }
@@ -127,13 +130,13 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
     private NetManager _netServer;
     private DateTime? _gameStartTime;
     private NetDataWriter _dataWriter;
-    private int _port;
+    private ushort _port;
     private CoopHandler _coopHandler;
     private ManualLogSource _logger;
     private int _currentNetId;
     private FikaChatUIScript _fikaChat;
     private RaidAdminUIScript _raidAdminUIScript;
-    private CancellationTokenSource _natIntroduceRoutineCts;
+    private CancellationTokenSource _cts;
     private float _statisticsCounter;
     private float _sendThreshold;
     private Dictionary<Profile, bool> _visualProfiles;
@@ -145,7 +148,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
     internal FikaVOIPServer VOIPServer { get; set; }
     internal FikaVOIPClient VOIPClient { get; set; }
 
-    public async void Init()
+    public async Task Init()
     {
         _netServer = new(this)
         {
@@ -154,13 +157,13 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
             UpdateTime = 50,
             AutoRecycle = true,
             IPv6Enabled = true,
-            DisconnectTimeout = FikaPlugin.ConnectionTimeout.Value * 1000,
+            DisconnectTimeout = FikaPlugin.Instance.Settings.ConnectionTimeout.Value * 1000,
             EnableStatistics = true,
             NatPunchEnabled = true,
             ChannelsCount = 2
         };
 
-        AllowVOIP = FikaPlugin.AllowVOIP.Value;
+        AllowVOIP = FikaPlugin.Instance.Settings.AllowVOIP.Value;
 
         _packetProcessor = new();
         _dataWriter = new();
@@ -174,6 +177,8 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         PlayerAmount = 1;
 
         ReadyClients = 0;
+
+        MaxMTU = NetConstants.PossibleMtu[0] - NetConstants.HeaderSize; // we assume minimum MTU + unreliable header size
 
         TimeSinceLastPeerDisconnected = DateTime.Now.AddDays(1);
 
@@ -191,9 +196,9 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
             }
         }
 
-        _sendRate = FikaPlugin.SendRate.Value.ToNumber();
+        _sendRate = FikaPlugin.Instance.Settings.SendRate.Value.ToNumber();
         _logger.LogInfo($"Starting server with SendRate: {_sendRate}");
-        _port = FikaPlugin.UDPPort.Value;
+        _port = FikaPlugin.Instance.Settings.UDPPort.Value;
 
         NetworkGameSession.Rtt = 0;
         NetworkGameSession.LossPercent = 0;
@@ -216,7 +221,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
 #endif            
         await NetManagerUtils.CreateCoopHandler();
 
-        if (FikaPlugin.UseUPnP.Value && !FikaPlugin.UseNatPunching.Value)
+        if (FikaPlugin.Instance.Settings.UseUPnP.Value && !FikaPlugin.Instance.Settings.UseNATPunching.Value)
         {
             var upnpFailed = false;
 
@@ -242,9 +247,9 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
                 throw new MappingException("Error during mapping. Check log file for more information.");
             }
         }
-        else if (FikaPlugin.ForceIP.Value != "")
+        else if (FikaPlugin.Instance.Settings.ForceIP.Value != "")
         {
-            _externalIp = FikaPlugin.ForceIP.Value;
+            _externalIp = FikaPlugin.Instance.Settings.ForceIP.Value;
         }
         else
         {
@@ -256,27 +261,33 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
             _externalIp = FikaPlugin.Instance.WanIP.ToString();
         }
 
-        if (FikaPlugin.UseNatPunching.Value)
+        if (FikaPlugin.Instance.Settings.UseNATPunching.Value)
         {
             _netServer.NatPunchModule.UnsyncedEvents = true;
             _netServer.NatPunchModule.Init(this);
             _netServer.Start();
 
-            _natIntroduceRoutineCts = new CancellationTokenSource();
+            _cts = new CancellationTokenSource();
 
             var natPunchServerIP = FikaPlugin.Instance.NatPunchServerIP;
             var natPunchServerPort = FikaPlugin.Instance.NatPunchServerPort;
-            var token = $"Server:{RequestHandler.SessionId}";
 
-            var natIntroduceTask = Task.Run(() => NatIntroduceRoutine(natPunchServerIP, natPunchServerPort, token, _natIntroduceRoutineCts.Token));
+            if (FikaPlugin.Instance.Settings.UseFikaNATPunchServer.Value)
+            {
+                natPunchServerIP = FikaPlugin.FikaNATPunchMasterServer;
+                natPunchServerPort = FikaPlugin.FikaNATPunchMasterPort;
+            }
+
+            var token = $"Server:{FikaBackendUtils.ServerGuid}";
+            var natIntroduceTask = Task.Run(() => NatIntroduceTask(natPunchServerIP, natPunchServerPort, token, _cts.Token));
         }
         else
         {
-            if (FikaPlugin.ForceBindIP.Value != "Disabled")
+            if (FikaPlugin.Instance.Settings.ForceBindIP.Value != "Disabled")
             {
-                if (!IPAddress.TryParse(FikaPlugin.ForceBindIP.Value, out var bindAddress))
+                if (!IPAddress.TryParse(FikaPlugin.Instance.Settings.ForceBindIP.Value, out var bindAddress))
                 {
-                    var error = $"{FikaPlugin.ForceBindIP.Value} could not be parsed into a valid IP, raid will not start";
+                    var error = $"{FikaPlugin.Instance.Settings.ForceBindIP.Value} could not be parsed into a valid IP, raid will not start";
                     NotificationManagerClass.DisplayWarningNotification(
                         error,
                         EFT.Communications.ENotificationDurationType.Long);
@@ -326,7 +337,8 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
                 iconType: EFT.Communications.ENotificationIconType.Alert);
         }
 
-        SetHostRequest body = new([.. ipAddresses], _port, FikaPlugin.UseNatPunching.Value, FikaBackendUtils.IsHeadless);
+        SetHostRequest body = new([.. ipAddresses], _port, FikaPlugin.Instance.Settings.UseNATPunching.Value,
+            FikaPlugin.Instance.Settings.UseFikaNATPunchServer.Value, FikaBackendUtils.IsHeadless);
         FikaRequestHandler.UpdateSetHost(body);
 
         if (!FikaBackendUtils.IsHeadless)
@@ -518,7 +530,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
 
     public void CreateFikaChat()
     {
-        if (FikaPlugin.EnableChat.Value)
+        if (FikaPlugin.Instance.Settings.EnableChat.Value)
         {
             _fikaChat = FikaChatUIScript.Create();
         }
@@ -538,7 +550,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
             SendStatisticsPacket();
         }
 
-        if (!FikaBackendUtils.IsHeadless && Input.GetKeyDown(FikaPlugin.ChatKey.Value.MainKey))
+        if (!FikaBackendUtils.IsHeadless && Input.GetKeyDown(FikaPlugin.Instance.Settings.ChatKey.Value.MainKey))
         {
             if (_fikaChat != null)
             {
@@ -578,10 +590,10 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
             return;
         }
 
-        var fps = (int)(1f / Time.unscaledDeltaTime);
+        var fps = Mathf.CeilToInt(1f / Time.unscaledDeltaTime);
         StatisticsPacket packet = new(fps);
 
-        SendData(ref packet, DeliveryMethod.ReliableUnordered);
+        SendData(ref packet, DeliveryMethod.Unreliable);
     }
 
     protected void OnDestroy()
@@ -677,7 +689,18 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
     {
         _dataWriter.Reset();
         _dataWriter.PutEnum(EPacketType.PlayerState);
+        _dataWriter.Put((byte)1); // we're sending one packet
         _dataWriter.PutUnmanaged(packet);
+
+        _netServer.SendToAll(_dataWriter.AsReadOnlySpan, DeliveryMethod.Unreliable);
+    }
+
+    public void BatchSendStates(NetDataWriter writer, byte writtenPackets)
+    {
+        _dataWriter.Reset();
+        _dataWriter.PutEnum(EPacketType.PlayerState);
+        _dataWriter.Put(writtenPackets);
+        _dataWriter.Put(writer.AsReadOnlySpan);
 
         _netServer.SendToAll(_dataWriter.AsReadOnlySpan, DeliveryMethod.Unreliable);
     }
@@ -942,9 +965,13 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
                 _packetProcessor.ReadAllPackets(reader, peer);
                 break;
             case EPacketType.PlayerState:
-                if (_snapshotCount < PlayerSnapshots.Snapshots.Length)
+                var count = reader.GetByte();
+                for (byte i = 0; i < count; i++)
                 {
-                    PlayerSnapshots.Snapshots[_snapshotCount++] = ArraySegmentPooling.Get(reader.GetRemainingBytesSpan());
+                    if (_snapshotCount < PlayerSnapshots.Snapshots.Length)
+                    {
+                        PlayerSnapshots.Snapshots[_snapshotCount++] = ArraySegmentPooling.Get(reader.GetSpan(PlayerStatePacket.PacketSize));
+                    }
                 }
                 break;
             case EPacketType.VOIP:
@@ -1011,7 +1038,6 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
     }
 
     // NAT Punching
-
     public void OnNatIntroductionRequest(IPEndPoint localEndPoint, IPEndPoint remoteEndPoint, string token)
     {
         // Do nothing
@@ -1019,47 +1045,43 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
 
     public void OnNatIntroductionSuccess(IPEndPoint targetEndPoint, NatAddressType type, string token)
     {
-        // Do nothing
-    }
-    public void OnNatIntroductionResponse(IPEndPoint localEndPoint, IPEndPoint remoteEndPoint, string token)
-    {
-        _logger.LogInfo($"OnNatIntroductionResponse: {remoteEndPoint}");
-
-        Task.Run(async () =>
+        /*_logger.LogInfo($"Received NAT introduction from master server for [{targetEndPoint}]: {token}");
+        var message = token.Split(":")[1];
+        if (!Guid.TryParse(message, out var id))
         {
-            NetDataWriter data = new();
-            data.Put("fika.hello");
+            Console.WriteLine($"Could not parse token: {message}");
+        }
 
-            for (var i = 0; i < 20; i++)
-            {
-                _netServer.SendUnconnectedMessage(data, localEndPoint);
-                _netServer.SendUnconnectedMessage(data, remoteEndPoint);
-                await Task.Delay(250);
-            }
-        });
+        if (id != FikaBackendUtils.ServerGuid)
+        {
+            Console.WriteLine($"Incorrect GUID: {id}");
+        }
+
+        _logger.LogInfo($"Received endpoint {targetEndPoint} from the NAT punching server.");*/
+
+        // todo: proper connect
+        //_netServer.Connect(targetEndPoint, id.ToString());
     }
 
     public void StopNatIntroduceRoutine()
     {
-        if (_natIntroduceRoutineCts != null)
+        if (_cts != null)
         {
-            _natIntroduceRoutineCts.Cancel();
+            _cts.Cancel();
         }
     }
 
-    private async void NatIntroduceRoutine(string natPunchServerIP, int natPunchServerPort, string token, CancellationToken ct)
+    private async Task NatIntroduceTask(string natPunchServerIP, int natPunchServerPort, string token, CancellationToken ct = default)
     {
-        _logger.LogInfo("NatIntroduceRoutine started.");
+        _logger.LogInfo("Send NAT Introduce Request task started.");
 
         while (!ct.IsCancellationRequested)
         {
-            _logger.LogInfo($"SendNatIntroduceRequest: {natPunchServerIP}:{natPunchServerPort}");
-
             _netServer.NatPunchModule.SendNatIntroduceRequest(natPunchServerIP, natPunchServerPort, token);
 
             await Task.Delay(TimeSpan.FromSeconds(15));
         }
 
-        _logger.LogInfo("NatIntroduceRoutine ended.");
+        _logger.LogInfo("Send NAT Introduce Request task stopped.");
     }
 }

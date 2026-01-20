@@ -17,10 +17,10 @@ public class SendItemUI : MonoBehaviour
 
     protected void Awake()
     {
-        _headerText.text = LocaleUtils.UI_SENDITEM_HEADER.Localized();
-        _sendText.text = LocaleUtils.UI_SENDITEM_BUTTON.Localized();
-        GameObject gameObjectToAdd = gameObject.transform.GetChild(0).GetChild(0).gameObject;
-        RectTransform rectTransform = gameObjectToAdd.RectTransform();
+        _headerText.SetText(LocaleUtils.UI_SENDITEM_HEADER.Localized());
+        _sendText.SetText(LocaleUtils.UI_SENDITEM_BUTTON.Localized());
+        var gameObjectToAdd = gameObject.transform.GetChild(0).GetChild(0).gameObject;
+        var rectTransform = gameObjectToAdd.RectTransform();
         gameObjectToAdd.AddComponent<UIDragComponent>().Init(rectTransform, true);
     }
 }

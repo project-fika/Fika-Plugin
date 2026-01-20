@@ -79,7 +79,7 @@ public class BTRView_GoOut_Patch : ModulePatch
         }
         catch (Exception ex)
         {
-            FikaPlugin.Instance.FikaLogger.LogError("BTRView_GoOut_Patch: " + ex.Message);
+            FikaGlobals.LogError("BTRView_GoOut_Patch: " + ex.Message);
         }
     }
 }

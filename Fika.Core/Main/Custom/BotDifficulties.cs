@@ -1,4 +1,5 @@
 ﻿using EFT;
+using Fika.Core.Main.Utils;
 using Newtonsoft.Json;
 using SPT.Common.Http;
 using System.Collections.Generic;
@@ -11,13 +12,8 @@ public class BotDifficulties : Dictionary<string, BotDifficulties.RoleData>
     {
         get
         {
-            FikaPlugin.Instance.FikaLogger.LogInfo("Retrieving Core settings");
-            if (_coreSettings != null)
-            {
-                return _coreSettings;
-            }
-
-            return null;
+            FikaGlobals.LogInfo("Retrieving Core settings");
+            return _coreSettings ?? null;
         }
     }
 
@@ -37,7 +33,7 @@ public class BotDifficulties : Dictionary<string, BotDifficulties.RoleData>
     public BotSettingsComponents GetComponent(BotDifficulty botDifficulty, WildSpawnType role)
     {
 #if DEBUG
-        FikaPlugin.Instance.FikaLogger.LogInfo($"Retrieving data for: {role}, difficulty: {botDifficulty}");
+        FikaGlobals.LogInfo($"Retrieving data for: {role}, difficulty: {botDifficulty}");
 #endif
         if (TryGetValue(role.ToString().ToLower(), out RoleData value))
         {
@@ -47,7 +43,7 @@ public class BotDifficulties : Dictionary<string, BotDifficulties.RoleData>
             }
         }
 
-        FikaPlugin.Instance.FikaLogger.LogError($"Unable to retrieve difficulty settings for: {role}, difficulty: {botDifficulty}");
+        FikaGlobals.LogError($"Unable to retrieve difficulty settings for: {role}, difficulty: {botDifficulty}");
         return null;
     }
 

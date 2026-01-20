@@ -224,7 +224,7 @@ public partial class FikaServer
 
     private void OnPingPacketReceived(PingPacket packet, NetPeer peer)
     {
-        if (FikaPlugin.UsePingSystem.Value && !FikaBackendUtils.IsHeadless)
+        if (FikaPlugin.Instance.Settings.UsePingSystem.Value && !FikaBackendUtils.IsHeadless)
         {
             PingFactory.ReceivePing(packet.PingLocation, packet.PingType, packet.PingColor, packet.Nickname, packet.LocaleId);
         }

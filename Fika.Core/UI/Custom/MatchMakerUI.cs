@@ -31,17 +31,18 @@ public class MatchMakerUI : MonoBehaviour
 
     protected void Awake()
     {
-        RaidsText.text = LocaleUtils.UI_MM_RAIDSHEADER.Localized();
-        JoinText.text = LocaleUtils.UI_MM_JOIN_BUTTON.Localized();
-        HostRaidText.text = LocaleUtils.UI_MM_HOST_BUTTON.Localized();
-        SelectAmountText.text = LocaleUtils.UI_MM_SESSION_SETTINGS_HEADER.Localized();
-        UseDedicatedHostText.text = LocaleUtils.UI_MM_USE_DEDICATED_HOST.Localized();
-        StartText.text = LocaleUtils.UI_MM_START_BUTTON.Localized();
-        LoadingScreenHeaderText.text = LocaleUtils.UI_MM_LOADING_HEADER.Localized();
-        LoadingScreenInfoText.text = LocaleUtils.UI_MM_LOADING_DESCRIPTION.Localized();
-        JoinAsSpectatorText.text = LocaleUtils.UI_MM_JOIN_AS_SPECTATOR.Localized().ToUpper();
+        RaidsText.SetText(LocaleUtils.UI_MM_RAIDSHEADER.Localized());
+        JoinText.SetText(LocaleUtils.UI_MM_JOIN_BUTTON.Localized());
+        HostRaidText.SetText(LocaleUtils.UI_MM_HOST_BUTTON.Localized());
+        SelectAmountText.SetText(LocaleUtils.UI_MM_SESSION_SETTINGS_HEADER.Localized());
+        UseDedicatedHostText.SetText(LocaleUtils.UI_MM_USE_DEDICATED_HOST.Localized());
+        StartText.SetText(LocaleUtils.UI_MM_START_BUTTON.Localized());
+        LoadingScreenHeaderText.SetText(LocaleUtils.UI_MM_LOADING_HEADER.Localized());
+        LoadingScreenInfoText.SetText(LocaleUtils.UI_MM_LOADING_DESCRIPTION.Localized());
 
-        HoverTooltipArea spectateTooltip = SpectatorToggle.gameObject.AddComponent<HoverTooltipArea>();
+        JoinAsSpectatorText.SetText(LocaleUtils.UI_MM_JOIN_AS_SPECTATOR.Localized().ToUpper());
+
+        var spectateTooltip = SpectatorToggle.gameObject.AddComponent<HoverTooltipArea>();
         spectateTooltip.SetMessageText(LocaleUtils.UI_MM_JOIN_AS_SPECTATOR_DESCRIPTION.Localized());
     }
 }

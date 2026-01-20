@@ -876,7 +876,6 @@ public static class FikaSerializationExtensions
 
         writer.PutUnmanaged(packet.Direction);
         writer.PutUnmanaged(packet.Point);
-        writer.PutUnmanaged(packet.OverallVelocity);
         writer.Put(packet.Force);
 
         writer.PutEnum(packet.BodyPartColliderType);
@@ -896,7 +895,6 @@ public static class FikaSerializationExtensions
 
             Direction = reader.GetUnmanaged<Vector3>(),
             Point = reader.GetUnmanaged<Vector3>(),
-            OverallVelocity = reader.GetUnmanaged<Vector3>(),
             Force = reader.GetFloat(),
 
             BodyPartColliderType = reader.GetEnum<EBodyPartColliderType>(),
@@ -1253,7 +1251,7 @@ public static class FikaSerializationExtensions
             case EFirearmSubPacketType.Loot:
                 break;
             default:
-                FikaPlugin.Instance.FikaLogger.LogError("PutFirearmSubPacket: type was outside of bounds!");
+                FikaGlobals.LogError("PutFirearmSubPacket: type was outside of bounds!");
                 break;
         }
     }
@@ -1272,7 +1270,7 @@ public static class FikaSerializationExtensions
             case ERequestSubPacketType.CharacterSync:
                 return new RequestCharactersPacket(reader);
             default:
-                FikaPlugin.Instance.FikaLogger.LogError("GetRequestSubPacket: type was outside of bounds!");
+                FikaGlobals.LogError("GetRequestSubPacket: type was outside of bounds!");
                 return null;
         }
     }

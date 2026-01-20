@@ -2,6 +2,7 @@
 using EFT.InventoryLogic;
 using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
+using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Pooling;
 using System;
 
@@ -39,7 +40,7 @@ public sealed class QuickReloadMagPacket : IPoolSubPacket
                 GStruct156<Item> result = player.FindItemById(MagId);
                 if (!result.Succeeded)
                 {
-                    FikaPlugin.Instance.FikaLogger.LogError(result.Error);
+                    FikaGlobals.LogError(result.Error);
                     return;
                 }
                 if (result.Value is MagazineItemClass magazine)
@@ -49,13 +50,13 @@ public sealed class QuickReloadMagPacket : IPoolSubPacket
                 }
                 else
                 {
-                    FikaPlugin.Instance.FikaLogger.LogError($"QuickReloadMagPacket: item was not of type MagazineClass, was {result.Value.GetType()}");
+                    FikaGlobals.LogError($"QuickReloadMagPacket: item was not of type MagazineClass, was {result.Value.GetType()}");
                 }
             }
             catch (Exception ex)
             {
-                FikaPlugin.Instance.FikaLogger.LogError(ex);
-                FikaPlugin.Instance.FikaLogger.LogError($"QuickReloadMagPacket: There is no item {MagId} in profile {player.ProfileId}");
+                FikaGlobals.LogError(ex);
+                FikaGlobals.LogError($"QuickReloadMagPacket: There is no item {MagId} in profile {player.ProfileId}");
                 throw;
             }
         }

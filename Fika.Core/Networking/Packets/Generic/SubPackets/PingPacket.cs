@@ -33,7 +33,7 @@ public sealed class PingPacket : IPoolSubPacket
 
     public void Execute(FikaPlayer player = null)
     {
-        if (FikaPlugin.UsePingSystem.Value && !FikaBackendUtils.IsHeadless)
+        if (FikaPlugin.Instance.Settings.UsePingSystem.Value && !FikaBackendUtils.IsHeadless)
         {
             PingFactory.ReceivePing(PingLocation, PingType, PingColor, Nickname, LocaleId);
         }

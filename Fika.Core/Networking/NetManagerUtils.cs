@@ -47,14 +47,14 @@ public static class NetManagerUtils
         {
             var server = FikaGameObject.AddComponent<FikaServer>();
             Singleton<FikaServer>.Create(server);
-            _logger.LogInfo("FikaServer has started!");
+            _logger.LogInfo("FikaServer has created!");
             Singleton<IFikaNetworkManager>.Create(server);
             return;
         }
 
         var client = FikaGameObject.AddComponent<FikaClient>();
         Singleton<FikaClient>.Create(client);
-        _logger.LogInfo("FikaClient has started!");
+        _logger.LogInfo("FikaClient has created!");
         Singleton<IFikaNetworkManager>.Create(client);
     }
 
@@ -95,16 +95,17 @@ public static class NetManagerUtils
         }
     }
 
-    public static void CreatePingingClient()
+    public static Task<FikaPingingClient> CreatePingingClient()
     {
         if (FikaGameObject == null)
         {
             CreateFikaGameObject();
         }
 
-        var pingingClient = FikaGameObject.AddComponent<FikaPingingClient>();
+        var pingingClient = new FikaPingingClient();
         Singleton<FikaPingingClient>.Create(pingingClient);
         _logger.LogInfo("FikaPingingClient has started!");
+        return Task.FromResult(pingingClient);
     }
 
     public static void DestroyNetManager(bool isServer)
@@ -183,19 +184,7 @@ public static class NetManagerUtils
         }
     }
 
-    public static void DestroyPingingClient()
-    {
-        if (FikaGameObject != null)
-        {
-            var pingingClient = Singleton<FikaPingingClient>.Instance;
-            pingingClient.NetClient.Stop();
-            Singleton<FikaPingingClient>.TryRelease(pingingClient);
-            UnityEngine.Object.Destroy(pingingClient);
-            _logger.LogInfo("Destroyed FikaPingingClient");
-        }
-    }
-
-    public static Task InitNetManager(bool isServer)
+    public static async Task InitNetManager(bool isServer)
     {
         if (FikaGameObject != null)
         {
@@ -204,19 +193,19 @@ public static class NetManagerUtils
                 var server = Singleton<FikaServer>.Instance;
                 if (!server.Started)
                 {
-                    server.Init();
+                    await server.Init();
                 }
                 FikaEventDispatcher.DispatchEvent(new FikaNetworkManagerCreatedEvent(server));
-                return Task.CompletedTask;
+                return;
             }
 
             var client = Singleton<FikaClient>.Instance;
             if (!client.Started)
             {
-                client.Init();
+                await client.Init();
             }
             FikaEventDispatcher.DispatchEvent(new FikaNetworkManagerCreatedEvent(client));
-            return Task.CompletedTask;
+            return;
         }
 
         _logger.LogError("InitNetManager: FikaGameObject was null!");

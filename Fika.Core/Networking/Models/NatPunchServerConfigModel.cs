@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Reflection;
 using System.Runtime.Serialization;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Networking.Models;
 
@@ -13,39 +13,34 @@ public struct NatPunchServerConfigModel
     [DataMember(Name = "port")]
     public int Port;
 
-    [DataMember(Name = "natIntroduceAmount")]
-    public int NatIntroduceAmount;
-
-    public NatPunchServerConfigModel(bool enable, int port, int natIntroduceAmount)
+    public NatPunchServerConfigModel(bool enable, int port)
     {
         Enable = enable;
         Port = port;
-        NatIntroduceAmount = natIntroduceAmount;
     }
 
     public readonly void LogValues()
     {
-        FikaPlugin.Instance.FikaLogger.LogInfo("Received NatPunchServer config from server:");
-        FieldInfo[] fields = typeof(NatPunchServerConfigModel).GetFields();
-        foreach (FieldInfo field in fields)
+        FikaGlobals.LogInfo("Received NatPunchServer config from server:");
+        foreach (var field in typeof(NatPunchServerConfigModel).GetFields())
         {
-            object value = field.GetValue(this);
+            var value = field.GetValue(this);
             if (value is Array valueArray)
             {
-                string values = "";
-                for (int i = 0; i < valueArray.Length; i++)
+                var values = "";
+                for (var i = 0; i < valueArray.Length; i++)
                 {
                     if (i == 0)
                     {
                         values = valueArray.GetValue(i).ToString();
                         continue;
                     }
-                    values = values + ", " + valueArray.GetValue(i).ToString();
+                    values = values + ", " + valueArray.GetValue(i);
                 }
-                FikaPlugin.Instance.FikaLogger.LogInfo(field.Name + ": " + values);
+                FikaGlobals.LogInfo(field.Name + ": " + values);
                 continue;
             }
-            FikaPlugin.Instance.FikaLogger.LogInfo(field.Name + ": " + value);
+            FikaGlobals.LogInfo(field.Name + ": " + value);
         }
     }
 }
