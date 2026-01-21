@@ -6,6 +6,7 @@
 ![Issues](https://img.shields.io/github/issues/project-fika/Fika-Plugin?style=plastic&logo=github)
 [![License](https://img.shields.io/badge/CC--BY--NC--SA--4.0-blue?style=plastic&logo=creativecommons&logoColor=FFFFFF&label=License)](https://github.com/project-fika/Fika-Plugin/blob/main/LICENSE.md)
 [![Crowdin](https://badges.crowdin.net/project-fika/localized.svg)](https://crowdin.com/project/project-fika)
+[![.NET Test](https://github.com/project-fika/Fika-Plugin/actions/workflows/dotnet.yml/badge.svg)](https://github.com/project-fika/Fika-Plugin/actions/workflows/dotnet.yml)
 
 Client-side changes to make multiplayer work.
 
