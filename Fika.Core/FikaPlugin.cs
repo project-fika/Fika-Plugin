@@ -15,9 +15,9 @@ using Fika.Core.UI;
 using Fika.Core.UI.Patches;
 using SPT.Common.Http;
 using SPT.Custom.Patches;
-#if RELEASE
+#if RELEASE || GOLDMASTER
 using SPT.Custom.Utils;
-# endif
+#endif
 using SPT.Reflection.Patching;
 using SPT.SinglePlayer.Patches.RaidFix;
 using SPT.SinglePlayer.Patches.ScavMode;
@@ -187,7 +187,7 @@ public class FikaPlugin : BaseUnityPlugin
         _patchManager.EnablePatches();
     }
 
-#if RELEASE
+#if RELEASE || GOLDMASTER
     private void VerifyServerVersion()
     {
         var version = FikaRequestHandler.CheckServerVersion().Version;
@@ -376,33 +376,6 @@ public class FikaPlugin : BaseUnityPlugin
 
     private void DisableSPTPatches()
     {
-        /*// Disable these as they interfere with Fika (currently does not work, use below)
-        var patches = ModPatchCache.GetActivePatches();
-        var targets = new HashSet<string>
-        {
-            nameof(VersionLabelPatch),
-            nameof(AmmoUsedCounterPatch),
-            nameof(ArmorDamageCounterPatch),
-            nameof(ScavRepAdjustmentPatch),
-            nameof(GetProfileAtEndOfRaidPatch),
-            nameof(ScavExfilPatch),
-            nameof(SendPlayerScavProfileToServerAfterRaidPatch),
-            nameof(MatchStartServerLocationPatch),
-            nameof(QuestAchievementRewardInRaidPatch)
-        };
-
-        for (var i = 0; i < patches.Count; i++)
-        {
-            var patch = patches[i];
-            var name = patch.GetType().Name;
-            Logger.LogWarning(name);
-            if (targets.Contains(name))
-            {
-                Logger.LogInfo($"Found {name}, disabling...");
-                patch.Disable();
-            }
-        }*/
-
         new VersionLabelPatch().Disable();
         new ScavRepAdjustmentPatch().Disable();
         new GetProfileAtEndOfRaidPatch().Disable();

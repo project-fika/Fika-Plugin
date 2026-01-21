@@ -4,6 +4,9 @@ using BepInEx.Configuration;
 using Comfort.Common;
 using EFT.UI;
 using Fika.Core.Main.Utils;
+#if GOLDMASTER
+using Fika.Core.UI; 
+#endif
 using Fika.Core.UI.Patches;
 using static Fika.Core.FikaPlugin;
 using static Fika.Core.Networking.IFikaNetworkManager;
