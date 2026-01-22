@@ -120,7 +120,7 @@ public class ItemContext_Patch : ModulePatch
                 var currentUI = GameObject.Find("SendItemMenu(Clone)");
                 if (currentUI != null)
                 {
-                    Object.Destroy(currentUI);
+                    GameObject.Destroy(currentUI);
                 }
 
                 // Create the window
@@ -142,6 +142,26 @@ public class ItemContext_Patch : ModulePatch
                 sendItemUI.PlayersDropdown.onValueChanged.AddListener((_) => Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuDropdownSelect));
                 sendItemUI.CloseButton.onClick.AddListener(() => Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick));
                 sendItemUI.CloseButton.onClick.AddListener(() => Object.Destroy(uiGameObj));
+
+                sendItemUI.PlayersFilter.onValueChanged.AddListener((input) =>
+                {
+                    if (string.IsNullOrEmpty(input))
+                    {
+                        sendItemUI.PlayersDropdown.ClearOptions();
+                        sendItemUI.PlayersDropdown.AddOptions(optionDatas);
+                        sendItemUI.PlayersDropdown.interactable = true;
+                        return;
+                    }
+
+                    sendItemUI.PlayersDropdown.ClearOptions();
+
+                    var filtered = availableUsers.Keys.Where(option => option
+                        .Contains(input, System.StringComparison.OrdinalIgnoreCase))
+                        .ToList();
+
+                    sendItemUI.PlayersDropdown.AddOptions(filtered);
+                    sendItemUI.PlayersDropdown.interactable = filtered.Count > 0;
+                });
 
                 sendItemUI.SendButton.onClick.AddListener(() =>
                 {
@@ -167,7 +187,7 @@ public class ItemContext_Patch : ModulePatch
                             PreloaderUI.Instance.ShowErrorScreen("Fika.Core.ItemContextPatch", "!Singleton<ISession>.Instantiated");
                         }
                     }
-                    Object.Destroy(uiGameObj);
+                    GameObject.Destroy(uiGameObj);
                 });
             }, CacheResourcesPopAbstractClass.Pop<Sprite>("Characteristics/Icons/UnloadAmmo"));
         }
