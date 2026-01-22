@@ -388,6 +388,7 @@ public class FikaPingingClient : INetEventListener, INatPunchListener, IDisposab
         _candidates = null;
         _writer.Reset();
         _writer = null;
+        _cts?.Cancel();
 
         NetClient.Stop();
         if (!Singleton<FikaPingingClient>.TryRelease(this))
