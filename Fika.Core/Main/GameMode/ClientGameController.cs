@@ -203,7 +203,7 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
     {
         if (RaidSettings.PlayersSpawnPlace == EPlayersSpawnPlace.SamePlace)
         {
-            return false;
+            return true;
         }
 
         if (string.Equals(RaidSettings.SelectedLocation.Id, "labyrinth", StringComparison.OrdinalIgnoreCase)
