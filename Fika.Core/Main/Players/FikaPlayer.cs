@@ -735,6 +735,12 @@ public class FikaPlayer : LocalPlayer
         UpdateInteractionCast();
     }
 
+    public override void vmethod_6(string itemId, string zoneId, bool successful)
+    {
+        base.vmethod_6(itemId, zoneId, successful);
+        UpdateInteractionCast();
+    }
+
     public override void OnAnimatedInteraction(EInteraction interaction)
     {
         if (!FikaGlobals.BlockedInteractions.Contains(interaction))

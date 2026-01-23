@@ -459,8 +459,7 @@ public abstract class BaseGameController
 
     public void InitShellingController(BackendConfigSettingsClass instance, GameWorld gameWorld, LocationSettingsClass.Location location)
     {
-        if (instance != null && instance.ArtilleryShelling != null && instance.ArtilleryShelling.ArtilleryMapsConfigs != null &&
-            instance.ArtilleryShelling.ArtilleryMapsConfigs.Keys.Contains(location.Id))
+        if (instance != null && instance.ArtilleryShelling != null && instance.ArtilleryShelling.ArtilleryMapsConfigs?.Keys.Contains(location.Id) == true)
         {
             if (IsServer)
             {

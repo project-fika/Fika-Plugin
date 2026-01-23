@@ -45,7 +45,7 @@ namespace Fika.Core;
 [BepInDependency("com.SPT.debugging", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after spt-debugging, that way we can disable its patches
 public class FikaPlugin : BaseUnityPlugin
 {
-    public const string FikaVersion = "2.2.0";
+    public const string FikaVersion = "2.2.1";
     public const string FikaNATPunchMasterServer = "natpunch.project-fika.com";
     public const ushort FikaNATPunchMasterPort = 6790;
 
@@ -119,6 +119,7 @@ public class FikaPlugin : BaseUnityPlugin
     public bool EnableTransits;
     public bool AnyoneCanStartRaid;
     public bool AllowNamePlates;
+    public bool RandomLabyrinthSpawns;
     #endregion
 
     #region natpunch config
@@ -268,6 +269,7 @@ public class FikaPlugin : BaseUnityPlugin
         EnableTransits = clientConfig.EnableTransits;
         AnyoneCanStartRaid = clientConfig.AnyoneCanStartRaid;
         AllowNamePlates = clientConfig.AllowNamePlates;
+        RandomLabyrinthSpawns = clientConfig.RandomLabyrinthSpawns;
 
         clientConfig.LogValues();
     }
