@@ -35,10 +35,13 @@ public static class FikaRequestHandler
             "https://ipv4.icanhazip.com/"
         ];
 
+        var _origTimeout = client.Timeout;
+
         foreach (var url in urls)
         {
             try
             {
+                client.Timeout = TimeSpan.FromSeconds(10);
                 var ipString = await client.GetStringAsync(url);
                 ipString = ipString.Trim();
                 if (IPAddress.TryParse(ipString, out var ipAddress))
@@ -53,6 +56,10 @@ public static class FikaRequestHandler
             catch (Exception ex)
             {
                 FikaGlobals.LogWarning($"Could not get public IP address from [{url}], Error message: {ex.Message}");
+            }
+            finally
+            {
+                client.Timeout = _origTimeout;
             }
         }
 

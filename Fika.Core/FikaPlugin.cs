@@ -228,15 +228,6 @@ public class FikaPlugin : BaseUnityPlugin
     /// </remarks>
     private async Task RunChecks()
     {
-        try
-        {
-            WanIP = await FikaRequestHandler.GetPublicIP();
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError($"RunChecks: {ex.Message}");
-        }
-
         await Task.Delay(5000);
 #if !DEBUG
         VerifyServerVersion();
@@ -249,6 +240,15 @@ public class FikaPlugin : BaseUnityPlugin
         }
 
         _patchManager = null;
+
+        try
+        {
+            WanIP = await FikaRequestHandler.GetPublicIP();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError($"RunChecks: {ex.Message}");
+        }
     }
 
     private void GetClientConfig()
