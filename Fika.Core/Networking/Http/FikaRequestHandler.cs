@@ -35,7 +35,7 @@ public static class FikaRequestHandler
             "https://ipv4.icanhazip.com/"
         ];
 
-        var _origTimeout = client.Timeout;
+        var origTimeout = client.Timeout;
         client.Timeout = TimeSpan.FromSeconds(5);
 
         foreach (var url in urls)
