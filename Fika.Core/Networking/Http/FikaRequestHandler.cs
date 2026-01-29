@@ -36,12 +36,12 @@ public static class FikaRequestHandler
         ];
 
         var _origTimeout = client.Timeout;
+        client.Timeout = TimeSpan.FromSeconds(5);
 
         foreach (var url in urls)
         {
             try
             {
-                client.Timeout = TimeSpan.FromSeconds(10);
                 var ipString = await client.GetStringAsync(url);
                 ipString = ipString.Trim();
                 if (IPAddress.TryParse(ipString, out var ipAddress))
@@ -57,12 +57,9 @@ public static class FikaRequestHandler
             {
                 FikaGlobals.LogWarning($"Could not get public IP address from [{url}], Error message: {ex.Message}");
             }
-            finally
-            {
-                client.Timeout = _origTimeout;
-            }
         }
 
+        client.Timeout = _origTimeout;
         throw new Exception("Could not retrieve or parse the external IP address!");
     }
 
