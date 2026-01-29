@@ -59,7 +59,7 @@ public static class FikaRequestHandler
             }
         }
 
-        client.Timeout = _origTimeout;
+        client.Timeout = origTimeout;
         throw new Exception("Could not retrieve or parse the external IP address!");
     }
 
