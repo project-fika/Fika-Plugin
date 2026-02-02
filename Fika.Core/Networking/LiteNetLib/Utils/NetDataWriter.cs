@@ -40,10 +40,7 @@ public unsafe class NetDataWriter
         }
     }
 
-    [ThreadStatic]
-    private static UTF8Encoding _utf8EncodingInternal;
-
-    public static UTF8Encoding UTF8Encoding => _utf8EncodingInternal ??= new UTF8Encoding(false, true);
+    internal static readonly UTF8Encoding UTF8Encoding = new(false, true);
 
     public NetDataWriter() : this(true, _initialSize)
     {
