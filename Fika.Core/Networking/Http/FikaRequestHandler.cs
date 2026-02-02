@@ -35,6 +35,9 @@ public static class FikaRequestHandler
             "https://ipv4.icanhazip.com/"
         ];
 
+        var origTimeout = client.Timeout;
+        client.Timeout = TimeSpan.FromSeconds(5);
+
         foreach (var url in urls)
         {
             try
@@ -56,6 +59,7 @@ public static class FikaRequestHandler
             }
         }
 
+        client.Timeout = origTimeout;
         throw new Exception("Could not retrieve or parse the external IP address!");
     }
 
