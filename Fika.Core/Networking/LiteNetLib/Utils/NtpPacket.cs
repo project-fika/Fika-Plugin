@@ -278,7 +278,10 @@ public class NtpPacket
     internal NtpPacket(byte[] bytes)
     {
         if (bytes.Length < 48)
+        {
             throw new ArgumentException("SNTP reply packet must be at least 48 bytes long.", "bytes");
+        }
+
         Bytes = bytes;
     }
 
@@ -296,43 +299,77 @@ public class NtpPacket
     internal void ValidateRequest()
     {
         if (Mode != NtpMode.Client)
+        {
             throw new InvalidOperationException("This is not a request SNTP packet.");
+        }
+
         if (VersionNumber == 0)
+        {
             throw new InvalidOperationException("Protocol version of the request is not specified.");
+        }
+
         if (TransmitTimestamp == null)
+        {
             throw new InvalidOperationException("TransmitTimestamp must be set in request packet.");
+        }
     }
 
     internal void ValidateReply()
     {
         if (Mode != NtpMode.Server)
+        {
             throw new InvalidOperationException("This is not a reply SNTP packet.");
+        }
+
         if (VersionNumber == 0)
+        {
             throw new InvalidOperationException("Protocol version of the reply is not specified.");
+        }
+
         if (Stratum == 0)
+        {
             throw new InvalidOperationException(string.Format("Received Kiss-o'-Death SNTP packet with code 0x{0:x}.", ReferenceId));
+        }
+
         if (LeapIndicator == NtpLeapIndicator.AlarmCondition)
+        {
             throw new InvalidOperationException("SNTP server has unsynchronized clock.");
+        }
+
         CheckTimestamps();
     }
 
     private void CheckTimestamps()
     {
         if (OriginTimestamp == null)
+        {
             throw new InvalidOperationException("Origin timestamp is missing.");
+        }
+
         if (ReceiveTimestamp == null)
+        {
             throw new InvalidOperationException("Receive timestamp is missing.");
+        }
+
         if (TransmitTimestamp == null)
+        {
             throw new InvalidOperationException("Transmit timestamp is missing.");
+        }
+
         if (DestinationTimestamp == null)
+        {
             throw new InvalidOperationException("Destination timestamp is missing.");
+        }
     }
 
     private DateTime? GetDateTime64(int offset)
     {
         var field = GetUInt64BE(offset);
         if (field == 0)
+        {
             return null;
+        }
+
         return new DateTime(Epoch.Ticks + Convert.ToInt64(field * (1.0 / (1L << 32) * 10000000.0)));
     }
 

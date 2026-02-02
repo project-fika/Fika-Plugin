@@ -245,7 +245,7 @@ public class EventBasedNetListener : INetEventListener
     public event OnNtpResponseEvent NtpResponseEvent;
     public event OnPeerAddressChangedEvent PeerAddressChangedEvent;
 
-    public void ClearPeerConnectedEvent() =>  PeerConnectedEvent = null;
+    public void ClearPeerConnectedEvent() => PeerConnectedEvent = null;
     public void ClearPeerDisconnectedEvent() => PeerDisconnectedEvent = null;
     public void ClearNetworkErrorEvent() => NetworkErrorEvent = null;
     public void ClearNetworkReceiveEvent() => NetworkReceiveEvent = null;
@@ -287,7 +287,7 @@ public class EventBasedNetListener : INetEventListener
         PeerAddressChangedEvent?.Invoke(peer, previousAddress);
 }
 
-    /// <summary>
+/// <summary>
 /// Simple event based listener for simple setups and benchmarks
 /// </summary>
 public class EventBasedLiteNetListener : ILiteNetEventListener
@@ -312,7 +312,7 @@ public class EventBasedLiteNetListener : ILiteNetEventListener
     public event OnDeliveryEvent DeliveryEvent;
     public event OnPeerAddressChangedEvent PeerAddressChangedEvent;
 
-    public void ClearPeerConnectedEvent() =>  PeerConnectedEvent = null;
+    public void ClearPeerConnectedEvent() => PeerConnectedEvent = null;
     public void ClearPeerDisconnectedEvent() => PeerDisconnectedEvent = null;
     public void ClearNetworkErrorEvent() => NetworkErrorEvent = null;
     public void ClearNetworkReceiveEvent() => NetworkReceiveEvent = null;

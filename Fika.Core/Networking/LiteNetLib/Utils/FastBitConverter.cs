@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace Fika.Core.Networking.LiteNetLib.Utils;
@@ -124,14 +123,14 @@ public static class FastBitConverter
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void GetBytes(byte[] bytes, int startIndex, double value)
     {
-        ConverterHelperDouble ch = new ConverterHelperDouble { Adouble = value };
+        var ch = new ConverterHelperDouble { Adouble = value };
         WriteLittleEndian(bytes, startIndex, ch.Along);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void GetBytes(byte[] bytes, int startIndex, float value)
     {
-        ConverterHelperFloat ch = new ConverterHelperFloat { Afloat = value };
+        var ch = new ConverterHelperFloat { Afloat = value };
         WriteLittleEndian(bytes, startIndex, ch.Aint);
     }
 

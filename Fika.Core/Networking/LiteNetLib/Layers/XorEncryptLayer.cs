@@ -31,15 +31,21 @@ public class XorEncryptLayer : PacketLayerBase
     public void SetKey(byte[] key)
     {
         if (_byteKey == null || _byteKey.Length != key.Length)
+        {
             _byteKey = new byte[key.Length];
+        }
+
         Buffer.BlockCopy(key, 0, _byteKey, 0, key.Length);
     }
 
     public override void ProcessInboundPacket(ref IPEndPoint endPoint, ref byte[] data, ref int length)
     {
         if (_byteKey == null)
+        {
             return;
-        for (int i = 0; i < length; i++)
+        }
+
+        for (var i = 0; i < length; i++)
         {
             data[i] = (byte)(data[i] ^ _byteKey[i % _byteKey.Length]);
         }
@@ -48,9 +54,12 @@ public class XorEncryptLayer : PacketLayerBase
     public override void ProcessOutBoundPacket(ref IPEndPoint endPoint, ref byte[] data, ref int offset, ref int length)
     {
         if (_byteKey == null)
+        {
             return;
-        int cur = offset;
-        for (int i = 0; i < length; i++, cur++)
+        }
+
+        var cur = offset;
+        for (var i = 0; i < length; i++, cur++)
         {
             data[cur] = (byte)(data[cur] ^ _byteKey[i % _byteKey.Length]);
         }

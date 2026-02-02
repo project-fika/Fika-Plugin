@@ -23,7 +23,7 @@ public readonly ref struct PooledPacket
     internal PooledPacket(NetPacket packet, int maxDataSize, byte channelNumber)
     {
         _packet = packet;
-        UserDataOffset = _packet.GetHeaderSize();
+        UserDataOffset = _packet.HeaderSize;
         _packet.Size = UserDataOffset;
         MaxUserDataSize = maxDataSize - UserDataOffset;
         _channelNumber = channelNumber;

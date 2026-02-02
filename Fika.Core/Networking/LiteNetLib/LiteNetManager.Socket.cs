@@ -1,11 +1,11 @@
 ﻿#if UNITY_2018_3_OR_NEWER
 #define UNITY_SOCKET_FIX
 #endif
-using System.Runtime.InteropServices;
 using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace Fika.Core.Networking.LiteNetLib;
@@ -100,9 +100,11 @@ public partial class LiteNetManager
         //Reading data
         try
         {
-            int available = socket.Available;
+            var available = socket.Available;
             while (available > 0)
+            {
                 available -= ReceiveFrom(socket, ref bufferEndPoint);
+            }
         }
         catch (SocketException ex)
         {
@@ -121,10 +123,10 @@ public partial class LiteNetManager
 
     private void NativeReceiveLogic()
     {
-        IntPtr socketHandle4 = _udpSocketv4.Handle;
-        IntPtr socketHandle6 = _udpSocketv6?.Handle ?? IntPtr.Zero;
-        byte[] addrBuffer4 = new byte[NativeSocket.IPv4AddrSize];
-        byte[] addrBuffer6 = new byte[NativeSocket.IPv6AddrSize];
+        var socketHandle4 = _udpSocketv4.Handle;
+        var socketHandle6 = _udpSocketv6?.Handle ?? IntPtr.Zero;
+        var addrBuffer4 = new byte[NativeSocket.IPv4AddrSize];
+        var addrBuffer6 = new byte[NativeSocket.IPv6AddrSize];
         var tempEndPoint = new IPEndPoint(IPAddress.Any, 0);
         var selectReadList = new List<Socket>(2);
         var socketv4 = _udpSocketv4;
@@ -138,27 +140,38 @@ public partial class LiteNetManager
                 if (socketV6 == null)
                 {
                     if (NativeReceiveFrom(socketHandle4, addrBuffer4) == false)
+                    {
                         return;
+                    }
+
                     continue;
                 }
-                bool messageReceived = false;
+                var messageReceived = false;
                 if (socketv4.Available != 0 || selectReadList.Contains(socketv4))
                 {
                     if (NativeReceiveFrom(socketHandle4, addrBuffer4) == false)
+                    {
                         return;
+                    }
+
                     messageReceived = true;
                 }
                 if (socketV6.Available != 0 || selectReadList.Contains(socketV6))
                 {
                     if (NativeReceiveFrom(socketHandle6, addrBuffer6) == false)
+                    {
                         return;
+                    }
+
                     messageReceived = true;
                 }
 
                 selectReadList.Clear();
 
                 if (messageReceived)
+                {
                     continue;
+                }
 
                 selectReadList.Add(socketv4);
                 selectReadList.Add(socketV6);
@@ -168,7 +181,9 @@ public partial class LiteNetManager
             catch (SocketException ex)
             {
                 if (ProcessError(ex))
+                {
                     return;
+                }
             }
             catch (ObjectDisposedException)
             {
@@ -189,10 +204,12 @@ public partial class LiteNetManager
 
         bool NativeReceiveFrom(IntPtr s, byte[] address)
         {
-            int addrSize = address.Length;
+            var addrSize = address.Length;
             packet.Size = NativeSocket.RecvFrom(s, packet.RawData, NetConstants.MaxPacketSize, address, ref addrSize);
             if (packet.Size == 0)
+            {
                 return true; //socket closed or empty packet
+            }
 
             if (packet.Size == -1)
             {
@@ -202,11 +219,11 @@ public partial class LiteNetManager
 
             //NetDebug.WriteForce($"[R]Received data from {endPoint}, result: {packet.Size}");
             //refresh temp Addr/Port
-            short family = (short)((address[1] << 8) | address[0]);
+            var family = (short)((address[1] << 8) | address[0]);
             tempEndPoint.Port = (ushort)((address[2] << 8) | address[3]);
             if ((NativeSocket.UnixMode && family == NativeSocket.AF_INET6) || (!NativeSocket.UnixMode && (AddressFamily)family == AddressFamily.InterNetworkV6))
             {
-                uint scope = unchecked((uint)(
+                var scope = unchecked((uint)(
                     (address[27] << 24) +
                     (address[26] << 16) +
                     (address[25] << 8) +
@@ -242,7 +259,7 @@ public partial class LiteNetManager
         var packet = PoolGetPacket(NetConstants.MaxPacketSize);
 #if NET8_0_OR_GREATER
         var sockAddr = s.AddressFamily == AddressFamily.InterNetwork ? _sockAddrCacheV4 : _sockAddrCacheV6;
-        packet.Size = s.ReceiveFrom(packet, SocketFlags.None, sockAddr);
+        packet.Size = s.ReceiveFrom(new Span<byte>(packet.RawData, 0, NetConstants.MaxPacketSize), SocketFlags.None, sockAddr);
         OnMessageReceived(packet, TryGetPeer(sockAddr, out var peer) ? peer : (IPEndPoint)bufferEndPoint.Create(sockAddr));
 #else
         packet.Size = s.ReceiveFrom(packet.RawData, 0, NetConstants.MaxPacketSize, SocketFlags.None, ref bufferEndPoint);
@@ -267,12 +284,15 @@ public partial class LiteNetManager
                 if (socketV6 == null)
                 {
                     if (socketv4.Available == 0 && !socketv4.Poll(ReceivePollingTime, SelectMode.SelectRead))
+                    {
                         continue;
+                    }
+
                     ReceiveFrom(socketv4, ref bufferEndPoint4);
                 }
                 else
                 {
-                    bool messageReceived = false;
+                    var messageReceived = false;
                     if (socketv4.Available != 0 || selectReadList.Contains(socketv4))
                     {
                         ReceiveFrom(socketv4, ref bufferEndPoint4);
@@ -287,7 +307,9 @@ public partial class LiteNetManager
                     selectReadList.Clear();
 
                     if (messageReceived)
+                    {
                         continue;
+                    }
 
                     selectReadList.Add(socketv4);
                     selectReadList.Add(socketV6);
@@ -298,7 +320,9 @@ public partial class LiteNetManager
             catch (SocketException ex)
             {
                 if (ProcessError(ex))
+                {
                     return;
+                }
             }
             catch (ObjectDisposedException)
             {
@@ -328,14 +352,18 @@ public partial class LiteNetManager
     public bool Start(IPAddress addressIPv4, IPAddress addressIPv6, int port, bool manualMode)
     {
         if (IsRunning && NotConnected == false)
+        {
             return false;
+        }
 
         NotConnected = false;
         _manualMode = manualMode;
         UseNativeSockets = UseNativeSockets && NativeSocket.IsSupported;
         _udpSocketv4 = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
         if (!BindSocket(_udpSocketv4, new IPEndPoint(addressIPv4, port)))
+        {
             return false;
+        }
 
         LocalPort = ((IPEndPoint)_udpSocketv4.LocalEndPoint).Port;
 
@@ -358,7 +386,9 @@ public partial class LiteNetManager
             if (BindSocket(_udpSocketv6, new IPEndPoint(addressIPv6, LocalPort)))
             {
                 if (_manualMode)
+                {
                     _bufferEndPointv6 = new IPEndPoint(IPAddress.IPv6Any, 0);
+                }
             }
             else
             {
@@ -370,7 +400,10 @@ public partial class LiteNetManager
         {
             ThreadStart ts = ReceiveLogic;
             if (UseNativeSockets)
+            {
                 ts = NativeReceiveLogic;
+            }
+
             _receiveThread = new Thread(ts)
             {
                 Name = $"ReceiveThread({LocalPort})",
@@ -446,6 +479,7 @@ public partial class LiteNetManager
             //join multicast
             if (ep.AddressFamily == AddressFamily.InterNetworkV6)
             {
+#pragma warning disable RCS1075 // Avoid empty catch clause that catches System.Exception
                 try
                 {
 #if !UNITY_SOCKET_FIX
@@ -459,6 +493,7 @@ public partial class LiteNetManager
                 {
                     // Unity3d throws exception - ignored
                 }
+#pragma warning restore RCS1075 // Avoid empty catch clause that catches System.Exception
             }
         }
         catch (SocketException bindException)
@@ -496,7 +531,7 @@ public partial class LiteNetManager
 
     internal int SendRawAndRecycle(NetPacket packet, IPEndPoint remoteEndPoint)
     {
-        int result = SendRaw(packet.RawData, 0, packet.Size, remoteEndPoint);
+        var result = SendRaw(packet.RawData, 0, packet.Size, remoteEndPoint);
         PoolRecycle(packet);
         return result;
     }
@@ -507,7 +542,9 @@ public partial class LiteNetManager
     internal int SendRaw(byte[] message, int start, int length, IPEndPoint remoteEndPoint)
     {
         if (!_isRunning)
+        {
             return 0;
+        }
 
         NetPacket expandedPacket = null;
         if (_extraPacketLayer != null)
@@ -523,14 +560,20 @@ public partial class LiteNetManager
         if (HandleSimulateOutboundPacketLoss())
         {
             if (expandedPacket != null)
+            {
                 PoolRecycle(expandedPacket);
+            }
+
             return 0; // Simulate successful send to avoid triggering error handling
         }
 
         if (HandleSimulateOutboundLatency(message, start, length, remoteEndPoint))
         {
             if (expandedPacket != null)
+            {
                 PoolRecycle(expandedPacket);
+            }
+
             return length; // Simulate successful send
         }
 #endif
@@ -547,7 +590,9 @@ public partial class LiteNetManager
         finally
         {
             if (expandedPacket != null)
+            {
                 PoolRecycle(expandedPacket);
+            }
         }
     }
 
@@ -555,14 +600,18 @@ public partial class LiteNetManager
     internal int SendRawCore(byte[] message, int start, int length, IPEndPoint remoteEndPoint)
     {
         if (!_isRunning)
+        {
             return 0;
+        }
 
         var socket = _udpSocketv4;
         if (remoteEndPoint.AddressFamily == AddressFamily.InterNetworkV6 && IPv6Support)
         {
             socket = _udpSocketv6;
             if (socket == null)
+            {
                 return 0;
+            }
         }
 
         int result;
@@ -573,10 +622,14 @@ public partial class LiteNetManager
                 unsafe
                 {
                     fixed (byte* dataWithOffset = &message[start])
+                    {
                         result = NativeSocket.SendTo(socket.Handle, dataWithOffset, length, peer.NativeAddress, peer.NativeAddress.Length);
+                    }
                 }
                 if (result == -1)
+                {
                     throw NativeSocket.GetSocketException();
+                }
             }
             else
             {
@@ -631,7 +684,9 @@ public partial class LiteNetManager
         }
 
         if (result <= 0)
+        {
             return 0;
+        }
 
         if (EnableStatistics)
         {
@@ -651,7 +706,9 @@ public partial class LiteNetManager
     public bool SendBroadcast(byte[] data, int start, int length, int port)
     {
         if (!IsRunning)
+        {
             return false;
+        }
 
         NetPacket packet;
         if (_extraPacketLayer != null)
@@ -661,7 +718,7 @@ public partial class LiteNetManager
             packet.Property = PacketProperty.Broadcast;
             Buffer.BlockCopy(data, start, packet.RawData, headerSize, length);
             var checksumComputeStart = 0;
-            int preCrcLength = length + headerSize;
+            var preCrcLength = length + headerSize;
             IPEndPoint emptyEp = null;
             _extraPacketLayer.ProcessOutBoundPacket(ref emptyEp, ref packet.RawData, ref checksumComputeStart, ref preCrcLength);
         }
@@ -670,8 +727,8 @@ public partial class LiteNetManager
             packet = PoolGetWithData(PacketProperty.Broadcast, data, start, length);
         }
 
-        bool broadcastSuccess = false;
-        bool multicastSuccess = false;
+        var broadcastSuccess = false;
+        var multicastSuccess = false;
         try
         {
             broadcastSuccess = _udpSocketv4.SendTo(
@@ -694,7 +751,10 @@ public partial class LiteNetManager
         catch (SocketException ex)
         {
             if (ex.SocketErrorCode == SocketError.HostUnreachable)
+            {
                 return broadcastSuccess;
+            }
+
             NetDebug.WriteError($"[S][MCAST] {ex}");
             return broadcastSuccess;
         }
@@ -715,7 +775,10 @@ public partial class LiteNetManager
     {
         _isRunning = false;
         if (_receiveThread != null && _receiveThread != Thread.CurrentThread)
+        {
             _receiveThread.Join();
+        }
+
         _receiveThread = null;
         _udpSocketv4?.Close();
         _udpSocketv6?.Close();

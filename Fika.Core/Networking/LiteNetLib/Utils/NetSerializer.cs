@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Reflection;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Net;
+using System.Reflection;
 using System.Runtime.Serialization;
 
 namespace Fika.Core.Networking.LiteNetLib.Utils;
@@ -54,7 +53,7 @@ public class NetSerializer
 
         protected TProperty[] ReadArrayHelper(TClass inf, NetDataReader r)
         {
-            ushort count = r.GetUShort();
+            var count = r.GetUShort();
             var arr = GetterArr(inf);
             arr = arr == null || arr.Length != count ? new TProperty[count] : arr;
             SetterArr(inf, arr);
@@ -135,15 +134,19 @@ public class NetSerializer
         public override void ReadArray(TClass inf, NetDataReader r)
         {
             var arr = ReadArrayHelper(inf, r);
-            for (int i = 0; i < arr.Length; i++)
+            for (var i = 0; i < arr.Length; i++)
+            {
                 ElementRead(r, out arr[i]);
+            }
         }
 
         public override void WriteArray(TClass inf, NetDataWriter w)
         {
             var arr = WriteArrayHelper(inf, w);
-            for (int i = 0; i < arr.Length; i++)
+            for (var i = 0; i < arr.Length; i++)
+            {
                 ElementWrite(w, ref arr[i]);
+            }
         }
     }
 
@@ -163,40 +166,52 @@ public class NetSerializer
 
         public override void ReadList(TClass inf, NetDataReader r)
         {
-            var list = ReadListHelper(inf, r, out int len);
-            int listCount = list.Count;
-            for (int i = 0; i < len; i++)
+            var list = ReadListHelper(inf, r, out var len);
+            var listCount = list.Count;
+            for (var i = 0; i < len; i++)
             {
                 if (i < listCount)
+                {
                     list[i] = _reader(r);
+                }
                 else
+                {
                     list.Add(_reader(r));
+                }
             }
             if (len < listCount)
+            {
                 list.RemoveRange(len, listCount - len);
+            }
         }
 
         public override void WriteList(TClass inf, NetDataWriter w)
         {
-            var list = WriteListHelper(inf, w, out int len);
-            for (int i = 0; i < len; i++)
+            var list = WriteListHelper(inf, w, out var len);
+            for (var i = 0; i < len; i++)
+            {
                 _writer(w, list[i]);
+            }
         }
 
         public override void ReadArray(TClass inf, NetDataReader r)
         {
             var arr = ReadArrayHelper(inf, r);
-            int len = arr.Length;
-            for (int i = 0; i < len; i++)
+            var len = arr.Length;
+            for (var i = 0; i < len; i++)
+            {
                 arr[i] = _reader(r);
+            }
         }
 
         public override void WriteArray(TClass inf, NetDataWriter w)
         {
             var arr = WriteArrayHelper(inf, w);
-            int len = arr.Length;
-            for (int i = 0; i < len; i++)
+            var len = arr.Length;
+            for (var i = 0; i < len; i++)
+            {
                 _writer(w, arr[i]);
+            }
         }
     }
 
@@ -218,42 +233,54 @@ public class NetSerializer
 
         public override void ReadList(TClass inf, NetDataReader r)
         {
-            var list = ReadListHelper(inf, r, out int len);
-            int listCount = list.Count;
-            for (int i = 0; i < len; i++)
+            var list = ReadListHelper(inf, r, out var len);
+            var listCount = list.Count;
+            for (var i = 0; i < len; i++)
             {
                 var itm = default(TProperty);
                 itm.Deserialize(r);
-                if(i < listCount)
+                if (i < listCount)
+                {
                     list[i] = itm;
+                }
                 else
+                {
                     list.Add(itm);
+                }
             }
             if (len < listCount)
+            {
                 list.RemoveRange(len, listCount - len);
+            }
         }
 
         public override void WriteList(TClass inf, NetDataWriter w)
         {
-            var list = WriteListHelper(inf, w, out int len);
-            for (int i = 0; i < len; i++)
+            var list = WriteListHelper(inf, w, out var len);
+            for (var i = 0; i < len; i++)
+            {
                 list[i].Serialize(w);
+            }
         }
 
         public override void ReadArray(TClass inf, NetDataReader r)
         {
             var arr = ReadArrayHelper(inf, r);
-            int len = arr.Length;
-            for (int i = 0; i < len; i++)
+            var len = arr.Length;
+            for (var i = 0; i < len; i++)
+            {
                 arr[i].Deserialize(r);
+            }
         }
 
         public override void WriteArray(TClass inf, NetDataWriter w)
         {
             var arr = WriteArrayHelper(inf, w);
-            int len = arr.Length;
-            for (int i = 0; i < len; i++)
+            var len = arr.Length;
+            for (var i = 0; i < len; i++)
+            {
                 arr[i].Serialize(w);
+            }
         }
     }
 
@@ -277,9 +304,9 @@ public class NetSerializer
 
         public override void ReadList(TClass inf, NetDataReader r)
         {
-            var list = ReadListHelper(inf, r, out int len);
-            int listCount = list.Count;
-            for (int i = 0; i < len; i++)
+            var list = ReadListHelper(inf, r, out var len);
+            var listCount = list.Count;
+            for (var i = 0; i < len; i++)
             {
                 if (i < listCount)
                 {
@@ -293,21 +320,25 @@ public class NetSerializer
                 }
             }
             if (len < listCount)
+            {
                 list.RemoveRange(len, listCount - len);
+            }
         }
 
         public override void WriteList(TClass inf, NetDataWriter w)
         {
-            var list = WriteListHelper(inf, w, out int len);
-            for (int i = 0; i < len; i++)
+            var list = WriteListHelper(inf, w, out var len);
+            for (var i = 0; i < len; i++)
+            {
                 list[i].Serialize(w);
+            }
         }
 
         public override void ReadArray(TClass inf, NetDataReader r)
         {
             var arr = ReadArrayHelper(inf, r);
-            int len = arr.Length;
-            for (int i = 0; i < len; i++)
+            var len = arr.Length;
+            for (var i = 0; i < len; i++)
             {
                 arr[i] = _constructor();
                 arr[i].Deserialize(r);
@@ -317,9 +348,11 @@ public class NetSerializer
         public override void WriteArray(TClass inf, NetDataWriter w)
         {
             var arr = WriteArrayHelper(inf, w);
-            int len = arr.Length;
-            for (int i = 0; i < len; i++)
+            var len = arr.Length;
+            for (var i = 0; i < len; i++)
+            {
                 arr[i].Serialize(w);
+            }
         }
     }
 
@@ -477,29 +510,41 @@ public class NetSerializer
 
         public void Write(T obj, NetDataWriter writer)
         {
-            for (int i = 0; i < _membersCount; i++)
+            for (var i = 0; i < _membersCount; i++)
             {
                 var s = _serializers[i];
                 if (s.Type == CallType.Basic)
+                {
                     s.Write(obj, writer);
+                }
                 else if (s.Type == CallType.Array)
+                {
                     s.WriteArray(obj, writer);
+                }
                 else
+                {
                     s.WriteList(obj, writer);
+                }
             }
         }
 
         public void Read(T obj, NetDataReader reader)
         {
-            for (int i = 0; i < _membersCount; i++)
+            for (var i = 0; i < _membersCount; i++)
             {
                 var s = _serializers[i];
                 if (s.Type == CallType.Basic)
+                {
                     s.Read(obj, reader);
-                else if(s.Type == CallType.Array)
+                }
+                else if (s.Type == CallType.Array)
+                {
                     s.ReadArray(obj, reader);
+                }
                 else
+                {
                     s.ReadList(obj, reader);
+                }
             }
         }
     }
@@ -582,7 +627,9 @@ public class NetSerializer
         T>()
     {
         if (ClassInfo<T>.Instance != null)
+        {
             return ClassInfo<T>.Instance;
+        }
 
         var props = typeof(T).GetProperties(
             BindingFlags.Instance |
@@ -590,7 +637,7 @@ public class NetSerializer
             BindingFlags.GetProperty |
             BindingFlags.SetProperty);
         var serializers = new List<FastCall<T>>();
-        for (int i = 0; i < props.Length; i++)
+        for (var i = 0; i < props.Length; i++)
         {
             var property = props[i];
             var propertyType = property.PropertyType;
@@ -605,59 +652,101 @@ public class NetSerializer
             }
 
             if (Attribute.IsDefined(property, typeof(IgnoreDataMemberAttribute)))
+            {
                 continue;
+            }
 
             var getMethod = property.GetGetMethod();
             var setMethod = property.GetSetMethod();
             if (getMethod == null || setMethod == null)
+            {
                 continue;
+            }
 
             FastCall<T> serialzer = null;
             if (propertyType.IsEnum)
             {
                 var underlyingType = Enum.GetUnderlyingType(propertyType);
                 if (underlyingType == typeof(byte))
+                {
                     serialzer = new EnumByteSerializer<T>(property, propertyType);
+                }
                 else if (underlyingType == typeof(int))
+                {
                     serialzer = new EnumIntSerializer<T>(property, propertyType);
+                }
                 else
+                {
                     throw new InvalidTypeException("Not supported enum underlying type: " + underlyingType.Name);
+                }
             }
             else if (elementType == typeof(string))
+            {
                 serialzer = new StringSerializer<T>(_maxStringLength);
+            }
             else if (elementType == typeof(bool))
+            {
                 serialzer = new BoolSerializer<T>();
+            }
             else if (elementType == typeof(byte))
+            {
                 serialzer = new ByteSerializer<T>();
+            }
             else if (elementType == typeof(sbyte))
+            {
                 serialzer = new SByteSerializer<T>();
+            }
             else if (elementType == typeof(short))
+            {
                 serialzer = new ShortSerializer<T>();
+            }
             else if (elementType == typeof(ushort))
+            {
                 serialzer = new UShortSerializer<T>();
+            }
             else if (elementType == typeof(int))
+            {
                 serialzer = new IntSerializer<T>();
+            }
             else if (elementType == typeof(uint))
+            {
                 serialzer = new UIntSerializer<T>();
+            }
             else if (elementType == typeof(long))
+            {
                 serialzer = new LongSerializer<T>();
+            }
             else if (elementType == typeof(ulong))
+            {
                 serialzer = new ULongSerializer<T>();
+            }
             else if (elementType == typeof(float))
+            {
                 serialzer = new FloatSerializer<T>();
+            }
             else if (elementType == typeof(double))
+            {
                 serialzer = new DoubleSerializer<T>();
+            }
             else if (elementType == typeof(char))
+            {
                 serialzer = new CharSerializer<T>();
+            }
             else if (elementType == typeof(IPEndPoint))
+            {
                 serialzer = new IPEndPointSerializer<T>();
+            }
             else if (elementType == typeof(Guid))
+            {
                 serialzer = new GuidSerializer<T>();
+            }
             else
             {
                 _registeredTypes.TryGetValue(elementType, out var customType);
                 if (customType != null)
+                {
                     serialzer = customType.Get<T>();
+                }
             }
 
             if (serialzer != null)
@@ -761,7 +850,10 @@ public class NetSerializer
     T>(T obj) where T : class, new()
     {
         if (_writer == null)
+        {
             _writer = new NetDataWriter();
+        }
+
         _writer.Reset();
         Serialize(_writer, obj);
         return _writer.CopyData();

@@ -74,7 +74,7 @@ public class NetManager : LiteNetManager
 
             var copiedData = new byte[packet.Size];
             Buffer.BlockCopy(packet.RawData, 0, copiedData, 0, packet.Size);
-            NtpPacket ntpPacket = NtpPacket.FromServerResponse(copiedData, DateTime.UtcNow);
+            var ntpPacket = NtpPacket.FromServerResponse(copiedData, DateTime.UtcNow);
             try
             {
                 ntpPacket.ValidateReply();
