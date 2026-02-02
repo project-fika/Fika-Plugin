@@ -1,6 +1,6 @@
-﻿using EFT.Achievements;
+﻿using System.Reflection;
+using EFT.Achievements;
 using SPT.Reflection.Patching;
-using System.Reflection;
 using TMPro;
 
 namespace Fika.Core.UI.Patches;

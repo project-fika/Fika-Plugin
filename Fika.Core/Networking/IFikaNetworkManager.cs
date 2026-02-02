@@ -1,12 +1,12 @@
-﻿using EFT;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using EFT;
 using Fika.Core.Main.Components;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Player;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Fika.Core.Networking;
 

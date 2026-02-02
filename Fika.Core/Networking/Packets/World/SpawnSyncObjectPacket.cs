@@ -1,5 +1,5 @@
-﻿using EFT.SynchronizableObjects;
-using System;
+﻿using System;
+using EFT.SynchronizableObjects;
 using static Fika.Core.Networking.Packets.World.SpawnSyncObjectSubPackets;
 
 namespace Fika.Core.Networking.Packets.World;

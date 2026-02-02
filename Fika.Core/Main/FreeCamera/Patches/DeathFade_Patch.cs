@@ -1,6 +1,5 @@
-﻿using SPT.Reflection.Patching;
-using System;
-using System.Reflection;
+﻿using System.Reflection;
+using SPT.Reflection.Patching;
 
 namespace Fika.Core.Main.FreeCamera.Patches;
 
@@ -15,11 +14,11 @@ public class DeathFade_Patch : ModulePatch
     [PatchPrefix]
     private static bool Prefix(DeathFade __instance)
     {
-        Type deathFadeType = typeof(DeathFade);
+        var deathFadeType = typeof(DeathFade);
 
         deathFadeType.GetField("_float_0", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(__instance, (float)deathFadeType.GetField("_disableTime", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(__instance));
         deathFadeType.GetField("bool_0", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(__instance, false);
-        AnimationCurve disableCurveValue = (AnimationCurve)deathFadeType.GetField("_disableCurve", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(__instance);
+        var disableCurveValue = (AnimationCurve)deathFadeType.GetField("_disableCurve", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(__instance);
         deathFadeType.GetField("animationCurve_0", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(__instance, disableCurveValue);
         return false;
     }

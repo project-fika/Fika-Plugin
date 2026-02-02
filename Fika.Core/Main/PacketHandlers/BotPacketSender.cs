@@ -1,11 +1,11 @@
 ﻿// © 2026 Lacyway All Rights Reserved
 
+using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Player;
-using System.Threading.Tasks;
 
 namespace Fika.Core.Main.PacketHandlers;
 

@@ -15,7 +15,7 @@ public class FikaClientKnifeController : EFT.Player.KnifeController
 
     public static FikaClientKnifeController Create(FikaPlayer player, KnifeComponent item)
     {
-        FikaClientKnifeController controller = smethod_9<FikaClientKnifeController>(player, item);
+        var controller = smethod_9<FikaClientKnifeController>(player, item);
         controller._fikaPlayer = player;
         controller._packet = new()
         {
@@ -57,7 +57,7 @@ public class FikaClientKnifeController : EFT.Player.KnifeController
 
     public override bool MakeKnifeKick()
     {
-        bool knifeKick = base.MakeKnifeKick();
+        var knifeKick = base.MakeKnifeKick();
 
         if (knifeKick)
         {
@@ -71,7 +71,7 @@ public class FikaClientKnifeController : EFT.Player.KnifeController
 
     public override bool MakeAlternativeKick()
     {
-        bool alternateKnifeKick = base.MakeAlternativeKick();
+        var alternateKnifeKick = base.MakeAlternativeKick();
 
         if (alternateKnifeKick)
         {

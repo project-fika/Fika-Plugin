@@ -1,5 +1,4 @@
-﻿using System;
-using Comfort.Common;
+﻿using Comfort.Common;
 using EFT;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
@@ -68,7 +67,7 @@ public class HostRunddansController(BackendConfigSettingsClass.GClass1748 settin
         }
 
 #if DEBUG
-        FikaGlobals.LogInfo($"Player {player.Profile.Info.MainProfileNickname} interacted with object"); 
+        FikaGlobals.LogInfo($"Player {player.Profile.Info.MainProfileNickname} interacted with object");
 #endif
         if (Singleton<GameWorld>.Instance.TransitController is not FikaHostTransitController transitController)
         {
@@ -82,7 +81,7 @@ public class HostRunddansController(BackendConfigSettingsClass.GClass1748 settin
         }
         var interaction = packet.interaction;
 #if DEBUG
-        FikaGlobals.LogWarning($"Current interaction: {interaction}"); 
+        FikaGlobals.LogWarning($"Current interaction: {interaction}");
 #endif
         if (interaction != EventObject.EInteraction.Run)
         {

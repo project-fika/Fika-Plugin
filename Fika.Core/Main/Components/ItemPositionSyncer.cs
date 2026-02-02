@@ -23,7 +23,7 @@ public class ItemPositionSyncer : MonoBehaviour
 
     public static void Create(GameObject gameObject, bool isServer, ObservedLootItem lootItem)
     {
-        ItemPositionSyncer posSync = gameObject.AddComponent<ItemPositionSyncer>();
+        var posSync = gameObject.AddComponent<ItemPositionSyncer>();
         posSync._isServer = isServer;
         if (isServer)
         {

@@ -1,5 +1,4 @@
 ﻿using Comfort.Common;
-using Fika.Core.Main.Components;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Pooling;
@@ -19,7 +18,7 @@ public sealed class ClearEffects : IPoolSubPacket
 
     public static ClearEffects FromValue(int netId)
     {
-        ClearEffects packet = GenericSubPacketPoolManager.Instance.GetPacket<ClearEffects>(EGenericSubPacketType.ClearEffects);
+        var packet = GenericSubPacketPoolManager.Instance.GetPacket<ClearEffects>(EGenericSubPacketType.ClearEffects);
         packet.NetId = netId;
         return packet;
     }
@@ -31,14 +30,14 @@ public sealed class ClearEffects : IPoolSubPacket
             return;
         }
 
-        CoopHandler coopHandler = Singleton<IFikaNetworkManager>.Instance.CoopHandler;
+        var coopHandler = Singleton<IFikaNetworkManager>.Instance.CoopHandler;
         if (coopHandler == null)
         {
             FikaGlobals.LogError("ClientExtract: CoopHandler was null!");
             return;
         }
 
-        if (coopHandler.Players.TryGetValue(NetId, out FikaPlayer playerToApply))
+        if (coopHandler.Players.TryGetValue(NetId, out var playerToApply))
         {
             if (playerToApply is ObservedPlayer observedPlayer)
             {

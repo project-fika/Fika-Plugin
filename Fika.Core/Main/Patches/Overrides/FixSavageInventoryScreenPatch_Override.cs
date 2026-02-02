@@ -1,11 +1,11 @@
-﻿using EFT;
+﻿using System.Linq;
+using System.Reflection;
+using EFT;
 using Fika.Core.Main.GameMode;
 using Fika.Core.Main.Utils;
 using HarmonyLib;
 using SPT.Common.Http;
 using SPT.Reflection.Patching;
-using System.Linq;
-using System.Reflection;
 
 namespace Fika.Core.Main.Patches.Overrides;
 
@@ -45,7 +45,7 @@ public class FixSavageInventoryScreenPatch_Override : ModulePatch
             return;
         }
 
-        ProfileEndpointFactoryAbstractClass session = (ProfileEndpointFactoryAbstractClass)___ISession;
+        var session = (ProfileEndpointFactoryAbstractClass)___ISession;
         session.AllProfiles =
         [
             session.AllProfiles.First(x => x.Side != EPlayerSide.Savage),

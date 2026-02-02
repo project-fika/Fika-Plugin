@@ -12,7 +12,7 @@ public class FikaClientPortableRangeFinderController : PortableRangeFinderContro
 
     public static FikaClientPortableRangeFinderController Create(FikaPlayer player, Item item)
     {
-        FikaClientPortableRangeFinderController controller = smethod_6<FikaClientPortableRangeFinderController>(player, item);
+        var controller = smethod_6<FikaClientPortableRangeFinderController>(player, item);
         controller._fikaPlayer = player;
         return controller;
     }
@@ -27,7 +27,7 @@ public class FikaClientPortableRangeFinderController : PortableRangeFinderContro
 
     public override bool ExamineWeapon()
     {
-        bool flag = base.ExamineWeapon();
+        var flag = base.ExamineWeapon();
         if (flag)
         {
             _fikaPlayer.CommonPacket.Type = ECommonSubPacketType.UsableItem;
@@ -39,7 +39,7 @@ public class FikaClientPortableRangeFinderController : PortableRangeFinderContro
 
     public override void SetAim(bool value)
     {
-        bool isAiming = IsAiming;
+        var isAiming = IsAiming;
         base.SetAim(value);
 
         if (IsAiming != isAiming)

@@ -1,8 +1,8 @@
-﻿using EFT;
+﻿using System.Reflection;
+using System.Threading.Tasks;
+using EFT;
 using Fika.Core.Main.Utils;
 using SPT.Reflection.Patching;
-using System.Reflection;
-using System.Threading.Tasks;
 
 namespace Fika.Core.Main.Patches.BTR;
 

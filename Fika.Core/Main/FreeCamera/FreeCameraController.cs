@@ -427,7 +427,7 @@ public class FreeCameraController : MonoBehaviour
                 var fikaPlayer = alivePlayers[0];
                 _freeCamScript.SetCurrentPlayer(fikaPlayer);
 #if DEBUG
-                FikaGlobals.LogInfo("FreecamController: Spectating new player: " + fikaPlayer.Profile.Info.MainProfileNickname); 
+                FikaGlobals.LogInfo("FreecamController: Spectating new player: " + fikaPlayer.Profile.Info.MainProfileNickname);
 #endif
 
                 Player.PointOfView = EPointOfView.ThirdPerson;

@@ -9,7 +9,7 @@ public struct AirdropUpdatePacket : INetSerializable
 
     public void Deserialize(NetDataReader reader)
     {
-        ref AirplaneDataPacketStruct data = ref Data;
+        ref var data = ref Data;
         data.ObjectId = reader.GetInt();
         data.Position = reader.GetUnmanaged<Vector3>();
         data.Rotation = reader.GetUnmanaged<Vector3>();
@@ -17,7 +17,7 @@ public struct AirdropUpdatePacket : INetSerializable
 
         if (data.ObjectType == SynchronizableObjectType.AirDrop)
         {
-            ref AirdropDataPacketStruct airdrop = ref data.PacketData.AirdropDataPacket;
+            ref var airdrop = ref data.PacketData.AirdropDataPacket;
             airdrop.SignalFire = reader.GetBool();
             airdrop.FallingStage = (EAirdropFallingStage)reader.GetByte();
             airdrop.AirdropType = (EAirdropType)reader.GetByte();
@@ -28,7 +28,7 @@ public struct AirdropUpdatePacket : INetSerializable
             data.PacketData.AirplaneDataPacket.AirplanePercent = reader.GetInt();
         }
 
-        byte flags = reader.GetByte();
+        var flags = reader.GetByte();
         data.Outdated = (flags & 1 << 0) != 0;
         data.IsStatic = (flags & 1 << 1) != 0;
     }
@@ -42,7 +42,7 @@ public struct AirdropUpdatePacket : INetSerializable
 
         if (Data.ObjectType == SynchronizableObjectType.AirDrop)
         {
-            AirdropDataPacketStruct airdrop = Data.PacketData.AirdropDataPacket;
+            var airdrop = Data.PacketData.AirdropDataPacket;
             writer.Put(airdrop.SignalFire);
             writer.Put((byte)airdrop.FallingStage);
             writer.Put((byte)airdrop.AirdropType);

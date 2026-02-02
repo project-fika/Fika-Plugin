@@ -1,7 +1,7 @@
-﻿using EFT;
+﻿using System;
+using EFT;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Pooling;
-using System;
 
 namespace Fika.Core.Networking.Packets.Generic.SubPackets;
 
@@ -16,7 +16,7 @@ public sealed class OperationCallbackPacket : IPoolSubPacket
 
     public static OperationCallbackPacket FromValue(int netId, ushort callbackId, EOperationStatus status, string error = null)
     {
-        OperationCallbackPacket packet = GenericSubPacketPoolManager.Instance.GetPacket<OperationCallbackPacket>(EGenericSubPacketType.OperationCallback);
+        var packet = GenericSubPacketPoolManager.Instance.GetPacket<OperationCallbackPacket>(EGenericSubPacketType.OperationCallback);
         packet.NetId = netId;
         packet.CallbackId = callbackId;
         packet.Status = status;

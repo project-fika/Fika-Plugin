@@ -1,4 +1,5 @@
-﻿using Comfort.Common;
+﻿using System.Collections.Generic;
+using Comfort.Common;
 using EFT;
 using EFT.Communications;
 using EFT.UI;
@@ -6,7 +7,6 @@ using Fika.Core.Bundles;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.UI;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine.UI;
 using Object = System.Object;

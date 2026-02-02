@@ -19,7 +19,7 @@ public sealed class VaultPacket : IPoolSubPacket
 
     public static VaultPacket FromValue(EVaultingStrategy vaultingStrategy, Vector3 vaultingPoint, float vaultingHeight, float vaultingLength, float vaultingSpeed, float behindObstacleHeight, float absoluteForwardVelocity)
     {
-        VaultPacket packet = CommonSubPacketPoolManager.Instance.GetPacket<VaultPacket>(ECommonSubPacketType.Vault);
+        var packet = CommonSubPacketPoolManager.Instance.GetPacket<VaultPacket>(ECommonSubPacketType.Vault);
         packet.VaultingStrategy = vaultingStrategy;
         packet.VaultingPoint = vaultingPoint;
         packet.VaultingHeight = vaultingHeight;

@@ -1,4 +1,5 @@
-﻿using Comfort.Common;
+﻿using System.Collections.Generic;
+using Comfort.Common;
 using EFT;
 using EFT.Communications;
 using EFT.GlobalEvents;
@@ -9,7 +10,6 @@ using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Communication;
-using System.Collections.Generic;
 
 namespace Fika.Core.Main.HostClasses;
 
@@ -54,7 +54,7 @@ public class FikaHostTransitController : LocalGameTransitControllerClass
 
     private void OnHostPlayerEnter(TransitPoint point, Player player)
     {
-        if (!method_11(player, point.parameters.id, out string _))
+        if (!method_11(player, point.parameters.id, out var _))
         {
             if (player.IsYourPlayer)
             {
@@ -64,7 +64,7 @@ public class FikaHostTransitController : LocalGameTransitControllerClass
         }
         else
         {
-            if (!method_11(player, point.parameters.id, out string _))
+            if (!method_11(player, point.parameters.id, out var _))
             {
                 return;
             }
@@ -108,7 +108,7 @@ public class FikaHostTransitController : LocalGameTransitControllerClass
 
     private void OnHostPlayerExit(TransitPoint point, Player player)
     {
-        if (_playersInTransitZone.TryGetValue(player, out int value))
+        if (_playersInTransitZone.TryGetValue(player, out var value))
         {
             if (value == point.parameters.id)
             {
@@ -143,13 +143,13 @@ public class FikaHostTransitController : LocalGameTransitControllerClass
     public override void Sizes(Dictionary<int, byte> sizes)
     {
 #if DEBUG
-        foreach (KeyValuePair<int, byte> item in sizes)
+        foreach (var item in sizes)
         {
             FikaGlobals.LogWarning($"int: {item.Key}, byte: {item.Value}");
         }
 #endif
 
-        foreach (KeyValuePair<int, byte> size in sizes)
+        foreach (var size in sizes)
         {
             if (GamePlayerOwner.MyPlayer.Id == size.Key)
             {
@@ -173,13 +173,13 @@ public class FikaHostTransitController : LocalGameTransitControllerClass
     public override void Timers(int pointId, Dictionary<int, ushort> timers)
     {
 #if DEBUG
-        foreach (KeyValuePair<int, ushort> item in timers)
+        foreach (var item in timers)
         {
             FikaGlobals.LogWarning($"int: {item.Key}, ushort: {item.Value}");
         }
 #endif
 
-        foreach (KeyValuePair<int, ushort> timer in timers)
+        foreach (var timer in timers)
         {
             if (GamePlayerOwner.MyPlayer.Id == timer.Key)
             {
@@ -227,7 +227,7 @@ public class FikaHostTransitController : LocalGameTransitControllerClass
 
     public override void InteractWithTransit(Player player, TransitInteractionPacketStruct packet)
     {
-        TransitPoint point = Dictionary_0[packet.pointId];
+        var point = Dictionary_0[packet.pointId];
         if (point == null)
         {
             return;
@@ -259,8 +259,8 @@ public class FikaHostTransitController : LocalGameTransitControllerClass
 
     private bool CheckForPlayers(Player player, int pointId)
     {
-        int humanPlayers = 0;
-        foreach (FikaPlayer fikaPlayer in Singleton<IFikaNetworkManager>.Instance.CoopHandler.HumanPlayers)
+        var humanPlayers = 0;
+        foreach (var fikaPlayer in Singleton<IFikaNetworkManager>.Instance.CoopHandler.HumanPlayers)
         {
             if (fikaPlayer.HealthController.IsAlive)
             {
@@ -273,8 +273,8 @@ public class FikaHostTransitController : LocalGameTransitControllerClass
             }
         }
 
-        int playersInPoint = 0;
-        foreach (KeyValuePair<Player, int> item in _playersInTransitZone)
+        var playersInPoint = 0;
+        foreach (var item in _playersInTransitZone)
         {
             if (item.Key.HealthController.IsAlive)
             {
@@ -316,14 +316,14 @@ public class FikaHostTransitController : LocalGameTransitControllerClass
     {
         if (player.IsYourPlayer)
         {
-            string location = point.parameters.location;
-            ERaidMode eraidMode = ERaidMode.Local;
-            if (TarkovApplication.Exist(out TarkovApplication tarkovApplication))
+            var location = point.parameters.location;
+            var eraidMode = ERaidMode.Local;
+            if (TarkovApplication.Exist(out var tarkovApplication))
             {
                 eraidMode = ERaidMode.Local;
                 tarkovApplication.transitionStatus = new(location, false, _localRaidSettings.playerSide, eraidMode, _localRaidSettings.timeVariant);
             }
-            string profileId = player.ProfileId;
+            var profileId = player.ProfileId;
             AlreadyTransitDataClass gclass = new()
             {
                 hash = hash,
@@ -338,7 +338,7 @@ public class FikaHostTransitController : LocalGameTransitControllerClass
             };
             alreadyTransits.Add(profileId, gclass);
 
-            IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
+            var fikaGame = Singleton<IFikaGame>.Instance;
             if (fikaGame is not CoopGame coopGame)
             {
                 FikaGlobals.LogError("FikaGame was not a CoopGame!");

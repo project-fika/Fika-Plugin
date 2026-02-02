@@ -1,6 +1,5 @@
 ﻿using Comfort.Common;
 using EFT.AssetsManager;
-using Fika.Core.Main.Components;
 using Fika.Core.Main.GameMode;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
@@ -22,28 +21,28 @@ public sealed class ClientExtract : IPoolSubPacket
 
     public static ClientExtract FromValue(int netId)
     {
-        ClientExtract packet = GenericSubPacketPoolManager.Instance.GetPacket<ClientExtract>(EGenericSubPacketType.ClientExtract);
+        var packet = GenericSubPacketPoolManager.Instance.GetPacket<ClientExtract>(EGenericSubPacketType.ClientExtract);
         packet.NetId = netId;
         return packet;
     }
 
     public void Execute(FikaPlayer player = null)
     {
-        CoopHandler coopHandler = Singleton<IFikaNetworkManager>.Instance.CoopHandler;
+        var coopHandler = Singleton<IFikaNetworkManager>.Instance.CoopHandler;
         if (coopHandler == null)
         {
             FikaGlobals.LogWarning("ClientExtract: CoopHandler was null! This is probably harmless.");
             return;
         }
 
-        if (coopHandler.Players.TryGetValue(NetId, out FikaPlayer playerToApply))
+        if (coopHandler.Players.TryGetValue(NetId, out var playerToApply))
         {
             coopHandler.Players.Remove(NetId);
             coopHandler.HumanPlayers.Remove(playerToApply);
             if (!coopHandler.ExtractedPlayers.Contains(NetId))
             {
                 coopHandler.ExtractedPlayers.Add(NetId);
-                IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
+                var fikaGame = Singleton<IFikaGame>.Instance;
                 if (fikaGame != null)
                 {
                     fikaGame.ExtractedPlayers.Add(NetId);
@@ -54,7 +53,7 @@ public sealed class ClientExtract : IPoolSubPacket
 
                     if (FikaPlugin.Instance.Settings.ShowNotifications.Value)
                     {
-                        string nickname = !string.IsNullOrEmpty(playerToApply.Profile.Info.MainProfileNickname) ? playerToApply.Profile.Info.MainProfileNickname : playerToApply.Profile.Nickname;
+                        var nickname = !string.IsNullOrEmpty(playerToApply.Profile.Info.MainProfileNickname) ? playerToApply.Profile.Info.MainProfileNickname : playerToApply.Profile.Nickname;
                         NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.GROUP_MEMBER_EXTRACTED.Localized(),
                             ColorizeText(EColor.GREEN, nickname)),
                         EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);

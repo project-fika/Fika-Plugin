@@ -1,7 +1,7 @@
-﻿using EFT;
+﻿using System.Reflection;
+using EFT;
 using Fika.Core.Main.Utils;
 using SPT.Reflection.Patching;
-using System.Reflection;
 
 namespace Fika.Core.Main.Patches.LocalGame;
 
@@ -12,7 +12,7 @@ internal class WaveSpawnScenario_Patch : ModulePatch
     [PatchPrefix]
     public static bool PatchPrefix(WavesSpawnScenario __instance)
     {
-        bool result = FikaBackendUtils.IsServer;
+        var result = FikaBackendUtils.IsServer;
         typeof(WavesSpawnScenario).GetProperty(nameof(WavesSpawnScenario.Enabled)).SetValue(__instance, result);
         return result;
     }

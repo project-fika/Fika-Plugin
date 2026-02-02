@@ -18,7 +18,7 @@ public sealed class ProceedPacket : IPoolSubPacket
 
     public static ProceedPacket FromValue(GStruct382<EBodyPart> bodyParts, MongoID itemId, float amount, int animationVariant, EProceedType proceedType, bool scheduled)
     {
-        ProceedPacket packet = CommonSubPacketPoolManager.Instance.GetPacket<ProceedPacket>(ECommonSubPacketType.Proceed);
+        var packet = CommonSubPacketPoolManager.Instance.GetPacket<ProceedPacket>(ECommonSubPacketType.Proceed);
         packet.BodyParts = bodyParts;
         packet.ItemId = itemId;
         packet.Amount = amount;
@@ -60,9 +60,9 @@ public sealed class ProceedPacket : IPoolSubPacket
             writer.Put(AnimationVariant);
             if (ProceedType is EProceedType.MedsClass)
             {
-                int bodyPartsAmount = BodyParts.Length;
+                var bodyPartsAmount = BodyParts.Length;
                 writer.Put(bodyPartsAmount);
-                for (int i = 0; i < bodyPartsAmount; i++)
+                for (var i = 0; i < bodyPartsAmount; i++)
                 {
                     writer.PutEnum(BodyParts[i]);
                 }
@@ -87,8 +87,8 @@ public sealed class ProceedPacket : IPoolSubPacket
             AnimationVariant = reader.GetInt();
             if (ProceedType is EProceedType.MedsClass)
             {
-                int bodyPartsAmount = reader.GetInt();
-                for (int i = 0; i < bodyPartsAmount; i++)
+                var bodyPartsAmount = reader.GetInt();
+                for (var i = 0; i < bodyPartsAmount; i++)
                 {
                     BodyParts.Add(reader.GetEnum<EBodyPart>());
                 }

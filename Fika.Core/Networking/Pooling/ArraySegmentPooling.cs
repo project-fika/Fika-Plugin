@@ -62,7 +62,7 @@ internal static class ArraySegmentPooling
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ArraySegment<byte> Get(ReadOnlySpan<byte> source)
     {
-        byte[] array = ArrayPool<byte>.Shared.Rent(source.Length);
+        var array = ArrayPool<byte>.Shared.Rent(source.Length);
         source.CopyTo(array);
         return new(array, 0, source.Length);
     }
@@ -79,7 +79,7 @@ internal static class ArraySegmentPooling
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ArraySegment<byte> Get(byte[] buffer, int bufferOffset, int bufferCount)
     {
-        byte[] array = ArrayPool<byte>.Shared.Rent(bufferCount);
+        var array = ArrayPool<byte>.Shared.Rent(bufferCount);
         Buffer.BlockCopy(buffer, bufferOffset, array, 0, bufferCount);
         return new(array, 0, bufferCount);
     }

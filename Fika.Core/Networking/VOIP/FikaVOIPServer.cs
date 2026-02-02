@@ -1,8 +1,8 @@
-﻿using Dissonance.Networking;
+﻿using System;
+using System.Collections.Generic;
+using Dissonance.Networking;
 using Dissonance.Networking.Server;
 using Fika.Core.Main.Utils;
-using System;
-using System.Collections.Generic;
 
 namespace Fika.Core.Networking.VOIP;
 
@@ -27,11 +27,11 @@ public class FikaVOIPServer(FikaCommsNetwork commsNetwork) : BaseServer<FikaVOIP
 
     public override ServerState Update()
     {
-        for (int i = _peers.Count - 1; i >= 0; i--)
+        for (var i = _peers.Count - 1; i >= 0; i--)
         {
             if (_peers[i].ConnectionState != ConnectionState.Connected)
             {
-                NetPeer peer = _peers[i];
+                var peer = _peers[i];
                 FikaGlobals.LogInfo($"FikaVOIPServer::Update: Peer {peer} disconnected from VOIP service");
                 ClientDisconnected(new(new RemotePeer(peer)));
                 _peers.RemoveAt(i);
@@ -74,7 +74,7 @@ public class FikaVOIPServer(FikaCommsNetwork commsNetwork) : BaseServer<FikaVOIP
             throw new ArgumentNullException("connections");
         }
 
-        for (int i = 0; i < connections.Count; i++)
+        for (var i = 0; i < connections.Count; i++)
         {
             SendReliable(connections[i], packet);
         }
@@ -87,7 +87,7 @@ public class FikaVOIPServer(FikaCommsNetwork commsNetwork) : BaseServer<FikaVOIP
             throw new ArgumentNullException(nameof(connections));
         }
 
-        for (int i = 0; i < connections.Count; i++)
+        for (var i = 0; i < connections.Count; i++)
         {
             SendUnreliable(connections[i], packet);
         }

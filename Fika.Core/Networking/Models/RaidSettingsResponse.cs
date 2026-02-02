@@ -1,5 +1,5 @@
-using EFT;
 using System.Runtime.Serialization;
+using EFT;
 
 namespace Fika.Core.Networking.Models;
 

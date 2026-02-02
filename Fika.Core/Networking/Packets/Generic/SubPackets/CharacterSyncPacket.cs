@@ -1,8 +1,8 @@
-﻿using Comfort.Common;
+﻿using System.Collections.Generic;
+using Comfort.Common;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Pooling;
-using System.Collections.Generic;
 
 namespace Fika.Core.Networking.Packets.Generic.SubPackets;
 
@@ -20,8 +20,8 @@ public sealed class CharacterSyncPacket : IPoolSubPacket
 
     public static CharacterSyncPacket FromValue(Dictionary<int, FikaPlayer> players)
     {
-        CharacterSyncPacket packet = GenericSubPacketPoolManager.Instance.GetPacket<CharacterSyncPacket>(EGenericSubPacketType.CharacterSync);
-        foreach ((int netid, _) in players)
+        var packet = GenericSubPacketPoolManager.Instance.GetPacket<CharacterSyncPacket>(EGenericSubPacketType.CharacterSync);
+        foreach ((var netid, _) in players)
         {
             packet.PlayerIds.Add(netid);
         }
@@ -32,10 +32,10 @@ public sealed class CharacterSyncPacket : IPoolSubPacket
 
     public void Deserialize(NetDataReader reader)
     {
-        ushort amount = reader.GetUShort();
+        var amount = reader.GetUShort();
         if (amount > 0)
         {
-            for (int i = 0; i < amount; i++)
+            for (var i = 0; i < amount; i++)
             {
                 PlayerIds.Add(reader.GetInt());
             }
@@ -45,7 +45,7 @@ public sealed class CharacterSyncPacket : IPoolSubPacket
     public void Serialize(NetDataWriter writer)
     {
         writer.Put((ushort)PlayerIds.Count);
-        foreach (int netId in PlayerIds)
+        foreach (var netId in PlayerIds)
         {
             writer.Put(netId);
         }

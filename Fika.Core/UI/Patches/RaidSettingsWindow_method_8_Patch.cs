@@ -1,8 +1,8 @@
-﻿using EFT.UI;
+﻿using System.Collections.Generic;
+using System.Reflection;
+using EFT.UI;
 using EFT.UI.Matchmaker;
 using SPT.Reflection.Patching;
-using System.Collections.Generic;
-using System.Reflection;
 
 namespace Fika.Core.UI.Patches;
 
@@ -20,8 +20,8 @@ public class RaidSettingsWindow_method_8_Patch : ModulePatch
     [PatchPrefix]
     public static bool Prefix(CanvasGroup ____aiDifficultyCanvasGroup, CanvasGroup ____aiAmountCanvasGroup, DropDownBox ____aiAmountDropdown, List<CanvasGroup> ____wavesCanvasGroups)
     {
-        bool hasAi = ____aiAmountDropdown.CurrentIndex != 1;
-        foreach (CanvasGroup canvasGroup in ____wavesCanvasGroups)
+        var hasAi = ____aiAmountDropdown.CurrentIndex != 1;
+        foreach (var canvasGroup in ____wavesCanvasGroups)
         {
             canvasGroup.interactable = hasAi;
             canvasGroup.blocksRaycasts = hasAi;

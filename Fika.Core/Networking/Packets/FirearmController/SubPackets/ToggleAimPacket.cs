@@ -13,7 +13,7 @@ public sealed class ToggleAimPacket : IPoolSubPacket
 
     public static ToggleAimPacket FromValue(int aimingIndex)
     {
-        ToggleAimPacket packet = FirearmSubPacketPoolManager.Instance.GetPacket<ToggleAimPacket>(EFirearmSubPacketType.ToggleAim);
+        var packet = FirearmSubPacketPoolManager.Instance.GetPacket<ToggleAimPacket>(EFirearmSubPacketType.ToggleAim);
         packet.AimingIndex = aimingIndex;
         return packet;
     }

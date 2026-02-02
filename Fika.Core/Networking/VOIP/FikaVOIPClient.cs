@@ -1,6 +1,6 @@
-﻿using Comfort.Common;
+﻿using System;
+using Comfort.Common;
 using Dissonance.Networking;
-using System;
 
 namespace Fika.Core.Networking.VOIP;
 

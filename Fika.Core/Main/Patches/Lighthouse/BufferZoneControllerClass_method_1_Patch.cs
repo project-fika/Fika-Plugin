@@ -1,9 +1,9 @@
-﻿using EFT;
+﻿using System;
+using System.Reflection;
+using EFT;
 using EFT.Interactive;
 using Fika.Core.Main.Utils;
 using SPT.Reflection.Patching;
-using System;
-using System.Reflection;
 
 namespace Fika.Core.Main.Patches.Lighthouse;
 

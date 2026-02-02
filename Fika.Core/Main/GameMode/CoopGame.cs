@@ -645,7 +645,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         gparam_0.vmethod_0();
 #if DEBUG
         FikaGlobals.LogWarning("Forcing god mode on DEBUG build, use 'god f' console command to disable");
-        gparam_0.Player.ActiveHealthController.SetDamageCoeff(0f); 
+        gparam_0.Player.ActiveHealthController.SetDamageCoeff(0f);
 #endif
     }
 

@@ -18,14 +18,14 @@ public sealed class ClientConnected : IPoolSubPacket
 
     public static ClientConnected FromValue(string name)
     {
-        ClientConnected packet = GenericSubPacketPoolManager.Instance.GetPacket<ClientConnected>(EGenericSubPacketType.ClientConnected);
+        var packet = GenericSubPacketPoolManager.Instance.GetPacket<ClientConnected>(EGenericSubPacketType.ClientConnected);
         packet.Name = name;
         return packet;
     }
 
     public void Execute(FikaPlayer player = null)
     {
-        string message = string.Format(LocaleUtils.UI_PLAYER_CONNECTED.Localized(), ColorizeText(EColor.BLUE, Name));
+        var message = string.Format(LocaleUtils.UI_PLAYER_CONNECTED.Localized(), ColorizeText(EColor.BLUE, Name));
         NotificationManagerClass.DisplayMessageNotification(message);
     }
 

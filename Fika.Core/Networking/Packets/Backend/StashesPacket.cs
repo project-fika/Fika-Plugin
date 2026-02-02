@@ -18,14 +18,14 @@ public struct StashesPacket : INetSerializable
         HasBTR = reader.GetBool();
         if (HasBTR)
         {
-            int amount = reader.GetInt();
+            var amount = reader.GetInt();
             BTRData = new byte[amount][];
             BTRStashes = new StashItemClass[amount];
-            for (int i = 0; i < amount; i++)
+            for (var i = 0; i < amount; i++)
             {
-                byte[] data = reader.GetByteArray();
-                using GClass1283 eftReader = PacketToEFTReaderAbstractClass.Get(data);
-                InventoryDescriptorClass descriptor = eftReader.ReadEFTItemDescriptor();
+                var data = reader.GetByteArray();
+                using var eftReader = PacketToEFTReaderAbstractClass.Get(data);
+                var descriptor = eftReader.ReadEFTItemDescriptor();
                 BTRStashes[i] = descriptor.Deserialize<StashItemClass>();
             }
 
@@ -34,14 +34,14 @@ public struct StashesPacket : INetSerializable
         HasTransit = reader.GetBool();
         if (HasTransit)
         {
-            int amount = reader.GetInt();
+            var amount = reader.GetInt();
             TransitData = new byte[amount][];
             TransitStashes = new StashItemClass[amount];
-            for (int i = 0; i < amount; i++)
+            for (var i = 0; i < amount; i++)
             {
-                byte[] data = reader.GetByteArray();
-                using GClass1283 eftReader = PacketToEFTReaderAbstractClass.Get(data);
-                InventoryDescriptorClass descriptor = eftReader.ReadEFTItemDescriptor();
+                var data = reader.GetByteArray();
+                using var eftReader = PacketToEFTReaderAbstractClass.Get(data);
+                var descriptor = eftReader.ReadEFTItemDescriptor();
                 TransitStashes[i] = descriptor.Deserialize<StashItemClass>();
             }
         }
@@ -54,9 +54,9 @@ public struct StashesPacket : INetSerializable
         {
             BTRData = new byte[BTRStashes.Length][];
             writer.Put(BTRData.Length);
-            for (int i = 0; i < BTRData.Length; i++)
+            for (var i = 0; i < BTRData.Length; i++)
             {
-                EFTWriterClass eftWriter = WriterPoolManager.GetWriter();
+                var eftWriter = WriterPoolManager.GetWriter();
                 eftWriter.WriteEFTItemDescriptor(EFTItemSerializerClass.SerializeItem(BTRStashes[i],
                     FikaGlobals.SearchControllerSerializer));
                 BTRData[i] = eftWriter.ToArray();
@@ -70,9 +70,9 @@ public struct StashesPacket : INetSerializable
         {
             TransitData = new byte[TransitStashes.Length][];
             writer.Put(TransitData.Length);
-            for (int i = 0; i < TransitData.Length; i++)
+            for (var i = 0; i < TransitData.Length; i++)
             {
-                EFTWriterClass eftWriter = WriterPoolManager.GetWriter();
+                var eftWriter = WriterPoolManager.GetWriter();
                 eftWriter.WriteEFTItemDescriptor(EFTItemSerializerClass.SerializeItem(TransitStashes[i],
                     FikaGlobals.SearchControllerSerializer));
                 TransitData[i] = eftWriter.ToArray();

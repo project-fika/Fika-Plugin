@@ -1,7 +1,7 @@
-﻿using Comfort.Common;
+﻿using System.Reflection;
+using Comfort.Common;
 using Fika.Core.Main.HostClasses;
 using SPT.Reflection.Patching;
-using System.Reflection;
 
 namespace Fika.Core.Main.Patches.Airdrops;
 

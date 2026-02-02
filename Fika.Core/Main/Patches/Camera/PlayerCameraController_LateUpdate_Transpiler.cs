@@ -1,9 +1,9 @@
-﻿using EFT.CameraControl;
-using HarmonyLib;
-using SPT.Reflection.Patching;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
+using EFT.CameraControl;
+using HarmonyLib;
+using SPT.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.Camera;
 
@@ -21,7 +21,7 @@ public class PlayerCameraController_LateUpdate_Transpiler : ModulePatch
     public static IEnumerable<CodeInstruction> Transpile(IEnumerable<CodeInstruction> instructions)
     {
         List<CodeInstruction> newInstructions = [.. instructions];
-        for (int i = 11; i < newInstructions.Count; i++)
+        for (var i = 11; i < newInstructions.Count; i++)
         {
             newInstructions[i].opcode = OpCodes.Ret;
         }

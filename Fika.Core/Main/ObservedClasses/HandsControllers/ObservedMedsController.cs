@@ -1,11 +1,11 @@
 ﻿// © 2026 Lacyway All Rights Reserved
 
-using EFT;
-using EFT.InventoryLogic;
-using Fika.Core.Main.Players;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using EFT;
+using EFT.InventoryLogic;
+using Fika.Core.Main.Players;
 
 namespace Fika.Core.Main.ObservedClasses.HandsControllers;
 
@@ -24,7 +24,7 @@ internal class ObservedMedsController : Player.MedsController
 
     public static ObservedMedsController Create(FikaPlayer player, Item item, GStruct382<EBodyPart> bodyParts, float amount, int animationVariant)
     {
-        ObservedMedsController controller = smethod_6<ObservedMedsController>(player, item, bodyParts, amount, animationVariant);
+        var controller = smethod_6<ObservedMedsController>(player, item, bodyParts, amount, animationVariant);
         controller._fikaPlayer = player;
         controller._healParts = bodyParts;
         return controller;
@@ -170,7 +170,7 @@ internal class ObservedMedsController : Player.MedsController
 
             if (_observedMedsController.FirearmsAnimator != null)
             {
-                FirearmsAnimator animator = _observedMedsController.FirearmsAnimator;
+                var animator = _observedMedsController.FirearmsAnimator;
 
                 animator.SetActiveParam(false, false);
                 if (animator.HasNextLimb())
@@ -178,16 +178,16 @@ internal class ObservedMedsController : Player.MedsController
                     animator.SetNextLimb(true);
                 }
 
-                float mult = _observedMedsController._fikaPlayer.Skills.SurgerySpeed.Value / 100f;
+                var mult = _observedMedsController._fikaPlayer.Skills.SurgerySpeed.Value / 100f;
                 animator.SetUseTimeMultiplier(1f + mult);
 
-                int variant = 0;
+                var variant = 0;
                 _animation++;
                 if (_observedMedsController.Item.TryGetItemComponent(out AnimationVariantsComponent animationVariantsComponent))
                 {
                     variant = animationVariantsComponent.VariantsNumber;
                 }
-                int newAnim = (int)Mathf.Repeat(_animation, variant);
+                var newAnim = (int)Mathf.Repeat(_animation, variant);
 
                 animator.SetAnimationVariant(newAnim);
             }

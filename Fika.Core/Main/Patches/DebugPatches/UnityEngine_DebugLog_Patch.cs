@@ -1,7 +1,7 @@
-﻿using HarmonyLib;
-using SPT.Reflection.Patching;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Threading.Tasks;
+using HarmonyLib;
+using SPT.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.DebugPatches;
 

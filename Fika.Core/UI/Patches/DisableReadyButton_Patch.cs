@@ -1,9 +1,9 @@
 ﻿// © 2026 Lacyway All Rights Reserved
 
+using System.Reflection;
 using EFT.UI;
 using EFT.UI.Matchmaker;
 using SPT.Reflection.Patching;
-using System.Reflection;
 
 namespace Fika.Core.UI.Patches;
 

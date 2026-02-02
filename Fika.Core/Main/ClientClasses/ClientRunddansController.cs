@@ -1,9 +1,7 @@
-﻿using System.Linq;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
-using EFT.Interactive;
 using EFT.Weather;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;

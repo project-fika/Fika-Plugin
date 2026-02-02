@@ -1,12 +1,12 @@
-﻿using EFT;
+﻿using System;
+using System.Collections.Generic;
+using System.Reflection;
+using EFT;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using Fika.Core.Main.Components;
 using Fika.Core.Main.Utils;
 using SPT.Reflection.Patching;
-using System;
-using System.Collections.Generic;
-using System.Reflection;
 
 namespace Fika.Core.Main.Patches.Lighthouse;
 
@@ -23,13 +23,13 @@ public static class LighthouseTraderZone_Patches
         public static bool Prefix(Player player, LighthouseTraderZone __instance, ref List<Player> ___allPlayersInZone,
             ref List<Player> ___allowedPlayers, ref List<Player> ___unallowedPlayers, ref Action<string, bool> ___action_0)
         {
-            if (!CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
+            if (!CoopHandler.TryGetCoopHandler(out var coopHandler))
             {
                 return false;
             }
 
             player.OnPlayerDead += __instance.method_7;
-            bool flag = player.RecodableItemsHandler.TryToGetRecodableComponent(out RadioTransmitterRecodableComponent radioTransmitterRecodableComponent);
+            var flag = player.RecodableItemsHandler.TryToGetRecodableComponent(out RadioTransmitterRecodableComponent radioTransmitterRecodableComponent);
 
             if (player.IsAI && __instance.method_3(player))
             {
@@ -87,7 +87,7 @@ public static class LighthouseTraderZone_Patches
         public static bool Prefix(Player player, LighthouseTraderZone __instance, ref List<Player> ___allPlayersInZone,
             ref List<Player> ___allowedPlayers, ref List<Player> ___unallowedPlayers, ref Action<string, bool> ___action_0)
         {
-            if (!CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
+            if (!CoopHandler.TryGetCoopHandler(out var coopHandler))
             {
                 return false;
             }

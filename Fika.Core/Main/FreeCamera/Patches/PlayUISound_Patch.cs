@@ -1,7 +1,7 @@
-﻿using EFT.UI;
+﻿using System.Reflection;
+using EFT.UI;
 using Fika.Core.Main.Utils;
 using SPT.Reflection.Patching;
-using System.Reflection;
 
 namespace Fika.Core.Main.FreeCamera.Patches;
 

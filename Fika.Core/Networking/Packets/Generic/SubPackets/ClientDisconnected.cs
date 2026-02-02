@@ -18,14 +18,14 @@ public sealed class ClientDisconnected : IPoolSubPacket
 
     public static ClientDisconnected FromValue(string name)
     {
-        ClientDisconnected packet = GenericSubPacketPoolManager.Instance.GetPacket<ClientDisconnected>(EGenericSubPacketType.ClientDisconnected);
+        var packet = GenericSubPacketPoolManager.Instance.GetPacket<ClientDisconnected>(EGenericSubPacketType.ClientDisconnected);
         packet.Name = name;
         return packet;
     }
 
     public void Execute(FikaPlayer player = null)
     {
-        string message = string.Format(LocaleUtils.UI_PLAYER_DISCONNECTED.Localized(), ColorizeText(EColor.BLUE, Name));
+        var message = string.Format(LocaleUtils.UI_PLAYER_DISCONNECTED.Localized(), ColorizeText(EColor.BLUE, Name));
         NotificationManagerClass.DisplayMessageNotification(message);
     }
 

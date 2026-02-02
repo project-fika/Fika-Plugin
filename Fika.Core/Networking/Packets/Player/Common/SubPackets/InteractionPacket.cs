@@ -16,7 +16,7 @@ public sealed class InteractionPacket : IPoolSubPacket
 
     public static InteractionPacket FromValue(EInteraction interaction)
     {
-        InteractionPacket packet = CreateInstance();
+        var packet = CreateInstance();
         packet.Interaction = interaction;
         return packet;
     }

@@ -15,7 +15,7 @@ public sealed class ArmorDamagePacket : IPoolSubPacket
 
     public static ArmorDamagePacket FromValue(MongoID itemId, float amount)
     {
-        ArmorDamagePacket packet = CommonSubPacketPoolManager.Instance.GetPacket<ArmorDamagePacket>(ECommonSubPacketType.ArmorDamage);
+        var packet = CommonSubPacketPoolManager.Instance.GetPacket<ArmorDamagePacket>(ECommonSubPacketType.ArmorDamage);
         packet.ItemId = itemId;
         packet.Durability = amount;
         return packet;

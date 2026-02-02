@@ -1,8 +1,8 @@
-﻿using EFT;
+﻿using System;
+using System.Collections.Generic;
+using EFT;
 using EFT.HealthSystem;
 using EFT.InventoryLogic;
-using System;
-using System.Collections.Generic;
 
 namespace Fika.Core.Main.ObservedClasses;
 

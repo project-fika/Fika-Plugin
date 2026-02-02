@@ -1,12 +1,10 @@
+using System.Collections.Generic;
 using Comfort.Common;
 using EFT.UI;
-using Fika.Core;
 using Fika.Core.Main.Components;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
-using Mono.Cecil.Cil;
-using System.Collections.Generic;
 using TMPro;
 
 public class DebugUI : MonoBehaviour

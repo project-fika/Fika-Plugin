@@ -1,6 +1,6 @@
-﻿using Fika.Core.Networking.Packets.Player;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using Fika.Core.Networking.Packets.Player;
 
 namespace Fika.Core.Main.ObservedClasses.Snapshotting;
 
@@ -8,7 +8,7 @@ public static class SortedListExtensions
 {
     public static void RemoveRange<T, U>(this SortedList<T, U> list, int amount)
     {
-        for (int i = 0; i < amount && i < list.Count; ++i)
+        for (var i = 0; i < amount && i < list.Count; ++i)
         {
             list.RemoveAt(0);
         }
@@ -37,10 +37,10 @@ public static class SnapshotInterpolation
 
     public static double DynamicAdjustment(double sendInterval, double jitterStandardDeviation, double dynamicAdjustmentTolerance)
     {
-        double intervalWithJitter = sendInterval + jitterStandardDeviation;
-        double multiples = intervalWithJitter / sendInterval;
+        var intervalWithJitter = sendInterval + jitterStandardDeviation;
+        var multiples = intervalWithJitter / sendInterval;
 
-        double safezone = multiples + dynamicAdjustmentTolerance;
+        var safezone = multiples + dynamicAdjustmentTolerance;
 
         return Mathd.Clamp(safezone, 0, 5);
     }
@@ -52,16 +52,16 @@ public static class SnapshotInterpolation
             return false;
         }
 
-        int before = buffer.Count;
+        var before = buffer.Count;
         buffer[snapshot.RemoteTime] = snapshot;
         return buffer.Count > before;
     }
 
     public static double TimelineClamp(double localTimeline, double bufferTime, double latestRemoteTime)
     {
-        double targetTime = latestRemoteTime - bufferTime;
-        double lowerBound = targetTime - bufferTime;
-        double upperBound = targetTime + bufferTime;
+        var targetTime = latestRemoteTime - bufferTime;
+        var lowerBound = targetTime - bufferTime;
+        var upperBound = targetTime + bufferTime;
         return Mathd.Clamp(localTimeline, lowerBound, upperBound);
     }
 
@@ -79,23 +79,23 @@ public static class SnapshotInterpolation
         {
             if (buffer.Count >= 2)
             {
-                double previousLocalTime = buffer.Values[buffer.Count - 2].LocalTime;
-                double lastestLocalTime = buffer.Values[buffer.Count - 1].LocalTime;
+                var previousLocalTime = buffer.Values[buffer.Count - 2].LocalTime;
+                var lastestLocalTime = buffer.Values[buffer.Count - 1].LocalTime;
 
-                double localDeliveryTime = lastestLocalTime - previousLocalTime;
+                var localDeliveryTime = lastestLocalTime - previousLocalTime;
 
                 deliveryTimeEma.Add(localDeliveryTime);
             }
 
-            double latestRemoteTime = snapshot.RemoteTime;
+            var latestRemoteTime = snapshot.RemoteTime;
 
             localTimeline = TimelineClamp(localTimeline, bufferTime, latestRemoteTime);
 
-            double timeDiff = latestRemoteTime - localTimeline;
+            var timeDiff = latestRemoteTime - localTimeline;
 
             driftEma.Add(timeDiff);
 
-            double drift = driftEma.Value - bufferTime;
+            var drift = driftEma.Value - bufferTime;
 
             double absoluteNegativeThreshold = sendInterval * catchupNegativeThreshold;
             double absolutePositiveThreshold = sendInterval * catchupPositiveThreshold;
@@ -107,12 +107,12 @@ public static class SnapshotInterpolation
     public static void Sample(SortedList<double, PlayerStatePacket> buffer, double localTimeline, out int from, out int to, out double t)
     {
         // this is a wrapper, so we cache it
-        IList<PlayerStatePacket> values = buffer.Values;
+        var values = buffer.Values;
 
-        for (int i = 0; i < buffer.Count - 1; ++i)
+        for (var i = 0; i < buffer.Count - 1; ++i)
         {
-            PlayerStatePacket first = values[i];
-            PlayerStatePacket second = values[i + 1];
+            var first = values[i];
+            var second = values[i + 1];
             if (localTimeline >= first.RemoteTime && localTimeline <= second.RemoteTime)
             {
                 from = i;
@@ -142,7 +142,7 @@ public static class SnapshotInterpolation
     public static void StepInterpolation(SortedList<double, PlayerStatePacket> buffer, double localTimeline,
         out PlayerStatePacket fromSnapshot, out PlayerStatePacket toSnapshot, out double t)
     {
-        Sample(buffer, localTimeline, out int from, out int to, out t);
+        Sample(buffer, localTimeline, out var from, out var to, out t);
 
         fromSnapshot = buffer.Values[from];
         toSnapshot = buffer.Values[to];

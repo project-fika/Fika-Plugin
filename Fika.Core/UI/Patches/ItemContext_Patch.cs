@@ -1,4 +1,7 @@
-﻿using Comfort.Common;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
 using EFT.UI;
@@ -8,9 +11,6 @@ using Fika.Core.Networking.Http;
 using Fika.Core.UI.Models;
 using HarmonyLib;
 using SPT.Reflection.Patching;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using TMPro;
 using static Fika.Core.UI.FikaUIGlobals;
 

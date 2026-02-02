@@ -13,7 +13,7 @@ public sealed class ToggleInventoryPacket : IPoolSubPacket
 
     public static ToggleInventoryPacket FromValue(bool open)
     {
-        ToggleInventoryPacket packet = FirearmSubPacketPoolManager.Instance.GetPacket<ToggleInventoryPacket>(EFirearmSubPacketType.ToggleInventory);
+        var packet = FirearmSubPacketPoolManager.Instance.GetPacket<ToggleInventoryPacket>(EFirearmSubPacketType.ToggleInventory);
         packet.Open = open;
         return packet;
     }

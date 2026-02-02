@@ -6,7 +6,7 @@ public class ObservedJumpState(MovementContext movementContext) : JumpStateClass
 {
     public override void ApplyMovementAndRotation(float deltaTime)
     {
-        Quaternion quaternion = Quaternion.Lerp(MovementContext.TransformRotation,
+        var quaternion = Quaternion.Lerp(MovementContext.TransformRotation,
             Quaternion.AngleAxis(MovementContext.Yaw, Vector3.up),
             EFTHardSettings.Instance.TRANSFORM_ROTATION_LERP_SPEED * deltaTime);
         MovementContext.ApplyRotation(quaternion);

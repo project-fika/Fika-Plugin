@@ -1,7 +1,6 @@
 ﻿using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Pooling;
-using System.Collections.Generic;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
@@ -14,7 +13,7 @@ public sealed class CylinderMagPacket : IPoolSubPacket
 
     public static CylinderMagPacket FromValue(EReloadWithAmmoStatus status, int camoraIndex, int ammoLoadedToMag, bool changed, bool hammerClosed, bool reload, string[] ammoIds)
     {
-        CylinderMagPacket packet = FirearmSubPacketPoolManager.Instance.GetPacket<CylinderMagPacket>(EFirearmSubPacketType.CylinderMag);
+        var packet = FirearmSubPacketPoolManager.Instance.GetPacket<CylinderMagPacket>(EFirearmSubPacketType.CylinderMag);
         packet.Status = status;
         packet.CamoraIndex = camoraIndex;
         packet.AmmoLoadedToMag = ammoLoadedToMag;
@@ -51,7 +50,7 @@ public sealed class CylinderMagPacket : IPoolSubPacket
             {
                 if (Status == EReloadWithAmmoStatus.StartReload)
                 {
-                    List<AmmoItemClass> bullets = controller.FindAmmoByIds(AmmoIds);
+                    var bullets = controller.FindAmmoByIds(AmmoIds);
                     AmmoPackReloadingClass ammoPack = new(bullets);
                     controller.FastForwardCurrentState();
                     controller.CurrentOperation.ReloadCylinderMagazine(ammoPack, null, null);

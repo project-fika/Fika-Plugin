@@ -1,11 +1,11 @@
-﻿using EFT;
+﻿using System.Linq;
+using System.Reflection;
+using EFT;
 using EFT.UI;
 using EFT.UI.Matchmaker;
 using Fika.Core.Main.Utils;
 using Fika.Core.UI.Custom;
 using SPT.Reflection.Patching;
-using System.Linq;
-using System.Reflection;
 
 namespace Fika.Core.UI.Patches.MatchmakerAcceptScreen;
 
@@ -22,7 +22,7 @@ public class MatchmakerAcceptScreen_Show_Patch : ModulePatch
     {
         FikaBackendUtils.IsScav = raidSettings.IsScav;
 
-        MatchMakerUIScript newMatchMaker = __instance.gameObject.GetOrAddComponent<MatchMakerUIScript>();
+        var newMatchMaker = __instance.gameObject.GetOrAddComponent<MatchMakerUIScript>();
         newMatchMaker.RaidSettings = raidSettings;
         newMatchMaker.AcceptButton = ____acceptButton;
         newMatchMaker.BackButton = ____backButton;

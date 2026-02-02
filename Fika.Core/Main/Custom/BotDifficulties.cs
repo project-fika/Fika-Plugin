@@ -1,8 +1,8 @@
-﻿using EFT;
+﻿using System.Collections.Generic;
+using EFT;
 using Fika.Core.Main.Utils;
 using Newtonsoft.Json;
 using SPT.Common.Http;
-using System.Collections.Generic;
 
 namespace Fika.Core.Main.Custom;
 
@@ -22,7 +22,7 @@ public class BotDifficulties : Dictionary<string, BotDifficulties.RoleData>
 
     public BotDifficulties()
     {
-        string coreString = RequestHandler.GetJson("/singleplayer/settings/bot/difficulty/core/core");
+        var coreString = RequestHandler.GetJson("/singleplayer/settings/bot/difficulty/core/core");
         _coreSettings = JsonConvert.DeserializeObject<CoreBotSettingsClass>(coreString);
 
         // Adjust wave coefs so that wave settings do something
@@ -35,9 +35,9 @@ public class BotDifficulties : Dictionary<string, BotDifficulties.RoleData>
 #if DEBUG
         FikaGlobals.LogInfo($"Retrieving data for: {role}, difficulty: {botDifficulty}");
 #endif
-        if (TryGetValue(role.ToString().ToLower(), out RoleData value))
+        if (TryGetValue(role.ToString().ToLower(), out var value))
         {
-            if (value.TryGetValue(botDifficulty.ToString().ToLower(), out BotSettingsComponents botSettingsComponents))
+            if (value.TryGetValue(botDifficulty.ToString().ToLower(), out var botSettingsComponents))
             {
                 return botSettingsComponents;
             }

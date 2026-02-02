@@ -1,11 +1,11 @@
-﻿using Comfort.Common;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
 using EFT.Quests;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Packets.Backend;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Fika.Core.Main.ClientClasses;
 
@@ -17,13 +17,13 @@ public class ClientQuestController(Profile profile, InventoryController inventor
     public override async Task<GStruct154<GStruct426<QuestClass>>> FinishQuest(QuestClass quest, bool runNetworkTransaction)
     {
         List<FlatItemsDataClass[]> items = [];
-        bool hasRewards = false;
-        if (quest.Rewards.TryGetValue(EQuestStatus.Success, out IReadOnlyList<QuestRewardDataClass> list))
+        var hasRewards = false;
+        if (quest.Rewards.TryGetValue(EQuestStatus.Success, out var list))
         {
             hasRewards = true;
-            for (int i = 0; i < list.Count; i++)
+            for (var i = 0; i < list.Count; i++)
             {
-                QuestRewardDataClass item = list[i];
+                var item = list[i];
                 if (item.type != ERewardType.Item)
                 {
                     continue;
@@ -31,7 +31,7 @@ public class ClientQuestController(Profile profile, InventoryController inventor
                 items.Add(item.items);
             }
         }
-        GStruct154<GStruct426<QuestClass>> finishResult = await base.FinishQuest(quest, runNetworkTransaction);
+        var finishResult = await base.FinishQuest(quest, runNetworkTransaction);
         if (finishResult.Succeeded && hasRewards)
         {
             InRaidQuestPacket packet = new()
@@ -49,10 +49,10 @@ public class ClientQuestController(Profile profile, InventoryController inventor
     public override async Task<IResult> HandoverItem(QuestClass quest, ConditionItem condition, Item[] items, bool runNetworkTransaction)
     {
         List<MongoID> itemIds = [];
-        bool hasNonQuestItem = false;
-        for (int i = 0; i < items.Length; i++)
+        var hasNonQuestItem = false;
+        for (var i = 0; i < items.Length; i++)
         {
-            Item item = items[i];
+            var item = items[i];
             if (!item.QuestItem)
             {
                 hasNonQuestItem = true;
@@ -62,9 +62,9 @@ public class ClientQuestController(Profile profile, InventoryController inventor
 
         if (hasNonQuestItem)
         {
-            for (int i = 0; i < items.Length; i++)
+            for (var i = 0; i < items.Length; i++)
             {
-                Item item = items[i];
+                var item = items[i];
                 if (item.QuestItem)
                 {
                     continue;
@@ -74,7 +74,7 @@ public class ClientQuestController(Profile profile, InventoryController inventor
             }
         }
 
-        IResult handoverResult = await base.HandoverItem(quest, condition, items, runNetworkTransaction);
+        var handoverResult = await base.HandoverItem(quest, condition, items, runNetworkTransaction);
         if (handoverResult.Succeed && hasNonQuestItem)
         {
 

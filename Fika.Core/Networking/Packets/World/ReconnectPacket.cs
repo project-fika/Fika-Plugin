@@ -1,7 +1,7 @@
-﻿using ComponentAce.Compression.Libs.zlib;
+﻿using System.Collections.Generic;
+using ComponentAce.Compression.Libs.zlib;
 using EFT;
 using EFT.Interactive;
-using System.Collections.Generic;
 
 namespace Fika.Core.Networking.Packets.World;
 

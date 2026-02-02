@@ -1,6 +1,6 @@
-﻿using SPT.Reflection.Patching;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Threading.Tasks;
+using SPT.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches;
 

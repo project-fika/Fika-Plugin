@@ -1,5 +1,6 @@
 ﻿// © 2026 Lacyway All Rights Reserved
 
+using System;
 using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
@@ -7,7 +8,6 @@ using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Packets.FirearmController;
 using Fika.Core.Networking.Packets.FirearmController.SubPackets;
-using System;
 
 namespace Fika.Core.Main.ClientClasses.HandsControllers;
 
@@ -19,7 +19,7 @@ public class FikaClientGrenadeController : Player.GrenadeHandsController
 
     public static FikaClientGrenadeController Create(FikaPlayer player, ThrowWeapItemClass item)
     {
-        FikaClientGrenadeController controller = smethod_9<FikaClientGrenadeController>(player, item);
+        var controller = smethod_9<FikaClientGrenadeController>(player, item);
         controller._fikaPlayer = player;
         controller._isClient = FikaBackendUtils.IsClient;
         controller._packet = new()
@@ -195,7 +195,7 @@ public class FikaClientGrenadeController : Player.GrenadeHandsController
         }
 
         // Check for GClass increments
-        Class1272 currentOperation = CurrentOperation;
+        var currentOperation = CurrentOperation;
         if (currentOperation != null)
         {
             if (currentOperation is not Class1277)

@@ -15,7 +15,7 @@ public sealed class RocketShotPacket : IPoolSubPacket
 
     public static RocketShotPacket FromValue(Vector3 shotPosition, Vector3 shotForward, MongoID ammoTemplate)
     {
-        RocketShotPacket packet = FirearmSubPacketPoolManager.Instance.GetPacket<RocketShotPacket>(EFirearmSubPacketType.RocketShot);
+        var packet = FirearmSubPacketPoolManager.Instance.GetPacket<RocketShotPacket>(EFirearmSubPacketType.RocketShot);
         packet.ShotPosition = shotPosition;
         packet.ShotForward = shotForward;
         packet.AmmoTemplateId = ammoTemplate;
@@ -35,7 +35,7 @@ public sealed class RocketShotPacket : IPoolSubPacket
     {
         if (player.HandsController is ObservedFirearmController controller)
         {
-            AmmoItemClass rocketClass = (AmmoItemClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), AmmoTemplateId, null);
+            var rocketClass = (AmmoItemClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), AmmoTemplateId, null);
             controller.HandleRocketShot(rocketClass, ShotPosition, ShotForward);
         }
     }

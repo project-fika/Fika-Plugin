@@ -1,6 +1,6 @@
-﻿using EFT;
+﻿using System.Runtime.Serialization;
+using EFT;
 using JsonType;
-using System.Runtime.Serialization;
 using static Fika.Core.UI.FikaUIGlobals;
 
 namespace Fika.Core.Networking.Models.Presence;

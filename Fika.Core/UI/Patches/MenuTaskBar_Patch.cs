@@ -1,14 +1,14 @@
-﻿using Comfort.Common;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
+using Comfort.Common;
 using EFT;
 using EFT.Communications;
 using EFT.UI;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Http;
 using SPT.Reflection.Patching;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
 using UnityEngine.UI;
 using static Fika.Core.UI.FikaUIGlobals;
 
@@ -119,9 +119,9 @@ public class MenuTaskBar_Patch : ModulePatch
                                     NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.SAVED_PROFILE.Localized(),
                                         [ColorizeText(EColor.BLUE, profileId), fikaDir]));
 
-                                   /* ____toggleButtons.Remove(EMenuType.NewsHub);
-                                    ____hoverTooltipAreas.Remove(EMenuType.NewsHub);
-                                    GameObject.Destroy(downloadProfileGameObject);*/
+                                    /* ____toggleButtons.Remove(EMenuType.NewsHub);
+                                     ____hoverTooltipAreas.Remove(EMenuType.NewsHub);
+                                     GameObject.Destroy(downloadProfileGameObject);*/
                                 }
                             }
                             else

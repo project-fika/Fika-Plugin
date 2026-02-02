@@ -1,11 +1,11 @@
-﻿using Comfort.Common;
+﻿using System;
+using System.Collections.Generic;
+using Comfort.Common;
 using Dissonance;
 using Dissonance.Datastructures;
 using Dissonance.Extensions;
 using Dissonance.Networking;
 using Fika.Core.Main.Utils;
-using System;
-using System.Collections.Generic;
 
 namespace Fika.Core.Networking.VOIP;
 
@@ -97,9 +97,9 @@ public class FikaCommsNetwork : BaseCommsNetwork<FikaVOIPServer, FikaVOIPClient,
             Stop();
             _loopbackQueue.Clear();
         }
-        for (int i = 0; i < _loopbackQueue.Count; i++)
+        for (var i = 0; i < _loopbackQueue.Count; i++)
         {
-            ArraySegment<byte> segment = _loopbackQueue[i];
+            var segment = _loopbackQueue[i];
             if (Client != null)
             {
                 Client.NetworkReceivedPacket(segment);

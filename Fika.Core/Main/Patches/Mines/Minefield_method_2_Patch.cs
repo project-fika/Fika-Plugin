@@ -1,4 +1,7 @@
-﻿using Comfort.Common;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using Comfort.Common;
 using EFT;
 using EFT.Interactive;
 using Fika.Core.Main.Players;
@@ -7,9 +10,6 @@ using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Player.Common;
 using Fika.Core.Networking.Packets.Player.Common.SubPackets;
 using SPT.Reflection.Patching;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 
 namespace Fika.Core.Main.Patches.Mines;
 
@@ -32,8 +32,8 @@ internal class Minefield_method_2_Patch : ModulePatch
         {
             if (FikaBackendUtils.IsServer)
             {
-                Vector3 position = player.Position;
-                foreach (IPlayer player2 in ___TargetedPlayers.Concat(___NotTargetedPlayers).ToList())
+                var position = player.Position;
+                foreach (var player2 in ___TargetedPlayers.Concat(___NotTargetedPlayers).ToList())
                 {
                     DoReplicatedMineDamage(player2, Vector3.Distance(position, player2.Position), first,
                         player != player2, ____collateralContusionRange, ____collateralDamageRange,
@@ -54,7 +54,7 @@ internal class Minefield_method_2_Patch : ModulePatch
             return;
         }
 
-        FikaPlayer fikaPlayer = (FikaPlayer)Singleton<GameWorld>.Instance.GetAlivePlayerByProfileID(player.ProfileId);
+        var fikaPlayer = (FikaPlayer)Singleton<GameWorld>.Instance.GetAlivePlayerByProfileID(player.ProfileId);
         if (isCollateral && distance > collateralDamageRange)
         {
             return;
@@ -63,7 +63,7 @@ internal class Minefield_method_2_Patch : ModulePatch
         if (fikaPlayer != null)
         {
             float num2 = 1f - distance / collateralDamageRange;
-            IEnumerable<BodyPartCollider> enumerable = isCollateral ? player.PlayerBones.BodyPartColliders.Where(minefield.method_4)
+            var enumerable = isCollateral ? player.PlayerBones.BodyPartColliders.Where(minefield.method_4)
                 : player.PlayerBones.BodyPartColliders.Where(minefield.method_5);
 
             enumerable = enumerable.DistinctBy(FikaGlobals.GetBodyPartFromCollider).ToArray();
@@ -73,7 +73,7 @@ internal class Minefield_method_2_Patch : ModulePatch
             float num4 = isCollateral || first ? firstExplosionDamage : secondExplosionDamage;
             int num5 = 0;
 
-            foreach (BodyPartCollider bodyPartCollider in enumerable)
+            foreach (var bodyPartCollider in enumerable)
             {
                 fikaPlayer.CommonPacket.Type = ECommonSubPacketType.Damage;
                 fikaPlayer.CommonPacket.SubPacket = DamagePacket.FromValue(fikaPlayer.NetId, new()

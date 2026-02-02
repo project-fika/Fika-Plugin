@@ -17,7 +17,7 @@ public sealed class UpdateBackendData : IPoolSubPacket
 
     public static UpdateBackendData FromValue(int playerAmount)
     {
-        UpdateBackendData packet = GenericSubPacketPoolManager.Instance.GetPacket<UpdateBackendData>(EGenericSubPacketType.UpdateBackendData);
+        var packet = GenericSubPacketPoolManager.Instance.GetPacket<UpdateBackendData>(EGenericSubPacketType.UpdateBackendData);
         packet.PlayerAmount = playerAmount;
         return packet;
     }

@@ -1,7 +1,7 @@
 ﻿// © 2026 Lacyway All Rights Reserved
 
-using EFT;
 using System;
+using EFT;
 
 namespace Fika.Core.Networking.Packets.Backend;
 

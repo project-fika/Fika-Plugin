@@ -1,9 +1,7 @@
 ﻿using Comfort.Common;
 using EFT;
-using EFT.Interactive;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Pooling;
-using System.Collections.Generic;
 
 namespace Fika.Core.Networking.Packets.Generic.SubPackets;
 
@@ -21,7 +19,7 @@ public sealed class BorderZoneEvent : IPoolSubPacket
 
     public static BorderZoneEvent FromValue(string profileId, int zoneId)
     {
-        BorderZoneEvent packet = GenericSubPacketPoolManager.Instance.GetPacket<BorderZoneEvent>(EGenericSubPacketType.BorderZone);
+        var packet = GenericSubPacketPoolManager.Instance.GetPacket<BorderZoneEvent>(EGenericSubPacketType.BorderZone);
         packet.ProfileId = profileId;
         packet.ZoneId = zoneId;
         return packet;
@@ -34,22 +32,22 @@ public sealed class BorderZoneEvent : IPoolSubPacket
             return;
         }
 
-        BorderZone[] borderZones = Singleton<GameWorld>.Instance.BorderZones;
+        var borderZones = Singleton<GameWorld>.Instance.BorderZones;
         if (borderZones == null || borderZones.Length == 0)
         {
             return;
         }
 
-        foreach (BorderZone borderZone in borderZones)
+        foreach (var borderZone in borderZones)
         {
             if (borderZone.Id == ZoneId)
             {
-                List<IPlayer> players = Singleton<GameWorld>.Instance.RegisteredPlayers;
-                foreach (IPlayer iPlayer in players)
+                var players = Singleton<GameWorld>.Instance.RegisteredPlayers;
+                foreach (var iPlayer in players)
                 {
                     if (iPlayer.ProfileId == ProfileId)
                     {
-                        IPlayerOwner playerBridge = Singleton<GameWorld>.Instance.GetAlivePlayerBridgeByProfileID(ProfileId);
+                        var playerBridge = Singleton<GameWorld>.Instance.GetAlivePlayerBridgeByProfileID(ProfileId);
                         if (playerBridge != null)
                         {
                             borderZone.ProcessIncomingPacket(playerBridge);

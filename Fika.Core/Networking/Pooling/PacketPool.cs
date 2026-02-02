@@ -34,7 +34,7 @@ public class PacketPool<T> : IDisposable
     {
         _pool = new Stack<T>(size);
         _constructor = constructor;
-        for (int i = 0; i < size; i++)
+        for (var i = 0; i < size; i++)
         {
             _pool.Push(_constructor());
         }
@@ -55,7 +55,7 @@ public class PacketPool<T> : IDisposable
         }
         else
         {
-            T packet = _constructor();
+            var packet = _constructor();
             FikaGlobals.LogError($"[{packet.GetType().Name}] Tried to pop but none existed?");
             return _constructor();
         }

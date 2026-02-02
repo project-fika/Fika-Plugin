@@ -1,9 +1,9 @@
-﻿using Comfort.Common;
+﻿using System.Collections.Generic;
+using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Packets.Backend;
-using System.Collections.Generic;
 
 namespace Fika.Core.Main.ObservedClasses;
 

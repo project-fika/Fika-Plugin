@@ -1,7 +1,6 @@
 ﻿using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Pooling;
-using System.Collections.Generic;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
@@ -14,7 +13,7 @@ public sealed class ReloadWithAmmoPacket : IPoolSubPacket
 
     public static ReloadWithAmmoPacket FromValue(bool reload, EReloadWithAmmoStatus status, int ammoLoadedToMag = 0, string[] ammoIds = null)
     {
-        ReloadWithAmmoPacket packet = FirearmSubPacketPoolManager.Instance.GetPacket<ReloadWithAmmoPacket>(EFirearmSubPacketType.ReloadWithAmmo);
+        var packet = FirearmSubPacketPoolManager.Instance.GetPacket<ReloadWithAmmoPacket>(EFirearmSubPacketType.ReloadWithAmmo);
         packet.Reload = reload;
         packet.Status = status;
         packet.AmmoLoadedToMag = ammoLoadedToMag;
@@ -45,7 +44,7 @@ public sealed class ReloadWithAmmoPacket : IPoolSubPacket
             {
                 if (Status == EReloadWithAmmoStatus.StartReload)
                 {
-                    List<AmmoItemClass> bullets = controller.FindAmmoByIds(AmmoIds);
+                    var bullets = controller.FindAmmoByIds(AmmoIds);
                     AmmoPackReloadingClass ammoPack = new(bullets);
                     controller.FastForwardCurrentState();
                     controller.CurrentOperation.ReloadWithAmmo(ammoPack, null, null);

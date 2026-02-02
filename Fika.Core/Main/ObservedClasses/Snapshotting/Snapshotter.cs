@@ -1,8 +1,8 @@
-﻿using Comfort.Common;
+﻿using System.Collections.Generic;
+using Comfort.Common;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Player;
-using System.Collections.Generic;
 
 namespace Fika.Core.Main.ObservedClasses.Snapshotting;
 
@@ -54,8 +54,8 @@ public class Snapshotter
     {
         if (_buffer.Count > 0)
         {
-            SnapshotInterpolation.Step(_buffer, unscaledDeltaTime, ref _localTimeline, _localTimeScale, out PlayerStatePacket fromSnapshot,
-                out PlayerStatePacket toSnapshot, out double ratio);
+            SnapshotInterpolation.Step(_buffer, unscaledDeltaTime, ref _localTimeline, _localTimeScale, out var fromSnapshot,
+                out var toSnapshot, out var ratio);
             Interpolate(toSnapshot, fromSnapshot, (float)ratio);
         }
     }

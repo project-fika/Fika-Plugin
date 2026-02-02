@@ -1,7 +1,7 @@
-﻿using EFT.UI.Matchmaker;
+﻿using System.Reflection;
+using EFT.UI.Matchmaker;
 using Fika.Core.Main.Utils;
 using SPT.Reflection.Patching;
-using System.Reflection;
 
 namespace Fika.Core.UI.Patches;
 

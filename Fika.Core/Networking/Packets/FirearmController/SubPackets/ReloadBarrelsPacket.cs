@@ -3,7 +3,6 @@ using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Pooling;
-using System.Collections.Generic;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
@@ -16,7 +15,7 @@ public sealed class ReloadBarrelsPacket : IPoolSubPacket
 
     public static ReloadBarrelsPacket FromValue(bool reload, string[] ammoIds, byte[] locationDescription)
     {
-        ReloadBarrelsPacket packet = FirearmSubPacketPoolManager.Instance.GetPacket<ReloadBarrelsPacket>(EFirearmSubPacketType.ReloadBarrels);
+        var packet = FirearmSubPacketPoolManager.Instance.GetPacket<ReloadBarrelsPacket>(EFirearmSubPacketType.ReloadBarrels);
         packet.Reload = reload;
         packet.AmmoIds = ammoIds;
         packet.LocationDescription = locationDescription;
@@ -36,16 +35,16 @@ public sealed class ReloadBarrelsPacket : IPoolSubPacket
     {
         if (player.HandsController is ObservedFirearmController controller)
         {
-            List<AmmoItemClass> ammo = controller.FindAmmoByIds(AmmoIds);
+            var ammo = controller.FindAmmoByIds(AmmoIds);
             AmmoPackReloadingClass ammoPack = new(ammo);
             ItemAddress gridItemAddress = null;
 
-            using GClass1283 eftReader = PacketToEFTReaderAbstractClass.Get(LocationDescription);
+            using var eftReader = PacketToEFTReaderAbstractClass.Get(LocationDescription);
             try
             {
                 if (LocationDescription.Length > 0)
                 {
-                    GClass1950 descriptor = eftReader.ReadPolymorph<GClass1950>();
+                    var descriptor = eftReader.ReadPolymorph<GClass1950>();
                     gridItemAddress = player.InventoryController.ToItemAddress(descriptor);
                 }
             }

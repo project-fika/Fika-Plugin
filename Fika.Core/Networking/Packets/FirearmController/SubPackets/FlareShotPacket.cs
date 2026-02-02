@@ -15,7 +15,7 @@ public sealed class FlareShotPacket : IPoolSubPacket
 
     public static FlareShotPacket FromValue(Vector3 shotPosition, Vector3 shotForward, MongoID ammoTemplateId, bool startOneShotFire)
     {
-        FlareShotPacket packet = FirearmSubPacketPoolManager.Instance.GetPacket<FlareShotPacket>(EFirearmSubPacketType.FlareShot);
+        var packet = FirearmSubPacketPoolManager.Instance.GetPacket<FlareShotPacket>(EFirearmSubPacketType.FlareShot);
         packet.ShotPosition = shotPosition;
         packet.ShotForward = shotForward;
         packet.AmmoTemplateId = ammoTemplateId;
@@ -53,7 +53,7 @@ public sealed class FlareShotPacket : IPoolSubPacket
             }
             else
             {
-                AmmoItemClass bulletClass = (AmmoItemClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), AmmoTemplateId, null);
+                var bulletClass = (AmmoItemClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), AmmoTemplateId, null);
                 controller.InitiateFlare(bulletClass, ShotPosition, ShotForward);
                 bulletClass.IsUsed = true;
                 controller.WeaponManager.MoveAmmoFromChamberToShellPort(bulletClass.IsUsed, 0);

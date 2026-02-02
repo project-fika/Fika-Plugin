@@ -17,6 +17,7 @@ public class RaidAdminUIScript : InputNode
     private LiteNetPeer _currentPeer;
     private float _counter;
     private float _counterThreshold;
+    private List<LiteNetPeer> _peers;
 
     private void Awake()
     {
@@ -24,6 +25,7 @@ public class RaidAdminUIScript : InputNode
 
         _counter = 0f;
         _counterThreshold = 1f;
+        _peers = [];
 
         _raidAdminUI.ClientSelection.onValueChanged.AddListener(OnClientSelection);
         _raidAdminUI.KickButton.onClick.AddListener(OnKickButton);
@@ -101,9 +103,10 @@ public class RaidAdminUIScript : InputNode
             return;
         }
 
-        if (_netManager.ConnectedPeerList[index] != null)
+        _netManager.GetConnectedPeers(_peers);
+        if (_peers[index] != null)
         {
-            _currentPeer = _netManager.ConnectedPeerList[index];
+            _currentPeer = _peers[index];
             _raidAdminUI.InfoPane.SetActive(true);
             _raidAdminUI.HeaderText.SetText("Client {0}", index);
         }
@@ -151,7 +154,8 @@ public class RaidAdminUIScript : InputNode
         clientSelection.ClearOptions();
         List<TMP_Dropdown.OptionData> options = [];
 
-        for (var i = 0; i < _netManager.ConnectedPeerList.Count; i++)
+        _netManager.GetConnectedPeers(_peers);
+        for (var i = 0; i < _peers.Count; i++)
         {
             options.Add(new($"Client {i}"));
         }

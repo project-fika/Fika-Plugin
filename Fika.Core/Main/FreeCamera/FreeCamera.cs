@@ -1,4 +1,6 @@
-﻿using BSG.CameraEffects;
+﻿using System;
+using System.Collections.Generic;
+using BSG.CameraEffects;
 using Comfort.Common;
 using EFT;
 using EFT.UI;
@@ -6,8 +8,6 @@ using Fika.Core.Bundles;
 using Fika.Core.Main.Components;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
-using System;
-using System.Collections.Generic;
 
 namespace Fika.Core.Main.FreeCamera;
 
@@ -157,7 +157,7 @@ public partial class FreeCamera : MonoBehaviour
         {
             if ((FikaPlugin.Instance.AllowSpectateFreeCam || _isSpectator) && CheckAndAssignPlayer())
             {
-                JumpToPlayer();                
+                JumpToPlayer();
             }
 
             return;
@@ -491,7 +491,7 @@ public partial class FreeCamera : MonoBehaviour
         // Teleportation
         if (Input.GetKeyDown(KeyCode.T))
         {
-            FikaPlayer player = (FikaPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+            var player = (FikaPlayer)Singleton<GameWorld>.Instance.MainPlayer;
 
             if (player != null && !_coopHandler.ExtractedPlayers.Contains(player.NetId) && player.HealthController.IsAlive)
             {

@@ -16,7 +16,7 @@ public sealed class GrenadePacket : IPoolSubPacket
     public static GrenadePacket FromValue(Quaternion grenadeRotation, Vector3 grenadePosition, Vector3 throwForce,
         EGrenadePacketType type, bool hasGrenade, bool lowThrow, bool plantTripwire, bool changeToIdle, bool changeToPlant)
     {
-        GrenadePacket packet = FirearmSubPacketPoolManager.Instance.GetPacket<GrenadePacket>(EFirearmSubPacketType.Grenade);
+        var packet = FirearmSubPacketPoolManager.Instance.GetPacket<GrenadePacket>(EFirearmSubPacketType.Grenade);
         packet.GrenadeRotation = grenadeRotation;
         packet.GrenadePosition = grenadePosition;
         packet.ThrowForce = throwForce;

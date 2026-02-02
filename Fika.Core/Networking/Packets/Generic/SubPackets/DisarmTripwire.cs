@@ -20,7 +20,7 @@ public sealed class DisarmTripwire : IPoolSubPacket
 
     public static DisarmTripwire FromValue(AirplaneDataPacketStruct data)
     {
-        DisarmTripwire packet = GenericSubPacketPoolManager.Instance.GetPacket<DisarmTripwire>(EGenericSubPacketType.DisarmTripwire);
+        var packet = GenericSubPacketPoolManager.Instance.GetPacket<DisarmTripwire>(EGenericSubPacketType.DisarmTripwire);
         packet.Data = data;
         return packet;
     }
@@ -29,8 +29,8 @@ public sealed class DisarmTripwire : IPoolSubPacket
     {
         if (Data.ObjectType == SynchronizableObjectType.Tripwire)
         {
-            GameWorld gameWorld = Singleton<GameWorld>.Instance;
-            TripwireSynchronizableObject tripwire = gameWorld.SynchronizableObjectLogicProcessor.TripwireManager.GetTripwireById(Data.ObjectId);
+            var gameWorld = Singleton<GameWorld>.Instance;
+            var tripwire = gameWorld.SynchronizableObjectLogicProcessor.TripwireManager.GetTripwireById(Data.ObjectId);
             if (tripwire != null)
             {
                 gameWorld.DeActivateTripwire(tripwire);

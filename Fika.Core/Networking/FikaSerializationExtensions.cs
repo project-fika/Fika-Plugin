@@ -1,4 +1,8 @@
-﻿using Comfort.Common;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using Comfort.Common;
 using EFT;
 using EFT.Airdrop;
 using EFT.Interactive;
@@ -10,10 +14,6 @@ using Fika.Core.Networking.Packets.FirearmController;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
 using Fika.Core.Networking.Packets.Player.Common.SubPackets;
 using Fika.Core.Networking.Pooling;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using static BasePhysicalClass;
 using static Fika.Core.Networking.Packets.World.RequestSubPackets;
 
@@ -153,8 +153,8 @@ public static class FikaSerializationExtensions
     /// <param name="item">The <see cref="Item"/> to serialize</param>
     public static void PutItem(this NetDataWriter writer, Item item)
     {
-        EFTWriterClass eftWriter = WriterPoolManager.GetWriter();
-        InventoryDescriptorClass descriptor = EFTItemSerializerClass.SerializeItem(item, FikaGlobals.SearchControllerSerializer);
+        var eftWriter = WriterPoolManager.GetWriter();
+        var descriptor = EFTItemSerializerClass.SerializeItem(item, FikaGlobals.SearchControllerSerializer);
         eftWriter.WriteEFTItemDescriptor(descriptor);
         writer.PutByteArray(eftWriter.ToArray());
         WriterPoolManager.ReturnWriter(eftWriter);
@@ -168,7 +168,7 @@ public static class FikaSerializationExtensions
     /// <returns>The deserialized <see cref="Item"/></returns>
     public static Item GetItem(this NetDataReader reader)
     {
-        using GClass1283 eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
+        using var eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
         return EFTItemSerializerClass.DeserializeItem(eftReader.ReadEFTItemDescriptor(), Singleton<ItemFactoryClass>.Instance, []);
     }
 
@@ -180,7 +180,7 @@ public static class FikaSerializationExtensions
     /// <returns>An <see cref="Inventory"/></returns>
     public static Inventory GetInventoryFromEquipment(this NetDataReader reader)
     {
-        using GClass1283 eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
+        using var eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
         return new EFTInventoryClass()
         {
             Equipment = eftReader.ReadEFTItemDescriptor()
@@ -194,7 +194,7 @@ public static class FikaSerializationExtensions
     /// <param name="descriptor">The <see cref="InventoryDescriptorClass"/> instance to serialize</param>
     public static void PutItemDescriptor(this NetDataWriter writer, InventoryDescriptorClass descriptor)
     {
-        EFTWriterClass eftWriter = WriterPoolManager.GetWriter();
+        var eftWriter = WriterPoolManager.GetWriter();
         eftWriter.WriteEFTItemDescriptor(descriptor);
         writer.CompressAndPutByteArray(eftWriter.ToArray());
         WriterPoolManager.ReturnWriter(eftWriter);
@@ -207,7 +207,7 @@ public static class FikaSerializationExtensions
     /// <returns>The deserialized <see cref="InventoryDescriptorClass"/> instance</returns>
     public static InventoryDescriptorClass GetItemDescriptor(this NetDataReader reader)
     {
-        using GClass1283 eftReader = PacketToEFTReaderAbstractClass.Get(reader.DecompressAndGetByteArray());
+        using var eftReader = PacketToEFTReaderAbstractClass.Get(reader.DecompressAndGetByteArray());
         return eftReader.ReadEFTItemDescriptor();
     }
 
@@ -218,8 +218,8 @@ public static class FikaSerializationExtensions
     /// <returns>The deserialized <see cref="Item"/> instance representing the airdrop item</returns>
     public static Item GetAirdropItem(this NetDataReader reader)
     {
-        using GClass1283 eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
-        Item item = EFTItemSerializerClass.DeserializeItem(eftReader.ReadEFTItemDescriptor(), Singleton<ItemFactoryClass>.Instance, []);
+        using var eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
+        var item = EFTItemSerializerClass.DeserializeItem(eftReader.ReadEFTItemDescriptor(), Singleton<ItemFactoryClass>.Instance, []);
 
         GClass1404 enumerable = [new LootItemPositionClass()];
         enumerable[0].Item = item;
@@ -241,7 +241,7 @@ public static class FikaSerializationExtensions
     public static void PutThrowableData(this NetDataWriter writer, List<SmokeGrenadeDataPacketStruct> throwables)
     {
         writer.Put(throwables.Count);
-        foreach (SmokeGrenadeDataPacketStruct data in throwables)
+        foreach (var data in throwables)
         {
             writer.Put(data.Id);
             writer.PutUnmanaged(data.Position);
@@ -285,7 +285,7 @@ public static class FikaSerializationExtensions
     /// <param name="profile">The <see cref="Profile"/> to serialize</param>
     public static void PutProfile(this NetDataWriter writer, Profile profile)
     {
-        EFTWriterClass eftWriter = WriterPoolManager.GetWriter();
+        var eftWriter = WriterPoolManager.GetWriter();
         eftWriter.WriteEFTProfileDescriptor(new(profile, FikaGlobals.SearchControllerSerializer));
         writer.CompressAndPutByteArray(eftWriter.ToArray());
         WriterPoolManager.ReturnWriter(eftWriter);
@@ -298,7 +298,7 @@ public static class FikaSerializationExtensions
     /// <returns>The deserialized <see cref="Profile"/></returns>
     public static Profile GetProfile(this NetDataReader reader)
     {
-        using GClass1283 eftReader = PacketToEFTReaderAbstractClass.Get(reader.DecompressAndGetByteArray());
+        using var eftReader = PacketToEFTReaderAbstractClass.Get(reader.DecompressAndGetByteArray());
         return new(eftReader.ReadEFTProfileDescriptor());
     }
 
@@ -350,7 +350,7 @@ public static class FikaSerializationExtensions
     {
         var amount = lampStates.Count;
         writer.Put(amount);
-        foreach (KeyValuePair<int, byte> lampState in lampStates)
+        foreach (var lampState in lampStates)
         {
             writer.Put(lampState.Key);
             writer.Put(lampState.Value);
@@ -383,7 +383,7 @@ public static class FikaSerializationExtensions
     {
         var amount = windowBreakerStates.Count;
         writer.Put(amount);
-        foreach (KeyValuePair<int, Vector3> windowBreakerState in windowBreakerStates)
+        foreach (var windowBreakerState in windowBreakerStates)
         {
             writer.Put(windowBreakerState.Key);
             writer.PutUnmanaged(windowBreakerState.Value);
@@ -478,7 +478,7 @@ public static class FikaSerializationExtensions
         writer.Put(traderService.CanAfford);
         writer.Put(traderService.WasPurchasedInThisRaid);
         writer.Put(traderService.ItemsToPay.Count);
-        foreach ((MongoID id, var amount) in traderService.ItemsToPay)
+        foreach ((var id, var amount) in traderService.ItemsToPay)
         {
             writer.PutMongoID(id);
             writer.Put(amount);
@@ -564,9 +564,9 @@ public static class FikaSerializationExtensions
         // Stamina Coeff
         writer.Write(standard);
 
-        foreach ((EBodyPart part, Profile.ProfileHealthClass.ProfileBodyPartHealthClass healthClass) in health.BodyParts)
+        foreach ((var part, var healthClass) in health.BodyParts)
         {
-            Profile.ProfileHealthClass.ValueInfo bodyPartInfo = healthClass.Health;
+            var bodyPartInfo = healthClass.Health;
             writer.Write(bodyPartInfo.Current <= bodyPartInfo.Minimum);
             writer.Write(bodyPartInfo.Current);
             writer.Write(bodyPartInfo.Maximum);
@@ -772,8 +772,16 @@ public static class FikaSerializationExtensions
         writer.PutEnum(packet.ControllerType);
 
         byte flags = 0;
-        if (packet.IsStationary) flags |= 1;
-        if (packet.IsZombie) flags |= 2;
+        if (packet.IsStationary)
+        {
+            flags |= 1;
+        }
+
+        if (packet.IsZombie)
+        {
+            flags |= 2;
+        }
+
         writer.Put(flags);
     }
 
@@ -915,7 +923,7 @@ public static class FikaSerializationExtensions
 
         if (packet.Done && packet.TransformSyncs != null)
         {
-            GStruct138[] transforms = packet.TransformSyncs;
+            var transforms = packet.TransformSyncs;
             for (var i = 0; i < 12; i++)
             {
                 writer.PutUnmanaged(transforms[i].Position);

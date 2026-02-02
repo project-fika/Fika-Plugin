@@ -1,6 +1,6 @@
-﻿using EFT;
+﻿using System.Collections.Generic;
+using EFT;
 using Fika.Core.Main.Components;
-using System.Collections.Generic;
 
 namespace Fika.Core.Main.ClientClasses;
 

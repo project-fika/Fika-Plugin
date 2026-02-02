@@ -1,9 +1,9 @@
-﻿using Comfort.Common;
+﻿using System.Collections.Generic;
+using Comfort.Common;
 using EFT;
 using EFT.Interactive;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.World;
-using System.Collections.Generic;
 
 namespace Fika.Core.Main.ClientClasses;
 
@@ -22,7 +22,7 @@ public class FikaClientWorld : World
 
     public static FikaClientWorld Create(FikaClientGameWorld gameWorld)
     {
-        FikaClientWorld clientWorld = gameWorld.gameObject.AddComponent<FikaClientWorld>();
+        var clientWorld = gameWorld.gameObject.AddComponent<FikaClientWorld>();
         clientWorld._clientGameWorld = gameWorld;
         clientWorld.LootSyncPackets = new(8);
         clientWorld.SyncObjectPackets = new(16);

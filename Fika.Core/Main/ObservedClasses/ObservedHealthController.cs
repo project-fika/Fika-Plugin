@@ -1,11 +1,11 @@
 ﻿// © 2026 Lacyway All Rights Reserved
 
+using System;
+using System.Collections.Generic;
 using EFT;
 using EFT.HealthSystem;
 using EFT.InventoryLogic;
 using Fika.Core.Main.Players;
-using System;
-using System.Collections.Generic;
 
 namespace Fika.Core.Main.ObservedClasses;
 
@@ -38,10 +38,10 @@ public sealed class ObservedHealthController(byte[] serializedState, ObservedPla
     public void PauseAllEffects()
     {
         EffectHandler handler = new(this);
-        for (int i = List_1.Count - 1; i >= 0; i--)
+        for (var i = List_1.Count - 1; i >= 0; i--)
         {
             handler.PausedEffects.Add(List_1[i]);
-            PausedEffectsStruct gstruct = Gclass835_0.Withdraw();
+            var gstruct = Gclass835_0.Withdraw();
             gstruct.SaveInfo(List_1[i].Id, List_1[i].HealthController, List_1[i].Type, List_1[i].BodyPart, List_1[i].Strength,
                 List_1[i].CurrentStrength, List_1[i].DelayTime, List_1[i].StateTime, List_1[i].WorkStateTime, List_1[i].BuildUpTime,
                 List_1[i].ResidueTime, List_1[i].State);
@@ -89,12 +89,12 @@ public sealed class ObservedHealthController(byte[] serializedState, ObservedPla
             };
         }
         health = profileHealthClass;
-        foreach (KeyValuePair<EBodyPart, BodyPartState> keyValuePair in Dictionary_0)
+        foreach (var keyValuePair in Dictionary_0)
         {
-            keyValuePair.Deconstruct(out EBodyPart ebodyPart, out BodyPartState bodyPartState);
-            EBodyPart ebodyPart2 = ebodyPart;
-            BodyPartState bodyPartState2 = bodyPartState;
-            if (!health.BodyParts.TryGetValue(ebodyPart2, out Profile.ProfileHealthClass.ProfileBodyPartHealthClass gclass))
+            keyValuePair.Deconstruct(out var ebodyPart, out var bodyPartState);
+            var ebodyPart2 = ebodyPart;
+            var bodyPartState2 = bodyPartState;
+            if (!health.BodyParts.TryGetValue(ebodyPart2, out var gclass))
             {
                 gclass = new Profile.ProfileHealthClass.ProfileBodyPartHealthClass();
                 health.BodyParts.Add(ebodyPart2, gclass);
@@ -107,11 +107,11 @@ public sealed class ObservedHealthController(byte[] serializedState, ObservedPla
             gclass.Effects ??= [];
         }
 
-        foreach (NetworkBodyEffectsAbstractClass gclass in IReadOnlyList_0)
+        foreach (var gclass in IReadOnlyList_0)
         {
             if (gclass is GInterface333 && gclass.State != EEffectState.Residued) // We only resync effects that are in-game effects, check for GClass increments, e.g. Dehydration or Exhaustion
             {
-                Profile.ProfileHealthClass.ProfileBodyPartHealthClass gclass2 = health.BodyParts[gclass.BodyPart];
+                var gclass2 = health.BodyParts[gclass.BodyPart];
                 gclass2.Effects ??= [];
                 gclass2.Effects.Add(gclass.GetType().Name, new()
                 {
@@ -131,7 +131,7 @@ public sealed class ObservedHealthController(byte[] serializedState, ObservedPla
 
         public void UnpauseEffects()
         {
-            for (int i = PausedEffects.Count - 1; i >= 0; i--)
+            for (var i = PausedEffects.Count - 1; i >= 0; i--)
             {
                 PausedEffects[i].SetEffectInfo(PausedEffectsInfo[i].ID, PausedEffectsInfo[i].HealthController, PausedEffectsInfo[i].Type,
                     PausedEffectsInfo[i].BodyPart, PausedEffectsInfo[i].Strength, PausedEffectsInfo[i].CurrentStrength,

@@ -23,7 +23,7 @@ public struct NetworkSettingsPacket : INetSerializable
 
     public readonly void Serialize(NetDataWriter writer)
     {
-        bool isRequest = !string.IsNullOrEmpty(ProfileId);
+        var isRequest = !string.IsNullOrEmpty(ProfileId);
         writer.Put(isRequest);
 
         if (isRequest)

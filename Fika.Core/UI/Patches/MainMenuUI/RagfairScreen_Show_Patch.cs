@@ -1,7 +1,7 @@
-﻿using EFT.UI.Ragfair;
+﻿using System.Reflection;
+using EFT.UI.Ragfair;
 using Fika.Core.UI.Custom;
 using SPT.Reflection.Patching;
-using System.Reflection;
 
 namespace Fika.Core.UI.Patches.MainMenuUI;
 

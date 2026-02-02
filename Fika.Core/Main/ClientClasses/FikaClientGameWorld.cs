@@ -1,12 +1,12 @@
-﻿using Comfort.Common;
+﻿using System;
+using System.Collections.Generic;
+using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using HarmonyLib;
-using System;
-using System.Collections.Generic;
 using Systems.Effects;
 
 namespace Fika.Core.Main.ClientClasses;
@@ -20,7 +20,7 @@ public class FikaClientGameWorld : ClientLocalGameWorld
 
     public static FikaClientGameWorld Create(GameObject gameObject, PoolManagerClass objectsFactory, EUpdateQueue updateQueue, string currentProfileId)
     {
-        FikaClientGameWorld gameWorld = gameObject.AddComponent<FikaClientGameWorld>();
+        var gameWorld = gameObject.AddComponent<FikaClientGameWorld>();
         gameWorld.ObjectsFactory = objectsFactory;
         Traverse.Create(gameWorld).Field<EUpdateQueue>("eupdateQueue_0").Value = updateQueue;
         gameWorld.SpeakerManager = gameObject.AddComponent<SpeakerManager>();
@@ -40,14 +40,14 @@ public class FikaClientGameWorld : ClientLocalGameWorld
         {
             DamageInfoStruct damageInfoStruct = new(EDamageType.Bullet, shotResult);
             ShotIdStruct shotIdStruct = new(shotResult.Ammo.Id, shotResult.FragmentIndex);
-            ShotInfoClass shotInfoClass = (shotResult.HittedBallisticCollider != null) ? shotResult.HittedBallisticCollider.ApplyHit(damageInfoStruct, shotIdStruct) : null;
+            var shotInfoClass = (shotResult.HittedBallisticCollider != null) ? shotResult.HittedBallisticCollider.ApplyHit(damageInfoStruct, shotIdStruct) : null;
             shotResult.AddClientHitPosition(shotInfoClass);
-            ExplosiveItemComponentClass itemComponent = shotResult.Ammo.GetItemComponent<ExplosiveItemComponentClass>();
+            var itemComponent = shotResult.Ammo.GetItemComponent<ExplosiveItemComponentClass>();
             if (itemComponent != null && shotResult.TimeSinceShot >= itemComponent.Template.FuzeArmTimeSec)
             {
                 if (Singleton<Effects>.Instantiated)
                 {
-                    string explosionType = itemComponent.Template.ExplosionType;
+                    var explosionType = itemComponent.Template.ExplosionType;
                     if (!string.IsNullOrEmpty(explosionType) && shotResult.IsFirstHit)
                     {
                         Singleton<Effects>.Instance.EmitGrenade(explosionType, shotResult.HitPoint, shotResult.HitNormal, (float)(shotResult.IsForwardHit ? 1 : 0));
@@ -76,9 +76,9 @@ public class FikaClientGameWorld : ClientLocalGameWorld
 
     public override void PlayerTick(float dt)
     {
-        for (int i = AllAlivePlayersList.Count - 1; i >= 0; i--)
+        for (var i = AllAlivePlayersList.Count - 1; i >= 0; i--)
         {
-            Player player = AllAlivePlayersList[i];
+            var player = AllAlivePlayersList[i];
             try
             {
                 player.UpdateTick();
@@ -120,9 +120,9 @@ public class FikaClientGameWorld : ClientLocalGameWorld
         Singleton<FikaClientGameWorld>.Release(this);
         NetManagerUtils.DestroyNetManager(false);
         List<SynchronizableObject> syncObjects = [.. SynchronizableObjectLogicProcessor.GetSynchronizableObjects()];
-        for (int i = 0; i < syncObjects.Count; i++)
+        for (var i = 0; i < syncObjects.Count; i++)
         {
-            SynchronizableObject syncObject = syncObjects[i];
+            var syncObject = syncObjects[i];
             syncObject.OnUpdateRequired -= SynchronizableObjectLogicProcessor.method_1;
             syncObject.Logic.ReturnToPool();
             syncObject.ReturnToPool();

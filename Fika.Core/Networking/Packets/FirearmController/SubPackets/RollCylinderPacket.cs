@@ -13,7 +13,7 @@ public sealed class RollCylinderPacket : IPoolSubPacket
 
     public static RollCylinderPacket FromValue(bool rollToZeroCamora)
     {
-        RollCylinderPacket packet = FirearmSubPacketPoolManager.Instance.GetPacket<RollCylinderPacket>(EFirearmSubPacketType.RollCylinder);
+        var packet = FirearmSubPacketPoolManager.Instance.GetPacket<RollCylinderPacket>(EFirearmSubPacketType.RollCylinder);
         packet.RollToZeroCamora = rollToZeroCamora;
         return packet;
     }
