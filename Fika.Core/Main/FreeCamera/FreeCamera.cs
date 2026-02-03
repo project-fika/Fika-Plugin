@@ -789,6 +789,11 @@ public partial class FreeCamera : MonoBehaviour
     protected void OnDestroy()
     {
         FikaPlugin.Instance.Settings.KeybindOverlay.SettingChanged -= KeybindOverlay_SettingChanged;
+
+        _playerKindCache.Clear();
+        _listPlayers.Clear();
+        _players.Clear();
+
         Destroy(_freecamUI.gameObject);
         Destroy(this);
     }

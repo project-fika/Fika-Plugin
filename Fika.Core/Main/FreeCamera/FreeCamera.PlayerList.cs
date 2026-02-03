@@ -12,6 +12,8 @@ public partial class FreeCamera
     private GUIStyle _rowGuiStyle, _badgeGuiStyle, _hpTextGuiStyle, _nameGuiStyle;
     private FikaPlayer _lastSpectatingPlayer;
     private bool _guiCreated;
+    private readonly Dictionary<int, string> _playerKindCache = [];
+    private readonly List<FikaPlayer> _listPlayers = [];
 
     ECameraState _cameraState;
 
@@ -81,7 +83,7 @@ public partial class FreeCamera
         var hpCur = health.Current;
         var hpMax = health.Maximum;
 
-        var kind = GetPlayerKind(p);
+        var kind = GetPlayerKindCached(p);
         var kindColor = GetKindColor(kind);
 
         const float hpWidth = 100f;
@@ -123,8 +125,25 @@ public partial class FreeCamera
         DrawLabelBox(new Rect(x, y + 2f, kindSize.x + 12f, row.height - 8f), kind, kindColor, _badgeGuiStyle);
     }
 
+    private string GetPlayerKindCached(FikaPlayer p)
+    {
+        if (_playerKindCache.TryGetValue(p.NetId, out var cachedKind))
+        {
+            return cachedKind;
+        }
+
+        var result = GetPlayerKind(p);
+        _playerKindCache[p.NetId] = result;
+        return result;
+    }
+
     private string GetPlayerKind(FikaPlayer p)
     {
+        if (!p.IsObservedAI)
+        {
+            return $"Player ({p.Profile.Info.Side})";
+        }
+
         var role = p.Profile.Info.Settings.Role;
         var kind = role switch
         {
@@ -211,14 +230,14 @@ public partial class FreeCamera
 
     private void DrawPlayerList()
     {
-        List<FikaPlayer> players = [];
+        _listPlayers.Clear();
         var humanPlayers = _coopHandler.HumanPlayers;
         for (var i = 0; i < humanPlayers.Count; i++)
         {
             var player = humanPlayers[i];
             if (!player.IsYourPlayer && player.HealthController.IsAlive)
             {
-                players.Add(player);
+                _listPlayers.Add(player);
             }
         }
         // If no alive players, add bots to spectate pool if enabled
@@ -235,7 +254,7 @@ public partial class FreeCamera
                 {
                     if (player.IsAI && player.HealthController.IsAlive)
                     {
-                        players.Add(player);
+                        _listPlayers.Add(player);
                     }
                 }
             }
@@ -245,20 +264,20 @@ public partial class FreeCamera
                 {
                     if (player.IsObservedAI && player.HealthController.IsAlive)
                     {
-                        players.Add(player);
+                        _listPlayers.Add(player);
                     }
                 }
             }
         }
 
-        if (players == null || players.Count == 0)
+        if (_listPlayers.Count == 0)
         {
             return;
         }
 
-        for (var i = 0; i < players.Count; i++)
+        for (var i = 0; i < _listPlayers.Count; i++)
         {
-            DrawPlayerRow(players[i]);
+            DrawPlayerRow(_listPlayers[i]);
         }
     }
 
