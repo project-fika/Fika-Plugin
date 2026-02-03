@@ -533,7 +533,7 @@ public class LiteNetPeer : IPEndPoint
             throw new ArgumentException("Delivery event will work only for ReliableOrdered/Unordered packets");
         }
 
-        SendInternal(dataWriter.AsReadOnlySpan, 0, deliveryMethod, userData);
+        SendInternal(dataWriter.AsReadOnlySpan(), 0, deliveryMethod, userData);
     }
 
     /// <summary>
@@ -560,7 +560,7 @@ public class LiteNetPeer : IPEndPoint
     ///     Fragment count exceeded ushort.MaxValue<para/>
     /// </exception>
     public void Send(NetDataWriter dataWriter, DeliveryMethod deliveryMethod) =>
-        SendInternal(dataWriter.AsReadOnlySpan, 0, deliveryMethod, null);
+        SendInternal(dataWriter.AsReadOnlySpan(), 0, deliveryMethod, null);
 
     /// <summary>
     /// Send data to peer (channel - 0)

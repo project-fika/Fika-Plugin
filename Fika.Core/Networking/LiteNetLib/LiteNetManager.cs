@@ -1507,7 +1507,7 @@ public partial class LiteNetManager : IEnumerable<LiteNetPeer>
 
             //Create reliable connection
             //And send connection request
-            peer = CreateOutgoingPeer(target, GetNextPeerId(), connectionNumber, connectionData.AsReadOnlySpan);
+            peer = CreateOutgoingPeer(target, GetNextPeerId(), connectionNumber, connectionData.AsReadOnlySpan());
             AddPeer(peer);
             return peer;
         }

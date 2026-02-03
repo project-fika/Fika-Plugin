@@ -32,12 +32,9 @@ public unsafe class NetDataWriter
     /// <summary>
     /// Returns a new <see cref="ReadOnlySpan{T}"/>(<see cref="byte"/>) of the <see cref="Data"/>
     /// </summary>
-    public ReadOnlySpan<byte> AsReadOnlySpan
+    public ReadOnlySpan<byte> AsReadOnlySpan()
     {
-        get
-        {
-            return new(Data, 0, Length);
-        }
+        return new(Data, 0, Length);
     }
 
     internal static readonly UTF8Encoding UTF8Encoding = new(false, true);

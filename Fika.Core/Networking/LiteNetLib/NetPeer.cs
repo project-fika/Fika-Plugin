@@ -42,7 +42,7 @@ public class NetPeer : LiteNetPeer
     ///     Fragment count exceeded ushort.MaxValue<para/>
     /// </exception>
     public void Send(NetDataWriter dataWriter, byte channelNumber, DeliveryMethod deliveryMethod) =>
-        SendInternal(dataWriter.AsReadOnlySpan, channelNumber, deliveryMethod, null);
+        SendInternal(dataWriter.AsReadOnlySpan(), channelNumber, deliveryMethod, null);
 
     /// <summary>
     /// Send data to peer with delivery event called
@@ -103,7 +103,7 @@ public class NetPeer : LiteNetPeer
             throw new ArgumentException("Delivery event will work only for ReliableOrdered/Unordered packets");
         }
 
-        SendInternal(dataWriter.AsReadOnlySpan, channelNumber, deliveryMethod, userData);
+        SendInternal(dataWriter.AsReadOnlySpan(), channelNumber, deliveryMethod, userData);
     }
 
     /// <summary>

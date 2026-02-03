@@ -221,7 +221,7 @@ public class FikaPingingClient : INetEventListener, INatPunchListener, IDisposab
 
         foreach (var ipEndPoint in _endPoints)
         {
-            NetClient.SendUnconnectedMessage(_writer.AsReadOnlySpan, ipEndPoint);
+            NetClient.SendUnconnectedMessage(_writer.AsReadOnlySpan(), ipEndPoint);
         }
     }
 
