@@ -255,7 +255,8 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         {
             if (FikaPlugin.Instance.WanIP == null)
             {
-                throw new NullReferenceException("Failed to start Fika Server because WAN IP was null!");
+                NotificationManagerClass.DisplayMessageNotification("No WAN IP could be found, external players will not be able to join", 
+                    iconType: EFT.Communications.ENotificationIconType.Alert, textColor: Color.red);
             }
 
             _externalIp = FikaPlugin.Instance.WanIP.ToString();
