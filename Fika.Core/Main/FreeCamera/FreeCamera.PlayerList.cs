@@ -245,7 +245,7 @@ public partial class FreeCamera
         if (FikaPlugin.Instance.Settings.AllowSpectateBots.Value)
 #else
 
-        if (players.Count == 0 && FikaPlugin.Instance.Settings.AllowSpectateBots.Value)
+        if (_listPlayers.Count == 0 && FikaPlugin.Instance.Settings.AllowSpectateBots.Value)
 #endif
         {
             if (FikaBackendUtils.IsServer)
