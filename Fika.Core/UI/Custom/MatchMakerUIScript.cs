@@ -457,7 +457,7 @@ public class MatchMakerUIScript : MonoBehaviour
         else
         {
             Singleton<PreloaderUI>.Instance.ShowErrorScreen("ERROR JOINING", errorMessage, null);
-            return true;
+            return false;
         }
     }
 
