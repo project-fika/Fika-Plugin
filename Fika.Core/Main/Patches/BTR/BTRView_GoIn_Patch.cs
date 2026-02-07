@@ -1,4 +1,8 @@
-﻿using Audio.Vehicles.BTR;
+﻿using System;
+using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
+using Audio.Vehicles.BTR;
 using Comfort.Common;
 using EFT;
 using EFT.Vehicle;
@@ -8,10 +12,6 @@ using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.World;
 using HarmonyLib;
 using SPT.Reflection.Patching;
-using System;
-using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Fika.Core.Main.Patches.BTR;
 
@@ -25,7 +25,7 @@ public class BTRView_GoIn_Patch : ModulePatch
     [PatchPrefix]
     public static bool Prefix(BTRView __instance, Player player, BTRSide side, byte placeId, bool fast, ref Task __result)
     {
-        bool isServer = FikaBackendUtils.IsServer;
+        var isServer = FikaBackendUtils.IsServer;
         if (player is ObservedPlayer observedPlayer)
         {
             __result = ObservedGoIn(__instance, observedPlayer, side, placeId, fast);
@@ -35,7 +35,7 @@ public class BTRView_GoIn_Patch : ModulePatch
 
         if (player.IsYourPlayer)
         {
-            FikaPlayer myPlayer = (FikaPlayer)player;
+            var myPlayer = (FikaPlayer)player;
             myPlayer.PacketSender.SendState = false;
             player.InputDirection = new(0, 0);
             if (isServer)

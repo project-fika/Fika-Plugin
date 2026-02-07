@@ -15,7 +15,7 @@ internal class CorpsePositionSyncer : MonoBehaviour
 
     public static void Create(GameObject gameObject, Corpse corpse, int netId)
     {
-        CorpsePositionSyncer corpsePositionSyncer = gameObject.AddComponent<CorpsePositionSyncer>();
+        var corpsePositionSyncer = gameObject.AddComponent<CorpsePositionSyncer>();
         corpsePositionSyncer._corpse = corpse;
         corpsePositionSyncer._world = (FikaHostWorld)Singleton<GameWorld>.Instance.World_0;
         corpsePositionSyncer._counter = 0;

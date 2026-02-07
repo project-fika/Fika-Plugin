@@ -1,5 +1,5 @@
-﻿using SPT.Reflection.Patching;
-using System.Reflection;
+﻿using System.Reflection;
+using SPT.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.Camera;
 

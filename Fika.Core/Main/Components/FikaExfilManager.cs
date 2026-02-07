@@ -1,4 +1,6 @@
-﻿using Comfort.Common;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Comfort.Common;
 using EFT;
 using EFT.Interactive;
 using EFT.Interactive.SecretExfiltrations;
@@ -7,8 +9,6 @@ using Fika.Core.Main.Players;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Fika.Core.Main.Components;
 

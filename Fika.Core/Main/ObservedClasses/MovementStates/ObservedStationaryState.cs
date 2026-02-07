@@ -1,5 +1,5 @@
-﻿using EFT;
-using System;
+﻿using System;
+using EFT;
 
 namespace Fika.Core.Main.ObservedClasses.MovementStates;
 

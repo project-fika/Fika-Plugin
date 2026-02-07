@@ -1,9 +1,9 @@
-﻿using Comfort.Common;
+﻿using System.Collections.Generic;
+using System.Reflection;
+using Comfort.Common;
 using EFT;
 using Fika.Core.Networking;
 using SPT.Reflection.Patching;
-using System.Collections.Generic;
-using System.Reflection;
 
 namespace Fika.Core.Main.Patches;
 

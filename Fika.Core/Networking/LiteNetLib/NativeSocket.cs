@@ -146,21 +146,27 @@ internal static class NativeSocket
 
     public static SocketError GetSocketError()
     {
-        int error = Marshal.GetLastWin32Error();
+        var error = Marshal.GetLastWin32Error();
         if (UnixMode)
+        {
             return NativeErrorToSocketError.TryGetValue(error, out var err)
                 ? err
                 : SocketError.SocketError;
+        }
+
         return (SocketError)error;
     }
 
     public static SocketException GetSocketException()
     {
-        int error = Marshal.GetLastWin32Error();
+        var error = Marshal.GetLastWin32Error();
         if (UnixMode)
+        {
             return NativeErrorToSocketError.TryGetValue(error, out var err)
                 ? new SocketException((int)err)
                 : new SocketException((int)SocketError.SocketError);
+        }
+
         return new SocketException(error);
     }
 

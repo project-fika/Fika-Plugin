@@ -1,9 +1,9 @@
-﻿using BepInEx.Logging;
+﻿using System;
+using BepInEx.Logging;
 using Comfort.Common;
 using EFT.GlobalEvents;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.World;
-using System;
 
 namespace Fika.Core.Main.Components;
 

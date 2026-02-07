@@ -49,12 +49,15 @@ public struct ClientConfigModel
     [DataMember(Name = "allowNamePlates")]
     public bool AllowNamePlates { get; set; }
 
+    [DataMember(Name = "randomLabyrinthSpawns")]
+    public bool RandomLabyrinthSpawns { get; set; }
+
     public readonly void LogValues()
     {
         FikaGlobals.LogInfo("Received config from server:");
-        foreach (var field in typeof(ClientConfigModel).GetFields())
+        foreach (var property in typeof(ClientConfigModel).GetProperties())
         {
-            var value = field.GetValue(this);
+            var value = property.GetValue(this);
             if (value is Array valueArray)
             {
                 var values = "";
@@ -67,10 +70,10 @@ public struct ClientConfigModel
                     }
                     values = values + ", " + valueArray.GetValue(i);
                 }
-                FikaGlobals.LogInfo(field.Name + ": " + values);
+                FikaGlobals.LogInfo(property.Name + ": " + values);
                 continue;
             }
-            FikaGlobals.LogInfo(field.Name + ": " + value);
+            FikaGlobals.LogInfo(property.Name + ": " + value);
         }
     }
 }

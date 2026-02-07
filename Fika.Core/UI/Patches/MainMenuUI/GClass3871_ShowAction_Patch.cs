@@ -1,8 +1,8 @@
-﻿using Comfort.Common;
+﻿using System.Reflection;
+using Comfort.Common;
 using Fika.Core.Networking;
 using Fika.Core.UI.Custom;
 using SPT.Reflection.Patching;
-using System.Reflection;
 using static EFT.UI.InventoryScreen;
 using static Fika.Core.UI.FikaUIGlobals;
 

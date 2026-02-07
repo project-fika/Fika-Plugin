@@ -20,7 +20,7 @@ public sealed class MountingPacket : IPoolSubPacket
     public static MountingPacket FromValue(MountingPacketStruct.EMountingCommand command, bool isMounted,
         Vector3 mountDirection, Vector3 mountingPoint, float currentMountingPointVerticalOffset, short mountingDirection)
     {
-        MountingPacket packet = CommonSubPacketPoolManager.Instance.GetPacket<MountingPacket>(ECommonSubPacketType.Mounting);
+        var packet = CommonSubPacketPoolManager.Instance.GetPacket<MountingPacket>(ECommonSubPacketType.Mounting);
         packet.Command = command;
         packet.IsMounted = isMounted;
         packet.MountDirection = mountDirection;

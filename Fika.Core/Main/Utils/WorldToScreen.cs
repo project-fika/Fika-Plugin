@@ -24,8 +24,8 @@ public static class WorldToScreen
 
         var projCam = camClass.Camera;
 
-        Vector2 canvasSize = canvasRect.sizeDelta;
-        float scaleFactor = 1f;
+        var canvasSize = canvasRect.sizeDelta;
+        var scaleFactor = 1f;
 
         // Use optic camera if zoomed
         if (useOpticCamera && IsZoomedOpticAiming(mainPlayer.ProceduralWeaponAnimation))

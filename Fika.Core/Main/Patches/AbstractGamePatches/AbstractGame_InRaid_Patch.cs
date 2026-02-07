@@ -1,7 +1,7 @@
-﻿using EFT;
+﻿using System.Reflection;
+using EFT;
 using Fika.Core.Main.GameMode;
 using SPT.Reflection.Patching;
-using System.Reflection;
 
 namespace Fika.Core.Main.Patches.AbstractGamePatches;
 

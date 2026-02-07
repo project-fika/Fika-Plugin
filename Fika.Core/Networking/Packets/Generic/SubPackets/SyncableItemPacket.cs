@@ -18,7 +18,7 @@ public sealed class SyncableItemPacket : IPoolSubPacket
 
     public static SyncableItemPacket FromValue(int netId, Turnable.EState state)
     {
-        SyncableItemPacket packet = GenericSubPacketPoolManager.Instance.GetPacket<SyncableItemPacket>(EGenericSubPacketType.SyncableItem);
+        var packet = GenericSubPacketPoolManager.Instance.GetPacket<SyncableItemPacket>(EGenericSubPacketType.SyncableItem);
         packet.NetId = netId;
         packet.SyncType = ESyncType.LampState;
         packet.LampStates = state;
@@ -27,7 +27,7 @@ public sealed class SyncableItemPacket : IPoolSubPacket
 
     public static SyncableItemPacket FromValue(int netId, Vector3 hitPoint)
     {
-        SyncableItemPacket packet = GenericSubPacketPoolManager.Instance.GetPacket<SyncableItemPacket>(EGenericSubPacketType.SyncableItem);
+        var packet = GenericSubPacketPoolManager.Instance.GetPacket<SyncableItemPacket>(EGenericSubPacketType.SyncableItem);
         packet.NetId = netId;
         packet.SyncType = ESyncType.WindowBreak;
         packet.WindowStates = hitPoint;
@@ -47,7 +47,7 @@ public sealed class SyncableItemPacket : IPoolSubPacket
         }
         else
         {
-            if (Singleton<GameWorld>.Instance.Windows.TryGetByKey(NetId, out WindowBreaker windowBreaker))
+            if (Singleton<GameWorld>.Instance.Windows.TryGetByKey(NetId, out var windowBreaker))
             {
                 DamageInfoStruct damageInfoStruct = new()
                 {

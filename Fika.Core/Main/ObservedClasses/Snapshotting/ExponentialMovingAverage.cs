@@ -15,7 +15,7 @@ public struct ExponentialMovingAverage(int n)
     {
         if (_initialized)
         {
-            double delta = newValue - Value;
+            var delta = newValue - Value;
             Value += _alpha * delta;
             Variance = (1 - _alpha) * (Variance + _alpha * delta * delta);
             StandardDeviation = Math.Sqrt(Variance);

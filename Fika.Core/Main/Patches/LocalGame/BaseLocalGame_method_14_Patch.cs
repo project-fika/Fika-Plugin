@@ -1,8 +1,8 @@
-﻿using EFT;
+﻿using System.Collections.Generic;
+using System.Reflection;
+using EFT;
 using Fika.Core.Main.GameMode;
 using SPT.Reflection.Patching;
-using System.Collections.Generic;
-using System.Reflection;
 
 namespace Fika.Core.Main.Patches.LocalGame;
 

@@ -1,4 +1,8 @@
-﻿using BepInEx;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
+using BepInEx;
 using BepInEx.Bootstrap;
 using BepInEx.Logging;
 using Comfort.Common;
@@ -10,10 +14,6 @@ using Newtonsoft.Json;
 using SPT.Common.Http;
 using SPT.Custom.Utils;
 using SPT.Reflection.Patching;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
 
 namespace Fika.Core.Main.Utils;
 
@@ -45,9 +45,9 @@ public class FikaModHandler
 
         foreach (var pluginInfo in pluginInfos)
         {
-            string location = pluginInfo.Location;
-            byte[] fileBytes = File.ReadAllBytes(location);
-            uint crc32 = CRC32C.Compute(fileBytes, 0, fileBytes.Length);
+            var location = pluginInfo.Location;
+            var fileBytes = File.ReadAllBytes(location);
+            var crc32 = CRC32C.Compute(fileBytes, 0, fileBytes.Length);
             loadedMods.Add(pluginInfo.Metadata.GUID, crc32);
             _logger.LogInfo($"Loaded plugin: [{pluginInfo.Metadata.Name}] with GUID [{pluginInfo.Metadata.GUID}] and crc32 [{crc32}]");
             if (pluginInfo.Metadata.GUID == "com.fika.core")
@@ -58,10 +58,10 @@ public class FikaModHandler
             CheckSpecialMods(pluginInfo.Metadata.GUID);
         }
 
-        string modValidationRequestJson = JsonConvert.SerializeObject(loadedMods);
+        var modValidationRequestJson = JsonConvert.SerializeObject(loadedMods);
         _logger.LogDebug(modValidationRequestJson);
 
-        string validationJson = RequestHandler.PostJson("/fika/client/check/mods", modValidationRequestJson);
+        var validationJson = RequestHandler.PostJson("/fika/client/check/mods", modValidationRequestJson);
         _logger.LogDebug(validationJson);
 
         var validationResult = JsonConvert.DeserializeObject<ModValidationResponse>(validationJson);
@@ -74,7 +74,7 @@ public class FikaModHandler
         }
 
         // If any errors were detected we will print what has happened
-        bool installationError =
+        var installationError =
             validationResult.Forbidden.Length > 0 ||
             validationResult.MissingRequired.Length > 0 ||
             validationResult.HashMismatch.Length > 0;

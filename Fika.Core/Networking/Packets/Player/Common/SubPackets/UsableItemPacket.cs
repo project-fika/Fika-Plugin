@@ -14,7 +14,7 @@ public sealed class UsableItemPacket : IPoolSubPacket
 
     public static UsableItemPacket FromValue(bool hasCompassState, bool compassState, bool examineWeapon, bool hasAim, bool aimState)
     {
-        UsableItemPacket packet = CommonSubPacketPoolManager.Instance.GetPacket<UsableItemPacket>(ECommonSubPacketType.UsableItem);
+        var packet = CommonSubPacketPoolManager.Instance.GetPacket<UsableItemPacket>(ECommonSubPacketType.UsableItem);
         packet.HasCompassState = hasCompassState;
         packet.CompassState = compassState;
         packet.ExamineWeapon = examineWeapon;

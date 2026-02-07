@@ -1,7 +1,7 @@
-﻿using EFT;
-using SPT.Reflection.Patching;
-using System;
+﻿using System;
 using System.Reflection;
+using EFT;
+using SPT.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches;
 
@@ -23,7 +23,7 @@ public class BotCacher_Patch : ModulePatch
         }
         else
         {
-            string text = LocalBotSettingsProviderClass.LoadCoreByString();
+            var text = LocalBotSettingsProviderClass.LoadCoreByString();
             if (text == null)
             {
                 core = null;
@@ -33,9 +33,9 @@ public class BotCacher_Patch : ModulePatch
             core = CoreBotSettingsClass.Create(text);
         }
 
-        foreach (object type in Enum.GetValues(typeof(WildSpawnType)))
+        foreach (var type in Enum.GetValues(typeof(WildSpawnType)))
         {
-            foreach (object difficulty in Enum.GetValues(typeof(BotDifficulty)))
+            foreach (var difficulty in Enum.GetValues(typeof(BotDifficulty)))
             {
                 BotSettingsComponents botSettingsComponents;
                 botSettingsComponents = FikaPlugin.Instance.BotDifficulties.GetComponent((BotDifficulty)difficulty, (WildSpawnType)type);

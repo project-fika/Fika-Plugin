@@ -1,10 +1,10 @@
-﻿using Comfort.Common;
+﻿using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
+using Comfort.Common;
 using EFT;
 using Fika.Core.Main.Utils;
 using SPT.Reflection.Patching;
-using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Fika.Core.Main.Patches.BTR;
 

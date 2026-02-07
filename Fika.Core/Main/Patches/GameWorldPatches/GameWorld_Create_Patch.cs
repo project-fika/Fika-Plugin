@@ -1,10 +1,10 @@
-﻿using EFT;
+﻿using System.Reflection;
+using EFT;
 using Fika.Core.Main.ClientClasses;
 using Fika.Core.Main.HostClasses;
 using Fika.Core.Main.Utils;
 using HarmonyLib;
 using SPT.Reflection.Patching;
-using System.Reflection;
 
 namespace Fika.Core.Main.Patches.GameWorldPatches;
 
@@ -41,8 +41,8 @@ public class GameWorld_Create_Patch : ModulePatch
 
     private static GameWorld CreateHideoutWorld(GameObject gameObject, PoolManagerClass objectsFactory, EUpdateQueue updateQueue, MongoID? currentProfileId)
     {
-        HideoutGameWorld gameWorld = gameObject.AddComponent<HideoutGameWorld>();
-        Traverse gameWorldTraverse = Traverse.Create(gameWorld);
+        var gameWorld = gameObject.AddComponent<HideoutGameWorld>();
+        var gameWorldTraverse = Traverse.Create(gameWorld);
         gameWorldTraverse.Field<PoolManagerClass>("ObjectsFactory").Value = objectsFactory;
         gameWorldTraverse.Field<EUpdateQueue>("eupdateQueue_0").Value = updateQueue;
         gameWorld.SpeakerManager = gameObject.AddComponent<SpeakerManager>();

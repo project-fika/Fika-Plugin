@@ -34,7 +34,7 @@ public abstract class BasePacketPoolManager<TEnum, TType>
         if (_pool == null)
         {
             _pool = new PacketPool<TType>[_subPacketFactories.Length];
-            for (int i = 0; i < _subPacketFactories.Length; i++)
+            for (var i = 0; i < _subPacketFactories.Length; i++)
             {
                 _pool[i] = new(2, _subPacketFactories[i]);
             }
@@ -50,7 +50,7 @@ public abstract class BasePacketPoolManager<TEnum, TType>
     {
         if (_pool != null)
         {
-            for (int i = 0; i < _pool.Length; i++)
+            for (var i = 0; i < _pool.Length; i++)
             {
                 _pool[i].Dispose();
             }

@@ -1,6 +1,6 @@
-﻿using Fika.Core.Main.Utils;
+﻿using System.Reflection;
+using Fika.Core.Main.Utils;
 using SPT.Reflection.Patching;
-using System.Reflection;
 
 namespace Fika.Core.Main.Patches.Mines;
 

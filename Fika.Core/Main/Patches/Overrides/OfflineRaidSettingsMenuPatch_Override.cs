@@ -1,11 +1,11 @@
-﻿using EFT;
+﻿using System.Collections.Generic;
+using System.Reflection;
+using EFT;
 using EFT.UI;
 using EFT.UI.Matchmaker;
 using Fika.Core.Main.Utils;
 using HarmonyLib;
 using SPT.Reflection.Patching;
-using System.Collections.Generic;
-using System.Reflection;
 
 namespace Fika.Core.Main.Patches.Overrides;
 
@@ -44,7 +44,7 @@ public class OfflineRaidSettingsMenuPatch_Override : ModulePatch
         ____coopModeToggle.onValueChanged.RemoveAllListeners();
         ____coopModeToggle.isOn = true;
 
-        LocalizedText captionText = __instance.gameObject.transform.GetChild(0).GetChild(1).GetComponent<LocalizedText>();
+        var captionText = __instance.gameObject.transform.GetChild(0).GetChild(1).GetComponent<LocalizedText>();
         if (captionText != null)
         {
             captionText.method_2(LocaleUtils.UI_COOP_RAID_SETTINGS.Localized());
@@ -59,23 +59,23 @@ public class OfflineRaidSettingsMenuPatch_Override : ModulePatch
             weatherCanvasGroups = ____weatherCanvasGroups;
         }
 
-        foreach (CanvasGroup canvasGroup in ____waterAndFoodCanvasGroups)
+        foreach (var canvasGroup in ____waterAndFoodCanvasGroups)
         {
             canvasGroup.SetUnlockStatus(true, true);
         }
 
-        foreach (CanvasGroup canvasGroup in ____playersSpawnPlaceCanvasGroups)
+        foreach (var canvasGroup in ____playersSpawnPlaceCanvasGroups)
         {
             canvasGroup.SetUnlockStatus(true, true);
         }
 
-        foreach (CanvasGroup canvasGroup in ____timeCanvasGroups)
+        foreach (var canvasGroup in ____timeCanvasGroups)
         {
             canvasGroup.SetUnlockStatus(true, true);
         }
 
         // Remove redundant settings and add our own "Random" to make the setting clear, while also renaming index 0 to "Together"
-        List<BaseDropDownBox.Struct1160> labelList = Traverse.Create(____playersSpawnPlaceDropdown).Field<List<BaseDropDownBox.Struct1160>>("list_0").Value;
+        var labelList = Traverse.Create(____playersSpawnPlaceDropdown).Field<List<BaseDropDownBox.Struct1160>>("list_0").Value;
         labelList.Clear();
         labelList.Add(new()
         {
@@ -91,23 +91,23 @@ public class OfflineRaidSettingsMenuPatch_Override : ModulePatch
 
         instance = __instance;
 
-        GameObject timeFlowDropDown = GameObject.Find("TimeFlowDropdown");
+        var timeFlowDropDown = GameObject.Find("TimeFlowDropdown");
         if (timeFlowDropDown != null)
         {
-            GameObject tooltip = timeFlowDropDown.transform.parent.GetChild(1).gameObject;
+            var tooltip = timeFlowDropDown.transform.parent.GetChild(1).gameObject;
             tooltip.SetActive(false);
 
-            CanvasGroup timeFlowCanvasGroup = timeFlowDropDown.GetComponent<CanvasGroup>();
+            var timeFlowCanvasGroup = timeFlowDropDown.GetComponent<CanvasGroup>();
             if (timeFlowCanvasGroup != null)
             {
                 timeFlowCanvasGroup.SetUnlockStatus(true, true);
             }
             ____timeFlowDropdown.Interactable = true;
 
-            GameObject timeFlowText = GameObject.Find("TimeFlowText");
+            var timeFlowText = GameObject.Find("TimeFlowText");
             if (timeFlowText != null)
             {
-                CanvasGroup group = timeFlowText.GetComponent<CanvasGroup>();
+                var group = timeFlowText.GetComponent<CanvasGroup>();
                 if (group != null)
                 {
                     group.SetUnlockStatus(true, true);
@@ -121,10 +121,10 @@ public class OfflineRaidSettingsMenuPatch_Override : ModulePatch
             ____randomWeatherToggle.Bind(ToggleWeather);
             ____randomTimeToggle.gameObject.GetComponent<CanvasGroup>().SetUnlockStatus(false, false);
 
-            GameObject weatherToggle = GameObject.Find("RandomWeatherCheckmark");
+            var weatherToggle = GameObject.Find("RandomWeatherCheckmark");
             if (weatherToggle != null)
             {
-                CustomTextMeshProUGUI customTmp = weatherToggle.GetComponentInChildren<CustomTextMeshProUGUI>();
+                var customTmp = weatherToggle.GetComponentInChildren<CustomTextMeshProUGUI>();
                 if (customTmp != null)
                 {
                     customTmp.SetText("Use custom weather");
@@ -145,7 +145,7 @@ public class OfflineRaidSettingsMenuPatch_Override : ModulePatch
             return;
         }
 
-        foreach (CanvasGroup item in weatherCanvasGroups)
+        foreach (var item in weatherCanvasGroups)
         {
             item.SetUnlockStatus(enabled, enabled);
         }

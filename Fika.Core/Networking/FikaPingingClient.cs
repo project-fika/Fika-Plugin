@@ -221,7 +221,7 @@ public class FikaPingingClient : INetEventListener, INatPunchListener, IDisposab
 
         foreach (var ipEndPoint in _endPoints)
         {
-            NetClient.SendUnconnectedMessage(_writer.AsReadOnlySpan, ipEndPoint);
+            NetClient.SendUnconnectedMessage(_writer.AsReadOnlySpan(), ipEndPoint);
         }
     }
 
@@ -388,6 +388,7 @@ public class FikaPingingClient : INetEventListener, INatPunchListener, IDisposab
         _candidates = null;
         _writer.Reset();
         _writer = null;
+        _cts?.Cancel();
 
         NetClient.Stop();
         if (!Singleton<FikaPingingClient>.TryRelease(this))

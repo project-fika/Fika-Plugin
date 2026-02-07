@@ -1,4 +1,5 @@
-﻿using Comfort.Common;
+﻿using System;
+using Comfort.Common;
 using EFT;
 using EFT.Airdrop;
 using EFT.Interactive;
@@ -6,7 +7,6 @@ using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
-using System;
 
 namespace Fika.Core.Networking.Packets.World;
 
@@ -42,7 +42,7 @@ public class SpawnSyncObjectSubPackets
 
         public void Execute(FikaPlayer player)
         {
-            SyncObjectProcessorClass processor = Singleton<GameWorld>.Instance.SynchronizableObjectLogicProcessor;
+            var processor = Singleton<GameWorld>.Instance.SynchronizableObjectLogicProcessor;
             if (processor == null)
             {
                 return;
@@ -54,7 +54,7 @@ public class SpawnSyncObjectSubPackets
                 return;
             }
 
-            TripwireSynchronizableObject syncObject = (TripwireSynchronizableObject)processor.TakeFromPool(SynchronizableObjectType.Tripwire);
+            var syncObject = (TripwireSynchronizableObject)processor.TakeFromPool(SynchronizableObjectType.Tripwire);
             syncObject.ObjectId = ObjectId;
             syncObject.IsStatic = IsStatic;
             syncObject.transform.SetPositionAndRotation(Position, Rotation);
@@ -97,13 +97,13 @@ public class SpawnSyncObjectSubPackets
 
         public void Execute(FikaPlayer player)
         {
-            SyncObjectProcessorClass processor = Singleton<GameWorld>.Instance.SynchronizableObjectLogicProcessor;
+            var processor = Singleton<GameWorld>.Instance.SynchronizableObjectLogicProcessor;
             if (processor == null)
             {
                 return;
             }
 
-            AirplaneSynchronizableObject syncObject = (AirplaneSynchronizableObject)processor.TakeFromPool(SynchronizableObjectType.AirPlane);
+            var syncObject = (AirplaneSynchronizableObject)processor.TakeFromPool(SynchronizableObjectType.AirPlane);
             syncObject.ObjectId = ObjectId;
             syncObject.transform.SetPositionAndRotation(Position, Rotation);
             processor.InitSyncObject(syncObject, Position, Rotation.eulerAngles, ObjectId);
@@ -147,7 +147,7 @@ public class SpawnSyncObjectSubPackets
 
         public void Execute(FikaPlayer player)
         {
-            SyncObjectProcessorClass processor = Singleton<GameWorld>.Instance.SynchronizableObjectLogicProcessor;
+            var processor = Singleton<GameWorld>.Instance.SynchronizableObjectLogicProcessor;
             if (processor == null)
             {
                 return;
@@ -157,7 +157,7 @@ public class SpawnSyncObjectSubPackets
             FikaGlobals.LogWarning($"Spawning airdrop at {Position} with id {ObjectId}");
 #endif
 
-            AirdropSynchronizableObject syncObject = (AirdropSynchronizableObject)processor.TakeFromPool(SynchronizableObjectType.AirDrop);
+            var syncObject = (AirdropSynchronizableObject)processor.TakeFromPool(SynchronizableObjectType.AirDrop);
             syncObject.ObjectId = ObjectId;
             syncObject.transform.position = Position;
             syncObject.transform.rotation = Rotation;
@@ -170,7 +170,7 @@ public class SpawnSyncObjectSubPackets
                 FikaGlobals.LogWarning("AirdropSynchronizableObject logic was not of type AirdropLogicClass!");
             }
             syncObject.AirdropType = AirdropType;
-            LootableContainer container = syncObject.GetComponentInChildren<LootableContainer>().gameObject.GetComponentInChildren<LootableContainer>();
+            var container = syncObject.GetComponentInChildren<LootableContainer>().gameObject.GetComponentInChildren<LootableContainer>();
             container.enabled = true;
             container.Id = ContainerId;
             if (NetId > 0)

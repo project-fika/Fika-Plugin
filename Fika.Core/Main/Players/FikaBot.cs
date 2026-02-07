@@ -1,5 +1,8 @@
 ﻿// © 2026 Lacyway All Rights Reserved
 
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
 using EFT.Ballistics;
@@ -16,9 +19,6 @@ using Fika.Core.Networking.Packets.Communication;
 using Fika.Core.Networking.Packets.Player.Common;
 using Fika.Core.Networking.Packets.Player.Common.SubPackets;
 using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using static Fika.Core.UI.FikaUIGlobals;
 
 namespace Fika.Core.Main.Players;
@@ -301,9 +301,11 @@ public class FikaBot : FikaPlayer
                 if (LastAggressor is FikaPlayer aggressor)
                 {
                     if (aggressor.gameObject.name.StartsWith("Player_") || aggressor.IsYourPlayer)
+                    {
                         NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.KILLED_BOSS.Localized(),
                             [ColorizeText(EColor.GREEN, LastAggressor.Profile.Info.MainProfileNickname), ColorizeText(EColor.BROWN, name)]),
                             iconType: EFT.Communications.ENotificationIconType.Friend);
+                    }
                 }
             }
         }

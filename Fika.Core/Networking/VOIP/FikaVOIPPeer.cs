@@ -1,5 +1,5 @@
-﻿using Comfort.Common;
-using System;
+﻿using System;
+using Comfort.Common;
 
 namespace Fika.Core.Networking.VOIP;
 

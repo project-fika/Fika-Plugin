@@ -1,10 +1,10 @@
-﻿using EFT;
+﻿using System;
+using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Pooling;
-using System;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
@@ -17,7 +17,7 @@ public sealed class ReloadMagPacket : IPoolSubPacket
 
     public static ReloadMagPacket FromValue(MongoID magId, byte[] locationDescription, bool reload)
     {
-        ReloadMagPacket packet = FirearmSubPacketPoolManager.Instance.GetPacket<ReloadMagPacket>(EFirearmSubPacketType.ReloadMag);
+        var packet = FirearmSubPacketPoolManager.Instance.GetPacket<ReloadMagPacket>(EFirearmSubPacketType.ReloadMag);
         packet.MagId = magId;
         packet.LocationDescription = locationDescription;
         packet.Reload = reload;
@@ -40,7 +40,7 @@ public sealed class ReloadMagPacket : IPoolSubPacket
             MagazineItemClass magazine = null;
             try
             {
-                GStruct156<Item> result = player.FindItemById(MagId);
+                var result = player.FindItemById(MagId);
                 if (!result.Succeeded)
                 {
                     FikaGlobals.LogError(result.Error.ToString());
@@ -66,10 +66,10 @@ public sealed class ReloadMagPacket : IPoolSubPacket
             {
                 try
                 {
-                    using GClass1283 eftReader = PacketToEFTReaderAbstractClass.Get(LocationDescription);
+                    using var eftReader = PacketToEFTReaderAbstractClass.Get(LocationDescription);
                     if (LocationDescription.Length != 0)
                     {
-                        GClass1950 descriptor = eftReader.ReadPolymorph<GClass1950>();
+                        var descriptor = eftReader.ReadPolymorph<GClass1950>();
                         gridItemAddress = player.InventoryController.ToItemAddress(descriptor);
                     }
                 }

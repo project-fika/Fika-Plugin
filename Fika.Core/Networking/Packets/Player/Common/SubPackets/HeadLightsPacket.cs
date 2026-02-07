@@ -17,7 +17,7 @@ public sealed class HeadLightsPacket : IPoolSubPacket
 
     public static HeadLightsPacket FromValue(int amount, bool isSilent, FirearmLightStateStruct[] lightStates)
     {
-        HeadLightsPacket packet = CommonSubPacketPoolManager.Instance.GetPacket<HeadLightsPacket>(ECommonSubPacketType.HeadLights);
+        var packet = CommonSubPacketPoolManager.Instance.GetPacket<HeadLightsPacket>(ECommonSubPacketType.HeadLights);
         packet.Amount = amount;
         packet.IsSilent = isSilent;
         packet.LightStates = lightStates;
@@ -39,7 +39,7 @@ public sealed class HeadLightsPacket : IPoolSubPacket
         writer.Put(IsSilent);
         if (Amount > 0)
         {
-            for (int i = 0; i < Amount; i++)
+            for (var i = 0; i < Amount; i++)
             {
                 writer.Put(LightStates[i].Id);
                 writer.Put(LightStates[i].IsActive);
@@ -55,7 +55,7 @@ public sealed class HeadLightsPacket : IPoolSubPacket
         if (Amount > 0)
         {
             LightStates = new FirearmLightStateStruct[Amount];
-            for (int i = 0; i < Amount; i++)
+            for (var i = 0; i < Amount; i++)
             {
                 LightStates[i] = new()
                 {

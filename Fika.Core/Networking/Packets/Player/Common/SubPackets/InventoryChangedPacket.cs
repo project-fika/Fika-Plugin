@@ -17,7 +17,7 @@ public sealed class InventoryChangedPacket : IPoolSubPacket
 
     public static InventoryChangedPacket FromValue(bool inventoryOpen)
     {
-        InventoryChangedPacket packet = CommonSubPacketPoolManager.Instance.GetPacket<InventoryChangedPacket>(ECommonSubPacketType.InventoryChanged);
+        var packet = CommonSubPacketPoolManager.Instance.GetPacket<InventoryChangedPacket>(ECommonSubPacketType.InventoryChanged);
         packet.InventoryOpen = inventoryOpen;
         return packet;
     }

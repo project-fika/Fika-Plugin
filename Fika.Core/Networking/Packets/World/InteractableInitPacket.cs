@@ -1,5 +1,5 @@
-﻿using ComponentAce.Compression.Libs.zlib;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using ComponentAce.Compression.Libs.zlib;
 
 namespace Fika.Core.Networking.Packets.World;
 
@@ -24,7 +24,7 @@ public struct InteractableInitPacket(bool isRequest) : INetSerializable
         writer.Put(IsRequest);
         if (!IsRequest)
         {
-            byte[] data = SimpleZlib.CompressToBytes(Interactables.ToJson([]), 6);
+            var data = SimpleZlib.CompressToBytes(Interactables.ToJson([]), 6);
             writer.PutByteArray(data);
         }
     }

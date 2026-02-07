@@ -1,5 +1,5 @@
-﻿using Fika.Core.Main.Players;
-using System;
+﻿using System;
+using Fika.Core.Main.Players;
 
 namespace Fika.Core.Networking.Packets;
 

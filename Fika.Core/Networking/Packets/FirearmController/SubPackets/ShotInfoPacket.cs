@@ -32,7 +32,7 @@ public sealed class ShotInfoPacket : IPoolSubPacket
 
     public static ShotInfoPacket FromDryShot(int chamberIndex, bool underbarrelShot, EShotType shotType)
     {
-        ShotInfoPacket packet = FirearmSubPacketPoolManager.Instance.GetPacket<ShotInfoPacket>(EFirearmSubPacketType.ShotInfo);
+        var packet = FirearmSubPacketPoolManager.Instance.GetPacket<ShotInfoPacket>(EFirearmSubPacketType.ShotInfo);
         packet.ShotType = shotType;
         packet.ChamberIndex = chamberIndex;
         packet.UnderbarrelShot = underbarrelShot;
@@ -41,7 +41,7 @@ public sealed class ShotInfoPacket : IPoolSubPacket
 
     public static ShotInfoPacket FromMisfire(MongoID ammoTemplate, float overheat, EShotType shotType)
     {
-        ShotInfoPacket packet = FirearmSubPacketPoolManager.Instance.GetPacket<ShotInfoPacket>(EFirearmSubPacketType.ShotInfo);
+        var packet = FirearmSubPacketPoolManager.Instance.GetPacket<ShotInfoPacket>(EFirearmSubPacketType.ShotInfo);
         packet.AmmoTemplate = ammoTemplate;
         packet.Overheat = overheat;
         packet.ShotType = shotType;
@@ -52,7 +52,7 @@ public sealed class ShotInfoPacket : IPoolSubPacket
         float lastShotOverheat, float lastShotTime, float durability, int chamberIndex, bool underbarrelShot,
         bool slideOnOverheatReached, EShotType shotType)
     {
-        ShotInfoPacket packet = FirearmSubPacketPoolManager.Instance.GetPacket<ShotInfoPacket>(EFirearmSubPacketType.ShotInfo);
+        var packet = FirearmSubPacketPoolManager.Instance.GetPacket<ShotInfoPacket>(EFirearmSubPacketType.ShotInfo);
         packet.ShotPosition = shotPosition;
         packet.ShotDirection = shotDirection;
         packet.AmmoTemplate = ammoTemplate;

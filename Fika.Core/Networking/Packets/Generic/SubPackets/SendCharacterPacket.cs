@@ -1,6 +1,5 @@
 ﻿using Comfort.Common;
 using EFT;
-using Fika.Core.Main.Components;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Pooling;
 
@@ -17,7 +16,7 @@ public sealed class SendCharacterPacket : IPoolSubPacket
 
     public static SendCharacterPacket FromValue(PlayerInfoPacket playerInfoPacket, bool isAlive, bool isAi, Vector3 position, int netId)
     {
-        SendCharacterPacket packet = GenericSubPacketPoolManager.Instance.GetPacket<SendCharacterPacket>(EGenericSubPacketType.SendCharacter);
+        var packet = GenericSubPacketPoolManager.Instance.GetPacket<SendCharacterPacket>(EGenericSubPacketType.SendCharacter);
         packet.PlayerInfoPacket = playerInfoPacket;
         packet.IsAlive = isAlive;
         packet.IsAI = isAi;
@@ -34,7 +33,7 @@ public sealed class SendCharacterPacket : IPoolSubPacket
 
     public void Execute(FikaPlayer player = null)
     {
-        CoopHandler handler = Singleton<IFikaNetworkManager>.Instance.CoopHandler;
+        var handler = Singleton<IFikaNetworkManager>.Instance.CoopHandler;
         if (handler != null)
         {
             handler.QueueProfile(PlayerInfoPacket.Profile, PlayerInfoPacket.HealthByteArray, Position, NetId, IsAlive, IsAI,

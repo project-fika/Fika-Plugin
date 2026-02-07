@@ -1,11 +1,11 @@
 ﻿// © 2026 Lacyway All Rights Reserved
 
+using System;
+using System.Collections.Generic;
 using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Main.Players;
-using System;
-using System.Collections.Generic;
 
 namespace Fika.Core.Main.ObservedClasses.HandsControllers;
 
@@ -15,14 +15,14 @@ internal class ObservedGrenadeController : Player.GrenadeHandsController
 
     public static ObservedGrenadeController Create(ObservedPlayer observedPlayer, ThrowWeapItemClass item)
     {
-        ObservedGrenadeController controller = smethod_9<ObservedGrenadeController>(observedPlayer, item);
+        var controller = smethod_9<ObservedGrenadeController>(observedPlayer, item);
         controller._observedPlayer = observedPlayer;
         return controller;
     }
 
     public override Dictionary<Type, OperationFactoryDelegate> GetOperationFactoryDelegates()
     {
-        Dictionary<Type, OperationFactoryDelegate> operationFactoryDelegates = base.GetOperationFactoryDelegates();
+        var operationFactoryDelegates = base.GetOperationFactoryDelegates();
         operationFactoryDelegates[typeof(TripwireStateManagerClass)] = new OperationFactoryDelegate(Grenade1);
         return operationFactoryDelegates;
     }

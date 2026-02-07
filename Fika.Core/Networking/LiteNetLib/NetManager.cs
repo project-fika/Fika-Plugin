@@ -74,7 +74,7 @@ public class NetManager : LiteNetManager
 
             var copiedData = new byte[packet.Size];
             Buffer.BlockCopy(packet.RawData, 0, copiedData, 0, packet.Size);
-            NtpPacket ntpPacket = NtpPacket.FromServerResponse(copiedData, DateTime.UtcNow);
+            var ntpPacket = NtpPacket.FromServerResponse(copiedData, DateTime.UtcNow);
             try
             {
                 ntpPacket.ValidateReply();
@@ -264,11 +264,33 @@ public class NetManager : LiteNetManager
             _peersLock.EnterReadLock();
             for (var netPeer = _headPeer; netPeer != null; netPeer = netPeer.NextPeer)
             {
-                if (!ReferenceEquals(netPeer, excludePeer))
+                if (netPeer != excludePeer)
                 {
-                    netPeer.Send(data, start, length, channelNumber, options);
+                    ((NetPeer)netPeer).Send(data, start, length, channelNumber, options);
                 }
             }
+        }
+        finally
+        {
+            _peersLock.ExitReadLock();
+        }
+    }
+
+    /// <summary>
+    /// Send data to all connected peers
+    /// </summary>
+    /// <param name="data">Data</param>
+    /// <param name="start">Start of data</param>
+    /// <param name="length">Length of data</param>
+    /// <param name="channelNumber">Number of channel (from 0 to channelsCount - 1)</param>
+    /// <param name="options">Send options (reliable, unreliable, etc.)</param>
+    public void SendToAll(byte[] data, int start, int length, byte channelNumber, DeliveryMethod options)
+    {
+        try
+        {
+            _peersLock.EnterReadLock();
+            for (var netPeer = _headPeer; netPeer != null; netPeer = netPeer.NextPeer)
+                ((NetPeer)netPeer).Send(data, start, length, channelNumber, options);
         }
         finally
         {

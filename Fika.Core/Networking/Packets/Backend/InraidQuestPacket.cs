@@ -1,6 +1,6 @@
-﻿using EFT;
+﻿using System.Collections.Generic;
+using EFT;
 using Newtonsoft.Json;
-using System.Collections.Generic;
 
 namespace Fika.Core.Networking.Packets.Backend;
 
@@ -19,9 +19,9 @@ public class InRaidQuestPacket : INetSerializable
         {
             case InraidQuestType.Finish:
                 {
-                    int length = reader.GetInt();
+                    var length = reader.GetInt();
                     Items = new(length);
-                    for (int i = 0; i < length; i++)
+                    for (var i = 0; i < length; i++)
                     {
                         Items.Add(JsonConvert.DeserializeObject<FlatItemsDataClass[]>(reader.GetString()));
                     }
@@ -31,9 +31,9 @@ public class InRaidQuestPacket : INetSerializable
                 {
                     if (reader.GetBool())
                     {
-                        int length = reader.GetInt();
+                        var length = reader.GetInt();
                         ItemIdsToRemove = new(length);
-                        for (int i = 0; i < length; i++)
+                        for (var i = 0; i < length; i++)
                         {
                             ItemIdsToRemove.Add(reader.GetMongoID());
                         }
@@ -53,7 +53,7 @@ public class InRaidQuestPacket : INetSerializable
         {
             case InraidQuestType.Finish:
                 writer.Put(Items.Count);
-                for (int i = 0; i < Items.Count; i++)
+                for (var i = 0; i < Items.Count; i++)
                 {
                     writer.Put(JsonConvert.SerializeObject(Items[i]));
                 }
@@ -63,7 +63,7 @@ public class InRaidQuestPacket : INetSerializable
                 {
                     writer.Put(true);
                     writer.Put(ItemIdsToRemove.Count);
-                    for (int i = 0; i < ItemIdsToRemove.Count; i++)
+                    for (var i = 0; i < ItemIdsToRemove.Count; i++)
                     {
                         writer.PutMongoID(ItemIdsToRemove[i]);
                     }

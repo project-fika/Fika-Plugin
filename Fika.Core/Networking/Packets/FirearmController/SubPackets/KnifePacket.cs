@@ -14,7 +14,7 @@ public sealed class KnifePacket : IPoolSubPacket
 
     public static KnifePacket FromValue(bool examine, bool kick, bool altKick, bool breakCombo)
     {
-        KnifePacket packet = FirearmSubPacketPoolManager.Instance.GetPacket<KnifePacket>(EFirearmSubPacketType.Knife);
+        var packet = FirearmSubPacketPoolManager.Instance.GetPacket<KnifePacket>(EFirearmSubPacketType.Knife);
         packet.Examine = examine;
         packet.Kick = kick;
         packet.AltKick = altKick;

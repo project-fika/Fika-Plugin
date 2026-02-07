@@ -20,13 +20,13 @@ public class StartRaidNotification : NotificationAbstractClass
     {
         get
         {
-            string message = string.Format(LocaleUtils.UI_NOTIFICATION_STARTED_RAID.Localized(),
+            var message = string.Format(LocaleUtils.UI_NOTIFICATION_STARTED_RAID.Localized(),
                 ColorizeText(EColor.GREEN, Nickname.StartsWith("headless_") ? "Headless Client" : Nickname),
                 ColorizeText(EColor.BLUE, Location.Localized()));
 
             if (Location is not "laboratory")
             {
-                string time = FormattedTime(RaidTime, Location is "factory4_day" or "factory4_night");
+                var time = FormattedTime(RaidTime, Location is "factory4_day" or "factory4_night");
                 if (!string.IsNullOrEmpty(time))
                 {
                     message += $" ({BoldText(ColorizeText(EColor.BLUE, time))})";

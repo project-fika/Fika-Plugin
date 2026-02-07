@@ -2,7 +2,6 @@
 using EFT;
 using Fika.Core.Main.GameMode;
 using Fika.Core.Main.Players;
-using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Player;
 

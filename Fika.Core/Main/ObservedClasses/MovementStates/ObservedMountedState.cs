@@ -1,7 +1,6 @@
 ﻿using Comfort.Common;
 using EFT;
 using EFT.WeaponMounting;
-using System;
 
 namespace Fika.Core.Main.ObservedClasses.MovementStates;
 
@@ -113,7 +112,7 @@ public class ObservedMountedState : MovementState
         }
         if (_playerMountingPointData.MountPointData.MountSideDirection != EMountSideDirection.Forward)
         {
-            float num = MovementContext.Yaw;
+            var num = MovementContext.Yaw;
             if (num < -360f)
             {
                 num += 360f;
@@ -122,7 +121,7 @@ public class ObservedMountedState : MovementState
             {
                 num -= 360f;
             }
-            float num2 = num > 0f ? num - 360f : num + 360f;
+            var num2 = num > 0f ? num - 360f : num + 360f;
             if (num < _playerMountingPointData.YawLimit.x || num > _playerMountingPointData.YawLimit.y)
             {
                 num = num2;
@@ -137,8 +136,8 @@ public class ObservedMountedState : MovementState
             }
             _float_9 = Mathf.Approximately(_playerMountingPointData.TargetHandsRotation, _playerMountingPointData.YawLimit.x)
                 ? _float_6 - _playerMountingPointData.YawLimit.x : _float_6 - _playerMountingPointData.YawLimit.y;
-            float num3 = _int_0 * _float_9 < 0f ? _int_0 : _int_0 == 0 ? -_float_9 : 0f;
-            float num4 = Mathf.Abs(_float_9) / _float_11;
+            var num3 = _int_0 * _float_9 < 0f ? _int_0 : _int_0 == 0 ? -_float_9 : 0f;
+            var num4 = Mathf.Abs(_float_9) / _float_11;
             _float_8 = Mathf.Sign(num3) * Mathf.Lerp(0f, 5f, num4);
         }
         _playerMountingPointData.TransitionMounting = true;
@@ -151,10 +150,10 @@ public class ObservedMountedState : MovementState
         _player.OnMounting(MountingPacketStruct.EMountingCommand.Enter);
         _float_5 = _playerMountingPointData.MountPointData.MountSideDirection != EMountSideDirection.Forward || MovementContext.IsInPronePose
             ? MovementContext.Pitch < MovementContext.PitchLimit.x ? PitchLimitX : MovementContext.Pitch > MovementContext.PitchLimit.y ? MovementContext.PitchLimit.y : MovementContext.Pitch : 0f;
-        float num5 = Mathf.InverseLerp(PitchLimitX, PitchLimitY, _float_5);
-        float num6 = Mathf.Lerp(_playerMountingPointData.PoseLimit.x, _playerMountingPointData.PoseLimit.y, num5);
+        var num5 = Mathf.InverseLerp(PitchLimitX, PitchLimitY, _float_5);
+        var num6 = Mathf.Lerp(_playerMountingPointData.PoseLimit.x, _playerMountingPointData.PoseLimit.y, num5);
         MovementContext.SetPoseLevel(num6, false);
-        Action<float> onEnterMountedState = _playerMountingPointData.OnEnterMountedState;
+        var onEnterMountedState = _playerMountingPointData.OnEnterMountedState;
         if (onEnterMountedState == null)
         {
             return;
@@ -182,7 +181,7 @@ public class ObservedMountedState : MovementState
         MovementContext.RotationAction = MovementContext.DefaultRotationFunction;
         MovementContext.CanUseProp.Value = _bool_0;
         _player.ProceduralWeaponAnimation.SetStrategy(EPointOfView.ThirdPerson);
-        Action<float> onExitMountedState = _playerMountingPointData.OnExitMountedState;
+        var onExitMountedState = _playerMountingPointData.OnExitMountedState;
         if (onExitMountedState == null)
         {
             return;
@@ -225,7 +224,7 @@ public class ObservedMountedState : MovementState
 
     public void UpdateState()
     {
-        float num = Mathf.Abs(_float_10) / _float_11;
+        var num = Mathf.Abs(_float_10) / _float_11;
         if (!MovementContext.IsInPronePose)
         {
             SetRotation(num);
@@ -239,8 +238,8 @@ public class ObservedMountedState : MovementState
 
     public void SetPose()
     {
-        float num = Mathf.InverseLerp(PitchLimitX, PitchLimitY, MovementContext.Pitch);
-        float num2 = Mathf.Lerp(_playerMountingPointData.PoseLimit.x, _playerMountingPointData.PoseLimit.y, num);
+        var num = Mathf.InverseLerp(PitchLimitX, PitchLimitY, MovementContext.Pitch);
+        var num2 = Mathf.Lerp(_playerMountingPointData.PoseLimit.x, _playerMountingPointData.PoseLimit.y, num);
         MovementContext.SetPoseLevel(num2, false);
     }
 
@@ -248,16 +247,16 @@ public class ObservedMountedState : MovementState
     {
         MovementContext.IgnoreDeltaMovement = true;
         _float_4 += deltaTime;
-        float num = _float_4 / _playerMountingPointData.CurrentApproachTime;
+        var num = _float_4 / _playerMountingPointData.CurrentApproachTime;
         _playerMountingPointData.TransitionProgress = num;
         _float_10 = Mathf.LerpAngle(0f, _float_9, num);
-        float num2 = Mathf.LerpAngle(_vector2_0.x, _float_6, num);
-        float num3 = Mathf.LerpAngle(_vector2_0.y, _float_5, num);
+        var num2 = Mathf.LerpAngle(_vector2_0.x, _float_6, num);
+        var num3 = Mathf.LerpAngle(_vector2_0.y, _float_5, num);
         MovementContext.ApplyRotation(Quaternion.Lerp(_quaternion_0, _playerMountingPointData.TargetBodyRotation, num));
         MovementContext.Rotation = Vector2.Lerp(_vector2_0, new Vector2(num2, num3), num);
         if (!MovementContext.IsInPronePose)
         {
-            float num4 = Mathf.Lerp(_float_7, _float_8, num);
+            var num4 = Mathf.Lerp(_float_7, _float_8, num);
             MovementContext.SetTilt(num4, false);
             MovementContext.MountedSmoothedTilt = num4;
             if (_playerMountingPointData.MountPointData.MountSideDirection != EMountSideDirection.Forward)
@@ -267,13 +266,13 @@ public class ObservedMountedState : MovementState
                 _playerMountingPointData.CurrentMountingPointVerticalOffset = -0.1f * Mathf.Abs(_float_10) / _float_11;
             }
         }
-        Vector3 vector = Vector3.Lerp(_vector3_0, _playerMountingPointData.PlayerTargetPos, num) - MovementContext.TransformPosition;
+        var vector = Vector3.Lerp(_vector3_0, _playerMountingPointData.PlayerTargetPos, num) - MovementContext.TransformPosition;
         vector.y = 0f;
-        Vector3 vector2 = (MovementContext.TransformPosition - _playerMountingPointData.PlayerTargetPos).XZ();
+        var vector2 = (MovementContext.TransformPosition - _playerMountingPointData.PlayerTargetPos).XZ();
         if (vector.sqrMagnitude > 0f)
         {
             MovementContext.ApplyMotion(vector, deltaTime);
-            Vector3 vector3 = MovementContext.InverseTransformVector(vector.normalized);
+            var vector3 = MovementContext.InverseTransformVector(vector.normalized);
             MovementContext.MovementDirection = new Vector2(vector3.x, vector3.z);
             MovementContext.PlayerAnimatorEnableInert(vector2.sqrMagnitude > 0.0005f);
         }
@@ -290,7 +289,7 @@ public class ObservedMountedState : MovementState
     {
         if (_int_0 * _float_10 < 0f || _int_0 == 0)
         {
-            float num = Mathf.Sign(_int_0 * _float_10 < 0f ? _int_0 : _int_0 == 0 ? -_float_10 : 0f) * Mathf.Lerp(0f, 5f, currentRotationFactor);
+            var num = Mathf.Sign(_int_0 * _float_10 < 0f ? _int_0 : _int_0 == 0 ? -_float_10 : 0f) * Mathf.Lerp(0f, 5f, currentRotationFactor);
             MovementContext.SetTilt(num, false);
             MovementContext.MountedSmoothedTilt = num;
             if (_playerMountingPointData.MountPointData.MountSideDirection != EMountSideDirection.Forward)
@@ -338,19 +337,19 @@ public class ObservedMountedState : MovementState
             {
                 deltaRotation = ClampRotation(deltaRotation);
             }
-            float num = _int_0 > 0 ? -_float_11 : 0f;
-            float num2 = _int_0 > 0 ? 0f : _float_11;
+            var num = _int_0 > 0 ? -_float_11 : 0f;
+            var num2 = _int_0 > 0 ? 0f : _float_11;
             if (_int_0 == 0)
             {
                 num = -_float_11;
                 num2 = _float_11;
             }
-            float num3 = _float_10;
+            var num3 = _float_10;
             _float_10 = Mathf.Clamp(_float_10 + deltaRotation.x, num, num2);
             if (Mathf.Abs(_float_10) > Mathf.Abs(num3))
             {
-                float num4 = Mathf.Abs(_float_10) / _float_11;
-                float num5 = _int_0 * _float_10 < 0f ? _int_0 : _int_0 == 0 ? Mathf.Sign(-_float_10) : 0f;
+                var num4 = Mathf.Abs(_float_10) / _float_11;
+                var num5 = _int_0 * _float_10 < 0f ? _int_0 : _int_0 == 0 ? Mathf.Sign(-_float_10) : 0f;
                 if (!MovementContext.RotationOverlapPrediction(MovementContext.PlayerTransform.right * (num5 * num4 * _mountingMovementSettings.TiltPositionOffset), Quaternion.Euler(0f, 2f * deltaRotation.x, 0f), MovementContext.PlayerTransform.Original).Equals(Vector3.zero))
                 {
                     _float_10 = num3;
@@ -393,7 +392,7 @@ public class ObservedMountedState : MovementState
             MovementContext.PlayerAnimatorSetTilt(MovementContext.MountedSmoothedTilt);
         }
         _player.OnMounting(MountingPacketStruct.EMountingCommand.StartLeaving);
-        Action<float> onExitMountedState = _playerMountingPointData.OnExitMountedState;
+        var onExitMountedState = _playerMountingPointData.OnExitMountedState;
         if (onExitMountedState == null)
         {
             return;

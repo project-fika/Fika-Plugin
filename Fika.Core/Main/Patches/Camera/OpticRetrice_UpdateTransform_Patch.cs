@@ -1,6 +1,6 @@
-﻿using EFT.CameraControl;
+﻿using System.Reflection;
+using EFT.CameraControl;
 using SPT.Reflection.Patching;
-using System.Reflection;
 
 namespace Fika.Core.Main.Patches.Camera;
 

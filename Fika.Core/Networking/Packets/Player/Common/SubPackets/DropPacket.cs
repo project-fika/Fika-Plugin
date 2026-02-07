@@ -17,7 +17,7 @@ public sealed class DropPacket : IPoolSubPacket
 
     public static DropPacket FromValue(bool fastDrop)
     {
-        DropPacket packet = CommonSubPacketPoolManager.Instance.GetPacket<DropPacket>(ECommonSubPacketType.Drop);
+        var packet = CommonSubPacketPoolManager.Instance.GetPacket<DropPacket>(ECommonSubPacketType.Drop);
         packet.FastDrop = fastDrop;
         return packet;
     }

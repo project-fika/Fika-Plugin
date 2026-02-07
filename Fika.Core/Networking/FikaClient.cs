@@ -393,7 +393,7 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
             _dataWriter.PutEnum(EPacketType.Serializable);
 
             _packetProcessor.WriteNetSerializable(_dataWriter, ref packet);
-            peer.Send(_dataWriter.AsReadOnlySpan, deliveryMethod);
+            peer.Send(_dataWriter.AsReadOnlySpan(), deliveryMethod);
         }
     }
 
@@ -405,7 +405,7 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
         _dataWriter.Put((byte)1); // we're sending one packet
         _dataWriter.PutUnmanaged(packet);
 
-        _netClient.SendToAll(_dataWriter.AsReadOnlySpan, DeliveryMethod.Unreliable);
+        _netClient.SendToAll(_dataWriter.AsReadOnlySpan(), DeliveryMethod.Unreliable);
     }
 
     public void SendGenericPacket(EGenericSubPacketType type, IPoolSubPacket subpacket, bool broadcast = false, NetPeer peerToIgnore = null)
@@ -423,7 +423,7 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
         _dataWriter.PutEnum(EPacketType.Serializable);
 
         _packetProcessor.WriteNetReusable(_dataWriter, ref packet);
-        _netClient.SendToAll(_dataWriter.AsReadOnlySpan, deliveryMethod);
+        _netClient.SendToAll(_dataWriter.AsReadOnlySpan(), deliveryMethod);
 
         packet.Clear();
     }
@@ -435,7 +435,7 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
         _dataWriter.PutEnum(EPacketType.Serializable);
 
         _packetProcessor.WriteNetSerializable(_dataWriter, ref packet);
-        peer.Send(_dataWriter.AsReadOnlySpan, deliveryMethod);
+        peer.Send(_dataWriter.AsReadOnlySpan(), deliveryMethod);
     }
 
     public void SendVOIPData(ArraySegment<byte> data, DeliveryMethod deliveryMethod, NetPeer peer = null)
@@ -448,7 +448,7 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
             _dataWriter.Put(false);
             _dataWriter.PutEnum(EPacketType.VOIP);
             _dataWriter.Put(data.AsSpan());
-            firstPeer.Send(_dataWriter.AsReadOnlySpan, deliveryMethod);
+            firstPeer.Send(_dataWriter.AsReadOnlySpan(), deliveryMethod);
         }
     }
 
@@ -471,7 +471,7 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
             _dataWriter.Put(true);
             _dataWriter.PutEnum(EPacketType.Serializable);
             _packetProcessor.Write(_dataWriter, packet);
-            peer.Send(_dataWriter.AsReadOnlySpan, deliveryMethod);
+            peer.Send(_dataWriter.AsReadOnlySpan(), deliveryMethod);
         }
 
         packet.Flush();
@@ -550,7 +550,7 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
         if (messageType == UnconnectedMessageType.BasicMessage && _netClient.ConnectedPeersCount == 0 && reader.GetInt() == 1)
         {
             _logger.LogInfo("[CLIENT] Received discovery response. Connecting to: " + remoteEndPoint);
-            _netClient.Connect(remoteEndPoint, NetDataWriter.FromString("fika.core").AsReadOnlySpan);
+            _netClient.Connect(remoteEndPoint, NetDataWriter.FromString("fika.core").AsReadOnlySpan());
         }
     }
 

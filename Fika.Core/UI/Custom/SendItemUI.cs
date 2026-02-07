@@ -8,6 +8,7 @@ public class SendItemUI : MonoBehaviour
     public Button CloseButton;
     public Button SendButton;
     public TMP_Dropdown PlayersDropdown;
+    public TMP_InputField PlayersFilter;
     [SerializeField]
 #pragma warning disable CS0649
     TextMeshProUGUI _headerText;

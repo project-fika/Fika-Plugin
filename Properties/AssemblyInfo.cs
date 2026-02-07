@@ -1,6 +1,6 @@
-using Fika.Core;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using Fika.Core;
 
 [assembly: AssemblyDescription("Play with friends in SPT")]
 [assembly: AssemblyCompany("https://github.com/project-fika")]

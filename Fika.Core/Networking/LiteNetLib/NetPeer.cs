@@ -42,7 +42,7 @@ public class NetPeer : LiteNetPeer
     ///     Fragment count exceeded ushort.MaxValue<para/>
     /// </exception>
     public void Send(NetDataWriter dataWriter, byte channelNumber, DeliveryMethod deliveryMethod) =>
-        SendInternal(dataWriter.AsReadOnlySpan, channelNumber, deliveryMethod, null);
+        SendInternal(dataWriter.AsReadOnlySpan(), channelNumber, deliveryMethod, null);
 
     /// <summary>
     /// Send data to peer with delivery event called
@@ -57,7 +57,10 @@ public class NetPeer : LiteNetPeer
     public void SendWithDeliveryEvent(byte[] data, byte channelNumber, DeliveryMethod deliveryMethod, object userData)
     {
         if (deliveryMethod != DeliveryMethod.ReliableOrdered && deliveryMethod != DeliveryMethod.ReliableUnordered)
+        {
             throw new ArgumentException("Delivery event will work only for ReliableOrdered/Unordered packets");
+        }
+
         SendInternal(new ReadOnlySpan<byte>(data, 0, data.Length), channelNumber, deliveryMethod, userData);
     }
 
@@ -76,7 +79,10 @@ public class NetPeer : LiteNetPeer
     public void SendWithDeliveryEvent(byte[] data, int start, int length, byte channelNumber, DeliveryMethod deliveryMethod, object userData)
     {
         if (deliveryMethod != DeliveryMethod.ReliableOrdered && deliveryMethod != DeliveryMethod.ReliableUnordered)
+        {
             throw new ArgumentException("Delivery event will work only for ReliableOrdered/Unordered packets");
+        }
+
         SendInternal(new ReadOnlySpan<byte>(data, start, length), channelNumber, deliveryMethod, userData);
     }
 
@@ -93,8 +99,11 @@ public class NetPeer : LiteNetPeer
     public void SendWithDeliveryEvent(NetDataWriter dataWriter, byte channelNumber, DeliveryMethod deliveryMethod, object userData)
     {
         if (deliveryMethod != DeliveryMethod.ReliableOrdered && deliveryMethod != DeliveryMethod.ReliableUnordered)
+        {
             throw new ArgumentException("Delivery event will work only for ReliableOrdered/Unordered packets");
-        SendInternal(dataWriter.AsReadOnlySpan, channelNumber, deliveryMethod, userData);
+        }
+
+        SendInternal(dataWriter.AsReadOnlySpan(), channelNumber, deliveryMethod, userData);
     }
 
     /// <summary>
@@ -110,7 +119,10 @@ public class NetPeer : LiteNetPeer
     public void SendWithDeliveryEvent(ReadOnlySpan<byte> data, byte channelNumber, DeliveryMethod deliveryMethod, object userData)
     {
         if (deliveryMethod != DeliveryMethod.ReliableOrdered && deliveryMethod != DeliveryMethod.ReliableUnordered)
+        {
             throw new ArgumentException("Delivery event will work only for ReliableOrdered/Unordered packets");
+        }
+
         SendInternal(data, channelNumber, deliveryMethod, userData);
     }
 
@@ -123,7 +135,7 @@ public class NetPeer : LiteNetPeer
     public PooledPacket CreatePacketFromPool(DeliveryMethod deliveryMethod, byte channelNumber)
     {
         //multithreaded variable
-        int mtu = Mtu;
+        var mtu = Mtu;
         var packet = NetManager.PoolGetPacket(mtu);
         if (deliveryMethod == DeliveryMethod.Unreliable)
         {
@@ -166,6 +178,22 @@ public class NetPeer : LiteNetPeer
         SendInternal(data, channelNumber, deliveryMethod, null);
 
     /// <summary>
+    /// Send data to peer
+    /// </summary>
+    /// <param name="data">Data</param>
+    /// <param name="start">Start of data</param>
+    /// <param name="length">Length of data</param>
+    /// <param name="channelNumber">Number of channel (from 0 to channelsCount - 1)</param>
+    /// <param name="deliveryMethod">Delivery method (reliable, unreliable, etc.)</param>
+    /// <exception cref="TooBigPacketException">
+    ///     If size exceeds maximum limit:<para/>
+    ///     MTU - headerSize bytes for Unreliable<para/>
+    ///     Fragment count exceeded ushort.MaxValue<para/>
+    /// </exception>
+    public void Send(byte[] data, int start, int length, byte channelNumber, DeliveryMethod deliveryMethod) =>
+        SendInternal(new ReadOnlySpan<byte>(data, start, length), channelNumber, deliveryMethod, null);
+
+    /// <summary>
     /// Returns packets count in queue for reliable channel
     /// </summary>
     /// <param name="channelNumber">number of channel 0-63</param>
@@ -173,8 +201,8 @@ public class NetPeer : LiteNetPeer
     /// <returns>packets count in channel queue</returns>
     public int GetPacketsCountInReliableQueue(byte channelNumber, bool ordered)
     {
-        int idx = channelNumber * NetConstants.ChannelTypeCount +
-                  (byte) (ordered ? DeliveryMethod.ReliableOrdered : DeliveryMethod.ReliableUnordered);
+        var idx = channelNumber * NetConstants.ChannelTypeCount +
+                  (byte)(ordered ? DeliveryMethod.ReliableOrdered : DeliveryMethod.ReliableUnordered);
         return ((ReliableChannel)_channels[idx])?.PacketsInQueue ?? 0;
     }
 
@@ -182,13 +210,18 @@ public class NetPeer : LiteNetPeer
     {
         //Pending send
         if (_channelSendQueue.IsEmpty)
+        {
             return;
+        }
 
-        int count = _channelSendQueue.Count;
+        var count = _channelSendQueue.Count;
         while (count-- > 0)
         {
             if (!_channelSendQueue.TryDequeue(out var channel))
+            {
                 break;
+            }
+
             if (channel.SendAndCheckQueue())
             {
                 // still has something to send, re-add it to the send queue
@@ -206,7 +239,9 @@ public class NetPeer : LiteNetPeer
         }
         var channel = _channels[packet.ChannelId] ?? (packet.Property == PacketProperty.Ack ? null : CreateChannel(packet.ChannelId));
         if (channel != null && !channel.ProcessPacket(packet))
+        {
             NetManager.PoolRecycle(packet);
+        }
     }
 
     internal override void AddToReliableChannelSendQueue(BaseChannel channel) =>
@@ -216,7 +251,10 @@ public class NetPeer : LiteNetPeer
     {
         var newChannel = _channels[idx];
         if (newChannel != null)
+        {
             return newChannel;
+        }
+
         switch ((DeliveryMethod)(idx % NetConstants.ChannelTypeCount))
         {
             case DeliveryMethod.ReliableUnordered:
@@ -234,7 +272,9 @@ public class NetPeer : LiteNetPeer
         }
         var prevChannel = Interlocked.CompareExchange(ref _channels[idx], newChannel, null);
         if (prevChannel != null)
+        {
             return prevChannel;
+        }
 
         return newChannel;
     }

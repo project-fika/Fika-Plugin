@@ -16,7 +16,7 @@ public class FikaClientQuickGrenadeController : EFT.Player.QuickGrenadeThrowHand
 
     public static FikaClientQuickGrenadeController Create(FikaPlayer player, ThrowWeapItemClass item)
     {
-        FikaClientQuickGrenadeController controller = smethod_9<FikaClientQuickGrenadeController>(player, item);
+        var controller = smethod_9<FikaClientQuickGrenadeController>(player, item);
         controller._fikaPlayer = player;
         controller._packet = new()
         {

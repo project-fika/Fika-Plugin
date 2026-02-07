@@ -1,4 +1,8 @@
-﻿using Comfort.Common;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
@@ -8,10 +12,6 @@ using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
 using Fika.Core.Networking.Packets.World;
 using HarmonyLib;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Fika.Core.Main.HostClasses;
 
@@ -32,7 +32,7 @@ public class FikaHostGameWorld : ClientLocalGameWorld
 
     public static FikaHostGameWorld Create(GameObject gameObject, PoolManagerClass objectsFactory, EUpdateQueue updateQueue, string currentProfileId)
     {
-        FikaHostGameWorld gameWorld = gameObject.AddComponent<FikaHostGameWorld>();
+        var gameWorld = gameObject.AddComponent<FikaHostGameWorld>();
         gameWorld.ObjectsFactory = objectsFactory;
         Traverse.Create(gameWorld).Field<EUpdateQueue>("eupdateQueue_0").Value = updateQueue;
         gameWorld.SpeakerManager = gameObject.AddComponent<SpeakerManager>();
@@ -49,9 +49,9 @@ public class FikaHostGameWorld : ClientLocalGameWorld
 
     public override void PlayerTick(float dt)
     {
-        for (int i = AllAlivePlayersList.Count - 1; i >= 0; i--)
+        for (var i = AllAlivePlayersList.Count - 1; i >= 0; i--)
         {
-            Player player = AllAlivePlayersList[i];
+            var player = AllAlivePlayersList[i];
             try
             {
                 player.UpdateTick();
@@ -107,13 +107,13 @@ public class FikaHostGameWorld : ClientLocalGameWorld
 
     public override void InitAirdrop(string lootTemplateId = null, bool takeNearbyPoint = false, Vector3 position = default)
     {
-        GameObject gameObject = method_20(takeNearbyPoint, position);
+        var gameObject = method_20(takeNearbyPoint, position);
         if (gameObject == null)
         {
             FikaGlobals.LogError("There are no airdrop points here!");
             return;
         }
-        SynchronizableObject synchronizableObject = ClientSynchronizableObjectLogicProcessor.TakeFromPool(SynchronizableObjectType.AirPlane);
+        var synchronizableObject = ClientSynchronizableObjectLogicProcessor.TakeFromPool(SynchronizableObjectType.AirPlane);
         if (synchronizableObject.Logic is AirplaneLogicClass airplaneLogicClass && airplaneLogicClass.offlineMode)
         {
             airplaneLogicClass.OfflineServerLogic.ContainerTemplateId = lootTemplateId;
@@ -148,7 +148,7 @@ public class FikaHostGameWorld : ClientLocalGameWorld
         SynchronizableObjectLogicProcessor.InitSyncObject(tripwireSynchronizableObject, fromPosition, Vector3.forward, -1);
         tripwireSynchronizableObject.SetupGrenade(grenadeClass, profileId, fromPosition, toPosition);
         SynchronizableObjectLogicProcessor.TripwireManager.AddTripwire(tripwireSynchronizableObject);
-        Vector3 vector = (fromPosition + toPosition) * 0.5f;
+        var vector = (fromPosition + toPosition) * 0.5f;
         Singleton<BotEventHandler>.Instance.PlantTripwire(tripwireSynchronizableObject, vector);
 
         SpawnSyncObjectPacket packet = new()

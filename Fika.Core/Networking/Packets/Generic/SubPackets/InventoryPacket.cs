@@ -1,6 +1,6 @@
-﻿using Fika.Core.Main.Players;
+﻿using System;
+using Fika.Core.Main.Players;
 using Fika.Core.Networking.Pooling;
-using System;
 
 namespace Fika.Core.Networking.Packets.Generic.SubPackets;
 
@@ -15,7 +15,7 @@ public sealed class InventoryPacket : IPoolSubPacket
 
     public static InventoryPacket FromValue(int netId, BaseInventoryOperationClass operation)
     {
-        InventoryPacket packet = GenericSubPacketPoolManager.Instance.GetPacket<InventoryPacket>(EGenericSubPacketType.InventoryOperation);
+        var packet = GenericSubPacketPoolManager.Instance.GetPacket<InventoryPacket>(EGenericSubPacketType.InventoryOperation);
         packet.NetId = netId;
         packet.CallbackId = operation.Id;
         packet.WriteOperation(operation);
@@ -35,7 +35,7 @@ public sealed class InventoryPacket : IPoolSubPacket
 
     public void WriteOperation(BaseInventoryOperationClass operation)
     {
-        EFTWriterClass eftWriter = WriterPoolManager.GetWriter();
+        var eftWriter = WriterPoolManager.GetWriter();
         eftWriter.WritePolymorph(operation.ToDescriptor());
         OperationBytes = eftWriter.ToArray();
         WriterPoolManager.ReturnWriter(eftWriter);

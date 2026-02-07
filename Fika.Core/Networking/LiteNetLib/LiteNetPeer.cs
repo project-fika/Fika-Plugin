@@ -54,7 +54,7 @@ public class LiteNetPeer : IPEndPoint
     private int _rtt;
     private int _avgRtt;
     private int _rttCount;
-    private double _resendDelay = 27.0;
+    private float _resendDelay = 27.0f;
     private float _pingSendTimer;
     private float _rttResetTimer;
     private readonly Stopwatch _pingTimer = new Stopwatch();
@@ -182,7 +182,17 @@ public class LiteNetPeer : IPEndPoint
     /// </summary>
     public float TimeSinceLastPacket => _timeSinceLastPacket;
 
-    internal double ResendDelay => _resendDelay;
+    /// <summary>
+    /// Fixed part of the resend delay
+    /// </summary>
+    public float ResendFixedDelay = 25.0f;
+
+    /// <summary>
+    /// Multiplication factor of Rtt in the resend delay calculation
+    /// </summary>
+    public float ResendRttMultiplier = 2.1f;
+
+    internal float ResendDelay => _resendDelay;
 
     /// <summary>
     /// Application defined object containing data about the connection
@@ -523,7 +533,7 @@ public class LiteNetPeer : IPEndPoint
             throw new ArgumentException("Delivery event will work only for ReliableOrdered/Unordered packets");
         }
 
-        SendInternal(dataWriter.AsReadOnlySpan, 0, deliveryMethod, userData);
+        SendInternal(dataWriter.AsReadOnlySpan(), 0, deliveryMethod, userData);
     }
 
     /// <summary>
@@ -550,7 +560,7 @@ public class LiteNetPeer : IPEndPoint
     ///     Fragment count exceeded ushort.MaxValue<para/>
     /// </exception>
     public void Send(NetDataWriter dataWriter, DeliveryMethod deliveryMethod) =>
-        SendInternal(dataWriter.AsReadOnlySpan, 0, deliveryMethod, null);
+        SendInternal(dataWriter.AsReadOnlySpan(), 0, deliveryMethod, null);
 
     /// <summary>
     /// Send data to peer (channel - 0)
@@ -566,22 +576,6 @@ public class LiteNetPeer : IPEndPoint
     /// </exception>
     public void Send(byte[] data, int start, int length, DeliveryMethod options) =>
         SendInternal(new ReadOnlySpan<byte>(data, start, length), 0, options, null);
-
-    /// <summary>
-    /// Send data to peer
-    /// </summary>
-    /// <param name="data">Data</param>
-    /// <param name="start">Start of data</param>
-    /// <param name="length">Length of data</param>
-    /// <param name="channelNumber">Number of channel (from 0 to channelsCount - 1)</param>
-    /// <param name="deliveryMethod">Delivery method (reliable, unreliable, etc.)</param>
-    /// <exception cref="TooBigPacketException">
-    ///     If size exceeds maximum limit:<para/>
-    ///     MTU - headerSize bytes for Unreliable<para/>
-    ///     Fragment count exceeded ushort.MaxValue<para/>
-    /// </exception>
-    public void Send(byte[] data, int start, int length, byte channelNumber, DeliveryMethod deliveryMethod) =>
-        SendInternal(new ReadOnlySpan<byte>(data, start, length), channelNumber, deliveryMethod, null);
 
     /// <summary>
     /// Send data to peer with delivery event called
@@ -671,7 +665,7 @@ public class LiteNetPeer : IPEndPoint
             {
                 var sendLength = length > packetDataSize ? packetDataSize : length;
 
-                NetPacket p = NetManager.PoolGetPacket(headerSize + sendLength + NetConstants.FragmentHeaderSize);
+                var p = NetManager.PoolGetPacket(headerSize + sendLength + NetConstants.FragmentHeaderSize);
                 p.Property = property;
                 p.UserData = userData;
                 p.FragmentId = currentFragmentId;
@@ -688,7 +682,7 @@ public class LiteNetPeer : IPEndPoint
         }
 
         //Else just send
-        NetPacket packet = NetManager.PoolGetPacket(headerSize + length);
+        var packet = NetManager.PoolGetPacket(headerSize + length);
         packet.Property = property;
         data.CopyTo(new Span<byte>(packet.RawData, headerSize, length));
         packet.UserData = userData;
@@ -791,7 +785,7 @@ public class LiteNetPeer : IPEndPoint
         _rtt += roundTripTime;
         _rttCount++;
         _avgRtt = _rtt / _rttCount;
-        _resendDelay = 25.0 + _avgRtt * 2.1; // 25 ms + double rtt
+        _resendDelay = ResendFixedDelay + _avgRtt * ResendRttMultiplier;
     }
 
     internal void AddReliablePacket(DeliveryMethod method, NetPacket p)
@@ -853,7 +847,7 @@ public class LiteNetPeer : IPEndPoint
             }
 
             //just simple packet
-            NetPacket resultingPacket = NetManager.PoolGetPacket(incomingFragments.TotalSize);
+            var resultingPacket = NetManager.PoolGetPacket(incomingFragments.TotalSize);
 
             var pos = 0;
             for (var i = 0; i < incomingFragments.ReceivedCount; i++)
@@ -1109,7 +1103,7 @@ public class LiteNetPeer : IPEndPoint
                         break;
                     }
 
-                    NetPacket mergedPacket = NetManager.PoolGetPacket(size);
+                    var mergedPacket = NetManager.PoolGetPacket(size);
                     Buffer.BlockCopy(packet.RawData, pos, mergedPacket.RawData, 0, size);
                     mergedPacket.Size = size;
 
@@ -1151,6 +1145,7 @@ public class LiteNetPeer : IPEndPoint
 
             case PacketProperty.Ack:
             case PacketProperty.Channeled:
+            case PacketProperty.ReliableMerged:
                 ProcessChanneled(packet);
                 break;
 
@@ -1342,7 +1337,16 @@ public class LiteNetPeer : IPEndPoint
     //For reliable channel
     internal void RecycleAndDeliver(NetPacket packet)
     {
-        if (packet.UserData != null)
+        if (packet.UserData is MergedPacketUserData mergedUserData)
+        {
+            for (var i = 0; i < mergedUserData.Items.Length; i++)
+            {
+                NetManager.MessageDelivered(this, mergedUserData.Items[i]);
+            }
+
+            packet.UserData = null;
+        }
+        else if (packet.UserData != null)
         {
             if (packet.IsFragmented)
             {

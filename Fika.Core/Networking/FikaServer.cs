@@ -255,7 +255,8 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         {
             if (FikaPlugin.Instance.WanIP == null)
             {
-                throw new NullReferenceException("Failed to start Fika Server because WAN IP was null!");
+                NotificationManagerClass.DisplayMessageNotification("No WAN IP could be found, external players will not be able to join", 
+                    iconType: EFT.Communications.ENotificationIconType.Alert, textColor: Color.red);
             }
 
             _externalIp = FikaPlugin.Instance.WanIP.ToString();
@@ -635,7 +636,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         _dataWriter.PutEnum(EPacketType.Serializable);
 
         _packetProcessor.WriteNetSerializable(_dataWriter, ref packet);
-        _netServer.SendToAll(_dataWriter.AsReadOnlySpan, deliveryMethod);
+        _netServer.SendToAll(_dataWriter.AsReadOnlySpan(), deliveryMethod);
     }
 
     public void SendGenericPacket(EGenericSubPacketType type, IPoolSubPacket subpacket, bool broadcast = false, NetPeer peerToIgnore = null)
@@ -660,7 +661,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         _dataWriter.PutEnum(EPacketType.Serializable);
 
         _packetProcessor.WriteNetReusable(_dataWriter, ref packet);
-        _netServer.SendToAll(_dataWriter.AsReadOnlySpan, deliveryMethod, peerToIgnore);
+        _netServer.SendToAll(_dataWriter.AsReadOnlySpan(), deliveryMethod, peerToIgnore);
 
         packet.Clear();
     }
@@ -671,7 +672,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         _dataWriter.PutEnum(EPacketType.Serializable);
 
         _packetProcessor.WriteNetReusable(_dataWriter, ref packet);
-        peer.Send(_dataWriter.AsReadOnlySpan, deliveryMethod);
+        peer.Send(_dataWriter.AsReadOnlySpan(), deliveryMethod);
 
         packet.Clear();
     }
@@ -682,7 +683,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         _dataWriter.PutEnum(EPacketType.Serializable);
 
         _packetProcessor.WriteNetSerializable(_dataWriter, ref packet);
-        _netServer.SendToAll(_dataWriter.AsReadOnlySpan, deliveryMethod, peerToIgnore);
+        _netServer.SendToAll(_dataWriter.AsReadOnlySpan(), deliveryMethod, peerToIgnore);
     }
 
     public void SendPlayerState(ref PlayerStatePacket packet)
@@ -692,7 +693,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         _dataWriter.Put((byte)1); // we're sending one packet
         _dataWriter.PutUnmanaged(packet);
 
-        _netServer.SendToAll(_dataWriter.AsReadOnlySpan, DeliveryMethod.Unreliable);
+        _netServer.SendToAll(_dataWriter.AsReadOnlySpan(), DeliveryMethod.Unreliable);
     }
 
     public void BatchSendStates(NetDataWriter writer, byte writtenPackets)
@@ -700,9 +701,9 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         _dataWriter.Reset();
         _dataWriter.PutEnum(EPacketType.PlayerState);
         _dataWriter.Put(writtenPackets);
-        _dataWriter.Put(writer.AsReadOnlySpan);
+        _dataWriter.Put(writer.AsReadOnlySpan());
 
-        _netServer.SendToAll(_dataWriter.AsReadOnlySpan, DeliveryMethod.Unreliable);
+        _netServer.SendToAll(_dataWriter.AsReadOnlySpan(), DeliveryMethod.Unreliable);
     }
 
     public void SendDataToPeer<T>(ref T packet, DeliveryMethod deliveryMethod, NetPeer peer) where T : INetSerializable
@@ -711,7 +712,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         _dataWriter.PutEnum(EPacketType.Serializable);
 
         _packetProcessor.WriteNetSerializable(_dataWriter, ref packet);
-        peer.Send(_dataWriter.AsReadOnlySpan, deliveryMethod);
+        peer.Send(_dataWriter.AsReadOnlySpan(), deliveryMethod);
     }
 
     public void SendReusableToAll<T>(T packet, DeliveryMethod deliveryMethod, NetPeer peerToExlude = null) where T : class, IReusable, new()
@@ -722,11 +723,11 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         _packetProcessor.Write(_dataWriter, packet);
         if (peerToExlude != null)
         {
-            _netServer.SendToAll(_dataWriter.AsReadOnlySpan, deliveryMethod, peerToExlude);
+            _netServer.SendToAll(_dataWriter.AsReadOnlySpan(), deliveryMethod, peerToExlude);
         }
         else
         {
-            _netServer.SendToAll(_dataWriter.AsReadOnlySpan, deliveryMethod);
+            _netServer.SendToAll(_dataWriter.AsReadOnlySpan(), deliveryMethod);
         }
 
         packet.Flush();
@@ -743,7 +744,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         _dataWriter.Reset();
         _dataWriter.PutEnum(EPacketType.VOIP);
         _dataWriter.Put(data.AsSpan());
-        peer.Send(_dataWriter.AsReadOnlySpan, deliveryMethod);
+        peer.Send(_dataWriter.AsReadOnlySpan(), deliveryMethod);
     }
 
     public void SendBTRPacket(ref BTRDataPacketStruct data)
@@ -752,7 +753,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         _dataWriter.PutEnum(EPacketType.BTR);
         _dataWriter.PutUnmanaged(data);
 
-        _netServer.SendToAll(_dataWriter.AsReadOnlySpan, DeliveryMethod.Unreliable);
+        _netServer.SendToAll(_dataWriter.AsReadOnlySpan(), DeliveryMethod.Unreliable);
     }
 
     public void SendStashes()
@@ -832,7 +833,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
             _logger.LogInfo("[SERVER] Received discovery request. Send discovery response");
             NetDataWriter resp = new();
             resp.Put(1);
-            _netServer.SendUnconnectedMessage(resp.AsReadOnlySpan, remoteEndPoint);
+            _netServer.SendUnconnectedMessage(resp.AsReadOnlySpan(), remoteEndPoint);
 
             return;
         }
@@ -845,13 +846,13 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
             {
                 var reconnect = reader.GetBool();
                 resp.Put(started && !reconnect ? "fika.inprogress" : "fika.hello");
-                _netServer.SendUnconnectedMessage(resp.AsReadOnlySpan, remoteEndPoint);
+                _netServer.SendUnconnectedMessage(resp.AsReadOnlySpan(), remoteEndPoint);
             }
             else
             {
                 _logger.LogError($"PingingRequest::Data was not as expected: {data}");
                 resp.Put("fika.reject");
-                _netServer.SendUnconnectedMessage(resp.AsReadOnlySpan, remoteEndPoint);
+                _netServer.SendUnconnectedMessage(resp.AsReadOnlySpan(), remoteEndPoint);
             }
         }
         else

@@ -167,41 +167,52 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
 
     public override async Task ReceiveSpawnPoint(Profile profile)
     {
-        var spawnTogether = RaidSettings.PlayersSpawnPlace == EPlayersSpawnPlace.SamePlace;
+        var spawnTogether = CheckSpawnTogether();
         if (!spawnTogether)
         {
             Logger.LogInfo("Using random spawn points!");
-            NotificationManagerClass.DisplayMessageNotification(LocaleUtils.RANDOM_SPAWNPOINTS.Localized(), iconType: EFT.Communications.ENotificationIconType.Alert);
+            NotificationManagerClass.DisplayMessageNotification(LocaleUtils.RANDOM_SPAWNPOINTS.Localized(),
+                iconType: EFT.Communications.ENotificationIconType.Alert);
 
-            if (!IsServer)
-            {
-                CreateSpawnSystem(profile);
-            }
+            CreateSpawnSystem(profile);
             return;
         }
 
-        if (!IsServer && spawnTogether)
+        _abstractGame.SetMatchmakerStatus(LocaleUtils.UI_RETRIEVE_SPAWN_INFO.Localized());
+
+        RequestPacket packet = new()
         {
-            _abstractGame.SetMatchmakerStatus(LocaleUtils.UI_RETRIEVE_SPAWN_INFO.Localized());
+            Type = ERequestSubPacketType.SpawnPoint
+        };
+        var client = Singleton<FikaClient>.Instance;
 
-            RequestPacket packet = new()
+        do
+        {
+            client.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+            await Task.Delay(1000);
+            if (string.IsNullOrEmpty(InfiltrationPoint))
             {
-                Type = ERequestSubPacketType.SpawnPoint
-            };
-            var client = Singleton<FikaClient>.Instance;
+                await Task.Delay(2000);
+            }
+        } while (string.IsNullOrEmpty(InfiltrationPoint));
 
-            do
-            {
-                client.SendData(ref packet, DeliveryMethod.ReliableOrdered);
-                await Task.Delay(1000);
-                if (string.IsNullOrEmpty(InfiltrationPoint))
-                {
-                    await Task.Delay(2000);
-                }
-            } while (string.IsNullOrEmpty(InfiltrationPoint));
+        Logger.LogInfo($"Retrieved infiltration point '{InfiltrationPoint}' from server");
+    }
 
-            Logger.LogInfo($"Retrieved infiltration point '{InfiltrationPoint}' from server");
+    private bool CheckSpawnTogether()
+    {
+        if (RaidSettings.PlayersSpawnPlace == EPlayersSpawnPlace.SamePlace)
+        {
+            return true;
         }
+
+        if (string.Equals(RaidSettings.SelectedLocation.Id, "labyrinth", StringComparison.OrdinalIgnoreCase)
+            && FikaPlugin.Instance.RandomLabyrinthSpawns)
+        {
+            return false;
+        }
+
+        return true;
     }
 
     public override void CreateSpawnSystem(Profile profile)

@@ -12,7 +12,7 @@ public class FikaClientUsableItemController : UsableItemController
 
     public static FikaClientUsableItemController Create(FikaPlayer player, Item item)
     {
-        FikaClientUsableItemController controller = smethod_6<FikaClientUsableItemController>(player, item);
+        var controller = smethod_6<FikaClientUsableItemController>(player, item);
         controller._fikaPlayer = player;
         return controller;
     }
@@ -27,7 +27,7 @@ public class FikaClientUsableItemController : UsableItemController
 
     public override bool ExamineWeapon()
     {
-        bool flag = base.ExamineWeapon();
+        var flag = base.ExamineWeapon();
         if (flag)
         {
             _fikaPlayer.CommonPacket.Type = ECommonSubPacketType.UsableItem;
@@ -39,7 +39,7 @@ public class FikaClientUsableItemController : UsableItemController
 
     public override void SetAim(bool value)
     {
-        bool isAiming = IsAiming;
+        var isAiming = IsAiming;
         base.SetAim(value);
         if (IsAiming != isAiming)
         {

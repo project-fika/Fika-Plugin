@@ -14,7 +14,7 @@ public sealed class ChangeFireModePacket : IPoolSubPacket
 
     public static ChangeFireModePacket FromValue(Weapon.EFireMode fireMode)
     {
-        ChangeFireModePacket packet = FirearmSubPacketPoolManager.Instance.GetPacket<ChangeFireModePacket>(EFirearmSubPacketType.ChangeFireMode);
+        var packet = FirearmSubPacketPoolManager.Instance.GetPacket<ChangeFireModePacket>(EFirearmSubPacketType.ChangeFireMode);
         packet.FireMode = fireMode;
         return packet;
     }

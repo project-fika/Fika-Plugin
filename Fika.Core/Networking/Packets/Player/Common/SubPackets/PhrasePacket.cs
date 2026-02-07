@@ -17,7 +17,7 @@ public sealed class PhrasePacket : IPoolSubPacket
 
     public static PhrasePacket FromValue(EPhraseTrigger trigger, int index)
     {
-        PhrasePacket packet = CommonSubPacketPoolManager.Instance.GetPacket<PhrasePacket>(ECommonSubPacketType.Phrase);
+        var packet = CommonSubPacketPoolManager.Instance.GetPacket<PhrasePacket>(ECommonSubPacketType.Phrase);
         packet.PhraseTrigger = trigger;
         packet.PhraseIndex = index;
         return packet;

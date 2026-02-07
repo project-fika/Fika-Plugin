@@ -1,4 +1,8 @@
-﻿using BepInEx.Logging;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
 using EFT.InputSystem;
@@ -8,12 +12,6 @@ using EFT.UI;
 using Fika.Core.Main.GameMode;
 using Fika.Core.Main.Players;
 using HarmonyLib;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Net.Sockets;
-using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 using static Fika.Core.FikaPlugin;
 using static Fika.Core.Networking.IFikaNetworkManager;
 

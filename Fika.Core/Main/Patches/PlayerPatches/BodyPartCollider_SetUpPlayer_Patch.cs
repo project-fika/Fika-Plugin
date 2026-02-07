@@ -1,10 +1,10 @@
-﻿using EFT;
+﻿using System.Reflection;
+using EFT;
 using Fika.Core.Main.BotClasses;
 using Fika.Core.Main.ObservedClasses.PlayerBridge;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using SPT.Reflection.Patching;
-using System.Reflection;
 
 namespace Fika.Core.Main.Patches.PlayerPatches;
 

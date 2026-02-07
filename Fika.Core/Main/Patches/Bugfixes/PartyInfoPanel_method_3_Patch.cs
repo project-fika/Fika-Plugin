@@ -1,8 +1,7 @@
-﻿using EFT;
-using EFT.InventoryLogic;
+﻿using System.Reflection;
+using EFT;
 using EFT.UI.Matchmaker;
 using SPT.Reflection.Patching;
-using System.Reflection;
 
 namespace Fika.Core.Main.Patches.Bugfixes;
 
@@ -21,7 +20,7 @@ public class PartyInfoPanel_method_3_Patch : ModulePatch
     [PatchPrefix]
     public static bool Prefix(GroupPlayerViewModelClass raidPlayer)
     {
-        InventoryEquipment equipment = raidPlayer.PlayerVisualRepresentation.Equipment;
+        var equipment = raidPlayer.PlayerVisualRepresentation.Equipment;
         if (equipment.CurrentAddress.GetOwnerOrNull() is Player.PlayerOwnerInventoryController)
         {
             return false;

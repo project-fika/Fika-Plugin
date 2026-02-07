@@ -106,7 +106,7 @@ public class TarkovApplication_LocalGameCreator_Patch : ModulePatch
         if (!isServer)
         {
 #if DEBUG
-            Logger.LogInfo("Waiting for host to receive location"); 
+            Logger.LogInfo("Waiting for host to receive location");
 #endif
             await WaitForServerToReceiveLocation();
 #if DEBUG

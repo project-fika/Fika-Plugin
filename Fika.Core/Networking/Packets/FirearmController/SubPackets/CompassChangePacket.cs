@@ -1,7 +1,5 @@
 ﻿using Fika.Core.Main.Players;
-using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Pooling;
-using static EFT.Player;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
@@ -14,7 +12,7 @@ public sealed class CompassChangePacket : IPoolSubPacket
 
     public static CompassChangePacket FromValue(bool enabled)
     {
-        CompassChangePacket packet = FirearmSubPacketPoolManager.Instance.GetPacket<CompassChangePacket>(EFirearmSubPacketType.CompassChange);
+        var packet = FirearmSubPacketPoolManager.Instance.GetPacket<CompassChangePacket>(EFirearmSubPacketType.CompassChange);
         packet.Enabled = enabled;
         return packet;
     }

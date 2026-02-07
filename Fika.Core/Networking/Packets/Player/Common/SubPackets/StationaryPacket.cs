@@ -1,6 +1,5 @@
 ﻿using Comfort.Common;
 using EFT;
-using EFT.Interactive;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Pooling;
 
@@ -20,7 +19,7 @@ public sealed class StationaryPacket : IPoolSubPacket
 
     public static StationaryPacket FromValue(EStationaryCommand command, string id = null)
     {
-        StationaryPacket packet = CommonSubPacketPoolManager.Instance.GetPacket<StationaryPacket>(ECommonSubPacketType.Stationary);
+        var packet = CommonSubPacketPoolManager.Instance.GetPacket<StationaryPacket>(ECommonSubPacketType.Stationary);
         packet.Command = command;
         packet.Id = id;
         return packet;
@@ -31,7 +30,7 @@ public sealed class StationaryPacket : IPoolSubPacket
 
     public void Execute(FikaPlayer player)
     {
-        StationaryWeapon stationaryWeapon = Command == EStationaryCommand.Occupy
+        var stationaryWeapon = Command == EStationaryCommand.Occupy
             ? Singleton<GameWorld>.Instance.FindStationaryWeapon(Id) : null;
         player.ObservedStationaryInteract(stationaryWeapon, (StationaryPacketStruct.EStationaryCommand)Command);
     }

@@ -1,4 +1,6 @@
-﻿using BepInEx.Logging;
+﻿using System;
+using System.Threading.Tasks;
+using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
@@ -13,9 +15,6 @@ using Fika.Core.Networking.Packets.Communication;
 using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
 using Fika.Core.Networking.Packets.World;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using static Fika.Core.Main.ClientClasses.ClientInventoryController;
 
 namespace Fika.Core.Main.HostClasses;
@@ -104,7 +103,7 @@ public sealed class FikaHostInventoryController : Player.PlayerOwnerInventoryCon
         // Do not replicate picking up quest items, throws an error on the other clients            
         if (operation is MoveOperationClass moveOperation)
         {
-            Item lootedItem = moveOperation.Item;
+            var lootedItem = moveOperation.Item;
             if (lootedItem.QuestItem)
             {
                 if (_fikaPlayer.AbstractQuestControllerClass is ClientSharedQuestController sharedQuestController && sharedQuestController.ContainsAcceptedType("PlaceBeacon"))
@@ -169,7 +168,7 @@ public sealed class FikaHostInventoryController : Player.PlayerOwnerInventoryCon
     public override bool HasCultistAmulet(out CultistAmuletItemClass amulet)
     {
         amulet = null;
-        using IEnumerator<Item> enumerator = Inventory.GetItemsInSlots([EquipmentSlot.Pockets]).GetEnumerator();
+        using var enumerator = Inventory.GetItemsInSlots([EquipmentSlot.Pockets]).GetEnumerator();
         while (enumerator.MoveNext())
         {
             if (enumerator.Current is CultistAmuletItemClass cultistAmuletClass)
@@ -183,7 +182,7 @@ public sealed class FikaHostInventoryController : Player.PlayerOwnerInventoryCon
 
     private uint AddOperationCallback(BaseInventoryOperationClass operation, Action<ServerOperationStatus> callback)
     {
-        ushort id = operation.Id;
+        var id = operation.Id;
         _fikaPlayer.OperationCallbacks.Add(id, callback);
         return id;
     }

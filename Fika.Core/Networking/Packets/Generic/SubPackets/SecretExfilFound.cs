@@ -18,7 +18,7 @@ public sealed class SecretExfilFound : IPoolSubPacket
 
     public static SecretExfilFound FromValue(string groupId, string exitName)
     {
-        SecretExfilFound packet = GenericSubPacketPoolManager.Instance.GetPacket<SecretExfilFound>(EGenericSubPacketType.SecretExfilFound);
+        var packet = GenericSubPacketPoolManager.Instance.GetPacket<SecretExfilFound>(EGenericSubPacketType.SecretExfilFound);
         packet.GroupId = groupId;
         packet.ExitName = exitName;
         return packet;

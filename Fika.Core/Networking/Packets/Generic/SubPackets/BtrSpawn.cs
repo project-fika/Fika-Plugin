@@ -20,7 +20,7 @@ public sealed class BtrSpawn : IPoolSubPacket
 
     public static BtrSpawn FromValue(Vector3 position, Quaternion rotation, string profileId)
     {
-        BtrSpawn packet = GenericSubPacketPoolManager.Instance.GetPacket<BtrSpawn>(EGenericSubPacketType.SpawnBTR);
+        var packet = GenericSubPacketPoolManager.Instance.GetPacket<BtrSpawn>(EGenericSubPacketType.SpawnBTR);
         packet.Position = position;
         packet.Rotation = rotation;
         packet.PlayerProfileId = profileId;

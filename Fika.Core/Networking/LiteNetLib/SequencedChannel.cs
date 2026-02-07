@@ -18,15 +18,17 @@ internal sealed class SequencedChannel : BaseChannel
         _id = id;
         _reliable = reliable;
         if (_reliable)
-            _ackPacket = new NetPacket(PacketProperty.Ack, 0) {ChannelId = id};
+        {
+            _ackPacket = new NetPacket(PacketProperty.Ack, 0) { ChannelId = id };
+        }
     }
 
     public override bool SendNextPackets()
     {
         if (_reliable && OutgoingQueue.Count == 0)
         {
-            long currentTime = DateTime.UtcNow.Ticks;
-            long packetHoldTime = currentTime - _lastPacketSendTime;
+            var currentTime = DateTime.UtcNow.Ticks;
+            var packetHoldTime = currentTime - _lastPacketSendTime;
             if (packetHoldTime >= Peer.ResendDelay * TimeSpan.TicksPerMillisecond)
             {
                 var packet = _lastPacket;
@@ -43,7 +45,7 @@ internal sealed class SequencedChannel : BaseChannel
             {
                 while (OutgoingQueue.Count > 0)
                 {
-                    NetPacket packet = OutgoingQueue.Dequeue();
+                    var packet = OutgoingQueue.Dequeue();
                     _localSequence = (_localSequence + 1) % NetConstants.MaxSequence;
                     packet.Sequence = (ushort)_localSequence;
                     packet.ChannelId = _id;
@@ -75,15 +77,21 @@ internal sealed class SequencedChannel : BaseChannel
     public override bool ProcessPacket(NetPacket packet)
     {
         if (packet.IsFragmented)
+        {
             return false;
+        }
+
         if (packet.Property == PacketProperty.Ack)
         {
             if (_reliable && _lastPacket != null && packet.Sequence == _lastPacket.Sequence)
+            {
                 _lastPacket = null;
+            }
+
             return false;
         }
-        int relative = NetUtils.RelativeSequenceNumber(packet.Sequence, _remoteSequence);
-        bool packetProcessed = false;
+        var relative = NetUtils.RelativeSequenceNumber(packet.Sequence, _remoteSequence);
+        var packetProcessed = false;
         if (packet.Sequence < NetConstants.MaxSequence && relative > 0)
         {
             if (Peer.NetManager.EnableStatistics)

@@ -6,6 +6,7 @@ internal enum PacketProperty : byte
 {
     Unreliable,
     Channeled,
+    ReliableMerged,
     Ack,
     Ping,
     Pong,
@@ -21,23 +22,25 @@ internal enum PacketProperty : byte
     PeerNotFound,
     InvalidProtocol,
     NatMessage,
-    Empty
+    Empty,
+    Total
 }
 
 internal sealed class NetPacket
 {
-    private static readonly int PropertiesCount = Enum.GetValues(typeof(PacketProperty)).Length;
+    private static readonly int PropertiesCount = (int)PacketProperty.Total;
     private static readonly int[] HeaderSizes;
 
     static NetPacket()
     {
         HeaderSizes = NetUtils.AllocatePinnedUninitializedArray<int>(PropertiesCount);
-        for (int i = 0; i < HeaderSizes.Length; i++)
+        for (var i = 0; i < HeaderSizes.Length; i++)
         {
             switch ((PacketProperty)i)
             {
                 case PacketProperty.Channeled:
                 case PacketProperty.Ack:
+                case PacketProperty.ReliableMerged:
                     HeaderSizes[i] = NetConstants.ChanneledHeaderSize;
                     break;
                 case PacketProperty.Ping:
@@ -72,7 +75,7 @@ internal sealed class NetPacket
     public byte ConnectionNumber
     {
         get => (byte)((RawData[0] & 0x60) >> 5);
-        set => RawData[0] = (byte) ((RawData[0] & 0x9F) | (value << 5));
+        set => RawData[0] = (byte)((RawData[0] & 0x9F) | (value << 5));
     }
 
     public ushort Sequence
@@ -135,17 +138,18 @@ internal sealed class NetPacket
 
     public static int GetHeaderSize(PacketProperty property) => HeaderSizes[(int)property];
 
-    public int GetHeaderSize() => HeaderSizes[RawData[0] & 0x1F];
+    public int HeaderSize => HeaderSizes[RawData[0] & 0x1F];
 
     public bool Verify()
     {
-        byte property = (byte)(RawData[0] & 0x1F);
+        var property = (byte)(RawData[0] & 0x1F);
         if (property >= PropertiesCount)
+        {
             return false;
-        int headerSize = HeaderSizes[property];
-        bool fragmented = (RawData[0] & 0x80) != 0;
+        }
+
+        var headerSize = HeaderSizes[property];
+        var fragmented = (RawData[0] & 0x80) != 0;
         return Size >= headerSize && (!fragmented || Size >= headerSize + NetConstants.FragmentHeaderSize);
     }
-
-    public static implicit operator Span<byte>(NetPacket p) => new Span<byte>(p.RawData, 0, p.Size);
 }

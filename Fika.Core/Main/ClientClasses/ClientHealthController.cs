@@ -29,6 +29,11 @@ public sealed class ClientHealthController(Profile.ProfileHealthClass healthInfo
             return;
         }
 
+        if (packet.SyncType is NetworkHealthSyncPacketStruct.ESyncType.ApplyDamage)
+        {
+            return;
+        }
+
         _fikaPlayer.CommonPacket.Type = ECommonSubPacketType.HealthSync;
         _fikaPlayer.CommonPacket.SubPacket = HealthSyncPacket.FromValue(packet);
         _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _fikaPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);

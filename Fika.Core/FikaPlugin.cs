@@ -45,7 +45,7 @@ namespace Fika.Core;
 [BepInDependency("com.SPT.debugging", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after spt-debugging, that way we can disable its patches
 public class FikaPlugin : BaseUnityPlugin
 {
-    public const string FikaVersion = "2.2.0";
+    public const string FikaVersion = "2.2.1";
     public const string FikaNATPunchMasterServer = "natpunch.project-fika.com";
     public const ushort FikaNATPunchMasterPort = 6790;
 
@@ -119,6 +119,7 @@ public class FikaPlugin : BaseUnityPlugin
     public bool EnableTransits;
     public bool AnyoneCanStartRaid;
     public bool AllowNamePlates;
+    public bool RandomLabyrinthSpawns;
     #endregion
 
     #region natpunch config
@@ -227,15 +228,6 @@ public class FikaPlugin : BaseUnityPlugin
     /// </remarks>
     private async Task RunChecks()
     {
-        try
-        {
-            WanIP = await FikaRequestHandler.GetPublicIP();
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError($"RunChecks: {ex.Message}");
-        }
-
         await Task.Delay(5000);
 #if !DEBUG
         VerifyServerVersion();
@@ -248,6 +240,15 @@ public class FikaPlugin : BaseUnityPlugin
         }
 
         _patchManager = null;
+
+        try
+        {
+            WanIP = await FikaRequestHandler.GetPublicIP();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError($"RunChecks: {ex.Message}");
+        }
     }
 
     private void GetClientConfig()
@@ -268,6 +269,7 @@ public class FikaPlugin : BaseUnityPlugin
         EnableTransits = clientConfig.EnableTransits;
         AnyoneCanStartRaid = clientConfig.AnyoneCanStartRaid;
         AllowNamePlates = clientConfig.AllowNamePlates;
+        RandomLabyrinthSpawns = clientConfig.RandomLabyrinthSpawns;
 
         clientConfig.LogValues();
     }

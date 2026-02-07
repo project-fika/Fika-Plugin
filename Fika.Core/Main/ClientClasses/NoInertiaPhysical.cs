@@ -19,13 +19,13 @@ public class NoInertiaPhysical : PlayerPhysicalClass
 
     public override void OnWeightUpdated()
     {
-        BackendConfigSettingsClass.InertiaSettings inertia = Singleton<BackendConfigSettingsClass>.Instance.Inertia;
+        var inertia = Singleton<BackendConfigSettingsClass>.Instance.Inertia;
         float num = IobserverToPlayerBridge_0.Skills.StrengthBuffElite ? _fikaPlayer.InventoryController.Inventory.TotalWeightEliteSkill : _fikaPlayer.InventoryController.Inventory.TotalWeight;
         Inertia = 0.0113f;
         SprintAcceleration = 0.9887f;
         PreSprintAcceleration = 2.9853f;
-        float num2 = Mathf.Lerp(inertia.MinMovementAccelerationRangeRight.x, inertia.MaxMovementAccelerationRangeRight.x, Inertia);
-        float num3 = Mathf.Lerp(inertia.MinMovementAccelerationRangeRight.y, inertia.MaxMovementAccelerationRangeRight.y, Inertia);
+        var num2 = Mathf.Lerp(inertia.MinMovementAccelerationRangeRight.x, inertia.MaxMovementAccelerationRangeRight.x, Inertia);
+        var num3 = Mathf.Lerp(inertia.MinMovementAccelerationRangeRight.y, inertia.MaxMovementAccelerationRangeRight.y, Inertia);
         EFTHardSettings.Instance.MovementAccelerationRange.MoveKey(1, new Keyframe(num2, num3));
         Overweight = BaseOverweightLimits.InverseLerp(num);
         WalkOverweight = WalkOverweightLimits.InverseLerp(num);

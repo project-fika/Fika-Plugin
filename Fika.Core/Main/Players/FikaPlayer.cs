@@ -1,5 +1,10 @@
 ﻿// © 2026 Lacyway All Rights Reserved
 
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
 using EFT.Ballistics;
@@ -30,11 +35,6 @@ using Fika.Core.Networking.Packets.World;
 using Fika.Core.Networking.VOIP;
 using HarmonyLib;
 using JsonType;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using static Fika.Core.Main.ClientClasses.ClientInventoryController;
 
 namespace Fika.Core.Main.Players;
@@ -732,6 +732,12 @@ public class FikaPlayer : LocalPlayer
                 EInteractionStage.Execute, (interactionResult is KeyInteractionResultClass keyInteractionResult) ? keyInteractionResult.Key.Item.Id : null);
             PacketSender.NetworkManager.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
         }
+        UpdateInteractionCast();
+    }
+
+    public override void vmethod_6(string itemId, string zoneId, bool successful)
+    {
+        base.vmethod_6(itemId, zoneId, successful);
         UpdateInteractionCast();
     }
 

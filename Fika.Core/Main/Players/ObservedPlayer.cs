@@ -1235,7 +1235,7 @@ public class ObservedPlayer : FikaPlayer
             {
                 if (item is not Weapon newWeapon)
                 {
-                    FikaGlobals.LogError("SetInventory::HandsController item was not Weapon");
+                    FikaGlobals.LogError("HandsController item was not Weapon");
                     return;
                 }
 
@@ -1249,7 +1249,7 @@ public class ObservedPlayer : FikaPlayer
                         {
                             if (currentViews.ContainsKey(slot.FullId))
                             {
-                                FikaGlobals.LogError("RefreshSlotViews::CRITICAL ERROR DICTIONARY: " + slot.FullId);
+                                FikaGlobals.LogError("CRITICAL ERROR DICTIONARY: " + slot.FullId);
                                 continue;
                             }
                             currentViews.Add(slot.FullId, kvp.Value);
@@ -1262,7 +1262,8 @@ public class ObservedPlayer : FikaPlayer
                         {
                             if (slot.ContainedItem == null)
                             {
-                                var transform = TransformHelperClass.FindTransformRecursive(controller.CCV.GameObject.transform, slot.ID, true);
+                                var transform = TransformHelperClass.FindTransformRecursive(controller.CCV.GameObject.transform,
+                                    slot.ID, true);
                                 if (transform == null)
                                 {
 #if DEBUG

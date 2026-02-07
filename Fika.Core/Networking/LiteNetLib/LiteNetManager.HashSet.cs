@@ -21,17 +21,21 @@ public partial class LiteNetManager
 
     private static int HashSetGetPrime(int min)
     {
-        foreach (int prime in Primes)
+        foreach (var prime in Primes)
         {
             if (prime >= min)
+            {
                 return prime;
+            }
         }
 
         // Outside of our predefined table. Compute the hard way.
-        for (int i = (min | 1); i < int.MaxValue; i += 2)
+        for (var i = (min | 1); i < int.MaxValue; i += 2)
         {
             if (IsPrime(i) && ((i - 1) % HashPrime != 0))
+            {
                 return i;
+            }
         }
         return min;
 
@@ -39,11 +43,13 @@ public partial class LiteNetManager
         {
             if ((candidate & 1) != 0)
             {
-                int limit = (int)Math.Sqrt(candidate);
-                for (int divisor = 3; divisor <= limit; divisor += 2)
+                var limit = (int)Math.Sqrt(candidate);
+                for (var divisor = 3; divisor <= limit; divisor += 2)
                 {
                     if (candidate % divisor == 0)
+                    {
                         return false;
+                    }
                 }
                 return true;
             }
@@ -93,11 +99,13 @@ public partial class LiteNetManager
         }
         if (_buckets != null)
         {
-            int hashCode = item.GetHashCode() & Lower31BitMask;
-            for (int i = _buckets[hashCode % _buckets.Length] - 1; i >= 0; i = _slots[i].Next)
+            var hashCode = item.GetHashCode() & Lower31BitMask;
+            for (var i = _buckets[hashCode % _buckets.Length] - 1; i >= 0; i = _slots[i].Next)
             {
                 if (_slots[i].HashCode == hashCode && _slots[i].Value.Equals(item))
+                {
                     return true;
+                }
             }
         }
         return false;
@@ -142,9 +150,12 @@ public partial class LiteNetManager
         AddPeerToSet(peer);
         if (peer.Id >= _peersArray.Length)
         {
-            int newSize = _peersArray.Length * 2;
+            var newSize = _peersArray.Length * 2;
             while (peer.Id >= newSize)
+            {
                 newSize *= 2;
+            }
+
             Array.Resize(ref _peersArray, newSize);
         }
         _peersArray[peer.Id] = peer;
@@ -153,45 +164,69 @@ public partial class LiteNetManager
 
     private void RemovePeer(LiteNetPeer peer, bool enableWriteLock)
     {
-        if(enableWriteLock)
+        if (enableWriteLock)
+        {
             _peersLock.EnterWriteLock();
+        }
+
         if (!RemovePeerFromSet(peer))
         {
-            if(enableWriteLock)
+            if (enableWriteLock)
+            {
                 _peersLock.ExitWriteLock();
+            }
+
             return;
         }
         if (peer == _headPeer)
+        {
             _headPeer = peer.NextPeer;
+        }
 
         if (peer.PrevPeer != null)
+        {
             peer.PrevPeer.NextPeer = peer.NextPeer;
+        }
+
         if (peer.NextPeer != null)
+        {
             peer.NextPeer.PrevPeer = peer.PrevPeer;
+        }
+
         peer.PrevPeer = null;
 
         _peersArray[peer.Id] = null;
         _peerIds.Enqueue(peer.Id);
 
-        if(enableWriteLock)
+        if (enableWriteLock)
+        {
             _peersLock.ExitWriteLock();
+        }
     }
 
     protected bool RemovePeerFromSet(LiteNetPeer peer)
     {
         if (_buckets == null || peer == null)
+        {
             return false;
-        int hashCode = peer.GetHashCode() & Lower31BitMask;
-        int bucket = hashCode % _buckets.Length;
-        int last = -1;
-        for (int i = _buckets[bucket] - 1; i >= 0; last = i, i = _slots[i].Next)
+        }
+
+        var hashCode = peer.GetHashCode() & Lower31BitMask;
+        var bucket = hashCode % _buckets.Length;
+        var last = -1;
+        for (var i = _buckets[bucket] - 1; i >= 0; last = i, i = _slots[i].Next)
         {
             if (_slots[i].HashCode == hashCode && _slots[i].Value.Equals(peer))
             {
                 if (last < 0)
+                {
                     _buckets[bucket] = _slots[i].Next + 1;
+                }
                 else
+                {
                     _slots[last].Next = _slots[i].Next;
+                }
+
                 _slots[i].HashCode = -1;
                 _slots[i].Value = null;
                 _slots[i].Next = _freeList;
@@ -220,10 +255,10 @@ public partial class LiteNetManager
             //can be NetPeer or IPEndPoint
             int hashCode = (UseNativeSockets ? endPoint.GetHashCode() : endPoint.Serialize().GetHashCode()) & Lower31BitMask;
 #else
-            int hashCode = endPoint.GetHashCode() & Lower31BitMask;
+            var hashCode = endPoint.GetHashCode() & Lower31BitMask;
 #endif
             _peersLock.EnterReadLock();
-            for (int i = _buckets[hashCode % _buckets.Length] - 1; i >= 0; i = _slots[i].Next)
+            for (var i = _buckets[hashCode % _buckets.Length] - 1; i >= 0; i = _slots[i].Next)
             {
                 if (_slots[i].HashCode == hashCode && _slots[i].Value.Equals(endPoint))
                 {
@@ -243,9 +278,9 @@ public partial class LiteNetManager
     {
         if (_buckets != null)
         {
-            int hashCode = saddr.GetHashCode() & Lower31BitMask;
+            var hashCode = saddr.GetHashCode() & Lower31BitMask;
             _peersLock.EnterReadLock();
-            for (int i = _buckets[hashCode % _buckets.Length] - 1; i >= 0; i = _slots[i].Next)
+            for (var i = _buckets[hashCode % _buckets.Length] - 1; i >= 0; i = _slots[i].Next)
             {
                 if (_slots[i].HashCode == hashCode && _slots[i].Value.Serialize().Equals(saddr))
                 {
@@ -264,17 +299,19 @@ public partial class LiteNetManager
     {
         if (_buckets == null)
         {
-            int size = HashSetGetPrime(0);
+            var size = HashSetGetPrime(0);
             _buckets = new int[size];
             _slots = new Slot[size];
         }
 
-        int hashCode = value.GetHashCode() & Lower31BitMask;
-        int bucket = hashCode % _buckets.Length;
-        for (int i = _buckets[hashCode % _buckets.Length] - 1; i >= 0; i = _slots[i].Next)
+        var hashCode = value.GetHashCode() & Lower31BitMask;
+        var bucket = hashCode % _buckets.Length;
+        for (var i = _buckets[hashCode % _buckets.Length] - 1; i >= 0; i = _slots[i].Next)
         {
             if (_slots[i].HashCode == hashCode && _slots[i].Value.Equals(value))
+            {
                 return false;
+            }
         }
 
         int index;
@@ -288,18 +325,18 @@ public partial class LiteNetManager
             if (_lastIndex == _slots.Length)
             {
                 //increase capacity
-                int newSize = 2 * _count;
+                var newSize = 2 * _count;
                 newSize = (uint)newSize > MaxPrimeArrayLength && MaxPrimeArrayLength > _count
                     ? MaxPrimeArrayLength
                     : HashSetGetPrime(newSize);
 
                 // Able to increase capacity; copy elements to larger array and rehash
-                Slot[] newSlots = new Slot[newSize];
+                var newSlots = new Slot[newSize];
                 Array.Copy(_slots, 0, newSlots, 0, _lastIndex);
                 _buckets = new int[newSize];
-                for (int i = 0; i < _lastIndex; i++)
+                for (var i = 0; i < _lastIndex; i++)
                 {
-                    int b = newSlots[i].HashCode % newSize;
+                    var b = newSlots[i].HashCode % newSize;
                     newSlots[i].Next = _buckets[b] - 1;
                     _buckets[b] = i + 1;
                 }

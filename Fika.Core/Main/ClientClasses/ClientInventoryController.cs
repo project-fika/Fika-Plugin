@@ -1,4 +1,6 @@
-﻿using BepInEx.Logging;
+﻿using System;
+using System.Threading.Tasks;
+using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
@@ -12,8 +14,6 @@ using Fika.Core.Networking.Packets.Communication;
 using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
 using Fika.Core.Networking.Packets.World;
-using System;
-using System.Threading.Tasks;
 
 namespace Fika.Core.Main.ClientClasses;
 

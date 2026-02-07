@@ -13,7 +13,7 @@ public sealed class LeftStanceChangePacket : IPoolSubPacket
 
     public static LeftStanceChangePacket FromValue(bool leftStance)
     {
-        LeftStanceChangePacket packet = FirearmSubPacketPoolManager.Instance.GetPacket<LeftStanceChangePacket>(EFirearmSubPacketType.LeftStanceChange);
+        var packet = FirearmSubPacketPoolManager.Instance.GetPacket<LeftStanceChangePacket>(EFirearmSubPacketType.LeftStanceChange);
         packet.LeftStance = leftStance;
         return packet;
     }

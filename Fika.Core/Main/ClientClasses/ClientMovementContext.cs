@@ -1,6 +1,6 @@
-﻿using EFT;
+﻿using System;
+using EFT;
 using Fika.Core.Main.Utils;
-using System;
 
 namespace Fika.Core.Main.ClientClasses;
 
@@ -10,7 +10,7 @@ public class ClientMovementContext : MovementContext
 
     public new static ClientMovementContext Create(Player player, Func<IAnimator> animatorGetter, Func<ICharacterController> characterControllerGetter, LayerMask groundMask)
     {
-        ClientMovementContext movementContext = Create<ClientMovementContext>(player, animatorGetter, characterControllerGetter, groundMask);
+        var movementContext = Create<ClientMovementContext>(player, animatorGetter, characterControllerGetter, groundMask);
         return movementContext;
     }
 

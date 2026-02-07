@@ -1,7 +1,7 @@
-﻿using Comfort.Common;
+﻿using System.Reflection;
+using Comfort.Common;
 using Fika.Core.Main.GameMode;
 using SPT.Reflection.Patching;
-using System.Reflection;
 
 namespace Fika.Core.Main.Patches;
 
@@ -19,7 +19,7 @@ public class GrenadeClass_Init_Patch : ModulePatch
     [PatchPostfix]
     public static void Postfix(ThrowWeapItemClass item)
     {
-        IFikaGame fikaGame = Singleton<IFikaGame>.Instance;
+        var fikaGame = Singleton<IFikaGame>.Instance;
         if (fikaGame != null)
         {
             fikaGame.GameController.ThrownGrenades.Add(item);

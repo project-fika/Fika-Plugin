@@ -6,7 +6,7 @@ public struct LootSyncPacket : INetSerializable
 
     public void Deserialize(NetDataReader reader)
     {
-        ref LootSyncStruct data = ref Data;
+        ref var data = ref Data;
 
         data.Id = reader.GetInt();
         data.Position = reader.GetUnmanaged<Vector3>();

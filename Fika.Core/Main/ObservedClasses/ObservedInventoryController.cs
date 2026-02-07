@@ -1,14 +1,13 @@
 ﻿// © 2026 Lacyway All Rights Reserved
 
+using System.Collections.Generic;
 using Comfort.Common;
-using Diz.LanguageExtensions;
 using EFT;
 using EFT.InventoryLogic;
 using EFT.InventoryLogic.Operations;
 using Fika.Core.Main.Players;
 using HarmonyLib;
 using JetBrains.Annotations;
-using System.Collections.Generic;
 
 namespace Fika.Core.Main.ObservedClasses;
 
@@ -121,7 +120,7 @@ public class ObservedInventoryController : Player.PlayerInventoryController, Int
             callback.Succeed();
             return;
         }
-        if (!executor.CheckTransferOwners(item, to, out Error error))
+        if (!executor.CheckTransferOwners(item, to, out var error))
         {
             callback.Fail(error.ToString());
             return;

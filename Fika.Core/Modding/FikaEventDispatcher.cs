@@ -1,5 +1,5 @@
-﻿using Fika.Core.Modding.Events;
-using System;
+﻿using System;
+using Fika.Core.Modding.Events;
 
 namespace Fika.Core.Modding;
 

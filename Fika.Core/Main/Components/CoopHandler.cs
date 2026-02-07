@@ -1,4 +1,8 @@
-﻿using BepInEx.Logging;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using BepInEx.Logging;
 using Comfort.Common;
 using Diz.Jobs;
 using EFT;
@@ -11,10 +15,6 @@ using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Fika.Core.Main.Components;
 

@@ -1,6 +1,6 @@
-﻿using Comfort.Common;
+﻿using System;
+using Comfort.Common;
 using EFT;
-using System;
 
 namespace Fika.Core.Main.ClientClasses;
 
@@ -11,7 +11,7 @@ public class NoInertiaMovementContext : ClientMovementContext
 {
     public new static NoInertiaMovementContext Create(Player player, Func<IAnimator> animatorGetter, Func<ICharacterController> characterControllerGetter, LayerMask groundMask)
     {
-        NoInertiaMovementContext movementContext = Create<NoInertiaMovementContext>(player, animatorGetter, characterControllerGetter, groundMask);
+        var movementContext = Create<NoInertiaMovementContext>(player, animatorGetter, characterControllerGetter, groundMask);
         return movementContext;
     }
 
@@ -43,7 +43,7 @@ public class NoInertiaMovementContext : ClientMovementContext
         {
             _player.PoseMemo = _player.Physical.MaxPoseLevel;
         }
-        float walkSpeedLimit = _player.Physical.WalkSpeedLimit;
+        var walkSpeedLimit = _player.Physical.WalkSpeedLimit;
         RemoveStateSpeedLimit(Player.ESpeedLimit.Weight);
         if (walkSpeedLimit < 1f)
         {

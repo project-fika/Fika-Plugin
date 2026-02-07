@@ -19,7 +19,7 @@ public sealed class MuffledState : IPoolSubPacket
 
     public static MuffledState FromValue(int netId, bool muffled)
     {
-        MuffledState packet = GenericSubPacketPoolManager.Instance.GetPacket<MuffledState>(EGenericSubPacketType.MuffledState);
+        var packet = GenericSubPacketPoolManager.Instance.GetPacket<MuffledState>(EGenericSubPacketType.MuffledState);
         packet.NetId = netId;
         packet.Muffled = muffled;
         return packet;
@@ -27,19 +27,21 @@ public sealed class MuffledState : IPoolSubPacket
 
     public void Execute(FikaPlayer player = null)
     {
-        if (CoopHandler.TryGetCoopHandler(out CoopHandler coopHandler))
+        if (CoopHandler.TryGetCoopHandler(out var coopHandler))
         {
-            if (coopHandler.Players.TryGetValue(NetId, out FikaPlayer fikaPlayer) && fikaPlayer is ObservedPlayer observed)
+            if (coopHandler.Players.TryGetValue(NetId, out var fikaPlayer) && fikaPlayer is ObservedPlayer observed)
             {
                 observed.SetMuffledState(Muffled);
                 return;
             }
 
+#if DEBUG
             FikaGlobals.LogError($"MuffledState: Could not find player with id {NetId} or they were not observed!");
+#endif
             return;
         }
 
-        FikaGlobals.LogWarning($"MuffledState: Could not get CoopHandler!");
+        FikaGlobals.LogWarning("MuffledState: Could not get CoopHandler!");
     }
 
     public void Serialize(NetDataWriter writer)

@@ -1,8 +1,8 @@
-﻿using EFT;
+﻿using System.Collections.Generic;
+using System.Reflection;
+using EFT;
 using HarmonyLib;
 using SPT.Reflection.Patching;
-using System.Collections.Generic;
-using System.Reflection;
 
 namespace Fika.Core.Main.Patches.MovementContextPatches;
 

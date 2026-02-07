@@ -1,5 +1,8 @@
 ﻿// © 2026 Lacyway All Rights Reserved
 
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
@@ -7,9 +10,6 @@ using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Packets.FirearmController.SubPackets;
 using HarmonyLib;
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using static EFT.Player;
 
 namespace Fika.Core.Main.ObservedClasses.HandsControllers;

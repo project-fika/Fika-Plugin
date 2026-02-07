@@ -1,7 +1,7 @@
-using EFT;
-using JsonType;
 using System;
 using System.Runtime.Serialization;
+using EFT;
+using JsonType;
 
 namespace Fika.Core.Networking.Models;
 

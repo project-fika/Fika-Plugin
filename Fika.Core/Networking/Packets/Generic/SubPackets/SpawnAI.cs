@@ -1,5 +1,4 @@
 ﻿using Comfort.Common;
-using Fika.Core.Main.Components;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Pooling;
@@ -38,7 +37,7 @@ public sealed class SpawnAI : IPoolSubPacket
         if (coopHandler.Players.TryGetValue(NetId, out var playerToApply))
         {
 #if DEBUG
-            FikaGlobals.LogWarning($"[{NetId}] is ready, spawning at {Location}"); 
+            FikaGlobals.LogWarning($"[{NetId}] is ready, spawning at {Location}");
 #endif
             playerToApply.Teleport(Location);
         }

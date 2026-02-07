@@ -30,7 +30,7 @@ internal sealed class NtpRequest
         var packet = new NtpPacket();
         try
         {
-            int sendCount = socket.SendTo(packet.Bytes, 0, packet.Bytes.Length, SocketFlags.None, _ntpEndPoint);
+            var sendCount = socket.SendTo(packet.Bytes, 0, packet.Bytes.Length, SocketFlags.None, _ntpEndPoint);
             return sendCount == packet.Bytes.Length;
         }
         catch

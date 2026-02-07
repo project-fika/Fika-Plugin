@@ -1,6 +1,6 @@
-﻿using SPT.Reflection.Patching;
-using System;
+﻿using System;
 using System.Reflection;
+using SPT.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.AI;
 

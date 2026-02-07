@@ -1,9 +1,9 @@
-﻿using Comfort.Common;
+﻿using System.Reflection;
+using Comfort.Common;
 using EFT;
 using EFT.RocketLauncher;
 using Fika.Core.Main.Utils;
 using SPT.Reflection.Patching;
-using System.Reflection;
 
 namespace Fika.Core.Main.Patches.Rockets;
 

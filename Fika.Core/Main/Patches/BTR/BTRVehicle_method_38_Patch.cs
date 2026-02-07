@@ -1,4 +1,5 @@
-﻿using Comfort.Common;
+﻿using System.Reflection;
+using Comfort.Common;
 using EFT;
 using EFT.Vehicle;
 using Fika.Core.Main.Players;
@@ -6,7 +7,6 @@ using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.World;
 using SPT.Reflection.Patching;
-using System.Reflection;
 
 namespace Fika.Core.Main.Patches.BTR;
 

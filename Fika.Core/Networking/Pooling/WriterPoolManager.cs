@@ -44,7 +44,7 @@ public static class WriterPoolManager
             return new();
         }
 
-        EFTWriterClass writer = _writers.Pop();
+        var writer = _writers.Pop();
         writer.Reset();
         return writer;
     }

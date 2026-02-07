@@ -26,7 +26,7 @@ public struct GetHostResponse(string[] ips, Guid serverGuid, ushort port, bool n
 
     public override readonly string ToString()
     {
-        string ips = string.Join("; ", IPs);
+        var ips = string.Join("; ", IPs);
         return $"HostResponse Data: IPs: {ips}, Guid: {ServerGuid}, Port: {Port}, NatPunch: {NatPunch}, UseFikaNatPunchServer: {UseFikaNatPunchServer}, IsHeadless: {IsHeadless}";
     }
 }

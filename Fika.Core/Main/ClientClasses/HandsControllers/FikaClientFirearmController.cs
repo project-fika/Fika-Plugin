@@ -1,5 +1,7 @@
 ﻿// © 2026 Lacyway All Rights Reserved
 
+using System;
+using System.Collections.Generic;
 using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
@@ -9,8 +11,6 @@ using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.FirearmController;
 using Fika.Core.Networking.Packets.FirearmController.SubPackets;
 using Fika.Core.Networking.Pooling;
-using System;
-using System.Collections.Generic;
 
 namespace Fika.Core.Main.ClientClasses.HandsControllers;
 
@@ -23,7 +23,7 @@ public class FikaClientFirearmController : Player.FirearmController
 
     public static FikaClientFirearmController Create(FikaPlayer player, Weapon weapon)
     {
-        FikaClientFirearmController controller = smethod_6<FikaClientFirearmController>(player, weapon);
+        var controller = smethod_6<FikaClientFirearmController>(player, weapon);
         controller._fikaPlayer = player;
         controller._isClient = FikaBackendUtils.IsClient;
         controller._isGrenadeLauncher = weapon.IsGrenadeLauncher;
@@ -77,7 +77,7 @@ public class FikaClientFirearmController : Player.FirearmController
 
     public override Dictionary<Type, OperationFactoryDelegate> GetOperationFactoryDelegates()
     {
-        Dictionary<Type, OperationFactoryDelegate> operationFactoryDelegates = base.GetOperationFactoryDelegates();
+        var operationFactoryDelegates = base.GetOperationFactoryDelegates();
         operationFactoryDelegates[typeof(AmmoPackReloadOperationClass)] = new OperationFactoryDelegate(Weapon1);
         operationFactoryDelegates[typeof(CylinderReloadOperationClass)] = new OperationFactoryDelegate(Weapon2);
         operationFactoryDelegates[typeof(GenericFireOperationClass)] = new OperationFactoryDelegate(Weapon3);
@@ -162,7 +162,7 @@ public class FikaClientFirearmController : Player.FirearmController
 
     public override bool ToggleBipod()
     {
-        bool success = base.ToggleBipod();
+        var success = base.ToggleBipod();
         if (success)
         {
             _packet.Type = EFirearmSubPacketType.ToggleBipod;
@@ -173,7 +173,7 @@ public class FikaClientFirearmController : Player.FirearmController
 
     public override bool CheckChamber()
     {
-        bool flag = base.CheckChamber();
+        var flag = base.CheckChamber();
         if (flag)
         {
             _packet.Type = EFirearmSubPacketType.CheckChamber;
@@ -184,7 +184,7 @@ public class FikaClientFirearmController : Player.FirearmController
 
     public override bool CheckAmmo()
     {
-        bool flag = base.CheckAmmo();
+        var flag = base.CheckAmmo();
         if (flag)
         {
             _packet.Type = EFirearmSubPacketType.CheckAmmo;
@@ -195,7 +195,7 @@ public class FikaClientFirearmController : Player.FirearmController
 
     public override bool ChangeFireMode(Weapon.EFireMode fireMode)
     {
-        bool flag = base.ChangeFireMode(fireMode);
+        var flag = base.ChangeFireMode(fireMode);
         if (flag)
         {
             _packet.Type = EFirearmSubPacketType.ChangeFireMode;
@@ -215,8 +215,8 @@ public class FikaClientFirearmController : Player.FirearmController
 
     public override void SetAim(bool value)
     {
-        bool isAiming = IsAiming;
-        bool aimingInterruptedByOverlap = AimingInterruptedByOverlap;
+        var isAiming = IsAiming;
+        var aimingInterruptedByOverlap = AimingInterruptedByOverlap;
         base.SetAim(value);
         if (IsAiming != isAiming || (aimingInterruptedByOverlap && _fikaPlayer.HealthController.IsAlive))
         {
@@ -239,7 +239,7 @@ public class FikaClientFirearmController : Player.FirearmController
 
     public override bool CheckFireMode()
     {
-        bool flag = base.CheckFireMode();
+        var flag = base.CheckFireMode();
         if (flag && _fikaPlayer.HealthController.IsAlive)
         {
             _packet.Type = EFirearmSubPacketType.CheckFireMode;
@@ -259,7 +259,7 @@ public class FikaClientFirearmController : Player.FirearmController
 
     public override bool ExamineWeapon()
     {
-        bool flag = base.ExamineWeapon();
+        var flag = base.ExamineWeapon();
         if (flag && _fikaPlayer.HealthController.IsAlive)
         {
             _packet.Type = EFirearmSubPacketType.ExamineWeapon;
@@ -357,7 +357,7 @@ public class FikaClientFirearmController : Player.FirearmController
     {
         if (CanStartReload())
         {
-            string[] reloadingAmmoIds = ammoPack.GetReloadingAmmoIds();
+            var reloadingAmmoIds = ammoPack.GetReloadingAmmoIds();
             _packet.Type = EFirearmSubPacketType.ReloadLauncher;
             _packet.SubPacket = ReloadLauncherPacket.FromValue(true, reloadingAmmoIds);
             _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
@@ -476,7 +476,7 @@ public class FikaClientFirearmController : Player.FirearmController
 
     public override bool ToggleLauncher(Action callback = null)
     {
-        bool flag = base.ToggleLauncher(callback);
+        var flag = base.ToggleLauncher(callback);
         if (flag)
         {
             _packet.Type = EFirearmSubPacketType.ToggleLauncher;
@@ -572,7 +572,7 @@ public class FikaClientFirearmController : Player.FirearmController
     {
         public override void SetTriggerPressed(bool pressed)
         {
-            bool bool_ = Bool_1;
+            var bool_ = Bool_1;
             base.SetTriggerPressed(pressed);
             if (Bool_1 && !bool_)
             {
@@ -594,7 +594,7 @@ public class FikaClientFirearmController : Player.FirearmController
     {
         public override void SetTriggerPressed(bool pressed)
         {
-            bool bool_ = Bool_1;
+            var bool_ = Bool_1;
             base.SetTriggerPressed(pressed);
             if (Bool_1 && !bool_)
             {
@@ -615,7 +615,7 @@ public class FikaClientFirearmController : Player.FirearmController
     {
         public override void SetTriggerPressed(bool pressed)
         {
-            bool bool_ = Bool_1;
+            var bool_ = Bool_1;
             base.SetTriggerPressed(pressed);
             if (Bool_1 && !bool_)
             {
@@ -704,9 +704,9 @@ public class FikaClientFirearmController : Player.FirearmController
 
         public void Process(IResult result)
         {
-            ItemAddress itemAddress = _gridItemAddress;
-            GClass1950 descriptor = itemAddress?.ToDescriptor();
-            EFTWriterClass eftWriter = WriterPoolManager.GetWriter();
+            var itemAddress = _gridItemAddress;
+            var descriptor = itemAddress?.ToDescriptor();
+            var eftWriter = WriterPoolManager.GetWriter();
 
             byte[] locationDescription;
             if (descriptor != null)
@@ -761,10 +761,10 @@ public class FikaClientFirearmController : Player.FirearmController
 
         public void Process(IResult result)
         {
-            ItemAddress itemAddress = _placeToPutContainedAmmoMagazine;
-            GClass1950 descriptor = itemAddress?.ToDescriptor();
-            EFTWriterClass eftWriter = WriterPoolManager.GetWriter();
-            string[] ammoIds = _ammoPack.GetReloadingAmmoIds();
+            var itemAddress = _placeToPutContainedAmmoMagazine;
+            var descriptor = itemAddress?.ToDescriptor();
+            var eftWriter = WriterPoolManager.GetWriter();
+            var ammoIds = _ammoPack.GetReloadingAmmoIds();
 
             byte[] locationDescription;
             if (descriptor != null)

@@ -1,8 +1,8 @@
-﻿using Comfort.Common;
+﻿using System;
+using Comfort.Common;
 using EFT;
 using EFT.GameTriggers;
 using Fika.Core.Main.Utils;
-using System;
 
 namespace Fika.Core.Main.Components;
 

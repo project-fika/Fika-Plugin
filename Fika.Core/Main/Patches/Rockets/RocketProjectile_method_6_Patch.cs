@@ -1,7 +1,7 @@
-﻿using EFT.RocketLauncher;
+﻿using System.Reflection;
+using EFT.RocketLauncher;
 using Fika.Core.Main.Utils;
 using SPT.Reflection.Patching;
-using System.Reflection;
 
 namespace Fika.Core.Main.Patches.Rockets;
 

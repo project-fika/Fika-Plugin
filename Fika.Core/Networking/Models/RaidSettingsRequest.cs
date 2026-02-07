@@ -1,5 +1,5 @@
-using Fika.Core.Main.Components;
 using System.Runtime.Serialization;
+using Fika.Core.Main.Components;
 
 namespace Fika.Core.Networking.Models;
 

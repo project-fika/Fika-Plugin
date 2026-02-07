@@ -1,5 +1,5 @@
-﻿using SPT.Reflection.Patching;
-using System.Reflection;
+﻿using System.Reflection;
+using SPT.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.DebugPatches;
 
@@ -18,7 +18,7 @@ public class GClass1640_method_0_Patch : ModulePatch
     [PatchPrefix]
     public static void Prefix(ref LocationSettingsClass.Location.TransitParameters[] parameters)
     {
-        foreach (LocationSettingsClass.Location.TransitParameters parameter in parameters)
+        foreach (var parameter in parameters)
         {
             parameter.activateAfterSec = 10;
         }
