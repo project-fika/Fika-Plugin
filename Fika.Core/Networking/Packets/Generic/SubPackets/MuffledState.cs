@@ -35,11 +35,13 @@ public sealed class MuffledState : IPoolSubPacket
                 return;
             }
 
+#if DEBUG
             FikaGlobals.LogError($"MuffledState: Could not find player with id {NetId} or they were not observed!");
+#endif
             return;
         }
 
-        FikaGlobals.LogWarning($"MuffledState: Could not get CoopHandler!");
+        FikaGlobals.LogWarning("MuffledState: Could not get CoopHandler!");
     }
 
     public void Serialize(NetDataWriter writer)
