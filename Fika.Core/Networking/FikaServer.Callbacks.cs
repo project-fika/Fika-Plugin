@@ -148,6 +148,8 @@ public partial class FikaServer
         }
 
         FikaHostWorld.LootSyncPackets.AddRange(packet.LootSyncStructs);
+
+        packet.Flush();
     }
 
     private void OnRequestPacketReceived(RequestPacket packet, NetPeer peer)
