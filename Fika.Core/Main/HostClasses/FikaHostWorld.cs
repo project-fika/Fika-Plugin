@@ -111,9 +111,9 @@ public class FikaHostWorld : World
                 {
                     observedLootItem.ApplyNetPacket(gstruct);
                 }
-                LootSyncPackets.RemoveAt(i);
             }
         }
+        LootSyncPackets.Clear();
     }
 
     /// <summary>

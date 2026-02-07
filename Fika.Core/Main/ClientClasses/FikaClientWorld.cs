@@ -74,9 +74,9 @@ public class FikaClientWorld : World
                 {
                     observedLootItem.ApplyNetPacket(lootSyncData);
                 }
-                LootSyncPackets.RemoveAt(i);
             }
         }
+        LootSyncPackets.Clear();
     }
 
     /// <summary>
