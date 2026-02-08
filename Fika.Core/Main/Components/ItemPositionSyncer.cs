@@ -13,11 +13,11 @@ public class ItemPositionSyncer : MonoBehaviour
     private ObservedLootItem _lootItem;
     private LootSyncStruct _data;
 
-    private Rigidbody Rigidbody
+    private bool PhysicsDone
     {
         get
         {
-            return _lootItem.RigidBody;
+            return _lootItem.RigidBody == null;
         }
     }
 
@@ -49,7 +49,7 @@ public class ItemPositionSyncer : MonoBehaviour
             return;
         }
 
-        if (Rigidbody == null)
+        if (_lootItem.RigidBody == null)
         {
             FikaGlobals.LogError("ItemPositionSyncer::Start: Rigidbody was null!");
             Destroy(this);
@@ -58,8 +58,8 @@ public class ItemPositionSyncer : MonoBehaviour
 
         _data.Position = _lootItem.transform.position;
         _data.Rotation = _lootItem.transform.rotation;
-        _data.Velocity = Rigidbody.velocity;
-        _data.AngularVelocity = Rigidbody.angularVelocity;
+        _data.Velocity = _lootItem.RigidBody.velocity;
+        _data.AngularVelocity = _lootItem.RigidBody.angularVelocity;
         if (_isServer)
         {
             _server.FikaHostWorld.WorldPacket.LootSyncStructs.Add(_data);
@@ -71,39 +71,44 @@ public class ItemPositionSyncer : MonoBehaviour
 
     public void FixedUpdate()
     {
-        if (Rigidbody == null)
+        if (PhysicsDone)
         {
+#if DEBUG
+            FikaGlobals.LogInfo($"{_lootItem.Item.LocalizedShortName()} rigid body done");
+#endif
+
             _data.Position = _lootItem.transform.position;
             _data.Rotation = _lootItem.transform.rotation;
             _data.Velocity = Vector3.zero;
             _data.AngularVelocity = Vector3.zero;
             _data.Done = true;
+
             if (_isServer)
             {
                 _server.FikaHostWorld.WorldPacket.LootSyncStructs.Add(_data);
                 _server.FikaHostWorld.SetCritical();
-                Destroy(this);
-                return;
             }
-
-            _client.FikaClientWorld.WorldPacket.LootSyncStructs.Add(_data);
-            _client.FikaClientWorld.SetCritical();
-            Destroy(this);
-        }
-        else
-        {
-            _data.Position = _lootItem.transform.position;
-            _data.Rotation = _lootItem.transform.rotation;
-            _data.Velocity = Rigidbody.velocity;
-            _data.AngularVelocity = Rigidbody.angularVelocity;
-
-            if (_isServer)
+            else
             {
-                _server.FikaHostWorld.WorldPacket.LootSyncStructs.Add(_data);
-                return;
+                _client.FikaClientWorld.WorldPacket.LootSyncStructs.Add(_data);
+                _client.FikaClientWorld.SetCritical();
             }
 
-            _client.FikaClientWorld.WorldPacket.LootSyncStructs.Add(_data);
+            Destroy(this);
+            return;
         }
+
+        _data.Position = _lootItem.transform.position;
+        _data.Rotation = _lootItem.transform.rotation;
+        _data.Velocity = _lootItem.RigidBody.velocity;
+        _data.AngularVelocity = _lootItem.RigidBody.angularVelocity;
+
+        if (_isServer)
+        {
+            _server.FikaHostWorld.WorldPacket.LootSyncStructs.Add(_data);
+            return;
+        }
+
+        _client.FikaClientWorld.WorldPacket.LootSyncStructs.Add(_data);
     }
 }

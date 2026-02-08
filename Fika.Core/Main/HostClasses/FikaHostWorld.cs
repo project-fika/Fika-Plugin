@@ -105,12 +105,9 @@ public class FikaHostWorld : World
         for (var i = LootSyncPackets.Count - 1; i >= 0; i--)
         {
             var gstruct = LootSyncPackets[i];
-            if (lootItems.TryGetByKey(gstruct.Id, out var lootItem))
+            if (lootItems.TryGetByKey(gstruct.Id, out var lootItem) && lootItem is ObservedLootItem observedLootItem)
             {
-                if (lootItem is ObservedLootItem observedLootItem)
-                {
-                    observedLootItem.ApplyNetPacket(gstruct);
-                }
+                observedLootItem.ApplyNetPacket(gstruct);
             }
         }
         LootSyncPackets.Clear();

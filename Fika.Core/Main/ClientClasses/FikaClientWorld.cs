@@ -68,12 +68,9 @@ public class FikaClientWorld : World
         for (var i = LootSyncPackets.Count - 1; i >= 0; i--)
         {
             var lootSyncData = LootSyncPackets[i];
-            if (lootItems.TryGetByKey(lootSyncData.Id, out var lootItem))
+            if (lootItems.TryGetByKey(lootSyncData.Id, out var lootItem) && lootItem is ObservedLootItem observedLootItem)
             {
-                if (lootItem is ObservedLootItem observedLootItem)
-                {
-                    observedLootItem.ApplyNetPacket(lootSyncData);
-                }
+                observedLootItem.ApplyNetPacket(lootSyncData);
             }
         }
         LootSyncPackets.Clear();

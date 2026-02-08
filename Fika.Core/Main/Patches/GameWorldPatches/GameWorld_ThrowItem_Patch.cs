@@ -27,6 +27,7 @@ public class GameWorld_ThrowItem_Patch : ModulePatch
             if (player.IsYourPlayer || player.IsAI)
             {
                 ItemPositionSyncer.Create(observedLootItem.gameObject, FikaBackendUtils.IsServer, observedLootItem);
+                _networkPhysics.SetValue(observedLootItem, false);
                 return;
             }
 
