@@ -22,7 +22,7 @@ public struct RaidSettingsResponse(bool received, bool metabolismDisabled,
 
     [DataMember(Name = "hourOfDay")]
     public int HourOfDay = hourOfDay;
-    [DataMember(Name = "timeFlowType")]
 
+    [DataMember(Name = "timeFlowType")]
     public ETimeFlowType TimeFlowType = (ETimeFlowType)timeFlowType;
 }

@@ -13,7 +13,8 @@ public class OfflineRaidSettingsMenuPatch_Override : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return AccessTools.Method(typeof(RaidSettingsWindow), nameof(RaidSettingsWindow.Show));
+        return AccessTools.Method(typeof(RaidSettingsWindow),
+            nameof(RaidSettingsWindow.Show));
     }
 
     private static RaidSettingsWindow _instance;
