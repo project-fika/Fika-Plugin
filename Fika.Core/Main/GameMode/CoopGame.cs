@@ -128,7 +128,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
             _logger.LogInfo($"Using custom time flow: {newFlow}");
         }
 
-        if (OfflineRaidSettingsMenuPatch_Override.UseCustomWeather && coopGame.GameController.IsServer)
+        if (FikaBackendUtils.CustomRaidSettings.UseCustomWeather && coopGame.GameController.IsServer)
         {
             _logger.LogInfo("Custom weather enabled, initializing curves");
             (coopGame.GameController as HostGameController).SetupCustomWeather(timeAndWeather);

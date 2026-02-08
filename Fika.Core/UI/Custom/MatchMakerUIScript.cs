@@ -318,7 +318,7 @@ public class MatchMakerUIScript : MonoBehaviour
                     Side = raidSettings.Side,
                     TimeAndWeatherSettings = raidSettings.TimeAndWeatherSettings,
                     WavesSettings = raidSettings.WavesSettings,
-                    CustomWeather = OfflineRaidSettingsMenuPatch_Override.UseCustomWeather,
+                    CustomRaidSettings = FikaBackendUtils.CustomRaidSettings,
                     UseEvent = raidSettings.transitionType.HasFlagNoBox(ELocationTransition.Event)
                 };
 
@@ -460,74 +460,6 @@ public class MatchMakerUIScript : MonoBehaviour
             return false;
         }
     }
-
-    /*public static IEnumerator JoinMatch(string profileId, string serverId, Button button, Action<bool> callback, bool reconnect)
-    {
-        if (button != null)
-        {
-            button.enabled = false;
-        }
-
-        FikaBackendUtils.IsReconnect = reconnect;
-        NotificationManagerClass.DisplayMessageNotification(LocaleUtils.CONNECTING_TO_SESSION.Localized(),
-            iconType: EFT.Communications.ENotificationIconType.EntryPoint);
-        using var pingingClient = NetManagerUtils.CreatePingingClient();
-
-        if (pingingClient.Init(serverId))
-        {
-            FikaGlobals.LogInfo("Attempting to connect to host session...");
-            var knockMessage = FikaBackendUtils.ServerGuid.ToString();
-            var pingTask = pingingClient.AttemptToPingHost(knockMessage, reconnect)
-                .GetAwaiter();
-
-            while (!pingTask.IsCompleted)
-            {
-                yield return null;
-            }
-
-            var success = pingTask.GetResult();
-
-            if (!success)
-            {
-                Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen(
-                LocaleUtils.UI_ERROR_CONNECTING.Localized(),
-                LocaleUtils.UI_UNABLE_TO_CONNECT.Localized(),
-                ErrorScreen.EButtonType.OkButton, 10f);
-
-                if (button != null)
-                {
-                    button.enabled = true;
-                }
-                callback.Invoke(false);
-                yield break;
-            }
-        }
-        else
-        {
-            Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen(
-                LocaleUtils.UI_ERROR_CONNECTING.Localized(),
-                LocaleUtils.UI_PINGER_START_FAIL.Localized(),
-                ErrorScreen.EButtonType.OkButton, 10f);
-            callback(false);
-            yield break;
-        }
-
-        if (FikaBackendUtils.JoinMatch(profileId, serverId, out var result, out var errorMessage))
-        {
-            FikaBackendUtils.GroupId = result.ServerId;
-            FikaBackendUtils.ClientType = EClientType.Client;
-
-            AddPlayerRequest data = new(FikaBackendUtils.GroupId, profileId, FikaBackendUtils.IsSpectator);
-            FikaRequestHandler.UpdateAddPlayer(data);
-
-            callback?.Invoke(true);
-        }
-        else
-        {
-            Singleton<PreloaderUI>.Instance.ShowErrorScreen("ERROR JOINING", errorMessage, null);
-            callback?.Invoke(false);
-        }
-    }*/
 
     private void RefreshUI()
     {

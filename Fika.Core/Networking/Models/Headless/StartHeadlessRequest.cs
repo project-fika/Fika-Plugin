@@ -1,6 +1,7 @@
 ﻿using System.Runtime.Serialization;
 using EFT;
 using EFT.Bots;
+using Fika.Core.Main.Utils;
 using JsonType;
 
 namespace Fika.Core.Networking.Models.Headless;
@@ -10,6 +11,7 @@ public struct StartHeadlessRequest
 {
     [DataMember(Name = "headlessSessionID")]
     public string HeadlessSessionID { get; set; }
+
     [DataMember(Name = "time")]
     public EDateTime Time { get; set; }
 
@@ -34,8 +36,8 @@ public struct StartHeadlessRequest
     [DataMember(Name = "side")]
     public ESideType Side { readonly get; set; }
 
-    [DataMember(Name = "customWeather")]
-    public bool CustomWeather { readonly get; set; }
+    [DataMember(Name = "customRaidSettings")]
+    public FikaCustomRaidSettings CustomRaidSettings { readonly get; set; }
 
     [DataMember(Name = "useEvent")]
     public bool UseEvent { readonly get; set; }

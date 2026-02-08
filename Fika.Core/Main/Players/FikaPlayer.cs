@@ -215,6 +215,11 @@ public class FikaPlayer : LocalPlayer
         NestedStepSoundSource.SetBaseVolume(0.9f);
     }
 
+    public override BasePhysicalClass CreatePhysical()
+    {
+        return new FikaClientPhysical();
+    }
+
     public override void CreateMovementContext()
     {
         var movement_MASK = EFTHardSettings.Instance.MOVEMENT_MASK;

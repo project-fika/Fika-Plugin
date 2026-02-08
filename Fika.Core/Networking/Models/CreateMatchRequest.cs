@@ -1,13 +1,14 @@
 using System;
 using System.Runtime.Serialization;
 using EFT;
+using Fika.Core.Main.Utils;
 using JsonType;
 
 namespace Fika.Core.Networking.Models;
 
 [DataContract]
 public struct CreateMatch(string raidCode, MongoID serverId, Guid serverGuid, string hostUsername, bool isSpectator,
-    long timestamp, RaidSettings settings, uint crc32, ESideType side, EDateTime time)
+    long timestamp, RaidSettings settings, uint crc32, ESideType side, EDateTime time, FikaCustomRaidSettings customRaidSettings)
 {
     [DataMember(Name = "raidCode")]
     public string RaidCode = raidCode;
@@ -41,4 +42,7 @@ public struct CreateMatch(string raidCode, MongoID serverId, Guid serverGuid, st
 
     [DataMember(Name = "isSpectator")]
     public bool IsSpectator = isSpectator;
+
+    [DataMember(Name = "customRaidSettings")]
+    public FikaCustomRaidSettings CustomRaidSettings = customRaidSettings;
 }

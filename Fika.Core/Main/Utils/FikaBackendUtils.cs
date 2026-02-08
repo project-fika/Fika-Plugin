@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
@@ -11,6 +12,7 @@ using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Models;
 using HarmonyLib;
+using Newtonsoft.Json;
 
 namespace Fika.Core.Main.Utils;
 
@@ -22,8 +24,7 @@ public enum EClientType
 }
 
 public static class FikaBackendUtils
-{
-    internal static MatchMakerAcceptScreen MatchMakerAcceptScreenInstance;
+{    
     /// <summary>
     /// The local player PMC <see cref="EFT.Profile"/>
     /// </summary>
@@ -58,11 +59,14 @@ public static class FikaBackendUtils
     public static string HostLocationId { get; internal set; }
     public static RaidSettings CachedRaidSettings { get; set; }
     public static GClass1628<GroupPlayerViewModelClass> GroupPlayers { get; set; } = [];
+    public static FikaCustomRaidSettings CustomRaidSettings { get; set; } = new();
 
     internal static bool RequestFikaWorld;
     internal static Vector3 ReconnectPosition = Vector3.zero;
-    internal static PlayersRaidReadyPanel PlayersRaidReadyPanel;
-    internal static MatchMakerGroupPreview MatchMakerGroupPreview;
+
+    internal static MatchMakerAcceptScreen MatchMakerAcceptScreenInstance { get; set; }
+    internal static PlayersRaidReadyPanel PlayersRaidReadyPanel { get; set; }
+    internal static MatchMakerGroupPreview MatchMakerGroupPreview { get; set; }
 
     private static Profile _profile;
 
@@ -74,6 +78,10 @@ public static class FikaBackendUtils
             IsHeadlessRequester = false;
             IsHeadlessGame = false;
         }
+
+        MatchMakerAcceptScreenInstance = null;
+        PlayersRaidReadyPanel = null;
+        MatchMakerGroupPreview = null;
 
         RequestFikaWorld = false;
         IsReconnect = false;
@@ -169,7 +177,7 @@ public static class FikaBackendUtils
         var raidCode = GenerateRaidCode(6);
         var serverGuid = Guid.NewGuid();
         CreateMatch body = new(raidCode, profileId, serverGuid, hostUsername, IsSpectator, timestamp, raidSettings, FikaPlugin.Crc32,
-            raidSettings.Side, raidSettings.SelectedDateTime);
+            raidSettings.Side, raidSettings.SelectedDateTime, CustomRaidSettings);
 
         await FikaRequestHandler.RaidCreate(body);
 
@@ -254,5 +262,33 @@ public static class FikaBackendUtils
             FikaGlobals.LogWarning("AddPartyMembers: MatchmakerPlayerControllerClass was null!");
         }
         FikaGlobals.LogWarning("AddPartyMembers: TarkovApplication was null!");
+    }
+}
+
+public class FikaCustomRaidSettings
+{
+    [JsonProperty("useCustomWeather")]
+    public bool UseCustomWeather { get; set; }
+
+    [JsonProperty("disableOverload")]
+    public bool DisableOverload { get; set; }
+
+    [JsonProperty("disableLegStamina")]
+    public bool DisableLegStamina { get; set; }
+
+    [JsonProperty("disableArmStamina")]
+    public bool DisableArmStamina { get; set; }
+
+    public override string ToString()
+    {
+        return $"UseCustomWeather: {UseCustomWeather}, DisableOverload: {DisableOverload}, DisableLegStamina: {DisableLegStamina}, DisableArmStamina: {DisableArmStamina}";
+    }
+
+    public void Reset()
+    {
+        UseCustomWeather = default;
+        DisableOverload = default;
+        DisableLegStamina = default;
+        DisableArmStamina = default;
     }
 }

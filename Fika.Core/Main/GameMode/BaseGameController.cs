@@ -21,7 +21,6 @@ using Fika.Core.Bundles;
 using Fika.Core.Main.ClientClasses;
 using Fika.Core.Main.Components;
 using Fika.Core.Main.HostClasses;
-using Fika.Core.Main.Patches.Overrides;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Modding;
@@ -326,7 +325,7 @@ public abstract class BaseGameController
             Season = ESeason.Summer;
         }
         WeatherReady = true;
-        OfflineRaidSettingsMenuPatch_Override.UseCustomWeather = false;
+        FikaBackendUtils.CustomRaidSettings.UseCustomWeather = false;
 
         Class444 seasonController = new();
         _gameWorld.GInterface29_0 = seasonController;
@@ -676,6 +675,11 @@ public abstract class BaseGameController
         if (_extractRoutine != null)
         {
             _abstractGame.StopCoroutine(_extractRoutine);
+        }
+
+        if (!FikaBackendUtils.IsTransit)
+        {
+            FikaBackendUtils.CustomRaidSettings.Reset();
         }
     }
 

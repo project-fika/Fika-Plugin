@@ -164,6 +164,9 @@ public class TarkovApplication_LocalGameCreator_Patch : ModulePatch
             raidSettings.PlayersSpawnPlace = raidSettingsResponse.PlayersSpawnPlace;
             timeAndWeather.HourOfDay = raidSettingsResponse.HourOfDay;
             timeAndWeather.TimeFlowType = raidSettingsResponse.TimeFlowType;
+
+            FikaBackendUtils.CustomRaidSettings = raidSettingsResponse.CustomRaidSettings;
+            Logger.LogInfo($"Received CustomRaidSettings: {raidSettingsResponse.CustomRaidSettings}");
         }
         else
         {

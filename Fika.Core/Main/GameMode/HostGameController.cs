@@ -387,7 +387,7 @@ public class HostGameController : BaseGameController, IBotGame
         {
             Logger.LogInfo("Location is 'Laboratory', skipping weather generation");
             Season = ESeason.Summer;
-            OfflineRaidSettingsMenuPatch_Override.UseCustomWeather = false;
+            FikaBackendUtils.CustomRaidSettings.UseCustomWeather = false;
         }
         else
         {
@@ -531,7 +531,7 @@ public class HostGameController : BaseGameController, IBotGame
             var weather = await _backendSession.WeatherRequest();
             Season = _backendSession.Season;
             SeasonsSettings = _backendSession.SeasonsSettings;
-            if (!OfflineRaidSettingsMenuPatch_Override.UseCustomWeather)
+            if (!FikaBackendUtils.CustomRaidSettings.UseCustomWeather)
             {
                 WeatherClasses = weather.Weathers;
                 WeatherController.Instance.method_0(WeatherClasses);

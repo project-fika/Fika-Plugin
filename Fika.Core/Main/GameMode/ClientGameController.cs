@@ -498,7 +498,7 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
         {
             Logger.LogInfo("Location is 'Laboratory', skipping weather generation");
             Season = ESeason.Summer;
-            OfflineRaidSettingsMenuPatch_Override.UseCustomWeather = false;
+            FikaBackendUtils.CustomRaidSettings.UseCustomWeather = false;
         }
         else
         {
