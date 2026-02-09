@@ -28,7 +28,6 @@ public sealed class BotHealthController(Profile.ProfileHealthClass healthInfo, P
             case NetworkHealthSyncPacketStruct.ESyncType.RemoveEffect:
             case NetworkHealthSyncPacketStruct.ESyncType.IsAlive:
             case NetworkHealthSyncPacketStruct.ESyncType.BodyHealth:
-            case NetworkHealthSyncPacketStruct.ESyncType.ApplyDamage:
             case NetworkHealthSyncPacketStruct.ESyncType.DestroyedBodyPart:
             case NetworkHealthSyncPacketStruct.ESyncType.EffectStrength:
             case NetworkHealthSyncPacketStruct.ESyncType.EffectNextState:
