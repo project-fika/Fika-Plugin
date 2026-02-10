@@ -1067,7 +1067,7 @@ public class FikaPlayer : LocalPlayer
                 }
             }
         }
-        catch (Exception)
+        catch
         {
             // Do nothing
         }
