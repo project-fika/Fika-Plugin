@@ -1190,11 +1190,6 @@ public class ObservedPlayer : FikaPlayer
 
     public void SetInventory(InventoryDescriptorClass inventoryDescriptor)
     {
-        foreach (var unsubcribe in _armorUnsubcribes)
-        {
-            unsubcribe();
-        }
-
         if (HandsController != null)
         {
             HandsController.FastForwardCurrentState();

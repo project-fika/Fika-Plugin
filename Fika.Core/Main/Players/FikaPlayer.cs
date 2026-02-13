@@ -78,7 +78,7 @@ public class FikaPlayer : LocalPlayer
     }
 
     protected MongoID? _lastWeaponId;
-    protected List<Action> _armorUnsubcribes = new(Inventory.ArmorSlots.Length);
+    protected Action[] _armorUnsubcribes = new Action[Inventory.ArmorSlots.Length];
 
     private bool _hasSkilledScav;
     private bool _shouldSendSideEffect;
@@ -183,25 +183,24 @@ public class FikaPlayer : LocalPlayer
 
     protected void SubscribeToArmorChangeEvent()
     {
-        foreach (var slotType in Inventory.ArmorSlots)
+        for (var i = 0; i < Inventory.ArmorSlots.Length; i++)
         {
+            var slotType = Inventory.ArmorSlots[i];
             var slot = Inventory.Equipment.GetSlot(slotType);
-            _armorUnsubcribes.Add(slot.ReactiveContainedItem
-                .Bind(RecalculateEquippedArmorComponents));
+
+            _armorUnsubcribes[i] = slot.ReactiveContainedItem
+                .Subscribe(RecalculateEquippedArmorComponents); // we use subscribe to avoid calling the event on each subscription
         }
     }
 
     /// <summary>
-    /// Recalculates all equipped <see cref="ArmorComponent"/> when an armor slot changes
+    /// Recalculates all equipped <see cref="ArmorComponent"/>s when an armor slot changes
     /// </summary>
     /// <param name="item">The item changed</param>
     protected void RecalculateEquippedArmorComponents(Item item)
     {
         _preAllocatedArmorComponents.Clear();
         Inventory.GetPutOnArmorsNonAlloc(_preAllocatedArmorComponents);
-#if DEBUG
-        FikaGlobals.LogWarning($"Recalculating armor components, found {_preAllocatedArmorComponents.Count}");
-#endif
     }
 
     public void AbuseNotification(string reporterId)
@@ -954,6 +953,11 @@ public class FikaPlayer : LocalPlayer
 
     public override void OnDead(EDamageType damageType)
     {
+        foreach (var unsubcribe in _armorUnsubcribes)
+        {
+            unsubcribe?.Invoke();
+        }
+
         if (LastDamageInfo.Weapon == null && _lastWeaponId != null)
         {
             FindKillerWeapon();
@@ -1389,7 +1393,7 @@ public class FikaPlayer : LocalPlayer
     {
         foreach (var unsubcribe in _armorUnsubcribes)
         {
-            unsubcribe();
+            unsubcribe?.Invoke();
         }
 
         if (PacketSender != null)
