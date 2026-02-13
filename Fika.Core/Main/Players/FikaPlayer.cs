@@ -78,6 +78,7 @@ public class FikaPlayer : LocalPlayer
     }
 
     protected MongoID? _lastWeaponId;
+    protected List<Action> _armorUnsubcribes = new(Inventory.ArmorSlots.Length);
 
     private bool _hasSkilledScav;
     private bool _shouldSendSideEffect;
@@ -172,9 +173,35 @@ public class FikaPlayer : LocalPlayer
             }
         }
 
+        player.SubscribeToArmorChangeEvent();
+        player.RecalculateEquippedArmorComponents(null);
+
         player.Profile.Info.SetProfileNickname(FikaBackendUtils.PMCName ?? profile.Nickname);
 
         return player;
+    }
+
+    protected void SubscribeToArmorChangeEvent()
+    {
+        foreach (var slotType in Inventory.ArmorSlots)
+        {
+            var slot = Inventory.Equipment.GetSlot(slotType);
+            _armorUnsubcribes.Add(slot.ReactiveContainedItem
+                .Bind(RecalculateEquippedArmorComponents));
+        }
+    }
+
+    /// <summary>
+    /// Recalculates all equipped <see cref="ArmorComponent"/> when an armor slot changes
+    /// </summary>
+    /// <param name="item">The item changed</param>
+    protected void RecalculateEquippedArmorComponents(Item item)
+    {
+        _preAllocatedArmorComponents.Clear();
+        Inventory.GetPutOnArmorsNonAlloc(_preAllocatedArmorComponents);
+#if DEBUG
+        FikaGlobals.LogWarning($"Recalculating armor components, found {_preAllocatedArmorComponents.Count}");
+#endif
     }
 
     public void AbuseNotification(string reporterId)
@@ -1164,12 +1191,9 @@ public class FikaPlayer : LocalPlayer
     {
         if (IsYourPlayer)
         {
-            _preAllocatedArmorComponents.Clear();
-            List<ArmorComponent> listTocheck = [];
-            Inventory.GetPutOnArmorsNonAlloc(listTocheck);
-            for (var i = 0; i < listTocheck.Count; i++)
+            for (var i = 0; i < _preAllocatedArmorComponents.Count; i++)
             {
-                var armorComponent = listTocheck[i];
+                var armorComponent = _preAllocatedArmorComponents[i];
                 var num = 0f;
                 foreach ((var colliderStruct, var amount) in armorDamage)
                 {
@@ -1296,8 +1320,6 @@ public class FikaPlayer : LocalPlayer
 
     public void HandleArmorDamagePacket(ArmorDamagePacket packet)
     {
-        _preAllocatedArmorComponents.Clear();
-        Inventory.GetPutOnArmorsNonAlloc(_preAllocatedArmorComponents);
         for (var i = 0; i < _preAllocatedArmorComponents.Count; i++)
         {
             var armorComponent = _preAllocatedArmorComponents[i];
@@ -1326,6 +1348,28 @@ public class FikaPlayer : LocalPlayer
         }
     }
 
+    public override bool SetShotStatus(BodyPartCollider bodypart, EftBulletClass shot, Vector3 hitpoint, Vector3 shotNormal, Vector3 shotDirection)
+    {
+        var armorPlateCollider = bodypart as ArmorPlateCollider;
+        var earmorPlateCollider = ((armorPlateCollider == null) ? 0 : armorPlateCollider.ArmorPlateColliderType);
+        for (var i = 0; i < _preAllocatedArmorComponents.Count; i++)
+        {
+            var armorComponent = _preAllocatedArmorComponents[i];
+            if (armorComponent.ShotMatches(bodypart.BodyPartColliderType, earmorPlateCollider))
+            {
+                if (armorComponent.Deflects(shotDirection, shotNormal, shot))
+                {
+                    return true;
+                }
+                if (shot.BlockedBy == null)
+                {
+                    armorComponent.SetPenetrationStatus(shot);
+                }
+            }
+        }
+        return false;
+    }
+
     public override void UpdateTick()
     {
         _voipController?.Update();
@@ -1343,11 +1387,17 @@ public class FikaPlayer : LocalPlayer
 
     public override void Dispose()
     {
+        foreach (var unsubcribe in _armorUnsubcribes)
+        {
+            unsubcribe();
+        }
+
         if (PacketSender != null)
         {
             PacketSender.DestroyThis();
             PacketSender = null;
         }
+
         _voipController?.Dispose();
         _lastWeaponId = null;
         base.Dispose();

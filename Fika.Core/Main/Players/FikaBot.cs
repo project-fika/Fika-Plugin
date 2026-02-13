@@ -96,6 +96,9 @@ public class FikaBot : FikaPlayer
         player.AggressorFound = false;
         player._animators[0].enabled = true;
 
+        player.SubscribeToArmorChangeEvent();
+        player.RecalculateEquippedArmorComponents(null);
+
         return player;
     }
 
@@ -249,10 +252,7 @@ public class FikaBot : FikaPlayer
 
     public override void ApplyExplosionDamageToArmor(Dictionary<ExplosiveHitArmorColliderStruct, float> armorDamage, DamageInfoStruct damageInfo)
     {
-        _preAllocatedArmorComponents.Clear();
-        List<ArmorComponent> listTocheck = [];
-        Inventory.GetPutOnArmorsNonAlloc(listTocheck);
-        foreach (var armorComponent in listTocheck)
+        foreach (var armorComponent in _preAllocatedArmorComponents)
         {
             var num = 0f;
             foreach (var keyValuePair in armorDamage)

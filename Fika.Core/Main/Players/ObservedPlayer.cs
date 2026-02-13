@@ -302,6 +302,9 @@ public class ObservedPlayer : FikaPlayer
                 EFTHardSettings.Instance.CULLING_PLAYER_SPHERE_SHIFT, EFTHardSettings.Instance.CULLING_PLAYER_DISTANCE);
         }
 
+        player.SubscribeToArmorChangeEvent();
+        player.RecalculateEquippedArmorComponents(null);
+
         return player;
     }
 
@@ -1187,6 +1190,11 @@ public class ObservedPlayer : FikaPlayer
 
     public void SetInventory(InventoryDescriptorClass inventoryDescriptor)
     {
+        foreach (var unsubcribe in _armorUnsubcribes)
+        {
+            unsubcribe();
+        }
+
         if (HandsController != null)
         {
             HandsController.FastForwardCurrentState();
