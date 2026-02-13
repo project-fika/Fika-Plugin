@@ -67,34 +67,19 @@ public class ItemPositionSyncer : MonoBehaviour
         }
 
         _client.FikaClientWorld.WorldPacket.LootSyncStructs.Add(_data);
+        _lootItem.ItemOwner.RemoveItemEvent += ItemOwner_RemoveItemEvent;
+    }
+
+    private void ItemOwner_RemoveItemEvent(GEventArgs3 obj)
+    {
+        NotifyDone();
     }
 
     public void FixedUpdate()
     {
         if (PhysicsDone)
         {
-#if DEBUG
-            FikaGlobals.LogInfo($"{_lootItem.Item.LocalizedShortName()} rigid body done");
-#endif
-
-            _data.Position = _lootItem.transform.position;
-            _data.Rotation = _lootItem.transform.rotation;
-            _data.Velocity = Vector3.zero;
-            _data.AngularVelocity = Vector3.zero;
-            _data.Done = true;
-
-            if (_isServer)
-            {
-                _server.FikaHostWorld.WorldPacket.LootSyncStructs.Add(_data);
-                _server.FikaHostWorld.SetCritical();
-            }
-            else
-            {
-                _client.FikaClientWorld.WorldPacket.LootSyncStructs.Add(_data);
-                _client.FikaClientWorld.SetCritical();
-            }
-
-            Destroy(this);
+            NotifyDone();
             return;
         }
 
@@ -110,5 +95,32 @@ public class ItemPositionSyncer : MonoBehaviour
         }
 
         _client.FikaClientWorld.WorldPacket.LootSyncStructs.Add(_data);
+    }
+
+    private void NotifyDone()
+    {
+#if DEBUG
+        FikaGlobals.LogInfo($"{_lootItem.Item.LocalizedShortName()} rigid body done");
+#endif
+
+        _data.Position = _lootItem.transform.position;
+        _data.Rotation = _lootItem.transform.rotation;
+        _data.Velocity = Vector3.zero;
+        _data.AngularVelocity = Vector3.zero;
+        _data.Done = true;
+
+        if (_isServer)
+        {
+            _server.FikaHostWorld.WorldPacket.LootSyncStructs.Add(_data);
+            _server.FikaHostWorld.SetCritical();
+        }
+        else
+        {
+            _client.FikaClientWorld.WorldPacket.LootSyncStructs.Add(_data);
+            _client.FikaClientWorld.SetCritical();
+        }
+
+        _lootItem.ItemOwner.RemoveItemEvent -= ItemOwner_RemoveItemEvent;
+        Destroy(this);
     }
 }
