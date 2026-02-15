@@ -210,7 +210,7 @@ public static class FikaGlobals
     /// <summary>
     /// Sets a PMC profile to FiR
     /// </summary>
-    /// <param name="profile">The profile to mark as FiR</param>
+    /// <param name="player">The player to mark as FiR</param>
     /// <remarks>
     /// This still sets Armbands and Melee as non-FiR due to them being unlootable
     /// </remarks>
