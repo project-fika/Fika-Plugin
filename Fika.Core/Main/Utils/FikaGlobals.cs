@@ -216,9 +216,6 @@ public static class FikaGlobals
     /// </remarks>
     public static void SetPMCProfileAsFoundInRaid(FikaPlayer player)
     {
-#if DEBUG
-        LogInfo($"Marking profile of {player.Profile.GetCorrectedNickname()} as found in raid");
-#endif
         foreach (var item in player.Profile.InventoryInfo.GetPlayerItems(EPlayerItems.Equipment))
         {
             item.SpawnedInSession = true;
