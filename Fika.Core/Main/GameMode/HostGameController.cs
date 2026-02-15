@@ -232,8 +232,9 @@ public class HostGameController : BaseGameController, IBotGame
 
         fikaBot = await FikaBot.CreateBot(_gameWorld, netId, position, Quaternion.identity, "Player",
            "Bot_", EPointOfView.ThirdPerson, profile, true, _updateQueue, Player.EUpdateMode.Auto,
-           Player.EUpdateMode.Auto, BackendConfigAbstractClass.Config.CharacterController.BotPlayerMode, FikaGlobals.GetOtherPlayerSensitivity,
-            FikaGlobals.GetOtherPlayerSensitivity, ObservedViewFilter.Default, mongoId, nextOperationId);
+           Player.EUpdateMode.Auto, BackendConfigAbstractClass.Config.CharacterController.BotPlayerMode,
+           FikaGlobals.GetOtherPlayerSensitivity, FikaGlobals.GetOtherPlayerSensitivity,
+           ObservedViewFilter.Default, mongoId, nextOperationId);
 
         if (profile.Info.Side is not EPlayerSide.Savage && FikaPlugin.Instance.PMCFoundInRaid)
         {
