@@ -425,11 +425,6 @@ public class CoopHandler : MonoBehaviour
             return null;
         }
 
-        if (isAi && profile.Info.Side is not EPlayerSide.Savage && FikaPlugin.Instance.PMCFoundInRaid)
-        {
-            FikaGlobals.SetPMCProfileAsFoundInRaid(otherPlayer);
-        }
-
         Singleton<IFikaNetworkManager>.Instance.ObservedPlayers.Add(otherPlayer);
 
         otherPlayer.NetId = netId;

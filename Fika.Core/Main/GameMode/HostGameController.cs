@@ -213,7 +213,7 @@ public class HostGameController : BaseGameController, IBotGame
 
         netId = _server.PopNetId();
 
-        profile.SetSpawnedInSession(profile.Info.Side == EPlayerSide.Savage);
+        profile.SetSpawnedInSession(profile.Info.Side == EPlayerSide.Savage || FikaPlugin.Instance.PMCFoundInRaid);
 
         var mongoId = MongoID.Generate(true);
         const ushort nextOperationId = 0;
@@ -237,11 +237,6 @@ public class HostGameController : BaseGameController, IBotGame
            Player.EUpdateMode.Auto, BackendConfigAbstractClass.Config.CharacterController.BotPlayerMode,
            FikaGlobals.GetOtherPlayerSensitivity, FikaGlobals.GetOtherPlayerSensitivity,
            ObservedViewFilter.Default, mongoId, nextOperationId);
-
-        if (profile.Info.Side is not EPlayerSide.Savage && FikaPlugin.Instance.PMCFoundInRaid)
-        {
-            FikaGlobals.SetPMCProfileAsFoundInRaid(fikaBot);
-        }
 
         fikaBot.Location = Location.Id;
         Bots.Add(fikaBot.ProfileId, fikaBot);
