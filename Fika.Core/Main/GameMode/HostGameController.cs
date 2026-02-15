@@ -213,6 +213,8 @@ public class HostGameController : BaseGameController, IBotGame
 
         netId = _server.PopNetId();
 
+        profile.SetSpawnedInSession(profile.Info.Side == EPlayerSide.Savage);
+
         var mongoId = MongoID.Generate(true);
         const ushort nextOperationId = 0;
         var packet = SendCharacterPacket.FromValue(new()
