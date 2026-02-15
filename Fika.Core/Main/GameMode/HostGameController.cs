@@ -13,6 +13,7 @@ using EFT.Game.Spawning;
 using EFT.GlobalEvents;
 using EFT.Interactive;
 using EFT.Interactive.SecretExfiltrations;
+using EFT.InventoryLogic;
 using EFT.UI;
 using EFT.Weather;
 using Fika.Core.Main.ClientClasses;
@@ -212,6 +213,32 @@ public class HostGameController : BaseGameController, IBotGame
         netId = _server.PopNetId();
 
         profile.SetSpawnedInSession(profile.Info.Side == EPlayerSide.Savage || FikaPlugin.Instance.PMCFoundInRaid);
+        if (profile.Info.Side != EPlayerSide.Savage)
+        {
+            var backpack = profile.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack).ContainedItem;
+            if (backpack != null)
+            {
+                foreach (var item in backpack.GetAllItems())
+                {
+                    if (item != backpack)
+                    {
+                        item.SpawnedInSession = true;
+                    }
+                }
+            }
+
+            var armband = profile.Inventory.Equipment.GetSlot(EquipmentSlot.ArmBand).ContainedItem;
+            if (armband != null)
+            {
+                armband.SpawnedInSession = false;
+            }
+
+            var melee = profile.Inventory.Equipment.GetSlot(EquipmentSlot.Scabbard).ContainedItem;
+            if (melee != null)
+            {
+                melee.SpawnedInSession = false;
+            }
+        }
 
         var mongoId = MongoID.Generate(true);
         const ushort nextOperationId = 0;

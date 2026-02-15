@@ -77,7 +77,7 @@ public class FikaBot : FikaPlayer
 
         player.Pedometer.Stop();
         player._handsController = EmptyHandsController.smethod_6<EmptyHandsController>(player);
-        player._handsController.Spawn(1f, delegate { });
+        player._handsController.Spawn(1f, FikaGlobals.EmptyAction);
 
         player.AIData = new PlayerAIDataClass(null, player)
         {

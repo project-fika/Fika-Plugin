@@ -413,6 +413,32 @@ public class CoopHandler : MonoBehaviour
         }
 
         profile.SetSpawnedInSession(profile.Info.Side == EPlayerSide.Savage || FikaPlugin.Instance.PMCFoundInRaid);
+        if (profile.Info.Side != EPlayerSide.Savage)
+        {
+            var backpack = profile.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack).ContainedItem;
+            if (backpack != null)
+            {
+                foreach (var item in backpack.GetAllItems())
+                {
+                    if (item != backpack)
+                    {
+                        item.SpawnedInSession = true;
+                    }
+                }
+            }
+
+            var armband = profile.Inventory.Equipment.GetSlot(EquipmentSlot.ArmBand).ContainedItem;
+            if (armband != null)
+            {
+                armband.SpawnedInSession = false;
+            }
+
+            var melee = profile.Inventory.Equipment.GetSlot(EquipmentSlot.Scabbard).ContainedItem;
+            if (melee != null)
+            {
+                melee.SpawnedInSession = false;
+            }
+        }
 
         var otherPlayer = await ObservedPlayer.CreateObservedPlayer(gameWorld, netId, position, Quaternion.identity, "Player",
             isAi ? "Bot_" : $"Player_{profile.Nickname}_", EPointOfView.ThirdPerson, profile, healthBytes, isAi,
