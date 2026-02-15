@@ -534,13 +534,19 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
     protected void Update()
     {
         _netServer?.PollEvents();
-        var unscaledDelta = Time.unscaledDeltaTime;
+
+        var unscaledDeltaTime = Time.unscaledDeltaTime;
         for (var i = 0; i < ObservedPlayers.Count; i++)
         {
-            ObservedPlayers[i].Snapshotter.ManualUpdate(unscaledDelta);
+            var player = ObservedPlayers[i];
+            player.Snapshotter.ManualUpdate(unscaledDeltaTime);
+            if (player.CurrentPlayerState.ShouldUpdate)
+            {
+                player.ManualStateUpdate();
+            }
         }
 
-        _statisticsCounter += unscaledDelta;
+        _statisticsCounter += unscaledDeltaTime;
         if (_statisticsCounter > _sendThreshold)
         {
             _statisticsCounter -= _sendThreshold;
@@ -552,18 +558,6 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
             if (_fikaChat != null)
             {
                 _fikaChat.ToggleChat();
-            }
-        }
-    }
-
-    protected void LateUpdate()
-    {
-        for (var i = 0; i < ObservedPlayers.Count; i++)
-        {
-            var player = ObservedPlayers[i];
-            if (player.CurrentPlayerState.ShouldUpdate)
-            {
-                player.ManualStateUpdate();
             }
         }
     }

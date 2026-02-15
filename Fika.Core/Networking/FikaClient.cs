@@ -303,18 +303,24 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
     {
         _netClient?.PollEvents();
 
+        var unscaledDeltaTime = Time.unscaledDeltaTime;
         for (var i = 0; i < ObservedPlayers.Count; i++)
         {
-            ObservedPlayers[i].Snapshotter.ManualUpdate(Time.unscaledDeltaTime);
+            var player = ObservedPlayers[i];
+            player.Snapshotter.ManualUpdate(unscaledDeltaTime);
+            if (player.CurrentPlayerState.ShouldUpdate)
+            {
+                player.ManualStateUpdate();
+            }
         }
 
-        var inventoryOps = _inventoryOperations.Count;
-        if (inventoryOps > 0)
+        while (_inventoryOperations.Count > 0)
         {
             if (_inventoryOperations.Peek().WaitingForForeignEvents())
             {
-                return;
+                break;
             }
+
             _inventoryOperations.Dequeue()
                 .method_1(HandleResult);
         }
@@ -324,18 +330,6 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
             if (_fikaChat != null)
             {
                 _fikaChat.ToggleChat();
-            }
-        }
-    }
-
-    protected void LateUpdate()
-    {
-        for (var i = 0; i < ObservedPlayers.Count; i++)
-        {
-            var player = ObservedPlayers[i];
-            if (player.CurrentPlayerState.ShouldUpdate)
-            {
-                player.ManualStateUpdate();
             }
         }
     }
