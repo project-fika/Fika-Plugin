@@ -1073,7 +1073,6 @@ public class ObservedPlayer : FikaPlayer
             Corpse.SetItemInHandsLootedCallback(ReleaseHand);
         }
         CorpseSyncPacket = default;
-        Snapshotter.Clear();
         Singleton<IFikaNetworkManager>.Instance.ObservedPlayers.Remove(this);
     }
 

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Runtime.CompilerServices;
 using Comfort.Common;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking;
@@ -6,9 +7,12 @@ using Fika.Core.Networking.Packets.Player;
 
 namespace Fika.Core.Main.ObservedClasses.Snapshotting;
 
-public class Snapshotter
+public unsafe class Snapshotter
 {
-    private readonly SortedList<double, PlayerStatePacket> _buffer;
+    private const int _maxSnapshots = 32;
+    private readonly PlayerStatePacket[] _buffer;
+    private int _bufferCount;
+
     private double _localTimeline;
     private double _localTimeScale;
     private readonly SnapshotInterpolationSettings _interpolationSettings;
@@ -17,7 +21,6 @@ public class Snapshotter
     private readonly int _sendRate;
     private readonly float _sendInterval;
     private double _bufferTimeMultiplier;
-    private readonly object _bufferLock;
     private readonly ObservedPlayer _player;
     private readonly bool _isZombie;
 
@@ -26,15 +29,14 @@ public class Snapshotter
 
     internal Snapshotter(ObservedPlayer observedPlayer)
     {
-        _buffer = new(32);
+        _buffer = new PlayerStatePacket[_maxSnapshots];
         _localTimeScale = Time.timeScale;
         _sendRate = Singleton<IFikaNetworkManager>.Instance.SendRate;
         _interpolationSettings = new();
-        _bufferTimeMultiplier = _interpolationSettings.bufferTimeMultiplier;
-        _driftEma = new(_sendRate * _interpolationSettings.driftEmaDuration);
-        _deliveryTimeEma = new(_sendRate * _interpolationSettings.deliveryTimeEmaDuration);
+        _bufferTimeMultiplier = _interpolationSettings.BufferTimeMultiplier;
+        _driftEma = new(_sendRate * _interpolationSettings.DriftEmaDuration);
+        _deliveryTimeEma = new(_sendRate * _interpolationSettings.DeliveryTimeEmaDuration);
         _sendInterval = 1f / _sendRate;
-        _bufferLock = new();
         _player = observedPlayer;
         _isZombie = observedPlayer.UsedSimplifiedSkeleton;
     }
@@ -52,21 +54,21 @@ public class Snapshotter
     /// </summary>
     public void ManualUpdate(float unscaledDeltaTime)
     {
-        if (_buffer.Count > 0)
+        if (_bufferCount > 0)
         {
-            SnapshotInterpolation.Step(_buffer, unscaledDeltaTime, ref _localTimeline, _localTimeScale, out var fromSnapshot,
-                out var toSnapshot, out var ratio);
-            Interpolate(toSnapshot, fromSnapshot, (float)ratio);
+            SnapshotInterpolation.Step(_buffer, ref _bufferCount, unscaledDeltaTime, ref _localTimeline, _localTimeScale,
+                out var fromSnapshot, out var toSnapshot, out var ratio);
+            Interpolate(in fromSnapshot, in toSnapshot, ratio);
         }
     }
 
     /// <summary>
     /// Interpolates states in the <see cref="_buffer"/>
     /// </summary>
-    /// <param name="to">Goal state</param>
     /// <param name="from">State to lerp from</param>
+    /// <param name="to">Goal state</param>
     /// <param name="ratio">Interpolation ratio</param>
-    public void Interpolate(PlayerStatePacket to, PlayerStatePacket from, float ratio)
+    public void Interpolate(in PlayerStatePacket from, in PlayerStatePacket to, float ratio)
     {
         var currentState = _player.CurrentPlayerState;
         currentState.ShouldUpdate = true;
@@ -117,31 +119,65 @@ public class Snapshotter
     /// Inserts a snapshot to the <see cref="_buffer"/>
     /// </summary>
     /// <param name="snapshot">The snapshot to insert</param>
-    public void Insert(PlayerStatePacket snapshot, double networkTime)
+    /// <param name="networkTime">The current network time</param>
+    public void Insert(in PlayerStatePacket snapshot, double networkTime)
     {
-        lock (_bufferLock)
+        if (_bufferCount >= _interpolationSettings.BufferLimit)
         {
-            if (_buffer.Count > _interpolationSettings.bufferLimit)
+            _bufferCount = 0;
+        }
+
+        var low = 0;
+        var high = _bufferCount - 1;
+        var index = -1;
+
+        while (low <= high)
+        {
+            var mid = low + ((high - low) >> 1);
+            var midTime = _buffer[mid].RemoteTime;
+
+            if (midTime == snapshot.RemoteTime)
             {
-                _buffer.Clear();
+                index = mid; // found exact match
+                break;
             }
 
-            snapshot.LocalTime = networkTime;
-
-            _bufferTimeMultiplier = SnapshotInterpolation.DynamicAdjustment(_sendInterval,
-                _deliveryTimeEma.StandardDeviation, _interpolationSettings.dynamicAdjustmentTolerance);
-
-            SnapshotInterpolation.InsertAndAdjust(_buffer, _interpolationSettings.bufferLimit, in snapshot, ref _localTimeline, ref _localTimeScale,
-                _sendInterval, BufferTime, _interpolationSettings.catchupSpeed, _interpolationSettings.slowdownSpeed, ref _driftEma,
-                _interpolationSettings.catchupNegativeThreshold, _interpolationSettings.catchupPositiveThreshold, ref _deliveryTimeEma);
+            if (midTime < snapshot.RemoteTime)
+            {
+                low = mid + 1;
+            }
+            else
+            {
+                high = mid - 1;
+            }
         }
-    }
 
-    /// <summary>
-    /// Clears the <see cref="_buffer"/>
-    /// </summary>
-    public void Clear()
-    {
-        _buffer.Clear();
+        if (index != -1)
+        {
+            _buffer[index] = snapshot;
+        }
+        else
+        {
+            index = low;
+            if (index < _bufferCount)
+            {
+                Array.Copy(_buffer, index, _buffer, index + 1, _bufferCount - index);
+            }
+            _buffer[index] = snapshot;
+            _bufferCount++;
+        }
+
+        fixed (PlayerStatePacket* p = &_buffer[index])
+        {
+            *&p->LocalTime = networkTime;
+        }
+
+        _bufferTimeMultiplier = SnapshotInterpolation.DynamicAdjustment(_sendInterval, _deliveryTimeEma.StandardDeviation,
+            _interpolationSettings.DynamicAdjustmentTolerance);
+
+        SnapshotInterpolation.InsertAndAdjust(_buffer, _bufferCount, in _buffer[index],
+            ref _localTimeline, ref _localTimeScale, _sendInterval,
+            BufferTime, _interpolationSettings.CatchupSpeed, _interpolationSettings.SlowdownSpeed, ref _driftEma,
+            _interpolationSettings.CatchupNegativeThreshold, _interpolationSettings.CatchupPositiveThreshold, ref _deliveryTimeEma);
     }
 }

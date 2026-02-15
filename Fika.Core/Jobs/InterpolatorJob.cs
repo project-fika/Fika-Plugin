@@ -1,4 +1,4 @@
-﻿using Comfort.Common;
+﻿/*using Comfort.Common;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Player;
 using Unity.Collections;
@@ -39,3 +39,4 @@ internal readonly struct InterpolatorJob(float unscaledDeltaTime, double network
         }
     }
 }
+*/

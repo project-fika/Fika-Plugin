@@ -1,4 +1,4 @@
-﻿using Comfort.Common;
+﻿/*using Comfort.Common;
 using Fika.Core.Networking;
 using Unity.Collections;
 using Unity.Jobs;
@@ -24,3 +24,4 @@ internal readonly struct UpdateInterpolators(float unscaledDeltaTime) : IJobFor
         }
     }
 }
+*/

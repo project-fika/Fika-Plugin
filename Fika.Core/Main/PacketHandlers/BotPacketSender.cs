@@ -16,7 +16,6 @@ public class BotPacketSender : MonoBehaviour, IPacketSender
 
     private FikaPlayer _player;
     private bool _sendPackets;
-    private PlayerStatePacket _state;
     private int _animHash;
     private bool IsMoving
     {
@@ -31,10 +30,6 @@ public class BotPacketSender : MonoBehaviour, IPacketSender
         var sender = bot.gameObject.AddComponent<BotPacketSender>();
         sender._player = bot;
         sender.NetworkManager = Singleton<FikaServer>.Instance;
-        sender._state = new()
-        {
-            NetId = (byte)bot.NetId
-        };
         sender._animHash = PlayerAnimator.INERT_PARAM_HASH;
         sender.SendState = true;
         return Task.FromResult(sender);
@@ -62,8 +57,8 @@ public class BotPacketSender : MonoBehaviour, IPacketSender
             return;
         }
 
-        _state.UpdateFromPlayer(_player, IsMoving);
-        NetworkManager.SendPlayerState(ref _state);
+        var state = new PlayerStatePacket(_player, IsMoving);
+        NetworkManager.SendPlayerState(ref state);
     }
 
     public bool WriteState(NetDataWriter writer)
@@ -73,8 +68,8 @@ public class BotPacketSender : MonoBehaviour, IPacketSender
             return false;
         }
 
-        _state.UpdateFromPlayer(_player, IsMoving);
-        writer.PutUnmanaged(_state);
+        var state = new PlayerStatePacket(_player, IsMoving);
+        writer.PutUnmanaged(state);
         return true;
     }
 

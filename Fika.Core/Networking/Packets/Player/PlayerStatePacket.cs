@@ -13,7 +13,7 @@ namespace Fika.Core.Networking.Packets.Player;
 /// Assumes little-endian architecture
 /// </remarks>
 [StructLayout(LayoutKind.Sequential, Pack = 1)]
-public struct PlayerStatePacket
+public readonly struct PlayerStatePacket
 {
     /// <summary>
     /// Size in bytes of a <see cref="PlayerStatePacket"/>
@@ -21,70 +21,70 @@ public struct PlayerStatePacket
     public static readonly byte PacketSize = (byte)Unsafe.SizeOf<PlayerStatePacket>();
 
     /// <summary>8 bytes, offset 0</summary>
-    public double RemoteTime;
+    public readonly double RemoteTime;
 
     /// <summary>8 bytes, offset 8</summary>
-    public double LocalTime;
+    public readonly double LocalTime;
 
     /// <summary>12 bytes, offset 16 (Vector3 is 3 floats)</summary>
-    public Vector3 Position;
+    public readonly Vector3 Position;
 
     /// <summary>4 bytes, offset 28</summary>
-    private float _rotYaw;
+    private readonly float _rotYaw;
 
     /// <summary>2 bytes, offset 32</summary>
-    private ushort _tiltPacked;
+    private readonly ushort _tiltPacked;
 
     /// <summary>2 bytes, offset 34</summary>
-    private ushort _movementSpeedPacked;
+    private readonly ushort _movementSpeedPacked;
 
     /// <summary>2 bytes, offset 36</summary>
-    private ushort _sprintSpeedPacked;
+    private readonly ushort _sprintSpeedPacked;
 
     /// <summary>2 bytes, offset 38</summary>
-    private ushort _poseLevelPacked;
+    private readonly ushort _poseLevelPacked;
 
     /// <summary>2 bytes, offset 40</summary>
-    private ushort _weaponOverlapPacked;
+    private readonly ushort _weaponOverlapPacked;
 
     /// <summary>1 byte, offset 42</summary>
-    private byte _headRotYawPacked;
+    private readonly byte _headRotYawPacked;
 
     /// <summary>1 byte, offset 43</summary>
-    private byte _headRotPitchPacked;
+    private readonly byte _headRotPitchPacked;
 
     /// <summary>1 byte, offset 44</summary>
-    private byte _rotPitchPacked;
+    private readonly byte _rotPitchPacked;
 
     /// <summary>1 byte, offset 45</summary>
-    private byte _moveDirXPacked;
+    private readonly byte _moveDirXPacked;
 
     /// <summary>1 byte, offset 46</summary>
-    private byte _moveDirYPacked;
+    private readonly byte _moveDirYPacked;
 
     /// <summary>1 byte, offset 47</summary>
-    public byte NetId;
+    public readonly byte NetId;
 
     /// <summary>1 byte, offset 48</summary>
-    private byte _stepPacked;
+    private readonly byte _stepPacked;
 
     /// <summary>1 byte, offset 49</summary>
-    private byte _blindfirePacked;
+    private readonly byte _blindfirePacked;
 
     /// <summary>1 byte, offset 50</summary>
-    public EPlayerState State;  // Stored as byte
+    public readonly EPlayerState State;  // Stored as byte
 
     /// <summary>1 byte, offset 51</summary>
-    private byte _boolFlags;    // 7 bools packed into 1 byte
+    private readonly byte _boolFlags;    // 7 bools packed into 1 byte
 
     /// <summary>1 byte, offset 52</summary>
-    private byte _velocityDirXPacked;
+    private readonly byte _velocityDirXPacked;
 
     /// <summary>1 byte, offset 53</summary>
-    private byte _velocityDirYPacked;
+    private readonly byte _velocityDirYPacked;
 
     /// <summary>1 byte, offset 54</summary>
-    private byte _velocityDirZPacked;
+    private readonly byte _velocityDirZPacked;
 
     public BasePhysicalClass.PhysicalStateStruct Physical
     {
@@ -101,154 +101,94 @@ public struct PlayerStatePacket
 
     public Vector3 Velocity
     {
-        readonly get
+        get
         {
             return new Vector3(UnpackByteToFloat(_velocityDirXPacked, -25f, 25f),
                 UnpackByteToFloat(_velocityDirYPacked, -25f, 25f),
                 UnpackByteToFloat(_velocityDirZPacked, -25f, 25f));
         }
-
-        set
-        {
-            _velocityDirXPacked = PackFloatToByte(value.x, -25f, 25f);
-            _velocityDirYPacked = PackFloatToByte(value.y, -25f, 25f);
-            _velocityDirZPacked = PackFloatToByte(value.z, -25f, 25f);
-        }
     }
 
     public Vector2 HeadRotation
     {
-        readonly get
+        get
         {
             return new Vector2(UnpackByteToFloat(_headRotYawPacked, -50f, 20f),
                 UnpackByteToFloat(_headRotPitchPacked, -40f, 40f));
-        }
-
-        set
-        {
-            _headRotYawPacked = PackFloatToByte(value.x, -50f, 20f);
-            _headRotPitchPacked = PackFloatToByte(value.y, -40f, 40f);
         }
     }
 
     public Vector2 Rotation
     {
-        readonly get
+        get
         {
             return new Vector2(_rotYaw, UnpackByteToFloat(_rotPitchPacked,
                 -90f, 90f));
-        }
-
-        set
-        {
-            _rotYaw = value.x;
-            _rotPitchPacked = PackFloatToByte(value.y, -90f, 90f);
         }
     }
 
     public Vector2 MovementDirection
     {
-        readonly get
+        get
         {
             return new Vector2(UnpackByteToFloat(_moveDirXPacked, -1f, 1f),
                 UnpackByteToFloat(_moveDirYPacked, -1f, 1f));
-        }
-
-        set
-        {
-            _moveDirXPacked = PackFloatToByte(value.x, -1f, 1f);
-            _moveDirYPacked = PackFloatToByte(value.y, -1f, 1f);
         }
     }
 
     public float Tilt
     {
-        readonly get
+        get
         {
             return UnpackUShortToFloat(_tiltPacked, -5f, 5f);
-        }
-
-        set
-        {
-            _tiltPacked = PackFloatToUShort(value, -5f, 5f);
         }
     }
 
     public float MovementSpeed
     {
-        readonly get
+        get
         {
             return UnpackUShortToFloat(_movementSpeedPacked, 0f, 1f);
-        }
-
-        set
-        {
-            _movementSpeedPacked = PackFloatToUShort(value, 0f, 1f);
         }
     }
 
     public float SprintSpeed
     {
-        readonly get
+        get
         {
             return UnpackUShortToFloat(_sprintSpeedPacked, 0f, 1f);
-        }
-
-        set
-        {
-            _sprintSpeedPacked = PackFloatToUShort(value, 0f, 1f);
         }
     }
 
     public float PoseLevel
     {
-        readonly get
+        get
         {
             return UnpackUShortToFloat(_poseLevelPacked, 0f, 1f);
-        }
-
-        set
-        {
-            _poseLevelPacked = PackFloatToUShort(value, 0f, 1f);
         }
     }
 
     public float WeaponOverlap
     {
-        readonly get
+        get
         {
             return UnpackUShortToFloat(_weaponOverlapPacked, 0f, 1f);
-        }
-
-        set
-        {
-            _weaponOverlapPacked = PackFloatToUShort(value, 0f, 1f);
         }
     }
 
     public int Step
     {
-        readonly get
+        get
         {
             return UnpackByteToInt(_stepPacked, -1, 1);
-        }
-
-        set
-        {
-            _stepPacked = PackIntToByte(value, -1, 1);
         }
     }
 
     public int Blindfire
     {
-        readonly get
+        get
         {
             return UnpackByteToInt(_blindfirePacked, -1, 1);
-        }
-
-        set
-        {
-            _blindfirePacked = PackIntToByte(value, -1, 1);
         }
     }
 
@@ -382,9 +322,10 @@ public struct PlayerStatePacket
         return Unsafe.ReadUnaligned<PlayerStatePacket>(ref firstByte);
     }
 
-    public void UpdateFromPlayer(FikaPlayer player, bool isMoving)
+    public PlayerStatePacket(FikaPlayer player, bool isMoving)
     {
         RemoteTime = NetworkTimeSync.NetworkTime;
+        LocalTime = 0;
 
         Position = player.Position;
 
@@ -403,6 +344,8 @@ public struct PlayerStatePacket
         _poseLevelPacked = PackFloatToUShort(player.PoseLevel, 0f, 1f);
         _weaponOverlapPacked = PackFloatToUShort(player.ObservedOverlap, 0f, 1f);
 
+        NetId = (byte)player.NetId;
+
         _stepPacked = PackIntToByte(player.MovementContext.Step, -1, 1);
         _blindfirePacked = PackIntToByte(player.MovementContext.BlindFire, -1, 1);
 
@@ -418,51 +361,9 @@ public struct PlayerStatePacket
             player.Physical.SerializationStruct.HandsExhausted
         );
 
-        Velocity = player.Velocity;
-    }
-
-    public static PlayerStatePacket CreateFromPlayer(FikaPlayer player, bool isMoving)
-    {
-        return new()
-        {
-            RemoteTime = NetworkTimeSync.NetworkTime,
-            LocalTime = 0,
-
-            Position = player.Position,
-
-            _headRotYawPacked = PackFloatToByte(player.HeadRotation.x, -50f, 20f),
-            _headRotPitchPacked = PackFloatToByte(player.HeadRotation.y, -40f, 40f),
-
-            _rotYaw = player.Rotation.x,
-            _rotPitchPacked = PackFloatToByte(player.Rotation.y, -90f, 90f),
-
-            _moveDirXPacked = PackFloatToByte(isMoving ? player.MovementContext.MovementDirection.x : 0f, -1f, 1f),
-            _moveDirYPacked = PackFloatToByte(isMoving ? player.MovementContext.MovementDirection.y : 0f, -1f, 1f),
-
-            _tiltPacked = PackFloatToUShort(player.MovementContext.IsInMountedState ? player.MovementContext.MountedSmoothedTilt : player.MovementContext.SmoothedTilt, -5f, 5f),
-            _movementSpeedPacked = PackFloatToUShort(player.MovementContext.SmoothedCharacterMovementSpeed, 0f, 1f),
-            _sprintSpeedPacked = PackFloatToUShort(player.MovementContext.SprintSpeed, 0f, 1f),
-            _poseLevelPacked = PackFloatToUShort(player.PoseLevel, 0f, 1f),
-            _weaponOverlapPacked = PackFloatToUShort(player.ObservedOverlap, 0f, 1f),
-
-            NetId = (byte)player.NetId,
-
-            _stepPacked = PackIntToByte(player.MovementContext.Step, -1, 1),
-            _blindfirePacked = PackIntToByte(player.MovementContext.BlindFire, -1, 1),
-
-            State = player.CurrentManagedState.Name,
-
-            _boolFlags = PackBools(
-                player.IsInPronePose,
-                player.MovementContext.IsSprintEnabled,
-                player.LeftStanceDisabled,
-                player.MovementContext.IsGrounded,
-                player.Physical.SerializationStruct.StaminaExhausted,
-                player.Physical.SerializationStruct.OxygenExhausted,
-                player.Physical.SerializationStruct.HandsExhausted
-            ),
-
-            Velocity = player.Velocity
-        };
+        var velocity = player.Velocity;
+        _velocityDirXPacked = PackFloatToByte(velocity.x, -25f, 25f);
+        _velocityDirYPacked = PackFloatToByte(velocity.y, -25f, 25f);
+        _velocityDirZPacked = PackFloatToByte(velocity.z, -25f, 25f);
     }
 }

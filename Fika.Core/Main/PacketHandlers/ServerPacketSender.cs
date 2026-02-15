@@ -29,7 +29,6 @@ public class ServerPacketSender : MonoBehaviour, IPacketSender
     public IFikaNetworkManager NetworkManager { get; set; }
 
     private FikaPlayer _player;
-    private PlayerStatePacket _state;
     private int _animHash;
     private bool IsMoving
     {
@@ -65,10 +64,6 @@ public class ServerPacketSender : MonoBehaviour, IPacketSender
         sender._updateRate = sender.NetworkManager.SendRate;
         sender._updateCount = 0;
         sender._updatesPerTick = 1f / sender._updateRate;
-        sender._state = new()
-        {
-            NetId = (byte)player.NetId
-        };
         sender._animHash = PlayerAnimator.INERT_PARAM_HASH;
         return Task.FromResult(sender);
     }
@@ -111,8 +106,8 @@ public class ServerPacketSender : MonoBehaviour, IPacketSender
 
     private void SendPlayerState()
     {
-        _state.UpdateFromPlayer(_player, IsMoving);
-        NetworkManager.SendPlayerState(ref _state);
+        var state = new PlayerStatePacket(_player, IsMoving);
+        NetworkManager.SendPlayerState(ref state);
     }
 
     protected void LateUpdate()

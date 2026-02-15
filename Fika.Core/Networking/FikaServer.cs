@@ -18,7 +18,6 @@ using Fika.Core.Main.ObservedClasses.Snapshotting;
 using Fika.Core.Main.Patches.VOIP;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
-using Fika.Core.Jobs;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Http;
@@ -141,8 +140,6 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
     private float _sendThreshold;
     private Dictionary<Profile, bool> _visualProfiles;
     private Dictionary<string, int> _cachedConnections;
-    private JobHandle _stateHandle;
-    private int _snapshotCount;
     private GenericPacket _genericPacket;
 
     internal FikaVOIPServer VOIPServer { get; set; }
@@ -172,7 +169,6 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         _sendThreshold = 2f;
         _cachedConnections = [];
         _logger = Logger.CreateLogSource("Fika.Server");
-        _snapshotCount = 0;
         ObservedPlayers = [];
         PlayerAmount = 1;
 
@@ -209,8 +205,6 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         {
             NetId = NetId
         };
-
-        PlayerSnapshots.Init();
 
         RegisterPacketsAndTypes();
         var pmcName = FikaBackendUtils.IsHeadless ? "Headless" : FikaBackendUtils.PMCName;
@@ -541,8 +535,10 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
     {
         _netServer?.PollEvents();
         var unscaledDelta = Time.unscaledDeltaTime;
-        _stateHandle = new InterpolatorJob(unscaledDelta, NetworkTimeSync.NetworkTime, _snapshotCount)
-            .Schedule();
+        for (var i = 0; i < ObservedPlayers.Count; i++)
+        {
+            ObservedPlayers[i].Snapshotter.ManualUpdate(unscaledDelta);
+        }
 
         _statisticsCounter += unscaledDelta;
         if (_statisticsCounter > _sendThreshold)
@@ -562,25 +558,13 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
 
     protected void LateUpdate()
     {
-        try
+        for (var i = 0; i < ObservedPlayers.Count; i++)
         {
-            _stateHandle.Complete();
-            for (var i = 0; i < ObservedPlayers.Count; i++)
+            var player = ObservedPlayers[i];
+            if (player.CurrentPlayerState.ShouldUpdate)
             {
-                var player = ObservedPlayers[i];
-                if (player.CurrentPlayerState.ShouldUpdate)
-                {
-                    player.ManualStateUpdate();
-                }
+                player.ManualStateUpdate();
             }
-        }
-        finally
-        {
-            for (var i = 0; i < _snapshotCount; i++)
-            {
-                ArraySegmentPooling.Return(PlayerSnapshots.Snapshots[i]);
-            }
-            _snapshotCount = 0;
         }
     }
 
@@ -600,23 +584,9 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
     protected void OnDestroy()
     {
         _netServer?.Stop();
-        try
-        {
-            _stateHandle.Complete();
-        }
-        finally
-        {
-            for (var i = 0; i < _snapshotCount; i++)
-            {
-                ArraySegmentPooling.Return(PlayerSnapshots.Snapshots[i]);
-            }
-            _snapshotCount = 0;
-        }
         _genericPacket.Clear();
 
-
         PoolUtils.ReleaseAll();
-        PlayerSnapshots.Clear();
 
         if (_fikaChat != null)
         {
@@ -969,9 +939,10 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
                 var count = reader.GetByte();
                 for (byte i = 0; i < count; i++)
                 {
-                    if (_snapshotCount < PlayerSnapshots.Snapshots.Length)
+                    var snapshot = reader.GetUnmanaged<PlayerStatePacket>();
+                    if (_coopHandler.Players.TryGetValue(snapshot.NetId, out var player))
                     {
-                        PlayerSnapshots.Snapshots[_snapshotCount++] = ArraySegmentPooling.Get(reader.GetSpan(PlayerStatePacket.PacketSize));
+                        player.Snapshotter.Insert(in snapshot, NetworkTimeSync.NetworkTime);
                     }
                 }
                 break;

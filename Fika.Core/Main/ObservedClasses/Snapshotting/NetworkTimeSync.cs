@@ -9,7 +9,7 @@ public static class NetworkTimeSync
 {
     /// <summary>
     /// Gets the current time in the game since start as a <see cref="double"/>
-    /// </summary>        
+    /// </summary>
     public static double NetworkTime
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

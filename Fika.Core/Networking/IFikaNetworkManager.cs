@@ -22,7 +22,7 @@ public interface IFikaNetworkManager
     int NetId { get; set; }
 
     /// <summary>
-    /// Gets or sets the <see cref="CoopHandler"/> responsible for managing cooperative gameplay logic.
+    /// Gets or sets the <see cref="CoopHandler"/> responsible for managing gameplay logic.
     /// </summary>
     CoopHandler CoopHandler { get; set; }
 
@@ -42,7 +42,7 @@ public interface IFikaNetworkManager
     bool AllowVOIP { get; set; }
 
     /// <summary>
-    /// Gets or sets the list of observed cooperative players in the session.
+    /// Gets or sets the list of observed players in the session.
     /// </summary>
     List<ObservedPlayer> ObservedPlayers { get; set; }
 

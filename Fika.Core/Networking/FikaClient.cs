@@ -7,7 +7,6 @@ using Dissonance.Integrations.MirrorIgnorance;
 using EFT;
 using EFT.Communications;
 using EFT.UI;
-using Fika.Core.Jobs;
 using Fika.Core.Main.ClientClasses;
 using Fika.Core.Main.Components;
 using Fika.Core.Main.ObservedClasses.Snapshotting;
@@ -125,8 +124,6 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
     private string _myProfileId;
     private Queue<BaseInventoryOperationClass> _inventoryOperations;
     private List<int> _missingIds;
-    private JobHandle _stateHandle;
-    private int _snapshotCount;
     private GenericPacket _genericPacket;
 
     public async Task Init()
@@ -150,7 +147,6 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
         _logger = Logger.CreateLogSource("Fika.Client");
         _inventoryOperations = new(8);
         _missingIds = [];
-        _snapshotCount = 0;
         ObservedPlayers = [];
         PlayerAmount = 1;
 
@@ -163,8 +159,6 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
 
         _myProfileId = FikaBackendUtils.Profile.ProfileId;
         _genericPacket = new();
-
-        PlayerSnapshots.Init();
 
         RegisterPacketsAndTypes();
 
@@ -308,8 +302,11 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
     protected void Update()
     {
         _netClient?.PollEvents();
-        _stateHandle = new UpdateInterpolators(Time.unscaledDeltaTime).ScheduleParallel(ObservedPlayers.Count, 4,
-            new HandlePlayerStates(NetworkTimeSync.NetworkTime).ScheduleParallel(_snapshotCount, 4, default));
+
+        for (var i = 0; i < ObservedPlayers.Count; i++)
+        {
+            ObservedPlayers[i].Snapshotter.ManualUpdate(Time.unscaledDeltaTime);
+        }
 
         var inventoryOps = _inventoryOperations.Count;
         if (inventoryOps > 0)
@@ -333,47 +330,22 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
 
     protected void LateUpdate()
     {
-        try
+        for (var i = 0; i < ObservedPlayers.Count; i++)
         {
-            _stateHandle.Complete();
-            for (var i = 0; i < ObservedPlayers.Count; i++)
+            var player = ObservedPlayers[i];
+            if (player.CurrentPlayerState.ShouldUpdate)
             {
-                var player = ObservedPlayers[i];
-                if (player.CurrentPlayerState.ShouldUpdate)
-                {
-                    player.ManualStateUpdate();
-                }
+                player.ManualStateUpdate();
             }
-        }
-        finally
-        {
-            for (var i = 0; i < _snapshotCount; i++)
-            {
-                ArraySegmentPooling.Return(PlayerSnapshots.Snapshots[i]);
-            }
-            _snapshotCount = 0;
         }
     }
 
     protected void OnDestroy()
     {
         _netClient?.Stop();
-        try
-        {
-            _stateHandle.Complete();
-        }
-        finally
-        {
-            for (var i = 0; i < _snapshotCount; i++)
-            {
-                ArraySegmentPooling.Return(PlayerSnapshots.Snapshots[i]);
-            }
-            _snapshotCount = 0;
-        }
         _genericPacket.Clear();
 
         PoolUtils.ReleaseAll();
-        PlayerSnapshots.Clear();
 
         if (_fikaChat != null)
         {
@@ -523,9 +495,10 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
                 var count = reader.GetByte();
                 for (byte i = 0; i < count; i++)
                 {
-                    if (_snapshotCount < PlayerSnapshots.Snapshots.Length)
+                    var snapshot = reader.GetUnmanaged<PlayerStatePacket>();
+                    if (_coopHandler.Players.TryGetValue(snapshot.NetId, out var player))
                     {
-                        PlayerSnapshots.Snapshots[_snapshotCount++] = ArraySegmentPooling.Get(reader.GetSpan(PlayerStatePacket.PacketSize));
+                        player.Snapshotter.Insert(in snapshot, NetworkTimeSync.NetworkTime);
                     }
                 }
                 break;
