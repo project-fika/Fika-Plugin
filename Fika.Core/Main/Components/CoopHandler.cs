@@ -412,7 +412,8 @@ public class CoopHandler : MonoBehaviour
             position = new(0f, -5000f, 0f);
         }
 
-        // Check for GClass increments on filter
+        profile.SetSpawnedInSession(profile.Info.Side == EPlayerSide.Savage || FikaPlugin.Instance.PMCFoundInRaid);
+
         var otherPlayer = await ObservedPlayer.CreateObservedPlayer(gameWorld, netId, position, Quaternion.identity, "Player",
             isAi ? "Bot_" : $"Player_{profile.Nickname}_", EPointOfView.ThirdPerson, profile, healthBytes, isAi,
             EUpdateQueue.Update, Player.EUpdateMode.Manual, Player.EUpdateMode.Auto,
