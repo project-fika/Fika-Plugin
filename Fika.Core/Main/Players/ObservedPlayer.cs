@@ -639,10 +639,7 @@ public class ObservedPlayer : FikaPlayer
     {
         if (_isServer)
         {
-            _preAllocatedArmorComponents.Clear();
-            List<ArmorComponent> listToCheck = [];
-            Inventory.GetPutOnArmorsNonAlloc(listToCheck);
-            foreach (var armorComponent in listToCheck)
+            foreach (var armorComponent in _preAllocatedArmorComponents)
             {
                 var num = 0f;
                 foreach (var keyValuePair in armorDamage)
@@ -650,7 +647,6 @@ public class ObservedPlayer : FikaPlayer
                     if (armorComponent.ShotMatches(keyValuePair.Key.BodyPartColliderType, keyValuePair.Key.ArmorPlateCollider))
                     {
                         num += keyValuePair.Value;
-                        _preAllocatedArmorComponents.Add(armorComponent);
                     }
                 }
                 if (num > 0f)

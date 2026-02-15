@@ -260,7 +260,6 @@ public class FikaBot : FikaPlayer
                 if (armorComponent.ShotMatches(keyValuePair.Key.BodyPartColliderType, keyValuePair.Key.ArmorPlateCollider))
                 {
                     num += keyValuePair.Value;
-                    _preAllocatedArmorComponents.Add(armorComponent);
                 }
             }
             if (num > 0f)

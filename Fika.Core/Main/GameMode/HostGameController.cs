@@ -211,8 +211,6 @@ public class HostGameController : BaseGameController, IBotGame
             return null;
         }
 
-        profile.SetSpawnedInSession(profile.Info.Side == EPlayerSide.Savage);
-
         netId = _server.PopNetId();
 
         var mongoId = MongoID.Generate(true);
@@ -232,39 +230,15 @@ public class HostGameController : BaseGameController, IBotGame
             await WaitForPlayersToLoadBotProfile(netId);
         }
 
-        if (profile.Info.Side is not EPlayerSide.Savage)
-        {
-            if (!FikaPlugin.Instance.PMCFoundInRaid)
-            {
-                var backpack = profile.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack).ContainedItem;
-                if (backpack != null)
-                {
-                    foreach (var backpackItem in backpack.GetAllItems())
-                    {
-                        if (backpackItem != backpack)
-                        {
-                            backpackItem.SpawnedInSession = true;
-                        }
-                    }
-                }
-
-                // We still want DogTags to be 'FiR'
-                var item = profile.Inventory.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem;
-                if (item != null)
-                {
-                    item.SpawnedInSession = true;
-                }
-            }
-            else
-            {
-                FikaGlobals.SetPMCProfileAsFoundInRaid(profile);
-            }
-        }
-
         fikaBot = await FikaBot.CreateBot(_gameWorld, netId, position, Quaternion.identity, "Player",
            "Bot_", EPointOfView.ThirdPerson, profile, true, _updateQueue, Player.EUpdateMode.Auto,
            Player.EUpdateMode.Auto, BackendConfigAbstractClass.Config.CharacterController.BotPlayerMode, FikaGlobals.GetOtherPlayerSensitivity,
             FikaGlobals.GetOtherPlayerSensitivity, ObservedViewFilter.Default, mongoId, nextOperationId);
+
+        if (profile.Info.Side is not EPlayerSide.Savage && FikaPlugin.Instance.PMCFoundInRaid)
+        {
+            FikaGlobals.SetPMCProfileAsFoundInRaid(fikaBot);
+        }
 
         fikaBot.Location = Location.Id;
         Bots.Add(fikaBot.ProfileId, fikaBot);

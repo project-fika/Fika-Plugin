@@ -1204,7 +1204,6 @@ public class FikaPlayer : LocalPlayer
                     if (armorComponent.ShotMatches(colliderStruct.BodyPartColliderType, colliderStruct.ArmorPlateCollider))
                     {
                         num += amount;
-                        _preAllocatedArmorComponents.Add(armorComponent);
                     }
                 }
 

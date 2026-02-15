@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using BepInEx.Logging;
 using Comfort.Common;
@@ -213,17 +214,23 @@ public static class FikaGlobals
     /// <remarks>
     /// This still sets Armbands and Melee as non-FiR due to them being unlootable
     /// </remarks>
-    public static void SetPMCProfileAsFoundInRaid(Profile profile)
+    public static void SetPMCProfileAsFoundInRaid(FikaPlayer player)
     {
-        profile.SetSpawnedInSession(true);
+#if DEBUG
+        LogInfo($"Marking profile of {player.Profile.GetCorrectedNickname()} as found in raid");
+#endif
+        foreach (var item in player.Profile.InventoryInfo.GetPlayerItems(EPlayerItems.Equipment))
+        {
+            item.SpawnedInSession = true;
+        }
 
-        var armband = profile.Inventory.Equipment.GetSlot(EquipmentSlot.ArmBand).ContainedItem;
+        var armband = player.Profile.Inventory.Equipment.GetSlot(EquipmentSlot.ArmBand).ContainedItem;
         if (armband != null)
         {
             armband.SpawnedInSession = false;
         }
 
-        var melee = profile.Inventory.Equipment.GetSlot(EquipmentSlot.Scabbard).ContainedItem;
+        var melee = player.Profile.Inventory.Equipment.GetSlot(EquipmentSlot.Scabbard).ContainedItem;
         if (melee != null)
         {
             melee.SpawnedInSession = false;
