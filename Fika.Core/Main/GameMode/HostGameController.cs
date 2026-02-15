@@ -234,23 +234,30 @@ public class HostGameController : BaseGameController, IBotGame
 
         if (profile.Info.Side is not EPlayerSide.Savage)
         {
-            var backpack = profile.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack).ContainedItem;
-            if (backpack != null)
+            if (!FikaPlugin.Instance.PMCFoundInRaid)
             {
-                foreach (var backpackItem in backpack.GetAllItems())
+                var backpack = profile.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack).ContainedItem;
+                if (backpack != null)
                 {
-                    if (backpackItem != backpack)
+                    foreach (var backpackItem in backpack.GetAllItems())
                     {
-                        backpackItem.SpawnedInSession = true;
+                        if (backpackItem != backpack)
+                        {
+                            backpackItem.SpawnedInSession = true;
+                        }
                     }
                 }
-            }
 
-            // We still want DogTags to be 'FiR'
-            var item = profile.Inventory.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem;
-            if (item != null)
+                // We still want DogTags to be 'FiR'
+                var item = profile.Inventory.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem;
+                if (item != null)
+                {
+                    item.SpawnedInSession = true;
+                }
+            }
+            else
             {
-                item.SpawnedInSession = true;
+                FikaGlobals.SetPMCProfileAsFoundInRaid(profile);
             }
         }
 

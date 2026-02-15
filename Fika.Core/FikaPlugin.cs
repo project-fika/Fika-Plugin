@@ -122,6 +122,7 @@ public class FikaPlugin : BaseUnityPlugin
     public bool AnyoneCanStartRaid;
     public bool AllowNamePlates;
     public bool RandomLabyrinthSpawns;
+    public bool PMCFoundInRaid;
     #endregion
 
     #region natpunch config
@@ -272,6 +273,7 @@ public class FikaPlugin : BaseUnityPlugin
         AnyoneCanStartRaid = clientConfig.AnyoneCanStartRaid;
         AllowNamePlates = clientConfig.AllowNamePlates;
         RandomLabyrinthSpawns = clientConfig.RandomLabyrinthSpawns;
+        PMCFoundInRaid = clientConfig.PMCFoundInRaid;
 
         clientConfig.LogValues();
     }

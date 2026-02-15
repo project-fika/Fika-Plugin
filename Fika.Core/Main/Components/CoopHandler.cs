@@ -310,7 +310,7 @@ public class CoopHandler : MonoBehaviour
         }
         await JobScheduler.Yield();
 
-        var otherPlayer = SpawnObservedPlayer(spawnObject);
+        var otherPlayer = await SpawnObservedPlayer(spawnObject);
 
         if (!spawnObject.IsAlive)
         {
@@ -388,7 +388,7 @@ public class CoopHandler : MonoBehaviour
         _spawnQueue.Enqueue(spawnObject);
     }
 
-    private ObservedPlayer SpawnObservedPlayer(SpawnObject spawnObject)
+    private async ValueTask<ObservedPlayer> SpawnObservedPlayer(SpawnObject spawnObject)
     {
         var isAi = spawnObject.IsAI;
         var profile = spawnObject.Profile;
@@ -416,40 +416,45 @@ public class CoopHandler : MonoBehaviour
         {
             if (profile.Info.Side is not EPlayerSide.Savage)
             {
-                var backpack = profile.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack).ContainedItem;
-                if (backpack != null)
+                if (!FikaPlugin.Instance.PMCFoundInRaid)
                 {
-                    foreach (var backpackItem in backpack.GetAllItems())
+                    var backpack = profile.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack).ContainedItem;
+                    if (backpack != null)
                     {
-                        if (backpackItem != backpack)
+                        foreach (var backpackItem in backpack.GetAllItems())
                         {
-                            backpackItem.SpawnedInSession = true;
+                            if (backpackItem != backpack)
+                            {
+                                backpackItem.SpawnedInSession = true;
+                            }
                         }
                     }
-                }
 
-                // We still want DogTags to be 'FiR'
-                var item = profile.Inventory.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem;
-                if (item != null)
+                    // We still want DogTags to be 'FiR'
+                    var item = profile.Inventory.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem;
+                    if (item != null)
+                    {
+                        item.SpawnedInSession = true;
+                    }
+                }
+                else
                 {
-                    item.SpawnedInSession = true;
+                    FikaGlobals.SetPMCProfileAsFoundInRaid(profile);
                 }
             }
         }
-        else if (profile.Info.Side != EPlayerSide.Savage) // Make sure player PMC items are all not 'FiR'
+        else if (profile.Info.Side is not EPlayerSide.Savage) // Make sure player PMC items are all not 'FiR'
         {
             profile.SetSpawnedInSession(false);
         }
 
         // Check for GClass increments on filter
-        var otherPlayer = ObservedPlayer.CreateObservedPlayer(gameWorld, netId, position, Quaternion.identity, "Player",
+        var otherPlayer = await ObservedPlayer.CreateObservedPlayer(gameWorld, netId, position, Quaternion.identity, "Player",
             isAi ? "Bot_" : $"Player_{profile.Nickname}_", EPointOfView.ThirdPerson, profile, healthBytes, isAi,
             EUpdateQueue.Update, Player.EUpdateMode.Manual, Player.EUpdateMode.Auto,
             BackendConfigAbstractClass.Config.CharacterController.ObservedPlayerMode,
             FikaGlobals.GetOtherPlayerSensitivity, FikaGlobals.GetOtherPlayerSensitivity, ObservedViewFilter.Default,
-            firstId, firstOperationId, isZombie)
-            .GetAwaiter()
-            .GetResult();
+            firstId, firstOperationId, isZombie);
 
         if (otherPlayer == null)
         {

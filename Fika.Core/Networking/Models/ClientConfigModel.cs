@@ -52,6 +52,9 @@ public struct ClientConfigModel
     [DataMember(Name = "randomLabyrinthSpawns")]
     public bool RandomLabyrinthSpawns { get; set; }
 
+    [DataMember(Name = "pmcFoundInRaid")]
+    public bool PMCFoundInRaid { get; set; }
+
     public readonly void LogValues()
     {
         FikaGlobals.LogInfo("Received config from server:");

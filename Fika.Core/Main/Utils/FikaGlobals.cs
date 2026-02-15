@@ -207,6 +207,30 @@ public static class FikaGlobals
     }
 
     /// <summary>
+    /// Sets a PMC profile to FiR
+    /// </summary>
+    /// <param name="profile">The profile to mark as FiR</param>
+    /// <remarks>
+    /// This still sets Armbands and Melee as non-FiR due to them being unlootable
+    /// </remarks>
+    public static void SetPMCProfileAsFoundInRaid(Profile profile)
+    {
+        profile.SetSpawnedInSession(true);
+
+        var armband = profile.Inventory.Equipment.GetSlot(EquipmentSlot.ArmBand).ContainedItem;
+        if (armband != null)
+        {
+            armband.SpawnedInSession = false;
+        }
+
+        var melee = profile.Inventory.Equipment.GetSlot(EquipmentSlot.Scabbard).ContainedItem;
+        if (melee != null)
+        {
+            melee.SpawnedInSession = false;
+        }
+    }
+
+    /// <summary>
     /// Gets the current <see cref="ISession"/>
     /// </summary>
     /// <returns><see cref="ISession"/> of the application</returns>
