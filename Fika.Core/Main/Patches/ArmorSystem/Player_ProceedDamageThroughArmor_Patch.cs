@@ -28,7 +28,6 @@ internal class Player_ProceedDamageThroughArmor_Patch : ModulePatch
         var hasBlockedShot = false;
         var hasDeflectedShot = false;
 
-        // 3. Process each armor piece against the incoming shot
         for (var i = 0; i < ____preAllocatedArmorComponents.Count; i++)
         {
             var armor = ____preAllocatedArmorComponents[i];
@@ -54,13 +53,8 @@ internal class Player_ProceedDamageThroughArmor_Patch : ModulePatch
 
                     if (__instance.HealthController.IsAlive)
                     {
-                        armorDamageDealt = armor.ApplyDamage(
-                            ref damageInfo,
-                            colliderType,
-                            armorPlateCollider,
-                            damageInfoIsLocal,
-                            ____preAllocatedArmorComponents,
-                            __instance.Skills.LightVestMeleeWeaponDamageReduction,
+                        armorDamageDealt = armor.ApplyDamage(ref damageInfo, colliderType, armorPlateCollider, damageInfoIsLocal,
+                            ____preAllocatedArmorComponents, __instance.Skills.LightVestMeleeWeaponDamageReduction,
                             __instance.Skills.HeavyVestBluntThroughputDamageReduction
                         );
 
