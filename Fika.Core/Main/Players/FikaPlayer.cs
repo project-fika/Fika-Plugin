@@ -1111,8 +1111,8 @@ public class FikaPlayer : LocalPlayer
 
     public void HandleDropPacket(bool fastDrop)
     {
-        DropHandler handler = new(this);
-        base.DropCurrentController(handler.HandleResult, fastDrop, null);
+        /*DropHandler handler = new(this);*/
+        base.DropCurrentController(FikaGlobals.EmptyAction, fastDrop, null);
     }
 
     public void HandleUsableItemPacket(UsableItemPacket packet)
@@ -1794,7 +1794,7 @@ public class FikaPlayer : LocalPlayer
 
     private class DropHandler(FikaPlayer fikaPlayer)
     {
-        private readonly FikaPlayer fikaPlayer = fikaPlayer;
+        private readonly FikaPlayer _fikaPlayer = fikaPlayer;
 
         internal void HandleResult()
         {
