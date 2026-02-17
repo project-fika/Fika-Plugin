@@ -13,7 +13,7 @@ public struct LoadingScreenPlayersPacket : INetSerializable
 
     public void Deserialize(NetDataReader reader)
     {
-        NetIds = reader.GetArray<int>(4);
+        NetIds = reader.GetArray<int>();
         Nicknames = reader.GetStringArray();
     }
 }

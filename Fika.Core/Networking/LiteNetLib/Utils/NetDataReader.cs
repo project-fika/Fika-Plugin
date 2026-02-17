@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace Fika.Core.Networking.LiteNetLib.Utils;
 
@@ -230,21 +231,20 @@ public unsafe class NetDataReader
         return (sbyte)GetByte();
     }
 
-    public T[] GetArray<T>(ushort size)
+    public T[] GetArray<T>() where T : unmanaged
     {
-        var length = BitConverter.ToUInt16(_data, _position);
-        _position += 2;
-        var result = new T[length];
-        length *= size;
-        Buffer.BlockCopy(_data, _position, result, 0, length);
-        _position += length;
+        var length = GetUShort();
+        var byteLength = length * Unsafe.SizeOf<T>();
+        ReadOnlySpan<byte> slice = _data.AsSpan(_position, byteLength);
+        var result = MemoryMarshal.Cast<byte, T>(slice)
+            .ToArray();
+        _position += byteLength;
         return result;
     }
 
-    public T[] GetArray<T>() where T : INetSerializable, new()
+    public T[] GetSerializableArray<T>() where T : INetSerializable, new()
     {
-        var length = BitConverter.ToUInt16(_data, _position);
-        _position += 2;
+        var length = GetUShort();
         var result = new T[length];
         for (var i = 0; i < length; i++)
         {
@@ -255,10 +255,9 @@ public unsafe class NetDataReader
         return result;
     }
 
-    public T[] GetArray<T>(Func<T> constructor) where T : class, INetSerializable
+    public T[] GetSerializableConstructorArray<T>(Func<T> constructor) where T : class, INetSerializable
     {
-        var length = BitConverter.ToUInt16(_data, _position);
-        _position += 2;
+        var length = GetUShort();
         var result = new T[length];
         for (var i = 0; i < length; i++)
         {
@@ -270,47 +269,47 @@ public unsafe class NetDataReader
 
     public bool[] GetBoolArray()
     {
-        return GetArray<bool>(1);
+        return GetArray<bool>();
     }
 
     public ushort[] GetUShortArray()
     {
-        return GetArray<ushort>(2);
+        return GetArray<ushort>();
     }
 
     public short[] GetShortArray()
     {
-        return GetArray<short>(2);
+        return GetArray<short>();
     }
 
     public int[] GetIntArray()
     {
-        return GetArray<int>(4);
+        return GetArray<int>();
     }
 
     public uint[] GetUIntArray()
     {
-        return GetArray<uint>(4);
+        return GetArray<uint>();
     }
 
     public float[] GetFloatArray()
     {
-        return GetArray<float>(4);
+        return GetArray<float>();
     }
 
     public double[] GetDoubleArray()
     {
-        return GetArray<double>(8);
+        return GetArray<double>();
     }
 
     public long[] GetLongArray()
     {
-        return GetArray<long>(8);
+        return GetArray<long>();
     }
 
     public ulong[] GetULongArray()
     {
-        return GetArray<ulong>(8);
+        return GetArray<ulong>();
     }
 
     public string[] GetStringArray()
@@ -351,98 +350,42 @@ public unsafe class NetDataReader
 
     public ushort GetUShort()
     {
-#if LITENETLIB_SPANS || NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1 || NETCOREAPP3_1 || NET5_0 || NETSTANDARD2_1
-        //ushort result = MemoryMarshal.Read<ushort>(_data.AsSpan(_position));
         return GetUnmanaged<ushort>();
-#else
-        ushort result = BitConverter.ToUInt16(_data, _position);
-        _position += 2;
-        return result;
-#endif
     }
 
     public short GetShort()
     {
-#if LITENETLIB_SPANS || NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1 || NETCOREAPP3_1 || NET5_0 || NETSTANDARD2_1
-        //short result = MemoryMarshal.Read<short>(_data.AsSpan(_position));
         return GetUnmanaged<short>();
-#else
-        short result = BitConverter.ToInt16(_data, _position);
-        _position += 2;
-        return result;
-#endif
     }
 
     public long GetLong()
     {
-#if LITENETLIB_SPANS || NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1 || NETCOREAPP3_1 || NET5_0 || NETSTANDARD2_1
-        //long result = MemoryMarshal.Read<long>(_data.AsSpan(_position));
         return GetUnmanaged<long>();
-#else
-        long result = BitConverter.ToInt64(_data, _position);
-        _position += 8;
-        return result;
-#endif
     }
 
     public ulong GetULong()
     {
-#if LITENETLIB_SPANS || NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1 || NETCOREAPP3_1 || NET5_0 || NETSTANDARD2_1
-        //ulong result = MemoryMarshal.Read<ulong>(_data.AsSpan(_position));
         return GetUnmanaged<ulong>();
-#else
-        ulong result = BitConverter.ToUInt64(_data, _position);
-        _position += 8;
-        return result;
-#endif
     }
 
     public int GetInt()
     {
-#if LITENETLIB_SPANS || NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1 || NETCOREAPP3_1 || NET5_0 || NETSTANDARD2_1
-        //int result = MemoryMarshal.Read<int>(_data.AsSpan(_position));
         return GetUnmanaged<int>();
-#else
-        int result = BitConverter.ToInt32(_data, _position);
-        _position += 4;
-        return result;
-#endif
     }
 
     public uint GetUInt()
     {
-#if LITENETLIB_SPANS || NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1 || NETCOREAPP3_1 || NET5_0 || NETSTANDARD2_1
-        //uint result = MemoryMarshal.Read<uint>(_data.AsSpan(_position));
         return GetUnmanaged<uint>();
-#else
-        uint result = BitConverter.ToUInt32(_data, _position);
-        _position += 4;
-        return result;
-#endif
     }
 
     public float GetFloat()
     {
-#if LITENETLIB_SPANS || NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1 || NETCOREAPP3_1 || NET5_0 || NETSTANDARD2_1
-        //float result = MemoryMarshal.Read<float>(_data.AsSpan(_position));
         return GetUnmanaged<float>();
-#else
-        float result = BitConverter.ToSingle(_data, _position);
-        _position += 4;
-        return result;
-#endif
     }
 
     public double GetDouble()
     {
-#if LITENETLIB_SPANS || NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1 || NETCOREAPP3_1 || NET5_0 || NETSTANDARD2_1
-        //double result = MemoryMarshal.Read<double>(_data.AsSpan(_position));
         return GetUnmanaged<double>();
-#else
-        double result = BitConverter.ToDouble(_data, _position);
-        _position += 8;
-        return result;
-#endif
     }
 
 
@@ -459,16 +402,10 @@ public unsafe class NetDataReader
         }
 
         var actualSize = size - 1;
-#if LITENETLIB_SPANS || NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1 || NETCOREAPP3_1 || NET5_0 || NETSTANDARD2_1
         ReadOnlySpan<byte> slice = _data.AsSpan(_position, actualSize);
         var result = maxLength > 0 && NetDataWriter.UTF8Encoding.GetCharCount(slice) > maxLength ?
             string.Empty :
             NetDataWriter.UTF8Encoding.GetString(slice);
-#else
-        string result = maxLength > 0 && NetDataWriter.UTF8Encoding.Value.GetCharCount(_data, _position, actualSize) > maxLength ?
-            string.Empty :
-            NetDataWriter.UTF8Encoding.Value.GetString(_data, _position, actualSize);
-#endif
 
         _position += actualSize;
         return result;
@@ -483,14 +420,10 @@ public unsafe class NetDataReader
         }
 
         var actualSize = size - 1;
-#if LITENETLIB_SPANS || NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1 || NETCOREAPP3_1 || NET5_0 || NETSTANDARD2_1
         ReadOnlySpan<byte> slice = _data.AsSpan(_position, actualSize);
         var result = NetDataWriter.UTF8Encoding.GetString(slice);
+
         _position += actualSize;
-#else
-        string result = NetDataWriter.UTF8Encoding.Value.GetString(_data, _position, actualSize);
-        _position += actualSize; 
-#endif
         return result;
     }
 
@@ -542,7 +475,6 @@ public unsafe class NetDataReader
         return obj;
     }
 
-#if LITENETLIB_SPANS || NETCOREAPP2_1_OR_GREATER || NETSTANDARD2_1_OR_GREATER || NETCOREAPP2_1 || NETCOREAPP3_1 || NET5_0 || NETSTANDARD2_1
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ReadOnlySpan<byte> GetRemainingBytesSpan()
     {
@@ -555,7 +487,6 @@ public unsafe class NetDataReader
         _position += length;
         return span;
     }
-#endif
 
     public byte[] GetRemainingBytes()
     {
@@ -579,12 +510,12 @@ public unsafe class NetDataReader
 
     public sbyte[] GetSBytesWithLength()
     {
-        return GetArray<sbyte>(1);
+        return GetArray<sbyte>();
     }
 
     public byte[] GetBytesWithLength()
     {
-        return GetArray<byte>(1);
+        return GetArray<byte>();
     }
 
     /// <summary>
@@ -653,26 +584,6 @@ public unsafe class NetDataReader
     }
 
     /// <summary>
-    /// Reads a value of type <typeparamref name="T"/> from the internal byte buffer at the current position,
-    /// advancing the position by the size of <typeparamref name="T"/>.
-    /// </summary>
-    /// <typeparam name="T">An unmanaged value type to read from the buffer.</typeparam>
-    /// <returns>The value of type <typeparamref name="T"/> read from the buffer.</returns>
-    /// <exception cref="IndexOutOfRangeException">
-    /// Thrown in DEBUG mode if there is not enough data remaining in the buffer to read a value of type <typeparamref name="T"/>.
-    /// </exception>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public T PeekUnmanaged<T>() where T : unmanaged
-    {
-        T value;
-        fixed (byte* ptr = &_data[_position])
-        {
-            value = *(T*)ptr;
-        }
-        return value;
-    }
-
-    /// <summary>
     /// Reads an enum value of type <typeparamref name="T"/> from the internal data buffer at the current position. <br/>
     /// Advances the position by the size of <typeparamref name="T"/>.
     /// </summary>
@@ -717,6 +628,22 @@ public unsafe class NetDataReader
     public char PeekChar()
     {
         return (char)PeekUShort();
+    }
+
+    /// <summary>
+    /// Peeks a value of type <typeparamref name="T"/> from the internal byte buffer at the current position
+    /// </summary>
+    /// <typeparam name="T">An unmanaged value type to read from the buffer.</typeparam>
+    /// <returns>The value of type <typeparamref name="T"/> read from the buffer.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public T PeekUnmanaged<T>() where T : unmanaged
+    {
+        T value;
+        fixed (byte* ptr = &_data[_position])
+        {
+            value = *(T*)ptr;
+        }
+        return value;
     }
 
     public ushort PeekUShort()

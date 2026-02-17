@@ -2,6 +2,7 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Fika.Core.Networking.LiteNetLib.Utils;
@@ -266,7 +267,7 @@ public unsafe class NetDataWriter
 
     public void PutSBytesWithLength(sbyte[] data)
     {
-        PutArray(data, 1);
+        PutArray(data);
     }
 
     public void PutBytesWithLength(byte[] data, int offset, ushort length)
@@ -291,7 +292,7 @@ public unsafe class NetDataWriter
 
     public void PutBytesWithLength(byte[] data)
     {
-        PutArray(data, 1);
+        PutArray(data);
     }
 
     public void Put(bool value)
@@ -299,67 +300,48 @@ public unsafe class NetDataWriter
         Put((byte)(value ? 1 : 0));
     }
 
-    public void PutArray(Array arr, int sz)
+    public void PutArray<T>(T[] arr) where T : unmanaged
     {
-        var length = arr == null ? (ushort)0 : (ushort)arr.Length;
-        sz *= length;
+        PutReadOnlySpan(arr.AsSpan());
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void PutReadOnlySpan<T>(ReadOnlySpan<T> span) where T : unmanaged
+    {
+        var length = (ushort)span.Length;
+        var byteLength = length * Unsafe.SizeOf<T>();
+
         if (_autoResize)
         {
-            ResizeIfNeed(_position + sz + 2);
+            ResizeIfNeed(_position + byteLength + 2);
+        }
+
+        Put(length);
+
+        if (length > 0)
+        {
+            var sourceBytes = MemoryMarshal.AsBytes(span);
+            sourceBytes.CopyTo(_data.AsSpan(_position));
+            _position += byteLength;
+        }
+    }
+
+    public void PutArray(Array arr, int size)
+    {
+        var length = arr == null ? (ushort)0 : (ushort)arr.Length;
+        size *= length;
+        if (_autoResize)
+        {
+            ResizeIfNeed(_position + size + 2);
         }
 
         FastBitConverter.GetBytes(_data, _position, length);
         if (arr != null)
         {
-            Buffer.BlockCopy(arr, 0, _data, _position + 2, sz);
+            Buffer.BlockCopy(arr, 0, _data, _position + 2, size);
         }
 
-        _position += sz + 2;
-    }
-
-    public void PutArray(float[] value)
-    {
-        PutArray(value, 4);
-    }
-
-    public void PutArray(double[] value)
-    {
-        PutArray(value, 8);
-    }
-
-    public void PutArray(long[] value)
-    {
-        PutArray(value, 8);
-    }
-
-    public void PutArray(ulong[] value)
-    {
-        PutArray(value, 8);
-    }
-
-    public void PutArray(int[] value)
-    {
-        PutArray(value, 4);
-    }
-
-    public void PutArray(uint[] value)
-    {
-        PutArray(value, 4);
-    }
-
-    public void PutArray(ushort[] value)
-    {
-        PutArray(value, 2);
-    }
-
-    public void PutArray(short[] value)
-    {
-        PutArray(value, 2);
-    }
-
-    public void PutArray(bool[] value)
-    {
-        PutArray(value, 1);
+        _position += size + 2;
     }
 
     public void PutArray(string[] value)
@@ -382,7 +364,7 @@ public unsafe class NetDataWriter
         }
     }
 
-    public void PutArray<T>(T[] value) where T : INetSerializable, new()
+    public void PutSerializableArray<T>(T[] value) where T : INetSerializable, new()
     {
         var strArrayLength = (ushort)(value?.Length ?? 0);
         Put(strArrayLength);
@@ -473,13 +455,11 @@ public unsafe class NetDataWriter
     }
 
     /// <summary>
-    /// Writes a nullable value of type <typeparamref name="T"/> into the internal byte buffer at the current position,
-    /// first writing a <see cref="bool"/> indicating whether the value is present, 
-    /// and then writing the value itself if it exists. <br/> Advances the position by 1 byte for the presence flag plus
-    /// the size of <typeparamref name="T"/> if the value is present.
+    /// Writes a value of type <typeparamref name="T"/> into the internal byte buffer at the current position,
+    /// advancing the position by the size of <typeparamref name="T"/>.
     /// </summary>
     /// <typeparam name="T">An unmanaged value type to write into the buffer.</typeparam>
-    /// <param name="value">The nullable value to write into the buffer. If <see langword="null"/>, only a <see langword="false"/> flag is written.</param>
+    /// <param name="value">The value to write into the buffer.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void PutUnmanaged<T>(T value) where T : unmanaged
     {
@@ -497,11 +477,13 @@ public unsafe class NetDataWriter
     }
 
     /// <summary>
-    /// Writes a value of type <typeparamref name="T"/> into the internal byte buffer at the current position,
-    /// advancing the position by the size of <typeparamref name="T"/>.
+    /// Writes a nullable value of type <typeparamref name="T"/> into the internal byte buffer at the current position,
+    /// first writing a <see cref="bool"/> indicating whether the value is present, 
+    /// and then writing the value itself if it exists. <br/> Advances the position by 1 byte for the presence flag plus
+    /// the size of <typeparamref name="T"/> if the value is present.
     /// </summary>
     /// <typeparam name="T">An unmanaged value type to write into the buffer.</typeparam>
-    /// <param name="value">The value to write into the buffer.</param>
+    /// <param name="value">The nullable value to write into the buffer. If <see langword="null"/>, only a <see langword="false"/> flag is written.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void PutNullableUnmanaged<T>(T? value) where T : unmanaged
     {
