@@ -83,7 +83,7 @@ public class ListPlayer : MonoBehaviour
 
     private static string GetPlayerRole(FikaPlayer player)
     {
-        if ((!FikaBackendUtils.IsServer && !player.IsObservedAI) || !player.IsAI)
+        if ((!FikaBackendUtils.IsServer && !player.IsObservedAI) || (FikaBackendUtils.IsServer && !player.IsAI))
         {
             return $"[P] ({player.Profile.Info.Side})";
         }

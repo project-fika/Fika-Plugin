@@ -453,8 +453,6 @@ public class CoopHandler : MonoBehaviour
         }
 
         Singleton<IFikaNetworkManager>.Instance.ObservedPlayers.Add(otherPlayer);
-
-        otherPlayer.NetId = netId;
 #if DEBUG
         _logger.LogInfo($"SpawnObservedPlayer: {profile.Nickname} spawning with NetId {netId}");
 #endif
