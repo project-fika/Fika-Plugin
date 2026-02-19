@@ -305,6 +305,8 @@ public class ObservedPlayer : FikaPlayer
         player.SubscribeToArmorChangeEvent();
         player.RecalculateEquippedArmorComponents(null);
 
+        OnPlayerSpawned?.Invoke(player);
+
         return player;
     }
 

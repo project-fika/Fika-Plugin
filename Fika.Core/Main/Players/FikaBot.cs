@@ -99,6 +99,8 @@ public class FikaBot : FikaPlayer
         player.SubscribeToArmorChangeEvent();
         player.RecalculateEquippedArmorComponents(null);
 
+        OnPlayerSpawned?.Invoke(player);
+
         return player;
     }
 

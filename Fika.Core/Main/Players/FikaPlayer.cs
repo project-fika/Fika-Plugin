@@ -86,6 +86,11 @@ public class FikaPlayer : LocalPlayer
     private FikaVOIPController _voipController;
     #endregion
 
+    /// <summary>
+    /// Invoked when a player spawns and is ready
+    /// </summary>
+    public static Action<FikaPlayer> OnPlayerSpawned;
+
     public static async Task<FikaPlayer> Create(GameWorld gameWorld, int playerId, Vector3 position,
         Quaternion rotation, string layerName, string prefix, EPointOfView pointOfView, Profile profile,
         bool aiControl, EUpdateQueue updateQueue, EUpdateMode armsUpdateMode, EUpdateMode bodyUpdateMode,
@@ -177,6 +182,8 @@ public class FikaPlayer : LocalPlayer
         player.RecalculateEquippedArmorComponents(null);
 
         player.Profile.Info.SetProfileNickname(FikaBackendUtils.PMCName ?? profile.Nickname);
+
+        OnPlayerSpawned?.Invoke(player);
 
         return player;
     }
