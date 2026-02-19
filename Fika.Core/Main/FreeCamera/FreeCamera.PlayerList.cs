@@ -139,7 +139,7 @@ public partial class FreeCamera
 
     private string GetPlayerKind(FikaPlayer p)
     {
-        if (!p.IsObservedAI || !p.IsAI)
+        if ((!FikaBackendUtils.IsServer && !p.IsObservedAI) || !p.IsAI)
         {
             return $"Player ({p.Profile.Info.Side})";
         }
