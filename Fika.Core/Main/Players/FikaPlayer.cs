@@ -89,7 +89,7 @@ public class FikaPlayer : LocalPlayer
     /// <summary>
     /// Invoked when a player spawns and is ready
     /// </summary>
-    public static Action<FikaPlayer> OnPlayerSpawned;
+    public static Action<FikaPlayer> OnPlayerSpawned { get; set; }
 
     public static async Task<FikaPlayer> Create(GameWorld gameWorld, int playerId, Vector3 position,
         Quaternion rotation, string layerName, string prefix, EPointOfView pointOfView, Profile profile,

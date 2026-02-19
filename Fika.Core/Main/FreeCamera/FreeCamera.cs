@@ -156,7 +156,7 @@ public partial class FreeCamera : MonoBehaviour
 
     public void DetachCamera(bool force = false)
     {
-        if (!FikaPlugin.Instance.AllowSpectateFreeCam && !_isSpectator && !force)
+        if (!_isSpectator && !force)
         {
             return;
         }
@@ -166,7 +166,7 @@ public partial class FreeCamera : MonoBehaviour
             _lastSpectatingPlayer = _currentPlayer;
         }
 
-        SetCurrentPlayer(null); ;
+        SetCurrentPlayer(null);
         if (_isFollowing)
         {
             _isFollowing = false;
@@ -178,7 +178,7 @@ public partial class FreeCamera : MonoBehaviour
     {
         if (!_isFollowing)
         {
-            if ((FikaPlugin.Instance.AllowSpectateFreeCam || _isSpectator) && CheckAndAssignPlayer())
+            if (CheckAndAssignPlayer())
             {
                 JumpToPlayer();
             }
@@ -206,52 +206,22 @@ public partial class FreeCamera : MonoBehaviour
     public void CycleSpectatePlayers(bool reverse = false)
     {
         ClearAndAddPlayers();
-
-        // If no alive players, add bots to spectate pool if enabled
-#if DEBUG
-        if (FikaPlugin.Instance.Settings.AllowSpectateBots.Value)
-#else
-
-        if (_players.Count == 0 && FikaPlugin.Instance.Settings.AllowSpectateBots.Value)
-#endif
-        {
-            if (FikaBackendUtils.IsServer)
-            {
-                foreach (var player in _coopHandler.Players.Values)
-                {
-                    if (player.IsAI && player.HealthController.IsAlive)
-                    {
-                        _players.Add(player);
-                    }
-                }
-            }
-            else
-            {
-                foreach (var player in _coopHandler.Players.Values)
-                {
-                    if (player.IsObservedAI && player.HealthController.IsAlive)
-                    {
-                        _players.Add(player);
-                    }
-                }
-            }
-        }
 #if DEBUG
         FikaGlobals.LogInfo($"Freecam: There are {_players.Count} players");
 #endif
 
         if (_players.Count == 0)
         {
-            // Clear out all spectate positions
+            // clear out all spectate positions
             DetachCamera(true);
 
             return;
         }
 
-        // Start spectating a player if we haven't before
-        if (_currentPlayer == null && _players[0])
+        // start spectating a player if we haven't before
+        if (_currentPlayer == null && _players.Count > 0)
         {
-            if (_lastSpectatingPlayer && _players.Contains(_lastSpectatingPlayer))
+            if (_lastSpectatingPlayer != null && _players.Contains(_lastSpectatingPlayer))
             {
                 SetCurrentPlayer(_lastSpectatingPlayer);
             }
@@ -311,14 +281,11 @@ public partial class FreeCamera : MonoBehaviour
     private void ClearAndAddPlayers()
     {
         _players.Clear();
-
-        var humanPlayers = _coopHandler.HumanPlayers;
-        for (var i = 0; i < humanPlayers.Count; i++)
+        foreach (var players in _coopHandler.Players.Values)
         {
-            var player = humanPlayers[i];
-            if (!player.IsYourPlayer && player.HealthController.IsAlive)
+            if (!players.IsYourPlayer && players.HealthController.IsAlive)
             {
-                _players.Add(player);
+                _players.Add(players);
             }
         }
     }
@@ -559,7 +526,7 @@ public partial class FreeCamera : MonoBehaviour
     private void TogglePlayerList()
     {
         _hidePlayerList = !_hidePlayerList;
-        _freecamUI.ListOfPlayers.gameObject.SetActive(_hidePlayerList);
+        _freecamUI.ListOfPlayers.gameObject.SetActive(!_hidePlayerList);
     }
 
     private Vector3 GetNormalizedVector3(Transform transform)
