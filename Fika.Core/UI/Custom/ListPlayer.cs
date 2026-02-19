@@ -42,7 +42,7 @@ public class ListPlayer : MonoBehaviour
     /// <returns><see langword="true"/> if the entry should be remove, <see langword="false"/> otherwise</returns>
     public bool ManualUpdate()
     {
-        if (!_player.HealthController.IsAlive)
+        if (_player == null || !_player.HealthController.IsAlive)
         {
             Destroy(gameObject);
             return true;
