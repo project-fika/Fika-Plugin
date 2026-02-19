@@ -28,8 +28,8 @@ public class PlayerPlateUI : MonoBehaviour
         playerNameScreen.SetText(text);
     }
 
-    public void SetHealthNumberText(string text)
+    public void SetHealthNumberText(int amount)
     {
-        healthNumberScreen.SetText(text);
+        healthNumberScreen.SetText("{0}%", amount);
     }
 }

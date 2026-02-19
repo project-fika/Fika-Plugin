@@ -402,6 +402,7 @@ public class FreeCameraController : MonoBehaviour
         {
             return;
         }
+
         if (!_freeCamScript.IsActive)
         {
             if (CoopHandler.TryGetCoopHandler(out var coopHandler))

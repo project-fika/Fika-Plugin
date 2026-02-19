@@ -11,6 +11,7 @@ public class FreecamUI : MonoBehaviour
     public TextMeshProUGUI InputText;
     public TextMeshProUGUI TurboText;
     public TextMeshProUGUI PlayerList;
+    public Transform ListOfPlayers;
 
     public GameObject ListPlayerPrefab;
 }

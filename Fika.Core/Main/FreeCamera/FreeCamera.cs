@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using BSG.CameraEffects;
 using Comfort.Common;
@@ -8,6 +9,7 @@ using Fika.Core.Bundles;
 using Fika.Core.Main.Components;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
+using UnityEngine.UI;
 
 namespace Fika.Core.Main.FreeCamera;
 
@@ -69,6 +71,8 @@ public partial class FreeCamera : MonoBehaviour
         _upKey = KeyCode.R;
         _downKey = KeyCode.F;
 
+        _playersTracker = [];
+        _playersToRemove = [];
         _players = [];
 
         if (!CoopHandler.TryGetCoopHandler(out var coopHandler))
@@ -78,6 +82,8 @@ public partial class FreeCamera : MonoBehaviour
         }
 
         _coopHandler = coopHandler;
+
+        FikaPlayer.OnPlayerSpawned += OnPlayerSpawned;
     }
 
     protected void Start()
@@ -112,6 +118,14 @@ public partial class FreeCamera : MonoBehaviour
         }
         freecamObject.SetActive(false);
         _hidePlayerList = false;
+
+        foreach (var player in _coopHandler.Players.Values)
+        {
+            if (!player.IsYourPlayer && player.HealthController.IsAlive)
+            {
+                OnPlayerSpawned(player);
+            }
+        }
     }
 
     private void KeybindOverlay_SettingChanged(object sender, EventArgs e)
@@ -125,7 +139,16 @@ public partial class FreeCamera : MonoBehaviour
 
     public void SetCurrentPlayer(FikaPlayer player)
     {
+        if (_currentPlayer != null && _playersTracker.TryGetValue(_currentPlayer.NetId, out var listPlayer))
+        {
+            listPlayer.ToggleBackground(false);
+        }
+
         _currentPlayer = player;
+        if (_currentPlayer != null && _playersTracker.TryGetValue(_currentPlayer.NetId, out listPlayer))
+        {
+            listPlayer.ToggleBackground(true);
+        }
 #if DEBUG
         FikaGlobals.LogInfo($"Freecam: Setting player to {_currentPlayer}");
 #endif
@@ -143,7 +166,7 @@ public partial class FreeCamera : MonoBehaviour
             _lastSpectatingPlayer = _currentPlayer;
         }
 
-        _currentPlayer = null;
+        SetCurrentPlayer(null); ;
         if (_isFollowing)
         {
             _isFollowing = false;
@@ -230,11 +253,11 @@ public partial class FreeCamera : MonoBehaviour
         {
             if (_lastSpectatingPlayer && _players.Contains(_lastSpectatingPlayer))
             {
-                _currentPlayer = _lastSpectatingPlayer;
+                SetCurrentPlayer(_lastSpectatingPlayer);
             }
             else
             {
-                _currentPlayer = _players[0];
+                SetCurrentPlayer(_players[0]);
             }
 
 #if DEBUG
@@ -253,7 +276,7 @@ public partial class FreeCamera : MonoBehaviour
 #if DEBUG
                 FikaGlobals.LogInfo("Freecam: Setting to next player");
 #endif
-                _currentPlayer = _players[nextIndex];
+                SetCurrentPlayer(_players[nextIndex]);
             }
             else
             {
@@ -261,7 +284,7 @@ public partial class FreeCamera : MonoBehaviour
 #if DEBUG
                 FikaGlobals.LogInfo("Freecam: Looping back to start player");
 #endif
-                _currentPlayer = _players[0];
+                SetCurrentPlayer(_players[0]);
             }
         }
         else
@@ -271,7 +294,7 @@ public partial class FreeCamera : MonoBehaviour
 #if DEBUG
                 FikaGlobals.LogInfo("Freecam: Setting to previous player");
 #endif
-                _currentPlayer = _players[nextIndex];
+                SetCurrentPlayer(_players[nextIndex]);
             }
             else
             {
@@ -279,7 +302,7 @@ public partial class FreeCamera : MonoBehaviour
 #if DEBUG
                 FikaGlobals.LogInfo("Freecam: Looping back to end player");
 #endif
-                _currentPlayer = _players[^1];
+                SetCurrentPlayer(_players[^1]);
             }
         }
         SwitchSpectateMode();
@@ -355,7 +378,7 @@ public partial class FreeCamera : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.L))
         {
-            _hidePlayerList = !_hidePlayerList;
+            TogglePlayerList();
             return;
         }
 
@@ -372,6 +395,11 @@ public partial class FreeCamera : MonoBehaviour
             }
             SwitchSpectateMode();
             return;
+        }
+
+        if (!_hidePlayerList)
+        {
+            UpdatePlayerList();
         }
 
         if (Input.GetKeyDown(_detachKey))
@@ -528,6 +556,12 @@ public partial class FreeCamera : MonoBehaviour
         transform.rotation = Quaternion.Euler(_pitch, _yaw, 0f);
     }
 
+    private void TogglePlayerList()
+    {
+        _hidePlayerList = !_hidePlayerList;
+        _freecamUI.ListOfPlayers.gameObject.SetActive(_hidePlayerList);
+    }
+
     private Vector3 GetNormalizedVector3(Transform transform)
     {
         var newForward = transform.forward;
@@ -539,7 +573,7 @@ public partial class FreeCamera : MonoBehaviour
     {
         if (enabled)
         {
-            // Use different coordinates for headcam
+            // use different coordinates for headcam
             if (transform.localPosition.z == -0.17f)
             {
                 transform.localPosition = new(transform.localPosition.x, transform.localPosition.y, -transform.localPosition.z);
@@ -553,7 +587,7 @@ public partial class FreeCamera : MonoBehaviour
             return;
         }
 
-        // Use different coordinates for headcam
+        // use different coordinates for headcam
         if (transform.localPosition.z == 0.17f)
         {
             transform.localPosition = new(transform.localPosition.x, transform.localPosition.y, -transform.localPosition.z);
@@ -626,7 +660,7 @@ public partial class FreeCamera : MonoBehaviour
     {
         if (_currentPlayer == null && _lastSpectatingPlayer != null)
         {
-            _currentPlayer = _lastSpectatingPlayer;
+            SetCurrentPlayer(_lastSpectatingPlayer);
         }
 
         return _currentPlayer != null;
@@ -752,12 +786,12 @@ public partial class FreeCamera : MonoBehaviour
     /// <param name="player">The <see cref="Player"/> object containing transform and bone references</param>
     private void SetCameraPosition(Player player)
     {
-        // Offset camera relative to player
+        // offset camera relative to player
         transform.position = player.Transform.position - (player.Transform.forward * 1.5f) + (player.Transform.up * 2f);
-        // Look at the head
+        // look at the head
         transform.LookAt(player.PlayerBones.Head.Original.position, Vector3.up);
 
-        // Extract pitch and yaw from rotation
+        // extract pitch and yaw from rotation
         var euler = transform.eulerAngles;
         _pitch = NormalizeAngle(euler.x);
         _yaw = NormalizeAngle(euler.y);
@@ -788,13 +822,20 @@ public partial class FreeCamera : MonoBehaviour
 
     protected void OnDestroy()
     {
+        FikaPlayer.OnPlayerSpawned -= OnPlayerSpawned;
+
         FikaPlugin.Instance.Settings.KeybindOverlay.SettingChanged -= KeybindOverlay_SettingChanged;
 
-        _playerKindCache.Clear();
-        _listPlayers.Clear();
+        _playersTracker.Clear();
         _players.Clear();
 
         Destroy(_freecamUI.gameObject);
         Destroy(this);
     }
+
+    private enum ECameraState
+    {
+        Follow3rdPerson,
+        FollowHeadcam
+    };
 }
