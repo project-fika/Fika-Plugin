@@ -58,6 +58,19 @@ public class FikaHostWorld : World
         UpdateLootItems(_gameWorld.LootItems);
     }
 
+    public void AddLootSyncStruct(LootSyncStruct syncStruct)
+    {
+        if (WorldPacket.LootSyncStructs.Count >= 8)
+        {
+            _server.SendReusableToAll(WorldPacket,
+                _hasCriticalData ? DeliveryMethod.ReliableOrdered : DeliveryMethod.Unreliable);
+
+            _hasCriticalData = false;
+        }
+
+        WorldPacket.LootSyncStructs.Add(syncStruct);
+    }
+
     /// <summary>
     /// Marks the current <see cref="WorldPacket"/> as critical
     /// </summary>
