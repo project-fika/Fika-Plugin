@@ -173,7 +173,8 @@ public class ListPlayer : MonoBehaviour
 
     private void UpdateHealth(int currentHealth, int maxHealth)
     {
-        HPText.SetText("{0}/{1}", currentHealth, maxHealth);
+        HPText.SetText("{0}/{1}",
+            currentHealth, maxHealth);
 
         var normalizedHealth = Mathf.Clamp01((float)currentHealth / maxHealth);
         HPBackground.DOFillAmount(normalizedHealth, _tweenLength);
