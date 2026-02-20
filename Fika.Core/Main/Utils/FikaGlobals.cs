@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
+using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using BepInEx.Logging;
 using Comfort.Common;
@@ -422,5 +422,27 @@ public static class FikaGlobals
             ELoadPriority.High => JobPriorityClass.Immediate,
             _ => JobPriorityClass.Low,
         };
+    }
+
+    /// <summary>
+    /// Migrates IL labels
+    /// </summary>
+    /// <param name="codes">List of instructions</param>
+    /// <param name="index">Index to start at</param>
+    /// <param name="count">Iterations</param>
+    public static void MigrateLabels(List<CodeInstruction> codes, int index, int count)
+    {
+        var targetIndex = index + count;
+
+        if (targetIndex < codes.Count)
+        {
+            var labelsToMove = new List<Label>();
+            for (var i = index; i < targetIndex; i++)
+            {
+                labelsToMove.AddRange(codes[i].labels);
+            }
+
+            codes[targetIndex].labels.AddRange(labelsToMove);
+        }
     }
 }
