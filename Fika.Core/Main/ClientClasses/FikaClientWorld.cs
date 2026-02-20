@@ -44,6 +44,19 @@ public class FikaClientWorld : World
         _clientGameWorld.ClientSynchronizableObjectLogicProcessor.ProcessSyncObjectPackets(SyncObjectPackets);
     }
 
+    public void AddLootSyncStruct(LootSyncStruct syncStruct)
+    {
+        if (WorldPacket.LootSyncStructs.Count >= 8)
+        {
+            _client.SendReusable(WorldPacket,
+                _hasCriticalData ? DeliveryMethod.ReliableOrdered : DeliveryMethod.Unreliable);
+
+            _hasCriticalData = false;
+        }
+
+        WorldPacket.LootSyncStructs.Add(syncStruct);
+    }
+
     /// <summary>
     /// Marks the current <see cref="WorldPacket"/> as critical
     /// </summary>

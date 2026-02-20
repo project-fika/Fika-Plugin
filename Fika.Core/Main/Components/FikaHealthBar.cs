@@ -274,7 +274,7 @@ public class FikaHealthBar : MonoBehaviour
         _currentPlayer.HealthController.BodyPartRestoredEvent += HealthController_BodyPartRestoredEvent;
         _currentPlayer.HealthController.DiedEvent += HealthController_DiedEvent;
 
-        _playerPlate.SetHealthNumberText("100%");
+        _playerPlate.SetHealthNumberText(100);
 
         _canvasRect = _playerPlate.ScalarObjectScreen.transform.parent.RectTransform();
 
@@ -415,8 +415,9 @@ public class FikaHealthBar : MonoBehaviour
     /// </summary>
     private void UpdateHealth()
     {
-        var currentHealth = _currentPlayer.HealthController.GetBodyPartHealth(EBodyPart.Common, true).Current;
-        var maxHealth = _currentPlayer.HealthController.GetBodyPartHealth(EBodyPart.Common, true).Maximum;
+        var health = _currentPlayer.HealthController.GetBodyPartHealth(EBodyPart.Common, true);
+        var currentHealth = health.Current;
+        var maxHealth = health.Maximum;
         if (FikaPlugin.Instance.Settings.UseHealthNumber.Value)
         {
             if (!_playerPlate.healthNumberBackgroundScreen.gameObject.activeSelf)
@@ -424,7 +425,7 @@ public class FikaHealthBar : MonoBehaviour
                 SetPlayerPlateHealthVisibility(false);
             }
             var healthNumberPercentage = (int)Math.Round(currentHealth / maxHealth * 100);
-            _playerPlate.SetHealthNumberText($"{healthNumberPercentage}%");
+            _playerPlate.SetHealthNumberText(healthNumberPercentage);
         }
         else
         {
@@ -434,8 +435,7 @@ public class FikaHealthBar : MonoBehaviour
             }
 
             var normalizedHealth = Mathf.Clamp01(currentHealth / maxHealth);
-            _playerPlate.healthBarScreen.DOFillAmount(Mathf.Clamp01(currentHealth / maxHealth), _tweenLength);
-            //_playerPlate.healthBarScreen.fillAmount = normalizedHealth;
+            _playerPlate.healthBarScreen.DOFillAmount(normalizedHealth, _tweenLength);
             UpdateHealthBarColor(normalizedHealth);
         }
     }
@@ -444,7 +444,7 @@ public class FikaHealthBar : MonoBehaviour
     {
         var color = Color.Lerp(FikaPlugin.Instance.Settings.LowHealthColor.Value,
             FikaPlugin.Instance.Settings.FullHealthColor.Value, normalizedHealth);
-        color.a = _playerPlate.healthBarScreen.color.a; // Keep the alpha value unchanged
+        color.a = _playerPlate.healthBarScreen.color.a; // keep the alpha value unchanged
         _playerPlate.healthBarScreen.color = color;
     }
 

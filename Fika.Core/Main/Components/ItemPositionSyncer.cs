@@ -62,11 +62,11 @@ public class ItemPositionSyncer : MonoBehaviour
         _data.AngularVelocity = _lootItem.RigidBody.angularVelocity;
         if (_isServer)
         {
-            _server.FikaHostWorld.WorldPacket.LootSyncStructs.Add(_data);
+            _server.FikaHostWorld.AddLootSyncStruct(_data);
             return;
         }
 
-        _client.FikaClientWorld.WorldPacket.LootSyncStructs.Add(_data);
+        _client.FikaClientWorld.AddLootSyncStruct(_data);
         _lootItem.ItemOwner.RemoveItemEvent += ItemOwner_RemoveItemEvent;
     }
 
@@ -90,11 +90,11 @@ public class ItemPositionSyncer : MonoBehaviour
 
         if (_isServer)
         {
-            _server.FikaHostWorld.WorldPacket.LootSyncStructs.Add(_data);
+            _server.FikaHostWorld.AddLootSyncStruct(_data);
             return;
         }
 
-        _client.FikaClientWorld.WorldPacket.LootSyncStructs.Add(_data);
+        _client.FikaClientWorld.AddLootSyncStruct(_data);
     }
 
     private void NotifyDone()

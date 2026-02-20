@@ -35,6 +35,7 @@ using Fika.Core.Networking.Packets.World;
 using Fika.Core.Networking.VOIP;
 using HarmonyLib;
 using JsonType;
+using MultiFlare;
 using static Fika.Core.Main.ClientClasses.ClientInventoryController;
 
 namespace Fika.Core.Main.Players;
@@ -85,6 +86,11 @@ public class FikaPlayer : LocalPlayer
     private VoipSettingsClass _voipHandler;
     private FikaVOIPController _voipController;
     #endregion
+
+    /// <summary>
+    /// Invoked when a player spawns and is ready
+    /// </summary>
+    public static Action<FikaPlayer> OnPlayerSpawned { get; set; }
 
     public static async Task<FikaPlayer> Create(GameWorld gameWorld, int playerId, Vector3 position,
         Quaternion rotation, string layerName, string prefix, EPointOfView pointOfView, Profile profile,
@@ -178,6 +184,8 @@ public class FikaPlayer : LocalPlayer
 
         player.Profile.Info.SetProfileNickname(FikaBackendUtils.PMCName ?? profile.Nickname);
 
+        OnPlayerSpawned?.Invoke(player);
+
         return player;
     }
 
@@ -201,6 +209,7 @@ public class FikaPlayer : LocalPlayer
     {
         _preAllocatedArmorComponents.Clear();
         Inventory.GetPutOnArmorsNonAlloc(_preAllocatedArmorComponents);
+        RecalculateEquipmentParams();
     }
 
     public void AbuseNotification(string reporterId)

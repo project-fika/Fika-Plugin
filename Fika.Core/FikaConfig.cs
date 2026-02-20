@@ -83,7 +83,6 @@ public class FikaConfig(ConfigFile config)
 
     // Coop | Debug
     public ConfigEntry<KeyboardShortcut> FreeCamButton { get; set; }
-    public ConfigEntry<bool> AllowSpectateBots { get; set; }
     public ConfigEntry<bool> AZERTYMode { get; set; }
     public ConfigEntry<bool> DroneMode { get; set; }
     public ConfigEntry<bool> KeybindOverlay { get; set; }
@@ -643,15 +642,6 @@ public class FikaConfig(ConfigFile config)
                 Order = 4
             }),
             "Free Camera Button", ref failed, headers);
-
-        AllowSpectateBots = SetupSetting(coopDefaultDebugHeader, "Allow Spectating Bots", true,
-            new ConfigDescription(CleanConfigString(LocaleUtils.BEPINEX_SPECTATE_BOTS_D.Localized()), tags: new ConfigurationManagerAttributes()
-            {
-                Category = coopDebugHeader,
-                DispName = LocaleUtils.BEPINEX_SPECTATE_BOTS_T.Localized(),
-                Order = 3
-            }),
-            "Allow Spectating Bots", ref failed, headers);
 
         AZERTYMode = SetupSetting(coopDefaultDebugHeader, "AZERTY Mode", false,
             new ConfigDescription(CleanConfigString(LocaleUtils.BEPINEX_AZERTY_MODE_D.Localized()), tags: new ConfigurationManagerAttributes()
