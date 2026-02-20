@@ -35,6 +35,7 @@ using Fika.Core.Networking.Packets.World;
 using Fika.Core.Networking.VOIP;
 using HarmonyLib;
 using JsonType;
+using MultiFlare;
 using static Fika.Core.Main.ClientClasses.ClientInventoryController;
 
 namespace Fika.Core.Main.Players;
@@ -208,6 +209,7 @@ public class FikaPlayer : LocalPlayer
     {
         _preAllocatedArmorComponents.Clear();
         Inventory.GetPutOnArmorsNonAlloc(_preAllocatedArmorComponents);
+        RecalculateEquipmentParams();
     }
 
     public void AbuseNotification(string reporterId)
