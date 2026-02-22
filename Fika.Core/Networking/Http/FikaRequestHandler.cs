@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using EFT;
 using Fika.Core.Main.Custom;
@@ -35,32 +36,38 @@ public static class FikaRequestHandler
             "https://ipv4.icanhazip.com/"
         ];
 
-        var origTimeout = client.Timeout;
-        client.Timeout = TimeSpan.FromSeconds(5);
-
         foreach (var url in urls)
         {
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+
             try
             {
-                var ipString = await client.GetStringAsync(url);
+                var response = await client.GetAsync(url, cts.Token);
+                response.EnsureSuccessStatusCode();
+
+                var ipString = await response.Content.ReadAsStringAsync();
                 ipString = ipString.Trim();
+
                 if (IPAddress.TryParse(ipString, out var ipAddress))
                 {
                     if (ipAddress.AddressFamily == AddressFamily.InterNetwork)
                     {
                         return ipAddress;
                     }
-                    throw new ArgumentException($"IP address was not an IPv4 address, was: {ipAddress.AddressFamily}, address: {ipAddress}!");
+                    FikaGlobals.LogWarning($"Non-IPv4 address received from {url}: {ipAddress}");
                 }
+            }
+            catch (OperationCanceledException)
+            {
+                FikaGlobals.LogWarning($"Request to {url} timed out after 5 seconds.");
             }
             catch (Exception ex)
             {
-                FikaGlobals.LogWarning($"Could not get public IP address from [{url}], Error message: {ex.Message}");
+                FikaGlobals.LogWarning($"Could not get public IP address from [{url}]. Error: {ex.Message}");
             }
         }
 
-        client.Timeout = origTimeout;
-        throw new Exception("Could not retrieve or parse the external IP address!");
+        throw new Exception("Could not retrieve or parse the external IP address from any provider.");
     }
 
     private static byte[] EncodeBody<T>(T o)
