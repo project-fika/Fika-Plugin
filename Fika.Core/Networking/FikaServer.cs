@@ -31,7 +31,6 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
-using Unity.Jobs;
 #if DEBUG
 using Fika.Core.Networking.Packets.Debug;
 # endif
@@ -249,7 +248,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         {
             if (FikaPlugin.Instance.WanIP == null)
             {
-                NotificationManagerClass.DisplayMessageNotification("No WAN IP could be found, external players will not be able to join", 
+                NotificationManagerClass.DisplayMessageNotification("No WAN IP could be found, external players will not be able to join",
                     iconType: EFT.Communications.ENotificationIconType.Alert, textColor: Color.red);
             }
 
@@ -930,14 +929,10 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
                 _packetProcessor.ReadAllPackets(reader, peer);
                 break;
             case EPacketType.PlayerState:
-                var count = reader.GetByte();
-                for (byte i = 0; i < count; i++)
+                var snapshot = reader.GetUnmanaged<PlayerStatePacket>();
+                if (_coopHandler.Players.TryGetValue(snapshot.NetId, out var player))
                 {
-                    var snapshot = reader.GetUnmanaged<PlayerStatePacket>();
-                    if (_coopHandler.Players.TryGetValue(snapshot.NetId, out var player))
-                    {
-                        player.Snapshotter.Insert(in snapshot, NetworkTimeSync.NetworkTime);
-                    }
+                    player.Snapshotter.Insert(in snapshot, NetworkTimeSync.NetworkTime);
                 }
                 break;
             case EPacketType.VOIP:

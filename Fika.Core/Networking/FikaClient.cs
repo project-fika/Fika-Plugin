@@ -34,8 +34,8 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using Unity.Jobs;
 using static Fika.Core.Networking.NetworkUtils;
 
 namespace Fika.Core.Networking;
@@ -486,10 +486,11 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
                 _packetProcessor.ReadAllPackets(reader, peer);
                 break;
             case EPacketType.PlayerState:
-                var count = reader.GetByte();
-                for (byte i = 0; i < count; i++)
+                var remaining = reader.GetRemainingBytesSpan();
+                var snapshots = MemoryMarshal.Cast<byte, PlayerStatePacket>(remaining);
+                for (var i = 0; i < snapshots.Length; i++)
                 {
-                    var snapshot = reader.GetUnmanaged<PlayerStatePacket>();
+                    ref readonly var snapshot = ref snapshots[i];
                     if (_coopHandler.Players.TryGetValue(snapshot.NetId, out var player))
                     {
                         player.Snapshotter.Insert(in snapshot, NetworkTimeSync.NetworkTime);

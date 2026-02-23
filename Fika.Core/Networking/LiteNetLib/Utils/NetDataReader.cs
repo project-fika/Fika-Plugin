@@ -538,11 +538,7 @@ public unsafe class NetDataReader
         }
 #endif
 
-        T value;
-        fixed (byte* ptr = &_data[_position])
-        {
-            value = *(T*)ptr;
-        }
+        var value = MemoryMarshal.Read<T>(_data.AsSpan(_position, size));
 
         _position += size;
         return value;
