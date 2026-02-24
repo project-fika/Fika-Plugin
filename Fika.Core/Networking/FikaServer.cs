@@ -653,17 +653,15 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
     {
         _dataWriter.Reset();
         _dataWriter.PutEnum(EPacketType.PlayerState);
-        _dataWriter.Put((byte)1); // we're sending one packet
         _dataWriter.PutUnmanaged(packet);
 
         _netServer.SendToAll(_dataWriter.AsReadOnlySpan(), DeliveryMethod.Unreliable);
     }
 
-    public void BatchSendStates(NetDataWriter writer, byte writtenPackets)
+    public void BatchSendStates(NetDataWriter writer)
     {
         _dataWriter.Reset();
         _dataWriter.PutEnum(EPacketType.PlayerState);
-        _dataWriter.Put(writtenPackets);
         _dataWriter.Put(writer.AsReadOnlySpan());
 
         _netServer.SendToAll(_dataWriter.AsReadOnlySpan(), DeliveryMethod.Unreliable);

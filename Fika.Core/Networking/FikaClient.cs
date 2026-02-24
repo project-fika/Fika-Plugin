@@ -368,7 +368,6 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
         _dataWriter.Reset();
         _dataWriter.Put(true);
         _dataWriter.PutEnum(EPacketType.PlayerState);
-        _dataWriter.Put((byte)1); // we're sending one packet
         _dataWriter.PutUnmanaged(packet);
 
         _netClient.SendToAll(_dataWriter.AsReadOnlySpan(), DeliveryMethod.Unreliable);
