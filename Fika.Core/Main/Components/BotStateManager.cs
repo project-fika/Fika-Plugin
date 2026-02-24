@@ -17,7 +17,7 @@ public class BotStateManager : MonoBehaviour
 
     private float _updateCount;
     private float _updatesPerTick;
-    private int _writtenPackets;
+    private uint _writtenPackets;
 
     public void AddBot(FikaBot bot)
     {
@@ -85,7 +85,7 @@ public class BotStateManager : MonoBehaviour
 
     private void SendAndReset()
     {
-        if (_writtenPackets > 0)
+        if (_writtenPackets != 0)
         {
             _server.BatchSendStates(_writer);
             _writtenPackets = 0;
