@@ -10,6 +10,9 @@ public class ListPlayer : MonoBehaviour
 {
 #pragma warning disable CS0649
     [SerializeField]
+    private Image BackgroundBorder;
+
+    [SerializeField]
     private Image Background;
 
     [SerializeField]
@@ -168,7 +171,8 @@ public class ListPlayer : MonoBehaviour
 
     public void ToggleBackground(bool enabled)
     {
-        Background.color = enabled ? new Color(0.4f, 0.4f, 0.4f, 0.75f) : Color.clear;
+        Background.color = enabled ? Color.yellow : Color.clear;
+        BackgroundBorder.color = enabled ? Color.white : Color.clear;
     }
 
     private void UpdateHealth(int currentHealth, int maxHealth)
