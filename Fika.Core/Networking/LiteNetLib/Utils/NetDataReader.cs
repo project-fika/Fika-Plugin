@@ -530,17 +530,8 @@ public unsafe class NetDataReader
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T GetUnmanaged<T>() where T : unmanaged
     {
-        var size = sizeof(T);
-#if DEBUG
-        if (_position + size > _data.Length)
-        {
-            throw new IndexOutOfRangeException("Not enough data to read");
-        }
-#endif
-
-        var value = MemoryMarshal.Read<T>(_data.AsSpan(_position, size));
-
-        _position += size;
+        var value = Unsafe.ReadUnaligned<T>(ref _data[_position]);
+        _position += sizeof(T);
         return value;
     }
 
@@ -561,17 +552,7 @@ public unsafe class NetDataReader
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T? GetNullableUnmanaged<T>() where T : unmanaged
     {
-        var hasValue = GetBool();
-
-#if DEBUG
-        var requiredSize = hasValue ? sizeof(T) : 0;
-        if (_position + requiredSize > _data.Length)
-        {
-            throw new IndexOutOfRangeException("Not enough data to read");
-        }
-#endif
-
-        if (!hasValue)
+        if (!GetBool())
         {
             return null;
         }
