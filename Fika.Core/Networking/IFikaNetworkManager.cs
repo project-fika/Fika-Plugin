@@ -172,6 +172,18 @@ public interface IFikaNetworkManager
     void RegisterCustomType<T>(Action<NetDataWriter, T> writeDelegate, Func<NetDataReader, T> readDelegate);
 
     /// <summary>
+    /// Unregisters <typeparamref name="T"/> from the packet manager
+    /// </summary>
+    /// <typeparam name="T">The <see cref="INetSerializable"/> to unregister</typeparam>
+    void UnregisterPacket<T>() where T : INetSerializable;
+
+    /// <summary>
+    /// Unregisters <typeparamref name="T"/> from the packet manager
+    /// </summary>
+    /// <typeparam name="T">The <see cref="INetReusable"/> to unregister</typeparam>
+    void UnregisterNetReusable<T>() where T : INetReusable;
+
+    /// <summary>
     /// Initializes the VOIP system asynchronously.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>

@@ -594,6 +594,22 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
         _packetProcessor.RegisterNestedType(writeDelegate, readDelegate);
     }
 
+    public void UnregisterPacket<T>() where T : INetSerializable
+    {
+        if (!_packetProcessor.RemoveSubscription<T>())
+        {
+            _logger.LogError($"Failed to remove {typeof(T).Name} from the packet subscription list");
+        }
+    }
+
+    public void UnregisterNetReusable<T>() where T : INetReusable
+    {
+        if (!_packetProcessor.RemoveSubscription<T>())
+        {
+            _logger.LogError($"Failed to remove {typeof(T).Name} from the packet subscription list");
+        }
+    }
+
     public void PrintStatistics()
     {
         _logger.LogInfo("..:: Fika Client Session Statistics ::..");
