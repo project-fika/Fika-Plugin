@@ -412,7 +412,7 @@ public class CoopHandler : MonoBehaviour
             position = new(0f, -5000f, 0f);
         }
 
-        profile.SetSpawnedInSession(profile.Info.Side == EPlayerSide.Savage || FikaPlugin.Instance.PMCFoundInRaid);
+        profile.SetSpawnedInSession(profile.Info.Side == EPlayerSide.Savage || FikaPlugin.Instance.Settings.PMCFoundInRaid);
         if (profile.Info.Side != EPlayerSide.Savage)
         {
             var backpack = profile.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack).ContainedItem;

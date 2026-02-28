@@ -1150,7 +1150,7 @@ public class ObservedPlayer : FikaPlayer
             var sessionCounters = mainPlayer.Profile.EftStats.SessionCounters;
             HandleSharedExperience(countAsBoss, experience, sessionCounters);
 
-            if (FikaPlugin.Instance.SharedQuestProgression && FikaPlugin.Instance.Settings.EasyKillConditions.Value)
+            if (FikaPlugin.Instance.Settings.SharedQuestProgression && FikaPlugin.Instance.Settings.EasyKillConditions.Value)
             {
 #if DEBUG
                 FikaGlobals.LogInfo("Handling teammate kill from teammate: " + aggressor.Profile.Nickname);
@@ -1394,7 +1394,7 @@ public class ObservedPlayer : FikaPlayer
             yield return null;
         }
 
-        if (FikaPlugin.Instance.AllowNamePlates)
+        if (FikaPlugin.Instance.Settings.AllowNamePlates)
         {
             _healthBar = FikaHealthBar.Create(this);
         }

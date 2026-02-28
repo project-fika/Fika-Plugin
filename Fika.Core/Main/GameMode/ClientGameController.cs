@@ -55,7 +55,7 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
         await base.WaitForHostToStart();
 
         GameObject startButton = null;
-        if (FikaBackendUtils.IsHeadlessRequester || FikaPlugin.Instance.AnyoneCanStartRaid)
+        if (FikaBackendUtils.IsHeadlessRequester || FikaPlugin.Instance.Settings.AnyoneCanStartRaid)
         {
             startButton = CreateStartButton() ?? throw new NullReferenceException("Start button could not be created!");
             if (FikaPlugin.Instance.Settings.DevMode.Value)
@@ -207,7 +207,7 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
         }
 
         if (string.Equals(RaidSettings.SelectedLocation.Id, "labyrinth", StringComparison.OrdinalIgnoreCase)
-            && FikaPlugin.Instance.RandomLabyrinthSpawns)
+            && FikaPlugin.Instance.Settings.RandomLabyrinthSpawns)
         {
             return false;
         }

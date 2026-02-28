@@ -172,8 +172,8 @@ public class FreeCameraController : MonoBehaviour
 
         if (_extracted && !_freeCamScript.IsActive)
         {
-            ToggleUi();
-            if (FikaPlugin.Instance.AllowSpectateFreeCam || _isSpectator)
+            ToggleUI();
+            if (FikaPlugin.Instance.Settings.AllowSpectateFreeCam || _isSpectator)
             {
                 ToggleCamera();
             }
@@ -185,7 +185,7 @@ public class FreeCameraController : MonoBehaviour
 
         if (FikaPlugin.Instance.Settings.FreeCamButton.Value.IsDown())
         {
-            if (!FikaPlugin.Instance.AllowFreeCam)
+            if (!FikaPlugin.Instance.Settings.AllowFreeCam)
             {
                 return;
             }
@@ -193,7 +193,7 @@ public class FreeCameraController : MonoBehaviour
             if (quitState == CoopHandler.EQuitState.None)
             {
                 ToggleCamera();
-                ToggleUi();
+                ToggleUI();
                 return;
             }
         }
@@ -207,13 +207,14 @@ public class FreeCameraController : MonoBehaviour
             if (fikaGame.ExtractedPlayers.Contains(Player.NetId))
             {
                 _extracted = true;
+                _freeCamScript.Extracted = true;
                 ShowExtractMessage();
             }
 
             if (!_freeCamScript.IsActive)
             {
-                ToggleUi();
-                if (FikaPlugin.Instance.AllowSpectateFreeCam || _isSpectator)
+                ToggleUI();
+                if (FikaPlugin.Instance.Settings.AllowSpectateFreeCam || _isSpectator)
                 {
                     _freeCamScript.transform.position = _lastKnownPosition;
                     ToggleCamera();
@@ -268,8 +269,8 @@ public class FreeCameraController : MonoBehaviour
         _deathFade.DisableEffect();
         if (!_freeCamScript.IsActive)
         {
-            ToggleUi();
-            if (FikaPlugin.Instance.AllowSpectateFreeCam || _isSpectator)
+            ToggleUI();
+            if (FikaPlugin.Instance.Settings.AllowSpectateFreeCam || _isSpectator)
             {
                 ToggleCamera();
 
@@ -449,7 +450,7 @@ public class FreeCameraController : MonoBehaviour
     /// <summary>
     /// Hides the main UI (health, stamina, stance, hotbar, etc.)
     /// </summary>
-    private void ToggleUi()
+    private void ToggleUI()
     {
         // Check if we're currently in a raid
         if (Player == null)

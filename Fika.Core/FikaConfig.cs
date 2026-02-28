@@ -102,6 +102,26 @@ public class FikaConfig(ConfigFile config)
     public ConfigEntry<bool> DisableBotMetabolism { get; set; }
     #endregion
 
+    #region client config values
+    public bool UseBTR { get; set; }
+    public bool FriendlyFire { get; set; }
+    public bool DynamicVExfils { get; set; }
+    public bool AllowFreeCam { get; set; }
+    public bool AllowSpectateFreeCam { get; set; }
+    public bool AllowItemSending { get; set; }
+    public string[] BlacklistedItems { get; set; }
+    public bool ForceSaveOnDeath { get; set; }
+    public bool UseInertia { get; set; }
+    public bool SharedQuestProgression { get; set; }
+    public bool CanEditRaidSettings { get; set; }
+    public bool EnableTransits { get; set; }
+    public bool AnyoneCanStartRaid { get; set; }
+    public bool AllowNamePlates { get; set; }
+    public bool RandomLabyrinthSpawns { get; set; }
+    public bool PMCFoundInRaid { get; set; }
+    public bool AllowSpectateBots { get; set; }
+    #endregion
+
     private ConfigEntry<T> SetupSetting<T>(string section, string key, T defValue, ConfigDescription configDescription, string fallback, ref bool failed, List<string> error)
     {
         try
@@ -305,12 +325,12 @@ public class FikaConfig(ConfigFile config)
         const string coopDefaultNamePlatesHeader = "Coop | Name Plates";
 
         UseNamePlates = SetupSetting(coopDefaultNamePlatesHeader, "Show Player Name Plates", true,
-            new ConfigDescription(FikaPlugin.Instance.AllowNamePlates ? LocaleUtils.BEPINEX_USE_NAME_PLATES_D.Localized() : disabledMessage, tags: new ConfigurationManagerAttributes()
+            new ConfigDescription(AllowNamePlates ? LocaleUtils.BEPINEX_USE_NAME_PLATES_D.Localized() : disabledMessage, tags: new ConfigurationManagerAttributes()
             {
                 Category = coopNameplatesHeader,
                 DispName = LocaleUtils.BEPINEX_USE_NAME_PLATES_T.Localized(),
                 Order = 16,
-                ReadOnly = !FikaPlugin.Instance.AllowNamePlates
+                ReadOnly = !AllowNamePlates
             }),
             "Show Player Name Plates", ref failed, headers);
 
@@ -458,7 +478,7 @@ public class FikaConfig(ConfigFile config)
 
         var coopQuestSharingHeader = CleanConfigString(LocaleUtils.BEPINEX_H_COOP_QUEST_SHARING.Localized());
         const string coopDefaultQuestSharingHeader = "Coop | Quest Sharing";
-        var questSharingEnabled = Instance.SharedQuestProgression;
+        var questSharingEnabled = SharedQuestProgression;
 
         QuestTypesToShareAndReceive = SetupSetting(coopDefaultQuestSharingHeader, "Quest Types", EQuestSharingTypes.All,
             new ConfigDescription(questSharingEnabled ? LocaleUtils.BEPINEX_QUEST_TYPES_D.Localized() : disabledMessage, tags: new ConfigurationManagerAttributes()

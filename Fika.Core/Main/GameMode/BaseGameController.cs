@@ -427,7 +427,7 @@ public abstract class BaseGameController
         var transitController = Singleton<GameWorld>.Instance.TransitController;
         if (transitController == null)
         {
-            if (FikaPlugin.Instance.EnableTransits)
+            if (FikaPlugin.Instance.Settings.EnableTransits)
             {
                 Logger.LogError("SyncTransitControllers: TransitController was null!");
             }
@@ -495,7 +495,7 @@ public abstract class BaseGameController
 
     public void InitBTRController(BackendConfigSettingsClass instance, GameWorld gameWorld, LocationSettingsClass.Location location)
     {
-        if (FikaPlugin.Instance.UseBTR)
+        if (FikaPlugin.Instance.Settings.UseBTR)
         {
             if (instance != null)
             {

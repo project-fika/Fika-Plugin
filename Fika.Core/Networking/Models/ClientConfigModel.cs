@@ -55,6 +55,9 @@ public struct ClientConfigModel
     [DataMember(Name = "pmcFoundInRaid")]
     public bool PMCFoundInRaid { get; set; }
 
+    [DataMember(Name = "allowSpectateBots")]
+    public bool AllowSpectateBots { get; set; }
+
     public readonly void LogValues()
     {
         FikaGlobals.LogInfo("Received config from server:");

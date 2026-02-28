@@ -106,25 +106,6 @@ public class FikaPlugin : BaseUnityPlugin
         { "trippy",       "One of the chads that made the headless client a reality ~ Archangel"     }
     };
 
-    #region client config
-    public bool UseBTR;
-    public bool FriendlyFire;
-    public bool DynamicVExfils;
-    public bool AllowFreeCam;
-    public bool AllowSpectateFreeCam;
-    public bool AllowItemSending;
-    public string[] BlacklistedItems;
-    public bool ForceSaveOnDeath;
-    public bool UseInertia;
-    public bool SharedQuestProgression;
-    public bool CanEditRaidSettings;
-    public bool EnableTransits;
-    public bool AnyoneCanStartRaid;
-    public bool AllowNamePlates;
-    public bool RandomLabyrinthSpawns;
-    public bool PMCFoundInRaid;
-    #endregion
-
     #region natpunch config
     public bool NatPunchServerEnable;
     public string NatPunchServerIP;
@@ -157,7 +138,7 @@ public class FikaPlugin : BaseUnityPlugin
         BotDifficulties = FikaRequestHandler.GetBotDifficulties();
         ConsoleScreen.Processor.RegisterCommandGroup<FikaCommands>();
 
-        if (AllowItemSending)
+        if (Settings.AllowItemSending)
         {
             _patchManager.EnablePatch(new ItemContext_Patch());
         }
@@ -258,22 +239,23 @@ public class FikaPlugin : BaseUnityPlugin
     {
         var clientConfig = FikaRequestHandler.GetClientConfig();
 
-        UseBTR = clientConfig.UseBTR;
-        FriendlyFire = clientConfig.FriendlyFire;
-        DynamicVExfils = clientConfig.DynamicVExfils;
-        AllowFreeCam = clientConfig.AllowFreeCam;
-        AllowSpectateFreeCam = clientConfig.AllowSpectateFreeCam;
-        AllowItemSending = clientConfig.AllowItemSending;
-        BlacklistedItems = clientConfig.BlacklistedItems;
-        ForceSaveOnDeath = clientConfig.ForceSaveOnDeath;
-        UseInertia = clientConfig.UseInertia;
-        SharedQuestProgression = clientConfig.SharedQuestProgression;
-        CanEditRaidSettings = clientConfig.CanEditRaidSettings;
-        EnableTransits = clientConfig.EnableTransits;
-        AnyoneCanStartRaid = clientConfig.AnyoneCanStartRaid;
-        AllowNamePlates = clientConfig.AllowNamePlates;
-        RandomLabyrinthSpawns = clientConfig.RandomLabyrinthSpawns;
-        PMCFoundInRaid = clientConfig.PMCFoundInRaid;
+        Settings.UseBTR = clientConfig.UseBTR;
+        Settings.FriendlyFire = clientConfig.FriendlyFire;
+        Settings.DynamicVExfils = clientConfig.DynamicVExfils;
+        Settings.AllowFreeCam = clientConfig.AllowFreeCam;
+        Settings.AllowSpectateFreeCam = clientConfig.AllowSpectateFreeCam;
+        Settings.AllowItemSending = clientConfig.AllowItemSending;
+        Settings.BlacklistedItems = clientConfig.BlacklistedItems;
+        Settings.ForceSaveOnDeath = clientConfig.ForceSaveOnDeath;
+        Settings.UseInertia = clientConfig.UseInertia;
+        Settings.SharedQuestProgression = clientConfig.SharedQuestProgression;
+        Settings.CanEditRaidSettings = clientConfig.CanEditRaidSettings;
+        Settings.EnableTransits = clientConfig.EnableTransits;
+        Settings.AnyoneCanStartRaid = clientConfig.AnyoneCanStartRaid;
+        Settings.AllowNamePlates = clientConfig.AllowNamePlates;
+        Settings.RandomLabyrinthSpawns = clientConfig.RandomLabyrinthSpawns;
+        Settings.PMCFoundInRaid = clientConfig.PMCFoundInRaid;
+        Settings.AllowSpectateBots = clientConfig.AllowSpectateBots;
 
         clientConfig.LogValues();
     }

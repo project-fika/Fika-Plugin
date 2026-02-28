@@ -360,7 +360,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         GameController.InitHalloweenEvent(instance, gameWorld, Location_0);
         GameController.InitBTRController(instance, gameWorld, Location_0);
 
-        if (FikaPlugin.Instance.EnableTransits)
+        if (FikaPlugin.Instance.Settings.EnableTransits)
         {
             GameController.InitializeTransitSystem(gameWorld, instance, Profile_0, localRaidSettings_0, Location_0);
         }
@@ -740,7 +740,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         ExitStatus = ExitStatus.Killed;
         ExitLocation = string.Empty;
 
-        if (FikaPlugin.Instance.ForceSaveOnDeath)
+        if (FikaPlugin.Instance.Settings.ForceSaveOnDeath)
         {
             await SavePlayer((FikaPlayer)player, ExitStatus, string.Empty, true);
         }

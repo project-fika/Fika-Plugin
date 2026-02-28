@@ -16,7 +16,7 @@ public class RaidSettingsWindow_Show_Patch : ModulePatch
     [PatchPrefix]
     public static bool Prefix()
     {
-        if (!FikaPlugin.Instance.CanEditRaidSettings)
+        if (!FikaPlugin.Instance.Settings.CanEditRaidSettings)
         {
             NotificationManagerClass.DisplayMessageNotification(LocaleUtils.UI_NOTIFICATION_RAIDSETTINGS_DISABLED.Localized(), iconType: EFT.Communications.ENotificationIconType.Alert);
             return false;

@@ -35,7 +35,6 @@ using Fika.Core.Networking.Packets.World;
 using Fika.Core.Networking.VOIP;
 using HarmonyLib;
 using JsonType;
-using MultiFlare;
 using static Fika.Core.Main.ClientClasses.ClientInventoryController;
 
 namespace Fika.Core.Main.Players;
@@ -91,6 +90,14 @@ public class FikaPlayer : LocalPlayer
     /// Invoked when a player spawns and is ready
     /// </summary>
     public static Action<FikaPlayer> OnPlayerSpawned { get; set; }
+    /// <summary>
+    /// Invoked when a player is destroyed with <see cref="OnDestroy"/>
+    /// </summary>
+    public static Action<FikaPlayer> OnPlayerDestroyed { get; set; }
+    /// <summary>
+    /// Invoked when a player is killed
+    /// </summary>
+    public static Action<FikaPlayer> OnPlayerDeath { get; set; }
 
     public static async Task<FikaPlayer> Create(GameWorld gameWorld, int playerId, Vector3 position,
         Quaternion rotation, string layerName, string prefix, EPointOfView pointOfView, Profile profile,
@@ -116,7 +123,7 @@ public class FikaPlayer : LocalPlayer
             : new ClientInventoryController(player, profile, false);
 
         LocalQuestControllerClass questController;
-        if (FikaPlugin.Instance.SharedQuestProgression)
+        if (FikaPlugin.Instance.Settings.SharedQuestProgression)
         {
             questController = new ClientSharedQuestController(profile, inventoryController, inventoryController.PlayerSearchController, session, player);
         }
@@ -258,7 +265,7 @@ public class FikaPlayer : LocalPlayer
     public override void CreateMovementContext()
     {
         var movement_MASK = EFTHardSettings.Instance.MOVEMENT_MASK;
-        if (FikaPlugin.Instance.UseInertia)
+        if (FikaPlugin.Instance.Settings.UseInertia)
         {
             MovementContext = ClientMovementContext.Create(this, GetBodyAnimatorCommon,
                 GetCharacterControllerCommon, movement_MASK);
@@ -288,7 +295,7 @@ public class FikaPlayer : LocalPlayer
 
     public override void ApplyDamageInfo(DamageInfoStruct damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, float absorbed)
     {
-        if (IsYourPlayer && damageInfo.Player != null && !FikaPlugin.Instance.FriendlyFire && damageInfo.Player.iPlayer.GroupId == GroupId)
+        if (IsYourPlayer && damageInfo.Player != null && !FikaPlugin.Instance.Settings.FriendlyFire && damageInfo.Player.iPlayer.GroupId == GroupId)
         {
             return;
         }
@@ -962,6 +969,8 @@ public class FikaPlayer : LocalPlayer
 
     public override void OnDead(EDamageType damageType)
     {
+        OnPlayerDeath?.Invoke(this);
+
         foreach (var unsubcribe in _armorUnsubcribes)
         {
             unsubcribe?.Invoke();
@@ -992,6 +1001,7 @@ public class FikaPlayer : LocalPlayer
             CommonPacket?.Clear();
             CommonPacket = null;
         }
+        OnPlayerDestroyed?.Invoke(this);
         base.OnDestroy();
     }
 
@@ -1287,7 +1297,7 @@ public class FikaPlayer : LocalPlayer
             if (player != null)
             {
                 damageInfo.Player = player;
-                if (IsYourPlayer && !FikaPlugin.Instance.FriendlyFire && damageInfo.Player.iPlayer.GroupId == GroupId)
+                if (IsYourPlayer && !FikaPlugin.Instance.Settings.FriendlyFire && damageInfo.Player.iPlayer.GroupId == GroupId)
                 {
                     return;
                 }
