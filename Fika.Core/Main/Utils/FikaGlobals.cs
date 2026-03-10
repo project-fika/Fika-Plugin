@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
+using BepInEx.Configuration;
 using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
@@ -444,5 +445,23 @@ public static class FikaGlobals
 
             codes[targetIndex].labels.AddRange(labelsToMove);
         }
+    }
+
+    /// <summary>
+    /// Checks whether all modifiers are pressed for a <see cref="KeyboardShortcut"/>
+    /// </summary>
+    /// <param name="shortcut">The shortcut to check</param>
+    /// <returns><see langword="true"/> if all modifiers are pressed; <see langword="false"/> if not</returns>
+    public static bool AreModifiersPressed(KeyboardShortcut shortcut)
+    {
+        foreach (var key in shortcut.Modifiers)
+        {
+            if (!Input.GetKey(key))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

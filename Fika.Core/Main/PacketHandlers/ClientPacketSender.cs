@@ -19,6 +19,7 @@ using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
 using Fika.Core.Networking.Packets.Player;
 using Fika.Core.UI.Custom;
+using UnityEngine.UIElements;
 
 namespace Fika.Core.Main.PacketHandlers;
 
@@ -43,7 +44,7 @@ public class ClientPacketSender : MonoBehaviour, IPacketSender
         get
         {
             return FikaPlugin.Instance.Settings.UsePingSystem.Value && _player.IsYourPlayer && Input.GetKey(FikaPlugin.Instance.Settings.PingButton.Value.MainKey)
-                && FikaPlugin.Instance.Settings.PingButton.Value.Modifiers.All(Input.GetKey) && !MonoBehaviourSingleton<PreloaderUI>.Instance.Console.IsConsoleVisible
+                && FikaGlobals.AreModifiersPressed(FikaPlugin.Instance.Settings.PingButton.Value) && !MonoBehaviourSingleton<PreloaderUI>.Instance.Console.IsConsoleVisible
                 && _lastPingTime < DateTime.Now.AddSeconds(-3) && !FikaChatUIScript.IsActive && Singleton<IFikaGame>.Instance is CoopGame coopGame && coopGame.Status is GameStatus.Started
                 && !_player.IsInventoryOpened;
         }

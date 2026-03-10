@@ -43,7 +43,7 @@ public class ServerPacketSender : MonoBehaviour, IPacketSender
         get
         {
             return FikaPlugin.Instance.Settings.UsePingSystem.Value && _player.IsYourPlayer && Input.GetKey(FikaPlugin.Instance.Settings.PingButton.Value.MainKey)
-                && FikaPlugin.Instance.Settings.PingButton.Value.Modifiers.All(Input.GetKey) && !MonoBehaviourSingleton<PreloaderUI>.Instance.Console.IsConsoleVisible
+                && FikaGlobals.AreModifiersPressed(FikaPlugin.Instance.Settings.PingButton.Value) && !MonoBehaviourSingleton<PreloaderUI>.Instance.Console.IsConsoleVisible
                 && _lastPingTime < DateTime.Now.AddSeconds(-3) && !FikaChatUIScript.IsActive && Singleton<IFikaGame>.Instantiated &&
                 Singleton<IFikaGame>.Instance.GameController.GameInstance.Status is GameStatus.Started && !_player.IsInventoryOpened;
         }
