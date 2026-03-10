@@ -36,7 +36,7 @@ public class ObservedQuestController(Profile profile, InventoryController invent
         {
             case InRaidQuestPacket.InraidQuestType.Finish:
                 {
-                    FikaGlobals.LogInfo($"Processing {packet.Items.Count} items fom quest reward for {Profile.Info.MainProfileNickname}");
+                    FikaGlobals.LogInfo($"Processing {packet.Items.Count} items from quest reward for {Profile.Info.MainProfileNickname}");
                     List<QuestRewardDataClass> readList = [];
                     foreach (var item in packet.Items)
                     {
