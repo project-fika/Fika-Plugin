@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using EFT;
+using EFT.InventoryLogic;
 using Fika.Core.Main.Components;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Packets;
@@ -193,6 +194,13 @@ public interface IFikaNetworkManager
     /// Prints network statistics to the output (internal use only).
     /// </summary>
     internal void PrintStatistics();
+
+    /// <summary>
+    /// Returns a <see cref="NetPeer"/> from an id
+    /// </summary>
+    /// <param name="id">The id to look for</param>
+    /// <returns>A <see cref="NetPeer"/> if found; otherwise <see langword="null"/></returns>
+    public NetPeer GetPeerById(int id);
 
     /// <summary>
     /// Represents the send rate options for the <see cref="IFikaNetworkManager"/>.

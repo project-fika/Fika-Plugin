@@ -620,6 +620,11 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
         _logger.LogInfo($"Packet loss: {_netClient.Statistics.PacketLossPercent}%");
     }
 
+    public NetPeer GetPeerById(int id)
+    {
+        return (NetPeer)_netClient.GetPeerById(id);
+    }
+
     private void HandleInventoryPacket(InventoryPacket packet, FikaPlayer player)
     {
         if (packet.OperationBytes.Length == 0)

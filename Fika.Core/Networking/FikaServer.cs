@@ -1038,6 +1038,11 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         //_netServer.Connect(targetEndPoint, id.ToString());
     }
 
+    public NetPeer GetPeerById(int id)
+    {
+        return (NetPeer)_netServer.GetPeerById(id);
+    }
+
     public void StopNatIntroduceRoutine()
     {
         if (_cts != null)
