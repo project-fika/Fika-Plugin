@@ -57,8 +57,9 @@ public unsafe class Snapshotter
         if (_bufferCount > 0)
         {
             SnapshotInterpolation.Step(_buffer, ref _bufferCount, unscaledDeltaTime, ref _localTimeline, _localTimeScale,
-                out var fromSnapshot, out var toSnapshot, out var ratio);
-            Interpolate(in fromSnapshot, in toSnapshot, ratio);
+                out var fromIndex, out var toIndex, out var ratio);
+
+            Interpolate(in _buffer[fromIndex], in _buffer[toIndex], ratio);
         }
     }
 
@@ -167,10 +168,7 @@ public unsafe class Snapshotter
             _bufferCount++;
         }
 
-        fixed (PlayerStatePacket* p = &_buffer[index])
-        {
-            *&p->LocalTime = networkTime;
-        }
+        Unsafe.AsRef(in _buffer[index].LocalTime) = networkTime;
 
         _bufferTimeMultiplier = SnapshotInterpolation.DynamicAdjustment(_sendInterval, _deliveryTimeEma.StandardDeviation,
             _interpolationSettings.DynamicAdjustmentTolerance);
