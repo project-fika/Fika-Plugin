@@ -871,6 +871,22 @@ public class ObservedPlayer : FikaPlayer
             Rotation = CurrentPlayerState.Rotation;
             ObservedCharacterController.Vector3_0 = CurrentPlayerState.Velocity;
 
+            if (!_isServer)
+            {
+                return;
+            }
+
+            if (CurrentPlayerState.State == EPlayerState.Jump)
+            {
+                MovementContext.method_2(1f);
+                return;
+            }
+
+            if (CurrentPlayerState.IsMoving)
+            {
+                MovementContext.method_1(CurrentPlayerState.MovementDirection);
+            }
+
             return;
         }
 
@@ -2192,4 +2208,4 @@ public class ObservedPlayer : FikaPlayer
     }
 }
 
-#endregion
+    #endregion
