@@ -72,6 +72,7 @@ public static class SnapshotInterpolation
 
     public static void Sample(PlayerStatePacket[] buffer, int bufferCount, double localTimeline, out int from, out int to, out float t)
     {
+        // handle empty or single-packet buffers
         if (bufferCount == 0)
         {
             from = to = 0;
@@ -86,6 +87,7 @@ public static class SnapshotInterpolation
             return;
         }
 
+        // if timeline is behind the very first packet
         if (localTimeline <= buffer[0].RemoteTime)
         {
             from = to = 0;
@@ -93,6 +95,7 @@ public static class SnapshotInterpolation
             return;
         }
 
+        // if timeline is ahead of the very last packet
         if (localTimeline >= buffer[bufferCount - 1].RemoteTime)
         {
             from = to = bufferCount - 1;
@@ -100,6 +103,7 @@ public static class SnapshotInterpolation
             return;
         }
 
+        // binary Search for the range
         var low = 0;
         var high = bufferCount - 1;
 
@@ -116,9 +120,13 @@ public static class SnapshotInterpolation
             }
         }
 
+        // after the search:
+        // 'low' is the first index with RemoteTime > localTimeline (the "to" snapshot)
+        // 'low - 1' is the last index with RemoteTime <= localTimeline (the "from" snapshot)
         to = low;
         from = low - 1;
 
+        // calculate interpolation factor t
         ref readonly var first = ref buffer[from];
         ref readonly var second = ref buffer[to];
 
@@ -142,6 +150,7 @@ public static class SnapshotInterpolation
     public static void StepInterpolation(PlayerStatePacket[] buffer, ref int bufferCount, double localTimeline,
         out int fromIndex, out int toIndex, out float t)
     {
+        // find the indices (Sample needs to be updated to take the array)
         Sample(buffer, bufferCount, localTimeline, out fromIndex, out toIndex, out t);
 
         if (fromIndex > 0)
