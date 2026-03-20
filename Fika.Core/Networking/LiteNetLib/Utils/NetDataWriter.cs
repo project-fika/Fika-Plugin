@@ -503,16 +503,13 @@ public unsafe class NetDataWriter
     /// <param name="value">The enum value to write.</param>
     public void PutEnum<T>(T value) where T : unmanaged, Enum
     {
-        var size = Unsafe.SizeOf<T>();
+        var size = sizeof(T);
         if (_autoResize)
         {
             ResizeIfNeed(_position + size);
         }
 
-        fixed (byte* ptr = &_data[_position])
-        {
-            *(T*)ptr = value;
-        }
+        Unsafe.WriteUnaligned(ref _data[_position], value);
 
         _position += size;
     }
