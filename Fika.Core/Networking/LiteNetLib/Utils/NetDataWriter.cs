@@ -316,7 +316,8 @@ public unsafe class NetDataWriter
             ResizeIfNeed(_position + byteLength + 2);
         }
 
-        Put(length);
+        Unsafe.WriteUnaligned(ref _data[_position], length);
+        _position += 2;
 
         if (length > 0)
         {
