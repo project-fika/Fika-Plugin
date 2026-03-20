@@ -468,10 +468,7 @@ public unsafe class NetDataWriter
             ResizeIfNeed(_position + sizeof(T));
         }
 
-        fixed (byte* ptr = &_data[_position])
-        {
-            *(T*)ptr = value;
-        }
+        Unsafe.WriteUnaligned(ref _data[_position], value);
 
         _position += sizeof(T);
     }
