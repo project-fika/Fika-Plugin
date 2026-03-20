@@ -568,11 +568,8 @@ public unsafe class NetDataReader
     /// <returns>The enum value read from the buffer.</returns>
     public T GetEnum<T>() where T : unmanaged, Enum
     {
-        var span = GetSpan(Unsafe.SizeOf<T>());
-        fixed (byte* ptr = span)
-        {
-            return *(T*)ptr;
-        }
+        var span = GetSpan(sizeof(T));
+        return Unsafe.ReadUnaligned<T>(ref MemoryMarshal.GetReference(span));
     }
 
     /// <summary>
