@@ -28,7 +28,7 @@ public partial class FreeCamera : MonoBehaviour
 
     private bool _isSpectator;
     private bool _allowSpectateBots;
-    private bool _refreshedAfterLastPlayerLeft;
+    //private bool _refreshedAfterLastPlayerLeft;
     private FikaPlayer _currentPlayer;
     private Vector3 _lastKnownPlayerPosition;
     private bool _isFollowing;
