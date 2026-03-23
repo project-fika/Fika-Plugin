@@ -3,6 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using UnityEngine.UIElements;
 
 namespace Fika.Core.Networking.LiteNetLib.Utils;
 
@@ -541,10 +542,13 @@ public class NetDataReader
     /// Gets an <see cref="ArraySegment{T}"/> containing all remaining <see cref="byte"/>s.
     /// </summary>
     /// <returns>An <see cref="ArraySegment{T}"/> from the current position to the end of the data.</returns>
-    public ArraySegment<byte> GetRemainingBytesSegment()
+    public ArraySegment<byte> GetRemainingBytesSegment(bool advance = false)
     {
         var segment = new ArraySegment<byte>(_data, _position, AvailableBytes);
-        _position = _dataSize;
+        if (advance)
+        {
+            _position = _dataSize;
+        }
         return segment;
     }
 
@@ -578,10 +582,13 @@ public class NetDataReader
     /// </summary>
     /// <returns>A <see cref="ReadOnlySpan{T}"/> from the current <see cref="Position"/> to the end of the buffer.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ReadOnlySpan<byte> GetRemainingBytesSpan()
+    public ReadOnlySpan<byte> GetRemainingBytesSpan(bool advance = false)
     {
         var result = new ReadOnlySpan<byte>(_data, _position, _dataSize - _position);
-        _position = _dataSize;
+        if (advance)
+        {
+            _position = _dataSize;
+        }
         return result;
     }
 
@@ -590,10 +597,13 @@ public class NetDataReader
     /// </summary>
     /// <returns>A <see cref="ReadOnlyMemory{T}"/> from the current <see cref="Position"/> to the end of the buffer.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ReadOnlyMemory<byte> GetRemainingBytesMemory()
+    public ReadOnlyMemory<byte> GetRemainingBytesMemory(bool advance = false)
     {
         var result = new ReadOnlyMemory<byte>(_data, _position, _dataSize - _position);
-        _position = _dataSize;
+        if (advance)
+        {
+            _position = _dataSize;
+        }
         return result;
     }
 
@@ -704,7 +714,10 @@ public class NetDataReader
         var size = sizeof(T);
         var span = new ReadOnlySpan<byte>(_data, _position, size);
         _position += size;
-        return Unsafe.ReadUnaligned<T>(ref MemoryMarshal.GetReference(span));
+        fixed (byte* ptr = span)
+        {
+            return *(T*)ptr;
+        }
     }
 
     /// <summary>
