@@ -4,9 +4,9 @@
 // ReSharper disable ConditionIsAlwaysTrueOrFalse
 // ReSharper disable BuiltInTypeReferenceStyle
 
+using System.Runtime.CompilerServices;
 using Fika.Core.Networking.LZ4.Engine;
 using Fika.Core.Networking.LZ4.Internal;
-using System.Runtime.CompilerServices;
 
 namespace K4os.Compression.LZ4.Engine;
 
@@ -183,7 +183,10 @@ internal unsafe partial class LL
             dictSize = 64 * KB;
         }
 
-        if ((uint)dictSize > dict->dictSize) dictSize = (int)dict->dictSize;
+        if ((uint)dictSize > dict->dictSize)
+        {
+            dictSize = (int)dict->dictSize;
+        }
 
         Mem.Move(safeBuffer, previousDictEnd - dictSize, dictSize);
 

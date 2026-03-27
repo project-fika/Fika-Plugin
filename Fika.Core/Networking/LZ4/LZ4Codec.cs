@@ -1,9 +1,9 @@
 #nullable enable
 
+using System;
 using Fika.Core.Networking.LZ4.Engine;
 using Fika.Core.Networking.LZ4.Internal;
 using K4os.Compression.LZ4.Engine;
-using System;
 
 namespace Fika.Core.Networking.LZ4;
 
@@ -46,7 +46,9 @@ public static class LZ4Codec
         LZ4Level level = LZ4Level.L00_FAST)
     {
         if (sourceLength <= 0)
+        {
             return 0;
+        }
 
         var encoded = level < LZ4Level.L03_HC
             ? LLxx.LZ4_compress_fast(source, target, sourceLength, targetLength, 1)
@@ -65,12 +67,16 @@ public static class LZ4Codec
     {
         var sourceLength = source.Length;
         if (sourceLength <= 0)
+        {
             return 0;
+        }
 
         var targetLength = target.Length;
         fixed (byte* sourceP = source)
         fixed (byte* targetP = target)
+        {
             return Encode(sourceP, sourceLength, targetP, targetLength, level);
+        }
     }
 
     /// <summary>Compresses data from one buffer into another.</summary>
@@ -92,10 +98,12 @@ public static class LZ4Codec
 
         fixed (byte* sourceP = source)
         fixed (byte* targetP = target)
+        {
             return Encode(
                 sourceP + sourceOffset, sourceLength,
                 targetP + targetOffset, targetLength,
                 level);
+        }
     }
 
     /// <summary>Decompresses data from given buffer.</summary>
@@ -109,7 +117,9 @@ public static class LZ4Codec
         byte* target, int targetLength)
     {
         if (sourceLength <= 0)
+        {
             return 0;
+        }
 
         var decoded = LLxx.LZ4_decompress_safe(
             source, target, sourceLength, targetLength);
@@ -128,7 +138,9 @@ public static class LZ4Codec
         byte* target, int targetLength)
     {
         if (sourceLength <= 0)
+        {
             return 0;
+        }
 
         var decoded = LLxx.LZ4_decompress_safe_partial(
             source, target, sourceLength, targetLength);
@@ -150,7 +162,9 @@ public static class LZ4Codec
         byte* dictionary, int dictionaryLength)
     {
         if (sourceLength <= 0)
+        {
             return 0;
+        }
 
         var decoded = LLxx.LZ4_decompress_safe_usingDict(
             source, target, sourceLength, targetLength,
@@ -168,11 +182,15 @@ public static class LZ4Codec
     {
         var sourceLength = source.Length;
         if (sourceLength <= 0)
+        {
             return 0;
+        }
 
         fixed (byte* sourceP = source)
         fixed (byte* targetP = target)
+        {
             return PartialDecode(sourceP, sourceLength, targetP, target.Length);
+        }
     }
 
     /// <summary>Decompresses data from given buffer.</summary>
@@ -184,13 +202,17 @@ public static class LZ4Codec
     {
         var sourceLength = source.Length;
         if (sourceLength <= 0)
+        {
             return 0;
+        }
 
         var targetLength = target.Length;
 
         fixed (byte* sourceP = source)
         fixed (byte* targetP = target)
+        {
             return Decode(sourceP, sourceLength, targetP, targetLength);
+        }
     }
 
     /// <summary>Decompresses data from given buffer.</summary>
@@ -203,7 +225,9 @@ public static class LZ4Codec
     {
         var sourceLength = source.Length;
         if (sourceLength <= 0)
+        {
             return 0;
+        }
 
         var targetLength = target.Length;
         var dictionaryLength = dictionary.Length;
@@ -211,10 +235,12 @@ public static class LZ4Codec
         fixed (byte* sourceP = source)
         fixed (byte* targetP = target)
         fixed (byte* dictionaryP = dictionary)
+        {
             return Decode(
                 sourceP, sourceLength,
                 targetP, targetLength,
                 dictionaryP, dictionaryLength);
+        }
     }
 
     /// <summary>Decompresses data from given buffer.</summary>
@@ -234,9 +260,11 @@ public static class LZ4Codec
 
         fixed (byte* sourceP = source)
         fixed (byte* targetP = target)
+        {
             return Decode(
                 sourceP + sourceOffset, sourceLength,
                 targetP + targetOffset, targetLength);
+        }
     }
 
     /// <summary>Decompresses data from given buffer.</summary>
@@ -262,9 +290,11 @@ public static class LZ4Codec
         fixed (byte* sourceP = source)
         fixed (byte* targetP = target)
         fixed (byte* dictionaryP = dictionary)
+        {
             return Decode(
                 sourceP + sourceOffset, sourceLength,
                 targetP + targetOffset, targetLength,
                 dictionaryP + dictionaryOffset, dictionaryLength);
+        }
     }
 }

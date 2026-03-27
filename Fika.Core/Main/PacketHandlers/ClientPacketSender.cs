@@ -1,7 +1,6 @@
 ﻿// © 2026 Lacyway All Rights Reserved
 
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
@@ -19,7 +18,6 @@ using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
 using Fika.Core.Networking.Packets.Player;
 using Fika.Core.UI.Custom;
-using UnityEngine.UIElements;
 
 namespace Fika.Core.Main.PacketHandlers;
 
@@ -189,7 +187,7 @@ public class ClientPacketSender : MonoBehaviour, IPacketSender
             }
 
             var basePingPrefab = InternalBundleLoader.Instance.GetFikaAsset(InternalBundleLoader.EFikaAsset.Ping);
-            GameObject basePing = GameObject.Instantiate(basePingPrefab);
+            var basePing = GameObject.Instantiate(basePingPrefab);
             var hitPoint = hit.point;
             var abstractPing = PingFactory.FromPingType(pingType, basePing);
             var pingColor = FikaPlugin.Instance.Settings.PingColor.Value;

@@ -4,9 +4,9 @@
 // ReSharper disable ConditionIsAlwaysTrueOrFalse
 // ReSharper disable BuiltInTypeReferenceStyle
 
-using K4os.Compression.LZ4.Engine;
 using System;
 using System.Runtime.CompilerServices;
+using K4os.Compression.LZ4.Engine;
 
 namespace Fika.Core.Networking.LZ4.Engine;
 

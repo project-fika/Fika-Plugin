@@ -26,9 +26,6 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using Fika.Core.Networking.Open.Nat.Discovery;
-using Fika.Core.Networking.Open.Nat.Upnp.Messages;
-using Fika.Core.Networking.Open.Nat.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -38,6 +35,9 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Xml;
+using Fika.Core.Networking.Open.Nat.Discovery;
+using Fika.Core.Networking.Open.Nat.Upnp.Messages;
+using Fika.Core.Networking.Open.Nat.Utils;
 
 namespace Fika.Core.Networking.Open.Nat.Upnp;
 
@@ -101,7 +101,10 @@ internal class UpnpSearcher : Searcher
 
     private void Discover(UdpClient client, IPAddress address, CancellationToken cancelationToken)
     {
-        if (!IsValidClient(client.Client, address)) return;
+        if (!IsValidClient(client.Client, address))
+        {
+            return;
+        }
 
         NextSearch = DateTime.UtcNow.AddSeconds(1);
         var searchEndpoint = new IPEndPoint(address, 1900);
@@ -115,7 +118,11 @@ internal class UpnpSearcher : Searcher
             // Yes, however it works perfectly well with just 1 request.
             for (var i = 0; i < 3; i++)
             {
-                if (cancelationToken.IsCancellationRequested) return;
+                if (cancelationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+
                 client.Send(data, data.Length, searchEndpoint);
             }
         }
@@ -124,7 +131,10 @@ internal class UpnpSearcher : Searcher
     private bool IsValidClient(Socket socket, IPAddress address)
     {
         var endpoint = (IPEndPoint)socket.LocalEndPoint;
-        if (socket.AddressFamily != address.AddressFamily) return false;
+        if (socket.AddressFamily != address.AddressFamily)
+        {
+            return false;
+        }
 
         switch (socket.AddressFamily)
         {
@@ -133,9 +143,14 @@ internal class UpnpSearcher : Searcher
                 return true;
             case AddressFamily.InterNetworkV6:
                 if (endpoint.Address.IsIPv6LinkLocal && !Equals(address, WellKnownConstants.IPv6LinkLocalMulticastAddress))
+                {
                     return false;
+                }
+
                 if (!endpoint.Address.IsIPv6LinkLocal && !Equals(address, WellKnownConstants.IPv6LinkSiteMulticastAddress))
+                {
                     return false;
+                }
 
                 socket.SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.MulticastInterface, BitConverter.GetBytes((int)endpoint.Address.ScopeId));
                 return true;
@@ -181,7 +196,9 @@ internal class UpnpSearcher : Searcher
             {
                 var last = _lastFetched[endpoint.Address];
                 if (DateTime.Now - last < TimeSpan.FromSeconds(20))
+                {
                     return null;
+                }
             }
             _lastFetched[endpoint.Address] = DateTime.Now;
 
@@ -262,7 +279,10 @@ internal class UpnpSearcher : Searcher
             foreach (XmlNode service in services)
             {
                 var serviceType = service.GetXmlElementText("serviceType");
-                if (!IsValidControllerService(serviceType)) continue;
+                if (!IsValidControllerService(serviceType))
+                {
+                    continue;
+                }
 
                 NatDiscoverer.TraceSource.LogInfo("{0}: Found service: {1}", hostEndPoint, serviceType);
 
@@ -291,7 +311,9 @@ internal class UpnpSearcher : Searcher
         finally
         {
             if (response != null)
+            {
                 response.Close();
+            }
         }
     }
 

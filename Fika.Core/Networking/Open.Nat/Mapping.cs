@@ -28,10 +28,10 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using Fika.Core.Networking.Open.Nat.Enums;
-using Fika.Core.Networking.Open.Nat.Utils;
 using System;
 using System.Net;
+using Fika.Core.Networking.Open.Nat.Enums;
+using Fika.Core.Networking.Open.Nat.Utils;
 
 namespace Fika.Core.Networking.Open.Nat;
 
@@ -239,10 +239,22 @@ public class Mapping
 
     public override bool Equals(object obj)
     {
-        if (ReferenceEquals(null, obj)) return false;
-        if (ReferenceEquals(this, obj)) return true;
+        if (ReferenceEquals(null, obj))
+        {
+            return false;
+        }
+
+        if (ReferenceEquals(this, obj))
+        {
+            return true;
+        }
+
         var m = obj as Mapping;
-        if (ReferenceEquals(null, m)) return false;
+        if (ReferenceEquals(null, m))
+        {
+            return false;
+        }
+
         return PublicPort == m.PublicPort && PrivatePort == m.PrivatePort;
     }
 

@@ -24,9 +24,9 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using Fika.Core.Networking.Open.Nat.Utils;
 using System;
 using System.Net;
+using Fika.Core.Networking.Open.Nat.Utils;
 
 namespace Fika.Core.Networking.Open.Nat.Upnp;
 
@@ -41,7 +41,7 @@ internal class UpnpNatDeviceInfo
         if (Uri.IsWellFormedUriString(serviceControlUrl, UriKind.Absolute))
         {
             var u = new Uri(serviceControlUrl);
-            IPEndPoint old = HostEndPoint;
+            var old = HostEndPoint;
             serviceControlUrl = u.PathAndQuery;
 
             NatDiscoverer.TraceSource.LogInfo("{0}: Absolute URI detected. Host address is now: {1}", old,

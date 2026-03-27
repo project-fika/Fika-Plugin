@@ -8,7 +8,7 @@ using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Threading;
 
-namespace Fika.Core.Networking.LiteNetLib;
+namespace LiteNetLib;
 
 public partial class LiteNetManager
 {
@@ -348,7 +348,11 @@ public partial class LiteNetManager
     /// <param name="addressIPv4">bind to specific ipv4 address</param>
     /// <param name="addressIPv6">bind to specific ipv6 address</param>
     /// <param name="port">port to listen</param>
-    /// <param name="manualMode">mode of library</param>
+    /// <param name="manualMode">
+    /// When <see langword="true"/>, disables internal background threads. <br/>
+    /// You must manually call <see cref="PollEvents"/> and <see cref="ManualUpdate"/>. <br/> <br/>
+    /// Can be used when e.g. 10,000 instances are running on the same machine, reducing the amount of threads used.
+    /// </param>
     public bool Start(IPAddress addressIPv4, IPAddress addressIPv6, int port, bool manualMode)
     {
         if (IsRunning && NotConnected == false)
@@ -479,7 +483,6 @@ public partial class LiteNetManager
             //join multicast
             if (ep.AddressFamily == AddressFamily.InterNetworkV6)
             {
-#pragma warning disable RCS1075 // Avoid empty catch clause that catches System.Exception
                 try
                 {
 #if !UNITY_SOCKET_FIX
@@ -493,7 +496,6 @@ public partial class LiteNetManager
                 {
                     // Unity3d throws exception - ignored
                 }
-#pragma warning restore RCS1075 // Avoid empty catch clause that catches System.Exception
             }
         }
         catch (SocketException bindException)

@@ -81,7 +81,10 @@ public class MappingException : Exception
     [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
     public override void GetObjectData(SerializationInfo info, StreamingContext context)
     {
-        if (info == null) throw new ArgumentNullException("info");
+        if (info == null)
+        {
+            throw new ArgumentNullException("info");
+        }
 
         ErrorCode = info.GetInt32("errorCode");
         ErrorText = info.GetString("errorText");

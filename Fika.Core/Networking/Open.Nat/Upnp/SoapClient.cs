@@ -24,8 +24,6 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using Fika.Core.Networking.Open.Nat.Exceptions;
-using Fika.Core.Networking.Open.Nat.Utils;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -35,6 +33,8 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using Fika.Core.Networking.Open.Nat.Exceptions;
+using Fika.Core.Networking.Open.Nat.Utils;
 
 namespace Fika.Core.Networking.Open.Nat.Upnp;
 
@@ -106,8 +106,8 @@ internal class SoapClient
     {
         NatDiscoverer.TraceSource.TraceEvent(TraceEventType.Verbose, 0, "SOAPACTION: **{0}** url:{1}", operationName,
                                              _url);
-        byte[] messageBody = BuildMessageBody(operationName, args);
-        HttpWebRequest request = BuildHttpWebRequest(operationName, messageBody);
+        var messageBody = BuildMessageBody(operationName, args);
+        var request = BuildHttpWebRequest(operationName, messageBody);
 
         if (messageBody.Length > 0)
         {
@@ -186,7 +186,9 @@ internal class SoapClient
             response = ex.Response as HttpWebResponse;
 
             if (response == null)
+            {
                 throw;
+            }
         }
         return response;
     }
@@ -223,9 +225,9 @@ internal class SoapClient
         sb.AppendLine("	  </u:" + operationName + ">");
         sb.AppendLine("   </s:Body>");
         sb.Append("</s:Envelope>\r\n\r\n");
-        string requestBody = sb.ToString();
+        var requestBody = sb.ToString();
 
-        byte[] messageBody = Encoding.UTF8.GetBytes(requestBody);
+        var messageBody = Encoding.UTF8.GetBytes(requestBody);
         return messageBody;
     }
 
@@ -243,8 +245,8 @@ internal class SoapClient
         // Check to see if we have a fault code message.
         if ((node = doc.SelectSingleNode("//errorNs:UPnPError", nsm)) != null)
         {
-            int code = Convert.ToInt32(node.GetXmlElementText("errorCode"), CultureInfo.InvariantCulture);
-            string errorMessage = node.GetXmlElementText("errorDescription");
+            var code = Convert.ToInt32(node.GetXmlElementText("errorCode"), CultureInfo.InvariantCulture);
+            var errorMessage = node.GetXmlElementText("errorDescription");
             NatDiscoverer.TraceSource.LogWarn("Server failed with error: {0} - {1}", code, errorMessage);
             throw new MappingException(code, errorMessage);
         }

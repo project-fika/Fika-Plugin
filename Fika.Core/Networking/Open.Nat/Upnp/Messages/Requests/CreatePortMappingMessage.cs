@@ -26,9 +26,9 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using Fika.Core.Networking.Open.Nat.Enums;
 using System.Collections.Generic;
 using System.Net;
+using Fika.Core.Networking.Open.Nat.Enums;
 
 namespace Fika.Core.Networking.Open.Nat.Upnp.Messages.Requests;
 
@@ -43,7 +43,7 @@ internal class CreatePortMappingRequestMessage : RequestMessageBase
 
     public override IDictionary<string, object> ToXml()
     {
-        string remoteHost = _mapping.PublicIP.Equals(IPAddress.None)
+        var remoteHost = _mapping.PublicIP.Equals(IPAddress.None)
                                 ? string.Empty
                                 : _mapping.PublicIP.ToString();
 

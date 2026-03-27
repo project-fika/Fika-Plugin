@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net;
+using LiteNetLib;
 
 namespace Fika.Core.Networking.LiteNetLib;
 
@@ -48,7 +49,9 @@ public class NetManager : LiteNetManager, IEnumerable<NetPeer>
         for (var netPeer = _headPeer; netPeer != null; netPeer = netPeer.NextPeer)
         {
             if ((netPeer.ConnectionState & peerState) != 0)
+            {
                 peers.Add((NetPeer)netPeer);
+            }
         }
         _peersLock.ExitReadLock();
     }
@@ -130,12 +133,16 @@ public class NetManager : LiteNetManager, IEnumerable<NetPeer>
         new NetPeer(this, remoteEndPoint, id, connectNum, connectData);
 
     //accept
-    protected override LiteNetPeer CreateIncomingPeer(ConnectionRequest request, int id) =>
+    protected override LiteNetPeer CreateIncomingPeer(LiteConnectionRequest request, int id) =>
         new NetPeer(this, request, id);
 
     //reject
     protected override LiteNetPeer CreateRejectPeer(IPEndPoint remoteEndPoint, int id) =>
         new NetPeer(this, remoteEndPoint, id);
+
+    //connection request when you use Accept for getting NetPeer instead of LiteNetPeer
+    protected override LiteConnectionRequest CreateConnectionRequest(IPEndPoint remoteEndPoint, NetConnectRequestPacket requestPacket) =>
+        new ConnectionRequest(remoteEndPoint, requestPacket, this);
 
     protected override void ProcessEvent(NetEvent evt)
     {
@@ -172,7 +179,7 @@ public class NetManager : LiteNetManager, IEnumerable<NetPeer>
                 _netEventListener.OnNetworkLatencyUpdate(netPeer, evt.Latency);
                 break;
             case NetEvent.EType.ConnectionRequest:
-                _netEventListener.OnConnectionRequest(evt.ConnectionRequest);
+                _netEventListener.OnConnectionRequest((ConnectionRequest)evt.ConnectionRequest);
                 break;
             case NetEvent.EType.MessageDelivered:
                 _netEventListener.OnMessageDelivered(netPeer, evt.UserData);
@@ -319,7 +326,9 @@ public class NetManager : LiteNetManager, IEnumerable<NetPeer>
         {
             _peersLock.EnterReadLock();
             for (var netPeer = _headPeer; netPeer != null; netPeer = netPeer.NextPeer)
+            {
                 ((NetPeer)netPeer).Send(data, start, length, channelNumber, options);
+            }
         }
         finally
         {
@@ -380,7 +389,7 @@ public class NetManager : LiteNetManager, IEnumerable<NetPeer>
         (NetPeer)base.Connect(target, connectionData);
 
     public new NetPeerEnumerator<NetPeer> GetEnumerator() =>
-            new NetPeerEnumerator<NetPeer>((NetPeer)_headPeer);
+        new NetPeerEnumerator<NetPeer>((NetPeer)_headPeer);
 
     IEnumerator<NetPeer> IEnumerable<NetPeer>.GetEnumerator() =>
         new NetPeerEnumerator<NetPeer>((NetPeer)_headPeer);

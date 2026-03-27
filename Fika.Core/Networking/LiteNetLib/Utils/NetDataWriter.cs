@@ -14,6 +14,10 @@ public class NetDataWriter
     private const int InitialSize = 64;
     private readonly bool _autoResize;
 
+    private const int IPv4Size = 4;
+    private const int IPv6Size = 16;
+    private const int GuidSize = 16;
+
     /// <summary>
     /// Gets the total capacity of the internal <see cref="byte"/> buffer.
     /// </summary>
@@ -93,7 +97,7 @@ public class NetDataWriter
     /// <param name="length">Length of array</param>
     public static NetDataWriter FromBytes(byte[] bytes, int offset, int length)
     {
-        var netDataWriter = new NetDataWriter(true, bytes.Length);
+        var netDataWriter = new NetDataWriter(true, length);
         netDataWriter.Put(bytes, offset, length);
         return netDataWriter;
     }
@@ -239,7 +243,7 @@ public class NetDataWriter
     /// Serializes a <see cref="char"/> value as a <see cref="ushort"/>.
     /// </summary>
     /// <param name="value">The <see cref="char"/> value to write.</param>
-    public void Put(char value) => Put((ushort)value);
+    public void Put(char value) => PutUnmanaged(value);
 
     /// <summary>
     /// Serializes a <see cref="ushort"/> value.
@@ -273,11 +277,11 @@ public class NetDataWriter
     {
         if (_autoResize)
         {
-            ResizeIfNeed(_position + 16);
+            ResizeIfNeed(_position + GuidSize);
         }
 
         value.TryWriteBytes(_data.AsSpan(_position));
-        _position += 16;
+        _position += GuidSize;
     }
 
     /// <summary>
@@ -540,12 +544,12 @@ public class NetDataWriter
 
         if (endPoint.AddressFamily == AddressFamily.InterNetwork)
         {
-            addressSize = 4;
+            addressSize = IPv4Size;
             familyFlag = 0;
         }
         else if (endPoint.AddressFamily == AddressFamily.InterNetworkV6)
         {
-            addressSize = 16;
+            addressSize = IPv6Size;
             familyFlag = 1;
         }
         else
@@ -586,24 +590,21 @@ public class NetDataWriter
             Put(0);
             return;
         }
+
         var size = uTF8Encoding.GetByteCount(value);
-        if (size == 0)
-        {
-            Put(0);
-            return;
-        }
         Put(size);
+
         if (_autoResize)
         {
             ResizeIfNeed(_position + size);
         }
 
-        uTF8Encoding.GetBytes(value, 0, size, _data, _position);
+        uTF8Encoding.GetBytes(value, 0, value.Length, _data, _position);
         _position += size;
     }
 
     /// <summary>
-    /// Serializes a string using a 2-byte <see cref="float"/> length header.
+    /// Serializes a string using a 2-byte <see cref="ushort"/> length header.
     /// </summary>
     /// <param name="value">The string to write to the buffer.</param>
     /// <param name="maxLength">
@@ -622,14 +623,19 @@ public class NetDataWriter
             return;
         }
 
-        var length = maxLength > 0 && value.Length > maxLength ? maxLength : value.Length;
-        var maxSize = uTF8Encoding.GetMaxByteCount(length);
+        var source = value.AsSpan();
+        if (maxLength > 0 && source.Length > maxLength)
+        {
+            source = source.Slice(0, maxLength);
+        }
+
+        var maxSize = uTF8Encoding.GetMaxByteCount(source.Length);
         if (_autoResize)
         {
             ResizeIfNeed(_position + maxSize + sizeof(ushort));
         }
 
-        var size = uTF8Encoding.GetBytes(value, 0, length, _data, _position + sizeof(ushort));
+        var size = uTF8Encoding.GetBytes(source, _data.AsSpan(_position + sizeof(ushort)));
         if (size == 0)
         {
             Put((ushort)0);

@@ -1,5 +1,5 @@
-﻿using Fika.Core.Networking.LZ4.Internal;
-using System;
+﻿using System;
+using Fika.Core.Networking.LZ4.Internal;
 
 namespace Fika.Core.Networking.LZ4.Encoders;
 
@@ -41,14 +41,20 @@ public unsafe class LZ4BlockDecoder : UnmanagedResources, ILZ4Decoder
         ThrowIfDisposed();
 
         if (blockSize <= 0)
+        {
             blockSize = _blockSize;
+        }
 
         if (blockSize > _blockSize)
+        {
             throw new InvalidOperationException();
+        }
 
         var decoded = LZ4Codec.Decode(source, length, OutputBuffer, _outputLength);
         if (decoded < 0)
+        {
             throw new InvalidOperationException();
+        }
 
         _outputIndex = decoded;
         return _outputIndex;
@@ -60,10 +66,14 @@ public unsafe class LZ4BlockDecoder : UnmanagedResources, ILZ4Decoder
         ThrowIfDisposed();
 
         if (length <= 0)
+        {
             return _outputIndex = 0;
+        }
 
         if (length > _outputLength)
+        {
             throw new InvalidOperationException();
+        }
 
         Mem.Move(OutputBuffer, source, length);
         _outputIndex = length;
@@ -77,7 +87,9 @@ public unsafe class LZ4BlockDecoder : UnmanagedResources, ILZ4Decoder
 
         offset = _outputIndex + offset; // NOTE: negative value
         if (offset < 0 || length < 0 || offset + length > _outputIndex)
+        {
             throw new InvalidOperationException();
+        }
 
         Mem.Move(target, OutputBuffer + offset, length);
     }
@@ -89,7 +101,9 @@ public unsafe class LZ4BlockDecoder : UnmanagedResources, ILZ4Decoder
 
         offset = _outputIndex + offset; // NOTE: negative value
         if (offset < 0 || offset > _outputIndex)
+        {
             throw new InvalidOperationException();
+        }
 
         return OutputBuffer + offset;
     }

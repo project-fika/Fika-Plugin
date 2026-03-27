@@ -26,15 +26,15 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using Fika.Core.Networking.Open.Nat.Enums;
-using Fika.Core.Networking.Open.Nat.Exceptions;
-using Fika.Core.Networking.Open.Nat.Utils;
 using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using Fika.Core.Networking.Open.Nat.Enums;
+using Fika.Core.Networking.Open.Nat.Exceptions;
+using Fika.Core.Networking.Open.Nat.Utils;
 
 namespace Fika.Core.Networking.Open.Nat.Pmp;
 
@@ -190,9 +190,9 @@ internal sealed class PmpNatDevice : NatDevice
 
         try
         {
-            byte[] buffer = package.ToArray();
-            int attempt = 0;
-            int delay = PmpConstants.RetryDelay;
+            var buffer = package.ToArray();
+            var attempt = 0;
+            var delay = PmpConstants.RetryDelay;
 
             using (var udpClient = new UdpClient())
             {
@@ -211,8 +211,8 @@ internal sealed class PmpNatDevice : NatDevice
         }
         catch (Exception e)
         {
-            string type = create ? "create" : "delete";
-            string message = string.Format("Failed to {0} portmap (protocol={1}, private port={2})",
+            var type = create ? "create" : "delete";
+            var message = string.Format("Failed to {0} portmap (protocol={1}, private port={2})",
                                            type,
                                            mapping.Protocol,
                                            mapping.PrivatePort);
@@ -231,25 +231,31 @@ internal sealed class PmpNatDevice : NatDevice
 
         while (true)
         {
-            byte[] data = udpClient.Receive(ref endPoint);
+            var data = udpClient.Receive(ref endPoint);
 
             if (data.Length < 16)
+            {
                 continue;
+            }
 
             if (data[0] != PmpConstants.Version)
+            {
                 continue;
+            }
 
             var opCode = (byte)(data[1] & 127);
 
             var protocol = Protocol.Tcp;
             if (opCode == PmpConstants.OperationCodeUdp)
+            {
                 protocol = Protocol.Udp;
+            }
 
-            short resultCode = IPAddress.NetworkToHostOrder(BitConverter.ToInt16(data, 2));
-            int epoch = IPAddress.NetworkToHostOrder(BitConverter.ToInt32(data, 4));
+            var resultCode = IPAddress.NetworkToHostOrder(BitConverter.ToInt16(data, 2));
+            var epoch = IPAddress.NetworkToHostOrder(BitConverter.ToInt32(data, 4));
 
-            short privatePort = IPAddress.NetworkToHostOrder(BitConverter.ToInt16(data, 8));
-            short publicPort = IPAddress.NetworkToHostOrder(BitConverter.ToInt16(data, 10));
+            var privatePort = IPAddress.NetworkToHostOrder(BitConverter.ToInt16(data, 8));
+            var publicPort = IPAddress.NetworkToHostOrder(BitConverter.ToInt16(data, 10));
 
             var lifetime = (uint)IPAddress.NetworkToHostOrder(BitConverter.ToInt32(data, 12));
 
@@ -268,7 +274,10 @@ internal sealed class PmpNatDevice : NatDevice
                 throw new MappingException(resultCode, errors[resultCode]);
             }
 
-            if (lifetime == 0) return; //mapping was deleted
+            if (lifetime == 0)
+            {
+                return; //mapping was deleted
+            }
 
             //mapping was created
             //TODO: verify that the private port+protocol are a match

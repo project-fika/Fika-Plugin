@@ -89,7 +89,11 @@ public unsafe class Mem
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Copy(byte* target, byte* source, int length)
     {
-        if (length <= 0) return;
+        if (length <= 0)
+        {
+            return;
+        }
+
         CpBlk(target, source, (uint)length);
     }
 
@@ -128,7 +132,11 @@ public unsafe class Mem
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static byte* Fill(byte* target, byte value, int length)
     {
-        if (length > 0) ZBlk(target, value, (uint)length);
+        if (length > 0)
+        {
+            ZBlk(target, value, (uint)length);
+        }
+
         return target;
     }
 
@@ -155,7 +163,9 @@ public unsafe class Mem
         ref var source0 = ref Unsafe.As<T, byte>(ref array[0]);
 
         fixed (void* source = &source0)
+        {
             Copy((byte*)target, (byte*)source, length);
+        }
 
         return (T*)target;
     }

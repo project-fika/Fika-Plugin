@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
-using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
@@ -24,7 +23,7 @@ public enum EClientType
 }
 
 public static class FikaBackendUtils
-{    
+{
     /// <summary>
     /// The local player PMC <see cref="EFT.Profile"/>
     /// </summary>

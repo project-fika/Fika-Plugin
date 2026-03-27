@@ -43,38 +43,38 @@ internal unsafe partial class LL64
         int acceleration)
     {
         int result;
-        byte* ip = (byte*)source;
+        var ip = (byte*)source;
 
-        uint startIndex = cctx->currentOffset;
-        byte* @base = (byte*)source - startIndex;
+        var startIndex = cctx->currentOffset;
+        var @base = (byte*)source - startIndex;
         byte* lowLimit;
 
-        LZ4_stream_t* dictCtx = (LZ4_stream_t*)cctx->dictCtx;
-        byte* dictionary =
+        var dictCtx = (LZ4_stream_t*)cctx->dictCtx;
+        var dictionary =
             dictDirective == dict_directive.usingDictCtx ? dictCtx->dictionary
                 : cctx->dictionary;
-        uint dictSize =
+        var dictSize =
             dictDirective == dict_directive.usingDictCtx ? dictCtx->dictSize : cctx->dictSize;
-        uint dictDelta = (dictDirective == dict_directive.usingDictCtx)
+        var dictDelta = (dictDirective == dict_directive.usingDictCtx)
             ? startIndex - dictCtx->currentOffset : 0;
 
-        bool maybe_extMem = (dictDirective == dict_directive.usingExtDict)
+        var maybe_extMem = (dictDirective == dict_directive.usingExtDict)
             || (dictDirective == dict_directive.usingDictCtx);
-        uint prefixIdxLimit = startIndex - dictSize;
-        byte* dictEnd = dictionary + dictSize;
-        byte* anchor = (byte*)source;
-        byte* iend = ip + inputSize;
-        byte* mflimitPlusOne = iend - MFLIMIT + 1;
-        byte* matchlimit = iend - LASTLITERALS;
+        var prefixIdxLimit = startIndex - dictSize;
+        var dictEnd = dictionary + dictSize;
+        var anchor = (byte*)source;
+        var iend = ip + inputSize;
+        var mflimitPlusOne = iend - MFLIMIT + 1;
+        var matchlimit = iend - LASTLITERALS;
 
         /* the dictCtx currentOffset is indexed on the start of the dictionary,
 		 * while a dictionary in the current context precedes the currentOffset */
-        byte* dictBase = (dictDirective == dict_directive.usingDictCtx) ?
+        var dictBase = (dictDirective == dict_directive.usingDictCtx) ?
             dictionary + dictSize - dictCtx->currentOffset :
             dictionary + dictSize - startIndex;
 
-        byte* op = (byte*)dest;
-        byte* olimit = op + maxOutputSize;
+        var op = (byte*)dest;
+        var olimit = op + maxOutputSize;
 
         uint offset = 0;
         uint forwardH;
@@ -107,7 +107,10 @@ internal unsafe partial class LL64
         cctx->currentOffset += (uint)inputSize;
         cctx->tableType = tableType;
 
-        if (inputSize < LZ4_minLength) goto _last_literals;
+        if (inputSize < LZ4_minLength)
+        {
+            goto _last_literals;
+        }
 
         /* First Byte */
         LZ4_putPosition(ip, cctx->hashTable, tableType, @base);
@@ -124,18 +127,20 @@ internal unsafe partial class LL64
             /* Find a match */
             if (tableType == tableType_t.byPtr)
             {
-                byte* forwardIp = ip;
-                int step = 1;
-                int searchMatchNb = acceleration << LZ4_skipTrigger;
+                var forwardIp = ip;
+                var step = 1;
+                var searchMatchNb = acceleration << LZ4_skipTrigger;
                 do
                 {
-                    uint h = forwardH;
+                    var h = forwardH;
                     ip = forwardIp;
                     forwardIp += step;
                     step = (searchMatchNb++ >> LZ4_skipTrigger);
 
-                    if ((forwardIp > mflimitPlusOne)) goto _last_literals;
-
+                    if ((forwardIp > mflimitPlusOne))
+                    {
+                        goto _last_literals;
+                    }
 
                     match = LZ4_getPositionOnHash(h, cctx->hashTable, tableType, @base);
                     forwardH = LZ4_hashPosition(forwardIp, tableType);
@@ -147,20 +152,22 @@ internal unsafe partial class LL64
             {
                 /* byU32, byU16 */
 
-                byte* forwardIp = ip;
-                int step = 1;
-                int searchMatchNb = acceleration << LZ4_skipTrigger;
+                var forwardIp = ip;
+                var step = 1;
+                var searchMatchNb = acceleration << LZ4_skipTrigger;
                 do
                 {
-                    uint h = forwardH;
-                    uint current = (uint)(forwardIp - @base);
-                    uint matchIndex = LZ4_getIndexOnHash(h, cctx->hashTable, tableType);
+                    var h = forwardH;
+                    var current = (uint)(forwardIp - @base);
+                    var matchIndex = LZ4_getIndexOnHash(h, cctx->hashTable, tableType);
                     ip = forwardIp;
                     forwardIp += step;
                     step = (searchMatchNb++ >> LZ4_skipTrigger);
 
-                    if ((forwardIp > mflimitPlusOne)) goto _last_literals;
-
+                    if ((forwardIp > mflimitPlusOne))
+                    {
+                        goto _last_literals;
+                    }
 
                     if (dictDirective == dict_directive.usingDictCtx)
                     {
@@ -212,7 +219,11 @@ internal unsafe partial class LL64
 
                     if (Mem.Peek4(match) == Mem.Peek4(ip))
                     {
-                        if (maybe_extMem) offset = current - matchIndex;
+                        if (maybe_extMem)
+                        {
+                            offset = current - matchIndex;
+                        }
+
                         break;
                     }
                 }
@@ -245,18 +256,25 @@ internal unsafe partial class LL64
 
                 if (litLength >= RUN_MASK)
                 {
-                    int len = (int)(litLength - RUN_MASK);
+                    var len = (int)(litLength - RUN_MASK);
                     *token = (byte)(RUN_MASK << ML_BITS);
-                    for (; len >= 255; len -= 255) *op++ = 255;
+                    for (; len >= 255; len -= 255)
+                    {
+                        *op++ = 255;
+                    }
+
                     *op++ = (byte)len;
                 }
-                else *token = (byte)(litLength << ML_BITS);
+                else
+                {
+                    *token = (byte)(litLength << ML_BITS);
+                }
 
                 Mem.WildCopy8(op, anchor, op + litLength);
                 op += litLength;
             }
 
-            _next_match:
+        _next_match:
             /* at this stage, the following variables must be correctly set :
 			 * - ip : at start of LZ operation
 			 * - match : at start of previous pattern occurence; can be within current prefix, or within extDict
@@ -294,13 +312,17 @@ internal unsafe partial class LL64
                         || dictDirective == dict_directive.usingDictCtx)
                     && (lowLimit == dictionary) /* match within extDict */)
                 {
-                    byte* limit = ip + (dictEnd - match);
-                    if (limit > matchlimit) limit = matchlimit;
+                    var limit = ip + (dictEnd - match);
+                    if (limit > matchlimit)
+                    {
+                        limit = matchlimit;
+                    }
+
                     matchCode = LZ4_count(ip + MINMATCH, match + MINMATCH, limit);
                     ip += (uint)matchCode + MINMATCH;
                     if (ip == limit)
                     {
-                        uint more = LZ4_count(limit, (byte*)source, matchlimit);
+                        var more = LZ4_count(limit, (byte*)source, matchlimit);
                         matchCode += more;
                         ip += more;
                     }
@@ -317,7 +339,7 @@ internal unsafe partial class LL64
                     if (outputDirective == limitedOutput_directive.fillOutput)
                     {
                         /* Match description too long : reduce it */
-                        uint newMatchCode =
+                        var newMatchCode =
                             15 - 1 + ((uint)(olimit - op) - 1 - LASTLITERALS) * 255;
                         ip -= matchCode - newMatchCode;
                         matchCode = newMatchCode;
@@ -331,7 +353,7 @@ internal unsafe partial class LL64
                             byte* ptr;
                             for (ptr = ip; ptr <= filledIp; ++ptr)
                             {
-                                uint h = LZ4_hashPosition(ptr, tableType);
+                                var h = LZ4_hashPosition(ptr, tableType);
                                 LZ4_clearHash(h, cctx->hashTable, tableType);
                             }
                         }
@@ -358,14 +380,19 @@ internal unsafe partial class LL64
                     *op++ = (byte)(matchCode % 255);
                 }
                 else
+                {
                     *token += (byte)(matchCode);
+                }
             }
             /* Ensure we have enough space for the last literals. */
 
             anchor = ip;
 
             /* Test end of chunk */
-            if (ip >= mflimitPlusOne) break;
+            if (ip >= mflimitPlusOne)
+            {
+                break;
+            }
 
             /* Fill table */
             LZ4_putPosition(ip - 2, cctx->hashTable, tableType, @base);
@@ -386,9 +413,9 @@ internal unsafe partial class LL64
             {
                 /* byU32, byU16 */
 
-                uint h = LZ4_hashPosition(ip, tableType);
-                uint current = (uint)(ip - @base);
-                uint matchIndex = LZ4_getIndexOnHash(h, cctx->hashTable, tableType);
+                var h = LZ4_hashPosition(ip, tableType);
+                var current = (uint)(ip - @base);
+                var matchIndex = LZ4_getIndexOnHash(h, cctx->hashTable, tableType);
                 if (dictDirective == dict_directive.usingDictCtx)
                 {
                     if (matchIndex < startIndex)
@@ -433,7 +460,11 @@ internal unsafe partial class LL64
                 {
                     token = op++;
                     *token = 0;
-                    if (maybe_extMem) offset = current - matchIndex;
+                    if (maybe_extMem)
+                    {
+                        offset = current - matchIndex;
+                    }
+
                     goto _next_match;
                 }
             }
@@ -441,7 +472,7 @@ internal unsafe partial class LL64
             forwardH = LZ4_hashPosition(++ip, tableType);
         }
 
-        _last_literals:
+    _last_literals:
         {
             var lastRun = (size_t)(iend - anchor);
             if ((outputDirective != 0) &&
@@ -462,7 +493,11 @@ internal unsafe partial class LL64
             {
                 var accumulator = (size_t)(lastRun - RUN_MASK);
                 *op++ = (byte)(RUN_MASK << ML_BITS);
-                for (; accumulator >= 255; accumulator -= 255) *op++ = 255;
+                for (; accumulator >= 255; accumulator -= 255)
+                {
+                    *op++ = 255;
+                }
+
                 *op++ = (byte)accumulator;
             }
             else
@@ -491,7 +526,11 @@ internal unsafe partial class LL64
         int acceleration)
     {
         var ctx = LZ4_initStream(state);
-        if (acceleration < 1) acceleration = ACCELERATION_DEFAULT;
+        if (acceleration < 1)
+        {
+            acceleration = ACCELERATION_DEFAULT;
+        }
+
         if (maxOutputSize >= LZ4_compressBound(inputSize))
         {
             if (inputSize < LZ4_64Klimit)
@@ -560,10 +599,16 @@ internal unsafe partial class LL64
         var streamPtr = LZ4_stream;
         var dictEnd = streamPtr->dictionary + streamPtr->dictSize;
 
-        if (streamPtr->dirty) return 0;
+        if (streamPtr->dirty)
+        {
+            return 0;
+        }
 
         LZ4_renormDictT(streamPtr, inputSize);
-        if (acceleration < 1) acceleration = ACCELERATION_DEFAULT;
+        if (acceleration < 1)
+        {
+            acceleration = ACCELERATION_DEFAULT;
+        }
 
         if (streamPtr->dictSize - 1 < 4 - 1 && dictEnd != source)
         {
@@ -577,8 +622,16 @@ internal unsafe partial class LL64
             if ((sourceEnd > streamPtr->dictionary) && (sourceEnd < dictEnd))
             {
                 streamPtr->dictSize = (uint)(dictEnd - sourceEnd);
-                if (streamPtr->dictSize > 64 * KB) streamPtr->dictSize = 64 * KB;
-                if (streamPtr->dictSize < 4) streamPtr->dictSize = 0;
+                if (streamPtr->dictSize > 64 * KB)
+                {
+                    streamPtr->dictSize = 64 * KB;
+                }
+
+                if (streamPtr->dictSize < 4)
+                {
+                    streamPtr->dictSize = 0;
+                }
+
                 streamPtr->dictionary = dictEnd - streamPtr->dictSize;
             }
         }

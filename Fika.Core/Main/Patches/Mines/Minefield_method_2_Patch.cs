@@ -62,16 +62,16 @@ internal class Minefield_method_2_Patch : ModulePatch
 
         if (fikaPlayer != null)
         {
-            float num2 = 1f - distance / collateralDamageRange;
+            var num2 = 1f - distance / collateralDamageRange;
             var enumerable = isCollateral ? player.PlayerBones.BodyPartColliders.Where(minefield.method_4)
                 : player.PlayerBones.BodyPartColliders.Where(minefield.method_5);
 
             enumerable = enumerable.DistinctBy(FikaGlobals.GetBodyPartFromCollider).ToArray();
             enumerable = enumerable.Randomize();
 
-            int num3 = isCollateral || first ? Random.Range(2, enumerable.Count()) : int.MaxValue;
-            float num4 = isCollateral || first ? firstExplosionDamage : secondExplosionDamage;
-            int num5 = 0;
+            var num3 = isCollateral || first ? Random.Range(2, enumerable.Count()) : int.MaxValue;
+            var num4 = isCollateral || first ? firstExplosionDamage : secondExplosionDamage;
+            var num5 = 0;
 
             foreach (var bodyPartCollider in enumerable)
             {

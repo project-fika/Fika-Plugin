@@ -23,8 +23,16 @@ public unsafe class LZ4HighChainEncoder : LZ4EncoderBase
     public LZ4HighChainEncoder(LZ4Level level, int blockSize, int extraBlocks = 0) :
         base(true, blockSize, extraBlocks)
     {
-        if (level < LZ4Level.L03_HC) level = LZ4Level.L03_HC;
-        if (level > LZ4Level.L12_MAX) level = LZ4Level.L12_MAX;
+        if (level < LZ4Level.L03_HC)
+        {
+            level = LZ4Level.L03_HC;
+        }
+
+        if (level > LZ4Level.L12_MAX)
+        {
+            level = LZ4Level.L12_MAX;
+        }
+
         PinnedMemory.Alloc<LZ4Context>(out _contextPin, false);
         LL.LZ4_initStreamHC(Context);
         LL.LZ4_resetStreamHC_fast(Context, (int)level);

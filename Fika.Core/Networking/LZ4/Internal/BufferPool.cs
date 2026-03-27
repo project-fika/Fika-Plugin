@@ -22,7 +22,11 @@ public static class BufferPool
     private static byte[] Rent(int size, bool zero)
     {
         var array = ArrayPool<byte>.Shared.Rent(size);
-        if (zero) array.AsSpan(0, size).Clear();
+        if (zero)
+        {
+            array.AsSpan(0, size).Clear();
+        }
+
         return array;
     }
 
@@ -50,6 +54,8 @@ public static class BufferPool
     public static void Free(byte[]? buffer)
     {
         if (buffer is not null && IsPooled(buffer))
+        {
             ArrayPool<byte>.Shared.Return(buffer);
+        }
     }
 }

@@ -42,7 +42,7 @@ internal static class DiscoverDeviceMessage
             address.AddressFamily == AddressFamily.InterNetwork ? "{0}" : "[{0}]",
             address);
 
-        string s = "M-SEARCH * HTTP/1.1\r\n"
+        var s = "M-SEARCH * HTTP/1.1\r\n"
                     + "HOST: " + fmtAddress + ":1900\r\n"
                     + "MAN: \"ssdp:discover\"\r\n"
                     + "MX: 3\r\n"

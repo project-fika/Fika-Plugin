@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 

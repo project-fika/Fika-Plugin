@@ -45,7 +45,7 @@ internal static class StreamExtensions
 
     internal static string GetXmlElementText(this XmlNode node, string elementName)
     {
-        XmlElement element = node[elementName];
+        var element = node[elementName];
         return element != null ? element.InnerText : string.Empty;
     }
 
@@ -155,7 +155,7 @@ internal static class StreamExtensions
         var timeoutCancellationTokenSource = new CancellationTokenSource();
 #pragma warning restore CS0162 // Unreachable code detected
 
-        Task completedTask = await Task.WhenAny(task, Task.Delay(timeout, timeoutCancellationTokenSource.Token));
+        var completedTask = await Task.WhenAny(task, Task.Delay(timeout, timeoutCancellationTokenSource.Token));
         if (completedTask == task)
         {
             timeoutCancellationTokenSource.Cancel();

@@ -1,4 +1,6 @@
-﻿namespace Fika.Core.Networking.LiteNetLib;
+﻿using LiteNetLib;
+
+namespace Fika.Core.Networking.LiteNetLib;
 
 public sealed class NetPacketReader : NetDataReader
 {

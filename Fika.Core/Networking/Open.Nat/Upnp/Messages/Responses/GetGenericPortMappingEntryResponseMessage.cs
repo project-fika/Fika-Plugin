@@ -26,10 +26,10 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using Fika.Core.Networking.Open.Nat.Enums;
-using Fika.Core.Networking.Open.Nat.Utils;
 using System;
 using System.Xml;
+using Fika.Core.Networking.Open.Nat.Enums;
+using Fika.Core.Networking.Open.Nat.Utils;
 
 namespace Fika.Core.Networking.Open.Nat.Upnp.Messages.Responses;
 
@@ -38,16 +38,20 @@ internal class GetPortMappingEntryResponseMessage : ResponseMessageBase
     internal GetPortMappingEntryResponseMessage(XmlDocument response, string serviceType, bool genericMapping)
         : base(response, serviceType, genericMapping ? "GetGenericPortMappingEntryResponseMessage" : "GetSpecificPortMappingEntryResponseMessage")
     {
-        XmlNode data = GetNode();
+        var data = GetNode();
 
         RemoteHost = genericMapping ? data.GetXmlElementText("NewRemoteHost") : string.Empty;
         ExternalPort = genericMapping ? Convert.ToInt32(data.GetXmlElementText("NewExternalPort")) : ushort.MaxValue;
         if (genericMapping)
+        {
             Protocol = data.GetXmlElementText("NewProtocol").Equals("TCP", StringComparison.InvariantCultureIgnoreCase)
                            ? Protocol.Tcp
                            : Protocol.Udp;
+        }
         else
+        {
             Protocol = Protocol.Udp;
+        }
 
         InternalPort = Convert.ToInt32(data.GetXmlElementText("NewInternalPort"));
         InternalClient = data.GetXmlElementText("NewInternalClient");

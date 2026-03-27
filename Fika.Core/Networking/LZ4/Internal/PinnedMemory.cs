@@ -64,7 +64,9 @@ public unsafe struct PinnedMemory
     public static void Alloc(out PinnedMemory memory, int size, bool zero = true)
     {
         if (size <= 0)
+        {
             throw new ArgumentOutOfRangeException(nameof(size));
+        }
 
         if (size > MaxPooledSize)
         {
@@ -111,7 +113,10 @@ public unsafe struct PinnedMemory
     /// <summary>Fill allocated block of memory with zeros.</summary>
     public void Clear()
     {
-        if (_size <= 0 || _pointer is null) return;
+        if (_size <= 0 || _pointer is null)
+        {
+            return;
+        }
 
         Mem.Zero(_pointer, _size);
     }

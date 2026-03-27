@@ -139,21 +139,21 @@ internal unsafe partial class LL64
         if (src == null) { return -1; }
 
         {
-            byte* ip = (byte*)src;
-            byte* iend = ip + srcSize;
+            var ip = (byte*)src;
+            var iend = ip + srcSize;
 
-            byte* op = (byte*)dst;
-            byte* oend = op + outputSize;
+            var op = (byte*)dst;
+            var oend = op + outputSize;
             byte* cpy;
 
-            byte* dictEnd = (dictStart == null) ? null : dictStart + dictSize;
+            var dictEnd = (dictStart == null) ? null : dictStart + dictSize;
 
-            bool safeDecode = endOnInput;
-            bool checkOffset = ((safeDecode) && (dictSize < (int)(64 * KB)));
+            var safeDecode = endOnInput;
+            var checkOffset = ((safeDecode) && (dictSize < (int)(64 * KB)));
 
             /* Set up the "end" pointers for the shortcut. */
-            byte* shortiend = iend - (endOnInput ? 14 : 8) /*maxLL*/ - 2 /*offset*/;
-            byte* shortoend = oend - (endOnInput ? 14 : 8) /*maxLL*/ - 18 /*maxML*/;
+            var shortiend = iend - (endOnInput ? 14 : 8) /*maxLL*/ - 2 /*offset*/;
+            var shortoend = oend - (endOnInput ? 14 : 8) /*maxLL*/ - 18 /*maxML*/;
 
             byte* match;
             size_t offset;
@@ -164,7 +164,10 @@ internal unsafe partial class LL64
             if ((endOnInput) && ((outputSize == 0)))
             {
                 /* Empty output buffer */
-                if (partialDecoding) return 0;
+                if (partialDecoding)
+                {
+                    return 0;
+                }
 
                 return ((srcSize == 1) && (*ip == 0)) ? 0 : -1;
             }
@@ -194,8 +197,14 @@ internal unsafe partial class LL64
                     && ((!endOnInput || ip < shortiend) & (op <= shortoend)))
                 {
                     /* Copy the literals */
-                    if (endOnInput) Mem.Copy16(op, ip);
-                    else Mem.Copy8(op, ip);
+                    if (endOnInput)
+                    {
+                        Mem.Copy16(op, ip);
+                    }
+                    else
+                    {
+                        Mem.Copy8(op, ip);
+                    }
                     // Mem.Copy(op, ip, endOnInput ? 16 : 8);
                     op += length;
                     ip += length;
@@ -227,7 +236,7 @@ internal unsafe partial class LL64
                 /* decode literal length */
                 if (length == RUN_MASK)
                 {
-                    variable_length_error error = variable_length_error.ok;
+                    var error = variable_length_error.ok;
                     length += LZ4_readVLE(&ip, iend - RUN_MASK, endOnInput, endOnInput, &error);
                     if (error == variable_length_error.initial_error) { goto _output_error; }
 
@@ -318,29 +327,43 @@ internal unsafe partial class LL64
                 /* get matchlength */
                 length = token & ML_MASK;
 
-                _copy_match:
+            _copy_match:
                 if (length == ML_MASK)
                 {
-                    variable_length_error error = variable_length_error.ok;
+                    var error = variable_length_error.ok;
                     length += LZ4_readVLE(
                         &ip, iend - LASTLITERALS + 1, endOnInput, false, &error);
-                    if (error != variable_length_error.ok) goto _output_error;
+                    if (error != variable_length_error.ok)
+                    {
+                        goto _output_error;
+                    }
+
                     if ((safeDecode) && ((op) + length < op))
+                    {
                         goto _output_error; /* overflow detection */
+                    }
                 }
 
                 length += MINMATCH;
 
                 if ((checkOffset) && ((match + dictSize < lowPrefix)))
+                {
                     goto _output_error; /* Error : offset outside buffers */
+                }
 
                 /* match starting within external dictionary */
                 if ((dict == dict_directive.usingExtDict) && (match < lowPrefix))
                 {
                     if ((op + length > oend - LASTLITERALS))
                     {
-                        if (partialDecoding) length = MIN(length, (size_t)(oend - op));
-                        else goto _output_error; /* doesn't respect parsing restriction */
+                        if (partialDecoding)
+                        {
+                            length = MIN(length, (size_t)(oend - op));
+                        }
+                        else
+                        {
+                            goto _output_error; /* doesn't respect parsing restriction */
+                        }
                     }
 
                     if (length <= (size_t)(lowPrefix - match))
@@ -352,16 +375,19 @@ internal unsafe partial class LL64
                     else
                     {
                         /* match stretches into both external dictionary and current block */
-                        size_t copySize = (size_t)(lowPrefix - match);
-                        size_t restSize = length - copySize;
+                        var copySize = (size_t)(lowPrefix - match);
+                        var restSize = length - copySize;
                         Mem.Copy(op, dictEnd - copySize, (int)copySize);
                         op += copySize;
                         if (restSize > (size_t)(op - lowPrefix))
                         {
                             /* overlap copy */
-                            byte* endOfMatch = op + restSize;
-                            byte* copyFrom = lowPrefix;
-                            while (op < endOfMatch) *op++ = *copyFrom++;
+                            var endOfMatch = op + restSize;
+                            var copyFrom = lowPrefix;
+                            while (op < endOfMatch)
+                            {
+                                *op++ = *copyFrom++;
+                            }
                         }
                         else
                         {
@@ -380,9 +406,9 @@ internal unsafe partial class LL64
                 /* partialDecoding : may end anywhere within the block */
                 if (partialDecoding && (cpy > oend - MATCH_SAFEGUARD_DISTANCE))
                 {
-                    size_t mlen = MIN(length, (size_t)(oend - op));
-                    byte* matchEnd = match + mlen;
-                    byte* copyEnd = op + mlen;
+                    var mlen = MIN(length, (size_t)(oend - op));
+                    var matchEnd = match + mlen;
+                    var copyEnd = op + mlen;
                     if (matchEnd > op)
                     {
                         /* overlap copy */
@@ -420,7 +446,7 @@ internal unsafe partial class LL64
 
                 if ((cpy > oend - MATCH_SAFEGUARD_DISTANCE))
                 {
-                    byte* oCopyLimit = oend - (WILDCOPYLENGTH - 1);
+                    var oCopyLimit = oend - (WILDCOPYLENGTH - 1);
                     if (cpy > oend - LASTLITERALS)
                     {
                         goto _output_error;
@@ -455,7 +481,7 @@ internal unsafe partial class LL64
             }
 
             /* Overflow error detected */
-            _output_error:
+        _output_error:
             return (int)(-(((byte*)ip) - src)) - 1;
         }
     }
@@ -519,7 +545,9 @@ internal unsafe partial class LL64
         int dictSize)
     {
         if (dictSize == 0)
+        {
             return LZ4_decompress_safe(source, dest, compressedSize, maxOutputSize);
+        }
 
         if (dictStart + dictSize == dest)
         {
@@ -558,7 +586,10 @@ internal unsafe partial class LL64
         {
             /* The first call, no dictionary yet. */
             result = LZ4_decompress_safe(source, dest, compressedSize, maxOutputSize);
-            if (result <= 0) return result;
+            if (result <= 0)
+            {
+                return result;
+            }
 
             lz4sd->prefixSize = (size_t)result;
             lz4sd->prefixEnd = (byte*)dest + result;
@@ -567,16 +598,26 @@ internal unsafe partial class LL64
         {
             /* They're rolling the current segment. */
             if (lz4sd->prefixSize >= 64 * KB - 1)
+            {
                 result = LZ4_decompress_safe_withPrefix64k(
                     source, dest, compressedSize, maxOutputSize);
+            }
             else if (lz4sd->extDictSize == 0)
+            {
                 result = LZ4_decompress_safe_withSmallPrefix(
                     source, dest, compressedSize, maxOutputSize, lz4sd->prefixSize);
+            }
             else
+            {
                 result = LZ4_decompress_safe_doubleDict(
                     source, dest, compressedSize, maxOutputSize, lz4sd->prefixSize,
                     lz4sd->externalDict, lz4sd->extDictSize);
-            if (result <= 0) return result;
+            }
+
+            if (result <= 0)
+            {
+                return result;
+            }
 
             lz4sd->prefixSize += (size_t)result;
             lz4sd->prefixEnd += result;
@@ -589,7 +630,10 @@ internal unsafe partial class LL64
             result = LZ4_decompress_safe_forceExtDict(
                 source, dest, compressedSize, maxOutputSize,
                 lz4sd->externalDict, lz4sd->extDictSize);
-            if (result <= 0) return result;
+            if (result <= 0)
+            {
+                return result;
+            }
 
             lz4sd->prefixSize = (size_t)result;
             lz4sd->prefixEnd = (byte*)dest + result;

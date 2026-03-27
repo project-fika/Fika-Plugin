@@ -26,8 +26,6 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using Fika.Core.Networking.Open.Nat.EventArgs;
-using Fika.Core.Networking.Open.Nat.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,6 +33,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using Fika.Core.Networking.Open.Nat.EventArgs;
+using Fika.Core.Networking.Open.Nat.Utils;
 
 namespace Fika.Core.Networking.Open.Nat.Discovery;
 
@@ -79,7 +79,10 @@ internal abstract class Searcher
 
     private void Discover(CancellationToken cancelationToken)
     {
-        if (DateTime.UtcNow < NextSearch) return;
+        if (DateTime.UtcNow < NextSearch)
+        {
+            return;
+        }
 
         foreach (var socket in UdpClients)
         {
@@ -99,14 +102,20 @@ internal abstract class Searcher
     {
         foreach (var client in UdpClients.Where(x => x.Available > 0))
         {
-            if (cancelationToken.IsCancellationRequested) return;
+            if (cancelationToken.IsCancellationRequested)
+            {
+                return;
+            }
 
             var localHost = ((IPEndPoint)client.Client.LocalEndPoint).Address;
             var receivedFrom = new IPEndPoint(IPAddress.None, 0);
             var buffer = client.Receive(ref receivedFrom);
             var device = AnalyseReceivedResponse(localHost, buffer, receivedFrom);
 
-            if (device != null) RaiseDeviceFound(device);
+            if (device != null)
+            {
+                RaiseDeviceFound(device);
+            }
         }
     }
 
@@ -128,6 +137,8 @@ internal abstract class Searcher
         _devices.Add(device);
         var handler = DeviceFound;
         if (handler != null)
+        {
             handler(this, new DeviceEventArgs(device));
+        }
     }
 }

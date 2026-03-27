@@ -26,9 +26,9 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using Fika.Core.Networking.Open.Nat.Utils;
 using System.Net;
 using System.Xml;
+using Fika.Core.Networking.Open.Nat.Utils;
 
 namespace Fika.Core.Networking.Open.Nat.Upnp.Messages.Responses;
 
@@ -37,11 +37,13 @@ internal class GetExternalIPAddressResponseMessage : ResponseMessageBase
     public GetExternalIPAddressResponseMessage(XmlDocument response, string serviceType)
         : base(response, serviceType, "GetExternalIPAddressResponseMessage")
     {
-        string ip = GetNode().GetXmlElementText("NewExternalIPAddress");
+        var ip = GetNode().GetXmlElementText("NewExternalIPAddress");
 
         IPAddress ipAddr;
         if (IPAddress.TryParse(ip, out ipAddr))
+        {
             ExternalIPAddress = ipAddr;
+        }
     }
 
     public IPAddress ExternalIPAddress { get; private set; }
