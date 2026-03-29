@@ -18,7 +18,6 @@ using Fika.Core.Main.ClientClasses;
 using Fika.Core.Main.ClientClasses.HandsControllers;
 using Fika.Core.Main.GameMode;
 using Fika.Core.Main.HostClasses;
-using Fika.Core.Main.ObservedClasses.Snapshotting;
 using Fika.Core.Main.PacketHandlers;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
@@ -32,6 +31,7 @@ using Fika.Core.Networking.Packets.Player;
 using Fika.Core.Networking.Packets.Player.Common;
 using Fika.Core.Networking.Packets.Player.Common.SubPackets;
 using Fika.Core.Networking.Packets.World;
+using Fika.Core.Networking.Snapshotting;
 using Fika.Core.Networking.VOIP;
 using HarmonyLib;
 using JsonType;
@@ -51,7 +51,7 @@ public class FikaPlayer : LocalPlayer
     public int NetId;
     public bool IsObservedAI;
     public Dictionary<uint, Action<ServerOperationStatus>> OperationCallbacks = [];
-    public Snapshotter Snapshotter;
+    public PlayerSnapshotter Snapshotter;
     public CommonPlayerPacket CommonPacket;
     public virtual bool LeftStanceDisabled { get; internal set; }
     public DateTime TalkDateTime { get; internal set; }

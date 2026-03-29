@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using Fika.Core.Main.ObservedClasses.Snapshotting;
 using Fika.Core.Main.Players;
+using Fika.Core.Networking.Snapshotting;
 
 namespace Fika.Core.Networking.Packets.Player;
 

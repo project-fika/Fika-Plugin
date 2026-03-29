@@ -1,4 +1,4 @@
-﻿namespace Fika.Core.Main.ObservedClasses.Snapshotting;
+﻿namespace Fika.Core.Main.ObservedClasses;
 
 internal class ObservedState
 {

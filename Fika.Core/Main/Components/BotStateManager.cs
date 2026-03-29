@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using EFT;
 using Fika.Core.Main.GameMode;
-using Fika.Core.Main.ObservedClasses.Snapshotting;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Player;
+using Fika.Core.Networking.Snapshotting;
 
 namespace Fika.Core.Main.Components;
 

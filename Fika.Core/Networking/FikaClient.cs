@@ -9,7 +9,6 @@ using EFT.Communications;
 using EFT.UI;
 using Fika.Core.Main.ClientClasses;
 using Fika.Core.Main.Components;
-using Fika.Core.Main.ObservedClasses.Snapshotting;
 using Fika.Core.Main.Patches.VOIP;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
@@ -28,6 +27,7 @@ using Fika.Core.Networking.Packets.Player;
 using Fika.Core.Networking.Packets.Player.Common;
 using Fika.Core.Networking.Packets.World;
 using Fika.Core.Networking.Pooling;
+using Fika.Core.Networking.Snapshotting;
 using Fika.Core.Networking.VOIP;
 using Fika.Core.UI.Custom;
 using System;
@@ -307,11 +307,7 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
         for (var i = 0; i < ObservedPlayers.Count; i++)
         {
             var player = ObservedPlayers[i];
-            player.Snapshotter.ManualUpdate(unscaledDeltaTime);
-            if (player.CurrentPlayerState.ShouldUpdate)
-            {
-                player.ManualStateUpdate();
-            }
+            player.ManualStateUpdate(NetworkTimeSync.NetworkTime);
         }
 
         while (_inventoryOperations.Count > 0)
@@ -495,7 +491,7 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
                     if (_coopHandler.Players.TryGetValue(snapshot.NetId, out var player))
                     {
                         var header = new PlayerStateSnapshot(in snapshot, remoteTime);
-                        player.Snapshotter.Insert(in header, NetworkTimeSync.NetworkTime);
+                        player.Snapshotter.AddSnapshot(in header);
                     }
                 }
                 break;

@@ -14,7 +14,6 @@ using EFT.UI;
 using Fika.Core.Main.Components;
 using Fika.Core.Main.GameMode;
 using Fika.Core.Main.HostClasses;
-using Fika.Core.Main.ObservedClasses.Snapshotting;
 using Fika.Core.Main.Patches.VOIP;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
@@ -47,6 +46,7 @@ using Fika.Core.Networking.Models;
 using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Player.Common;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
+using Fika.Core.Networking.Snapshotting;
 
 namespace Fika.Core.Networking;
 
@@ -538,11 +538,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         for (var i = 0; i < ObservedPlayers.Count; i++)
         {
             var player = ObservedPlayers[i];
-            player.Snapshotter.ManualUpdate(unscaledDeltaTime);
-            if (player.CurrentPlayerState.ShouldUpdate)
-            {
-                player.ManualStateUpdate();
-            }
+            player.ManualStateUpdate(NetworkTimeSync.NetworkTime);
         }
 
         _statisticsCounter += unscaledDeltaTime;
@@ -929,11 +925,11 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
                 break;
             case EPacketType.PlayerState:
                 var remoteTime = reader.GetDouble();
-                var snapshot = reader.GetUnmanaged<PlayerStateData>();                
+                var snapshot = reader.GetUnmanaged<PlayerStateData>();
                 if (_coopHandler.Players.TryGetValue(snapshot.NetId, out var player))
                 {
                     var header = new PlayerStateSnapshot(in snapshot, remoteTime);
-                    player.Snapshotter.Insert(in header, NetworkTimeSync.NetworkTime);
+                    player.Snapshotter.AddSnapshot(in header);
                 }
                 break;
             case EPacketType.VOIP:

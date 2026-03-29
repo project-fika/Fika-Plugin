@@ -1,6 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 
-namespace Fika.Core.Main.ObservedClasses.Snapshotting;
+namespace Fika.Core.Networking.Snapshotting;
 
 /// <summary>
 /// Used to sync snapshots for replication
