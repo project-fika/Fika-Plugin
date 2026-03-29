@@ -7,83 +7,100 @@ using Fika.Core.Main.Players;
 namespace Fika.Core.Networking.Packets.Player;
 
 /// <summary>
+/// A local-only container that pairs a networked state with synchronization timestamps. <br/>
+/// Used for interpolation, lag compensation, and state buffering.
+/// </summary>
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
+public readonly struct PlayerStateSnapshot
+{
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public PlayerStateSnapshot(in PlayerStateData packet, double remoteTime)
+    {
+        RemoteTime = remoteTime;
+        LocalTime = NetworkTimeSync.NetworkTime;
+        Data = packet;
+    }
+
+    /// <summary>8 bytes, offset 0</summary>
+    public readonly double RemoteTime;
+    /// <summary>8 bytes, offset 8</summary>
+    public readonly double LocalTime;
+    /// <summary>39 bytes, offset 16</summary>
+    public readonly PlayerStateData Data;
+}
+
+/// <summary>
 /// State packet for a player
 /// </summary>
 /// <remarks>
 /// Assumes little-endian architecture
 /// </remarks>
 [StructLayout(LayoutKind.Sequential, Pack = 1)]
-public readonly struct PlayerStatePacket
+public readonly struct PlayerStateData
 {
     /// <summary>
-    /// Size in bytes of a <see cref="PlayerStatePacket"/>
+    /// Size in bytes of a <see cref="PlayerStateData"/>
     /// </summary>
-    public static readonly byte PacketSize = (byte)Unsafe.SizeOf<PlayerStatePacket>();
+    public static readonly byte PacketSize = (byte)Unsafe.SizeOf<PlayerStateData>();
 
-    /// <summary>8 bytes, offset 0</summary>
-    public readonly double RemoteTime;
-
-    /// <summary>8 bytes, offset 8</summary>
-    public readonly double LocalTime;
-
-    /// <summary>12 bytes, offset 16 (Vector3 is 3 floats)</summary>
+    /// <summary>12 bytes, offset 0</summary>
     public readonly Vector3 Position;
 
-    /// <summary>4 bytes, offset 28</summary>
+    /// <summary>4 bytes, offset 12</summary>
     private readonly float _rotYaw;
 
-    /// <summary>2 bytes, offset 32</summary>
+    /// <summary>2 bytes, offset 16</summary>
     private readonly ushort _tiltPacked;
 
-    /// <summary>2 bytes, offset 34</summary>
+    /// <summary>2 bytes, offset 18</summary>
     private readonly ushort _movementSpeedPacked;
 
-    /// <summary>2 bytes, offset 36</summary>
+    /// <summary>2 bytes, offset 20</summary>
     private readonly ushort _sprintSpeedPacked;
 
-    /// <summary>2 bytes, offset 38</summary>
+    /// <summary>2 bytes, offset 22</summary>
     private readonly ushort _poseLevelPacked;
 
-    /// <summary>2 bytes, offset 40</summary>
+    /// <summary>2 bytes, offset 24</summary>
     private readonly ushort _weaponOverlapPacked;
 
-    /// <summary>1 byte, offset 42</summary>
+    /// <summary>1 byte, offset 26</summary>
     private readonly byte _headRotYawPacked;
 
-    /// <summary>1 byte, offset 43</summary>
+    /// <summary>1 byte, offset 27</summary>
     private readonly byte _headRotPitchPacked;
 
-    /// <summary>1 byte, offset 44</summary>
+    /// <summary>1 byte, offset 28</summary>
     private readonly byte _rotPitchPacked;
 
-    /// <summary>1 byte, offset 45</summary>
+    /// <summary>1 byte, offset 29</summary>
     private readonly byte _moveDirXPacked;
 
-    /// <summary>1 byte, offset 46</summary>
+    /// <summary>1 byte, offset 30</summary>
     private readonly byte _moveDirYPacked;
 
-    /// <summary>1 byte, offset 47</summary>
+    /// <summary>1 byte, offset 31</summary>
     public readonly byte NetId;
 
-    /// <summary>1 byte, offset 48</summary>
+    /// <summary>1 byte, offset 32</summary>
     private readonly byte _stepPacked;
 
-    /// <summary>1 byte, offset 49</summary>
+    /// <summary>1 byte, offset 33</summary>
     private readonly byte _blindfirePacked;
 
-    /// <summary>1 byte, offset 50</summary>
-    public readonly EPlayerState State;  // Stored as byte
+    /// <summary>1 byte, offset 34</summary>
+    public readonly EPlayerState State;
 
-    /// <summary>1 byte, offset 51</summary>
-    private readonly byte _boolFlags;    // 7 bools packed into 1 byte
+    /// <summary>1 byte, offset 35</summary>
+    private readonly byte _boolFlags;
 
-    /// <summary>1 byte, offset 52</summary>
+    /// <summary>1 byte, offset 36</summary>
     private readonly byte _velocityDirXPacked;
 
-    /// <summary>1 byte, offset 53</summary>
+    /// <summary>1 byte, offset 37</summary>
     private readonly byte _velocityDirYPacked;
 
-    /// <summary>1 byte, offset 54</summary>
+    /// <summary>1 byte, offset 38</summary>
     private readonly byte _velocityDirZPacked;
 
     public BasePhysicalClass.PhysicalStateStruct Physical
@@ -316,17 +333,14 @@ public readonly struct PlayerStatePacket
         return flags;
     }
 
-    public static PlayerStatePacket FromBuffer(in ArraySegment<byte> buffer)
+    public static PlayerStateData FromBuffer(in ArraySegment<byte> buffer)
     {
         ref var firstByte = ref buffer.Array[buffer.Offset];
-        return Unsafe.ReadUnaligned<PlayerStatePacket>(ref firstByte);
+        return Unsafe.ReadUnaligned<PlayerStateData>(ref firstByte);
     }
 
-    public PlayerStatePacket(FikaPlayer player, bool isMoving)
+    public PlayerStateData(FikaPlayer player, bool isMoving)
     {
-        RemoteTime = NetworkTimeSync.NetworkTime;
-        LocalTime = 0;
-
         Position = player.Position;
 
         _headRotYawPacked = PackFloatToByte(player.HeadRotation.x, -50f, 20f);

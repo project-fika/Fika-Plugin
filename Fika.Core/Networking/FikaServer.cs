@@ -649,10 +649,11 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         _netServer.SendToAll(_dataWriter.AsReadOnlySpan(), deliveryMethod, peerToIgnore);
     }
 
-    public void SendPlayerState(ref PlayerStatePacket packet)
+    public void SendPlayerState(ref PlayerStateData packet)
     {
         _dataWriter.Reset();
         _dataWriter.PutEnum(EPacketType.PlayerState);
+        _dataWriter.Put(NetworkTimeSync.NetworkTime);
         _dataWriter.PutUnmanaged(packet);
 
         _netServer.SendToAll(_dataWriter.AsReadOnlySpan(), DeliveryMethod.Unreliable);
@@ -927,10 +928,12 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
                 _packetProcessor.ReadAllPackets(reader, peer);
                 break;
             case EPacketType.PlayerState:
-                var snapshot = reader.GetUnmanaged<PlayerStatePacket>();
+                var remoteTime = reader.GetDouble();
+                var snapshot = reader.GetUnmanaged<PlayerStateData>();                
                 if (_coopHandler.Players.TryGetValue(snapshot.NetId, out var player))
                 {
-                    player.Snapshotter.Insert(in snapshot, NetworkTimeSync.NetworkTime);
+                    var header = new PlayerStateSnapshot(in snapshot, remoteTime);
+                    player.Snapshotter.Insert(in header, NetworkTimeSync.NetworkTime);
                 }
                 break;
             case EPacketType.VOIP:

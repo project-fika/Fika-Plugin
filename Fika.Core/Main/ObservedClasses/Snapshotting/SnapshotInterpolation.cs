@@ -43,7 +43,7 @@ public static class SnapshotInterpolation
         return Mathd.Clamp(localTimeline, lowerBound, upperBound);
     }
 
-    public static void InsertAndAdjust(PlayerStatePacket[] buffer, int bufferCount, in PlayerStatePacket snapshot, ref double localTimeline, ref double localTimescale,
+    public static void InsertAndAdjust(PlayerStateSnapshot[] buffer, int bufferCount, in PlayerStateSnapshot snapshot, ref double localTimeline, ref double localTimescale,
         float sendInterval, double bufferTime, double catchupSpeed, double slowdownSpeed, ref ExponentialMovingAverage driftEma, float catchupNegativeThreshold,
         float catchupPositiveThreshold, ref ExponentialMovingAverage deliveryTimeEma)
     {
@@ -70,7 +70,7 @@ public static class SnapshotInterpolation
         );
     }
 
-    public static void Sample(PlayerStatePacket[] buffer, int bufferCount, double localTimeline, out int from, out int to, out float t)
+    public static void Sample(PlayerStateSnapshot[] buffer, int bufferCount, double localTimeline, out int from, out int to, out float t)
     {
         // handle empty or single-packet buffers
         if (bufferCount == 0)
@@ -147,7 +147,7 @@ public static class SnapshotInterpolation
         localTimeline += deltaTime * localTimescale;
     }
 
-    public static void StepInterpolation(PlayerStatePacket[] buffer, ref int bufferCount, double localTimeline,
+    public static void StepInterpolation(PlayerStateSnapshot[] buffer, ref int bufferCount, double localTimeline,
         out int fromIndex, out int toIndex, out float t)
     {
         // find the indices (Sample needs to be updated to take the array)
@@ -173,7 +173,7 @@ public static class SnapshotInterpolation
         }
     }
 
-    public static void Step(PlayerStatePacket[] buffer, ref int bufferCount, double deltaTime, ref double localTimeline,
+    public static void Step(PlayerStateSnapshot[] buffer, ref int bufferCount, double deltaTime, ref double localTimeline,
         double localTimescale, out int fromIndex, out int toIndex, out float t)
     {
         StepTime(deltaTime, ref localTimeline, localTimescale);

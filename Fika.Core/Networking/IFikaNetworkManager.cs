@@ -106,7 +106,7 @@ public interface IFikaNetworkManager
     /// Sends a player state using fast serialization.
     /// </summary>
     /// <param name="packet">The player state packet to send.</param>
-    void SendPlayerState(ref PlayerStatePacket packet);
+    void SendPlayerState(ref PlayerStateData packet);
 
     /// <summary>
     /// Sends raw VOIP audio data to a specific peer or multiple recipients.

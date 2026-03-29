@@ -363,11 +363,12 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
         }
     }
 
-    public void SendPlayerState(ref PlayerStatePacket packet)
+    public void SendPlayerState(ref PlayerStateData packet)
     {
         _dataWriter.Reset();
         _dataWriter.Put(true);
         _dataWriter.PutEnum(EPacketType.PlayerState);
+        _dataWriter.Put(NetworkTimeSync.NetworkTime);
         _dataWriter.PutUnmanaged(packet);
 
         _netClient.SendToAll(_dataWriter.AsReadOnlySpan(), DeliveryMethod.Unreliable);
@@ -485,14 +486,16 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
                 _packetProcessor.ReadAllPackets(reader, peer);
                 break;
             case EPacketType.PlayerState:
+                var remoteTime = reader.GetDouble();
                 var remaining = reader.GetRemainingBytesSpan();
-                var snapshots = MemoryMarshal.Cast<byte, PlayerStatePacket>(remaining);
+                var snapshots = MemoryMarshal.Cast<byte, PlayerStateData>(remaining);
                 for (var i = 0; i < snapshots.Length; i++)
                 {
                     ref readonly var snapshot = ref snapshots[i];
                     if (_coopHandler.Players.TryGetValue(snapshot.NetId, out var player))
                     {
-                        player.Snapshotter.Insert(in snapshot, NetworkTimeSync.NetworkTime);
+                        var header = new PlayerStateSnapshot(in snapshot, remoteTime);
+                        player.Snapshotter.Insert(in header, NetworkTimeSync.NetworkTime);
                     }
                 }
                 break;

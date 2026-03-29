@@ -1,7 +1,7 @@
 ﻿namespace Fika.Core.Main.ObservedClasses.Snapshotting;
 
 /// <summary>
-/// Settings used for the <see cref="Snapshotter{T}"/>
+/// Settings used for the <see cref="Snapshotter"/>
 /// </summary>
 public class SnapshotInterpolationSettings
 {
@@ -16,7 +16,7 @@ public class SnapshotInterpolationSettings
     /// <summary>
     /// If a client can't process snapshots fast enough, don't store too many.
     /// </summary>
-    public int BufferLimit = 32;
+    public const int BufferLimit = 32;
     #endregion
 
     #region Catchup / Slowdown

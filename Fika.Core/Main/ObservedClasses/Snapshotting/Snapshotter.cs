@@ -7,10 +7,11 @@ using Fika.Core.Networking.Packets.Player;
 
 namespace Fika.Core.Main.ObservedClasses.Snapshotting;
 
-public unsafe class Snapshotter
+public class Snapshotter
 {
-    private const int _maxSnapshots = 32;
-    private readonly PlayerStatePacket[] _buffer;
+    private const int _maxSnapshots = SnapshotInterpolationSettings.BufferLimit;
+
+    private readonly PlayerStateSnapshot[] _buffer;
     private int _bufferCount;
 
     private double _localTimeline;
@@ -29,7 +30,7 @@ public unsafe class Snapshotter
 
     internal Snapshotter(ObservedPlayer observedPlayer)
     {
-        _buffer = new PlayerStatePacket[_maxSnapshots];
+        _buffer = new PlayerStateSnapshot[_maxSnapshots];
         _localTimeScale = Time.timeScale;
         _sendRate = Singleton<IFikaNetworkManager>.Instance.SendRate;
         _interpolationSettings = new();
@@ -50,7 +51,7 @@ public unsafe class Snapshotter
     }
 
     /// <summary>
-    /// Checks the <see cref="_buffer"/> and <see cref="Interpolate(in PlayerStatePacket, in PlayerStatePacket, float)"/>s any snapshots
+    /// Checks the <see cref="_buffer"/> and <see cref="Interpolate(in PlayerStateData, in PlayerStateData, float)"/>s any snapshots
     /// </summary>
     public void ManualUpdate(float unscaledDeltaTime)
     {
@@ -69,21 +70,21 @@ public unsafe class Snapshotter
     /// <param name="from">State to lerp from</param>
     /// <param name="to">Goal state</param>
     /// <param name="ratio">Interpolation ratio</param>
-    public void Interpolate(in PlayerStatePacket from, in PlayerStatePacket to, float ratio)
+    public void Interpolate(in PlayerStateSnapshot from, in PlayerStateSnapshot to, float ratio)
     {
         var currentState = _player.CurrentPlayerState;
         currentState.ShouldUpdate = true;
 
         currentState.Rotation = new Vector2(
-            Mathf.LerpAngle(from.Rotation.x, to.Rotation.x, ratio),
-            Mathf.LerpUnclamped(from.Rotation.y, to.Rotation.y, ratio)
+            Mathf.LerpAngle(from.Data.Rotation.x, to.Data.Rotation.x, ratio),
+            Mathf.LerpUnclamped(from.Data.Rotation.y, to.Data.Rotation.y, ratio)
         );
 
-        currentState.HeadRotation = Vector3.LerpUnclamped(from.HeadRotation, to.HeadRotation, ratio);
-        currentState.Position = Vector3.LerpUnclamped(from.Position, to.Position, ratio);
+        currentState.HeadRotation = Vector3.LerpUnclamped(from.Data.HeadRotation, to.Data.HeadRotation, ratio);
+        currentState.Position = Vector3.LerpUnclamped(from.Data.Position, to.Data.Position, ratio);
 
-        var newDir = currentState.MovementDirection = Vector2.LerpUnclamped(from.MovementDirection, to.MovementDirection, ratio);
-        if (!_isZombie && (to.State is EPlayerState.Idle or EPlayerState.Transition || newDir.sqrMagnitude < _movementDeadZoneSqr))
+        var newDir = currentState.MovementDirection = Vector2.LerpUnclamped(from.Data.MovementDirection, to.Data.MovementDirection, ratio);
+        if (!_isZombie && (to.Data.State is EPlayerState.Idle or EPlayerState.Transition || newDir.sqrMagnitude < _movementDeadZoneSqr))
         {
             currentState.MovementDirection = Vector2.zero;
             currentState.IsMoving = false;
@@ -94,20 +95,20 @@ public unsafe class Snapshotter
             currentState.IsMoving = true;
         }
 
-        currentState.State = to.State;
-        currentState.Tilt = Mathf.LerpUnclamped(from.Tilt, to.Tilt, ratio);
-        currentState.Step = to.Step;
-        currentState.MovementSpeed = Mathf.LerpUnclamped(from.MovementSpeed, to.MovementSpeed, ratio);
-        currentState.SprintSpeed = Mathf.LerpUnclamped(from.SprintSpeed, to.SprintSpeed, ratio);
-        currentState.IsProne = to.IsProne;
-        currentState.PoseLevel = Mathf.LerpUnclamped(from.PoseLevel, to.PoseLevel, ratio);
-        currentState.IsSprinting = to.IsSprinting;
-        currentState.Stamina = to.Physical;
-        currentState.Blindfire = to.Blindfire;
-        currentState.WeaponOverlap = Mathf.LerpUnclamped(from.WeaponOverlap, to.WeaponOverlap, ratio);
-        currentState.LeftStanceDisabled = to.LeftStanceDisabled;
-        currentState.IsGrounded = to.IsGrounded;
-        var velocity = Vector3.LerpUnclamped(from.Velocity, to.Velocity, ratio);
+        currentState.State = to.Data.State;
+        currentState.Tilt = Mathf.LerpUnclamped(from.Data.Tilt, to.Data.Tilt, ratio);
+        currentState.Step = to.Data.Step;
+        currentState.MovementSpeed = Mathf.LerpUnclamped(from.Data.MovementSpeed, to.Data.MovementSpeed, ratio);
+        currentState.SprintSpeed = Mathf.LerpUnclamped(from.Data.SprintSpeed, to.Data.SprintSpeed, ratio);
+        currentState.IsProne = to.Data.IsProne;
+        currentState.PoseLevel = Mathf.LerpUnclamped(from.Data.PoseLevel, to.Data.PoseLevel, ratio);
+        currentState.IsSprinting = to.Data.IsSprinting;
+        currentState.Stamina = to.Data.Physical;
+        currentState.Blindfire = to.Data.Blindfire;
+        currentState.WeaponOverlap = Mathf.LerpUnclamped(from.Data.WeaponOverlap, to.Data.WeaponOverlap, ratio);
+        currentState.LeftStanceDisabled = to.Data.LeftStanceDisabled;
+        currentState.IsGrounded = to.Data.IsGrounded;
+        var velocity = Vector3.LerpUnclamped(from.Data.Velocity, to.Data.Velocity, ratio);
         if (velocity.sqrMagnitude < _velocityDeadZoneSqr)
         {
             velocity = Vector3.zero;
@@ -121,9 +122,9 @@ public unsafe class Snapshotter
     /// </summary>
     /// <param name="snapshot">The snapshot to insert</param>
     /// <param name="networkTime">The current network time</param>
-    public void Insert(in PlayerStatePacket snapshot, double networkTime)
+    public void Insert(in PlayerStateSnapshot snapshot, double networkTime)
     {
-        if (_bufferCount >= _interpolationSettings.BufferLimit)
+        if (_bufferCount >= _maxSnapshots)
         {
             _bufferCount = 0;
         }
@@ -167,8 +168,6 @@ public unsafe class Snapshotter
             _buffer[index] = snapshot;
             _bufferCount++;
         }
-
-        Unsafe.AsRef(in _buffer[index].LocalTime) = networkTime;
 
         _bufferTimeMultiplier = SnapshotInterpolation.DynamicAdjustment(_sendInterval, _deliveryTimeEma.StandardDeviation,
             _interpolationSettings.DynamicAdjustmentTolerance);

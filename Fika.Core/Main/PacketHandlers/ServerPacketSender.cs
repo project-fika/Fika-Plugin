@@ -105,7 +105,7 @@ public class ServerPacketSender : MonoBehaviour, IPacketSender
 
     private void SendPlayerState()
     {
-        var state = new PlayerStatePacket(_player, IsMoving);
+        var state = new PlayerStateData(_player, IsMoving);
         NetworkManager.SendPlayerState(ref state);
     }
 
