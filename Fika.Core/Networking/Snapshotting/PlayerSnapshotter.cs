@@ -21,13 +21,16 @@ public sealed class PlayerSnapshotter
     /// <summary> Contiguous memory block of snapshots to maximize CPU L1/L2 cache hits. </summary>
     private readonly PlayerStateSnapshot[] _buffer = new PlayerStateSnapshot[_capacity];
 
-    /// <summary>
-    /// Value-type clock synchronization manager.
-    /// </summary>
+    /// <summary> Clock synchronization manager. </summary>
     private TimeSyncEMA _timeSync;
+
+    /// <summary> Manages the dynamic interpolation delay for this entity. </summary>
+    private AdaptiveJitterBuffer _adaptiveJitterBuffer;
 
     /// <summary> Total number of snapshots added over the lifetime of this object. Used to calculate ring indices. </summary>
     private long _totalAdded;
+    private double _lastLocalTime;
+    private double _lastRemoteTime;
 
     /// <summary>
     /// Inserts a new snapshot into the ring buffer and updates the clock synchronization offset.
@@ -36,12 +39,34 @@ public sealed class PlayerSnapshotter
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void AddSnapshot(in PlayerStateSnapshot snapshot)
     {
+        if (_totalAdded > 0)
+        {
+            var newestIdx = (int)((_totalAdded - 1) & _mask);
+            var newestTime = _buffer[newestIdx].RemoteTime;
+
+            // sequence validation: drop out-of-order or duplicate packets
+            if (snapshot.RemoteTime <= newestTime)
+            {
+                return;
+            }
+
+            // calculate the physical time it took for the packet to arrive versus the expected server interval
+            var localDelta = snapshot.LocalTime - _lastLocalTime;
+            var remoteDelta = snapshot.RemoteTime - _lastRemoteTime;
+
+            // update the jitter variance
+            _adaptiveJitterBuffer.Update(localDelta, remoteDelta);
+        }
+
         // O(1) insertion: direct write to the masked index
         _buffer[_totalAdded & _mask] = snapshot;
         _totalAdded++;
 
         // update the EMA Offset (ServerTime - LocalTime) to synchronize the playback timeline
         _timeSync.Update(snapshot.RemoteTime, snapshot.LocalTime);
+
+        _lastLocalTime = snapshot.LocalTime;
+        _lastRemoteTime = snapshot.RemoteTime;
     }
 
     /// <summary>
@@ -49,12 +74,11 @@ public sealed class PlayerSnapshotter
     /// Returns indices instead of struct copies to prioritize CPU speed.
     /// </summary>
     /// <param name="localTime">Current local system time (usually <see cref="Time.unscaledTimeAsDouble"/>).</param>
-    /// <param name="interpolationDelay">The amount of time (in seconds) to stay behind the server to mask network jitter.</param>
     /// <param name="fromIdx">The index of the snapshot immediately before the render time.</param>
     /// <param name="toIdx">The index of the snapshot immediately after the render time.</param>
     /// <param name="t">The 0-1 interpolation factor (lerp amount) between the two snapshots.</param>
-    /// <returns><see langword="true"/> if valid interpolation boundaries were found; otherwise, <see langword="false"/>.</returns>
-    public bool GetInterpolationIndices(double localTime, double interpolationDelay, out int fromIdx, out int toIdx, out float t)
+    /// <returns>The <see cref="EBufferState"/> representing whether the buffer is currently interpolating, extrapolating, or stale.</returns>
+    public EBufferState GetInterpolationIndices(double localTime, out int fromIdx, out int toIdx, out float t)
     {
         fromIdx = toIdx = -1;
         t = 0;
@@ -62,14 +86,30 @@ public sealed class PlayerSnapshotter
         var count = (int)Math.Min(_totalAdded, _capacity);
         if (count < 2)
         {
-            return false;
+            return EBufferState.Stale;
         }
 
-        // calculate the target point on the synchronized timeline
-        var renderTime = localTime + _timeSync.SmoothOffset - interpolationDelay;
+        // consume the dynamic delay from the AdaptiveJitterBuffer
+        var renderTime = localTime + _timeSync.SmoothOffset - _adaptiveJitterBuffer.CurrentDelay;
         var offset = Math.Max(0, _totalAdded - _capacity);
 
-        // binary Search: O(log N), efficiently finds the interpolation window in the circular buffer
+        // check if we need to extrapolate before searching
+        var newestIdx = (int)((offset + count - 1) & _mask);
+        if (renderTime > _buffer[newestIdx].RemoteTime)
+        {
+            var timeSinceNewest = renderTime - _buffer[newestIdx].RemoteTime;
+
+            // hard limit extrapolation to 100ms. beyond this, predictions diverge too far from reality.
+            if (timeSinceNewest > 0.1d)
+            {
+                return EBufferState.Stale;
+            }
+
+            fromIdx = newestIdx; // use this index's data + velocity * timeSinceNewest
+            t = (float)timeSinceNewest;
+            return EBufferState.Extrapolating;
+        }
+
         var low = 0;
         var high = count - 1;
         while (low < high)
@@ -88,7 +128,7 @@ public sealed class PlayerSnapshotter
         // if low is 0, the renderTime is older than our oldest buffered snapshot
         if (low == 0)
         {
-            return false;
+            return EBufferState.Stale;
         }
 
         fromIdx = (int)((offset + low - 1) & _mask);
@@ -101,7 +141,7 @@ public sealed class PlayerSnapshotter
         var range = snapTo.RemoteTime - snapFrom.RemoteTime;
         t = range > 0 ? (float)((renderTime - snapFrom.RemoteTime) / range) : 0f;
 
-        return true;
+        return EBufferState.Interpolating;
     }
 
     /// <summary>

@@ -869,12 +869,31 @@ public class ObservedPlayer : FikaPlayer
     /// </summary>
     public void ManualStateUpdate(double localTime)
     {
-        if (Snapshotter.GetInterpolationIndices(localTime, 0.1, out var from, out var to, out var t))
-        {
-            ref readonly var snapFrom = ref Snapshotter.GetSnapshot(from);
-            ref readonly var snapTo = ref Snapshotter.GetSnapshot(to);
+        var bufferState = Snapshotter.GetInterpolationIndices(localTime, out var from, out var to, out var t);
 
-            var currentState = CurrentPlayerState;
+        if (bufferState == EBufferState.Stale)
+        {
+            if (!CurrentPlayerState.IsMoving)
+            {
+                return;
+            }
+
+            CurrentPlayerState.Velocity = Vector3.zero;
+            CurrentPlayerState.MovementDirection = Vector2.zero;
+            CurrentPlayerState.IsMoving = false;
+            ObservedCharacterController.Vector3_0 = CurrentPlayerState.Velocity;
+
+            MovementContext.PlayerAnimatorEnableInert(CurrentPlayerState.IsMoving);
+            MovementContext.MovementDirection = CurrentPlayerState.MovementDirection;
+            return;
+        }
+
+        ref readonly var snapFrom = ref Snapshotter.GetSnapshot(from);
+        var currentState = CurrentPlayerState;
+
+        if (bufferState == EBufferState.Interpolating)
+        {
+            ref readonly var snapTo = ref Snapshotter.GetSnapshot(to);
 
             currentState.Rotation = new Vector2(
                 Mathf.LerpAngle(snapFrom.Data.Rotation.x, snapTo.Data.Rotation.x, t),
@@ -909,6 +928,7 @@ public class ObservedPlayer : FikaPlayer
             currentState.WeaponOverlap = Mathf.LerpUnclamped(snapFrom.Data.WeaponOverlap, snapTo.Data.WeaponOverlap, t);
             currentState.LeftStanceDisabled = snapTo.Data.LeftStanceDisabled;
             currentState.IsGrounded = snapTo.Data.IsGrounded;
+
             var velocity = Vector3.LerpUnclamped(snapFrom.Data.Velocity, snapTo.Data.Velocity, t);
             if (velocity.sqrMagnitude < _velocityDeadZoneSqr)
             {
@@ -916,112 +936,135 @@ public class ObservedPlayer : FikaPlayer
             }
 
             currentState.Velocity = velocity;
+        }
+        else if (bufferState == EBufferState.Extrapolating)
+        {
+            currentState.Position = snapFrom.Data.Position + (snapFrom.Data.Velocity * t);
 
-            if (!_cullingHandler.IsVisible)
+            currentState.Rotation = snapFrom.Data.Rotation;
+            currentState.HeadRotation = snapFrom.Data.HeadRotation;
+            currentState.MovementDirection = snapFrom.Data.MovementDirection;
+            currentState.IsMoving = snapFrom.Data.MovementDirection.sqrMagnitude > _movementDeadZoneSqr;
+
+            currentState.State = snapFrom.Data.State;
+            currentState.Tilt = snapFrom.Data.Tilt;
+            currentState.Step = snapFrom.Data.Step;
+            currentState.MovementSpeed = snapFrom.Data.MovementSpeed;
+            currentState.SprintSpeed = snapFrom.Data.SprintSpeed;
+            currentState.IsProne = snapFrom.Data.IsProne;
+            currentState.PoseLevel = snapFrom.Data.PoseLevel;
+            currentState.IsSprinting = snapFrom.Data.IsSprinting;
+            currentState.Stamina = snapFrom.Data.Physical;
+            currentState.Blindfire = snapFrom.Data.Blindfire;
+            currentState.WeaponOverlap = snapFrom.Data.WeaponOverlap;
+            currentState.LeftStanceDisabled = snapFrom.Data.LeftStanceDisabled;
+            currentState.IsGrounded = snapFrom.Data.IsGrounded;
+            currentState.Velocity = snapFrom.Data.Velocity;
+        }
+
+        if (!_cullingHandler.IsVisible)
+        {
+            Position = CurrentPlayerState.Position;
+            Rotation = CurrentPlayerState.Rotation;
+            ObservedCharacterController.Vector3_0 = CurrentPlayerState.Velocity;
+
+            if (!_isServer)
             {
-                Position = CurrentPlayerState.Position;
-                Rotation = CurrentPlayerState.Rotation;
-                ObservedCharacterController.Vector3_0 = CurrentPlayerState.Velocity;
-
-                if (!_isServer)
-                {
-                    return;
-                }
-
-                if (CurrentPlayerState.State == EPlayerState.Jump)
-                {
-                    MovementContext.method_2(1f);
-                    return;
-                }
-
-                if (CurrentPlayerState.IsMoving)
-                {
-                    MovementContext.method_1(CurrentPlayerState.MovementDirection);
-                }
-
                 return;
             }
 
-            Rotation = CurrentPlayerState.Rotation;
-
-            HeadRotation = CurrentPlayerState.HeadRotation;
-            ProceduralWeaponAnimation.SetHeadRotation(CurrentPlayerState.HeadRotation);
-
-            var newState = CurrentPlayerState.State;
-
-            if (newState == EPlayerState.Jump)
+            if (CurrentPlayerState.State == EPlayerState.Jump)
             {
-                MovementContext.PlayerAnimatorEnableJump(true);
-                if (_isServer)
-                {
-                    MovementContext.method_2(1f);
-                }
+                MovementContext.method_2(1f);
+                return;
             }
 
-            var isGrounded = CurrentPlayerState.IsGrounded;
-            MovementContext.IsGrounded = isGrounded;
-
-            if (isGrounded)
-            {
-                MovementContext.PlayerAnimatorEnableJump(false);
-                MovementContext.PlayerAnimatorEnableLanding(true);
-            }
-
-            MovementContext.PlayerAnimatorEnableInert(CurrentPlayerState.IsMoving);
-            MovementContext.MovementDirection = CurrentPlayerState.MovementDirection;
-            if (_isServer && CurrentPlayerState.IsMoving)
+            if (CurrentPlayerState.IsMoving)
             {
                 MovementContext.method_1(CurrentPlayerState.MovementDirection);
             }
 
-            Physical.SerializationStruct = CurrentPlayerState.Stamina;
-
-            if (MovementContext.Step != CurrentPlayerState.Step)
-            {
-                CurrentManagedState.SetStep(CurrentPlayerState.Step);
-            }
-
-            if (Physical.Sprinting != CurrentPlayerState.IsSprinting)
-            {
-                CurrentManagedState.EnableSprint(CurrentPlayerState.IsSprinting);
-            }
-
-            if (MovementContext.IsInPronePose != CurrentPlayerState.IsProne)
-            {
-                MovementContext.IsInPronePose = CurrentPlayerState.IsProne;
-            }
-
-            if (!Mathf.Approximately(PoseLevel, CurrentPlayerState.PoseLevel))
-            {
-                MovementContext.SetPoseLevel(CurrentPlayerState.PoseLevel);
-            }
-
-            MovementContext.SetCharacterMovementSpeed(CurrentPlayerState.MovementSpeed, true);
-            MovementContext.SprintSpeed = CurrentPlayerState.SprintSpeed;
-
-            if (MovementContext.BlindFire != CurrentPlayerState.Blindfire)
-            {
-                MovementContext.SetBlindFire(CurrentPlayerState.Blindfire);
-            }
-
-            Transform.position = CurrentPlayerState.Position;
-
-            if (!Mathf.Approximately(MovementContext.Tilt, CurrentPlayerState.Tilt))
-            {
-                MovementContext.SetTilt(CurrentPlayerState.Tilt, true);
-            }
-
-            if (!Mathf.Approximately(ObservedOverlap, CurrentPlayerState.WeaponOverlap))
-            {
-                ObservedOverlap = CurrentPlayerState.WeaponOverlap;
-                ShouldOverlap = true;
-            }
-
-            LeftStanceDisabled = CurrentPlayerState.LeftStanceDisabled;
-
-            // hacky way to set velocity
-            ObservedCharacterController.Vector3_0 = CurrentPlayerState.Velocity;
+            return;
         }
+
+        Rotation = CurrentPlayerState.Rotation;
+
+        HeadRotation = CurrentPlayerState.HeadRotation;
+        ProceduralWeaponAnimation.SetHeadRotation(CurrentPlayerState.HeadRotation);
+
+        var newState = CurrentPlayerState.State;
+
+        if (newState == EPlayerState.Jump)
+        {
+            MovementContext.PlayerAnimatorEnableJump(true);
+            if (_isServer)
+            {
+                MovementContext.method_2(1f);
+            }
+        }
+
+        var isGrounded = CurrentPlayerState.IsGrounded;
+        MovementContext.IsGrounded = isGrounded;
+
+        if (isGrounded)
+        {
+            MovementContext.PlayerAnimatorEnableJump(false);
+            MovementContext.PlayerAnimatorEnableLanding(true);
+        }
+
+        MovementContext.PlayerAnimatorEnableInert(CurrentPlayerState.IsMoving);
+        MovementContext.MovementDirection = CurrentPlayerState.MovementDirection;
+        if (_isServer && CurrentPlayerState.IsMoving)
+        {
+            MovementContext.method_1(CurrentPlayerState.MovementDirection);
+        }
+
+        Physical.SerializationStruct = CurrentPlayerState.Stamina;
+
+        if (MovementContext.Step != CurrentPlayerState.Step)
+        {
+            CurrentManagedState.SetStep(CurrentPlayerState.Step);
+        }
+
+        if (Physical.Sprinting != CurrentPlayerState.IsSprinting)
+        {
+            CurrentManagedState.EnableSprint(CurrentPlayerState.IsSprinting);
+        }
+
+        if (MovementContext.IsInPronePose != CurrentPlayerState.IsProne)
+        {
+            MovementContext.IsInPronePose = CurrentPlayerState.IsProne;
+        }
+
+        if (!Mathf.Approximately(PoseLevel, CurrentPlayerState.PoseLevel))
+        {
+            MovementContext.SetPoseLevel(CurrentPlayerState.PoseLevel);
+        }
+
+        MovementContext.SetCharacterMovementSpeed(CurrentPlayerState.MovementSpeed, true);
+        MovementContext.SprintSpeed = CurrentPlayerState.SprintSpeed;
+
+        if (MovementContext.BlindFire != CurrentPlayerState.Blindfire)
+        {
+            MovementContext.SetBlindFire(CurrentPlayerState.Blindfire);
+        }
+
+        Transform.position = CurrentPlayerState.Position;
+
+        if (!Mathf.Approximately(MovementContext.Tilt, CurrentPlayerState.Tilt))
+        {
+            MovementContext.SetTilt(CurrentPlayerState.Tilt, true);
+        }
+
+        if (!Mathf.Approximately(ObservedOverlap, CurrentPlayerState.WeaponOverlap))
+        {
+            ObservedOverlap = CurrentPlayerState.WeaponOverlap;
+            ShouldOverlap = true;
+        }
+
+        LeftStanceDisabled = CurrentPlayerState.LeftStanceDisabled;
+
+        ObservedCharacterController.Vector3_0 = CurrentPlayerState.Velocity;
     }
 
     public override void InteractionRaycast()
