@@ -11,7 +11,7 @@ using JetBrains.Annotations;
 
 namespace Fika.Core.Main.ObservedClasses;
 
-public class ObservedInventoryController : Player.PlayerInventoryController, Interface18
+public sealed class ObservedInventoryController : Player.PlayerInventoryController, Interface18
 {
     private readonly IPlayerSearchController _searchController;
     private readonly FikaPlayer _fikaPlayer;

@@ -5,7 +5,7 @@ using Fika.Core.Main.Players;
 
 namespace Fika.Core.Main.ObservedClasses;
 
-public class ObservedCorpseCulling : IDisposable
+public sealed class ObservedCorpseCulling : IDisposable
 {
     public bool IsVisible;
 

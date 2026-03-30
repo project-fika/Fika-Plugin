@@ -9,7 +9,7 @@ using Fika.Core.Main.Players;
 
 namespace Fika.Core.Main.ObservedClasses.HandsControllers;
 
-internal class ObservedMedsController : Player.MedsController
+internal sealed class ObservedMedsController : Player.MedsController
 {
     private FikaPlayer _fikaPlayer;
     private GStruct382<EBodyPart> _healParts;

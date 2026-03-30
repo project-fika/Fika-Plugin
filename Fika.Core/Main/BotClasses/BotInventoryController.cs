@@ -14,7 +14,7 @@ using static EFT.Player;
 
 namespace Fika.Core.Main.BotClasses;
 
-public class BotInventoryController : PlayerInventoryController
+public sealed class BotInventoryController : PlayerInventoryController
 {
     public override bool HasDiscardLimits
     {

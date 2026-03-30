@@ -3,7 +3,7 @@ using EFT;
 
 namespace Fika.Core.Networking.Packets.Backend;
 
-public class LoadingProfilePacket : INetSerializable
+public sealed class LoadingProfilePacket : INetSerializable
 {
     public Dictionary<Profile, bool> Profiles;
 

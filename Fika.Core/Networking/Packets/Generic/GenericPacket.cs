@@ -7,7 +7,7 @@ namespace Fika.Core.Networking.Packets.Generic;
 /// <summary>
 /// Packet used for many different things to reduce packet bloat
 /// </summary>
-public class GenericPacket : INetReusable
+public sealed class GenericPacket : INetReusable
 {
     public int NetId;
     public EGenericSubPacketType Type;

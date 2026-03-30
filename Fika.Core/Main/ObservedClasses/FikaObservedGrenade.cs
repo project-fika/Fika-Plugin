@@ -2,4 +2,4 @@
 
 namespace Fika.Core.Main.ObservedClasses;
 
-public class FikaObservedGrenade : Grenade;
+public sealed class FikaObservedGrenade : Grenade;

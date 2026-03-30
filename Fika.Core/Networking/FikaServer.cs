@@ -53,7 +53,7 @@ namespace Fika.Core.Networking;
 /// <summary>
 /// Server used to synchronize all <see cref="FikaClient"/>s
 /// </summary>
-public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchListener, GInterface279, IFikaNetworkManager
+public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchListener, GInterface279, IFikaNetworkManager
 {
     public int ReadyClients;
     public DateTime TimeSinceLastPeerDisconnected;
@@ -530,15 +530,14 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         }
     }
 
-    protected void Update()
+    private void Update()
     {
         _netServer?.PollEvents();
 
         var unscaledDeltaTime = Time.unscaledDeltaTime;
         for (var i = 0; i < ObservedPlayers.Count; i++)
         {
-            var player = ObservedPlayers[i];
-            player.ManualStateUpdate(NetworkTimeSync.NetworkTime);
+            ObservedPlayers[i].ManualStateUpdate(NetworkTimeSync.NetworkTime);
         }
 
         _statisticsCounter += unscaledDeltaTime;
@@ -570,7 +569,7 @@ public partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchLis
         SendData(ref packet, DeliveryMethod.Unreliable);
     }
 
-    protected void OnDestroy()
+    private void OnDestroy()
     {
         _netServer?.Stop();
         _genericPacket.Clear();

@@ -29,7 +29,7 @@ using HarmonyLib;
 
 namespace Fika.Core.Networking;
 
-public partial class FikaClient
+public sealed partial class FikaClient
 {
     private void OnSyncEventPacketReceived(SyncEventPacket packet)
     {

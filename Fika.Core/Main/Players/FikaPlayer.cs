@@ -1492,7 +1492,7 @@ public class FikaPlayer : LocalPlayer
     }
 
     #region handlers
-    public class KeyHandler(FikaPlayer player)
+    public sealed class KeyHandler(FikaPlayer player)
     {
         public GStruct156<KeyInteractionResultClass> UnlockResult;
         private readonly FikaPlayer _player = player;
@@ -1503,7 +1503,7 @@ public class FikaPlayer : LocalPlayer
         }
     }
 
-    private class LootableContainerInteractionHandler(FikaPlayer player, LootableContainer container)
+    private sealed class LootableContainerInteractionHandler(FikaPlayer player, LootableContainer container)
     {
         private readonly FikaPlayer _player = player;
         public readonly LootableContainer Container = container;
@@ -1523,7 +1523,7 @@ public class FikaPlayer : LocalPlayer
         }
     }
 
-    private class FirearmControllerHandler(FikaPlayer fikaPlayer, Weapon weapon)
+    private sealed class FirearmControllerHandler(FikaPlayer fikaPlayer, Weapon weapon)
     {
         private readonly FikaPlayer _fikaPlayer = fikaPlayer;
         public readonly Weapon Weapon = weapon;
@@ -1552,7 +1552,7 @@ public class FikaPlayer : LocalPlayer
         }
     }
 
-    private class UsableItemControllerHandler(FikaPlayer fikaPlayer, Item item)
+    private sealed class UsableItemControllerHandler(FikaPlayer fikaPlayer, Item item)
     {
         private readonly FikaPlayer _fikaPlayer = fikaPlayer;
         private readonly Item _item = item;
@@ -1580,7 +1580,7 @@ public class FikaPlayer : LocalPlayer
         }
     }
 
-    private class PortableRangeFinderControllerHandler(FikaPlayer fikaPlayer, Item item)
+    private sealed class PortableRangeFinderControllerHandler(FikaPlayer fikaPlayer, Item item)
     {
         private readonly FikaPlayer _fikaPlayer = fikaPlayer;
         private readonly Item _item = item;
@@ -1608,7 +1608,7 @@ public class FikaPlayer : LocalPlayer
         }
     }
 
-    private class QuickUseItemControllerHandler(FikaPlayer fikaPlayer, Item item)
+    private sealed class QuickUseItemControllerHandler(FikaPlayer fikaPlayer, Item item)
     {
         private readonly FikaPlayer _fikaPlayer = fikaPlayer;
         private readonly Item _item = item;
@@ -1636,7 +1636,7 @@ public class FikaPlayer : LocalPlayer
         }
     }
 
-    private class MedsControllerHandler(FikaPlayer fikaPlayer, MedsItemClass meds, GStruct382<EBodyPart> bodyParts, int animationVariant)
+    private sealed class MedsControllerHandler(FikaPlayer fikaPlayer, MedsItemClass meds, GStruct382<EBodyPart> bodyParts, int animationVariant)
     {
         private readonly FikaPlayer _fikaPlayer = fikaPlayer;
         private readonly MedsItemClass _meds = meds;
@@ -1667,7 +1667,7 @@ public class FikaPlayer : LocalPlayer
         }
     }
 
-    private class FoodControllerHandler(FikaPlayer fikaPlayer, FoodDrinkItemClass foodDrink, float amount, GStruct382<EBodyPart> bodyParts, int animationVariant)
+    private sealed class FoodControllerHandler(FikaPlayer fikaPlayer, FoodDrinkItemClass foodDrink, float amount, GStruct382<EBodyPart> bodyParts, int animationVariant)
     {
         private readonly FikaPlayer _fikaPlayer = fikaPlayer;
         private readonly FoodDrinkItemClass _foodDrink = foodDrink;
@@ -1699,7 +1699,7 @@ public class FikaPlayer : LocalPlayer
         }
     }
 
-    private class KnifeControllerHandler(FikaPlayer fikaPlayer, KnifeComponent knife)
+    private sealed class KnifeControllerHandler(FikaPlayer fikaPlayer, KnifeComponent knife)
     {
         private readonly FikaPlayer _fikaPlayer = fikaPlayer;
         public readonly KnifeComponent Knife = knife;
@@ -1727,7 +1727,7 @@ public class FikaPlayer : LocalPlayer
         }
     }
 
-    private class QuickKnifeControllerHandler(FikaPlayer fikaPlayer, KnifeComponent knife)
+    private sealed class QuickKnifeControllerHandler(FikaPlayer fikaPlayer, KnifeComponent knife)
     {
         private readonly FikaPlayer _fikaPlayer = fikaPlayer;
         public readonly KnifeComponent Knife = knife;
@@ -1755,7 +1755,7 @@ public class FikaPlayer : LocalPlayer
         }
     }
 
-    private class GrenadeControllerHandler(FikaPlayer fikaPlayer, ThrowWeapItemClass throwWeap)
+    private sealed class GrenadeControllerHandler(FikaPlayer fikaPlayer, ThrowWeapItemClass throwWeap)
     {
         private readonly FikaPlayer _fikaPlayer = fikaPlayer;
         private readonly ThrowWeapItemClass _throwWeap = throwWeap;
@@ -1783,7 +1783,7 @@ public class FikaPlayer : LocalPlayer
         }
     }
 
-    private class QuickGrenadeControllerHandler(FikaPlayer fikaPlayer, ThrowWeapItemClass throwWeap)
+    private sealed class QuickGrenadeControllerHandler(FikaPlayer fikaPlayer, ThrowWeapItemClass throwWeap)
     {
         private readonly FikaPlayer _fikaPlayer = fikaPlayer;
         private readonly ThrowWeapItemClass _throwWeap = throwWeap;

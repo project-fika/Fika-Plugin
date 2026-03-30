@@ -5,7 +5,7 @@ using Fika.Core.Main.Players;
 
 namespace Fika.Core.Main.ObservedClasses.HandsControllers;
 
-internal class ObservedEmptyHandsController : Player.EmptyHandsController
+internal sealed class ObservedEmptyHandsController : Player.EmptyHandsController
 {
     private ObservedPlayer _observedPlayer;
 

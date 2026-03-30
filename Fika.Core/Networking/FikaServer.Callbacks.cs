@@ -33,7 +33,7 @@ using Fika.Core.ConsoleCommands;
 
 namespace Fika.Core.Networking;
 
-public partial class FikaServer
+public sealed partial class FikaServer
 {
     private void OnLoadingScreenPlayersPacketReceived(LoadingScreenPlayersPacket packet, NetPeer peer)
     {

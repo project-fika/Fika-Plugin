@@ -3,7 +3,7 @@ using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.Player.Common;
 
-public class CommonPlayerPacket : INetReusable
+public sealed class CommonPlayerPacket : INetReusable
 {
     public int NetId;
     public ECommonSubPacketType Type;

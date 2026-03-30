@@ -13,7 +13,7 @@ using static Fika.Core.Networking.IFikaNetworkManager;
 
 namespace Fika.Core;
 
-public class FikaConfig(ConfigFile config)
+public sealed class FikaConfig(ConfigFile config)
 {
     private readonly ConfigFile _config = config;
 

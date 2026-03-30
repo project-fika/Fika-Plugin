@@ -43,7 +43,7 @@ namespace Fika.Core.Networking;
 /// <summary>
 /// Client used to communicate with the <see cref="FikaServer"/>
 /// </summary>
-public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetworkManager
+public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetworkManager
 {
     public FikaPlayer MyPlayer;
     public int Ping;
@@ -299,15 +299,14 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
         }
     }
 
-    protected void Update()
+    private void Update()
     {
         _netClient?.PollEvents();
 
         var unscaledDeltaTime = Time.unscaledDeltaTime;
         for (var i = 0; i < ObservedPlayers.Count; i++)
         {
-            var player = ObservedPlayers[i];
-            player.ManualStateUpdate(NetworkTimeSync.NetworkTime);
+            ObservedPlayers[i].ManualStateUpdate(NetworkTimeSync.NetworkTime);
         }
 
         while (_inventoryOperations.Count > 0)
@@ -330,7 +329,7 @@ public partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetwork
         }
     }
 
-    protected void OnDestroy()
+    private void OnDestroy()
     {
         _netClient?.Stop();
         _genericPacket.Clear();

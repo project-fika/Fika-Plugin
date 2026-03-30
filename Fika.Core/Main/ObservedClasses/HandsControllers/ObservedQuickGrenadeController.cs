@@ -8,7 +8,7 @@ namespace Fika.Core.Main.ObservedClasses.HandsControllers;
 /// <summary>
 /// This is only used by AI
 /// </summary>
-internal class ObservedQuickGrenadeController : Player.QuickGrenadeThrowHandsController
+internal sealed class ObservedQuickGrenadeController : Player.QuickGrenadeThrowHandsController
 {
     public static ObservedQuickGrenadeController Create(FikaPlayer player, ThrowWeapItemClass item)
     {

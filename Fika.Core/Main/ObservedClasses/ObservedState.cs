@@ -1,6 +1,6 @@
 ﻿namespace Fika.Core.Main.ObservedClasses;
 
-internal class ObservedState
+internal sealed class ObservedState
 {
     internal ObservedState(Vector3 position, Vector2 rotation)
     {

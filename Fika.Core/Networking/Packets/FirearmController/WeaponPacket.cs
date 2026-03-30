@@ -3,7 +3,7 @@ using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.FirearmController;
 
-public class WeaponPacket : INetReusable
+public sealed class WeaponPacket : INetReusable
 {
     public int NetId;
     public EFirearmSubPacketType Type;
