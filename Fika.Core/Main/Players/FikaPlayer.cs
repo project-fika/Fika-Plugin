@@ -51,7 +51,7 @@ public class FikaPlayer : LocalPlayer
     public int NetId;
     public bool IsObservedAI;
     public Dictionary<uint, Action<ServerOperationStatus>> OperationCallbacks = [];
-    public PlayerSnapshotter Snapshotter;
+    public PlayerSnapshotter<PlayerStateSnapshot> Snapshotter;
     public CommonPlayerPacket CommonPacket;
     public virtual bool LeftStanceDisabled { get; internal set; }
     public DateTime TalkDateTime { get; internal set; }

@@ -22,6 +22,7 @@ using Fika.Core.Main.PacketHandlers;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Communication;
+using Fika.Core.Networking.Packets.Player;
 using Fika.Core.Networking.Packets.Player.Common;
 using Fika.Core.Networking.Packets.Player.Common.SubPackets;
 using Fika.Core.Networking.Snapshotting;
@@ -279,7 +280,7 @@ public class ObservedPlayer : FikaPlayer
         player.AggressorFound = false;
         player._animators[0].enabled = true;
         player._isServer = FikaBackendUtils.IsServer;
-        player.Snapshotter = new PlayerSnapshotter();
+        player.Snapshotter = new PlayerSnapshotter<PlayerStateSnapshot>();
         player.CurrentPlayerState = new ObservedState(position, player.Rotation);
         player._isZombie = player.UsedSimplifiedSkeleton;
 

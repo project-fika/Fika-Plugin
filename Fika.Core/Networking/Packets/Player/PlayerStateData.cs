@@ -11,7 +11,7 @@ namespace Fika.Core.Networking.Packets.Player;
 /// Used for interpolation, lag compensation, and state buffering.
 /// </summary>
 [StructLayout(LayoutKind.Sequential, Pack = 1)]
-public readonly struct PlayerStateSnapshot
+public readonly struct PlayerStateSnapshot : ISnapshot
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public PlayerStateSnapshot(in PlayerStateData packet, double remoteTime)
@@ -22,9 +22,9 @@ public readonly struct PlayerStateSnapshot
     }
 
     /// <summary>8 bytes, offset 0</summary>
-    public readonly double RemoteTime;
+    public readonly double RemoteTime { get; }
     /// <summary>8 bytes, offset 8</summary>
-    public readonly double LocalTime;
+    public readonly double LocalTime { get; }
     /// <summary>39 bytes, offset 16</summary>
     public readonly PlayerStateData Data;
 }

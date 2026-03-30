@@ -5,21 +5,21 @@ using Fika.Core.Networking.Packets.Player;
 namespace Fika.Core.Networking.Snapshotting;
 
 /// <summary>
-/// A high-performance, zero-allocation circular buffer designed for <see cref="PlayerStateSnapshot"/> interpolation. <br/>
+/// A high-performance, zero-allocation circular buffer designed for <see cref="ISnapshot"/> (<typeparamref name="T"/>) interpolation. <br/>
 /// Utilizes bitwise masking for O(1) insertions and binary search for O(log N) sampling.
 /// </summary>
 /// <remarks>
 /// Heavily inspired by the id Tech 3 networking model (used in Quake III Arena) <br/>
 /// Written by <b>Lacyway</b>
 /// </remarks>
-public sealed class PlayerSnapshotter
+public sealed class PlayerSnapshotter<T> where T : struct, ISnapshot
 {
     /// <summary> Capacity must be a power of two to allow bitwise wrapping via <see cref="_mask"/>. </summary>
     private const int _capacity = 16;
     private const int _mask = _capacity - 1;
 
     /// <summary> Contiguous memory block of snapshots to maximize CPU L1/L2 cache hits. </summary>
-    private readonly PlayerStateSnapshot[] _buffer = new PlayerStateSnapshot[_capacity];
+    private readonly T[] _buffer = new T[_capacity];
 
     /// <summary> Clock synchronization manager. </summary>
     private TimeSyncEMA _timeSync;
@@ -37,7 +37,7 @@ public sealed class PlayerSnapshotter
     /// </summary>
     /// <param name="snapshot">The state data received from the network. Passed by <see langword="in"/> to avoid copying the big struct.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void AddSnapshot(in PlayerStateSnapshot snapshot)
+    public void AddSnapshot(in T snapshot)
     {
         if (_totalAdded > 0)
         {
@@ -134,7 +134,7 @@ public sealed class PlayerSnapshotter
         fromIdx = (int)((offset + low - 1) & _mask);
         toIdx = (int)((offset + low) & _mask);
 
-        // access via ref readonly to avoid stack-copying the large PlayerStateSnapshot struct
+        // access via ref readonly to avoid stack-copying the large ISnapshot structs
         ref readonly var snapFrom = ref _buffer[fromIdx];
         ref readonly var snapTo = ref _buffer[toIdx];
 
@@ -150,8 +150,20 @@ public sealed class PlayerSnapshotter
     /// <param name="index">The masked index retrieved from <see cref="GetInterpolationIndices"/>.</param>
     /// <returns>A <see langword="readonly"/> reference to the snapshot, preventing struct copies.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ref readonly PlayerStateSnapshot GetSnapshot(int index)
+    public ref readonly T GetSnapshot(int index)
     {
         return ref _buffer[index];
+    }
+
+    /// <summary>
+    /// Clears the snapshotter and resets it to default
+    /// </summary>
+    public void Clear()
+    {
+        _totalAdded = 0;
+        _timeSync = default;
+        _adaptiveJitterBuffer = default;
+        _lastLocalTime = 0;
+        _lastRemoteTime = 0;
     }
 }
