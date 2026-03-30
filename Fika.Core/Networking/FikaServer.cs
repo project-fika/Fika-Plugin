@@ -535,9 +535,10 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
         _netServer?.PollEvents();
 
         var unscaledDeltaTime = Time.unscaledDeltaTime;
+        var networkTime = NetworkTimeSync.NetworkTime;
         for (var i = 0; i < ObservedPlayers.Count; i++)
         {
-            ObservedPlayers[i].ManualStateUpdate(NetworkTimeSync.NetworkTime);
+            ObservedPlayers[i].ManualStateUpdate(networkTime);
         }
 
         _statisticsCounter += unscaledDeltaTime;
