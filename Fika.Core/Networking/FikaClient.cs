@@ -125,6 +125,7 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
     private Queue<BaseInventoryOperationClass> _inventoryOperations;
     private List<int> _missingIds;
     private GenericPacket _genericPacket;
+    private DateTime _startTime;
 
     public async Task Init()
     {
@@ -147,6 +148,7 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
         _logger = Logger.CreateLogSource("Fika.Client");
         _inventoryOperations = new(8);
         _missingIds = [];
+        _startTime = DateTime.Now;
         ObservedPlayers = [];
         PlayerAmount = 1;
 
@@ -617,6 +619,7 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
         _logger.LogInfo($"Received packets: {_netClient.Statistics.PacketsReceived}");
         _logger.LogInfo($"Received data: {FikaGlobals.FormatFileSize(_netClient.Statistics.BytesReceived)}");
         _logger.LogInfo($"Packet loss: {_netClient.Statistics.PacketLossPercent}%");
+        _logger.LogInfo($"Time in raid: {_startTime - DateTime.Now:hh\\h\\ mm\\m\\ ss\\s}");
     }
 
     public NetPeer GetPeerById(int id)

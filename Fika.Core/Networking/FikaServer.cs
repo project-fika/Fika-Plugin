@@ -140,6 +140,7 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
     private Dictionary<Profile, bool> _visualProfiles;
     private Dictionary<string, int> _cachedConnections;
     private GenericPacket _genericPacket;
+    private DateTime _startTime;
 
     internal FikaVOIPServer VOIPServer { get; set; }
     internal FikaVOIPClient VOIPClient { get; set; }
@@ -168,6 +169,7 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
         _sendThreshold = 2f;
         _cachedConnections = [];
         _logger = Logger.CreateLogSource("Fika.Server");
+        _startTime = DateTime.Now;
         ObservedPlayers = [];
         PlayerAmount = 1;
 
@@ -1001,6 +1003,7 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
         _logger.LogInfo($"Received packets: {_netServer.Statistics.PacketsReceived}");
         _logger.LogInfo($"Received data: {FikaGlobals.FormatFileSize(_netServer.Statistics.BytesReceived)}");
         _logger.LogInfo($"Packet loss: {_netServer.Statistics.PacketLossPercent}%");
+        _logger.LogInfo($"Time in raid: {_startTime - DateTime.Now:hh\\h\\ mm\\m\\ ss\\s}");
     }
 
     public void ToggleAdminUI()
