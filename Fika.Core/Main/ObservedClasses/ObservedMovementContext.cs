@@ -240,7 +240,10 @@ public class ObservedMovementContext : MovementContext
     {
         return name switch
         {
+            EPlayerState.Idle => new ObservedIdleStateClass(this),
             EPlayerState.Run => new ObservedRunState(this),
+            EPlayerState.ProneMove => new ObservedProneMoveStateClass(this),
+            EPlayerState.Transit2Prone => new ObservedTransit2ProneStateClass(this),
             EPlayerState.Sprint => new ObservedSprintState(this),
             EPlayerState.Stationary => new ObservedStationaryState(this),
             EPlayerState.IdleWeaponMounting => new ObservedMountedState(this, _player),
