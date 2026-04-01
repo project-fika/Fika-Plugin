@@ -63,16 +63,15 @@ public class ObservedMovementContext : MovementContext
     public override void DirectApplyMotion(Vector3 motion, float deltaTime)
     {
         InputMotion = motion / deltaTime;
-        Flash(ref motion);
         var speedLimit = CharacterController.SpeedLimit;
-        var flag = PlatformMotion != Vector3.zero;
-        if (flag)
+        var hasPlatformMotion = PlatformMotion != Vector3.zero;
+        if (hasPlatformMotion)
         {
             CharacterController.SpeedLimit = -1f;
         }
 
         CharacterController.Move(motion + PlatformMotion, deltaTime);
-        if (flag)
+        if (hasPlatformMotion)
         {
             CharacterController.SpeedLimit = speedLimit;
         }
@@ -80,7 +79,6 @@ public class ObservedMovementContext : MovementContext
         {
             method_8(deltaTime);
         }
-        method_1(motion);
     }
 
     public override void Flash(ref Vector3 motion)
