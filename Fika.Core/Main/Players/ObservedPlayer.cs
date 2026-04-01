@@ -38,7 +38,7 @@ namespace Fika.Core.Main.Players;
 /// Bots are handled by the server, and other clients send their own data which the server replicates to other clients. <br/>
 /// As a host all <see cref="ObservedPlayer"/>s are only other clients.
 /// </summary>
-public class ObservedPlayer : FikaPlayer
+public sealed class ObservedPlayer : FikaPlayer
 {
     #region Fields and Properties
     public FikaHealthBar HealthBar
