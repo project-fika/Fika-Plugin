@@ -59,6 +59,7 @@ public sealed class FikaConfig(ConfigFile config)
     public ConfigEntry<Color> FullHealthColor { get; set; }
     public ConfigEntry<Color> LowHealthColor { get; set; }
     public ConfigEntry<Color> NamePlateTextColor { get; set; }
+    public ConfigEntry<bool> ShowBrokenLimbs { get; set; }
 
     // Coop | Quest Sharing
     public ConfigEntry<EQuestSharingTypes> QuestTypesToShareAndReceive { get; set; }
@@ -443,7 +444,7 @@ public sealed class FikaConfig(ConfigFile config)
             {
                 Category = coopNameplatesHeader,
                 DispName = LocaleUtils.BEPINEX_USE_OCCLUSION_T.Localized(),
-                Order = 3
+                Order = 4
             }),
             "Use Occlusion", ref failed, headers);
 
@@ -452,7 +453,7 @@ public sealed class FikaConfig(ConfigFile config)
             {
                 Category = coopNameplatesHeader,
                 DispName = LocaleUtils.BEPINEX_HEALTHCOLOR_FULL_T.Localized(),
-                Order = 2
+                Order = 3
             }),
             "Full Health Color", ref failed, headers);
 
@@ -461,7 +462,7 @@ public sealed class FikaConfig(ConfigFile config)
             {
                 Category = coopNameplatesHeader,
                 DispName = LocaleUtils.BEPINEX_HEALTHCOLOR_LOW_T.Localized(),
-                Order = 1
+                Order = 2
             }),
             "Low Health Color", ref failed, headers);
 
@@ -470,9 +471,18 @@ public sealed class FikaConfig(ConfigFile config)
             {
                 Category = coopNameplatesHeader,
                 DispName = LocaleUtils.BEPINEX_NAMEPLATECOLOR_T.Localized(),
-                Order = 0
+                Order = 1
             }),
             "Name Plate Text Color", ref failed, headers);
+
+        ShowBrokenLimbs = SetupSetting(coopDefaultNamePlatesHeader, "Show Broken Limbs", failed,
+            new ConfigDescription(LocaleUtils.BEPINEX_SHOWBROKENLIMBS_D.Localized(), tags: new ConfigurationManagerAttributes()
+            {
+                Category = coopNameplatesHeader,
+                DispName = LocaleUtils.BEPINEX_SHOWBROKENLIMBS_T.Localized(),
+                Order = 0
+            }),
+            "Show Broken Limbs", ref failed, headers);
 
         // Coop | Quest Sharing
 

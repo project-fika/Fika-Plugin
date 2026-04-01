@@ -43,6 +43,9 @@ public class FikaHealthBar : MonoBehaviour
     private CanvasGroup _labelsGroup;
     private CanvasGroup _statusGroup;
     private Transform _neckBone;
+    private Dictionary<EBodyPart, GameObject> _bodyParts;
+    private int _destroyedLimbs;
+    private bool _showLimbs;
 
     private static readonly int _checkLayers = LayerMask.GetMask(["HighPolyCollider", "Terrain", "Player"]);
     private static readonly int _playerLayer = LayerMask.NameToLayer("Player");
@@ -268,6 +271,7 @@ public class FikaHealthBar : MonoBehaviour
         FikaPlugin.Instance.Settings.UseNamePlates.SettingChanged += UseNamePlates_SettingChanged;
         FikaPlugin.Instance.Settings.UseHealthNumber.SettingChanged += UseHealthNumber_SettingChanged;
         FikaPlugin.Instance.Settings.ShowEffects.SettingChanged += ShowEffects_SettingChanged;
+        FikaPlugin.Instance.Settings.ShowBrokenLimbs.SettingChanged += ShowBrokenLimbs_SettingChanged;
 
         _currentPlayer.HealthController.HealthChangedEvent += HealthController_HealthChangedEvent;
         _currentPlayer.HealthController.BodyPartDestroyedEvent += HealthController_BodyPartDestroyedEvent;
@@ -278,7 +282,26 @@ public class FikaHealthBar : MonoBehaviour
 
         _canvasRect = _playerPlate.ScalarObjectScreen.transform.parent.RectTransform();
 
+        _showLimbs = FikaPlugin.Instance.Settings.ShowBrokenLimbs.Value;
+        _bodyParts = new Dictionary<EBodyPart, GameObject>()
+        {
+            [EBodyPart.Common] = _playerPlate.Skeleton,
+            [EBodyPart.Head] = _playerPlate.Head,
+            [EBodyPart.LeftArm] = _playerPlate.LeftArm,
+            [EBodyPart.RightArm] = _playerPlate.RightArm,
+            [EBodyPart.LeftLeg] = _playerPlate.LeftLeg,
+            [EBodyPart.RightLeg] = _playerPlate.RightLeg,
+            [EBodyPart.Chest] = _playerPlate.Chest,
+            [EBodyPart.Stomach] = _playerPlate.Stomach
+        };
+
         UpdateHealth();
+    }
+
+    private void ShowBrokenLimbs_SettingChanged(object sender, EventArgs e)
+    {
+        _showLimbs = FikaPlugin.Instance.Settings.ShowBrokenLimbs.Value;
+        RefreshLimbs(_showLimbs);
     }
 
     #region events
@@ -309,6 +332,74 @@ public class FikaHealthBar : MonoBehaviour
     {
         AddEffect(effect);
     }
+
+    private void ShowEffects_SettingChanged(object sender, EventArgs e)
+    {
+        if (FikaPlugin.Instance.Settings.ShowEffects.Value)
+        {
+            _currentPlayer.HealthController.EffectAddedEvent += HealthController_EffectAddedEvent;
+            _currentPlayer.HealthController.EffectRemovedEvent += HealthController_EffectRemovedEvent;
+            AddAllActiveEffects();
+        }
+        else
+        {
+            _currentPlayer.HealthController.EffectAddedEvent -= HealthController_EffectAddedEvent;
+            _currentPlayer.HealthController.EffectRemovedEvent -= HealthController_EffectRemovedEvent;
+
+            List<HealthBarEffect> tempList = [.. _effects];
+            foreach (var effect in tempList)
+            {
+                effect.Remove();
+            }
+            _effects.Clear();
+            tempList.Clear();
+            tempList = null;
+        }
+    }
+
+    private void HealthController_DiedEvent(EDamageType obj)
+    {
+        Destroy(this);
+    }
+
+    private void HealthController_BodyPartRestoredEvent(EBodyPart bodyPart, ValueStruct arg2)
+    {
+        if (_showLimbs)
+        {
+            HandleLimb(bodyPart, false);
+        }
+        UpdateHealth();
+    }
+
+    private void HealthController_BodyPartDestroyedEvent(EBodyPart bodyPart, EDamageType arg2)
+    {
+        if (_showLimbs)
+        {
+            HandleLimb(bodyPart, true);
+        }
+        UpdateHealth();
+    }
+
+    private void HealthController_HealthChangedEvent(EBodyPart bodyPart, float arg2, DamageInfoStruct arg3)
+    {
+        UpdateHealth();
+    }
+
+    private void UsePlateFactionSide_SettingChanged(object sender, EventArgs e)
+    {
+        SetPlayerPlateFactionVisibility(FikaPlugin.Instance.Settings.UsePlateFactionSide.Value);
+    }
+
+    private void HideHealthBar_SettingChanged(object sender, EventArgs e)
+    {
+        SetPlayerPlateHealthVisibility(FikaPlugin.Instance.Settings.HideHealthBar.Value);
+    }
+
+    private void UseNamePlates_SettingChanged(object sender, EventArgs e)
+    {
+        _playerPlate.gameObject.SetActive(FikaPlugin.Instance.Settings.UseNamePlates.Value);
+    }
+    #endregion
 
     private void AddEffect(IEffect effect)
     {
@@ -341,74 +432,53 @@ public class FikaHealthBar : MonoBehaviour
         }
     }
 
-    private void ShowEffects_SettingChanged(object sender, EventArgs e)
+    private void RefreshLimbs(bool active)
     {
-        if (FikaPlugin.Instance.Settings.ShowEffects.Value)
+        if (!active)
         {
-            _currentPlayer.HealthController.EffectAddedEvent += HealthController_EffectAddedEvent;
-            _currentPlayer.HealthController.EffectRemovedEvent += HealthController_EffectRemovedEvent;
-            AddAllActiveEffects();
+            foreach (var bodyPart in _bodyParts.Values)
+            {
+                bodyPart.SetActive(false);
+            }
         }
         else
         {
-            _currentPlayer.HealthController.EffectAddedEvent -= HealthController_EffectAddedEvent;
-            _currentPlayer.HealthController.EffectRemovedEvent -= HealthController_EffectRemovedEvent;
-
-            List<HealthBarEffect> tempList = [.. _effects];
-            foreach (var effect in tempList)
+            var shouldActivate = false;
+            foreach (var item in _bodyParts.Keys)
             {
-                effect.Remove();
+                if (item is EBodyPart.Common)
+                {
+                    continue;
+                }
+
+                var destroyed = _currentPlayer.HealthController.IsBodyPartDestroyed(item);
+                if (destroyed)
+                {
+                    shouldActivate = true;
+                }
+
+                _bodyParts[item].SetActive(destroyed);
             }
-            _effects.Clear();
-            tempList.Clear();
-            tempList = null;
+
+            _bodyParts[EBodyPart.Common].SetActive(shouldActivate);
         }
+    }
+
+    private void HandleLimb(EBodyPart bodyPart, bool destroyed)
+    {
+        _destroyedLimbs += destroyed ? 1 : -1;
+
+        _bodyParts[EBodyPart.Common].SetActive(_destroyedLimbs > 0);
+        _bodyParts[bodyPart].SetActive(destroyed);
     }
 
     private void AddAllActiveEffects()
     {
-        var currentEffects = _currentPlayer.HealthController.GetAllActiveEffects();
-        foreach (var effect in currentEffects)
+        foreach (var effect in _currentPlayer.HealthController.GetAllActiveEffects())
         {
             AddEffect(effect);
         }
     }
-
-    private void HealthController_DiedEvent(EDamageType obj)
-    {
-        Destroy(this);
-    }
-
-    private void HealthController_BodyPartRestoredEvent(EBodyPart arg1, ValueStruct arg2)
-    {
-        UpdateHealth();
-    }
-
-    private void HealthController_BodyPartDestroyedEvent(EBodyPart arg1, EDamageType arg2)
-    {
-        UpdateHealth();
-    }
-
-    private void HealthController_HealthChangedEvent(EBodyPart arg1, float arg2, DamageInfoStruct arg3)
-    {
-        UpdateHealth();
-    }
-
-    private void UsePlateFactionSide_SettingChanged(object sender, EventArgs e)
-    {
-        SetPlayerPlateFactionVisibility(FikaPlugin.Instance.Settings.UsePlateFactionSide.Value);
-    }
-
-    private void HideHealthBar_SettingChanged(object sender, EventArgs e)
-    {
-        SetPlayerPlateHealthVisibility(FikaPlugin.Instance.Settings.HideHealthBar.Value);
-    }
-
-    private void UseNamePlates_SettingChanged(object sender, EventArgs e)
-    {
-        _playerPlate.gameObject.SetActive(FikaPlugin.Instance.Settings.UseNamePlates.Value);
-    }
-    #endregion
 
     /// <summary>
     /// Updates the health on the HealthBar, this is invoked from events on the healthcontroller

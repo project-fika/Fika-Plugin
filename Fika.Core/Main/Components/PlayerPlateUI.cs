@@ -23,6 +23,15 @@ public class PlayerPlateUI : MonoBehaviour
     public CanvasGroup LabelsGroup;
     public CanvasGroup StatusGroup;
 
+    public GameObject Skeleton;
+    public GameObject Head;
+    public GameObject LeftArm;
+    public GameObject RightArm;
+    public GameObject LeftLeg;
+    public GameObject RightLeg;
+    public GameObject Chest;
+    public GameObject Stomach;
+
     public void SetNameText(string text)
     {
         playerNameScreen.SetText(text);
