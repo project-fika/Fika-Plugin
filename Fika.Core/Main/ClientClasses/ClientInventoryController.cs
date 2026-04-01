@@ -35,18 +35,20 @@ public sealed class ClientInventoryController : Player.PlayerOwnerInventoryContr
     }
     private readonly ManualLogSource _logger;
     private readonly Player _player;
+    private readonly bool _instantLoad;
     public readonly FikaPlayer _fikaPlayer;
 
-    public ClientInventoryController(Player player, Profile profile, bool examined) : base(player, profile, examined)
+    public ClientInventoryController(Player player, Profile profile, bool examined, bool instantLoad) : base(player, profile, examined)
     {
         _player = player;
         _fikaPlayer = (FikaPlayer)player;
         MongoID_0 = MongoID.Generate(true);
         PlayerSearchController = new PlayerSearchControllerClass(profile, this);
+        _instantLoad = instantLoad;
         _logger = BepInEx.Logging.Logger.CreateLogSource(nameof(ClientInventoryController));
     }
 
-    public override IPlayerSearchController PlayerSearchController { get; }
+    public override IPlayerSearchController PlayerSearchController { get; }    
 
     public override void GetTraderServicesDataFromServer(string traderId)
     {
@@ -75,6 +77,21 @@ public sealed class ClientInventoryController : Player.PlayerOwnerInventoryContr
         {
             MonoBehaviourSingleton<PreloaderUI>.Instance.MalfunctionGlow.ShowGlow(BattleUIMalfunctionGlow.EGlowType.Repaired, true, method_41());
         }
+    }
+
+    public override Task<IResult> LoadMagazine(AmmoItemClass sourceAmmo, MagazineItemClass magazine, int loadCount, bool ignoreRestrictions)
+    {
+        if (_instantLoad)
+        {
+            if (Singleton<GUISounds>.Instantiated)
+            {
+                Singleton<GUISounds>.Instance.PlayUILoadSound();
+            }
+            var gstruct = (ignoreRestrictions ? magazine.ApplyWithoutRestrictions(this, sourceAmmo, int.MaxValue, true) : magazine.Apply(this, sourceAmmo, int.MaxValue, true));
+            return TryRunNetworkTransaction(gstruct, null);
+        }
+
+        return base.LoadMagazine(sourceAmmo, magazine, loadCount, ignoreRestrictions);
     }
 
     public override void vmethod_1(BaseInventoryOperationClass operation, Callback callback)

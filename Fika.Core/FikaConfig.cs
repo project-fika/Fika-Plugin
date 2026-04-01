@@ -4,10 +4,13 @@ using BepInEx.Configuration;
 using Comfort.Common;
 using EFT.UI;
 using Fika.Core.Main.Utils;
+using Fika.Core.Networking.Http;
+
 #if GOLDMASTER
 using Fika.Core.UI; 
 #endif
 using Fika.Core.UI.Patches;
+using static EFT.SpeedTree.TreeWind;
 using static Fika.Core.FikaPlugin;
 using static Fika.Core.Networking.IFikaNetworkManager;
 
@@ -121,6 +124,8 @@ public sealed class FikaConfig(ConfigFile config)
     public bool RandomLabyrinthSpawns { get; set; }
     public bool PMCFoundInRaid { get; set; }
     public bool AllowSpectateBots { get; set; }
+    public bool InstantLoad { get; set; }
+    public bool FastLoad { get; set; }
     #endregion
 
     private ConfigEntry<T> SetupSetting<T>(string section, string key, T defValue, ConfigDescription configDescription, string fallback, ref bool failed, List<string> error)
@@ -844,5 +849,32 @@ public sealed class FikaConfig(ConfigFile config)
             FikaGlobals.LogWarning($"Header '{original}' was changed to '{header}'");
         }
         return header;
+    }
+
+    internal void GetClientConfig()
+    {
+        var clientConfig = FikaRequestHandler.GetClientConfig();
+
+        UseBTR = clientConfig.UseBTR;
+        FriendlyFire = clientConfig.FriendlyFire;
+        DynamicVExfils = clientConfig.DynamicVExfils;
+        AllowFreeCam = clientConfig.AllowFreeCam;
+        AllowSpectateFreeCam = clientConfig.AllowSpectateFreeCam;
+        AllowItemSending = clientConfig.AllowItemSending;
+        BlacklistedItems = clientConfig.BlacklistedItems;
+        ForceSaveOnDeath = clientConfig.ForceSaveOnDeath;
+        UseInertia = clientConfig.UseInertia;
+        SharedQuestProgression = clientConfig.SharedQuestProgression;
+        CanEditRaidSettings = clientConfig.CanEditRaidSettings;
+        EnableTransits = clientConfig.EnableTransits;
+        AnyoneCanStartRaid = clientConfig.AnyoneCanStartRaid;
+        AllowNamePlates = clientConfig.AllowNamePlates;
+        RandomLabyrinthSpawns = clientConfig.RandomLabyrinthSpawns;
+        PMCFoundInRaid = clientConfig.PMCFoundInRaid;
+        AllowSpectateBots = clientConfig.AllowSpectateBots;
+        InstantLoad = clientConfig.InstantLoad;
+        FastLoad = clientConfig.FastLoad && !InstantLoad; // can only use one, prioritize InstantLoad
+
+        clientConfig.LogValues();
     }
 }

@@ -6,6 +6,7 @@ using EFT.UI;
 using Fika.Core.Bundles;
 using Fika.Core.ConsoleCommands;
 using Fika.Core.Main.Custom;
+using Fika.Core.Main.Patches.InventoryController;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Websocket;
@@ -142,6 +143,12 @@ public class FikaPlugin : BaseUnityPlugin
         {
             _patchManager.EnablePatch(new ItemContext_Patch());
         }
+
+        if (Settings.FastLoad)
+        {
+            _patchManager.EnablePatch(new LoadAmmo_Task_Transpiler());
+            _patchManager.EnablePatch(new ItemViewLoadAmmoComponent_Show_Patch());
+        }
     }
 
     /// <summary>
@@ -237,27 +244,7 @@ public class FikaPlugin : BaseUnityPlugin
 
     private void GetClientConfig()
     {
-        var clientConfig = FikaRequestHandler.GetClientConfig();
-
-        Settings.UseBTR = clientConfig.UseBTR;
-        Settings.FriendlyFire = clientConfig.FriendlyFire;
-        Settings.DynamicVExfils = clientConfig.DynamicVExfils;
-        Settings.AllowFreeCam = clientConfig.AllowFreeCam;
-        Settings.AllowSpectateFreeCam = clientConfig.AllowSpectateFreeCam;
-        Settings.AllowItemSending = clientConfig.AllowItemSending;
-        Settings.BlacklistedItems = clientConfig.BlacklistedItems;
-        Settings.ForceSaveOnDeath = clientConfig.ForceSaveOnDeath;
-        Settings.UseInertia = clientConfig.UseInertia;
-        Settings.SharedQuestProgression = clientConfig.SharedQuestProgression;
-        Settings.CanEditRaidSettings = clientConfig.CanEditRaidSettings;
-        Settings.EnableTransits = clientConfig.EnableTransits;
-        Settings.AnyoneCanStartRaid = clientConfig.AnyoneCanStartRaid;
-        Settings.AllowNamePlates = clientConfig.AllowNamePlates;
-        Settings.RandomLabyrinthSpawns = clientConfig.RandomLabyrinthSpawns;
-        Settings.PMCFoundInRaid = clientConfig.PMCFoundInRaid;
-        Settings.AllowSpectateBots = clientConfig.AllowSpectateBots;
-
-        clientConfig.LogValues();
+        Settings.GetClientConfig();
     }
 
     private void GetNatPunchServerConfig()

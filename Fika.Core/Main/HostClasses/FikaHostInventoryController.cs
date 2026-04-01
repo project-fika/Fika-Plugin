@@ -39,12 +39,14 @@ public sealed class FikaHostInventoryController : Player.PlayerOwnerInventoryCon
     private readonly Player _player;
     private readonly FikaPlayer _fikaPlayer;
     private readonly IPlayerSearchController _searchController;
+    private readonly bool _instantLoad;
 
-    public FikaHostInventoryController(Player player, Profile profile, bool examined) : base(player, profile, examined)
+    public FikaHostInventoryController(Player player, Profile profile, bool examined, bool instantLoad) : base(player, profile, examined)
     {
         _player = player;
         _fikaPlayer = (FikaPlayer)player;
         _searchController = new PlayerSearchControllerClass(profile, this);
+        _instantLoad = instantLoad;
         _logger = BepInEx.Logging.Logger.CreateLogSource(nameof(FikaHostInventoryController));
     }
 
@@ -96,6 +98,21 @@ public sealed class FikaHostInventoryController : Player.PlayerOwnerInventoryCon
             await Task.Yield();
         }
         RunHostOperation(operation, callback);
+    }
+
+    public override Task<IResult> LoadMagazine(AmmoItemClass sourceAmmo, MagazineItemClass magazine, int loadCount, bool ignoreRestrictions)
+    {
+        if (_instantLoad)
+        {
+            if (Singleton<GUISounds>.Instantiated)
+            {
+                Singleton<GUISounds>.Instance.PlayUILoadSound();
+            }
+            var gstruct = (ignoreRestrictions ? magazine.ApplyWithoutRestrictions(this, sourceAmmo, int.MaxValue, true) : magazine.Apply(this, sourceAmmo, int.MaxValue, true));
+            return TryRunNetworkTransaction(gstruct, null); 
+        }
+
+        return base.LoadMagazine(sourceAmmo, magazine, loadCount, ignoreRestrictions);
     }
 
     private void RunHostOperation(BaseInventoryOperationClass operation, Callback callback)
