@@ -312,12 +312,19 @@ public class NetDataReader
         return result;
     }
 
+    /// <inheritdoc cref="GetUnmanagedArray{T}"/>
+    [Obsolete("Use GetUnmanagedArray<T>() instead", true)]
+    public T[] GetArray<T>() where T : unmanaged
+    {
+        return GetUnmanagedArray<T>();
+    }
+
     /// <summary>
     /// Reads an array of objects implementing <see cref="INetSerializable"/>.
     /// </summary>
     /// <typeparam name="T">A type with a parameterless constructor implementing <see cref="INetSerializable"/>.</typeparam>
     /// <returns>A new array of type <typeparamref name="T"/>.</returns>
-    public T[] GetArray<T>() where T : INetSerializable, new()
+    public T[] GetSerializableArray<T>() where T : INetSerializable, new()
     {
         var length = GetUShort();
         var result = new T[length];
