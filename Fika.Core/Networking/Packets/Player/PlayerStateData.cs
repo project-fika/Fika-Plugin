@@ -320,7 +320,7 @@ public readonly struct PlayerStateData
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static byte PackBools(params bool[] bools)
+    public static byte PackBools(params ReadOnlySpan<bool> bools)
     {
         byte flags = 0;
         for (var i = 0; i < 7; i++)
@@ -331,12 +331,6 @@ public readonly struct PlayerStateData
             }
         }
         return flags;
-    }
-
-    public static PlayerStateData FromBuffer(in ArraySegment<byte> buffer)
-    {
-        ref var firstByte = ref buffer.Array[buffer.Offset];
-        return Unsafe.ReadUnaligned<PlayerStateData>(ref firstByte);
     }
 
     public PlayerStateData(FikaPlayer player, bool isMoving)
