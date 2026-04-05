@@ -9,7 +9,7 @@ namespace Fika.Core.UI.Patches;
 /// <summary>
 /// This allows the user to modify all AI settings even after modifying AI amount / difficulty
 /// </summary>
-public class RaidSettingsWindow_method_8_Patch : ModulePatch
+public sealed class RaidSettingsWindow_method_8_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

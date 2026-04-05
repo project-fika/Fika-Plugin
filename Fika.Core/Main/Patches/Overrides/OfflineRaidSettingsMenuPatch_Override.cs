@@ -9,7 +9,7 @@ using SPT.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.Overrides;
 
-public class OfflineRaidSettingsMenuPatch_Override : ModulePatch
+public sealed class OfflineRaidSettingsMenuPatch_Override : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
@@ -30,8 +30,6 @@ public class OfflineRaidSettingsMenuPatch_Override : ModulePatch
         FikaBackendUtils.CustomRaidSettings.UseCustomWeather = false;
         // Always disable the Coop Mode checkbox
         ____coopModeBlocker.SetBlock(true, LocaleUtils.UI_FIKA_ALWAYS_COOP.Localized());
-        ____coopModeToggle.onValueChanged.RemoveAllListeners();
-        ____coopModeToggle.isOn = true;
 
         var captionText = __instance.gameObject.transform.GetChild(0).GetChild(1).GetComponent<LocalizedText>();
         if (captionText != null)

@@ -7,11 +7,13 @@ using SPT.Reflection.Patching;
 
 namespace Fika.Core.UI.Patches;
 
-public class MatchmakerOfflineRaidScreen_Show_Patch : ModulePatch
+public sealed class MatchmakerOfflineRaidScreen_Show_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(MatchmakerOfflineRaidScreen).GetMethods().FirstOrDefault(x => x.Name == "Show" && x.GetParameters().Length == 3);
+        return typeof(MatchmakerOfflineRaidScreen)
+            .GetMethods()
+            .FirstOrDefault(x => x.Name == "Show" && x.GetParameters().Length == 3);
     }
 
     [PatchPostfix]
