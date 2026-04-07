@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-#if UNITY_ANDROID
-using Unity.Collections.LowLevel.Unsafe;
-#endif
 
 namespace Fika.Core.Networking.LiteNetLib.Utils;
 
