@@ -213,8 +213,6 @@ public sealed class TarkovApplication_LocalGameCreator_Patch : ModulePatch
             coopGame.SetMatchmakerStatus("Coop game created");
         }
 
-        Logger.LogError($"{raidSettings.BotSettings.BotAmount}");
-
         await coopGame.InitPlayer(raidSettings.BotSettings);
         UnityEngine.Object.DestroyImmediate(MonoBehaviourSingleton<MenuUI>.Instance.gameObject);
         ___mainMenuController?.Unsubscribe();
