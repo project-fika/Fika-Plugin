@@ -140,7 +140,8 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
             EnableStatistics = true,
             MaxConnectAttempts = 5,
             ReconnectDelay = 1 * 1000,
-            ChannelsCount = 2
+            ChannelsCount = 2,
+            UseNativeSockets = NativeSocket.IsSupported
         };
 
         _packetProcessor = new();

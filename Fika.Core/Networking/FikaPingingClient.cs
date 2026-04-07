@@ -65,7 +65,8 @@ public class FikaPingingClient : INetEventListener, INatPunchListener, IDisposab
         NetClient = new(this)
         {
             UnconnectedMessagesEnabled = true,
-            NatPunchEnabled = true
+            NatPunchEnabled = true,
+            UseNativeSockets = NativeSocket.IsSupported
         };
 
         _endPoints = [];

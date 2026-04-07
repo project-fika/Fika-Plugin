@@ -157,7 +157,8 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
             DisconnectTimeout = FikaPlugin.Instance.Settings.ConnectionTimeout.Value * 1000,
             EnableStatistics = true,
             NatPunchEnabled = true,
-            ChannelsCount = 2
+            ChannelsCount = 2,
+            UseNativeSockets = NativeSocket.IsSupported
         };
 
         AllowVOIP = FikaPlugin.Instance.Settings.AllowVOIP.Value;
