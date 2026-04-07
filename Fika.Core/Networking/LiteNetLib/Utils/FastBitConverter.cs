@@ -21,11 +21,9 @@ public static class FastBitConverter
         var size = sizeof(T);
         if (bytes.Length < startIndex + size)
         {
-            ThrowIndexOutOfRangeException();
+            throw new IndexOutOfRangeException();
         }
 
         Unsafe.WriteUnaligned(ref bytes[startIndex], value);
     }
-
-    private static void ThrowIndexOutOfRangeException() => throw new IndexOutOfRangeException();
 }
