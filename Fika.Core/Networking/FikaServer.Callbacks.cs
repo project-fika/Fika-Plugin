@@ -627,6 +627,11 @@ public sealed partial class FikaServer
             respondPackage.GameDateTime = (Singleton<IFikaGame>.Instance.GameController as HostGameController).GameDateTime;
         }
 
+        if (packet.RemoteNetId != 0 && _coopHandler.Players.TryGetValue(packet.RemoteNetId, out var player))
+        {
+            peer.Player = player;
+        }
+
         SendData(ref respondPackage, DeliveryMethod.ReliableOrdered);
     }
 

@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Net;
 using System.Threading;
+using Fika.Core.Main.Players;
 
 namespace Fika.Core.Networking.LiteNetLib;
 
@@ -29,6 +30,12 @@ public class NetPeer : LiteNetPeer
     {
         _channels = new BaseChannel[netManager.ChannelsCount * NetConstants.ChannelTypeCount];
     }
+
+    /// <summary>
+    /// The <see cref="FikaPlayer"/> associated with this peer
+    /// </summary>
+    /// <remarks>Only applicable if running as a <see cref="FikaServer"/>, and is not reliable</remarks>
+    public FikaPlayer Player { get; internal set; }
 
     /// <summary>
     /// Send data to peer

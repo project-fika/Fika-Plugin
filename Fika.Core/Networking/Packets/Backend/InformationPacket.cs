@@ -17,6 +17,7 @@ public struct InformationPacket : INetSerializable
     public DateTime GameTime;
     public TimeSpan SessionTime;
     public GameDateTime GameDateTime;
+    public int RemoteNetId;
 
     public void Deserialize(NetDataReader reader)
     {
@@ -33,6 +34,7 @@ public struct InformationPacket : INetSerializable
         }
         HostReceivedLocation = reader.GetBool();
         HostLoaded = reader.GetBool();
+        RemoteNetId = reader.GetInt();
     }
 
     public void Serialize(NetDataWriter writer)
@@ -50,5 +52,6 @@ public struct InformationPacket : INetSerializable
         }
         writer.Put(HostReceivedLocation);
         writer.Put(HostLoaded);
+        writer.Put(RemoteNetId);
     }
 }

@@ -121,6 +121,12 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
             await Task.Delay(100);
             _abstractGame.SetMatchmakerStatus(LocaleUtils.UI_WAIT_FOR_OTHER_PLAYERS.Localized(), (float)client.ReadyClients / expectedPlayers);
         } while (client.ReadyClients < expectedPlayers);
+
+        var finalPacket = new InformationPacket
+        {
+            RemoteNetId = client.NetId
+        };
+        client.SendData(ref finalPacket, DeliveryMethod.ReliableOrdered);
     }
 
     public override async Task GenerateWeathers()
