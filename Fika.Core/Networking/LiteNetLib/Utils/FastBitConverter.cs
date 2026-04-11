@@ -16,14 +16,8 @@ public static class FastBitConverter
     /// Thrown when the <paramref name="bytes"/> array is too small to contain the value at the given <paramref name="startIndex"/>.
     /// </exception>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static unsafe void GetBytes<T>(byte[] bytes, int startIndex, T value) where T : unmanaged
+    public static void GetBytes<T>(byte[] bytes, int startIndex, T value) where T : unmanaged
     {
-        var size = sizeof(T);
-        if (bytes.Length < startIndex + size)
-        {
-            throw new IndexOutOfRangeException();
-        }
-
         Unsafe.WriteUnaligned(ref bytes[startIndex], value);
     }
 }
