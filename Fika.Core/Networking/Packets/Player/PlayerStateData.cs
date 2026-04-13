@@ -14,10 +14,10 @@ namespace Fika.Core.Networking.Packets.Player;
 public readonly struct PlayerStateSnapshot : ISnapshot
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public PlayerStateSnapshot(in PlayerStateData packet, double remoteTime)
+    public PlayerStateSnapshot(in PlayerStateData packet, double remoteTime, double localTime)
     {
         RemoteTime = remoteTime;
-        LocalTime = NetworkTimeSync.NetworkTime;
+        LocalTime = localTime;
         Data = packet;
     }
 

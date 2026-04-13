@@ -928,10 +928,11 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
                 break;
             case EPacketType.PlayerState:
                 var remoteTime = reader.GetDouble();
+                var localTime = NetworkTimeSync.NetworkTime;
                 var snapshot = reader.GetUnmanaged<PlayerStateData>();
                 if (_coopHandler.Players.TryGetValue(snapshot.NetId, out var player))
                 {
-                    var header = new PlayerStateSnapshot(in snapshot, remoteTime);
+                    var header = new PlayerStateSnapshot(in snapshot, remoteTime, localTime);
                     player.Snapshotter.AddSnapshot(in header);
                 }
                 break;

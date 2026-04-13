@@ -486,6 +486,7 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
                 break;
             case EPacketType.PlayerState:
                 var remoteTime = reader.GetDouble();
+                var localTime = NetworkTimeSync.NetworkTime;
                 var remaining = reader.GetRemainingBytesSpan();
                 var snapshots = MemoryMarshal.Cast<byte, PlayerStateData>(remaining);
                 for (var i = 0; i < snapshots.Length; i++)
@@ -493,7 +494,7 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
                     ref readonly var snapshot = ref snapshots[i];
                     if (_coopHandler.Players.TryGetValue(snapshot.NetId, out var player))
                     {
-                        var header = new PlayerStateSnapshot(in snapshot, remoteTime);
+                        var header = new PlayerStateSnapshot(in snapshot, remoteTime, localTime);
                         player.Snapshotter.AddSnapshot(in header);
                     }
                 }
