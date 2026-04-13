@@ -47,21 +47,14 @@ public class PacketPool<T> : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T Get()
     {
+        if (_pool.TryPop(out T item))
+        {
+            return item;
+        }
 #if DEBUG
-
-        if (_pool.Count > 0)
-        {
-            return _pool.Pop();
-        }
-        else
-        {
-            var packet = _constructor();
-            FikaGlobals.LogError($"[{packet.GetType().Name}] Tried to pop but none existed?");
-            return _constructor();
-        }
-#else
-        return _pool.Count > 0 ? _pool.Pop() : _constructor();
+        FikaGlobals.LogError($"[{typeof(T).Name}] Pool empty. Allocating new instance.");
 #endif
+        return _constructor();
     }
 
     /// <summary>
