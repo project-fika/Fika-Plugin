@@ -47,7 +47,7 @@ public class PacketPool<T> : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T Get()
     {
-        if (_pool.TryPop(out T item))
+        if (_pool.TryPop(out var item))
         {
             return item;
         }
