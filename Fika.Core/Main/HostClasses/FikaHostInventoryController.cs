@@ -197,13 +197,6 @@ public sealed class FikaHostInventoryController : Player.PlayerOwnerInventoryCon
         return false;
     }
 
-    private uint AddOperationCallback(BaseInventoryOperationClass operation, Action<ServerOperationStatus> callback)
-    {
-        var id = operation.Id;
-        _fikaPlayer.OperationCallbacks.Add(id, callback);
-        return id;
-    }
-
     public override SearchContentOperation vmethod_2(SearchableItemItemClass item)
     {
         return new SearchContentOperationResultClass(method_12(), this, PlayerSearchController, Profile, item);
