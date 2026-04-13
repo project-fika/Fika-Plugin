@@ -126,6 +126,7 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
     private List<int> _missingIds;
     private GenericPacket _genericPacket;
     private DateTime _startTime;
+    private Callback _handleInventoryOperationCallback;
 
     public async Task Init()
     {
@@ -150,6 +151,7 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
         _inventoryOperations = new(8);
         _missingIds = [];
         _startTime = DateTime.Now;
+        _handleInventoryOperationCallback = HandleResult;
         ObservedPlayers = [];
         PlayerAmount = 1;
 
@@ -321,7 +323,7 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
             }
 
             _inventoryOperations.Dequeue()
-                .method_1(HandleResult);
+                .method_1(_handleInventoryOperationCallback);
         }
 
         if (Input.GetKeyDown(FikaPlugin.Instance.Settings.ChatKey.Value.MainKey))
