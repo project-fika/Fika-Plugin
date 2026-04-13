@@ -29,7 +29,6 @@ using static Fika.Core.Networking.Packets.World.ReconnectPacket;
 #if DEBUG
 using static Fika.Core.Networking.Packets.Debug.CommandPacket;
 using Fika.Core.ConsoleCommands;
-using Fika.Core.Networking.Pooling;
 #endif
 
 namespace Fika.Core.Networking;
@@ -673,22 +672,14 @@ public sealed partial class FikaServer
                         return;
                     }
 
-                    var handler = _inventoryOperationHandlerPool.GetHandler();
-                    try
-                    {
-                        handler.Set(result, packet.CallbackId, packet.NetId, peer, this);
-                        SendGenericPacketToPeer(EGenericSubPacketType.OperationCallback,
-                                OperationCallbackPacket.FromValue(packet.NetId, packet.CallbackId, EOperationStatus.Started), peer);
+                    var handler = _inventoryOperationHandlerPool.Get();
+                    handler.Set(result, packet.CallbackId, packet.NetId, peer, this);
+                    SendGenericPacketToPeer(EGenericSubPacketType.OperationCallback,
+                            OperationCallbackPacket.FromValue(packet.NetId, packet.CallbackId, EOperationStatus.Started), peer);
 
-                        SendGenericPacket(EGenericSubPacketType.InventoryOperation, packet,
-                            true, peer);
-                        handler.OperationResult.Value.method_1(handler.HandleResultDelegate);
-                        
-                    }
-                    finally
-                    {
-                        _inventoryOperationHandlerPool.ReturnHandler(handler);
-                    }
+                    SendGenericPacket(EGenericSubPacketType.InventoryOperation, packet,
+                        true, peer);
+                    handler.OperationResult.Value.method_1(handler.HandleResultDelegate);
                 }
                 else
                 {

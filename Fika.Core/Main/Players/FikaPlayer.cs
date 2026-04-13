@@ -14,6 +14,7 @@ using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
 using EFT.Vehicle;
+using Fika.Core.Main.BotClasses;
 using Fika.Core.Main.ClientClasses;
 using Fika.Core.Main.ClientClasses.HandsControllers;
 using Fika.Core.Main.GameMode;
@@ -119,8 +120,8 @@ public class FikaPlayer : LocalPlayer
             NetId = netId
         };
 
-        PlayerOwnerInventoryController inventoryController = FikaBackendUtils.IsServer 
-            ? new FikaHostInventoryController(player, profile, false, FikaPlugin.Instance.Settings.InstantLoad)
+        PlayerOwnerInventoryController inventoryController = FikaBackendUtils.IsServer
+            ? new HostInventoryController(player, profile, false, FikaPlugin.Instance.Settings.InstantLoad)
             : new ClientInventoryController(player, profile, false, FikaPlugin.Instance.Settings.InstantLoad);
 
         LocalQuestControllerClass questController;
@@ -1423,6 +1424,21 @@ public class FikaPlayer : LocalPlayer
 
         _voipController?.Dispose();
         _lastWeaponId = null;
+        if (IsYourPlayer)
+        {
+            switch (InventoryController)
+            {
+                case HostInventoryController hostController:
+                    hostController.ClearPool();
+                    break;
+                case ClientInventoryController clientController:
+                    clientController.ClearPool();
+                    break;
+                default:
+                    FikaGlobals.LogWarning($"Unknown inventory controller when disposing: {InventoryController.GetType().Name}");
+                    break;
+            } 
+        }
         base.Dispose();
     }
 

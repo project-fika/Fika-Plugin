@@ -3,12 +3,14 @@
 using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
+using EFT.GameTriggers;
 using EFT.InventoryLogic;
 using EFT.InventoryLogic.Operations;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
+using Fika.Core.Networking.Pooling;
 using JetBrains.Annotations;
 using static EFT.Player;
 
@@ -24,23 +26,18 @@ public sealed class BotInventoryController : PlayerInventoryController
         }
     }
     private readonly FikaBot _fikaBot;
-    private readonly IPlayerSearchController _searchController;
+    private readonly BotInventoryOperationHandlerPool _botInventoryOperationHandlerPool;
 
     public BotInventoryController(Player player, Profile profile, bool examined, MongoID currentId, ushort nextOperationId) : base(player, profile, examined)
     {
         _fikaBot = (FikaBot)player;
         MongoID_0 = currentId;
         Ushort_0 = nextOperationId;
-        _searchController = new BotSearchControllerClass(profile);
+        PlayerSearchController = new BotSearchControllerClass(profile);
+        _botInventoryOperationHandlerPool = BotInventoryOperationHandlerPool.Instance;
     }
 
-    public override IPlayerSearchController PlayerSearchController
-    {
-        get
-        {
-            return _searchController;
-        }
-    }
+    public override IPlayerSearchController PlayerSearchController { get; }
 
     public override void CallMalfunctionRepaired(Weapon weapon)
     {
@@ -83,35 +80,26 @@ public sealed class BotInventoryController : PlayerInventoryController
 
     private void RunBotOperation(BaseInventoryOperationClass operation, Callback callback)
     {
-        BotInventoryOperationHandler handler = new(this, operation, callback);
-        if (vmethod_0(operation))
+        var handler = _botInventoryOperationHandlerPool.Get();
+        handler.Set(this, operation, callback);
+        try
         {
-            handler.Operation.method_1(handler.HandleResult);
-            return;
+            if (vmethod_0(operation))
+            {
+                handler.Operation.method_1(handler.HandleResult);
+                return;
+            }
+            handler.Operation.Dispose();
+            handler.Callback?.Fail($"Can't execute {handler.Operation}", 1);
         }
-        handler.Operation.Dispose();
-        handler.Callback?.Fail($"Can't execute {handler.Operation}", 1);
+        finally
+        {
+            _botInventoryOperationHandlerPool.ReturnHandler(handler);
+        }
     }
 
     public override SearchContentOperation vmethod_2(SearchableItemItemClass item)
     {
         return new SearchContentOperationResultClass(method_12(), this, PlayerSearchController, Profile, item);
-    }
-
-    private class BotInventoryOperationHandler(BotInventoryController controller, BaseInventoryOperationClass operation, Callback callback)
-    {
-        private readonly BotInventoryController controller = controller;
-        public readonly BaseInventoryOperationClass Operation = operation;
-        public readonly Callback Callback = callback;
-
-        public void HandleResult(IResult result)
-        {
-            if (result.Failed)
-            {
-                FikaGlobals.LogWarning($"BotInventoryOperationHandler: Operation has failed! Controller: {controller.Name}, Operation ID: {Operation.Id}, Operation: {Operation}, Error: {result.Error}");
-            }
-
-            Callback?.Invoke(result);
-        }
     }
 }

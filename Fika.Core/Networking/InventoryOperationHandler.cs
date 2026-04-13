@@ -43,21 +43,28 @@ public sealed class InventoryOperationHandler : IDisposable
 
     public void HandleResult(IResult result)
     {
-        if (!result.Succeed)
+        try
         {
-            FikaGlobals.LogError($"Error in operation: {result.Error ?? "An unknown error has occured"}");
+            if (!result.Succeed)
+            {
+                FikaGlobals.LogError($"Error in operation: {result.Error ?? "An unknown error has occured"}");
+                _server.SendGenericPacketToPeer(EGenericSubPacketType.OperationCallback,
+                            OperationCallbackPacket.FromValue(_netId, _operationId, EOperationStatus.Failed,
+                            result.Error ?? "An unknown error has occured"), _peer);
+
+                ResyncInventoryIdPacket resyncPacket = new(_netId);
+                _server.SendDataToPeer(ref resyncPacket, DeliveryMethod.ReliableOrdered, _peer);
+
+                return;
+            }
+
             _server.SendGenericPacketToPeer(EGenericSubPacketType.OperationCallback,
-                        OperationCallbackPacket.FromValue(_netId, _operationId, EOperationStatus.Failed,
-                        result.Error ?? "An unknown error has occured"), _peer);
-
-            ResyncInventoryIdPacket resyncPacket = new(_netId);
-            _server.SendDataToPeer(ref resyncPacket, DeliveryMethod.ReliableOrdered, _peer);
-
-            return;
+                            OperationCallbackPacket.FromValue(_netId, _operationId, EOperationStatus.Succeeded), _peer);
         }
-
-        _server.SendGenericPacketToPeer(EGenericSubPacketType.OperationCallback,
-                        OperationCallbackPacket.FromValue(_netId, _operationId, EOperationStatus.Succeeded), _peer);
+        finally
+        {
+            _server.ReturnHandler(this);
+        }
     }
 
     public void Dispose()

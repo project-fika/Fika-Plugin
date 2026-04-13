@@ -173,6 +173,7 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
         _logger = Logger.CreateLogSource("Fika.Server");
         _startTime = DateTime.Now;
         _inventoryOperationHandlerPool = new InventoryOperationHandlerPool(8, InventoryOperationHandler.CreateInstance);
+        BotInventoryOperationHandlerPool.Create();
         ObservedPlayers = [];
         PlayerAmount = 1;
 
@@ -591,6 +592,8 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
             Destroy(_raidAdminUIScript);
         }
 
+        BotInventoryOperationHandlerPool.Clear();
+
         FikaEventDispatcher.DispatchEvent(new FikaNetworkManagerDestroyedEvent(this));
     }
 
@@ -907,6 +910,11 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
             _logger.LogInfo("No reconnect was made, stopping session");
             AsyncWorker.RunInMainTread(DisconnectHeadless);
         }
+    }
+
+    public void ReturnHandler(InventoryOperationHandler handler)
+    {
+        _inventoryOperationHandlerPool.ReturnHandler(handler);
     }
 
     private void DisconnectHeadless()
