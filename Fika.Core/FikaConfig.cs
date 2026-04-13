@@ -10,7 +10,6 @@ using Fika.Core.Networking.Http;
 using Fika.Core.UI; 
 #endif
 using Fika.Core.UI.Patches;
-using static EFT.SpeedTree.TreeWind;
 using static Fika.Core.FikaPlugin;
 using static Fika.Core.Networking.IFikaNetworkManager;
 

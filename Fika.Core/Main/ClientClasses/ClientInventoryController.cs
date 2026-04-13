@@ -45,7 +45,7 @@ public sealed class ClientInventoryController : Player.PlayerOwnerInventoryContr
         _clientInventoryOperationHandlerPool = new ClientInventoryOperationHandlerPool(8, ClientInventoryOperationHandler.CreateInstance);
     }
 
-    public override IPlayerSearchController PlayerSearchController { get; }    
+    public override IPlayerSearchController PlayerSearchController { get; }
 
     public override void GetTraderServicesDataFromServer(string traderId)
     {

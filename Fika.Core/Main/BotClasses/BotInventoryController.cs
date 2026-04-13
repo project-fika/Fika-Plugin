@@ -3,7 +3,6 @@
 using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
-using EFT.GameTriggers;
 using EFT.InventoryLogic;
 using EFT.InventoryLogic.Operations;
 using Fika.Core.Main.Players;

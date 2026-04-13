@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-using Fika.Core.Networking.Packets.Player;
 
 namespace Fika.Core.Networking.Snapshotting;
 
