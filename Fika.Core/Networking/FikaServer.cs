@@ -141,6 +141,7 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
     private Dictionary<string, int> _cachedConnections;
     private GenericPacket _genericPacket;
     private DateTime _startTime;
+    private InventoryOperationHandlerPool _inventoryOperationHandlerPool;
 
     internal FikaVOIPServer VOIPServer { get; set; }
     internal FikaVOIPClient VOIPClient { get; set; }
@@ -171,6 +172,7 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
         _cachedConnections = [];
         _logger = Logger.CreateLogSource("Fika.Server");
         _startTime = DateTime.Now;
+        _inventoryOperationHandlerPool = new InventoryOperationHandlerPool(8, InventoryOperationHandler.CreateInstance);
         ObservedPlayers = [];
         PlayerAmount = 1;
 

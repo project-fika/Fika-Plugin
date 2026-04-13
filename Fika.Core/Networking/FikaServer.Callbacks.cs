@@ -29,6 +29,7 @@ using static Fika.Core.Networking.Packets.World.ReconnectPacket;
 #if DEBUG
 using static Fika.Core.Networking.Packets.Debug.CommandPacket;
 using Fika.Core.ConsoleCommands;
+using Fika.Core.Networking.Pooling;
 #endif
 
 namespace Fika.Core.Networking;
@@ -672,13 +673,22 @@ public sealed partial class FikaServer
                         return;
                     }
 
-                    InventoryOperationHandler handler = new(result, packet.CallbackId, packet.NetId, peer, this);
-                    SendGenericPacketToPeer(EGenericSubPacketType.OperationCallback,
-                            OperationCallbackPacket.FromValue(packet.NetId, packet.CallbackId, EOperationStatus.Started), peer);
+                    var handler = _inventoryOperationHandlerPool.GetHandler();
+                    try
+                    {
+                        handler.Set(result, packet.CallbackId, packet.NetId, peer, this);
+                        SendGenericPacketToPeer(EGenericSubPacketType.OperationCallback,
+                                OperationCallbackPacket.FromValue(packet.NetId, packet.CallbackId, EOperationStatus.Started), peer);
 
-                    SendGenericPacket(EGenericSubPacketType.InventoryOperation, packet,
-                        true, peer);
-                    handler.OperationResult.Value.method_1(handler.HandleResult);
+                        SendGenericPacket(EGenericSubPacketType.InventoryOperation, packet,
+                            true, peer);
+                        handler.OperationResult.Value.method_1(handler.HandleResultDelegate);
+                        
+                    }
+                    finally
+                    {
+                        _inventoryOperationHandlerPool.ReturnHandler(handler);
+                    }
                 }
                 else
                 {
@@ -702,34 +712,6 @@ public sealed partial class FikaServer
         if (_coopHandler.Players.TryGetValue(packet.NetId, out var playerToApply))
         {
             packet.Execute(playerToApply);
-        }
-    }
-
-    public class InventoryOperationHandler(OperationDataStruct operationResult, ushort operationId, int netId, NetPeer peer, FikaServer server)
-    {
-        public OperationDataStruct OperationResult = operationResult;
-        private readonly ushort _operationId = operationId;
-        private readonly int _netId = netId;
-        private readonly NetPeer _peer = peer;
-        private readonly FikaServer _server = server;
-
-        public void HandleResult(IResult result)
-        {
-            if (!result.Succeed)
-            {
-                _server._logger.LogError($"Error in operation: {result.Error ?? "An unknown error has occured"}");
-                _server.SendGenericPacketToPeer(EGenericSubPacketType.OperationCallback,
-                            OperationCallbackPacket.FromValue(_netId, _operationId, EOperationStatus.Failed,
-                            result.Error ?? "An unknown error has occured"), _peer);
-
-                ResyncInventoryIdPacket resyncPacket = new(_netId);
-                _server.SendDataToPeer(ref resyncPacket, DeliveryMethod.ReliableOrdered, _peer);
-
-                return;
-            }
-
-            _server.SendGenericPacketToPeer(EGenericSubPacketType.OperationCallback,
-                            OperationCallbackPacket.FromValue(_netId, _operationId, EOperationStatus.Succeeded), _peer);
         }
     }
 }
