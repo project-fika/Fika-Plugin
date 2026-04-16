@@ -15,8 +15,8 @@ Client-side changes to make multiplayer work.
 Fully functional with minimal bugs.
 
 - 99.99% of all base game features are replicating and working properly
-- Multi-threaded interpolation for performance
-- Compressed packets using bitpacking and flags (Fika is very light-weight and efficient)
+- Unique interpolation system inspired by the id Tech 3 networking model
+- Extremely efficient bandwidth usage
 - Headless client to off-load AI (see [Fika-Headless](https://github.com/project-fika/Fika-Headless) repo)
 - Base game bug fixes that have been unfixed for years
 - Base game performance fixes
@@ -66,6 +66,5 @@ SPT.Modules | [NCSA](https://dev.sp-tarkov.com/SPT/Modules/src/branch/master/LIC
 SIT         | [NCSA](./Licenses/LICENSE-SIT.md) (`Forked from SIT.Client master:9de30d8`)
 Open.NAT    | [MIT](https://github.com/lontivero/Open.NAT/blob/master/LICENSE) (for UPnP implementation)
 LiteNetLib  | [MIT](https://github.com/RevenantX/LiteNetLib/blob/master/LICENSE.txt) (for P2P UDP implementation)
-Mirror Networking  | [MIT](https://github.com/MirrorNetworking/Mirror/blob/master/LICENSE) (for Snapshot Interpolation implementation)
 
 <a href="https://crowdin.com/?utm_term=click-badge-add-on" rel="nofollow"><img style="width:140;height:40px" src="https://badges.crowdin.net/badge/light/crowdin-on-dark.png" srcset="https://badges.crowdin.net/badge/light/crowdin-on-dark.png 1x,https://badges.crowdin.net/badge/light/crowdin-on-dark@2x.png 2x" alt="Crowdin | Agile localization for tech companies" /></a>
