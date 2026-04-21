@@ -349,7 +349,7 @@ public class LiteNetPeer : IPEndPoint
     /// <param name="ordered">type of channel ReliableOrdered or ReliableUnordered</param>
     /// <returns>packets count in channel queue</returns>
     public int GetPacketsCountInReliableQueue(bool ordered) =>
-        _reliableChannel?.PacketsInQueue ?? 0;
+        (ordered ? _reliableChannel : _reliableUnorderedChannel)?.PacketsInQueue ?? 0;
 
     /// <summary>
     /// Create temporary packet (maximum size MTU - headerSize) to send later without additional copies
