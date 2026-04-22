@@ -206,18 +206,13 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
 
     private bool CheckSpawnTogether()
     {
-        if (RaidSettings.PlayersSpawnPlace == EPlayersSpawnPlace.SamePlace)
-        {
-            return true;
-        }
-
         if (string.Equals(RaidSettings.SelectedLocation.Id, "labyrinth", StringComparison.OrdinalIgnoreCase)
             && FikaPlugin.Instance.Settings.RandomLabyrinthSpawns)
         {
             return false;
         }
 
-        return true;
+        return RaidSettings.PlayersSpawnPlace == EPlayersSpawnPlace.SamePlace;
     }
 
     public override void CreateSpawnSystem(Profile profile)
