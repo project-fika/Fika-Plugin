@@ -6,6 +6,7 @@ using EFT;
 using EFT.InventoryLogic;
 using EFT.InventoryLogic.Operations;
 using EFT.UI;
+using Fika.Core.Main.HostClasses;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
@@ -103,6 +104,24 @@ public sealed class ClientInventoryController : Player.PlayerOwnerInventoryContr
             await Task.Yield();
         }
         RunClientOperation(operation, callback);
+    }
+
+    /// <summary>
+    /// Gets an inventory handler
+    /// </summary>
+    /// <returns>A pooled handler</returns>
+    public ClientInventoryOperationHandler GetHandler()
+    {
+        return _clientInventoryOperationHandlerPool.Get();
+    }
+
+    /// <summary>
+    /// Returns a handler
+    /// </summary>
+    /// <param name="handler">The handler to return</param>
+    public void ReturnHandler(ClientInventoryOperationHandler handler)
+    {
+        _clientInventoryOperationHandlerPool.ReturnHandler(handler);
     }
 
     private void RunClientOperation(BaseInventoryOperationClass operation, Callback callback)

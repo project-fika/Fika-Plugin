@@ -31,7 +31,6 @@ public sealed class HostInventoryController : Player.PlayerOwnerInventoryControl
     }
     private readonly ManualLogSource _logger;
     private readonly Player _player;
-    private readonly IPlayerSearchController _searchController;
     private readonly bool _instantLoad;
     private readonly HostInventoryOperationHandlerPool _hostInventoryOperationHandlerPool;
 
@@ -39,19 +38,13 @@ public sealed class HostInventoryController : Player.PlayerOwnerInventoryControl
     {
         _player = player;
         FikaPlayer = (FikaPlayer)player;
-        _searchController = new PlayerSearchControllerClass(profile, this);
+        PlayerSearchController = new PlayerSearchControllerClass(profile, this);
         _instantLoad = instantLoad;
         _hostInventoryOperationHandlerPool = new HostInventoryOperationHandlerPool(8, HostInventoryOperationHandler.CreateInstance);
         _logger = BepInEx.Logging.Logger.CreateLogSource(nameof(HostInventoryController));
     }
 
-    public override IPlayerSearchController PlayerSearchController
-    {
-        get
-        {
-            return _searchController;
-        }
-    }
+    public override IPlayerSearchController PlayerSearchController { get; }
 
     public override void GetTraderServicesDataFromServer(string traderId)
     {
@@ -108,6 +101,24 @@ public sealed class HostInventoryController : Player.PlayerOwnerInventoryControl
         }
 
         return base.LoadMagazine(sourceAmmo, magazine, loadCount, ignoreRestrictions);
+    }
+
+    /// <summary>
+    /// Gets an inventory handler
+    /// </summary>
+    /// <returns>A pooled handler</returns>
+    public HostInventoryOperationHandler GetHandler()
+    {
+        return _hostInventoryOperationHandlerPool.Get();
+    }
+
+    /// <summary>
+    /// Returns a handler
+    /// </summary>
+    /// <param name="handler">The handler to return</param>
+    public void ReturnHandler(HostInventoryOperationHandler handler)
+    {
+        _hostInventoryOperationHandlerPool.ReturnHandler(handler);
     }
 
     private void RunHostOperation(BaseInventoryOperationClass operation, Callback callback)
