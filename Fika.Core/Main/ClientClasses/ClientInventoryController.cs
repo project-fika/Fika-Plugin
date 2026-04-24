@@ -182,11 +182,6 @@ public sealed class ClientInventoryController : Player.PlayerOwnerInventoryContr
 #endif
     }
 
-    public void ReturnHandler(ClientInventoryOperationHandler handler)
-    {
-        _clientInventoryOperationHandlerPool.ReturnHandler(handler);
-    }
-
     public override bool HasCultistAmulet(out CultistAmuletItemClass amulet)
     {
         amulet = null;
