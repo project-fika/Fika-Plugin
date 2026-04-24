@@ -1,7 +1,7 @@
-﻿using Fika.Core.Networking.LZ4.Engine;
+﻿using System;
+using Fika.Core.Networking.LZ4.Engine;
 using Fika.Core.Networking.LZ4.Internal;
 using K4os.Compression.LZ4.Engine;
-using System;
 
 namespace Fika.Core.Networking.LZ4.Encoders;
 
@@ -46,7 +46,9 @@ public unsafe class LZ4ChainDecoder : UnmanagedResources, ILZ4Decoder
     public int Decode(byte* source, int length, int blockSize)
     {
         if (blockSize <= 0)
+        {
             blockSize = _blockSize;
+        }
 
         Prepare(blockSize);
 
@@ -54,7 +56,9 @@ public unsafe class LZ4ChainDecoder : UnmanagedResources, ILZ4Decoder
             source, length, OutputBuffer + _outputIndex, blockSize);
 
         if (decoded < 0)
+        {
             throw new InvalidOperationException();
+        }
 
         _outputIndex += decoded;
 
@@ -65,10 +69,14 @@ public unsafe class LZ4ChainDecoder : UnmanagedResources, ILZ4Decoder
     public int Inject(byte* source, int length)
     {
         if (length <= 0)
+        {
             return 0;
+        }
 
         if (length > Math.Max(_blockSize, Mem.K64))
+        {
             throw new InvalidOperationException();
+        }
 
         var outputBuffer = OutputBuffer;
 
@@ -98,7 +106,9 @@ public unsafe class LZ4ChainDecoder : UnmanagedResources, ILZ4Decoder
     {
         offset = _outputIndex + offset; // NOTE: negative value
         if (offset < 0 || length < 0 || offset + length > _outputIndex)
+        {
             throw new InvalidOperationException();
+        }
 
         Mem.Move(target, OutputBuffer + offset, length);
     }
@@ -110,7 +120,9 @@ public unsafe class LZ4ChainDecoder : UnmanagedResources, ILZ4Decoder
 
         offset = _outputIndex + offset; // NOTE: negative value
         if (offset < 0 || offset > _outputIndex)
+        {
             throw new InvalidOperationException();
+        }
 
         return OutputBuffer + offset;
     }
@@ -118,7 +130,9 @@ public unsafe class LZ4ChainDecoder : UnmanagedResources, ILZ4Decoder
     private void Prepare(int blockSize)
     {
         if (_outputIndex + blockSize <= _outputLength)
+        {
             return;
+        }
 
         _outputIndex = CopyDict(_outputIndex);
     }

@@ -9,7 +9,7 @@ using Fika.Core.Main.Players;
 
 namespace Fika.Core.Main.ObservedClasses.HandsControllers;
 
-internal class ObservedGrenadeController : Player.GrenadeHandsController
+internal sealed class ObservedGrenadeController : Player.GrenadeHandsController
 {
     private ObservedPlayer _observedPlayer;
 

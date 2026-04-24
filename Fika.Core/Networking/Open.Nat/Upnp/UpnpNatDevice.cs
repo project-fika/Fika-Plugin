@@ -28,15 +28,15 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Threading.Tasks;
 using Fika.Core.Networking.Open.Nat.Enums;
 using Fika.Core.Networking.Open.Nat.Exceptions;
 using Fika.Core.Networking.Open.Nat.Upnp.Messages.Requests;
 using Fika.Core.Networking.Open.Nat.Upnp.Messages.Responses;
 using Fika.Core.Networking.Open.Nat.Utils;
-using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Threading.Tasks;
 
 namespace Fika.Core.Networking.Open.Nat.Upnp;
 
@@ -156,10 +156,13 @@ internal sealed class UpnpNatDevice : NatDevice
     public override async Task CreatePortMapAsync(Mapping mapping)
     {
         Guard.IsNotNull(mapping, "mapping");
-        if (mapping.PrivateIP.Equals(IPAddress.None)) mapping.PrivateIP = DeviceInfo.LocalAddress;
+        if (mapping.PrivateIP.Equals(IPAddress.None))
+        {
+            mapping.PrivateIP = DeviceInfo.LocalAddress;
+        }
 
         NatDiscoverer.TraceSource.LogInfo("CreatePortMapAsync - Creating port mapping {0}", mapping);
-        bool retry = false;
+        var retry = false;
         try
         {
             var message = new CreatePortMappingRequestMessage(mapping);
@@ -201,7 +204,9 @@ internal sealed class UpnpNatDevice : NatDevice
             }
         }
         if (retry)
+        {
             await CreatePortMapAsync(mapping);
+        }
     }
 #endif
 
@@ -236,7 +241,10 @@ internal sealed class UpnpNatDevice : NatDevice
     {
         Guard.IsNotNull(mapping, "mapping");
 
-        if (mapping.PrivateIP.Equals(IPAddress.None)) mapping.PrivateIP = DeviceInfo.LocalAddress;
+        if (mapping.PrivateIP.Equals(IPAddress.None))
+        {
+            mapping.PrivateIP = DeviceInfo.LocalAddress;
+        }
 
         NatDiscoverer.TraceSource.LogInfo("DeletePortMapAsync - Deleteing port mapping {0}", mapping);
 
@@ -250,7 +258,10 @@ internal sealed class UpnpNatDevice : NatDevice
         }
         catch (MappingException e)
         {
-            if (e.ErrorCode != UpnpConstants.NoSuchEntryInArray) throw;
+            if (e.ErrorCode != UpnpConstants.NoSuchEntryInArray)
+            {
+                throw;
+            }
         }
     }
 #endif
@@ -445,7 +456,9 @@ internal sealed class UpnpNatDevice : NatDevice
             var messageResponse = new GetPortMappingEntryResponseMessage(responseData, DeviceInfo.ServiceType, false);
 
             if (messageResponse.Protocol != protocol)
+            {
                 NatDiscoverer.TraceSource.LogWarn("Router responded to a protocol {0} query with a protocol {1} answer, work around applied.", protocol, messageResponse.Protocol);
+            }
 
             return new Mapping(protocol
                 , IPAddress.Parse(messageResponse.InternalClient)

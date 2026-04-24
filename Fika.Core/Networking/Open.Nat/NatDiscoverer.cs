@@ -1,12 +1,12 @@
-using Fika.Core.Networking.Open.Nat.Exceptions;
-using Fika.Core.Networking.Open.Nat.Pmp;
-using Fika.Core.Networking.Open.Nat.Upnp;
-using Fika.Core.Networking.Open.Nat.Utils;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Fika.Core.Networking.Open.Nat.Exceptions;
+using Fika.Core.Networking.Open.Nat.Pmp;
+using Fika.Core.Networking.Open.Nat.Upnp;
+using Fika.Core.Networking.Open.Nat.Utils;
 
 namespace Fika.Core.Networking.Open.Nat;
 
@@ -187,13 +187,13 @@ public class NatDiscoverer
         if (portMapper.HasFlag(PortMapper.Upnp))
         {
             var upnpSearcher = new UpnpSearcher(new IPAddressesProvider());
-            upnpSearcher.DeviceFound += (sender, args) => { if (onlyOne) cts.Cancel(); };
+            upnpSearcher.DeviceFound += (sender, args) => { if (onlyOne) { cts.Cancel(); } };
             searcherTasks.Add(upnpSearcher.Search(cts.Token));
         }
         if (portMapper.HasFlag(PortMapper.Pmp))
         {
             var pmpSearcher = new PmpSearcher(new IPAddressesProvider());
-            pmpSearcher.DeviceFound += (sender, args) => { if (onlyOne) cts.Cancel(); };
+            pmpSearcher.DeviceFound += (sender, args) => { if (onlyOne) { cts.Cancel(); } };
             searcherTasks.Add(pmpSearcher.Search(cts.Token));
         }
 

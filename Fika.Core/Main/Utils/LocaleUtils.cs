@@ -230,6 +230,8 @@ public static class LocaleUtils
     public const string BEPINEX_HEALTHCOLOR_LOW_D = "F_BepInEx_HealthColorLow_D";
     public const string BEPINEX_NAMEPLATECOLOR_T = "F_BepInEx_NamePlateColor_T";
     public const string BEPINEX_NAMEPLATECOLOR_D = "F_BepInEx_NamePlateColor_D";
+    public const string BEPINEX_SHOWBROKENLIMBS_T = "F_BepInEx_ShowBrokenLimbs_T";
+    public const string BEPINEX_SHOWBROKENLIMBS_D = "F_BepInEx_ShowBrokenLimbs_D";
 
     public const string BEPINEX_QUEST_TYPES_T = "F_BepInEx_QuestTypes_T";
     public const string BEPINEX_QUEST_TYPES_D = "F_BepInEx_QuestTypes_D";

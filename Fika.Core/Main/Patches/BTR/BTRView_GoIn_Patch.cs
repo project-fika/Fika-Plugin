@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Reflection;
-using System.Threading;
 using System.Threading.Tasks;
 using Audio.Vehicles.BTR;
 using Comfort.Common;
@@ -63,7 +62,7 @@ public class BTRView_GoIn_Patch : ModulePatch
     {
         try
         {
-            CancellationToken cancellationToken = view.method_12(observedPlayer);
+            var cancellationToken = view.method_12(observedPlayer);
             observedPlayer.MovementContext.IsAxesIgnored = true;
             observedPlayer.BtrState = EPlayerBtrState.Approach;
             if (!fast)
@@ -79,7 +78,7 @@ public class BTRView_GoIn_Patch : ModulePatch
             observedPlayer.CharacterController.isEnabled = false;
             observedPlayer.BtrState = EPlayerBtrState.GoIn;
             side.AddPassenger(observedPlayer, placeId);
-            BtrSoundController soundController = Traverse.Create(view).Field<BtrSoundController>("_soundController").Value;
+            var soundController = Traverse.Create(view).Field<BtrSoundController>("_soundController").Value;
             if (soundController != null)
             {
                 soundController.UpdateBtrAudioRoom(EnvironmentType.Indoor, observedPlayer);

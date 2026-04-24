@@ -7,7 +7,6 @@ using Comfort.Common;
 using EFT;
 using EFT.UI;
 using Fika.Core.Bundles;
-using Fika.Core.Main.Patches.Overrides;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;

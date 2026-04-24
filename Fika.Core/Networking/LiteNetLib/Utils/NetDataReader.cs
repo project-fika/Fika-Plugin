@@ -1,68 +1,137 @@
 ﻿using System;
 using System.Net;
+using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace Fika.Core.Networking.LiteNetLib.Utils;
 
-public unsafe class NetDataReader
+public class NetDataReader
 {
     protected byte[] _data;
     protected int _position;
     protected int _dataSize;
     protected int _offset;
 
+    private const int IPv4Size = 4;
+    private const int IPv6Size = 16;
+    private const int GuidSize = 16;
+
+    /// <summary>
+    /// Gets the internal <see cref="byte"/> array containing the raw network data.
+    /// </summary>
     public byte[] RawData
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => _data;
     }
+
+    /// <summary>
+    /// Gets the total size of the <see cref="RawData"/> buffer.
+    /// </summary>
     public int RawDataSize
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => _dataSize;
     }
+
+    /// <summary>
+    /// Gets the starting offset of the user payload within the <see cref="RawData"/>.
+    /// </summary>
     public int UserDataOffset
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => _offset;
     }
+
+    /// <summary>
+    /// Gets the size of the user payload excluding the initial <see cref="UserDataOffset"/>.
+    /// </summary>
     public int UserDataSize
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => _dataSize - _offset;
     }
+
+    /// <summary>
+    /// Gets a value indicating whether the internal data buffer is <see langword="null"/>.
+    /// </summary>
     public bool IsNull
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => _data == null;
     }
+
+    /// <summary>
+    /// Gets the current read position within the buffer.
+    /// </summary>
     public int Position
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => _position;
     }
+
+    /// <summary>
+    /// Gets a value indicating whether the <see cref="Position"/> has reached the end of the data.
+    /// </summary>
     public bool EndOfData
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => _position == _dataSize;
     }
+
+    /// <summary>
+    /// Gets the number of <see cref="byte"/>s remaining to be read.
+    /// </summary>
     public int AvailableBytes
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => _dataSize - _position;
     }
 
-    public void SkipBytes(int count)
+    /// <summary>
+    /// Verifies that the buffer has at least <paramref name="count"/> <see cref="byte"/>s available to read.
+    /// </summary>
+    /// <param name="count">The number of <see cref="byte"/>s required.</param>
+    /// <exception cref="InvalidOperationException">Thrown if <paramref name="count"/> exceeds <see cref="AvailableBytes"/> or is negative.</exception>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void EnsureAvailable(int count)
     {
-        _position += count;
+        var available = _dataSize - _position;
+        if (count < 0 || available < 0 || count > available)
+        {
+            ThrowNotEnoughData(count);
+        }
     }
 
-    public void SetPosition(int position)
+    /// <summary>
+    /// Throws an <see cref="InvalidOperationException"/> indicating that there is not enough data to read.
+    /// </summary>
+    /// <param name="count">The number of bytes that were attempted to be read.</param>
+    /// <exception cref="InvalidOperationException">Always thrown.</exception>
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private void ThrowNotEnoughData(int count)
     {
-        _position = position;
+        throw new InvalidOperationException(
+            $"Not enough data to read {count} byte(s). Position={_position}, DataSize={_dataSize}");
     }
 
+    /// <summary>
+    /// Advances the <see cref="Position"/> by the specified <paramref name="count"/>.
+    /// </summary>
+    /// <param name="count">The number of <see cref="byte"/>s to skip.</param>
+    public void SkipBytes(int count) => _position += count;
+
+    /// <summary>
+    /// Sets the current read <see cref="Position"/> to a specific index.
+    /// </summary>
+    /// <param name="position">The index to move the <see cref="Position"/> to.</param>
+    public void SetPosition(int position) => _position = position;
+
+    /// <summary>
+    /// Reinitializes the reader using data from a <see cref="NetDataWriter"/>.
+    /// </summary>
+    /// <param name="dataWriter">The source <see cref="NetDataWriter"/>.</param>
     public void SetSource(NetDataWriter dataWriter)
     {
         _data = dataWriter.Data;
@@ -71,6 +140,10 @@ public unsafe class NetDataReader
         _dataSize = dataWriter.Length;
     }
 
+    /// <summary>
+    /// Reinitializes the reader using a <see cref="byte"/> array.
+    /// </summary>
+    /// <param name="source">The source <see cref="byte"/> array.</param>
     public void SetSource(byte[] source)
     {
         _data = source;
@@ -79,6 +152,12 @@ public unsafe class NetDataReader
         _dataSize = source.Length;
     }
 
+    /// <summary>
+    /// Reinitializes the reader using a segment of a <see cref="byte"/> array.
+    /// </summary>
+    /// <param name="source">The source <see cref="byte"/> array.</param>
+    /// <param name="offset">The starting index for reading.</param>
+    /// <param name="maxSize">The total number of <see cref="byte"/>s available to read from the <paramref name="source"/>.</param>
     public void SetSource(byte[] source, int offset, int maxSize)
     {
         _data = source;
@@ -87,154 +166,122 @@ public unsafe class NetDataReader
         _dataSize = maxSize;
     }
 
-    public NetDataReader()
-    {
+    public NetDataReader() { }
 
-    }
+    public NetDataReader(NetDataWriter writer) => SetSource(writer);
 
-    public NetDataReader(NetDataWriter writer)
-    {
-        SetSource(writer);
-    }
+    public NetDataReader(byte[] source) => SetSource(source);
 
-    public NetDataReader(byte[] source)
-    {
-        SetSource(source);
-    }
-
-    public NetDataReader(byte[] source, int offset, int maxSize)
-    {
-        SetSource(source, offset, maxSize);
-    }
+    public NetDataReader(byte[] source, int offset, int maxSize) => SetSource(source, offset, maxSize);
 
     #region GetMethods
 
+    /// <summary>
+    /// Deserializes a <see langword="struct"/> that implements <see cref="INetSerializable"/>.
+    /// </summary>
+    /// <typeparam name="T">A <see langword="struct"/> type implementing <see cref="INetSerializable"/>.</typeparam>
+    /// <param name="result">The deserialized <see langword="struct"/> output.</param>
     public void Get<T>(out T result) where T : struct, INetSerializable
     {
         result = default;
         result.Deserialize(this);
     }
 
+    /// <summary>
+    /// Deserializes a <see langword="class"/> that implements <see cref="INetSerializable"/> using a provided constructor.
+    /// </summary>
+    /// <typeparam name="T">A <see langword="class"/> type implementing <see cref="INetSerializable"/>.</typeparam>
+    /// <param name="result">The deserialized <see langword="class"/> instance output.</param>
+    /// <param name="constructor">A factory <see langword="delegate"/> used to instantiate the <see langword="class"/>.</param>
     public void Get<T>(out T result, Func<T> constructor) where T : class, INetSerializable
     {
         result = constructor();
         result.Deserialize(this);
     }
 
-    public void Get(out IPEndPoint result)
-    {
-        result = GetIPEndPoint();
-    }
+    /// <summary>
+    /// Deserializes an <see cref="IPEndPoint"/> and assigns it to the <paramref name="result"/> parameter.
+    /// </summary>
+    /// <param name="result">The deserialized <see cref="IPEndPoint"/> output.</param>
+    public void Get(out IPEndPoint result) => result = GetIPEndPoint();
 
+    /// <summary>
+    /// Reads an <see cref="IPEndPoint"/> from the current <see cref="Position"/>.
+    /// </summary>
+    /// <returns>The deserialized <see cref="IPEndPoint"/>.</returns>
+    /// <remarks>
+    /// Reads a <see cref="byte"/> to determine the <see cref="AddressFamily"/> (0 for IPv4, 1 for IPv6),
+    /// followed by the address bytes and a 2-byte <see cref="ushort"/> port.
+    /// </remarks>
     public IPEndPoint GetIPEndPoint()
     {
-        IPAddress address;
-        //IPv4
-        if (GetByte() == 0)
-        {
-            address = new IPAddress(new ReadOnlySpan<byte>(_data, _position, 4));
-            _position += 4;
-        }
-        //IPv6
-        else
-        {
-            address = new IPAddress(new ReadOnlySpan<byte>(_data, _position, 16));
-            _position += 16;
-        }
+        var isIPv4 = GetByte() == 0;
+
+        var size = isIPv4 ? IPv4Size : IPv6Size;
+        EnsureAvailable(size);
+
+        var address = new IPAddress(new ReadOnlySpan<byte>(_data, _position, size));
+        _position += size;
         return new IPEndPoint(address, GetUShort());
     }
 
-    public void Get(out byte result)
-    {
-        result = GetByte();
-    }
+    /// <summary>Reads a <see cref="byte"/> and assigns it to <paramref name="result"/>.</summary>
+    public void Get(out byte result) => result = GetByte();
 
-    public void Get(out sbyte result)
-    {
-        result = (sbyte)GetByte();
-    }
+    /// <summary>Reads an <see cref="sbyte"/> and assigns it to <paramref name="result"/>.</summary>
+    public void Get(out sbyte result) => result = GetSByte();
 
-    public void Get(out bool result)
-    {
-        result = GetBool();
-    }
+    /// <summary>Reads a <see cref="bool"/> and assigns it to <paramref name="result"/>.</summary>
+    public void Get(out bool result) => result = GetBool();
 
-    public void Get(out char result)
-    {
-        result = GetChar();
-    }
+    /// <summary>Reads a <see cref="char"/> and assigns it to <paramref name="result"/>.</summary>
+    public void Get(out char result) => result = GetChar();
 
-    public void Get(out ushort result)
-    {
-        result = GetUShort();
-    }
+    /// <summary>Reads a <see cref="ushort"/> and assigns it to <paramref name="result"/>.</summary>
+    public void Get(out ushort result) => result = GetUShort();
 
-    public void Get(out short result)
-    {
-        result = GetShort();
-    }
+    /// <summary>Reads a <see cref="short"/> and assigns it to <paramref name="result"/>.</summary>
+    public void Get(out short result) => result = GetShort();
 
-    public void Get(out ulong result)
-    {
-        result = GetULong();
-    }
+    /// <summary>Reads a <see cref="ulong"/> and assigns it to <paramref name="result"/>.</summary>
+    public void Get(out ulong result) => result = GetULong();
 
-    public void Get(out long result)
-    {
-        result = GetLong();
-    }
+    /// <summary>Reads a <see cref="long"/> and assigns it to <paramref name="result"/>.</summary>
+    public void Get(out long result) => result = GetLong();
 
-    public void Get(out uint result)
-    {
-        result = GetUInt();
-    }
+    /// <summary>Reads a <see cref="uint"/> and assigns it to <paramref name="result"/>.</summary>
+    public void Get(out uint result) => result = GetUInt();
 
-    public void Get(out int result)
-    {
-        result = GetInt();
-    }
+    /// <summary>Reads an <see cref="int"/> and assigns it to <paramref name="result"/>.</summary>
+    public void Get(out int result) => result = GetInt();
 
-    public void Get(out double result)
-    {
-        result = GetDouble();
-    }
+    /// <summary>Reads a <see cref="double"/> and assigns it to <paramref name="result"/>.</summary>
+    public void Get(out double result) => result = GetDouble();
 
-    public void Get(out float result)
-    {
-        result = GetFloat();
-    }
+    /// <summary>Reads a <see cref="float"/> and assigns it to <paramref name="result"/>.</summary>
+    public void Get(out float result) => result = GetFloat();
 
-    public void Get(out string result)
-    {
-        result = GetString();
-    }
+    /// <summary>Reads a <see cref="string"/> and assigns it to <paramref name="result"/>.</summary>
+    public void Get(out string result) => result = GetString();
 
-    public void Get(out string result, int maxLength)
-    {
-        result = GetString(maxLength);
-    }
+    /// <summary>Reads a <see cref="string"/> with a length limit and assigns it to <paramref name="result"/>.</summary>
+    public void Get(out string result, int maxLength) => result = GetString(maxLength);
 
-    public void Get(out Guid result)
-    {
-        result = GetGuid();
-    }
+    /// <summary>Reads a <see cref="Guid"/> and assigns it to <paramref name="result"/>.</summary>
+    public void Get(out Guid result) => result = GetGuid();
 
-    public byte GetByte()
-    {
-        var res = _data[_position];
-        _position++;
-        return res;
-    }
-
-    public sbyte GetSByte()
-    {
-        return (sbyte)GetByte();
-    }
-
-    public T[] GetArray<T>() where T : unmanaged
+    /// <summary>
+    /// Reads an array of unmanaged values prefixed by a <see cref="ushort"/> length.
+    /// </summary>
+    /// <typeparam name="T">An unmanaged type.</typeparam>
+    /// <returns>A new array of type <typeparamref name="T"/>.</returns>
+    public unsafe T[] GetUnmanagedArray<T>() where T : unmanaged
     {
         var length = GetUShort();
-        var byteLength = length * Unsafe.SizeOf<T>();
+
+        var byteLength = checked(length * sizeof(T));
+        EnsureAvailable(byteLength);
+
         ReadOnlySpan<byte> slice = _data.AsSpan(_position, byteLength);
         var result = MemoryMarshal.Cast<byte, T>(slice)
             .ToArray();
@@ -242,6 +289,41 @@ public unsafe class NetDataReader
         return result;
     }
 
+    /// <summary>
+    /// Reads an array of values by performing a direct memory copy.
+    /// </summary>
+    /// <typeparam name="T">The element type.</typeparam>
+    /// <param name="size">The size of a single element in <see cref="byte"/>s.</param>
+    /// <returns>A new array of type <typeparamref name="T"/>.</returns>
+    public T[] GetArray<T>(ushort size)
+    {
+        var length = GetUShort();
+
+        var byteLength = checked(length * size);
+        EnsureAvailable(byteLength);
+
+        var result = new T[length];
+        if (byteLength > 0)
+        {
+            Buffer.BlockCopy(_data, _position, result, 0, byteLength);
+        }
+
+        _position += byteLength;
+        return result;
+    }
+
+    /// <inheritdoc cref="GetUnmanagedArray{T}"/>
+    [Obsolete("Use GetUnmanagedArray<T>() instead", true)]
+    public T[] GetArray<T>() where T : unmanaged
+    {
+        return GetUnmanagedArray<T>();
+    }
+
+    /// <summary>
+    /// Reads an array of objects implementing <see cref="INetSerializable"/>.
+    /// </summary>
+    /// <typeparam name="T">A type with a parameterless constructor implementing <see cref="INetSerializable"/>.</typeparam>
+    /// <returns>A new array of type <typeparamref name="T"/>.</returns>
     public T[] GetSerializableArray<T>() where T : INetSerializable, new()
     {
         var length = GetUShort();
@@ -255,7 +337,13 @@ public unsafe class NetDataReader
         return result;
     }
 
-    public T[] GetSerializableConstructorArray<T>(Func<T> constructor) where T : class, INetSerializable
+    /// <summary>
+    /// Reads an array of objects implementing <see cref="INetSerializable"/> using a specific constructor.
+    /// </summary>
+    /// <typeparam name="T">A <see langword="class"/> type implementing <see cref="INetSerializable"/>.</typeparam>
+    /// <param name="constructor">The factory <see langword="delegate"/> used to create instances.</param>
+    /// <returns>A new array of type <typeparamref name="T"/>.</returns>
+    public T[] GetArray<T>(Func<T> constructor) where T : class, INetSerializable
     {
         var length = GetUShort();
         var result = new T[length];
@@ -267,132 +355,125 @@ public unsafe class NetDataReader
         return result;
     }
 
-    public bool[] GetBoolArray()
-    {
-        return GetArray<bool>();
-    }
+    /// <summary>Reads an array of <see cref="bool"/> values.</summary>
+    public bool[] GetBoolArray() => GetUnmanagedArray<bool>();
 
-    public ushort[] GetUShortArray()
-    {
-        return GetArray<ushort>();
-    }
+    /// <summary>Reads an array of <see cref="ushort"/> values.</summary>
+    public ushort[] GetUShortArray() => GetUnmanagedArray<ushort>();
 
-    public short[] GetShortArray()
-    {
-        return GetArray<short>();
-    }
+    /// <summary>Reads an array of <see cref="short"/> values.</summary>
+    public short[] GetShortArray() => GetUnmanagedArray<short>();
 
-    public int[] GetIntArray()
-    {
-        return GetArray<int>();
-    }
+    /// <summary>Reads an array of <see cref="int"/> values.</summary>
+    public int[] GetIntArray() => GetUnmanagedArray<int>();
 
-    public uint[] GetUIntArray()
-    {
-        return GetArray<uint>();
-    }
+    /// <summary>Reads an array of <see cref="uint"/> values.</summary>
+    public uint[] GetUIntArray() => GetUnmanagedArray<uint>();
 
-    public float[] GetFloatArray()
-    {
-        return GetArray<float>();
-    }
+    /// <summary>Reads an array of <see cref="float"/> values.</summary>
+    public float[] GetFloatArray() => GetUnmanagedArray<float>();
 
-    public double[] GetDoubleArray()
-    {
-        return GetArray<double>();
-    }
+    /// <summary>Reads an array of <see cref="double"/> values.</summary>
+    public double[] GetDoubleArray() => GetUnmanagedArray<double>();
 
-    public long[] GetLongArray()
-    {
-        return GetArray<long>();
-    }
+    /// <summary>Reads an array of <see cref="long"/> values.</summary>
+    public long[] GetLongArray() => GetUnmanagedArray<long>();
 
-    public ulong[] GetULongArray()
-    {
-        return GetArray<ulong>();
-    }
+    /// <summary>Reads an array of <see cref="ulong"/> values.</summary>
+    public ulong[] GetULongArray() => GetUnmanagedArray<ulong>();
 
+    /// <summary>
+    /// Reads an array of <see cref="string"/> values.
+    /// </summary>
+    /// <returns>A new <see cref="string"/> array.</returns>
+    /// <remarks>
+    /// Reads a 2-byte <see cref="ushort"/> length header followed by each <see cref="string"/> element.
+    /// </remarks>
     public string[] GetStringArray()
     {
         var length = GetUShort();
-        var arr = new string[length];
+        EnsureAvailable(checked(length * sizeof(ushort))); // 2 bytes (ushort) for string length
+
+        var result = new string[length];
         for (var i = 0; i < length; i++)
         {
-            arr[i] = GetString();
+            result[i] = GetString();
         }
-        return arr;
+
+        return result;
     }
 
     /// <summary>
-    /// Note that "maxStringLength" only limits the number of characters in a string, not its size in bytes.
-    /// Strings that exceed this parameter are returned as empty
+    /// Reads an array of <see cref="string"/> values with a maximum character limit per element.
     /// </summary>
+    /// <param name="maxStringLength">The maximum number of characters allowed per <see cref="string"/>.</param>
+    /// <returns>A new <see cref="string"/> array.</returns>
+    /// <remarks>
+    /// Strings exceeding <paramref name="maxStringLength"/> are returned as <see cref="string.Empty"/>.
+    /// </remarks>
     public string[] GetStringArray(int maxStringLength)
     {
         var length = GetUShort();
-        var arr = new string[length];
+        EnsureAvailable(checked(length * sizeof(ushort))); // 2 bytes (ushort) for string length
+
+        var result = new string[length];
         for (var i = 0; i < length; i++)
         {
-            arr[i] = GetString(maxStringLength);
+            result[i] = GetString(maxStringLength);
         }
-        return arr;
+
+        return result;
     }
 
-    public bool GetBool()
+    /// <summary>Reads the next <see cref="byte"/> from the buffer.</summary>
+    public byte GetByte()
     {
-        return GetByte() == 1;
+        EnsureAvailable(1);
+        return _data[_position++];
     }
 
-    public char GetChar()
-    {
-        return (char)GetUShort();
-    }
+    /// <summary>Reads the next <see cref="sbyte"/> from the buffer.</summary>
+    public sbyte GetSByte() => (sbyte)GetByte();
 
-    public ushort GetUShort()
-    {
-        return GetUnmanaged<ushort>();
-    }
+    /// <summary>Reads a <see cref="bool"/> value from the current position.</summary>
+    /// <returns><see langword="true"/> if the byte is 1; otherwise, <see langword="false"/>.</returns>
+    public bool GetBool() => GetByte() == 1;
 
-    public short GetShort()
-    {
-        return GetUnmanaged<short>();
-    }
+    /// <summary>Reads a <see cref="char"/> value as a 2-byte <see cref="ushort"/>.</summary>
+    public char GetChar() => GetUnmanaged<char>();
 
-    public long GetLong()
-    {
-        return GetUnmanaged<long>();
-    }
+    /// <summary>Reads a <see cref="ushort"/> value using unmanaged memory access.</summary>
+    public ushort GetUShort() => GetUnmanaged<ushort>();
 
-    public ulong GetULong()
-    {
-        return GetUnmanaged<ulong>();
-    }
+    /// <summary>Reads a <see cref="short"/> value using unmanaged memory access.</summary>
+    public short GetShort() => GetUnmanaged<short>();
 
-    public int GetInt()
-    {
-        return GetUnmanaged<int>();
-    }
+    /// <summary>Reads a <see cref="long"/> value using unmanaged memory access.</summary>
+    public long GetLong() => GetUnmanaged<long>();
 
-    public uint GetUInt()
-    {
-        return GetUnmanaged<uint>();
-    }
+    /// <summary>Reads a <see cref="ulong"/> value using unmanaged memory access.</summary>
+    public ulong GetULong() => GetUnmanaged<ulong>();
 
-    public float GetFloat()
-    {
-        return GetUnmanaged<float>();
-    }
+    /// <summary>Reads an <see cref="int"/> value using unmanaged memory access.</summary>
+    public int GetInt() => GetUnmanaged<int>();
 
-    public double GetDouble()
-    {
-        return GetUnmanaged<double>();
-    }
+    /// <summary>Reads a <see cref="uint"/> value using unmanaged memory access.</summary>
+    public uint GetUInt() => GetUnmanaged<uint>();
 
+    /// <summary>Reads a <see cref="float"/> value using unmanaged memory access.</summary>
+    public float GetFloat() => GetUnmanaged<float>();
+
+    /// <summary>Reads a <see cref="double"/> value using unmanaged memory access.</summary>
+    public double GetDouble() => GetUnmanaged<double>();
 
     /// <summary>
-    /// Note that "maxLength" only limits the number of characters in a string, not its size in bytes.
+    /// Reads a <see cref="string"/> with a maximum character limit.
     /// </summary>
-    /// <returns>"string.Empty" if value > "maxLength"</returns>
+    /// <param name="maxLength">The maximum allowed character count.</param>
+    /// <returns>The deserialized <see cref="string"/>, or <see cref="string.Empty"/> if the character count exceeds <paramref name="maxLength"/>.</returns>
+    /// <remarks>
+    /// Note that <paramref name="maxLength"/> limits the number of characters, not the total size in <see cref="byte"/>s.
+    /// </remarks>
     public string GetString(int maxLength)
     {
         var size = GetUShort();
@@ -402,15 +483,21 @@ public unsafe class NetDataReader
         }
 
         var actualSize = size - 1;
-        ReadOnlySpan<byte> slice = _data.AsSpan(_position, actualSize);
-        var result = maxLength > 0 && NetDataWriter.UTF8Encoding.GetCharCount(slice) > maxLength ?
-            string.Empty :
-            NetDataWriter.UTF8Encoding.GetString(slice);
+        EnsureAvailable(actualSize);
+
+        var result = maxLength > 0 &&
+                        NetDataWriter.uTF8Encoding.GetCharCount(_data, _position, actualSize) > maxLength
+            ? string.Empty
+            : NetDataWriter.uTF8Encoding.GetString(_data, _position, actualSize);
 
         _position += actualSize;
         return result;
     }
 
+    /// <summary>
+    /// Reads a <see cref="string"/> from the current position.
+    /// </summary>
+    /// <returns>The deserialized <see cref="string"/>.</returns>
     public string GetString()
     {
         var size = GetUShort();
@@ -420,13 +507,17 @@ public unsafe class NetDataReader
         }
 
         var actualSize = size - 1;
-        ReadOnlySpan<byte> slice = _data.AsSpan(_position, actualSize);
-        var result = NetDataWriter.UTF8Encoding.GetString(slice);
+        EnsureAvailable(actualSize);
 
+        var result = NetDataWriter.uTF8Encoding.GetString(_data, _position, actualSize);
         _position += actualSize;
         return result;
     }
 
+    /// <summary>
+    /// Reads a <see cref="string"/> prefixed with a 4-byte <see cref="int"/> length header.
+    /// </summary>
+    /// <returns>The deserialized <see cref="string"/>.</returns>
     public string GetLargeString()
     {
         var size = GetInt();
@@ -435,88 +526,165 @@ public unsafe class NetDataReader
             return string.Empty;
         }
 
-        var result = NetDataWriter.UTF8Encoding.GetString(_data, _position, size);
+        EnsureAvailable(size);
+
+        var result = NetDataWriter.uTF8Encoding.GetString(_data, _position, size);
         _position += size;
         return result;
     }
 
+    /// <summary>
+    /// Reads a 16-byte <see cref="Guid"/>.
+    /// </summary>
+    /// <returns>The deserialized <see cref="Guid"/>.</returns>
     public Guid GetGuid()
     {
-        var result = new Guid(_data.AsSpan(_position, 16));
-        _position += 16;
+        EnsureAvailable(GuidSize);
+        var result = new Guid(_data.AsSpan(_position, GuidSize));
+        _position += GuidSize;
         return result;
     }
 
+    /// <summary>
+    /// Gets an <see cref="ArraySegment{T}"/> of <see cref="byte"/>s from the current position.
+    /// </summary>
+    /// <param name="count">The number of <see cref="byte"/>s to include in the segment.</param>
+    /// <returns>An <see cref="ArraySegment{T}"/> wrapping the internal buffer.</returns>
     public ArraySegment<byte> GetBytesSegment(int count)
     {
-        ArraySegment<byte> segment = new(_data, _position, count);
+        EnsureAvailable(count);
+        var segment = new ArraySegment<byte>(_data, _position, count);
         _position += count;
         return segment;
     }
 
-    public ArraySegment<byte> GetRemainingBytesSegment()
+    /// <summary>
+    /// Gets an <see cref="ArraySegment{T}"/> containing all remaining <see cref="byte"/>s.
+    /// </summary>
+    /// <returns>An <see cref="ArraySegment{T}"/> from the current position to the end of the data.</returns>
+    public ArraySegment<byte> GetRemainingBytesSegment(bool advance = false)
     {
-        ArraySegment<byte> segment = new(_data, _position, AvailableBytes);
-        _position = _data.Length;
+        var segment = new ArraySegment<byte>(_data, _position, AvailableBytes);
+        if (advance)
+        {
+            _position = _dataSize;
+        }
         return segment;
     }
 
+    /// <summary>
+    /// Deserializes a <see langword="struct"/> that implements <see cref="INetSerializable"/>.
+    /// </summary>
+    /// <typeparam name="T">A <see langword="struct"/> type implementing <see cref="INetSerializable"/>.</typeparam>
+    /// <returns>The deserialized <see langword="struct"/>.</returns>
     public T Get<T>() where T : struct, INetSerializable
     {
-        var obj = default(T);
-        obj.Deserialize(this);
-        return obj;
+        Get(out T result);
+        return result;
     }
 
+    /// <summary>
+    /// Deserializes a <see langword="class"/> that implements <see cref="INetSerializable"/> using a provided constructor.
+    /// </summary>
+    /// <typeparam name="T">A <see langword="class"/> type implementing <see cref="INetSerializable"/>.</typeparam>
+    /// <param name="constructor">The factory <see langword="delegate"/> used to instantiate the <see langword="class"/>.</param>
+    /// <returns>A new instance of <typeparamref name="T"/>.</returns>
     public T Get<T>(Func<T> constructor) where T : class, INetSerializable
     {
-        var obj = constructor();
-        obj.Deserialize(this);
-        return obj;
+        Get(out var result, constructor);
+        return result;
     }
 
+    /// <summary>
+    /// Returns a <see cref="ReadOnlySpan{T}"/> of <see cref="byte"/>s containing all remaining data.
+    /// </summary>
+    /// <returns>A <see cref="ReadOnlySpan{T}"/> from the current <see cref="Position"/> to the end of the buffer.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public ReadOnlySpan<byte> GetRemainingBytesSpan()
+    public ReadOnlySpan<byte> GetRemainingBytesSpan(bool advance = false)
     {
-        return new ReadOnlySpan<byte>(_data, _position, _dataSize - _position);
+        var result = new ReadOnlySpan<byte>(_data, _position, AvailableBytes);
+        if (advance)
+        {
+            _position = _dataSize;
+        }
+        return result;
     }
 
-    public ReadOnlySpan<byte> GetSpan(int length)
+    /// <summary>
+    /// Returns a <see cref="ReadOnlyMemory{T}"/> of <see cref="byte"/>s containing all remaining data.
+    /// </summary>
+    /// <returns>A <see cref="ReadOnlyMemory{T}"/> from the current <see cref="Position"/> to the end of the buffer.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public ReadOnlyMemory<byte> GetRemainingBytesMemory(bool advance = false)
     {
-        ReadOnlySpan<byte> span = new(_data, _position, length);
-        _position += length;
-        return span;
+        var result = new ReadOnlyMemory<byte>(_data, _position, AvailableBytes);
+        if (advance)
+        {
+            _position = _dataSize;
+        }
+        return result;
     }
 
-    public byte[] GetRemainingBytes()
+    /// <summary>
+    /// Reads all remaining <see cref="byte"/>s and returns them as a new array.
+    /// </summary>
+    /// <returns>A new <see cref="byte"/> array containing the remaining data.</returns>
+    /// <remarks>
+    /// This method performs a heap allocation and advances the <see cref="Position"/> to the end of the data.
+    /// </remarks>
+    public byte[] GetRemainingBytes(bool advance = false)
     {
-        var outgoingData = new byte[AvailableBytes];
-        Buffer.BlockCopy(_data, _position, outgoingData, 0, AvailableBytes);
-        _position = _data.Length;
-        return outgoingData;
+        var size = _dataSize - _position;
+        if (size == 0)
+        {
+            return [];
+        }
+
+        var result = new byte[size];
+        Buffer.BlockCopy(_data, _position, result, 0, size);
+        if (advance)
+        {
+            _position = _dataSize;
+        }
+        return result;
     }
 
+    /// <summary>
+    /// Copies a specified number of <see cref="byte"/>s into a destination array at a specific offset.
+    /// </summary>
+    /// <param name="destination">The array to copy data into.</param>
+    /// <param name="start">The starting index in the <paramref name="destination"/> array.</param>
+    /// <param name="count">The number of <see cref="byte"/>s to read.</param>
     public void GetBytes(byte[] destination, int start, int count)
     {
+        EnsureAvailable(count);
         Buffer.BlockCopy(_data, _position, destination, start, count);
         _position += count;
     }
 
+    /// <summary>
+    /// Copies a specified number of <see cref="byte"/>s into a destination array starting at index 0.
+    /// </summary>
+    /// <param name="destination">The array to copy data into.</param>
+    /// <param name="count">The number of <see cref="byte"/>s to read.</param>
     public void GetBytes(byte[] destination, int count)
     {
+        EnsureAvailable(count);
         Buffer.BlockCopy(_data, _position, destination, 0, count);
         _position += count;
     }
 
-    public sbyte[] GetSBytesWithLength()
-    {
-        return GetArray<sbyte>();
-    }
+    /// <summary>
+    /// Reads an <see cref="sbyte"/> array prefixed with its <see cref="ushort"/> length.
+    /// </summary>
+    /// <returns>A new <see cref="sbyte"/> array.</returns>
+    public sbyte[] GetSBytesWithLength() => GetUnmanagedArray<sbyte>();
 
-    public byte[] GetBytesWithLength()
-    {
-        return GetArray<byte>();
-    }
+    /// <summary>
+    /// Reads a <see cref="byte"/> array prefixed with its <see cref="ushort"/> length.
+    /// </summary>
+    /// <returns>A new <see cref="byte"/> array.</returns>
+    public byte[] GetBytesWithLength() => GetUnmanagedArray<byte>();
 
     /// <summary>
     /// Reads a value of type <typeparamref name="T"/> from the internal byte buffer at the current position,
@@ -524,25 +692,22 @@ public unsafe class NetDataReader
     /// </summary>
     /// <typeparam name="T">An unmanaged value type to read from the buffer.</typeparam>
     /// <returns>The value of type <typeparamref name="T"/> read from the buffer.</returns>
-    /// <exception cref="IndexOutOfRangeException">
-    /// Thrown in DEBUG mode if there is not enough data remaining in the buffer to read a value of type <typeparamref name="T"/>.
-    /// </exception>
+    /// <exception cref="IndexOutOfRangeException"></exception>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public T GetUnmanaged<T>() where T : unmanaged
+    public unsafe T GetUnmanaged<T>() where T : unmanaged
     {
         var size = sizeof(T);
-#if DEBUG
-        if (_position + size > _data.Length)
-        {
-            throw new IndexOutOfRangeException("Not enough data to read");
-        }
-#endif
+        EnsureAvailable(size);
 
+#if NET8_0_OR_GREATER
+        var value = Unsafe.ReadUnaligned<T>(ref _data[_position]);
+#else
         T value;
         fixed (byte* ptr = &_data[_position])
         {
             value = *(T*)ptr;
         }
+#endif
 
         _position += size;
         return value;
@@ -559,22 +724,11 @@ public unsafe class NetDataReader
     /// The nullable value of type <typeparamref name="T"/> read from the buffer.
     /// Returns <see langword="null"/> if the presence flag indicates no value.
     /// </returns>
-    /// <exception cref="IndexOutOfRangeException">
-    /// Thrown in DEBUG mode if there is not enough data remaining in the buffer to read the value.
-    /// </exception>
+    /// <exception cref="IndexOutOfRangeException"></exception>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T? GetNullableUnmanaged<T>() where T : unmanaged
     {
         var hasValue = GetBool();
-
-#if DEBUG
-        var requiredSize = hasValue ? sizeof(T) : 0;
-        if (_position + requiredSize > _data.Length)
-        {
-            throw new IndexOutOfRangeException("Not enough data to read");
-        }
-#endif
-
         if (!hasValue)
         {
             return null;
@@ -589,14 +743,7 @@ public unsafe class NetDataReader
     /// </summary>
     /// <typeparam name="T">An unmanaged enum type to read.</typeparam>
     /// <returns>The enum value read from the buffer.</returns>
-    public T GetEnum<T>() where T : unmanaged, Enum
-    {
-        var span = GetSpan(Unsafe.SizeOf<T>());
-        fixed (byte* ptr = span)
-        {
-            return *(T*)ptr;
-        }
-    }
+    public unsafe T GetEnum<T>() where T : unmanaged, Enum => GetUnmanaged<T>();
 
     /// <summary>
     /// Deserializes a <see cref="DateTime"/> from the <paramref name="reader"/>
@@ -606,97 +753,52 @@ public unsafe class NetDataReader
     {
         return DateTime.FromOADate(GetDouble());
     }
+
     #endregion
 
     #region PeekMethods
 
-    public byte PeekByte()
-    {
-        return _data[_position];
-    }
+    /// <summary>Reads the <see cref="byte"/> at the current position without advancing the <see cref="Position"/>.</summary>
+    public byte PeekByte() => _data[_position];
 
-    public sbyte PeekSByte()
-    {
-        return (sbyte)_data[_position];
-    }
+    /// <summary>Reads the <see cref="sbyte"/> at the current position without advancing the <see cref="Position"/>.</summary>
+    public sbyte PeekSByte() => (sbyte)PeekByte();
 
-    public bool PeekBool()
-    {
-        return _data[_position] == 1;
-    }
+    /// <summary>Reads the <see cref="bool"/> at the current position without advancing the <see cref="Position"/>.</summary>
+    public bool PeekBool() => PeekByte() == 1;
 
-    public char PeekChar()
-    {
-        return (char)PeekUShort();
-    }
+    /// <summary>Reads the <see cref="char"/> at the current position without advancing the <see cref="Position"/>.</summary>
+    public char PeekChar() => PeekUnmanaged<char>();
 
-    /// <summary>
-    /// Peeks a value of type <typeparamref name="T"/> from the internal byte buffer at the current position
-    /// </summary>
-    /// <typeparam name="T">An unmanaged value type to read from the buffer.</typeparam>
-    /// <returns>The value of type <typeparamref name="T"/> read from the buffer.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public T PeekUnmanaged<T>() where T : unmanaged
-    {
-        T value;
-        fixed (byte* ptr = &_data[_position])
-        {
-            value = *(T*)ptr;
-        }
-        return value;
-    }
+    /// <summary>Reads the <see cref="ushort"/> at the current position without advancing the <see cref="Position"/>.</summary>
+    public ushort PeekUShort() => PeekUnmanaged<ushort>();
 
-    public ushort PeekUShort()
-    {
-        return PeekUnmanaged<ushort>();
-        //return BitConverter.ToUInt16(_data, _position);
-    }
+    /// <summary>Reads the <see cref="short"/> at the current position without advancing the <see cref="Position"/>.</summary>
+    public short PeekShort() => PeekUnmanaged<short>();
 
-    public short PeekShort()
-    {
-        return PeekUnmanaged<short>();
-        //return BitConverter.ToInt16(_data, _position);
-    }
+    /// <summary>Reads the <see cref="long"/> at the current position without advancing the <see cref="Position"/>.</summary>
+    public long PeekLong() => PeekUnmanaged<long>();
 
-    public long PeekLong()
-    {
-        return PeekUnmanaged<long>();
-        //return BitConverter.ToInt64(_data, _position);
-    }
+    /// <summary>Reads the <see cref="ulong"/> at the current position without advancing the <see cref="Position"/>.</summary>
+    public ulong PeekULong() => PeekUnmanaged<ulong>();
 
-    public ulong PeekULong()
-    {
-        return PeekUnmanaged<ulong>();
-        //return BitConverter.ToUInt64(_data, _position);
-    }
+    /// <summary>Reads the <see cref="int"/> at the current position without advancing the <see cref="Position"/>.</summary>
+    public int PeekInt() => PeekUnmanaged<int>();
 
-    public int PeekInt()
-    {
-        return PeekUnmanaged<int>();
-        //return BitConverter.ToInt32(_data, _position);
-    }
+    /// <summary>Reads the <see cref="uint"/> at the current position without advancing the <see cref="Position"/>.</summary>
+    public uint PeekUInt() => PeekUnmanaged<uint>();
 
-    public uint PeekUInt()
-    {
-        return PeekUnmanaged<uint>();
-        //return BitConverter.ToUInt32(_data, _position);
-    }
+    /// <summary>Reads the <see cref="float"/> at the current position without advancing the <see cref="Position"/>.</summary>
+    public float PeekFloat() => PeekUnmanaged<float>();
 
-    public float PeekFloat()
-    {
-        return PeekUnmanaged<float>();
-        //return BitConverter.ToSingle(_data, _position);
-    }
-
-    public double PeekDouble()
-    {
-        return PeekUnmanaged<double>();
-        //return BitConverter.ToDouble(_data, _position);
-    }
+    /// <summary>Reads the <see cref="double"/> at the current position without advancing the <see cref="Position"/>.</summary>
+    public double PeekDouble() => PeekUnmanaged<double>();
 
     /// <summary>
-    /// Note that "maxLength" only limits the number of characters in a string, not its size in bytes.
+    /// Reads a <see cref="string"/> with a character limit without advancing the <see cref="Position"/>.
     /// </summary>
+    /// <param name="maxLength">Maximum allowed character count.</param>
+    /// <remarks>Strings exceeding <paramref name="maxLength"/> are returned as <see cref="string.Empty"/>.</remarks>
     public string PeekString(int maxLength)
     {
         var size = PeekUShort();
@@ -706,11 +808,14 @@ public unsafe class NetDataReader
         }
 
         var actualSize = size - 1;
-        return maxLength > 0 && NetDataWriter.UTF8Encoding.GetCharCount(_data, _position + 2, actualSize) > maxLength ?
-            string.Empty :
-            NetDataWriter.UTF8Encoding.GetString(_data, _position + 2, actualSize);
+        return (maxLength > 0 && NetDataWriter.uTF8Encoding.GetCharCount(_data, _position + sizeof(ushort), actualSize) > maxLength)
+            ? string.Empty
+            : NetDataWriter.uTF8Encoding.GetString(_data, _position + sizeof(ushort), actualSize);
     }
 
+    /// <summary>
+    /// Reads a <see cref="string"/> without advancing the <see cref="Position"/>.
+    /// </summary>
     public string PeekString()
     {
         var size = PeekUShort();
@@ -720,198 +825,212 @@ public unsafe class NetDataReader
         }
 
         var actualSize = size - 1;
-        return NetDataWriter.UTF8Encoding.GetString(_data, _position + 2, actualSize);
+        return NetDataWriter.uTF8Encoding.GetString(_data, _position + sizeof(ushort), actualSize);
     }
+
+    /// <summary>
+    /// Reads an unmanaged value of type <typeparamref name="T"/> at the current position without advancing the <see cref="Position"/>.
+    /// </summary>
+    /// <typeparam name="T">An unmanaged value type.</typeparam>
+    /// <returns>The value read from the buffer.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public unsafe T PeekUnmanaged<T>() where T : unmanaged
+    {
+#if NET8_0_OR_GREATER
+        return Unsafe.ReadUnaligned<T>(ref _data[_position]);
+#else
+        T value;
+        fixed (byte* ptr = &_data[_position])
+        {
+            value = *(T*)ptr;
+        }
+        return value;
+#endif
+    }
+
     #endregion
 
     #region TryGetMethods
-    public bool TryGetByte(out byte result)
-    {
-        if (AvailableBytes >= 1)
-        {
-            result = GetByte();
-            return true;
-        }
-        result = 0;
-        return false;
-    }
 
-    public bool TryGetSByte(out sbyte result)
-    {
-        if (AvailableBytes >= 1)
-        {
-            result = GetSByte();
-            return true;
-        }
-        result = 0;
-        return false;
-    }
+    /// <summary>Attempts to read a <see cref="byte"/> without throwing an exception.</summary>
+    /// <param name="result">The deserialized <see cref="byte"/>, or 0 if failed.</param>
+    /// <returns><see langword="true"/> if enough data was available; otherwise, <see langword="false"/>.</returns>
+    public bool TryGetByte(out byte result) => TryGetUnmanaged(out result);
 
-    public bool TryGetBool(out bool result)
-    {
-        if (AvailableBytes >= 1)
-        {
-            result = GetBool();
-            return true;
-        }
-        result = false;
-        return false;
-    }
+    /// <summary>Attempts to read an <see cref="sbyte"/> without throwing an exception.</summary>
+    /// <param name="result">The deserialized <see cref="sbyte"/>, or 0 if failed.</param>
+    /// <returns><see langword="true"/> if enough data was available; otherwise, <see langword="false"/>.</returns>
+    public bool TryGetSByte(out sbyte result) => TryGetUnmanaged(out result);
 
-    public bool TryGetChar(out char result)
-    {
-        if (!TryGetUShort(out var uShortValue))
-        {
-            result = '\0';
-            return false;
-        }
-        result = (char)uShortValue;
-        return true;
-    }
+    /// <summary>Attempts to read a <see cref="bool"/> without throwing an exception.</summary>
+    /// <param name="result">The deserialized <see cref="bool"/>, or <see langword="false"/> if failed.</param>
+    /// <returns><see langword="true"/> if enough data was available; otherwise, <see langword="false"/>.</returns>
+    public bool TryGetBool(out bool result) => TryGetUnmanaged(out result);
 
-    public bool TryGetShort(out short result)
-    {
-        if (AvailableBytes >= 2)
-        {
-            result = GetShort();
-            return true;
-        }
-        result = 0;
-        return false;
-    }
+    /// <summary>Attempts to read a <see cref="char"/> without throwing an exception.</summary>
+    /// <param name="result">The deserialized <see cref="char"/>, or '\0' if failed.</param>
+    /// <returns><see langword="true"/> if enough data was available; otherwise, <see langword="false"/>.</returns>
+    public bool TryGetChar(out char result) => TryGetUnmanaged(out result);
 
-    public bool TryGetUShort(out ushort result)
-    {
-        if (AvailableBytes >= 2)
-        {
-            result = GetUShort();
-            return true;
-        }
-        result = 0;
-        return false;
-    }
+    /// <summary>Attempts to read a <see cref="short"/> without throwing an exception.</summary>
+    /// <param name="result">The deserialized <see cref="short"/>, or 0 if failed.</param>
+    /// <returns><see langword="true"/> if enough data was available; otherwise, <see langword="false"/>.</returns>
+    public bool TryGetShort(out short result) => TryGetUnmanaged(out result);
 
-    public bool TryGetInt(out int result)
-    {
-        if (AvailableBytes >= 4)
-        {
-            result = GetInt();
-            return true;
-        }
-        result = 0;
-        return false;
-    }
+    /// <summary>Attempts to read a <see cref="ushort"/> without throwing an exception.</summary>
+    /// <param name="result">The deserialized <see cref="ushort"/>, or 0 if failed.</param>
+    /// <returns><see langword="true"/> if enough data was available; otherwise, <see langword="false"/>.</returns>
+    public bool TryGetUShort(out ushort result) => TryGetUnmanaged(out result);
 
-    public bool TryGetUInt(out uint result)
-    {
-        if (AvailableBytes >= 4)
-        {
-            result = GetUInt();
-            return true;
-        }
-        result = 0;
-        return false;
-    }
+    /// <summary>Attempts to read an <see cref="int"/> without throwing an exception.</summary>
+    /// <param name="result">The deserialized <see cref="int"/>, or 0 if failed.</param>
+    /// <returns><see langword="true"/> if enough data was available; otherwise, <see langword="false"/>.</returns>
+    public bool TryGetInt(out int result) => TryGetUnmanaged(out result);
 
-    public bool TryGetLong(out long result)
-    {
-        if (AvailableBytes >= 8)
-        {
-            result = GetLong();
-            return true;
-        }
-        result = 0;
-        return false;
-    }
+    /// <summary>Attempts to read a <see cref="uint"/> without throwing an exception.</summary>
+    /// <param name="result">The deserialized <see cref="uint"/>, or 0 if failed.</param>
+    /// <returns><see langword="true"/> if enough data was available; otherwise, <see langword="false"/>.</returns>
+    public bool TryGetUInt(out uint result) => TryGetUnmanaged(out result);
 
-    public bool TryGetULong(out ulong result)
-    {
-        if (AvailableBytes >= 8)
-        {
-            result = GetULong();
-            return true;
-        }
-        result = 0;
-        return false;
-    }
+    /// <summary>Attempts to read a <see cref="long"/> without throwing an exception.</summary>
+    /// <param name="result">The deserialized <see cref="long"/>, or 0 if failed.</param>
+    /// <returns><see langword="true"/> if enough data was available; otherwise, <see langword="false"/>.</returns>
+    public bool TryGetLong(out long result) => TryGetUnmanaged(out result);
 
-    public bool TryGetFloat(out float result)
-    {
-        if (AvailableBytes >= 4)
-        {
-            result = GetFloat();
-            return true;
-        }
-        result = 0;
-        return false;
-    }
+    /// <summary>Attempts to read a <see cref="ulong"/> without throwing an exception.</summary>
+    /// <param name="result">The deserialized <see cref="ulong"/>, or 0 if failed.</param>
+    /// <returns><see langword="true"/> if enough data was available; otherwise, <see langword="false"/>.</returns>
+    public bool TryGetULong(out ulong result) => TryGetUnmanaged(out result);
 
-    public bool TryGetDouble(out double result)
-    {
-        if (AvailableBytes >= 8)
-        {
-            result = GetDouble();
-            return true;
-        }
-        result = 0;
-        return false;
-    }
+    /// <summary>Attempts to read a <see cref="float"/> without throwing an exception.</summary>
+    /// <param name="result">The deserialized <see cref="float"/>, or 0 if failed.</param>
+    /// <returns><see langword="true"/> if enough data was available; otherwise, <see langword="false"/>.</returns>
+    public bool TryGetFloat(out float result) => TryGetUnmanaged(out result);
 
+    /// <summary>Attempts to read a <see cref="double"/> without throwing an exception.</summary>
+    /// <param name="result">The deserialized <see cref="double"/>, or 0 if failed.</param>
+    /// <returns><see langword="true"/> if enough data was available; otherwise, <see langword="false"/>.</returns>
+    public bool TryGetDouble(out double result) => TryGetUnmanaged(out result);
+
+    /// <summary>Attempts to read a <see cref="string"/> without throwing an exception.</summary>
+    /// <param name="result">The deserialized <see cref="string"/>, or <see langword="null"/> if failed.</param>
+    /// <returns><see langword="true"/> if enough data was available; otherwise, <see langword="false"/>.</returns>
     public bool TryGetString(out string result)
     {
-        if (AvailableBytes >= 2)
-        {
-            var strSize = PeekUShort();
-            if (AvailableBytes >= strSize + 1)
-            {
-                result = GetString();
-                return true;
-            }
-        }
-        result = null;
-        return false;
-    }
-
-    public bool TryGetStringArray(out string[] result)
-    {
-        if (!TryGetUShort(out var strArrayLength))
+        if (AvailableBytes < sizeof(ushort))
         {
             result = null;
             return false;
         }
 
-        result = new string[strArrayLength];
-        for (var i = 0; i < strArrayLength; i++)
+        var size = PeekUShort();
+        var actualSize = size == 0 ? 0 : size - 1;
+
+        if (AvailableBytes < sizeof(ushort) + actualSize)
         {
-            if (!TryGetString(out result[i]))
+            result = null;
+            return false;
+        }
+
+        result = GetString();
+        return true;
+    }
+
+    /// <summary>Attempts to read a <see cref="string"/> array without throwing an exception.</summary>
+    /// <param name="result">The deserialized <see cref="string"/> array, or <see langword="null"/> if failed.</param>
+    /// <returns><see langword="true"/> if enough data was available; otherwise, <see langword="false"/>.</returns>
+    public bool TryGetStringArray(out string[] result)
+    {
+        if (AvailableBytes < sizeof(ushort))
+        {
+            result = null;
+            return false;
+        }
+
+        var startPosition = _position;
+
+        var length = GetUShort();
+        if (AvailableBytes < checked(length * sizeof(ushort))) // 2 bytes (ushort) for string length
+        {
+            _position = startPosition; // Roll back to the original position
+            result = null;
+            return false;
+        }
+
+        var values = new string[length];
+        for (var i = 0; i < length; i++)
+        {
+            if (!TryGetString(out values[i]))
             {
+                _position = startPosition; // Roll back to the original position
                 result = null;
                 return false;
             }
         }
 
+        result = values;
         return true;
     }
 
+    /// <summary>Attempts to read a <see cref="byte"/> array with a length header without throwing an exception.</summary>
+    /// <param name="result">The deserialized <see cref="byte"/> array, or <see langword="null"/> if failed.</param>
+    /// <returns><see langword="true"/> if enough data was available; otherwise, <see langword="false"/>.</returns>
     public bool TryGetBytesWithLength(out byte[] result)
     {
-        if (AvailableBytes >= 2)
+        if (AvailableBytes < sizeof(ushort))
         {
-            var length = PeekUShort();
-            if (AvailableBytes >= 2 + length)
-            {
-                result = GetBytesWithLength();
-                return true;
-            }
+            result = null;
+            return false;
         }
-        result = null;
-        return false;
+
+        var length = PeekUShort();
+        if (AvailableBytes < sizeof(ushort) + length)
+        {
+            result = null;
+            return false;
+        }
+
+        result = GetBytesWithLength();
+        return true;
     }
+
+    /// <summary>
+    /// Attempts to read a value of type <typeparamref name="T"/> from the internal byte buffer at the current position,
+    /// advancing the position by the size of <typeparamref name="T"/> if successful.
+    /// </summary>
+    /// <typeparam name="T">An unmanaged value type to read from the buffer.</typeparam>
+    /// <param name="result">When this method returns, contains the value read from the buffer, or the default value if the read failed.</param>
+    /// <returns><see langword="true"/> if enough data was available to read the value; otherwise, <see langword="false"/>.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public unsafe bool TryGetUnmanaged<T>(out T result) where T : unmanaged
+    {
+        var size = sizeof(T);
+        if (AvailableBytes < size)
+        {
+            result = default;
+            return false;
+        }
+
+#if NET8_0_OR_GREATER
+        result = Unsafe.ReadUnaligned<T>(ref _data[_position]);
+#else
+        fixed (byte* ptr = &_data[_position])
+        {
+            result = *(T*)ptr;
+        }
+#endif
+
+        _position += size;
+        return true;
+    }
+
     #endregion
 
+    /// <summary>Clears the reader state and releases the reference to the internal buffer.</summary>
     public void Clear()
     {
         _position = 0;
+        _offset = 0;
         _dataSize = 0;
         _data = null;
     }

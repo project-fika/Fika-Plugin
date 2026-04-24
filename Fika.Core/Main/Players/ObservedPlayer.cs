@@ -18,13 +18,14 @@ using Fika.Core.Main.Factories;
 using Fika.Core.Main.GameMode;
 using Fika.Core.Main.ObservedClasses;
 using Fika.Core.Main.ObservedClasses.HandsControllers;
-using Fika.Core.Main.ObservedClasses.Snapshotting;
 using Fika.Core.Main.PacketHandlers;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Communication;
+using Fika.Core.Networking.Packets.Player;
 using Fika.Core.Networking.Packets.Player.Common;
 using Fika.Core.Networking.Packets.Player.Common.SubPackets;
+using Fika.Core.Networking.Snapshotting;
 using HarmonyLib;
 using JsonType;
 using RootMotion.FinalIK;
@@ -37,7 +38,7 @@ namespace Fika.Core.Main.Players;
 /// Bots are handled by the server, and other clients send their own data which the server replicates to other clients. <br/>
 /// As a host all <see cref="ObservedPlayer"/>s are only other clients.
 /// </summary>
-public class ObservedPlayer : FikaPlayer
+public sealed class ObservedPlayer : FikaPlayer
 {
     #region Fields and Properties
     public FikaHealthBar HealthBar
@@ -169,7 +170,6 @@ public class ObservedPlayer : FikaPlayer
     public float TurnOffFbbikAt;
 
     internal ObservedState CurrentPlayerState;
-
     private float _lastDistance;
     private LocalPlayerCullingHandlerClass _cullingHandler;
     private float _rightHand;
@@ -190,6 +190,10 @@ public class ObservedPlayer : FikaPlayer
     private SoundSettingsControllerClass _soundSettings;
     private bool _voipAssigned;
     private int _frameSkip;
+    private bool _isZombie;
+
+    private const float _movementDeadZoneSqr = 0.05f * 0.05f;
+    private const float _velocityDeadZoneSqr = 0.20f * 0.20f;
     #endregion
 
     public static async Task<ObservedPlayer> CreateObservedPlayer(GameWorld gameWorld, int playerId, Vector3 position, Quaternion rotation, string layerName,
@@ -276,8 +280,9 @@ public class ObservedPlayer : FikaPlayer
         player.AggressorFound = false;
         player._animators[0].enabled = true;
         player._isServer = FikaBackendUtils.IsServer;
-        player.Snapshotter = new(player);
-        player.CurrentPlayerState = new(position, player.Rotation);
+        player.Snapshotter = new PlayerSnapshotter<PlayerStateSnapshot>();
+        player.CurrentPlayerState = new ObservedState(position, player.Rotation);
+        player._isZombie = player.UsedSimplifiedSkeleton;
 
         if (ObservedPlayerControllerClass.Int_1 == 0)
         {
@@ -861,15 +866,124 @@ public class ObservedPlayer : FikaPlayer
     }
 
     /// <summary>
-    /// Updates replicated values from the <see cref="ObservedState"/>
+    /// Updates replicated values
     /// </summary>
-    public void ManualStateUpdate()
+    public void ManualStateUpdate(double localTime)
     {
+        var bufferState = Snapshotter.GetInterpolationIndices(localTime, out var from, out var to, out var t);
+
+        if (bufferState == EBufferState.Stale)
+        {
+            if (!CurrentPlayerState.IsMoving)
+            {
+                return;
+            }
+
+            CurrentPlayerState.Velocity = Vector3.zero;
+            CurrentPlayerState.MovementDirection = Vector2.zero;
+            CurrentPlayerState.IsMoving = false;
+            ObservedCharacterController.Vector3_0 = CurrentPlayerState.Velocity;
+
+            MovementContext.PlayerAnimatorEnableInert(CurrentPlayerState.IsMoving);
+            MovementContext.MovementDirection = CurrentPlayerState.MovementDirection;
+            return;
+        }
+
+        ref readonly var snapFrom = ref Snapshotter.GetSnapshot(from);
+        var currentState = CurrentPlayerState;
+
+        if (bufferState == EBufferState.Interpolating)
+        {
+            ref readonly var snapTo = ref Snapshotter.GetSnapshot(to);
+
+            currentState.Rotation = new Vector2(
+                Mathf.LerpAngle(snapFrom.Data.Rotation.x, snapTo.Data.Rotation.x, t),
+                Mathf.LerpUnclamped(snapFrom.Data.Rotation.y, snapTo.Data.Rotation.y, t)
+            );
+
+            currentState.HeadRotation = Vector3.LerpUnclamped(snapFrom.Data.HeadRotation, snapTo.Data.HeadRotation, t);
+            currentState.Position = Vector3.LerpUnclamped(snapFrom.Data.Position, snapTo.Data.Position, t);
+
+            var newDir = currentState.MovementDirection = Vector2.LerpUnclamped(snapFrom.Data.MovementDirection, snapTo.Data.MovementDirection, t);
+            if (!_isZombie && (snapTo.Data.State is EPlayerState.Idle or EPlayerState.Transition || newDir.sqrMagnitude < _movementDeadZoneSqr))
+            {
+                currentState.MovementDirection = Vector2.zero;
+                currentState.IsMoving = false;
+            }
+            else
+            {
+                currentState.MovementDirection = newDir;
+                currentState.IsMoving = true;
+            }
+
+            currentState.State = snapTo.Data.State;
+            currentState.Tilt = Mathf.LerpUnclamped(snapFrom.Data.Tilt, snapTo.Data.Tilt, t);
+            currentState.Step = snapTo.Data.Step;
+            currentState.MovementSpeed = Mathf.LerpUnclamped(snapFrom.Data.MovementSpeed, snapTo.Data.MovementSpeed, t);
+            currentState.SprintSpeed = Mathf.LerpUnclamped(snapFrom.Data.SprintSpeed, snapTo.Data.SprintSpeed, t);
+            currentState.IsProne = snapTo.Data.IsProne;
+            currentState.PoseLevel = Mathf.LerpUnclamped(snapFrom.Data.PoseLevel, snapTo.Data.PoseLevel, t);
+            currentState.IsSprinting = snapTo.Data.IsSprinting;
+            currentState.Stamina = snapTo.Data.Physical;
+            currentState.Blindfire = snapTo.Data.Blindfire;
+            currentState.WeaponOverlap = Mathf.LerpUnclamped(snapFrom.Data.WeaponOverlap, snapTo.Data.WeaponOverlap, t);
+            currentState.LeftStanceDisabled = snapTo.Data.LeftStanceDisabled;
+            currentState.IsGrounded = snapTo.Data.IsGrounded;
+
+            var velocity = Vector3.LerpUnclamped(snapFrom.Data.Velocity, snapTo.Data.Velocity, t);
+            if (velocity.sqrMagnitude < _velocityDeadZoneSqr)
+            {
+                velocity = Vector3.zero;
+            }
+
+            currentState.Velocity = velocity;
+        }
+        else if (bufferState == EBufferState.Extrapolating)
+        {
+            currentState.Position = snapFrom.Data.Position + (snapFrom.Data.Velocity * t);
+
+            currentState.Rotation = snapFrom.Data.Rotation;
+            currentState.HeadRotation = snapFrom.Data.HeadRotation;
+            currentState.MovementDirection = snapFrom.Data.MovementDirection;
+            currentState.IsMoving = snapFrom.Data.MovementDirection.sqrMagnitude > _movementDeadZoneSqr;
+
+            currentState.State = snapFrom.Data.State;
+            currentState.Tilt = snapFrom.Data.Tilt;
+            currentState.Step = snapFrom.Data.Step;
+            currentState.MovementSpeed = snapFrom.Data.MovementSpeed;
+            currentState.SprintSpeed = snapFrom.Data.SprintSpeed;
+            currentState.IsProne = snapFrom.Data.IsProne;
+            currentState.PoseLevel = snapFrom.Data.PoseLevel;
+            currentState.IsSprinting = snapFrom.Data.IsSprinting;
+            currentState.Stamina = snapFrom.Data.Physical;
+            currentState.Blindfire = snapFrom.Data.Blindfire;
+            currentState.WeaponOverlap = snapFrom.Data.WeaponOverlap;
+            currentState.LeftStanceDisabled = snapFrom.Data.LeftStanceDisabled;
+            currentState.IsGrounded = snapFrom.Data.IsGrounded;
+            currentState.Velocity = snapFrom.Data.Velocity;
+        }
+
         if (!_cullingHandler.IsVisible)
         {
             Position = CurrentPlayerState.Position;
             Rotation = CurrentPlayerState.Rotation;
             ObservedCharacterController.Vector3_0 = CurrentPlayerState.Velocity;
+
+            if (!_isServer)
+            {
+                return;
+            }
+
+            if (CurrentPlayerState.State == EPlayerState.Jump)
+            {
+                MovementContext.method_2(1f);
+                return;
+            }
+
+            if (CurrentPlayerState.IsMoving)
+            {
+                MovementContext.method_1(CurrentPlayerState.MovementDirection);
+            }
 
             return;
         }
@@ -951,10 +1065,7 @@ public class ObservedPlayer : FikaPlayer
 
         LeftStanceDisabled = CurrentPlayerState.LeftStanceDisabled;
 
-        // hacky way to set velocity
         ObservedCharacterController.Vector3_0 = CurrentPlayerState.Velocity;
-
-        CurrentPlayerState.ShouldUpdate = false;
     }
 
     public override void InteractionRaycast()
@@ -1150,7 +1261,7 @@ public class ObservedPlayer : FikaPlayer
             var sessionCounters = mainPlayer.Profile.EftStats.SessionCounters;
             HandleSharedExperience(countAsBoss, experience, sessionCounters);
 
-            if (FikaPlugin.Instance.SharedQuestProgression && FikaPlugin.Instance.Settings.EasyKillConditions.Value)
+            if (FikaPlugin.Instance.Settings.SharedQuestProgression && FikaPlugin.Instance.Settings.EasyKillConditions.Value)
             {
 #if DEBUG
                 FikaGlobals.LogInfo("Handling teammate kill from teammate: " + aggressor.Profile.Nickname);
@@ -1394,7 +1505,7 @@ public class ObservedPlayer : FikaPlayer
             yield return null;
         }
 
-        if (FikaPlugin.Instance.AllowNamePlates)
+        if (FikaPlugin.Instance.Settings.AllowNamePlates)
         {
             _healthBar = FikaHealthBar.Create(this);
         }
@@ -2192,4 +2303,4 @@ public class ObservedPlayer : FikaPlayer
     }
 }
 
-#endregion
+    #endregion

@@ -19,7 +19,6 @@ using EFT.UI.Screens;
 using Fika.Core.Main.ClientClasses;
 using Fika.Core.Main.Components;
 using Fika.Core.Main.Patches.BTR;
-using Fika.Core.Main.Patches.Overrides;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Modding;
@@ -360,7 +359,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         GameController.InitHalloweenEvent(instance, gameWorld, Location_0);
         GameController.InitBTRController(instance, gameWorld, Location_0);
 
-        if (FikaPlugin.Instance.EnableTransits)
+        if (FikaPlugin.Instance.Settings.EnableTransits)
         {
             GameController.InitializeTransitSystem(gameWorld, instance, Profile_0, localRaidSettings_0, Location_0);
         }
@@ -740,7 +739,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         ExitStatus = ExitStatus.Killed;
         ExitLocation = string.Empty;
 
-        if (FikaPlugin.Instance.ForceSaveOnDeath)
+        if (FikaPlugin.Instance.Settings.ForceSaveOnDeath)
         {
             await SavePlayer((FikaPlayer)player, ExitStatus, string.Empty, true);
         }

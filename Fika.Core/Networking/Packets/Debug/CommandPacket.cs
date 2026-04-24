@@ -1,6 +1,6 @@
 ﻿namespace Fika.Core.Networking.Packets.Debug;
 
-public class CommandPacket : INetSerializable
+public sealed class CommandPacket : INetSerializable
 {
     public CommandPacket()
     {

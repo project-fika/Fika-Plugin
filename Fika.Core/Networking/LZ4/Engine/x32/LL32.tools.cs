@@ -97,7 +97,9 @@ internal unsafe partial class LL64: LL
         {
             var diff = Mem.PeekW(pMatch) ^ Mem.PeekW(pIn);
             if (diff != 0)
+            {
                 return LZ4_NbCommonBytes(diff);
+            }
 
             pIn += STEPSIZE;
             pMatch += STEPSIZE;
@@ -107,7 +109,9 @@ internal unsafe partial class LL64: LL
         {
             var diff = Mem.PeekW(pMatch) ^ Mem.PeekW(pIn);
             if (diff != 0)
+            {
                 return (uint)(pIn + LZ4_NbCommonBytes(diff) - pStart);
+            }
 
             pIn += STEPSIZE;
             pMatch += STEPSIZE;
@@ -130,7 +134,9 @@ internal unsafe partial class LL64: LL
         }
 
         if (pIn < pInLimit && *pMatch == *pIn)
+        {
             pIn++;
+        }
 
         return (uint)(pIn - pStart);
     }
@@ -159,18 +165,31 @@ internal unsafe partial class LL64: LL
 
     protected static void LZ4_renormDictT(LZ4_stream_t* LZ4_dict, int nextSize)
     {
-        if (LZ4_dict->currentOffset + (uint)nextSize <= 0x80000000) return;
+        if (LZ4_dict->currentOffset + (uint)nextSize <= 0x80000000)
+        {
+            return;
+        }
 
         var delta = LZ4_dict->currentOffset - 64 * KB;
         var dictEnd = LZ4_dict->dictionary + LZ4_dict->dictSize;
         for (var i = 0; i < LZ4_HASH_SIZE_U32; i++)
         {
-            if (LZ4_dict->hashTable[i] < delta) LZ4_dict->hashTable[i] = 0;
-            else LZ4_dict->hashTable[i] -= delta;
+            if (LZ4_dict->hashTable[i] < delta)
+            {
+                LZ4_dict->hashTable[i] = 0;
+            }
+            else
+            {
+                LZ4_dict->hashTable[i] -= delta;
+            }
         }
 
         LZ4_dict->currentOffset = 64 * KB;
-        if (LZ4_dict->dictSize > 64 * KB) LZ4_dict->dictSize = 64 * KB;
+        if (LZ4_dict->dictSize > 64 * KB)
+        {
+            LZ4_dict->dictSize = 64 * KB;
+        }
+
         LZ4_dict->dictionary = dictEnd - LZ4_dict->dictSize;
     }
 
@@ -191,7 +210,11 @@ internal unsafe partial class LL64: LL
             return 0;
         }
 
-        if (dictEnd - p > 64 * KB) p = dictEnd - 64 * KB;
+        if (dictEnd - p > 64 * KB)
+        {
+            p = dictEnd - 64 * KB;
+        }
+
         var @base = dictEnd - dict->currentOffset;
 
         dict->dictionary = p;

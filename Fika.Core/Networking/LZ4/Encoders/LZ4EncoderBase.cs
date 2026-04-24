@@ -1,5 +1,5 @@
-﻿using Fika.Core.Networking.LZ4.Internal;
-using System;
+﻿using System;
+using Fika.Core.Networking.LZ4.Internal;
 
 namespace Fika.Core.Networking.LZ4.Encoders;
 
@@ -48,11 +48,15 @@ public abstract unsafe class LZ4EncoderBase : UnmanagedResources, ILZ4Encoder
         ThrowIfDisposed();
 
         if (length == 0)
+        {
             return 0;
+        }
 
         var spaceLeft = _inputIndex + _blockSize - _inputPointer;
         if (spaceLeft <= 0)
+        {
             return 0;
+        }
 
         var chunk = Math.Min(spaceLeft, length);
         Mem.Move(InputBuffer + _inputPointer, source, chunk);
@@ -68,13 +72,17 @@ public abstract unsafe class LZ4EncoderBase : UnmanagedResources, ILZ4Encoder
 
         var sourceLength = _inputPointer - _inputIndex;
         if (sourceLength <= 0)
+        {
             return 0;
+        }
 
         var encoded = EncodeBlock(InputBuffer + _inputIndex, sourceLength, target, length);
 
         if (encoded <= 0)
+        {
             throw new InvalidOperationException(
                 "Failed to encode chunk. Target buffer too small.");
+        }
 
         if (allowCopy && encoded >= sourceLength)
         {
@@ -91,7 +99,9 @@ public abstract unsafe class LZ4EncoderBase : UnmanagedResources, ILZ4Encoder
     {
         _inputIndex = _inputPointer;
         if (_inputIndex + _blockSize <= _inputLength)
+        {
             return;
+        }
 
         _inputIndex = _inputPointer = CopyDict(InputBuffer, _inputPointer);
     }

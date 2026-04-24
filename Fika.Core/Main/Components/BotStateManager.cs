@@ -4,6 +4,7 @@ using Fika.Core.Main.GameMode;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Player;
+using Fika.Core.Networking.Snapshotting;
 
 namespace Fika.Core.Main.Components;
 
@@ -17,7 +18,8 @@ public class BotStateManager : MonoBehaviour
 
     private float _updateCount;
     private float _updatesPerTick;
-    private byte _writtenPackets;
+    private uint _writtenPackets;
+    private bool _headerWritten;
 
     public void AddBot(FikaBot bot)
     {
@@ -61,6 +63,12 @@ public class BotStateManager : MonoBehaviour
 
     private void SendBatchStates()
     {
+        if (!_headerWritten)
+        {
+            _writer.Put(NetworkTimeSync.NetworkTime);
+            _headerWritten = true;
+        }
+
         for (var i = _bots.Count - 1; i >= 0; i--)
         {
             var bot = _bots[i];
@@ -70,7 +78,7 @@ public class BotStateManager : MonoBehaviour
                 continue;
             }
 
-            if ((_writer.Length + PlayerStatePacket.PacketSize) > _server.MaxMTU)
+            if ((_writer.Length + PlayerStateData.PacketSize) > _server.MaxMTU)
             {
                 SendAndReset();
             }
@@ -85,10 +93,11 @@ public class BotStateManager : MonoBehaviour
 
     private void SendAndReset()
     {
-        if (_writtenPackets > 0)
+        if (_writtenPackets != 0)
         {
-            _server.BatchSendStates(_writer, _writtenPackets);
+            _server.BatchSendStates(_writer);
             _writtenPackets = 0;
+            _headerWritten = false;
             _writer.Reset();
         }
     }

@@ -18,7 +18,6 @@ using Fika.Core.Main.ClientClasses;
 using Fika.Core.Main.ClientClasses.HandsControllers;
 using Fika.Core.Main.GameMode;
 using Fika.Core.Main.HostClasses;
-using Fika.Core.Main.ObservedClasses.Snapshotting;
 using Fika.Core.Main.PacketHandlers;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
@@ -32,10 +31,10 @@ using Fika.Core.Networking.Packets.Player;
 using Fika.Core.Networking.Packets.Player.Common;
 using Fika.Core.Networking.Packets.Player.Common.SubPackets;
 using Fika.Core.Networking.Packets.World;
+using Fika.Core.Networking.Snapshotting;
 using Fika.Core.Networking.VOIP;
 using HarmonyLib;
 using JsonType;
-using MultiFlare;
 using static Fika.Core.Main.ClientClasses.ClientInventoryController;
 
 namespace Fika.Core.Main.Players;
@@ -52,7 +51,7 @@ public class FikaPlayer : LocalPlayer
     public int NetId;
     public bool IsObservedAI;
     public Dictionary<uint, Action<ServerOperationStatus>> OperationCallbacks = [];
-    public Snapshotter Snapshotter;
+    public PlayerSnapshotter<PlayerStateSnapshot> Snapshotter;
     public CommonPlayerPacket CommonPacket;
     public virtual bool LeftStanceDisabled { get; internal set; }
     public DateTime TalkDateTime { get; internal set; }
@@ -91,6 +90,14 @@ public class FikaPlayer : LocalPlayer
     /// Invoked when a player spawns and is ready
     /// </summary>
     public static Action<FikaPlayer> OnPlayerSpawned { get; set; }
+    /// <summary>
+    /// Invoked when a player is destroyed with <see cref="OnDestroy"/>
+    /// </summary>
+    public static Action<FikaPlayer> OnPlayerDestroyed { get; set; }
+    /// <summary>
+    /// Invoked when a player is killed
+    /// </summary>
+    public static Action<FikaPlayer> OnPlayerDeath { get; set; }
 
     public static async Task<FikaPlayer> Create(GameWorld gameWorld, int playerId, Vector3 position,
         Quaternion rotation, string layerName, string prefix, EPointOfView pointOfView, Profile profile,
@@ -112,11 +119,12 @@ public class FikaPlayer : LocalPlayer
             NetId = netId
         };
 
-        PlayerOwnerInventoryController inventoryController = FikaBackendUtils.IsServer ? new FikaHostInventoryController(player, profile, false)
-            : new ClientInventoryController(player, profile, false);
+        PlayerOwnerInventoryController inventoryController = FikaBackendUtils.IsServer
+            ? new HostInventoryController(player, profile, false, FikaPlugin.Instance.Settings.InstantLoad)
+            : new ClientInventoryController(player, profile, false, FikaPlugin.Instance.Settings.InstantLoad);
 
         LocalQuestControllerClass questController;
-        if (FikaPlugin.Instance.SharedQuestProgression)
+        if (FikaPlugin.Instance.Settings.SharedQuestProgression)
         {
             questController = new ClientSharedQuestController(profile, inventoryController, inventoryController.PlayerSearchController, session, player);
         }
@@ -258,7 +266,7 @@ public class FikaPlayer : LocalPlayer
     public override void CreateMovementContext()
     {
         var movement_MASK = EFTHardSettings.Instance.MOVEMENT_MASK;
-        if (FikaPlugin.Instance.UseInertia)
+        if (FikaPlugin.Instance.Settings.UseInertia)
         {
             MovementContext = ClientMovementContext.Create(this, GetBodyAnimatorCommon,
                 GetCharacterControllerCommon, movement_MASK);
@@ -288,7 +296,7 @@ public class FikaPlayer : LocalPlayer
 
     public override void ApplyDamageInfo(DamageInfoStruct damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, float absorbed)
     {
-        if (IsYourPlayer && damageInfo.Player != null && !FikaPlugin.Instance.FriendlyFire && damageInfo.Player.iPlayer.GroupId == GroupId)
+        if (IsYourPlayer && damageInfo.Player != null && !FikaPlugin.Instance.Settings.FriendlyFire && damageInfo.Player.iPlayer.GroupId == GroupId)
         {
             return;
         }
@@ -962,6 +970,8 @@ public class FikaPlayer : LocalPlayer
 
     public override void OnDead(EDamageType damageType)
     {
+        OnPlayerDeath?.Invoke(this);
+
         foreach (var unsubcribe in _armorUnsubcribes)
         {
             unsubcribe?.Invoke();
@@ -992,6 +1002,7 @@ public class FikaPlayer : LocalPlayer
             CommonPacket?.Clear();
             CommonPacket = null;
         }
+        OnPlayerDestroyed?.Invoke(this);
         base.OnDestroy();
     }
 
@@ -1287,7 +1298,7 @@ public class FikaPlayer : LocalPlayer
             if (player != null)
             {
                 damageInfo.Player = player;
-                if (IsYourPlayer && !FikaPlugin.Instance.FriendlyFire && damageInfo.Player.iPlayer.GroupId == GroupId)
+                if (IsYourPlayer && !FikaPlugin.Instance.Settings.FriendlyFire && damageInfo.Player.iPlayer.GroupId == GroupId)
                 {
                     return;
                 }
@@ -1412,6 +1423,21 @@ public class FikaPlayer : LocalPlayer
 
         _voipController?.Dispose();
         _lastWeaponId = null;
+        if (IsYourPlayer)
+        {
+            switch (InventoryController)
+            {
+                case HostInventoryController hostController:
+                    hostController.ClearPool();
+                    break;
+                case ClientInventoryController clientController:
+                    clientController.ClearPool();
+                    break;
+                default:
+                    FikaGlobals.LogWarning($"Unknown inventory controller when disposing: {InventoryController.GetType().Name}");
+                    break;
+            }
+        }
         base.Dispose();
     }
 
@@ -1482,7 +1508,7 @@ public class FikaPlayer : LocalPlayer
     }
 
     #region handlers
-    public class KeyHandler(FikaPlayer player)
+    public sealed class KeyHandler(FikaPlayer player)
     {
         public GStruct156<KeyInteractionResultClass> UnlockResult;
         private readonly FikaPlayer _player = player;
@@ -1493,7 +1519,7 @@ public class FikaPlayer : LocalPlayer
         }
     }
 
-    private class LootableContainerInteractionHandler(FikaPlayer player, LootableContainer container)
+    private sealed class LootableContainerInteractionHandler(FikaPlayer player, LootableContainer container)
     {
         private readonly FikaPlayer _player = player;
         public readonly LootableContainer Container = container;
@@ -1513,7 +1539,7 @@ public class FikaPlayer : LocalPlayer
         }
     }
 
-    private class FirearmControllerHandler(FikaPlayer fikaPlayer, Weapon weapon)
+    private sealed class FirearmControllerHandler(FikaPlayer fikaPlayer, Weapon weapon)
     {
         private readonly FikaPlayer _fikaPlayer = fikaPlayer;
         public readonly Weapon Weapon = weapon;
@@ -1542,7 +1568,7 @@ public class FikaPlayer : LocalPlayer
         }
     }
 
-    private class UsableItemControllerHandler(FikaPlayer fikaPlayer, Item item)
+    private sealed class UsableItemControllerHandler(FikaPlayer fikaPlayer, Item item)
     {
         private readonly FikaPlayer _fikaPlayer = fikaPlayer;
         private readonly Item _item = item;
@@ -1570,7 +1596,7 @@ public class FikaPlayer : LocalPlayer
         }
     }
 
-    private class PortableRangeFinderControllerHandler(FikaPlayer fikaPlayer, Item item)
+    private sealed class PortableRangeFinderControllerHandler(FikaPlayer fikaPlayer, Item item)
     {
         private readonly FikaPlayer _fikaPlayer = fikaPlayer;
         private readonly Item _item = item;
@@ -1598,7 +1624,7 @@ public class FikaPlayer : LocalPlayer
         }
     }
 
-    private class QuickUseItemControllerHandler(FikaPlayer fikaPlayer, Item item)
+    private sealed class QuickUseItemControllerHandler(FikaPlayer fikaPlayer, Item item)
     {
         private readonly FikaPlayer _fikaPlayer = fikaPlayer;
         private readonly Item _item = item;
@@ -1626,7 +1652,7 @@ public class FikaPlayer : LocalPlayer
         }
     }
 
-    private class MedsControllerHandler(FikaPlayer fikaPlayer, MedsItemClass meds, GStruct382<EBodyPart> bodyParts, int animationVariant)
+    private sealed class MedsControllerHandler(FikaPlayer fikaPlayer, MedsItemClass meds, GStruct382<EBodyPart> bodyParts, int animationVariant)
     {
         private readonly FikaPlayer _fikaPlayer = fikaPlayer;
         private readonly MedsItemClass _meds = meds;
@@ -1657,7 +1683,7 @@ public class FikaPlayer : LocalPlayer
         }
     }
 
-    private class FoodControllerHandler(FikaPlayer fikaPlayer, FoodDrinkItemClass foodDrink, float amount, GStruct382<EBodyPart> bodyParts, int animationVariant)
+    private sealed class FoodControllerHandler(FikaPlayer fikaPlayer, FoodDrinkItemClass foodDrink, float amount, GStruct382<EBodyPart> bodyParts, int animationVariant)
     {
         private readonly FikaPlayer _fikaPlayer = fikaPlayer;
         private readonly FoodDrinkItemClass _foodDrink = foodDrink;
@@ -1689,7 +1715,7 @@ public class FikaPlayer : LocalPlayer
         }
     }
 
-    private class KnifeControllerHandler(FikaPlayer fikaPlayer, KnifeComponent knife)
+    private sealed class KnifeControllerHandler(FikaPlayer fikaPlayer, KnifeComponent knife)
     {
         private readonly FikaPlayer _fikaPlayer = fikaPlayer;
         public readonly KnifeComponent Knife = knife;
@@ -1717,7 +1743,7 @@ public class FikaPlayer : LocalPlayer
         }
     }
 
-    private class QuickKnifeControllerHandler(FikaPlayer fikaPlayer, KnifeComponent knife)
+    private sealed class QuickKnifeControllerHandler(FikaPlayer fikaPlayer, KnifeComponent knife)
     {
         private readonly FikaPlayer _fikaPlayer = fikaPlayer;
         public readonly KnifeComponent Knife = knife;
@@ -1745,7 +1771,7 @@ public class FikaPlayer : LocalPlayer
         }
     }
 
-    private class GrenadeControllerHandler(FikaPlayer fikaPlayer, ThrowWeapItemClass throwWeap)
+    private sealed class GrenadeControllerHandler(FikaPlayer fikaPlayer, ThrowWeapItemClass throwWeap)
     {
         private readonly FikaPlayer _fikaPlayer = fikaPlayer;
         private readonly ThrowWeapItemClass _throwWeap = throwWeap;
@@ -1773,7 +1799,7 @@ public class FikaPlayer : LocalPlayer
         }
     }
 
-    private class QuickGrenadeControllerHandler(FikaPlayer fikaPlayer, ThrowWeapItemClass throwWeap)
+    private sealed class QuickGrenadeControllerHandler(FikaPlayer fikaPlayer, ThrowWeapItemClass throwWeap)
     {
         private readonly FikaPlayer _fikaPlayer = fikaPlayer;
         private readonly ThrowWeapItemClass _throwWeap = throwWeap;

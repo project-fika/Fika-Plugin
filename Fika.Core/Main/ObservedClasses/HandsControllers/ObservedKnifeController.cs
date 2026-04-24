@@ -5,7 +5,7 @@ using Fika.Core.Main.Players;
 
 namespace Fika.Core.Main.ObservedClasses.HandsControllers;
 
-internal class ObservedKnifeController : EFT.Player.KnifeController
+internal sealed class ObservedKnifeController : EFT.Player.KnifeController
 {
     private ObservedPlayer _observedPlayer;
 

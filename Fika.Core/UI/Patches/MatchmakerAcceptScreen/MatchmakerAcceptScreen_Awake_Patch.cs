@@ -1,8 +1,6 @@
-﻿using System;
-using System.Reflection;
+﻿using System.Reflection;
 using EFT.UI.Matchmaker;
 using Fika.Core.Main.Utils;
-using Newtonsoft.Json;
 using SPT.Reflection.Patching;
 
 namespace Fika.Core.UI.Patches.MatchmakerAcceptScreen;

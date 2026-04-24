@@ -6,7 +6,7 @@ using SPT.Common.Http;
 
 namespace Fika.Core.Main.Custom;
 
-public class BotDifficulties : Dictionary<string, BotDifficulties.RoleData>
+public sealed class BotDifficulties : Dictionary<string, BotDifficulties.RoleData>
 {
     public CoreBotSettingsClass CoreSettings
     {

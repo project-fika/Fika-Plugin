@@ -22,7 +22,9 @@ public abstract class UnmanagedResources : IDisposable
     protected void ThrowIfDisposed()
     {
         if (IsDisposed)
+        {
             throw new ObjectDisposedException($"{GetType().FullName} is already disposed");
+        }
     }
 
     /// <summary>Method releasing unmanaged resources.</summary>
@@ -39,12 +41,16 @@ public abstract class UnmanagedResources : IDisposable
     protected virtual void Dispose(bool disposing)
     {
         if (Interlocked.CompareExchange(ref _disposed, 1, 0) != 0)
+        {
             return;
+        }
 
         ReleaseUnmanaged();
 
         if (disposing)
+        {
             ReleaseManaged();
+        }
     }
 
     /// <inheritdoc />

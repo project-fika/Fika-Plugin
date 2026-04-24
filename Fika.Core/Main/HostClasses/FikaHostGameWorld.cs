@@ -143,7 +143,7 @@ public class FikaHostGameWorld : ClientLocalGameWorld
             SynchronizableObjectLogicProcessor.TripwireManager = new GClass2649(this);
         }
 
-        TripwireSynchronizableObject tripwireSynchronizableObject = (TripwireSynchronizableObject)SynchronizableObjectLogicProcessor.TakeFromPool(SynchronizableObjectType.Tripwire);
+        var tripwireSynchronizableObject = (TripwireSynchronizableObject)SynchronizableObjectLogicProcessor.TakeFromPool(SynchronizableObjectType.Tripwire);
         tripwireSynchronizableObject.transform.SetPositionAndRotation(fromPosition, Quaternion.identity);
         SynchronizableObjectLogicProcessor.InitSyncObject(tripwireSynchronizableObject, fromPosition, Vector3.forward, -1);
         tripwireSynchronizableObject.SetupGrenade(grenadeClass, profileId, fromPosition, toPosition);

@@ -1,6 +1,6 @@
 ﻿namespace Fika.Core.Networking.Packets.Player;
 
-public class SideEffectPacket : INetSerializable
+public sealed class SideEffectPacket : INetSerializable
 {
     public string ItemId;
     public float Value;

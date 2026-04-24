@@ -2,7 +2,7 @@
 
 namespace Fika.Core.Modding.Events;
 
-public class GameWorldStartedEvent(GameWorld gameWorld) : FikaEvent
+public sealed class GameWorldStartedEvent(GameWorld gameWorld) : FikaEvent
 {
     public GameWorld GameWorld { get; } = gameWorld;
 }

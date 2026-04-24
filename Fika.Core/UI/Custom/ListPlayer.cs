@@ -10,6 +10,9 @@ public class ListPlayer : MonoBehaviour
 {
 #pragma warning disable CS0649
     [SerializeField]
+    private Image BackgroundBorder;
+
+    [SerializeField]
     private Image Background;
 
     [SerializeField]
@@ -33,22 +36,16 @@ public class ListPlayer : MonoBehaviour
 
     private const float _tweenLength = 0.25f;
 
-    private FikaPlayer _player;
+    public FikaPlayer Player { get; private set; }
     private int _lastHealth;
 
     /// <summary>
     /// Updates values
     /// </summary>
     /// <returns><see langword="true"/> if the entry should be remove, <see langword="false"/> otherwise</returns>
-    public bool ManualUpdate()
+    public void ManualUpdate()
     {
-        if (_player == null || !_player.HealthController.IsAlive)
-        {
-            Destroy(gameObject);
-            return true;
-        }
-
-        var health = _player.HealthController.GetBodyPartHealth(EBodyPart.Common, true);
+        var health = Player.HealthController.GetBodyPartHealth(EBodyPart.Common, true);
         var current = Mathf.RoundToInt(health.Current);
         if (_lastHealth != current)
         {
@@ -56,8 +53,6 @@ public class ListPlayer : MonoBehaviour
             UpdateHealth(current,
                 Mathf.RoundToInt(health.Maximum));
         }
-
-        return false;
     }
 
     public void Init(FikaPlayer player)
@@ -72,7 +67,7 @@ public class ListPlayer : MonoBehaviour
         LayoutRebuilder.ForceRebuildLayoutImmediate(FactionBackground.rectTransform);
         LayoutRebuilder.ForceRebuildLayoutImmediate(FactionBackground.rectTransform.parent.RectTransform());
 
-        _player = player;
+        Player = player;
 
         _lastHealth = -1;
         ManualUpdate();
@@ -168,7 +163,8 @@ public class ListPlayer : MonoBehaviour
 
     public void ToggleBackground(bool enabled)
     {
-        Background.color = enabled ? new Color(0.4f, 0.4f, 0.4f, 0.75f) : Color.clear;
+        Background.color = enabled ? Color.yellow : Color.clear;
+        BackgroundBorder.color = enabled ? Color.white : Color.clear;
     }
 
     private void UpdateHealth(int currentHealth, int maxHealth)

@@ -1,6 +1,6 @@
-﻿namespace Fika.Core.Main.ObservedClasses.Snapshotting;
+﻿namespace Fika.Core.Main.ObservedClasses;
 
-internal class ObservedState
+internal sealed class ObservedState
 {
     internal ObservedState(Vector3 position, Vector2 rotation)
     {
@@ -10,7 +10,6 @@ internal class ObservedState
         IsGrounded = true;
     }
 
-    public bool ShouldUpdate;
     public Vector3 Position;
     public Vector2 Rotation;
     public Vector3 HeadRotation;

@@ -5,7 +5,7 @@ using Fika.Core.Main.Players;
 
 namespace Fika.Core.Main.ObservedClasses.PlayerBridge;
 
-public class ObservedClientBridge(ObservedPlayer observedPlayer) : BodyPartCollider.IPlayerBridge
+public sealed class ObservedClientBridge(ObservedPlayer observedPlayer) : BodyPartCollider.IPlayerBridge
 {
     private readonly ObservedPlayer _observedPlayer = observedPlayer;
 

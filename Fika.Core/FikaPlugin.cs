@@ -6,6 +6,7 @@ using EFT.UI;
 using Fika.Core.Bundles;
 using Fika.Core.ConsoleCommands;
 using Fika.Core.Main.Custom;
+using Fika.Core.Main.Patches.InventoryController;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Websocket;
@@ -45,7 +46,7 @@ namespace Fika.Core;
 [BepInDependency("com.SPT.debugging", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after spt-debugging, that way we can disable its patches
 public class FikaPlugin : BaseUnityPlugin
 {
-    public const string FikaVersion = "2.2.3";
+    public const string FikaVersion = "2.2.4";
     public const string FikaNATPunchMasterServer = "natpunch.project-fika.com";
     public const ushort FikaNATPunchMasterPort = 6790;
 
@@ -106,25 +107,6 @@ public class FikaPlugin : BaseUnityPlugin
         { "trippy",       "One of the chads that made the headless client a reality ~ Archangel"     }
     };
 
-    #region client config
-    public bool UseBTR;
-    public bool FriendlyFire;
-    public bool DynamicVExfils;
-    public bool AllowFreeCam;
-    public bool AllowSpectateFreeCam;
-    public bool AllowItemSending;
-    public string[] BlacklistedItems;
-    public bool ForceSaveOnDeath;
-    public bool UseInertia;
-    public bool SharedQuestProgression;
-    public bool CanEditRaidSettings;
-    public bool EnableTransits;
-    public bool AnyoneCanStartRaid;
-    public bool AllowNamePlates;
-    public bool RandomLabyrinthSpawns;
-    public bool PMCFoundInRaid;
-    #endregion
-
     #region natpunch config
     public bool NatPunchServerEnable;
     public string NatPunchServerIP;
@@ -157,9 +139,15 @@ public class FikaPlugin : BaseUnityPlugin
         BotDifficulties = FikaRequestHandler.GetBotDifficulties();
         ConsoleScreen.Processor.RegisterCommandGroup<FikaCommands>();
 
-        if (AllowItemSending)
+        if (Settings.AllowItemSending)
         {
             _patchManager.EnablePatch(new ItemContext_Patch());
+        }
+
+        if (Settings.FastLoad)
+        {
+            _patchManager.EnablePatch(new LoadAmmo_Task_Transpiler());
+            _patchManager.EnablePatch(new ItemViewLoadAmmoComponent_Show_Patch());
         }
     }
 
@@ -256,26 +244,7 @@ public class FikaPlugin : BaseUnityPlugin
 
     private void GetClientConfig()
     {
-        var clientConfig = FikaRequestHandler.GetClientConfig();
-
-        UseBTR = clientConfig.UseBTR;
-        FriendlyFire = clientConfig.FriendlyFire;
-        DynamicVExfils = clientConfig.DynamicVExfils;
-        AllowFreeCam = clientConfig.AllowFreeCam;
-        AllowSpectateFreeCam = clientConfig.AllowSpectateFreeCam;
-        AllowItemSending = clientConfig.AllowItemSending;
-        BlacklistedItems = clientConfig.BlacklistedItems;
-        ForceSaveOnDeath = clientConfig.ForceSaveOnDeath;
-        UseInertia = clientConfig.UseInertia;
-        SharedQuestProgression = clientConfig.SharedQuestProgression;
-        CanEditRaidSettings = clientConfig.CanEditRaidSettings;
-        EnableTransits = clientConfig.EnableTransits;
-        AnyoneCanStartRaid = clientConfig.AnyoneCanStartRaid;
-        AllowNamePlates = clientConfig.AllowNamePlates;
-        RandomLabyrinthSpawns = clientConfig.RandomLabyrinthSpawns;
-        PMCFoundInRaid = clientConfig.PMCFoundInRaid;
-
-        clientConfig.LogValues();
+        Settings.GetClientConfig();
     }
 
     private void GetNatPunchServerConfig()

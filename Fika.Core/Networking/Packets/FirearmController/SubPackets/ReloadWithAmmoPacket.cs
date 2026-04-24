@@ -40,15 +40,12 @@ public sealed class ReloadWithAmmoPacket : IPoolSubPacket
                 controller.CurrentOperation.SetTriggerPressed(true);
             }
 
-            if (Reload)
+            if (Reload && Status == EReloadWithAmmoStatus.StartReload)
             {
-                if (Status == EReloadWithAmmoStatus.StartReload)
-                {
-                    var bullets = controller.FindAmmoByIds(AmmoIds);
-                    AmmoPackReloadingClass ammoPack = new(bullets);
-                    controller.FastForwardCurrentState();
-                    controller.CurrentOperation.ReloadWithAmmo(ammoPack, null, null);
-                }
+                var bullets = controller.FindAmmoByIds(AmmoIds);
+                AmmoPackReloadingClass ammoPack = new(bullets);
+                controller.FastForwardCurrentState();
+                controller.CurrentOperation.ReloadWithAmmo(ammoPack, null, null);
             }
         }
     }
@@ -63,10 +60,7 @@ public sealed class ReloadWithAmmoPacket : IPoolSubPacket
             {
                 writer.PutArray(AmmoIds);
             }
-            if (AmmoLoadedToMag > 0)
-            {
-                writer.Put(AmmoLoadedToMag);
-            }
+            writer.Put(AmmoLoadedToMag);
         }
     }
 
@@ -80,10 +74,7 @@ public sealed class ReloadWithAmmoPacket : IPoolSubPacket
             {
                 AmmoIds = reader.GetStringArray();
             }
-            if (Status is EReloadWithAmmoStatus.EndReload or EReloadWithAmmoStatus.AbortReload)
-            {
-                AmmoLoadedToMag = reader.GetInt();
-            }
+            AmmoLoadedToMag = reader.GetInt();
         }
     }
 

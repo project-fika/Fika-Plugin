@@ -12,7 +12,6 @@ using EFT.UI;
 using EFT.Weather;
 using Fika.Core.Main.ClientClasses;
 using Fika.Core.Main.FreeCamera;
-using Fika.Core.Main.Patches.Overrides;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
@@ -55,7 +54,7 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
         await base.WaitForHostToStart();
 
         GameObject startButton = null;
-        if (FikaBackendUtils.IsHeadlessRequester || FikaPlugin.Instance.AnyoneCanStartRaid)
+        if (FikaBackendUtils.IsHeadlessRequester || FikaPlugin.Instance.Settings.AnyoneCanStartRaid)
         {
             startButton = CreateStartButton() ?? throw new NullReferenceException("Start button could not be created!");
             if (FikaPlugin.Instance.Settings.DevMode.Value)
@@ -122,6 +121,12 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
             await Task.Delay(100);
             _abstractGame.SetMatchmakerStatus(LocaleUtils.UI_WAIT_FOR_OTHER_PLAYERS.Localized(), (float)client.ReadyClients / expectedPlayers);
         } while (client.ReadyClients < expectedPlayers);
+
+        var finalPacket = new InformationPacket
+        {
+            RemoteNetId = client.NetId
+        };
+        client.SendData(ref finalPacket, DeliveryMethod.ReliableOrdered);
     }
 
     public override async Task GenerateWeathers()
@@ -201,18 +206,13 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
 
     private bool CheckSpawnTogether()
     {
-        if (RaidSettings.PlayersSpawnPlace == EPlayersSpawnPlace.SamePlace)
-        {
-            return true;
-        }
-
         if (string.Equals(RaidSettings.SelectedLocation.Id, "labyrinth", StringComparison.OrdinalIgnoreCase)
-            && FikaPlugin.Instance.RandomLabyrinthSpawns)
+            && FikaPlugin.Instance.Settings.RandomLabyrinthSpawns)
         {
             return false;
         }
 
-        return true;
+        return RaidSettings.PlayersSpawnPlace == EPlayersSpawnPlace.SamePlace;
     }
 
     public override void CreateSpawnSystem(Profile profile)

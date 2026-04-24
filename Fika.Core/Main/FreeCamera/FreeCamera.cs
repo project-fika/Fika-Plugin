@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using BSG.CameraEffects;
 using Comfort.Common;
@@ -9,7 +8,6 @@ using Fika.Core.Bundles;
 using Fika.Core.Main.Components;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
-using UnityEngine.UI;
 
 namespace Fika.Core.Main.FreeCamera;
 
@@ -23,11 +21,14 @@ namespace Fika.Core.Main.FreeCamera;
 public partial class FreeCamera : MonoBehaviour
 {
     public bool IsActive { get; set; }
+    public bool Extracted { get; set; }
 
     private const float _lookSensitivity = 3f;
     private const float _minFov = 10f;
 
     private bool _isSpectator;
+    private bool _allowSpectateBots;
+    //private bool _refreshedAfterLastPlayerLeft;
     private FikaPlayer _currentPlayer;
     private Vector3 _lastKnownPlayerPosition;
     private bool _isFollowing;
@@ -59,6 +60,7 @@ public partial class FreeCamera : MonoBehaviour
     protected void Awake()
     {
         _isSpectator = FikaBackendUtils.IsSpectator;
+        _allowSpectateBots = FikaPlugin.Instance.Settings.AllowSpectateBots;
         _yaw = 0f;
         _pitch = 0f;
         _forwardKey = KeyCode.W;
@@ -72,7 +74,6 @@ public partial class FreeCamera : MonoBehaviour
         _downKey = KeyCode.F;
 
         _playersTracker = [];
-        _playersToRemove = [];
         _players = [];
 
         if (!CoopHandler.TryGetCoopHandler(out var coopHandler))
@@ -84,6 +85,8 @@ public partial class FreeCamera : MonoBehaviour
         _coopHandler = coopHandler;
 
         FikaPlayer.OnPlayerSpawned += OnPlayerSpawned;
+        FikaPlayer.OnPlayerDestroyed += OnPlayerDestroyed;
+        FikaPlayer.OnPlayerDeath += OnPlayerDeath;
     }
 
     protected void Start()
@@ -119,6 +122,11 @@ public partial class FreeCamera : MonoBehaviour
         freecamObject.SetActive(false);
         _hidePlayerList = false;
 
+        ForceAddPlayers();
+    }
+
+    private void ForceAddPlayers()
+    {
         foreach (var player in _coopHandler.Players.Values)
         {
             if (!player.IsYourPlayer && player.HealthController.IsAlive)
@@ -154,14 +162,9 @@ public partial class FreeCamera : MonoBehaviour
 #endif
     }
 
-    public void DetachCamera(bool force = false)
+    public void DetachCamera()
     {
-        if (!_isSpectator && !force)
-        {
-            return;
-        }
-
-        if (_currentPlayer)
+        if (_currentPlayer != null)
         {
             _lastSpectatingPlayer = _currentPlayer;
         }
@@ -213,7 +216,7 @@ public partial class FreeCamera : MonoBehaviour
         if (_players.Count == 0)
         {
             // clear out all spectate positions
-            DetachCamera(true);
+            DetachCamera();
 
             return;
         }
@@ -281,12 +284,9 @@ public partial class FreeCamera : MonoBehaviour
     private void ClearAndAddPlayers()
     {
         _players.Clear();
-        foreach (var players in _coopHandler.Players.Values)
+        foreach (var listPlayer in _playersTracker.Values)
         {
-            if (!players.IsYourPlayer && players.HealthController.IsAlive)
-            {
-                _players.Add(players);
-            }
+            _players.Add(listPlayer.Player);
         }
     }
 
@@ -375,7 +375,7 @@ public partial class FreeCamera : MonoBehaviour
 
             if (_isFollowing)
             {
-                DetachCamera(_players.Count == 0);
+                DetachCamera();
             }
             else
             {
@@ -737,7 +737,14 @@ public partial class FreeCamera : MonoBehaviour
                     {
                         _thermalVision.method_1(false);
                     }
+
+                    ForceAddPlayers();
                 }
+            }
+
+            if (extracted)
+            {
+                ForceAddPlayers();
             }
         }
 
@@ -790,6 +797,8 @@ public partial class FreeCamera : MonoBehaviour
     protected void OnDestroy()
     {
         FikaPlayer.OnPlayerSpawned -= OnPlayerSpawned;
+        FikaPlayer.OnPlayerDestroyed -= OnPlayerDestroyed;
+        FikaPlayer.OnPlayerDeath -= OnPlayerDeath;
 
         FikaPlugin.Instance.Settings.KeybindOverlay.SettingChanged -= KeybindOverlay_SettingChanged;
 

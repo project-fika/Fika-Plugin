@@ -6,7 +6,6 @@ using Comfort.Common;
 using EFT;
 using EFT.InputSystem;
 using EFT.UI;
-using EFT.UI.Matchmaker;
 using Fika.Core.Main.GameMode;
 using Fika.Core.Main.Utils;
 using Fika.Core.Modding;
@@ -26,7 +25,7 @@ namespace Fika.Core.Main.Patches.LocalGame;
 /// Created by: Paulov
 /// Paulov: Overwrite and use our own CoopGame instance instead
 /// </summary>
-public class TarkovApplication_LocalGameCreator_Patch : ModulePatch
+public sealed class TarkovApplication_LocalGameCreator_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
@@ -35,23 +34,28 @@ public class TarkovApplication_LocalGameCreator_Patch : ModulePatch
     }
 
     [PatchPrefix]
-    public static bool Prefix(ref Task __result, TarkovApplication __instance, TimeAndWeatherSettings timeAndWeather, MatchmakerTimeHasCome.TimeHasComeScreenClass timeHasComeScreenController,
-        RaidSettings ____raidSettings, InputTree ____inputTree, GameDateTime ____localGameDateTime, float ____fixedDeltaTime, string ____backendUrl, MetricsEventsClass metricsEvents,
-        MetricsConfigClass metricsConfig, GameWorld gameWorld, MainMenuControllerClass ___mainMenuControllerClass, CompositeDisposableClass ___compositeDisposableClass, BundleLockClass ___BundleLock)
+    public static bool Prefix(ref Task __result, TarkovApplication __instance, TimeAndWeatherSettings timeAndWeather,
+        RaidSettings ____raidSettings, InputTree ____inputTree, GameDateTime ____localGameDateTime,
+        float ____fixedDeltaTime, MetricsEventsClass metricsEvents,
+        MetricsConfigClass metricsConfig, GameWorld gameWorld, MainMenuControllerClass ___mainMenuControllerClass,
+        CompositeDisposableClass ___compositeDisposableClass, BundleLockClass ___BundleLock)
     {
 #if DEBUG
         Logger.LogInfo("TarkovApplication_LocalGameCreator_Patch:Prefix");
 
 #endif
-        __result = CreateFikaGame(__instance, timeAndWeather, timeHasComeScreenController, ____raidSettings,
-            ____inputTree, ____localGameDateTime, ____fixedDeltaTime, ____backendUrl,
-            metricsEvents, metricsConfig, gameWorld, ___mainMenuControllerClass, ___compositeDisposableClass, ___BundleLock);
+        __result = CreateFikaGame(__instance, timeAndWeather, ____raidSettings,
+            ____inputTree, ____localGameDateTime, ____fixedDeltaTime,
+            metricsEvents, metricsConfig, gameWorld, ___mainMenuControllerClass,
+            ___compositeDisposableClass, ___BundleLock);
         return false;
     }
 
-    public static async Task CreateFikaGame(TarkovApplication instance, TimeAndWeatherSettings timeAndWeather, MatchmakerTimeHasCome.TimeHasComeScreenClass timeHasComeScreenController,
-        RaidSettings raidSettings, InputTree inputTree, GameDateTime localGameDateTime, float fixedDeltaTime, string backendUrl, MetricsEventsClass metricsEvents, MetricsConfigClass metricsConfig,
-        GameWorld gameWorld, MainMenuControllerClass ___mainMenuController, CompositeDisposableClass compositeDisposableClass, BundleLockClass bundleLock)
+    public static async Task CreateFikaGame(TarkovApplication instance, TimeAndWeatherSettings timeAndWeather,
+        RaidSettings raidSettings, InputTree inputTree, GameDateTime localGameDateTime, float fixedDeltaTime,
+        MetricsEventsClass metricsEvents, MetricsConfigClass metricsConfig,
+        GameWorld gameWorld, MainMenuControllerClass ___mainMenuController,
+        CompositeDisposableClass compositeDisposableClass, BundleLockClass bundleLock)
     {
         var isServer = FikaBackendUtils.IsServer;
         var isTransit = FikaBackendUtils.IsTransit;
@@ -130,6 +134,7 @@ public class TarkovApplication_LocalGameCreator_Patch : ModulePatch
         applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value = localRaidSettings;
 
         var localSettings = await instance.Session.LocalRaidStarted(localRaidSettings);
+        raidSettings.BotSettings.ExcludedBosses = localSettings.excludedBosses;
         var raidSettingsToUpdate = applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value;
         var escapeTimeLimit = raidSettings.IsScav ? RaidChangesUtil.NewEscapeTimeMinutes : raidSettings.SelectedLocation.EscapeTimeLimit;
         raidSettings.SelectedLocation = localSettings.locationLoot;

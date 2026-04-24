@@ -57,7 +57,7 @@ public class BotPacketSender : MonoBehaviour, IPacketSender
             return;
         }
 
-        var state = new PlayerStatePacket(_player, IsMoving);
+        var state = new PlayerStateData(_player, IsMoving);
         NetworkManager.SendPlayerState(ref state);
     }
 
@@ -68,7 +68,7 @@ public class BotPacketSender : MonoBehaviour, IPacketSender
             return false;
         }
 
-        var state = new PlayerStatePacket(_player, IsMoving);
+        var state = new PlayerStateData(_player, IsMoving);
         writer.PutUnmanaged(state);
         return true;
     }

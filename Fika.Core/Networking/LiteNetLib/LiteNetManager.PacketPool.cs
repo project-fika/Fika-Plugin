@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Fika.Core.Networking.LiteNetLib;
+namespace LiteNetLib;
 
 public partial class LiteNetManager
 {

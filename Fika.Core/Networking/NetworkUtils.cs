@@ -168,7 +168,7 @@ public static class NetworkUtils
         /// </summary>
         Serializable,
         /// <summary>
-        /// A raw <see cref="Packets.Player.PlayerStatePacket"/>
+        /// A raw <see cref="Packets.Player.PlayerStateData"/>
         /// </summary>
         PlayerState,
         /// <summary>

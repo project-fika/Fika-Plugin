@@ -212,7 +212,7 @@ public class HostGameController : BaseGameController, IBotGame
 
         netId = _server.PopNetId();
 
-        profile.SetSpawnedInSession(profile.Info.Side == EPlayerSide.Savage || FikaPlugin.Instance.PMCFoundInRaid);
+        profile.SetSpawnedInSession(profile.Info.Side == EPlayerSide.Savage || FikaPlugin.Instance.Settings.PMCFoundInRaid);
         if (profile.Info.Side != EPlayerSide.Savage)
         {
             var backpack = profile.Inventory.Equipment.GetSlot(EquipmentSlot.Backpack).ContainedItem;

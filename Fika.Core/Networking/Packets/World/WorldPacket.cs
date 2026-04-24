@@ -2,7 +2,7 @@
 
 namespace Fika.Core.Networking.Packets.World;
 
-public class WorldPacket : IReusable
+public sealed class WorldPacket : IReusable
 {
     public List<ArtilleryPacketStruct> ArtilleryPackets { get; set; }
     public List<GrenadeDataPacketStruct> GrenadePackets { get; set; }

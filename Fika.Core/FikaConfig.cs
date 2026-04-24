@@ -4,6 +4,8 @@ using BepInEx.Configuration;
 using Comfort.Common;
 using EFT.UI;
 using Fika.Core.Main.Utils;
+using Fika.Core.Networking.Http;
+
 #if GOLDMASTER
 using Fika.Core.UI; 
 #endif
@@ -13,7 +15,7 @@ using static Fika.Core.Networking.IFikaNetworkManager;
 
 namespace Fika.Core;
 
-public class FikaConfig(ConfigFile config)
+public sealed class FikaConfig(ConfigFile config)
 {
     private readonly ConfigFile _config = config;
 
@@ -59,6 +61,7 @@ public class FikaConfig(ConfigFile config)
     public ConfigEntry<Color> FullHealthColor { get; set; }
     public ConfigEntry<Color> LowHealthColor { get; set; }
     public ConfigEntry<Color> NamePlateTextColor { get; set; }
+    public ConfigEntry<bool> ShowBrokenLimbs { get; set; }
 
     // Coop | Quest Sharing
     public ConfigEntry<EQuestSharingTypes> QuestTypesToShareAndReceive { get; set; }
@@ -100,6 +103,28 @@ public class FikaConfig(ConfigFile config)
 
     // Gameplay
     public ConfigEntry<bool> DisableBotMetabolism { get; set; }
+    #endregion
+
+    #region client config values
+    public bool UseBTR { get; set; }
+    public bool FriendlyFire { get; set; }
+    public bool DynamicVExfils { get; set; }
+    public bool AllowFreeCam { get; set; }
+    public bool AllowSpectateFreeCam { get; set; }
+    public bool AllowItemSending { get; set; }
+    public string[] BlacklistedItems { get; set; }
+    public bool ForceSaveOnDeath { get; set; }
+    public bool UseInertia { get; set; }
+    public bool SharedQuestProgression { get; set; }
+    public bool CanEditRaidSettings { get; set; }
+    public bool EnableTransits { get; set; }
+    public bool AnyoneCanStartRaid { get; set; }
+    public bool AllowNamePlates { get; set; }
+    public bool RandomLabyrinthSpawns { get; set; }
+    public bool PMCFoundInRaid { get; set; }
+    public bool AllowSpectateBots { get; set; }
+    public bool InstantLoad { get; set; }
+    public bool FastLoad { get; set; }
     #endregion
 
     private ConfigEntry<T> SetupSetting<T>(string section, string key, T defValue, ConfigDescription configDescription, string fallback, ref bool failed, List<string> error)
@@ -305,12 +330,12 @@ public class FikaConfig(ConfigFile config)
         const string coopDefaultNamePlatesHeader = "Coop | Name Plates";
 
         UseNamePlates = SetupSetting(coopDefaultNamePlatesHeader, "Show Player Name Plates", true,
-            new ConfigDescription(FikaPlugin.Instance.AllowNamePlates ? LocaleUtils.BEPINEX_USE_NAME_PLATES_D.Localized() : disabledMessage, tags: new ConfigurationManagerAttributes()
+            new ConfigDescription(AllowNamePlates ? LocaleUtils.BEPINEX_USE_NAME_PLATES_D.Localized() : disabledMessage, tags: new ConfigurationManagerAttributes()
             {
                 Category = coopNameplatesHeader,
                 DispName = LocaleUtils.BEPINEX_USE_NAME_PLATES_T.Localized(),
                 Order = 16,
-                ReadOnly = !FikaPlugin.Instance.AllowNamePlates
+                ReadOnly = !AllowNamePlates
             }),
             "Show Player Name Plates", ref failed, headers);
 
@@ -423,7 +448,7 @@ public class FikaConfig(ConfigFile config)
             {
                 Category = coopNameplatesHeader,
                 DispName = LocaleUtils.BEPINEX_USE_OCCLUSION_T.Localized(),
-                Order = 3
+                Order = 4
             }),
             "Use Occlusion", ref failed, headers);
 
@@ -432,7 +457,7 @@ public class FikaConfig(ConfigFile config)
             {
                 Category = coopNameplatesHeader,
                 DispName = LocaleUtils.BEPINEX_HEALTHCOLOR_FULL_T.Localized(),
-                Order = 2
+                Order = 3
             }),
             "Full Health Color", ref failed, headers);
 
@@ -441,7 +466,7 @@ public class FikaConfig(ConfigFile config)
             {
                 Category = coopNameplatesHeader,
                 DispName = LocaleUtils.BEPINEX_HEALTHCOLOR_LOW_T.Localized(),
-                Order = 1
+                Order = 2
             }),
             "Low Health Color", ref failed, headers);
 
@@ -450,15 +475,24 @@ public class FikaConfig(ConfigFile config)
             {
                 Category = coopNameplatesHeader,
                 DispName = LocaleUtils.BEPINEX_NAMEPLATECOLOR_T.Localized(),
-                Order = 0
+                Order = 1
             }),
             "Name Plate Text Color", ref failed, headers);
+
+        ShowBrokenLimbs = SetupSetting(coopDefaultNamePlatesHeader, "Show Broken Limbs", failed,
+            new ConfigDescription(LocaleUtils.BEPINEX_SHOWBROKENLIMBS_D.Localized(), tags: new ConfigurationManagerAttributes()
+            {
+                Category = coopNameplatesHeader,
+                DispName = LocaleUtils.BEPINEX_SHOWBROKENLIMBS_T.Localized(),
+                Order = 0
+            }),
+            "Show Broken Limbs", ref failed, headers);
 
         // Coop | Quest Sharing
 
         var coopQuestSharingHeader = CleanConfigString(LocaleUtils.BEPINEX_H_COOP_QUEST_SHARING.Localized());
         const string coopDefaultQuestSharingHeader = "Coop | Quest Sharing";
-        var questSharingEnabled = Instance.SharedQuestProgression;
+        var questSharingEnabled = SharedQuestProgression;
 
         QuestTypesToShareAndReceive = SetupSetting(coopDefaultQuestSharingHeader, "Quest Types", EQuestSharingTypes.All,
             new ConfigDescription(questSharingEnabled ? LocaleUtils.BEPINEX_QUEST_TYPES_D.Localized() : disabledMessage, tags: new ConfigurationManagerAttributes()
@@ -814,5 +848,32 @@ public class FikaConfig(ConfigFile config)
             FikaGlobals.LogWarning($"Header '{original}' was changed to '{header}'");
         }
         return header;
+    }
+
+    internal void GetClientConfig()
+    {
+        var clientConfig = FikaRequestHandler.GetClientConfig();
+
+        UseBTR = clientConfig.UseBTR;
+        FriendlyFire = clientConfig.FriendlyFire;
+        DynamicVExfils = clientConfig.DynamicVExfils;
+        AllowFreeCam = clientConfig.AllowFreeCam;
+        AllowSpectateFreeCam = clientConfig.AllowSpectateFreeCam;
+        AllowItemSending = clientConfig.AllowItemSending;
+        BlacklistedItems = clientConfig.BlacklistedItems;
+        ForceSaveOnDeath = clientConfig.ForceSaveOnDeath;
+        UseInertia = clientConfig.UseInertia;
+        SharedQuestProgression = clientConfig.SharedQuestProgression;
+        CanEditRaidSettings = clientConfig.CanEditRaidSettings;
+        EnableTransits = clientConfig.EnableTransits;
+        AnyoneCanStartRaid = clientConfig.AnyoneCanStartRaid;
+        AllowNamePlates = clientConfig.AllowNamePlates;
+        RandomLabyrinthSpawns = clientConfig.RandomLabyrinthSpawns;
+        PMCFoundInRaid = clientConfig.PMCFoundInRaid;
+        AllowSpectateBots = clientConfig.AllowSpectateBots;
+        InstantLoad = clientConfig.InstantLoad;
+        FastLoad = clientConfig.FastLoad && !InstantLoad; // can only use one, prioritize InstantLoad
+
+        clientConfig.LogValues();
     }
 }

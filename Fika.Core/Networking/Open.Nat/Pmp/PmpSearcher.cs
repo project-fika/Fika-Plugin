@@ -26,14 +26,14 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-using Fika.Core.Networking.Open.Nat.Discovery;
-using Fika.Core.Networking.Open.Nat.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using Fika.Core.Networking.Open.Nat.Discovery;
+using Fika.Core.Networking.Open.Nat.Utils;
 
 namespace Fika.Core.Networking.Open.Nat.Pmp;
 
@@ -57,7 +57,7 @@ internal class PmpSearcher : Searcher
 
         try
         {
-            List<IPEndPoint> gatewayList = _ipprovider.GatewayAddresses()
+            var gatewayList = _ipprovider.GatewayAddresses()
                 .Select(ip => new IPEndPoint(ip, PmpConstants.ServerPort))
                 .ToList();
 
@@ -68,9 +68,12 @@ internal class PmpSearcher : Searcher
                         .Select(ip => new IPEndPoint(ip, PmpConstants.ServerPort)));
             }
 
-            if (!gatewayList.Any()) return;
+            if (!gatewayList.Any())
+            {
+                return;
+            }
 
-            foreach (IPAddress address in _ipprovider.UnicastAddresses())
+            foreach (var address in _ipprovider.UnicastAddresses())
             {
                 UdpClient client;
 
@@ -111,9 +114,12 @@ internal class PmpSearcher : Searcher
 
         // The nat-pmp search message. Must be sent to GatewayIP:53531
         var buffer = new[] { PmpConstants.Version, PmpConstants.OperationExternalAddressRequest };
-        foreach (IPEndPoint gatewayEndpoint in _gatewayLists[client])
+        foreach (var gatewayEndpoint in _gatewayLists[client])
         {
-            if (cancelationToken.IsCancellationRequested) return;
+            if (cancelationToken.IsCancellationRequested)
+            {
+                return;
+            }
 
             client.Send(buffer, buffer.Length, gatewayEndpoint);
         }
@@ -131,11 +137,15 @@ internal class PmpSearcher : Searcher
             || response.Length != 12
             || response[0] != PmpConstants.Version
             || response[1] != PmpConstants.ServerNoop)
+        {
             return null;
+        }
 
         int errorcode = IPAddress.NetworkToHostOrder(BitConverter.ToInt16(response, 2));
         if (errorcode != 0)
+        {
             NatDiscoverer.TraceSource.LogError("Non zero error: {0}", errorcode);
+        }
 
         var publicIp = new IPAddress(new[] { response[8], response[9], response[10], response[11] });
         //NextSearch = DateTime.Now.AddMinutes(5);

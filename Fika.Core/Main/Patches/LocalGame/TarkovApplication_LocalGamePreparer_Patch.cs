@@ -12,7 +12,7 @@ using SPT.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.LocalGame;
 
-internal class TarkovApplication_LocalGamePreparer_Patch : ModulePatch
+public sealed class TarkovApplication_LocalGamePreparer_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
@@ -29,8 +29,8 @@ internal class TarkovApplication_LocalGamePreparer_Patch : ModulePatch
         var isServer = FikaBackendUtils.IsServer;
         if (!isServer && !string.IsNullOrEmpty(FikaBackendUtils.HostLocationId))
         {
-            if (string.Equals(____raidSettings.LocationId, "sandbox", System.StringComparison.OrdinalIgnoreCase)
-                && string.Equals(FikaBackendUtils.HostLocationId, "sandbox_high", System.StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(____raidSettings.LocationId, "sandbox", StringComparison.OrdinalIgnoreCase)
+                && string.Equals(FikaBackendUtils.HostLocationId, "sandbox_high", StringComparison.OrdinalIgnoreCase))
             {
                 ____raidSettings.SelectedLocation = __instance.Session.LocationSettings.locations.Values
                     .FirstOrDefault(IsSandboxHigh);

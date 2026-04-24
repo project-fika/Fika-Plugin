@@ -13,7 +13,7 @@ namespace Fika.Core.Main.Factories;
 /// </summary>
 /// <param name="player">The <see cref="FikaPlayer"/> to initiate the controller on.</param>
 /// <param name="item">The <see cref="EFT.InventoryLogic.Item"/> to add to the controller.</param>
-internal class HandsControllerFactory(ObservedPlayer player, Item item = null, KnifeComponent knifeComponent = null)
+internal sealed class HandsControllerFactory(ObservedPlayer player, Item item = null, KnifeComponent knifeComponent = null)
 {
     public ObservedPlayer Player = player;
     public Item Item = item;

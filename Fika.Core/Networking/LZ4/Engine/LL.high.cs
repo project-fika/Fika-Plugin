@@ -6,8 +6,8 @@
 // ReSharper disable RedundantCast
 // ReSharper disable CommentTypo
 
-using Fika.Core.Networking.LZ4.Internal;
 using System.Runtime.CompilerServices;
+using Fika.Core.Networking.LZ4.Internal;
 using size_t = System.UInt32;
 
 namespace K4os.Compression.LZ4.Engine;
@@ -20,8 +20,16 @@ internal unsafe partial class LL
     public static void LZ4_setCompressionLevel(
         LZ4_streamHC_t* LZ4_streamHCPtr, int compressionLevel)
     {
-        if (compressionLevel < 1) compressionLevel = LZ4HC_CLEVEL_DEFAULT;
-        if (compressionLevel > LZ4HC_CLEVEL_MAX) compressionLevel = LZ4HC_CLEVEL_MAX;
+        if (compressionLevel < 1)
+        {
+            compressionLevel = LZ4HC_CLEVEL_DEFAULT;
+        }
+
+        if (compressionLevel > LZ4HC_CLEVEL_MAX)
+        {
+            compressionLevel = LZ4HC_CLEVEL_MAX;
+        }
+
         LZ4_streamHCPtr->compressionLevel = (short)compressionLevel;
     }
 
@@ -53,9 +61,16 @@ internal unsafe partial class LL
 
     public static LZ4_streamHC_t* LZ4_initStreamHC(void* buffer, int size)
     {
-        LZ4_streamHC_t* LZ4_streamHCPtr = (LZ4_streamHC_t*)buffer;
-        if (buffer == null) return null;
-        if (size < sizeof(LZ4_streamHC_t)) return null;
+        var LZ4_streamHCPtr = (LZ4_streamHC_t*)buffer;
+        if (buffer == null)
+        {
+            return null;
+        }
+
+        if (size < sizeof(LZ4_streamHC_t))
+        {
+            return null;
+        }
 
         LZ4_streamHCPtr->end = (byte*)-1;
         LZ4_streamHCPtr->@base = null;
@@ -100,17 +115,21 @@ internal unsafe partial class LL
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void LZ4HC_Insert(LZ4_streamHC_t* hc4, byte* ip)
     {
-        ushort* chainTable = hc4->chainTable;
-        uint* hashTable = hc4->hashTable;
-        byte* @base = hc4->@base;
-        uint target = (uint)(ip - @base);
-        uint idx = hc4->nextToUpdate;
+        var chainTable = hc4->chainTable;
+        var hashTable = hc4->hashTable;
+        var @base = hc4->@base;
+        var target = (uint)(ip - @base);
+        var idx = hc4->nextToUpdate;
 
         while (idx < target)
         {
-            uint h = LZ4HC_hashPtr(@base + idx);
-            uint delta = idx - hashTable[h];
-            if (delta > LZ4_DISTANCE_MAX) delta = LZ4_DISTANCE_MAX;
+            var h = LZ4HC_hashPtr(@base + idx);
+            var delta = idx - hashTable[h];
+            if (delta > LZ4_DISTANCE_MAX)
+            {
+                delta = LZ4_DISTANCE_MAX;
+            }
+
             DELTANEXTU16(chainTable, idx) = (ushort)delta;
             hashTable[h] = idx;
             idx++;
@@ -122,8 +141,10 @@ internal unsafe partial class LL
     public static void LZ4HC_setExternalDict(LZ4_streamHC_t* ctxPtr, byte* newBlock)
     {
         if (ctxPtr->end >= ctxPtr->@base + ctxPtr->dictLimit + 4)
+        {
             LZ4HC_Insert(
                 ctxPtr, ctxPtr->end - 3); /* Referencing remaining dictionary content */
+        }
 
         /* Only one memory segment for extDict, so any previous extDict is lost at this stage */
         ctxPtr->lowLimit = ctxPtr->dictLimit;
@@ -166,25 +187,40 @@ internal unsafe partial class LL
     public static int LZ4_saveDictHC(
         LZ4_streamHC_t* LZ4_streamHCPtr, byte* safeBuffer, int dictSize)
     {
-        LZ4_streamHC_t* streamPtr = LZ4_streamHCPtr;
-        int prefixSize = (int)(streamPtr->end - (streamPtr->@base + streamPtr->dictLimit));
-        if (dictSize > 64 * KB) dictSize = 64 * KB;
-        if (dictSize < 4) dictSize = 0;
-        if (dictSize > prefixSize) dictSize = prefixSize;
+        var streamPtr = LZ4_streamHCPtr;
+        var prefixSize = (int)(streamPtr->end - (streamPtr->@base + streamPtr->dictLimit));
+        if (dictSize > 64 * KB)
+        {
+            dictSize = 64 * KB;
+        }
+
+        if (dictSize < 4)
+        {
+            dictSize = 0;
+        }
+
+        if (dictSize > prefixSize)
+        {
+            dictSize = prefixSize;
+        }
+
         Mem.Move(safeBuffer, streamPtr->end - dictSize, dictSize);
-        uint endIndex = (uint)(streamPtr->end - streamPtr->@base);
+        var endIndex = (uint)(streamPtr->end - streamPtr->@base);
         streamPtr->end = (byte*)safeBuffer + dictSize;
         streamPtr->@base = streamPtr->end - endIndex;
         streamPtr->dictLimit = endIndex - (uint)dictSize;
         streamPtr->lowLimit = endIndex - (uint)dictSize;
         if (streamPtr->nextToUpdate < streamPtr->dictLimit)
+        {
             streamPtr->nextToUpdate = streamPtr->dictLimit;
+        }
+
         return dictSize;
     }
 
     public static int LZ4_loadDictHC(LZ4_streamHC_t* LZ4_streamHCPtr, byte* dictionary, int dictSize)
     {
-        LZ4_streamHC_t* ctxPtr = LZ4_streamHCPtr;
+        var ctxPtr = LZ4_streamHCPtr;
         if (dictSize > 64 * KB)
         {
             dictionary += dictSize - 64 * KB;
@@ -199,7 +235,11 @@ internal unsafe partial class LL
         }
         LZ4HC_init_internal(ctxPtr, (byte*)dictionary);
         ctxPtr->end = (byte*)dictionary + dictSize;
-        if (dictSize >= 4) LZ4HC_Insert(ctxPtr, ctxPtr->end - 3);
+        if (dictSize >= 4)
+        {
+            LZ4HC_Insert(ctxPtr, ctxPtr->end - 3);
+        }
+
         return dictSize;
     }
 
@@ -213,31 +253,40 @@ internal unsafe partial class LL
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int LZ4HC_countBack(byte* ip, byte* match, byte* iMin, byte* mMin)
     {
-        int back = 0;
-        int min = (int)MAX(iMin - ip, mMin - match);
+        var back = 0;
+        var min = (int)MAX(iMin - ip, mMin - match);
         while ((back > min)
             && (ip[back - 1] == match[back - 1]))
+        {
             back--;
+        }
+
         return back;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static uint LZ4HC_reverseCountPattern(byte* ip, byte* iLow, uint pattern)
     {
-        byte* iStart = ip;
+        var iStart = ip;
 
         while ((ip >= iLow + 4))
         {
-            if (Mem.Peek4(ip - 4) != pattern) break;
+            if (Mem.Peek4(ip - 4) != pattern)
+            {
+                break;
+            }
 
             ip -= 4;
         }
 
         {
-            byte* bytePtr = (byte*)(&pattern) + 3; /* works for any endianness */
+            var bytePtr = (byte*)(&pattern) + 3; /* works for any endianness */
             while ((ip > iLow))
             {
-                if (ip[-1] != *bytePtr) break;
+                if (ip[-1] != *bytePtr)
+                {
+                    break;
+                }
 
                 ip--;
                 bytePtr--;
@@ -249,30 +298,38 @@ internal unsafe partial class LL
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static uint LZ4HC_rotatePattern(size_t rotate, uint pattern)
     {
-        size_t bitsToRotate = (rotate & (sizeof(uint) - 1)) << 3;
+        var bitsToRotate = (rotate & (sizeof(uint) - 1)) << 3;
         if (bitsToRotate == 0)
+        {
             return pattern;
+        }
+
         return LZ4HC_rotl32(pattern, (int)bitsToRotate);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int LZ4HC_literalsPrice(int litlen)
     {
-        int price = litlen;
+        var price = litlen;
         if (litlen >= (int)RUN_MASK)
+        {
             price += 1 + ((litlen - (int)RUN_MASK) / 255);
+        }
+
         return price;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int LZ4HC_sequencePrice(int litlen, int mlen)
     {
-        int price = 1 + 2; /* token + 16-bit offset */
+        var price = 1 + 2; /* token + 16-bit offset */
 
         price += LZ4HC_literalsPrice(litlen);
 
         if (mlen >= (int)(ML_MASK + MINMATCH))
+        {
             price += 1 + ((mlen - (int)(ML_MASK + MINMATCH)) / 255);
+        }
 
         return price;
     }

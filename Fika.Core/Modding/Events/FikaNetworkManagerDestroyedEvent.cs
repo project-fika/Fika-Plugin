@@ -2,7 +2,7 @@
 
 namespace Fika.Core.Modding.Events;
 
-public class FikaNetworkManagerDestroyedEvent(IFikaNetworkManager server) : FikaEvent
+public sealed class FikaNetworkManagerDestroyedEvent(IFikaNetworkManager server) : FikaEvent
 {
     public IFikaNetworkManager Manager { get; } = server;
 }

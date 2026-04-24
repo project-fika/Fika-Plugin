@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
@@ -15,19 +14,14 @@ using Fika.Core.Networking.Packets.Communication;
 using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
 using Fika.Core.Networking.Packets.World;
-using static Fika.Core.Main.ClientClasses.ClientInventoryController;
+using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Main.HostClasses;
 
-public sealed class FikaHostInventoryController : Player.PlayerOwnerInventoryController
+public sealed class HostInventoryController : Player.PlayerOwnerInventoryController
 {
-    public FikaPlayer FikaPlayer
-    {
-        get
-        {
-            return _fikaPlayer;
-        }
-    }
+    public FikaPlayer FikaPlayer { get; }
+
     public override bool HasDiscardLimits
     {
         get
@@ -37,15 +31,18 @@ public sealed class FikaHostInventoryController : Player.PlayerOwnerInventoryCon
     }
     private readonly ManualLogSource _logger;
     private readonly Player _player;
-    private readonly FikaPlayer _fikaPlayer;
     private readonly IPlayerSearchController _searchController;
+    private readonly bool _instantLoad;
+    private readonly HostInventoryOperationHandlerPool _hostInventoryOperationHandlerPool;
 
-    public FikaHostInventoryController(Player player, Profile profile, bool examined) : base(player, profile, examined)
+    public HostInventoryController(Player player, Profile profile, bool examined, bool instantLoad) : base(player, profile, examined)
     {
         _player = player;
-        _fikaPlayer = (FikaPlayer)player;
+        FikaPlayer = (FikaPlayer)player;
         _searchController = new PlayerSearchControllerClass(profile, this);
-        _logger = BepInEx.Logging.Logger.CreateLogSource(nameof(FikaHostInventoryController));
+        _instantLoad = instantLoad;
+        _hostInventoryOperationHandlerPool = new HostInventoryOperationHandlerPool(8, HostInventoryOperationHandler.CreateInstance);
+        _logger = BepInEx.Logging.Logger.CreateLogSource(nameof(HostInventoryController));
     }
 
     public override IPlayerSearchController PlayerSearchController
@@ -65,7 +62,7 @@ public sealed class FikaHostInventoryController : Player.PlayerOwnerInventoryCon
                 Type = ERequestSubPacketType.TraderServices,
                 RequestSubPacket = new RequestSubPackets.TraderServicesRequest()
                 {
-                    NetId = _fikaPlayer.NetId,
+                    NetId = FikaPlayer.NetId,
                     TraderId = traderId
                 }
             };
@@ -73,7 +70,7 @@ public sealed class FikaHostInventoryController : Player.PlayerOwnerInventoryCon
             return;
         }
 
-        _fikaPlayer.UpdateTradersServiceData(traderId).HandleExceptions();
+        FikaPlayer.UpdateTradersServiceData(traderId).HandleExceptions();
     }
 
     public override void CallMalfunctionRepaired(Weapon weapon)
@@ -98,6 +95,21 @@ public sealed class FikaHostInventoryController : Player.PlayerOwnerInventoryCon
         RunHostOperation(operation, callback);
     }
 
+    public override Task<IResult> LoadMagazine(AmmoItemClass sourceAmmo, MagazineItemClass magazine, int loadCount, bool ignoreRestrictions)
+    {
+        if (_instantLoad)
+        {
+            if (Singleton<GUISounds>.Instantiated)
+            {
+                Singleton<GUISounds>.Instance.PlayUILoadSound();
+            }
+            var gstruct = (ignoreRestrictions ? magazine.ApplyWithoutRestrictions(this, sourceAmmo, int.MaxValue, true) : magazine.Apply(this, sourceAmmo, int.MaxValue, true));
+            return TryRunNetworkTransaction(gstruct, null);
+        }
+
+        return base.LoadMagazine(sourceAmmo, magazine, loadCount, ignoreRestrictions);
+    }
+
     private void RunHostOperation(BaseInventoryOperationClass operation, Callback callback)
     {
         // Do not replicate picking up quest items, throws an error on the other clients            
@@ -106,7 +118,7 @@ public sealed class FikaHostInventoryController : Player.PlayerOwnerInventoryCon
             var lootedItem = moveOperation.Item;
             if (lootedItem.QuestItem)
             {
-                if (_fikaPlayer.AbstractQuestControllerClass is ClientSharedQuestController sharedQuestController && sharedQuestController.ContainsAcceptedType("PlaceBeacon"))
+                if (FikaPlayer.AbstractQuestControllerClass is ClientSharedQuestController sharedQuestController && sharedQuestController.ContainsAcceptedType("PlaceBeacon"))
                 {
                     if (!sharedQuestController.CheckForTemplateId(lootedItem.TemplateId))
                     {
@@ -115,10 +127,10 @@ public sealed class FikaHostInventoryController : Player.PlayerOwnerInventoryCon
                         // We use templateId because each client gets a unique itemId
                         QuestItemPacket packet = new()
                         {
-                            Nickname = _fikaPlayer.Profile.Info.MainProfileNickname,
+                            Nickname = FikaPlayer.Profile.Info.MainProfileNickname,
                             ItemId = lootedItem.TemplateId,
                         };
-                        _fikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+                        FikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
                     }
                 }
                 base.vmethod_1(operation, callback);
@@ -153,16 +165,24 @@ public sealed class FikaHostInventoryController : Player.PlayerOwnerInventoryCon
             return;
         }
 
-        HostInventoryOperationHandler handler = new(this, operation, callback);
-        if (vmethod_0(handler.operation))
+        var handler = _hostInventoryOperationHandlerPool.Get();
+        handler.Set(this, operation, callback);
+        try
         {
-            handler.operation.method_1(handler.HandleResult);
-            _fikaPlayer.PacketSender.NetworkManager.SendGenericPacket(EGenericSubPacketType.InventoryOperation,
-                InventoryPacket.FromValue(_fikaPlayer.NetId, operation), true);
-            return;
+            if (vmethod_0(handler.Operation))
+            {
+                handler.Operation.method_1(handler.HandleResultDelegate);
+                FikaPlayer.PacketSender.NetworkManager.SendGenericPacket(EGenericSubPacketType.InventoryOperation,
+                    InventoryPacket.FromValue(FikaPlayer.NetId, operation), true);
+                return;
+            }
+            handler.Operation.Dispose();
+            handler.Callback?.Fail($"Can't execute {handler.Operation}", 1);
         }
-        handler.operation.Dispose();
-        handler.callback?.Fail($"Can't execute {handler.operation}", 1);
+        finally
+        {
+            _hostInventoryOperationHandlerPool.ReturnHandler(handler);
+        }
     }
 
     public override bool HasCultistAmulet(out CultistAmuletItemClass amulet)
@@ -180,31 +200,13 @@ public sealed class FikaHostInventoryController : Player.PlayerOwnerInventoryCon
         return false;
     }
 
-    private uint AddOperationCallback(BaseInventoryOperationClass operation, Action<ServerOperationStatus> callback)
-    {
-        var id = operation.Id;
-        _fikaPlayer.OperationCallbacks.Add(id, callback);
-        return id;
-    }
-
     public override SearchContentOperation vmethod_2(SearchableItemItemClass item)
     {
         return new SearchContentOperationResultClass(method_12(), this, PlayerSearchController, Profile, item);
     }
 
-    public class HostInventoryOperationHandler(FikaHostInventoryController inventoryController, BaseInventoryOperationClass operation, Callback callback)
+    public void ClearPool()
     {
-        public readonly FikaHostInventoryController inventoryController = inventoryController;
-        public BaseInventoryOperationClass operation = operation;
-        public readonly Callback callback = callback;
-
-        public void HandleResult(IResult result)
-        {
-            if (!result.Succeed)
-            {
-                inventoryController._logger.LogError($"[{Time.frameCount}][{inventoryController.Name}] {inventoryController.ID} - Local operation failed: {operation.Id} - {operation}\r\nError: {result.Error}");
-            }
-            callback?.Invoke(result);
-        }
+        _hostInventoryOperationHandlerPool.Dispose();
     }
 }

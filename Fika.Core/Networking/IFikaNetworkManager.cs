@@ -106,7 +106,7 @@ public interface IFikaNetworkManager
     /// Sends a player state using fast serialization.
     /// </summary>
     /// <param name="packet">The player state packet to send.</param>
-    void SendPlayerState(ref PlayerStatePacket packet);
+    void SendPlayerState(ref PlayerStateData packet);
 
     /// <summary>
     /// Sends raw VOIP audio data to a specific peer or multiple recipients.
@@ -172,6 +172,18 @@ public interface IFikaNetworkManager
     void RegisterCustomType<T>(Action<NetDataWriter, T> writeDelegate, Func<NetDataReader, T> readDelegate);
 
     /// <summary>
+    /// Unregisters <typeparamref name="T"/> from the packet manager
+    /// </summary>
+    /// <typeparam name="T">The <see cref="INetSerializable"/> to unregister</typeparam>
+    void UnregisterPacket<T>() where T : INetSerializable;
+
+    /// <summary>
+    /// Unregisters <typeparamref name="T"/> from the packet manager
+    /// </summary>
+    /// <typeparam name="T">The <see cref="INetReusable"/> to unregister</typeparam>
+    void UnregisterNetReusable<T>() where T : INetReusable;
+
+    /// <summary>
     /// Initializes the VOIP system asynchronously.
     /// </summary>
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
@@ -181,6 +193,13 @@ public interface IFikaNetworkManager
     /// Prints network statistics to the output (internal use only).
     /// </summary>
     internal void PrintStatistics();
+
+    /// <summary>
+    /// Returns a <see cref="NetPeer"/> from an id
+    /// </summary>
+    /// <param name="id">The id to look for</param>
+    /// <returns>A <see cref="NetPeer"/> if found; otherwise <see langword="null"/></returns>
+    public NetPeer GetPeerById(int id);
 
     /// <summary>
     /// Represents the send rate options for the <see cref="IFikaNetworkManager"/>.

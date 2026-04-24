@@ -5,11 +5,12 @@ using SPT.Reflection.Patching;
 
 namespace Fika.Core.UI.Patches;
 
-public class MatchmakerOfflineRaidScreen_Close_Patch : ModulePatch
+public sealed class MatchmakerOfflineRaidScreen_Close_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(MatchmakerOfflineRaidScreen).GetMethod(nameof(MatchmakerOfflineRaidScreen.Close));
+        return typeof(MatchmakerOfflineRaidScreen)
+            .GetMethod(nameof(MatchmakerOfflineRaidScreen.Close));
     }
 
     [PatchPrefix]

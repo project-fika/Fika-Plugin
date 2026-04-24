@@ -92,7 +92,7 @@ public class FikaExfilManager : MonoBehaviour
             exfiltrationPoint.OnStatusChanged += ExfiltrationPoint_OnStatusChanged;
             exfiltrationPoint.OnStatusChanged += _game.method_10;
             _game.UpdateExfiltrationUi(exfiltrationPoint, false, true);
-            if (FikaPlugin.Instance.DynamicVExfils && exfiltrationPoint.Settings.PlayersCount > 0 && exfiltrationPoint.Settings.PlayersCount < Singleton<IFikaNetworkManager>.Instance.PlayerAmount)
+            if (FikaPlugin.Instance.Settings.DynamicVExfils && exfiltrationPoint.Settings.PlayersCount > 0 && exfiltrationPoint.Settings.PlayersCount < Singleton<IFikaNetworkManager>.Instance.PlayerAmount)
             {
                 exfiltrationPoint.Settings.PlayersCount = Singleton<IFikaNetworkManager>.Instance.PlayerAmount;
             }

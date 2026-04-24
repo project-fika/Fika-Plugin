@@ -14,7 +14,7 @@ using static EFT.Player;
 
 namespace Fika.Core.Main.ObservedClasses.HandsControllers;
 
-public class ObservedFirearmController : FirearmController
+public sealed class ObservedFirearmController : FirearmController
 {
     public WeaponManagerClass WeaponManager
     {
@@ -114,7 +114,7 @@ public class ObservedFirearmController : FirearmController
         return new ObservedIdleOperation(this);
     }
 
-    protected void Start()
+    private void Start()
     {
         _objectInHandsAnimator.SetAiming(false);
         _weaponPrefab = ControllerGameObject.GetComponent<WeaponPrefab>();

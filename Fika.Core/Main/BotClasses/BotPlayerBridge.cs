@@ -5,7 +5,7 @@ using Fika.Core.Main.Players;
 
 namespace Fika.Core.Main.BotClasses;
 
-public class BotPlayerBridge(FikaBot bot) : BodyPartCollider.IPlayerBridge
+public sealed class BotPlayerBridge(FikaBot bot) : BodyPartCollider.IPlayerBridge
 {
     private readonly FikaBot _bot = bot;
 

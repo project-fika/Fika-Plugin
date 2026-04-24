@@ -1,12 +1,12 @@
 ﻿#nullable enable
 
-using Fika.Core.Networking.LZ4;
-using Fika.Core.Networking.LZ4.Internal;
 using System;
 using System.Buffers;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Fika.Core.Networking.LZ4;
+using Fika.Core.Networking.LZ4.Internal;
 
 namespace K4os.Compression.LZ4;
 
@@ -41,11 +41,17 @@ public static partial class LZ4Pickler
     /// <returns>Output buffer.</returns>
     public static byte[] Unpickle(ReadOnlySpan<byte> source)
     {
-        if (source.Length == 0) return Mem.Empty;
+        if (source.Length == 0)
+        {
+            return Mem.Empty;
+        }
 
         var header = DecodeHeader(source);
         var size = UnpickledSize(header);
-        if (size == 0) return Mem.Empty;
+        if (size == 0)
+        {
+            return Mem.Empty;
+        }
 
         var output = new byte[size];
         UnpickleCore(header, source, output);
@@ -60,7 +66,10 @@ public static partial class LZ4Pickler
         where TBufferWriter : IBufferWriter<byte>
     {
         var sourceLength = source.Length;
-        if (sourceLength == 0) return;
+        if (sourceLength == 0)
+        {
+            return;
+        }
 
         var header = DecodeHeader(source);
         var size = UnpickledSize(header);
@@ -101,7 +110,10 @@ public static partial class LZ4Pickler
     public static void Unpickle(ReadOnlySpan<byte> source, Span<byte> output)
     {
         var sourceLength = source.Length;
-        if (sourceLength == 0) return;
+        if (sourceLength == 0)
+        {
+            return;
+        }
 
         var header = DecodeHeader(source);
         UnpickleCore(header, source, output);
@@ -114,8 +126,10 @@ public static partial class LZ4Pickler
         var expectedLength = UnpickledSize(header);
         var targetLength = target.Length;
         if (targetLength != expectedLength)
+        {
             throw CorruptedPickle(
                 $"Output buffer size ({targetLength}) does not match expected value ({expectedLength})");
+        }
 
         if (!header.IsCompressed) // not compressed
         {
@@ -125,8 +139,10 @@ public static partial class LZ4Pickler
 
         var decodedLength = LZ4Codec.Decode(data, target);
         if (decodedLength != expectedLength)
+        {
             throw CorruptedPickle(
                 $"Expected to decode {expectedLength} bytes but {decodedLength} has been decoded");
+        }
     }
 
     private static PickleHeader DecodeHeader(ReadOnlySpan<byte> source) =>
@@ -143,7 +159,10 @@ public static partial class LZ4Pickler
         var dataOffset = (ushort)(1 + sizeOfDiff);
         var dataLength = source.Length - dataOffset;
         if (dataLength < 0)
+        {
             throw CorruptedPickle($"Unexpected data length: {dataLength}");
+        }
+
         var resultDiff = sizeOfDiff == 0 ? 0 : PeekN(source.Slice(1), sizeOfDiff);
         var resultLength = dataLength + resultDiff;
         return new PickleHeader(dataOffset, resultLength, resultDiff != 0);
@@ -153,9 +172,15 @@ public static partial class LZ4Pickler
     {
         int result = default; // just to make sure it is int 0
         if (size < 0 || size > sizeof(int) || size > bytes.Length)
+        {
             throw CorruptedPickle($"Unexpected field size: {size}");
+        }
+
         fixed (byte* bytesP = bytes)
+        {
             Unsafe.CopyBlockUnaligned(&result, bytesP, (uint)size);
+        }
+
         return result;
     }
 

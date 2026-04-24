@@ -78,7 +78,7 @@ public class ItemContext_Patch : ModulePatch
             var dynamicInteractions = gclass.Dictionary_0 ?? [];
             dynamicInteractions["SEND"] = new("SEND", "SEND", () =>
             {
-                foreach (var itemId in FikaPlugin.Instance.BlacklistedItems)
+                foreach (var itemId in FikaPlugin.Instance.Settings.BlacklistedItems)
                 {
                     foreach (var attachedItem in item.GetAllItems())
                     {

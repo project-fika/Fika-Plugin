@@ -2,7 +2,7 @@
 using System.Net;
 using System.Threading;
 
-namespace Fika.Core.Networking.LiteNetLib;
+namespace LiteNetLib;
 
 //minimal hashset class from dotnet with some optimizations
 public partial class LiteNetManager
@@ -126,7 +126,7 @@ public partial class LiteNetManager
     /// </summary>
     /// <param name="id">id of peer</param>
     /// <param name="peer">resulting peer</param>
-    /// <returns>True if peer with id exist, otherwise false</returns>
+    /// <returns><see langword="true"/> if peer with id exist; otherwise <see langword="false"/></returns>
     public bool TryGetPeerById(int id, out LiteNetPeer peer)
     {
         peer = GetPeerById(id);

@@ -31,7 +31,9 @@ public static class LZ4EncoderExtensions
         this ILZ4Encoder encoder, byte[] source, int offset, int length)
     {
         fixed (byte* sourceP = source)
+        {
             return encoder.Topup(sourceP + offset, length);
+        }
     }
 
     /// <summary>Tops encoder up with some data.</summary>
@@ -60,7 +62,9 @@ public static class LZ4EncoderExtensions
         this ILZ4Encoder encoder, byte[] target, int offset, int length, bool allowCopy)
     {
         fixed (byte* targetP = target)
+        {
             return encoder.Encode(targetP + offset, length, allowCopy);
+        }
     }
 
     /// <summary>Encodes all bytes currently stored in encoder into target buffer.</summary>
@@ -125,7 +129,9 @@ public static class LZ4EncoderExtensions
         encoded = 0;
 
         if (sourceLength > 0)
+        {
             loaded = encoder.Topup(source, sourceLength);
+        }
 
         return encoder.FlushAndEncode(
             target, targetLength, forceEncode, allowCopy, loaded, out encoded);
@@ -154,11 +160,13 @@ public static class LZ4EncoderExtensions
     {
         fixed (byte* sourceP = source)
         fixed (byte* targetP = target)
+        {
             return encoder.TopupAndEncode(
                 sourceP + sourceOffset, sourceLength,
                 targetP + targetOffset, targetLength,
                 forceEncode, allowCopy,
                 out loaded, out encoded);
+        }
     }
 
     /// <summary>Tops encoder and encodes content.</summary>
@@ -180,11 +188,13 @@ public static class LZ4EncoderExtensions
     {
         fixed (byte* sourceP = source)
         fixed (byte* targetP = target)
+        {
             return encoder.TopupAndEncode(
                 sourceP, source.Length,
                 targetP, target.Length,
                 forceEncode, allowCopy,
                 out loaded, out encoded);
+        }
     }
 
     private static unsafe EncoderAction FlushAndEncode(
@@ -199,11 +209,15 @@ public static class LZ4EncoderExtensions
         var bytesReady = encoder.BytesReady;
 
         if (bytesReady < (forceEncode ? 1 : blockSize))
+        {
             return loaded > 0 ? EncoderAction.Loaded : EncoderAction.None;
+        }
 
         encoded = encoder.Encode(target, targetLength, allowCopy);
         if (!allowCopy || encoded >= 0)
+        {
             return EncoderAction.Encoded;
+        }
 
         encoded = -encoded;
         return EncoderAction.Copied;
@@ -240,9 +254,11 @@ public static class LZ4EncoderExtensions
         out int encoded)
     {
         fixed (byte* targetP = target)
+        {
             return encoder.FlushAndEncode(
                 targetP + targetOffset, targetLength,
                 true, allowCopy, 0, out encoded);
+        }
     }
 
     /// <summary>Encoded remaining bytes in encoder.</summary>
@@ -257,9 +273,11 @@ public static class LZ4EncoderExtensions
         Span<byte> target, bool allowCopy, out int encoded)
     {
         fixed (byte* targetP = target)
+        {
             return encoder.FlushAndEncode(
                 targetP, target.Length,
                 true, allowCopy, 0, out encoded);
+        }
     }
 
     /// <summary>Drains decoder by reading all bytes which are ready.</summary>
@@ -275,7 +293,9 @@ public static class LZ4EncoderExtensions
         int offset, int length)
     {
         fixed (byte* targetP = target)
+        {
             decoder.Drain(targetP + targetOffset, offset, length);
+        }
     }
 
     /// <summary>Drains decoder by reading all bytes which are ready.</summary>
@@ -290,7 +310,9 @@ public static class LZ4EncoderExtensions
         int offset, int length)
     {
         fixed (byte* targetP = target)
+        {
             decoder.Drain(targetP, offset, length);
+        }
     }
 
     /// <summary>Decodes data and immediately drains it into target buffer.</summary>
@@ -310,11 +332,15 @@ public static class LZ4EncoderExtensions
         decoded = 0;
 
         if (sourceLength <= 0)
+        {
             return false;
+        }
 
         decoded = decoder.Decode(source, sourceLength);
         if (decoded <= 0 || targetLength < decoded)
+        {
             return false;
+        }
 
         decoder.Drain(target, -decoded, decoded);
 
@@ -339,12 +365,14 @@ public static class LZ4EncoderExtensions
     {
         fixed (byte* sourceP = source)
         fixed (byte* targetP = target)
+        {
             return decoder.DecodeAndDrain(
                 sourceP + sourceOffset,
                 sourceLength,
                 targetP + targetOffset,
                 targetLength,
                 out decoded);
+        }
     }
 
     /// <summary>Decodes data and immediately drains it into target buffer.</summary>
@@ -361,10 +389,12 @@ public static class LZ4EncoderExtensions
     {
         fixed (byte* sourceP = source)
         fixed (byte* targetP = target)
+        {
             return decoder.DecodeAndDrain(
                 sourceP, source.Length,
                 targetP, target.Length,
                 out decoded);
+        }
     }
 
     /// <summary>
@@ -381,7 +411,9 @@ public static class LZ4EncoderExtensions
         this ILZ4Decoder decoder, byte[] buffer, int offset, int length)
     {
         fixed (byte* bufferP = buffer)
+        {
             return decoder.Inject(bufferP + offset, length);
+        }
     }
 
     /// <summary>
@@ -399,7 +431,9 @@ public static class LZ4EncoderExtensions
         this ILZ4Decoder decoder, byte[] buffer, int offset, int length, int blockSize = 0)
     {
         fixed (byte* bufferP = buffer)
+        {
             return decoder.Decode(bufferP + offset, length, blockSize);
+        }
     }
 
 

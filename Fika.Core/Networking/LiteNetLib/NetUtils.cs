@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using LiteNetLib;
 
 namespace Fika.Core.Networking.LiteNetLib;
 
@@ -25,9 +26,25 @@ public static class NetUtils
 {
     private static readonly NetworkSorter NetworkSorter = new NetworkSorter();
 
+    /// <summary>
+    /// Creates an <see cref="IPEndPoint"/> from a host string and a port.
+    /// </summary>
+    /// <param name="hostStr">The host name or IP address string to resolve.</param>
+    /// <param name="port">The port number for the endpoint.</param>
+    /// <returns>A new <see cref="IPEndPoint"/> instance.</returns>
     public static IPEndPoint MakeEndPoint(string hostStr, int port) =>
         new IPEndPoint(ResolveAddress(hostStr), port);
 
+    /// <summary>
+    /// Resolves a host string into an <see cref="IPAddress"/>.
+    /// </summary>
+    /// <remarks>
+    /// This method handles "localhost" specifically, attempts to parse the string as a direct IP, 
+    /// and falls back to DNS resolution. It prioritizes IPv6 if <see cref="LiteNetManager.IPv6Support"/> is enabled.
+    /// </remarks>
+    /// <param name="hostStr">The host name or IP address string (e.g., "127.0.0.1", "localhost", or "google.com").</param>
+    /// <returns>The resolved <see cref="IPAddress"/>.</returns>
+    /// <exception cref="ArgumentException">Thrown when the address cannot be resolved or is invalid.</exception>
     public static IPAddress ResolveAddress(string hostStr)
     {
         if (hostStr == "localhost")
@@ -55,6 +72,12 @@ public static class NetUtils
         return ipAddress;
     }
 
+    /// <summary>
+    /// Resolves a host string using DNS for a specific <see cref="AddressFamily"/>.
+    /// </summary>
+    /// <param name="hostStr">The host name to resolve via DNS.</param>
+    /// <param name="addressFamily">The preferred address family (e.g., <see cref="AddressFamily.InterNetwork"/> or <see cref="AddressFamily.InterNetworkV6"/>).</param>
+    /// <returns>The first <see cref="IPAddress"/> matching the family, or <see langword="null"/> if no match is found.</returns>
     public static IPAddress ResolveAddress(string hostStr, AddressFamily addressFamily)
     {
         var addresses = Dns.GetHostEntry(hostStr).AddressList;
@@ -87,8 +110,8 @@ public static class NetUtils
     /// <param name="addrType">type of address (IPv4, IPv6 or both)</param>
     public static void GetLocalIpList(IList<string> targetList, LocalAddrType addrType)
     {
-        bool ipv4 = (addrType & LocalAddrType.IPv4) == LocalAddrType.IPv4;
-        bool ipv6 = (addrType & LocalAddrType.IPv6) == LocalAddrType.IPv6;
+        var ipv4 = (addrType & LocalAddrType.IPv4) == LocalAddrType.IPv4;
+        var ipv6 = (addrType & LocalAddrType.IPv6) == LocalAddrType.IPv6;
         try
         {
             // Sort networks interfaces so it prefer Wifi over Cellular networks

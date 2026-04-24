@@ -1,7 +1,6 @@
 ﻿// © 2026 Lacyway All Rights Reserved
 
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
@@ -43,7 +42,7 @@ public class ServerPacketSender : MonoBehaviour, IPacketSender
         get
         {
             return FikaPlugin.Instance.Settings.UsePingSystem.Value && _player.IsYourPlayer && Input.GetKey(FikaPlugin.Instance.Settings.PingButton.Value.MainKey)
-                && FikaPlugin.Instance.Settings.PingButton.Value.Modifiers.All(Input.GetKey) && !MonoBehaviourSingleton<PreloaderUI>.Instance.Console.IsConsoleVisible
+                && FikaGlobals.AreModifiersPressed(FikaPlugin.Instance.Settings.PingButton.Value) && !MonoBehaviourSingleton<PreloaderUI>.Instance.Console.IsConsoleVisible
                 && _lastPingTime < DateTime.Now.AddSeconds(-3) && !FikaChatUIScript.IsActive && Singleton<IFikaGame>.Instantiated &&
                 Singleton<IFikaGame>.Instance.GameController.GameInstance.Status is GameStatus.Started && !_player.IsInventoryOpened;
         }
@@ -106,7 +105,7 @@ public class ServerPacketSender : MonoBehaviour, IPacketSender
 
     private void SendPlayerState()
     {
-        var state = new PlayerStatePacket(_player, IsMoving);
+        var state = new PlayerStateData(_player, IsMoving);
         NetworkManager.SendPlayerState(ref state);
     }
 

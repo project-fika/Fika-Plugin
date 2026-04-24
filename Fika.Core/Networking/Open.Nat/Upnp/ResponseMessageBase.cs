@@ -47,10 +47,13 @@ internal abstract class ResponseMessageBase
         var nsm = new XmlNamespaceManager(_document.NameTable);
         nsm.AddNamespace("responseNs", ServiceType);
 
-        string typeName = _typeName;
-        string messageName = typeName.Substring(0, typeName.Length - "Message".Length);
-        XmlNode node = _document.SelectSingleNode("//responseNs:" + messageName, nsm);
-        if (node == null) throw new InvalidOperationException("The response is invalid: " + messageName);
+        var typeName = _typeName;
+        var messageName = typeName.Substring(0, typeName.Length - "Message".Length);
+        var node = _document.SelectSingleNode("//responseNs:" + messageName, nsm);
+        if (node == null)
+        {
+            throw new InvalidOperationException("The response is invalid: " + messageName);
+        }
 
         return node;
     }

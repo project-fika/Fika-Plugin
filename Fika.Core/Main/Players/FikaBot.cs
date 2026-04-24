@@ -26,7 +26,7 @@ namespace Fika.Core.Main.Players;
 /// <summary>
 /// Used to simulate bots for the host.
 /// </summary>
-public class FikaBot : FikaPlayer
+public sealed class FikaBot : FikaPlayer
 {
 
     public override bool IsVisible
@@ -193,7 +193,7 @@ public class FikaBot : FikaPlayer
             var sessionCounters = mainPlayer.Profile.EftStats.SessionCounters;
             HandleSharedExperience(countAsBoss, experience, sessionCounters);
 
-            if (FikaPlugin.Instance.SharedQuestProgression && FikaPlugin.Instance.Settings.EasyKillConditions.Value)
+            if (FikaPlugin.Instance.Settings.SharedQuestProgression && FikaPlugin.Instance.Settings.EasyKillConditions.Value)
             {
 #if DEBUG
                 FikaGlobals.LogInfo("Handling teammate kill from teammate: " + aggressor.Profile.Nickname);
@@ -321,7 +321,7 @@ public class FikaBot : FikaPlayer
         // Do nothing
     }
 
-    protected void OnEnable()
+    private void OnEnable()
     {
         var fikaGame = Singleton<IFikaGame>.Instance;
         if (fikaGame != null && fikaGame.GameController.GameInstance.Status == GameStatus.Started)
@@ -338,7 +338,7 @@ public class FikaBot : FikaPlayer
         }
     }
 
-    protected void OnDisable()
+    private void OnDisable()
     {
         var fikaGame = Singleton<IFikaGame>.Instance;
         if (fikaGame != null && fikaGame.GameController.GameInstance.Status == GameStatus.Started)

@@ -1,10 +1,10 @@
 ﻿#nullable enable
 
-using Fika.Core.Networking.LZ4;
-using Fika.Core.Networking.LZ4.Internal;
 using System;
 using System.Buffers;
 using System.Runtime.CompilerServices;
+using Fika.Core.Networking.LZ4;
+using Fika.Core.Networking.LZ4.Internal;
 
 namespace K4os.Compression.LZ4;
 
@@ -52,7 +52,10 @@ public static partial class LZ4Pickler
         ReadOnlySpan<byte> source, LZ4Level level = LZ4Level.L00_FAST)
     {
         var sourceLength = source.Length;
-        if (sourceLength == 0) return Mem.Empty;
+        if (sourceLength == 0)
+        {
+            return Mem.Empty;
+        }
 
         if (sourceLength <= MAX_STACKALLOC)
         {
@@ -113,10 +116,15 @@ public static partial class LZ4Pickler
         where TBufferWriter : IBufferWriter<byte>
     {
         if (writer is null)
+        {
             throw new ArgumentNullException(nameof(writer));
+        }
 
         var sourceLength = source.Length;
-        if (sourceLength == 0) return;
+        if (sourceLength == 0)
+        {
+            return;
+        }
 
         // this might be an argument at some point
         const int version = 0;
@@ -214,7 +222,10 @@ public static partial class LZ4Pickler
     private static unsafe void PokeN(Span<byte> target, int value, int size)
     {
         if (size < 0 || size > sizeof(int) || target.Length < size)
+        {
             throw new ArgumentException($"Unexpected size: {size}");
+        }
+
         Unsafe.CopyBlockUnaligned(ref target[0], ref *(byte*)&value, (uint)size);
     }
 

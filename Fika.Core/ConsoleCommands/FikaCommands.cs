@@ -15,7 +15,9 @@ using static Fika.Core.Networking.Packets.Debug.CommandPacket;
 
 namespace Fika.Core.ConsoleCommands;
 
+#pragma warning disable RCS1102
 public class FikaCommands
+#pragma warning restore RCS1102
 {
 #if DEBUG
     [ConsoleCommand("bring", "", null, "Teleports all AI to yourself as the host", [])]
@@ -301,11 +303,11 @@ public class FikaCommands
     /// Based on SSH's TarkyMenu command
     /// </summary>
     /// <param name="wildSpawnType"></param>
-    /// <param name="number"></param>
+    /// <param name="amount"></param>
     [ConsoleCommand("spawnNPC", "", null, "Spawn NPC with specified WildSpawnType")]
     public static void SpawnNPC([ConsoleArgument("assault", "The WildSpawnType to spawn (use help for a list)")] string wildSpawnType, [ConsoleArgument(1, "The amount of AI to spawn")] int amount)
     {
-        if (string.IsNullOrEmpty(wildSpawnType) || wildSpawnType.ToLower() == "help")
+        if (string.IsNullOrEmpty(wildSpawnType) || string.Equals(wildSpawnType, "help", StringComparison.OrdinalIgnoreCase))
         {
             foreach (WildSpawnType availableSpawnType in Enum.GetValues(typeof(WildSpawnType)))
             {

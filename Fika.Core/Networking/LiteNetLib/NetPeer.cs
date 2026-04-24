@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Net;
 using System.Threading;
+using Fika.Core.Main.Players;
 
 namespace Fika.Core.Networking.LiteNetLib;
 
@@ -25,10 +26,16 @@ public class NetPeer : LiteNetPeer
         _channels = new BaseChannel[netManager.ChannelsCount * NetConstants.ChannelTypeCount];
     }
 
-    internal NetPeer(NetManager netManager, ConnectionRequest request, int id) : base(netManager, request, id)
+    internal NetPeer(NetManager netManager, LiteConnectionRequest request, int id) : base(netManager, request, id)
     {
         _channels = new BaseChannel[netManager.ChannelsCount * NetConstants.ChannelTypeCount];
     }
+
+    /// <summary>
+    /// The <see cref="FikaPlayer"/> associated with this peer
+    /// </summary>
+    /// <remarks>Only applicable if running as a <see cref="FikaServer"/>, and is not reliable</remarks>
+    public FikaPlayer Player { get; internal set; }
 
     /// <summary>
     /// Send data to peer
@@ -205,6 +212,14 @@ public class NetPeer : LiteNetPeer
                   (byte)(ordered ? DeliveryMethod.ReliableOrdered : DeliveryMethod.ReliableUnordered);
         return ((ReliableChannel)_channels[idx])?.PacketsInQueue ?? 0;
     }
+
+    /// <summary>
+    /// Returns packets count in queue for reliable channel 0
+    /// </summary>
+    /// <param name="ordered">type of channel ReliableOrdered or ReliableUnordered</param>
+    /// <returns>packets count in channel queue</returns>
+    public new int GetPacketsCountInReliableQueue(bool ordered) =>
+        GetPacketsCountInReliableQueue(0, ordered);
 
     protected override void UpdateChannels()
     {

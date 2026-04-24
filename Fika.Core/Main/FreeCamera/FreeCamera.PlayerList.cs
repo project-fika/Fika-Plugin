@@ -9,7 +9,6 @@ public partial class FreeCamera
     private bool _hidePlayerList;
     private FikaPlayer _lastSpectatingPlayer;
     private Dictionary<int, ListPlayer> _playersTracker;
-    private List<int> _playersToRemove;
 
     ECameraState _cameraState;
 
@@ -18,6 +17,18 @@ public partial class FreeCamera
 #if DEBUG
         FikaGlobals.LogInfo($"Adding ListPlayer for {player.Profile.GetCorrectedNickname()}");
 #endif
+        if (!_allowSpectateBots && (player.IsAI || player.IsObservedAI))
+        {
+            for (var i = 0; i < _coopHandler.HumanPlayers.Count; i++)
+            {
+                var humanPlayer = _coopHandler.HumanPlayers[i];
+                if (humanPlayer.HealthController.IsAlive && !_coopHandler.ExtractedPlayers.Contains(humanPlayer.NetId))
+                {
+                    return;
+                }
+            }
+        }
+
         if (!_playersTracker.ContainsKey(player.NetId))
         {
             var newObj = Instantiate(_freecamUI.ListPlayerPrefab, _freecamUI.ListOfPlayers.transform);
@@ -32,21 +43,56 @@ public partial class FreeCamera
 #endif
     }
 
-    public void UpdatePlayerList()
+    private bool IsPlayerHuman(FikaPlayer player)
     {
-        _playersToRemove.Clear();
-        foreach ((var netId, var listPlayer) in _playersTracker)
+        return (FikaBackendUtils.IsClient && !player.IsObservedAI) || (FikaBackendUtils.IsServer && !player.IsAI);
+    }
+
+    private void OnPlayerDestroyed(FikaPlayer player)
+    {
+        if (_playersTracker.Remove(player.NetId, out var listPlayer))
         {
-            var shouldRemove = listPlayer.ManualUpdate();
-            if (shouldRemove)
-            {
-                _playersToRemove.Add(netId);
-            }
+            Destroy(listPlayer.gameObject);
         }
 
-        foreach (var idToRemove in _playersToRemove)
+        if (!_allowSpectateBots && IsPlayerHuman(player))
         {
-            _playersTracker.Remove(idToRemove);
+            for (var i = 0; i < _coopHandler.HumanPlayers.Count; i++)
+            {
+                if (_coopHandler.HumanPlayers[i].HealthController.IsAlive)
+                {
+                    return;
+                }
+            }
+            ForceAddPlayers();
+        }
+    }
+
+    private void OnPlayerDeath(FikaPlayer player)
+    {
+        if (_playersTracker.Remove(player.NetId, out var listPlayer))
+        {
+            Destroy(listPlayer.gameObject);
+        }
+
+        if (!_allowSpectateBots && IsPlayerHuman(player))
+        {
+            for (var i = 0; i < _coopHandler.HumanPlayers.Count; i++)
+            {
+                if (_coopHandler.HumanPlayers[i].HealthController.IsAlive)
+                {
+                    return;
+                }
+            }
+            ForceAddPlayers();
+        }
+    }
+
+    private void UpdatePlayerList()
+    {
+        foreach (var player in _playersTracker.Values)
+        {
+            player.ManualUpdate();
         }
     }
 }

@@ -1,7 +1,6 @@
 ﻿// © 2026 Lacyway All Rights Reserved
 
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
@@ -43,7 +42,7 @@ public class ClientPacketSender : MonoBehaviour, IPacketSender
         get
         {
             return FikaPlugin.Instance.Settings.UsePingSystem.Value && _player.IsYourPlayer && Input.GetKey(FikaPlugin.Instance.Settings.PingButton.Value.MainKey)
-                && FikaPlugin.Instance.Settings.PingButton.Value.Modifiers.All(Input.GetKey) && !MonoBehaviourSingleton<PreloaderUI>.Instance.Console.IsConsoleVisible
+                && FikaGlobals.AreModifiersPressed(FikaPlugin.Instance.Settings.PingButton.Value) && !MonoBehaviourSingleton<PreloaderUI>.Instance.Console.IsConsoleVisible
                 && _lastPingTime < DateTime.Now.AddSeconds(-3) && !FikaChatUIScript.IsActive && Singleton<IFikaGame>.Instance is CoopGame coopGame && coopGame.Status is GameStatus.Started
                 && !_player.IsInventoryOpened;
         }
@@ -95,7 +94,7 @@ public class ClientPacketSender : MonoBehaviour, IPacketSender
 
     private void SendPlayerState()
     {
-        var state = new PlayerStatePacket(_player, IsMoving);
+        var state = new PlayerStateData(_player, IsMoving);
         NetworkManager.SendPlayerState(ref state);
     }
 
@@ -188,7 +187,7 @@ public class ClientPacketSender : MonoBehaviour, IPacketSender
             }
 
             var basePingPrefab = InternalBundleLoader.Instance.GetFikaAsset(InternalBundleLoader.EFikaAsset.Ping);
-            GameObject basePing = GameObject.Instantiate(basePingPrefab);
+            var basePing = GameObject.Instantiate(basePingPrefab);
             var hitPoint = hit.point;
             var abstractPing = PingFactory.FromPingType(pingType, basePing);
             var pingColor = FikaPlugin.Instance.Settings.PingColor.Value;
