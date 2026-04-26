@@ -8,9 +8,9 @@ namespace Fika.Core.Main.ClientClasses;
 
 public sealed class ClientInventoryOperationHandler : IDisposable
 {
+    public ClientInventoryController InventoryController;
     public BaseInventoryOperationClass Operation;
     public Callback Callback;
-    public ClientInventoryController InventoryController;
 
     public IResult OperationResult;
     public ServerOperationStatus ServerStatus;
@@ -19,11 +19,11 @@ public sealed class ClientInventoryOperationHandler : IDisposable
     public Callback HandleResultDelegate;
     public Action<ServerOperationStatus> ServerStatusDelegate;
 
-    public void Set(BaseInventoryOperationClass operation, Callback callback, ClientInventoryController inventoryController)
+    public void Set(ClientInventoryController inventoryController, BaseInventoryOperationClass operation, Callback callback)
     {
+        InventoryController = inventoryController;
         Operation = operation;
         Callback = callback;
-        InventoryController = inventoryController;
     }
 
     public static ClientInventoryOperationHandler CreateInstance()

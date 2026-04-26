@@ -173,7 +173,7 @@ public sealed class ClientInventoryController : Player.PlayerOwnerInventoryContr
         }
 
         var handler = _clientInventoryOperationHandlerPool.Get();
-        handler.Set(operation, callback, this);
+        handler.Set(this, operation, callback);
         var operationNum = AddOperationCallback(operation, handler.ServerStatusDelegate);
         FikaPlayer.PacketSender.NetworkManager.SendGenericPacket(EGenericSubPacketType.InventoryOperation,
                 InventoryPacket.FromValue(FikaPlayer.NetId, operation));
