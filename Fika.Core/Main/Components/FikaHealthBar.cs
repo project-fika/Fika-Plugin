@@ -19,7 +19,7 @@ namespace Fika.Core.Main.Components;
 /// Displays a health bar over another player <br/>
 /// Created by: ssh_
 /// </summary>
-public class FikaHealthBar : MonoBehaviour
+public sealed class FikaHealthBar : MonoBehaviour
 {
     /// <summary>
     /// Check for GClass increments, can be checked in <see cref="StaticIcons.EffectSprites"/> method <see cref="ISerializationCallbackReceiver.OnAfterDeserialize"/> <br/><br/>
