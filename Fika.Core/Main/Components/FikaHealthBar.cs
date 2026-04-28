@@ -41,8 +41,7 @@ public sealed class FikaHealthBar : MonoBehaviour
     private RectTransform _canvasRect;
     private float _lastFinalAlpha = -1f;
     private RectTransform _plateRectTransform;
-    private CanvasGroup _labelsGroup;
-    private CanvasGroup _statusGroup;
+    private CanvasGroup _alphaGroup;
     private Transform _neckBone;
     private Dictionary<EBodyPart, GameObject> _bodyParts;
     private int _destroyedLimbs;
@@ -173,8 +172,7 @@ public sealed class FikaHealthBar : MonoBehaviour
         if (!WorldToScreen.ProjectToCanvas(targetPosition, _mainPlayer,
             _canvasRect, out var canvasPos, settings.NamePlateUseOpticZoom.Value, false))
         {
-            _labelsGroup.alpha = 0f;
-            _statusGroup.alpha = 0f;
+            _alphaGroup.alpha = 0f;
             return;
         }
 
@@ -202,8 +200,7 @@ public sealed class FikaHealthBar : MonoBehaviour
         {
             _lastFinalAlpha = finalAlpha;
 
-            _labelsGroup.alpha = finalAlpha;
-            _statusGroup.alpha = healthAlpha;
+            _alphaGroup.alpha = finalAlpha;
 
             var scaleMultiplier = Mathf.Lerp(0.48f, 0.075f, t * Mathf.Sqrt(t)) * settings.NamePlateScale.Value;
             _plateRectTransform.localScale = new Vector3(scaleMultiplier, scaleMultiplier, 1f);
@@ -225,8 +222,7 @@ public sealed class FikaHealthBar : MonoBehaviour
         var uiPrefab = InternalBundleLoader.Instance.GetFikaAsset(InternalBundleLoader.EFikaAsset.PlayerUI);
         var uiGameObj = Instantiate(uiPrefab);
         _playerPlate = uiGameObj.GetComponent<PlayerPlateUI>();
-        _labelsGroup = _playerPlate.LabelsGroup;
-        _statusGroup = _playerPlate.StatusGroup;
+        _alphaGroup = _playerPlate.AlphaGroup;
         _plateRectTransform = _playerPlate.ScalarObjectScreen.GetComponent<RectTransform>();
         _playerPlate.SetNameText(_currentPlayer.Profile.Info.MainProfileNickname);
         _camera = CameraClass.Instance.Camera;
@@ -408,9 +404,9 @@ public sealed class FikaHealthBar : MonoBehaviour
         for (var i = 0; i < _ignoredTypes.Length; i++)
         {
             if (_ignoredTypes[i] == effect.Type)
-        {
-            return;
-        }
+            {
+                return;
+            }
         }
 
         var found = false;
