@@ -87,9 +87,9 @@ public sealed class FikaHealthBar : MonoBehaviour
             if (FikaPlugin.Instance.Settings.UseOcclusion.Value)
             {
                 _counter += Time.deltaTime;
-                if (_counter > 1)
+                if (_counter > 1f)
                 {
-                    _counter = 0;
+                    _counter = 0f;
                     CheckForOcclusion();
                 }
             }
