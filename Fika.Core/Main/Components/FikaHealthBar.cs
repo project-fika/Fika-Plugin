@@ -26,7 +26,7 @@ public class FikaHealthBar : MonoBehaviour
     /// <see cref="ActiveHealthController.Wound"/>, <see cref="ActiveHealthController.Encumbered"/>, <see cref="ActiveHealthController.OverEncumbered"/>, <br/>
     /// <see cref="ActiveHealthController.MildMusclePain"/>, <see cref="ActiveHealthController.SevereMusclePain"/>
     /// </summary>
-    private static readonly List<Type> _ignoredTypes = [typeof(GInterface362), typeof(GInterface364), typeof(GInterface365), typeof(GInterface379), typeof(GInterface380)];
+    private static readonly Type[] _ignoredTypes = [typeof(GInterface362), typeof(GInterface364), typeof(GInterface365), typeof(GInterface379), typeof(GInterface380)];
 
     private const float _tweenLength = 0.25f;
 
@@ -403,9 +403,12 @@ public class FikaHealthBar : MonoBehaviour
 
     private void AddEffect(IEffect effect)
     {
-        if (_ignoredTypes.Contains(effect.Type))
+        foreach (var item in _ignoredTypes)
+        {
+            if (item.Equals(effect.Type))
         {
             return;
+        }
         }
 
         var found = false;
