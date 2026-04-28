@@ -79,7 +79,7 @@ public sealed class FikaHealthBar : MonoBehaviour
         _effects.Clear();
     }
 
-    protected void Update()
+    private void Update()
     {
         if (_currentPlayer != null)
         {
@@ -564,7 +564,7 @@ public sealed class FikaHealthBar : MonoBehaviour
         }
     }
 
-    protected void OnDestroy()
+    private void OnDestroy()
     {
         FikaPlugin.Instance.Settings.UsePlateFactionSide.SettingChanged -= UsePlateFactionSide_SettingChanged;
         FikaPlugin.Instance.Settings.HideHealthBar.SettingChanged -= HideHealthBar_SettingChanged;
