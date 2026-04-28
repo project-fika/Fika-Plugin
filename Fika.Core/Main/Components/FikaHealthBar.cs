@@ -31,6 +31,7 @@ public sealed class FikaHealthBar : MonoBehaviour
     private const float _tweenLength = 0.25f;
 
     private ObservedPlayer _currentPlayer;
+    private Camera _camera;
     private FikaPlayer _mainPlayer;
     private PlayerPlateUI _playerPlate;
     private Dictionary<Type, Sprite> _effectIcons;
@@ -101,7 +102,7 @@ public sealed class FikaHealthBar : MonoBehaviour
 
     private void CheckForOcclusion()
     {
-        var camPos = CameraClass.Instance.Camera.transform.position;
+        var camPos = _camera.transform.position;
         var targetPos = _currentPlayer.PlayerBones.Neck.position;
 
         if (Physics.Raycast(camPos, targetPos - camPos, out var hitinfo, 800f, _checkLayers))
@@ -148,7 +149,7 @@ public sealed class FikaHealthBar : MonoBehaviour
             opacityMultiplier = settings.OpacityInADS.Value;
         }
 
-        var cameraPos = CameraClass.Instance.Camera.transform.position;
+        var cameraPos = _camera.transform.position;
         var offset = _currentPlayer.Position - cameraPos;
         var sqrDist = offset.sqrMagnitude;
         var maxDist = settings.MaxDistanceToShow.Value;
@@ -228,6 +229,7 @@ public sealed class FikaHealthBar : MonoBehaviour
         _statusGroup = _playerPlate.StatusGroup;
         _plateRectTransform = _playerPlate.ScalarObjectScreen.GetComponent<RectTransform>();
         _playerPlate.SetNameText(_currentPlayer.Profile.Info.MainProfileNickname);
+        _camera = CameraClass.Instance.Camera;
         if (FikaPlugin.DevelopersList.ContainsKey(_currentPlayer.Profile.Nickname.ToLower()))
         {
             _playerPlate.playerNameScreen.color = new Color(0, 6f, 1, 1);
