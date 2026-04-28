@@ -403,9 +403,9 @@ public class FikaHealthBar : MonoBehaviour
 
     private void AddEffect(IEffect effect)
     {
-        foreach (var type in _ignoredTypes)
+        for (var i = 0; i < _ignoredTypes.Length; i++)
         {
-            if (type.Equals(effect.Type))
+            if (_ignoredTypes[i] == effect.Type)
         {
             return;
         }
