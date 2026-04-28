@@ -27,6 +27,9 @@ public static class FikaGlobals
 
     public static int PingMask = LayerMask.GetMask(["HighPolyCollider", "Interactive", "Deadbody", "Player", "Loot", "Terrain"]);
 
+    /// <summary>
+    /// Use when no callback is needed to reduce allocations
+    /// </summary>
     public static Callback EmptyCallbackDelegate => EmptyCallback;
 
     public const int PingRange = 1000;
