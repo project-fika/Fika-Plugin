@@ -912,11 +912,6 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
         }
     }
 
-    public void ReturnHandler(InventoryOperationHandler handler)
-    {
-        _inventoryOperationHandlerPool.ReturnHandler(handler);
-    }
-
     private void DisconnectHeadless()
     {
         Singleton<IFikaGame>.Instance.Stop(null, ExitStatus.Survived, "");
@@ -1059,10 +1054,7 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
 
     public void StopNatIntroduceRoutine()
     {
-        if (_cts != null)
-        {
-            _cts.Cancel();
-        }
+        _cts?.Cancel();
     }
 
     private async Task NatIntroduceTask(string natPunchServerIP, int natPunchServerPort, string token, CancellationToken ct = default)
@@ -1077,5 +1069,23 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
         }
 
         _logger.LogInfo("Send NAT Introduce Request task stopped.");
+    }
+
+    /// <summary>
+    /// Gets a pooled handler
+    /// </summary>
+    /// <returns>A pooled handler</returns>
+    public InventoryOperationHandler GetHandler()
+    {
+        return _inventoryOperationHandlerPool.Get();
+    }
+
+    /// <summary>
+    /// Returns a pooled handler
+    /// </summary>
+    /// <param name="handler">The handler to return</param>
+    public void ReturnHandler(InventoryOperationHandler handler)
+    {
+        _inventoryOperationHandlerPool.ReturnHandler(handler);
     }
 }

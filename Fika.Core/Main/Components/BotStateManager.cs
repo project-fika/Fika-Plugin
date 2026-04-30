@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using EFT;
 using Fika.Core.Main.GameMode;
 using Fika.Core.Main.Players;
@@ -8,7 +9,7 @@ using Fika.Core.Networking.Snapshotting;
 
 namespace Fika.Core.Main.Components;
 
-public class BotStateManager : MonoBehaviour
+public sealed class BotStateManager : MonoBehaviour
 {
     private List<FikaBot> _bots;
     private HostGameController _controller;
@@ -19,7 +20,8 @@ public class BotStateManager : MonoBehaviour
     private float _updateCount;
     private float _updatesPerTick;
     private uint _writtenPackets;
-    private bool _headerWritten;
+    private bool _timeWritten;
+    private readonly byte _maxSize = PlayerStateData.PacketSize;
 
     public void AddBot(FikaBot bot)
     {
@@ -48,7 +50,7 @@ public class BotStateManager : MonoBehaviour
         return component;
     }
 
-    protected void Update()
+    private void Update()
     {
         _controller.Update?.Invoke();
         _botsController?.method_0();
@@ -63,24 +65,23 @@ public class BotStateManager : MonoBehaviour
 
     private void SendBatchStates()
     {
-        if (!_headerWritten)
-        {
-            _writer.Put(NetworkTimeSync.NetworkTime);
-            _headerWritten = true;
-        }
+        CheckAndWriteNetworkTime();
 
-        for (var i = _bots.Count - 1; i >= 0; i--)
+        var count = _bots.Count;
+        for (var i = count - 1; i >= 0; i--)
         {
             var bot = _bots[i];
             if (!bot.HealthController.IsAlive)
             {
-                _bots.Remove(bot);
+                _bots[i] = _bots[--count];
+                _bots.RemoveAt(count);
                 continue;
             }
 
-            if ((_writer.Length + PlayerStateData.PacketSize) > _server.MaxMTU)
+            if ((_writer.Length + _maxSize) > _server.MaxMTU)
             {
                 SendAndReset();
+                CheckAndWriteNetworkTime();
             }
 
             if (bot.BotPacketSender.WriteState(_writer))
@@ -88,7 +89,18 @@ public class BotStateManager : MonoBehaviour
                 _writtenPackets++;
             }
         }
+
         SendAndReset();
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void CheckAndWriteNetworkTime()
+    {
+        if (!_timeWritten)
+        {
+            _writer.Put(NetworkTimeSync.NetworkTime);
+            _timeWritten = true;
+        }
     }
 
     private void SendAndReset()
@@ -97,12 +109,12 @@ public class BotStateManager : MonoBehaviour
         {
             _server.BatchSendStates(_writer);
             _writtenPackets = 0;
-            _headerWritten = false;
+            _timeWritten = false;
             _writer.Reset();
         }
     }
 
-    protected void OnDestroy()
+    private void OnDestroy()
     {
         _bots.Clear();
     }

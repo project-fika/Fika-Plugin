@@ -9,7 +9,6 @@ using UnityEngine.UI;
 /// </summary>
 public class PlayerPlateUI : MonoBehaviour
 {
-    public GameObject ScreenSpaceNamePlate;
     public GameObject ScalarObjectScreen;
     public TextMeshProUGUI playerNameScreen;
     public Image healthBarBackgroundScreen;
@@ -20,8 +19,7 @@ public class PlayerPlateUI : MonoBehaviour
     public Image bearPlateScreen;
     public GameObject EffectsBackground;
     public GameObject EffectImageTemplate;
-    public CanvasGroup LabelsGroup;
-    public CanvasGroup StatusGroup;
+    public CanvasGroup AlphaGroup;
 
     public GameObject Skeleton;
     public GameObject Head;

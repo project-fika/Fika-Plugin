@@ -6,6 +6,7 @@ using EFT;
 using EFT.InventoryLogic;
 using EFT.InventoryLogic.Operations;
 using EFT.UI;
+using Fika.Core.Main.HostClasses;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
@@ -105,6 +106,24 @@ public sealed class ClientInventoryController : Player.PlayerOwnerInventoryContr
         RunClientOperation(operation, callback);
     }
 
+    /// <summary>
+    /// Gets an inventory handler
+    /// </summary>
+    /// <returns>A pooled handler</returns>
+    public ClientInventoryOperationHandler GetHandler()
+    {
+        return _clientInventoryOperationHandlerPool.Get();
+    }
+
+    /// <summary>
+    /// Returns a handler
+    /// </summary>
+    /// <param name="handler">The handler to return</param>
+    public void ReturnHandler(ClientInventoryOperationHandler handler)
+    {
+        _clientInventoryOperationHandlerPool.ReturnHandler(handler);
+    }
+
     private void RunClientOperation(BaseInventoryOperationClass operation, Callback callback)
     {
         if (!vmethod_0(operation))
@@ -154,18 +173,13 @@ public sealed class ClientInventoryController : Player.PlayerOwnerInventoryContr
         }
 
         var handler = _clientInventoryOperationHandlerPool.Get();
-        handler.Set(operation, callback, this);
+        handler.Set(this, operation, callback);
         var operationNum = AddOperationCallback(operation, handler.ServerStatusDelegate);
         FikaPlayer.PacketSender.NetworkManager.SendGenericPacket(EGenericSubPacketType.InventoryOperation,
                 InventoryPacket.FromValue(FikaPlayer.NetId, operation));
 #if DEBUG
         ConsoleScreen.Log($"InvOperation: {operation.GetType().Name}, Id: {operation.Id}");
 #endif
-    }
-
-    public void ReturnHandler(ClientInventoryOperationHandler handler)
-    {
-        _clientInventoryOperationHandlerPool.ReturnHandler(handler);
     }
 
     public override bool HasCultistAmulet(out CultistAmuletItemClass amulet)

@@ -5,6 +5,7 @@ using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
 using EFT.InventoryLogic.Operations;
+using Fika.Core.Main.ClientClasses;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Packets.Generic;
@@ -41,6 +42,24 @@ public sealed class BotInventoryController : PlayerInventoryController
     public override void CallMalfunctionRepaired(Weapon weapon)
     {
         // Do nothing
+    }
+
+    /// <summary>
+    /// Gets an inventory handler
+    /// </summary>
+    /// <returns>A pooled handler</returns>
+    public BotInventoryOperationHandler GetHandler()
+    {
+        return _botInventoryOperationHandlerPool.Get();
+    }
+
+    /// <summary>
+    /// Returns a handler
+    /// </summary>
+    /// <param name="handler">The handler to return</param>
+    public void ReturnHandler(BotInventoryOperationHandler handler)
+    {
+        _botInventoryOperationHandlerPool.ReturnHandler(handler);
     }
 
     public override void vmethod_1(BaseInventoryOperationClass operation, [CanBeNull] Callback callback)

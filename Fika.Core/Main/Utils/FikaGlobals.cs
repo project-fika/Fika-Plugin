@@ -27,9 +27,14 @@ public static class FikaGlobals
 
     public static int PingMask = LayerMask.GetMask(["HighPolyCollider", "Interactive", "Deadbody", "Player", "Loot", "Terrain"]);
 
+    /// <summary>
+    /// Use when no callback is needed to reduce allocations
+    /// </summary>
+    public static Callback EmptyCallbackDelegate => EmptyCallback;
+
     public const int PingRange = 1000;
 
-    private static readonly ManualLogSource _logger = BepInEx.Logging.Logger.CreateLogSource("FikaGlobals");
+    private static readonly ManualLogSource _logger = Logger.CreateLogSource("FikaGlobals");
 
     internal static readonly List<EInteraction> BlockedInteractions =
     [
@@ -149,7 +154,7 @@ public static class FikaGlobals
 
     internal static string FormatFileSize(long bytes)
     {
-        var unit = 1024;
+        const int unit = 1024;
         if (bytes < unit) { return $"{bytes} B"; }
 
         var exp = (int)(Math.Log(bytes) / Math.Log(unit));
@@ -405,6 +410,11 @@ public static class FikaGlobals
     }
 
     public static void EmptyAction()
+    {
+
+    }
+
+    private static void EmptyCallback(IResult result)
     {
 
     }

@@ -19,18 +19,19 @@ namespace Fika.Core.Main.Components;
 /// Displays a health bar over another player <br/>
 /// Created by: ssh_
 /// </summary>
-public class FikaHealthBar : MonoBehaviour
+public sealed class FikaHealthBar : MonoBehaviour
 {
     /// <summary>
     /// Check for GClass increments, can be checked in <see cref="StaticIcons.EffectSprites"/> method <see cref="ISerializationCallbackReceiver.OnAfterDeserialize"/> <br/><br/>
     /// <see cref="ActiveHealthController.Wound"/>, <see cref="ActiveHealthController.Encumbered"/>, <see cref="ActiveHealthController.OverEncumbered"/>, <br/>
     /// <see cref="ActiveHealthController.MildMusclePain"/>, <see cref="ActiveHealthController.SevereMusclePain"/>
     /// </summary>
-    private static readonly List<Type> _ignoredTypes = [typeof(GInterface362), typeof(GInterface364), typeof(GInterface365), typeof(GInterface379), typeof(GInterface380)];
+    private static readonly Type[] _ignoredTypes = [typeof(GInterface362), typeof(GInterface364), typeof(GInterface365), typeof(GInterface379), typeof(GInterface380)];
 
     private const float _tweenLength = 0.25f;
 
     private ObservedPlayer _currentPlayer;
+    private Camera _camera;
     private FikaPlayer _mainPlayer;
     private PlayerPlateUI _playerPlate;
     private Dictionary<Type, Sprite> _effectIcons;
@@ -40,8 +41,7 @@ public class FikaHealthBar : MonoBehaviour
     private RectTransform _canvasRect;
     private float _lastFinalAlpha = -1f;
     private RectTransform _plateRectTransform;
-    private CanvasGroup _labelsGroup;
-    private CanvasGroup _statusGroup;
+    private CanvasGroup _alphaGroup;
     private Transform _neckBone;
     private Dictionary<EBodyPart, GameObject> _bodyParts;
     private int _destroyedLimbs;
@@ -78,7 +78,7 @@ public class FikaHealthBar : MonoBehaviour
         _effects.Clear();
     }
 
-    protected void Update()
+    private void Update()
     {
         if (_currentPlayer != null)
         {
@@ -86,9 +86,9 @@ public class FikaHealthBar : MonoBehaviour
             if (FikaPlugin.Instance.Settings.UseOcclusion.Value)
             {
                 _counter += Time.deltaTime;
-                if (_counter > 1)
+                if (_counter > 1f)
                 {
-                    _counter = 0;
+                    _counter = 0f;
                     CheckForOcclusion();
                 }
             }
@@ -101,7 +101,7 @@ public class FikaHealthBar : MonoBehaviour
 
     private void CheckForOcclusion()
     {
-        var camPos = CameraClass.Instance.Camera.transform.position;
+        var camPos = _camera.transform.position;
         var targetPos = _currentPlayer.PlayerBones.Neck.position;
 
         if (Physics.Raycast(camPos, targetPos - camPos, out var hitinfo, 800f, _checkLayers))
@@ -148,7 +148,7 @@ public class FikaHealthBar : MonoBehaviour
             opacityMultiplier = settings.OpacityInADS.Value;
         }
 
-        var cameraPos = CameraClass.Instance.Camera.transform.position;
+        var cameraPos = _camera.transform.position;
         var offset = _currentPlayer.Position - cameraPos;
         var sqrDist = offset.sqrMagnitude;
         var maxDist = settings.MaxDistanceToShow.Value;
@@ -172,8 +172,7 @@ public class FikaHealthBar : MonoBehaviour
         if (!WorldToScreen.ProjectToCanvas(targetPosition, _mainPlayer,
             _canvasRect, out var canvasPos, settings.NamePlateUseOpticZoom.Value, false))
         {
-            _labelsGroup.alpha = 0f;
-            _statusGroup.alpha = 0f;
+            _alphaGroup.alpha = 0f;
             return;
         }
 
@@ -201,8 +200,7 @@ public class FikaHealthBar : MonoBehaviour
         {
             _lastFinalAlpha = finalAlpha;
 
-            _labelsGroup.alpha = finalAlpha;
-            _statusGroup.alpha = healthAlpha;
+            _alphaGroup.alpha = finalAlpha;
 
             var scaleMultiplier = Mathf.Lerp(0.48f, 0.075f, t * Mathf.Sqrt(t)) * settings.NamePlateScale.Value;
             _plateRectTransform.localScale = new Vector3(scaleMultiplier, scaleMultiplier, 1f);
@@ -224,10 +222,10 @@ public class FikaHealthBar : MonoBehaviour
         var uiPrefab = InternalBundleLoader.Instance.GetFikaAsset(InternalBundleLoader.EFikaAsset.PlayerUI);
         var uiGameObj = Instantiate(uiPrefab);
         _playerPlate = uiGameObj.GetComponent<PlayerPlateUI>();
-        _labelsGroup = _playerPlate.LabelsGroup;
-        _statusGroup = _playerPlate.StatusGroup;
+        _alphaGroup = _playerPlate.AlphaGroup;
         _plateRectTransform = _playerPlate.ScalarObjectScreen.GetComponent<RectTransform>();
         _playerPlate.SetNameText(_currentPlayer.Profile.Info.MainProfileNickname);
+        _camera = CameraClass.Instance.Camera;
         if (FikaPlugin.DevelopersList.ContainsKey(_currentPlayer.Profile.Nickname.ToLower()))
         {
             _playerPlate.playerNameScreen.color = new Color(0, 6f, 1, 1);
@@ -403,9 +401,12 @@ public class FikaHealthBar : MonoBehaviour
 
     private void AddEffect(IEffect effect)
     {
-        if (_ignoredTypes.Contains(effect.Type))
+        for (var i = 0; i < _ignoredTypes.Length; i++)
         {
-            return;
+            if (_ignoredTypes[i] == effect.Type)
+            {
+                return;
+            }
         }
 
         var found = false;
@@ -559,7 +560,7 @@ public class FikaHealthBar : MonoBehaviour
         }
     }
 
-    protected void OnDestroy()
+    private void OnDestroy()
     {
         FikaPlugin.Instance.Settings.UsePlateFactionSide.SettingChanged -= UsePlateFactionSide_SettingChanged;
         FikaPlugin.Instance.Settings.HideHealthBar.SettingChanged -= HideHealthBar_SettingChanged;
