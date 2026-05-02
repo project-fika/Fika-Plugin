@@ -363,17 +363,22 @@ public sealed class FikaBot : FikaPlayer
         if (Singleton<FikaServer>.Instantiated)
         {
             var fikaGame = Singleton<IFikaGame>.Instance;
-            if (fikaGame != null && fikaGame.GameController.GameInstance.Status == GameStatus.Started)
+            if (fikaGame != null)
             {
-                var server = Singleton<FikaServer>.Instance;
-                BotStatePacket packet = new()
+                if (fikaGame.GameController.GameInstance.Status == GameStatus.Started)
                 {
-                    NetId = NetId,
-                    Type = BotStatePacket.EStateType.DisposeBot
-                };
+                    var server = Singleton<FikaServer>.Instance;
+                    BotStatePacket packet = new()
+                    {
+                        NetId = NetId,
+                        Type = BotStatePacket.EStateType.DisposeBot
+                    };
 
-                server.SendData(ref packet, DeliveryMethod.ReliableOrdered);
-                fikaGame.GameController.Bots.Remove(ProfileId);
+                    server.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+                    fikaGame.GameController.Bots.Remove(ProfileId);
+                }
+
+                (fikaGame.GameController as HostGameController).RemoveBot(this);
             }
         }
         if (CoopHandler.TryGetCoopHandler(out var coopHandler))
