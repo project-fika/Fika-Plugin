@@ -73,8 +73,7 @@ public sealed class BotStateManager : MonoBehaviour
             var bot = _bots[i];
             if (!bot.HealthController.IsAlive)
             {
-                _bots[i] = _bots[--count];
-                _bots.RemoveAt(count);
+                _bots.RemoveAt(i);
                 continue;
             }
 
