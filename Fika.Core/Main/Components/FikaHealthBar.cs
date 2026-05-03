@@ -292,6 +292,7 @@ public sealed class FikaHealthBar : MonoBehaviour
             [EBodyPart.Chest] = _playerPlate.Chest,
             [EBodyPart.Stomach] = _playerPlate.Stomach
         };
+        _bodyParts[EBodyPart.Common].SetActive(false);
 
         UpdateHealth();
     }
