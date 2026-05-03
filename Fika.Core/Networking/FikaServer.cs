@@ -665,11 +665,7 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
 
     public void BatchSendStates(NetDataWriter writer)
     {
-        _dataWriter.Reset();
-        _dataWriter.PutEnum(EPacketType.PlayerState);
-        _dataWriter.Put(writer.AsReadOnlySpan());
-
-        _netServer.SendToAll(_dataWriter.AsReadOnlySpan(), DeliveryMethod.Unreliable);
+        _netServer.SendToAll(writer.AsReadOnlySpan(), DeliveryMethod.Unreliable);
     }
 
     public void SendDataToPeer<T>(ref T packet, DeliveryMethod deliveryMethod, NetPeer peer) where T : INetSerializable
