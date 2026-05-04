@@ -24,6 +24,20 @@ public sealed class BotStateManager : MonoBehaviour
     private bool _headerWritten;
     private readonly byte _stateSize = PlayerStateData.PacketSize;
 
+    private void Start()
+    {
+        FikaBot.OnPlayerDeath += OnPlayerDeath;
+        FikaBot.OnPlayerDestroyed += OnPlayerDeath;
+    }
+
+    private void OnPlayerDeath(FikaPlayer player)
+    {
+        if (player is FikaBot bot)
+        {
+            RemoveBot(bot);
+        }
+    }
+
     public void AddBot(FikaBot bot)
     {
         if (_bots.Contains(bot))
@@ -71,20 +85,13 @@ public sealed class BotStateManager : MonoBehaviour
         var count = _bots.Count;
         for (var i = count - 1; i >= 0; i--)
         {
-            var bot = _bots[i];
-            if (!bot.HealthController.IsAlive)
-            {
-                _bots.RemoveAt(i);
-                continue;
-            }
-
             if ((_writer.Length + _stateSize) > _server.MaxMTU)
             {
                 SendAndReset();
                 CheckAndWriteHeader();
             }
 
-            if (bot.BotPacketSender.WriteState(_writer))
+            if (_bots[i].BotPacketSender.WriteState(_writer))
             {
                 _writtenPackets++;
             }
@@ -117,6 +124,8 @@ public sealed class BotStateManager : MonoBehaviour
 
     private void OnDestroy()
     {
+        FikaBot.OnPlayerDeath -= OnPlayerDeath;
+        FikaBot.OnPlayerDestroyed -= OnPlayerDeath;
         _bots.Clear();
     }
 
