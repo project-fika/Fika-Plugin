@@ -206,6 +206,7 @@ public class FreeCameraController : MonoBehaviour
             var fikaGame = _coopHandler.LocalGameInstance;
             if (fikaGame.ExtractedPlayers.Contains(Player.NetId))
             {
+                Player.ActiveHealthController.DiedEvent -= MainPlayer_DiedEvent;
                 _extracted = true;
                 _freeCamScript.Extracted = true;
                 ShowExtractMessage();
