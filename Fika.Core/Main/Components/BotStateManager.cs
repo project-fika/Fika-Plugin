@@ -6,6 +6,7 @@ using Fika.Core.Main.Players;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Player;
 using Fika.Core.Networking.Snapshotting;
+using static Fika.Core.Networking.NetworkUtils;
 
 namespace Fika.Core.Main.Components;
 
@@ -20,8 +21,22 @@ public sealed class BotStateManager : MonoBehaviour
     private float _updateCount;
     private float _updatesPerTick;
     private uint _writtenPackets;
-    private bool _timeWritten;
-    private readonly byte _maxSize = PlayerStateData.PacketSize;
+    private bool _headerWritten;
+    private readonly byte _stateSize = PlayerStateData.PacketSize;
+
+    private void Start()
+    {
+        FikaBot.OnPlayerDeath += OnPlayerDeath;
+        FikaBot.OnPlayerDestroyed += OnPlayerDeath;
+    }
+
+    private void OnPlayerDeath(FikaPlayer player)
+    {
+        if (player is FikaBot bot)
+        {
+            RemoveBot(bot);
+        }
+    }
 
     public void AddBot(FikaBot bot)
     {
@@ -65,26 +80,18 @@ public sealed class BotStateManager : MonoBehaviour
 
     private void SendBatchStates()
     {
-        CheckAndWriteNetworkTime();
+        CheckAndWriteHeader();
 
         var count = _bots.Count;
         for (var i = count - 1; i >= 0; i--)
         {
-            var bot = _bots[i];
-            if (!bot.HealthController.IsAlive)
-            {
-                _bots[i] = _bots[--count];
-                _bots.RemoveAt(count);
-                continue;
-            }
-
-            if ((_writer.Length + _maxSize) > _server.MaxMTU)
+            if ((_writer.Length + _stateSize) > _server.MaxMTU)
             {
                 SendAndReset();
-                CheckAndWriteNetworkTime();
+                CheckAndWriteHeader();
             }
 
-            if (bot.BotPacketSender.WriteState(_writer))
+            if (_bots[i].BotPacketSender.WriteState(_writer))
             {
                 _writtenPackets++;
             }
@@ -94,12 +101,13 @@ public sealed class BotStateManager : MonoBehaviour
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void CheckAndWriteNetworkTime()
+    private void CheckAndWriteHeader()
     {
-        if (!_timeWritten)
+        if (!_headerWritten)
         {
+            _writer.PutEnum(EPacketType.PlayerState);
             _writer.Put(NetworkTimeSync.NetworkTime);
-            _timeWritten = true;
+            _headerWritten = true;
         }
     }
 
@@ -109,13 +117,15 @@ public sealed class BotStateManager : MonoBehaviour
         {
             _server.BatchSendStates(_writer);
             _writtenPackets = 0;
-            _timeWritten = false;
+            _headerWritten = false;
             _writer.Reset();
         }
     }
 
     private void OnDestroy()
     {
+        FikaBot.OnPlayerDeath -= OnPlayerDeath;
+        FikaBot.OnPlayerDestroyed -= OnPlayerDeath;
         _bots.Clear();
     }
 

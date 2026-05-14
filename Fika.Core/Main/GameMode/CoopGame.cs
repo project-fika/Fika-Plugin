@@ -240,10 +240,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
 
         fikaPlayer.SpawnPoint = GameController.SpawnPoint;
 
-        //GameObject customButton = null;
-
         await NetManagerUtils.SetupGameVariables(fikaPlayer);
-        //customButton = CreateCancelButton(fikaPlayer, customButton);
 
         if (!GameController.IsServer && !FikaBackendUtils.IsReconnect)
         {
@@ -273,51 +270,12 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         _logger.LogInfo("Adding debug component...");
         GameController.CreateDebugComponent();
 
-        //Destroy(customButton);
-
         if (FikaBackendUtils.IsReconnect && !FikaBackendUtils.ReconnectPosition.Equals(Vector3.zero))
         {
             fikaPlayer.Teleport(FikaBackendUtils.ReconnectPosition);
         }
 
         return fikaPlayer;
-    }
-
-    /// <summary>
-    /// This creates a "custom" Back button so that we can back out if we get stuck
-    /// </summary>
-    /// <param name="myPlayer"></param>
-    /// <param name="customButton"></param>
-    /// <returns></returns>
-    private GameObject CreateCancelButton(LocalPlayer myPlayer, GameObject customButton)
-    {
-        if (myPlayer.Side is EPlayerSide.Savage)
-        {
-            return null;
-        }
-
-        if (MenuUI.Instantiated)
-        {
-            var menuUI = MenuUI.Instance;
-            var backButton = Traverse.Create(menuUI.MatchmakerTimeHasCome).Field<DefaultUIButton>("_cancelButton").Value;
-            customButton = Instantiate(backButton.gameObject, backButton.gameObject.transform.parent);
-            customButton.gameObject.name = "FikaBackButton";
-            customButton.gameObject.SetActive(true);
-            var backButtonComponent = customButton.GetComponent<DefaultUIButton>();
-            backButtonComponent.SetHeaderText("Cancel", 32);
-            backButtonComponent.SetEnabledTooltip("EXPERIMENTAL: Cancels the matchmaking and returns to the menu.");
-            UnityEngine.Events.UnityEvent newEvent = new();
-            newEvent.AddListener(() =>
-            {
-                var errorScreen = Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen("WARNING",
-                    message: "Backing out from this stage is currently experimental. It is recommended to ALT+F4 instead. Do you still want to continue?",
-                    ErrorScreen.EButtonType.OkButton, 15f);
-                errorScreen.OnAccept += StopFromCancel(myPlayer);
-            });
-            Traverse.Create(backButtonComponent).Field("OnClick").SetValue(newEvent);
-        }
-
-        return customButton;
     }
 
     private Action StopFromCancel(Player myPlayer)

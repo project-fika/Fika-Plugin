@@ -1090,4 +1090,12 @@ public class HostGameController : BaseGameController, IBotGame
     {
         return trap.TrapType is ETrapType.TrapDoor;
     }
+
+    internal void RemoveBot(FikaBot fikaBot)
+    {
+        if (_botStateManager != null)
+        {
+            _botStateManager.RemoveBot(fikaBot);
+        }
+    }
 }
