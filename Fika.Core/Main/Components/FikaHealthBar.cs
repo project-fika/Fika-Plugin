@@ -255,8 +255,6 @@ public sealed class FikaHealthBar : MonoBehaviour
         SetPlayerPlateFactionVisibility(FikaPlugin.Instance.Settings.UsePlateFactionSide.Value);
         SetPlayerPlateHealthVisibility(FikaPlugin.Instance.Settings.HideHealthBar.Value);
 
-        _playerPlate.gameObject.SetActive(FikaPlugin.Instance.Settings.UseNamePlates.Value);
-
         if (FikaPlugin.Instance.Settings.ShowEffects.Value)
         {
             _currentPlayer.HealthController.EffectAddedEvent += HealthController_EffectAddedEvent;
@@ -295,15 +293,23 @@ public sealed class FikaHealthBar : MonoBehaviour
         _bodyParts[EBodyPart.Common].SetActive(false);
 
         UpdateHealth();
+        ToggleNamePlate();
     }
 
+    private void ToggleNamePlate()
+    {
+        var useNamePlates = FikaPlugin.Instance.Settings.UseNamePlates.Value;
+        _playerPlate.gameObject.SetActive(useNamePlates);
+        enabled = useNamePlates;
+    }
+
+    #region events
     private void ShowBrokenLimbs_SettingChanged(object sender, EventArgs e)
     {
         _showLimbs = FikaPlugin.Instance.Settings.ShowBrokenLimbs.Value;
         RefreshLimbs(_showLimbs);
     }
 
-    #region events
     private void UseHealthNumber_SettingChanged(object sender, EventArgs e)
     {
         UpdateHealth();
@@ -396,7 +402,7 @@ public sealed class FikaHealthBar : MonoBehaviour
 
     private void UseNamePlates_SettingChanged(object sender, EventArgs e)
     {
-        _playerPlate.gameObject.SetActive(FikaPlugin.Instance.Settings.UseNamePlates.Value);
+        ToggleNamePlate();
     }
     #endregion
 
