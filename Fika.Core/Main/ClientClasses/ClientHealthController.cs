@@ -8,9 +8,10 @@ using Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
 namespace Fika.Core.Main.ClientClasses;
 
-public sealed class ClientHealthController(Profile.ProfileHealthClass healthInfo, Player player, InventoryController inventoryController, SkillManager skillManager, bool aiHealth)
-    : GClass3010(healthInfo, player, inventoryController, skillManager, aiHealth)
+public sealed class ClientHealthController(Profile.ProfileHealthClass healthInfo, Player player, InventoryController inventoryController, SkillManager skillManager, bool aiHealth) : GClass3010(healthInfo, player, inventoryController, skillManager, aiHealth)
 {
+    public bool ReviveEnabled { get; } = FikaPlugin.Instance.Settings.EnableReviveSystem.Value;
+
     private readonly FikaPlayer _fikaPlayer = (FikaPlayer)player;
 
     public override bool _sendNetworkSyncPackets
@@ -25,6 +26,12 @@ public sealed class ClientHealthController(Profile.ProfileHealthClass healthInfo
     {
         if (packet.SyncType == NetworkHealthSyncPacketStruct.ESyncType.IsAlive && !packet.Data.IsAlive.IsAlive)
         {
+            if (ReviveEnabled)
+            {
+                _fikaPlayer.ToggleDowned(true);
+                return;
+            }
+
             _fikaPlayer.SetupCorpseSyncPacket(packet);
             return;
         }

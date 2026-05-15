@@ -78,5 +78,10 @@ public enum ECommonSubPacketType : byte
     /// <summary>
     /// Usable item being used
     /// </summary>
-    UsableItem
+    UsableItem,
+
+    /// <summary>
+    /// Syncing downed state
+    /// </summary>
+    DownedSync
 }

@@ -167,6 +167,8 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
+    public bool Downed { get; internal set; }
+
     public float TurnOffFbbikAt;
 
     internal ObservedState CurrentPlayerState;

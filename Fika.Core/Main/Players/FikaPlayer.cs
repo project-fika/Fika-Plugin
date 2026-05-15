@@ -233,6 +233,37 @@ public class FikaPlayer : LocalPlayer
         _achievementsController.UnlockAchievementForced(tpl);
     }
 
+    public void ToggleDowned(bool downed)
+    {
+        if (!IsYourPlayer)
+        {
+            return;
+        }
+
+        if (downed)
+        {
+            ActiveHealthController.SetDamageCoeff(0f);
+            MovementContext.IsInPronePose = true;
+            HideWeapon();
+            ((SimpleCharacterController)CharacterController).IsMoveIgnored = true;
+            MovementContext.IsAxesIgnored = true;
+        }
+        else
+        {
+#if RELEASE || GOLDMASTER
+            ActiveHealthController.SetDamageCoeff(1f); 
+#endif
+            ActiveHealthController.IsAlive = true;
+            RevealWeapon();
+            ((SimpleCharacterController)CharacterController).IsMoveIgnored = false;
+            MovementContext.IsAxesIgnored = false;
+        }
+
+        CommonPacket.Type = ECommonSubPacketType.DownedSync;
+        CommonPacket.SubPacket = DownedSyncPacket.FromValue(downed);
+        PacketSender.NetworkManager.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
+    }
+
     public override void InitVoip(EVoipState voipState)
     {
         if (_voipHandler.VoipEnabled && voipState != EVoipState.NotAvailable)
