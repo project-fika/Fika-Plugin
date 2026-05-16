@@ -233,30 +233,41 @@ public class FikaPlayer : LocalPlayer
         _achievementsController.UnlockAchievementForced(tpl);
     }
 
-    public void ToggleDowned(bool downed)
+    public virtual void ToggleDowned(bool downed)
     {
         if (!IsYourPlayer)
         {
             return;
         }
 
+        var currentState = ((ClientHealthController)_healthController).Downed;
+        if (currentState != !downed)
+        {
+            FikaGlobals.LogWarning($"Trying to set downed to {downed} but it is already {currentState}");
+            return;
+        }
+
         if (downed)
         {
             ActiveHealthController.SetDamageCoeff(0f);
+            ActiveHealthController.PauseAllEffects();
             MovementContext.IsInPronePose = true;
             HideWeapon();
             ((SimpleCharacterController)CharacterController).IsMoveIgnored = true;
             MovementContext.IsAxesIgnored = true;
+            ((ClientHealthController)_healthController).Downed = true;
         }
         else
         {
 #if RELEASE || GOLDMASTER
             ActiveHealthController.SetDamageCoeff(1f); 
 #endif
+            ActiveHealthController.UnpauseAllEffects();
             ActiveHealthController.IsAlive = true;
             RevealWeapon();
             ((SimpleCharacterController)CharacterController).IsMoveIgnored = false;
             MovementContext.IsAxesIgnored = false;
+            ((ClientHealthController)_healthController).Downed = false;
         }
 
         CommonPacket.Type = ECommonSubPacketType.DownedSync;

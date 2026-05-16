@@ -190,6 +190,7 @@ public sealed class ObservedPlayer : FikaPlayer
     private bool _isServer;
     private VoiceBroadcastTrigger _voiceBroadcastTrigger;
     private SoundSettingsControllerClass _soundSettings;
+    private ReviveInteractable _reviveInteractable;
     private bool _voipAssigned;
     private int _frameSkip;
     private bool _isZombie;
@@ -1282,7 +1283,44 @@ public sealed class ObservedPlayer : FikaPlayer
         // Do nothing
     }
 
-    public void CreateObservedCompass()
+    public override void ToggleDowned(bool downed)
+    {
+#if DEBUG
+        FikaGlobals.LogInfo($"Setting {Profile.GetCorrectedNickname()} downed to {downed}");
+#endif
+        Downed = Downed;
+        NetworkHealthController.IsAlive = !Downed;
+        if (downed)
+        {
+            if (_reviveInteractable != null)
+            {
+                FikaGlobals.LogWarning($"ReviveInteractable was not null on {Profile.GetCorrectedNickname()}");
+                ClearReviveInteractable();
+            }
+
+            _reviveInteractable = ReviveInteractable.Create(this);
+            return;
+        }
+
+        if (_reviveInteractable == null)
+        {
+            return;
+        }
+
+        ClearReviveInteractable();
+    }
+
+    internal void ClearReviveInteractable()
+    {
+        var interactable = _reviveInteractable;
+        if (interactable != null)
+        {
+            Destroy(interactable);
+        }
+        _reviveInteractable = null;
+    }
+
+    internal void CreateObservedCompass()
     {
         const string bundlePath = "assets/content/weapons/additional_hands/item_compass.bundle";
         if (!_compassLoaded)
@@ -1704,12 +1742,9 @@ public sealed class ObservedPlayer : FikaPlayer
         }
         _observedSlotViewHandlers.Clear();
         _observedCorpseCulling?.Dispose();
-        if (HealthController.IsAlive)
+        if (HealthController.IsAlive && !Singleton<IFikaNetworkManager>.Instance.ObservedPlayers.Remove(this) && !Profile.Nickname.StartsWith("headless_"))
         {
-            if (!Singleton<IFikaNetworkManager>.Instance.ObservedPlayers.Remove(this) && !Profile.Nickname.StartsWith("headless_"))
-            {
-                FikaGlobals.LogWarning($"Failed to remove {ProfileId}, {Profile.Nickname} from observed list");
-            }
+            FikaGlobals.LogWarning($"Failed to remove {ProfileId}, {Profile.Nickname} from observed list");
         }
         base.OnDestroy();
     }

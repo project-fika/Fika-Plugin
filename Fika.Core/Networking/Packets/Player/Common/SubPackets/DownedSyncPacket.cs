@@ -26,8 +26,7 @@ public sealed class DownedSyncPacket : IPoolSubPacket
     {
         if (player is ObservedPlayer observedPlayer)
         {
-            observedPlayer.Downed = Downed;
-            observedPlayer.NetworkHealthController.IsAlive = !Downed;
+            observedPlayer.ToggleDowned(Downed);
             return;
         }
 

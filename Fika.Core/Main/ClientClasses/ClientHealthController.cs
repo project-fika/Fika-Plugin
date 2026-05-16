@@ -11,6 +11,7 @@ namespace Fika.Core.Main.ClientClasses;
 public sealed class ClientHealthController(Profile.ProfileHealthClass healthInfo, Player player, InventoryController inventoryController, SkillManager skillManager, bool aiHealth) : GClass3010(healthInfo, player, inventoryController, skillManager, aiHealth)
 {
     public bool ReviveEnabled { get; } = FikaPlugin.Instance.Settings.EnableReviveSystem.Value;
+    public bool Downed { get; internal set; }
 
     private readonly FikaPlayer _fikaPlayer = (FikaPlayer)player;
 
@@ -28,6 +29,13 @@ public sealed class ClientHealthController(Profile.ProfileHealthClass healthInfo
         {
             if (ReviveEnabled)
             {
+                if (Downed)
+                {
+                    return;
+                }
+
+                RestoreBodyPartNoEvents(EBodyPart.Head); // prevent blacked out head
+
                 _fikaPlayer.ToggleDowned(true);
                 return;
             }
@@ -44,5 +52,18 @@ public sealed class ClientHealthController(Profile.ProfileHealthClass healthInfo
         _fikaPlayer.CommonPacket.Type = ECommonSubPacketType.HealthSync;
         _fikaPlayer.CommonPacket.SubPacket = HealthSyncPacket.FromValue(packet);
         _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _fikaPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
+    }
+
+    private void RestoreBodyPartNoEvents(EBodyPart bodyPart)
+    {
+        var limb = Dictionary_0[bodyPart];
+        if (limb.IsDestroyed)
+        {
+            limb.IsDestroyed = false;
+            limb.Health.Current = 1f;
+
+            method_44(bodyPart, EDamageType.Medicine);
+            method_36(bodyPart);
+        }
     }
 }
