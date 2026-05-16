@@ -256,18 +256,30 @@ public class FikaPlayer : LocalPlayer
             ((SimpleCharacterController)CharacterController).IsMoveIgnored = true;
             MovementContext.IsAxesIgnored = true;
             ((ClientHealthController)_healthController).Downed = true;
+
+            var deathEffect = CameraClass.Instance.Camera.GetComponent<DeathFade>();
+            if (deathEffect != null)
+            {
+                deathEffect.enabled = true;
+                deathEffect.EnableEffect();
+            }
         }
         else
         {
-#if RELEASE || GOLDMASTER
-            ActiveHealthController.SetDamageCoeff(1f); 
-#endif
+            ActiveHealthController.SetDamageCoeff(1f);
             ActiveHealthController.UnpauseAllEffects();
             ActiveHealthController.IsAlive = true;
             RevealWeapon();
             ((SimpleCharacterController)CharacterController).IsMoveIgnored = false;
             MovementContext.IsAxesIgnored = false;
-            ((ClientHealthController)_healthController).Downed = false;
+            ((ClientHealthController)_healthController).Revive();
+
+            var deathEffect = CameraClass.Instance.Camera.GetComponent<DeathFade>();
+            if (deathEffect != null)
+            {
+                deathEffect.enabled = true;
+                deathEffect.DisableEffect();
+            }
         }
 
         CommonPacket.Type = ECommonSubPacketType.DownedSync;

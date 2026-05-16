@@ -11,33 +11,53 @@ namespace Fika.Core.Main.Components;
 internal sealed class ReviveInteractable : InteractableObject
 {
     private ObservedPlayer _observedPlayer;
-    private Action _revivePlayerDelegate;
+    private Action _startReviveDelegate;
+    private Action<bool> _revivePlayerDelegate;
+    private GamePlayerOwner _owner;
     private FikaPlayer _localPlayer;
 
     public static ReviveInteractable Create(ObservedPlayer observedPlayer)
     {
         var component = observedPlayer.gameObject.AddComponent<ReviveInteractable>();
         component._observedPlayer = observedPlayer;
+        component._startReviveDelegate = component.StartRevive;
         component._revivePlayerDelegate = component.RevivePlayer;
         return component;
     }
 
     public ActionsReturnClass GetActions(GamePlayerOwner owner)
     {
+        _owner = owner;
         _localPlayer = owner.Player as FikaPlayer;
 
         var actions = new ActionsReturnClass();
         actions.Actions.Add(new ActionsTypesClass
         {
-            Action = _revivePlayerDelegate,
-            Name = LocaleUtils.UI_REVIVE_PLAYER.Localized()
+            Action = _startReviveDelegate,
+            Name = string.Format(LocaleUtils.UI_REVIVE_PLAYER.Localized(), _observedPlayer.Profile.GetCorrectedNickname())
         });
 
         return actions;
     }
 
-    public void RevivePlayer()
+    public void StartRevive()
     {
+        if (_localPlayer.CurrentState is IdleStateClass)
+        {
+            const float reviveTime = 5f;
+            _owner.ShowObjectivesPanel(LocaleUtils.UI_REVIVING_PLAYER.Localized(), reviveTime);
+            _localPlayer.CurrentManagedState.Plant(true, false, reviveTime, _revivePlayerDelegate);
+        }
+    }
+
+    public void RevivePlayer(bool success)
+    {
+        _owner.CloseObjectivesPanel();
+        if (!success)
+        {
+            return;
+        }
+
         if (_localPlayer != null)
         {
             if (_observedPlayer != null)

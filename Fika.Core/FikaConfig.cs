@@ -5,6 +5,8 @@ using Comfort.Common;
 using EFT.UI;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Http;
+using Fika.Core.Networking.Models;
+
 
 #if GOLDMASTER
 using Fika.Core.UI; 
@@ -128,6 +130,7 @@ public sealed class FikaConfig(ConfigFile config)
     public bool AllowSpectateBots { get; set; }
     public bool InstantLoad { get; set; }
     public bool FastLoad { get; set; }
+    public ClientReviveConfig ReviveConfig { get; set; }
     #endregion
 
     private ConfigEntry<T> SetupSetting<T>(string section, string key, T defValue, ConfigDescription configDescription, string fallback, ref bool failed, List<string> error)
@@ -889,6 +892,7 @@ public sealed class FikaConfig(ConfigFile config)
         AllowSpectateBots = clientConfig.AllowSpectateBots;
         InstantLoad = clientConfig.InstantLoad;
         FastLoad = clientConfig.FastLoad && !InstantLoad; // can only use one, prioritize InstantLoad
+        ReviveConfig = clientConfig.ReviveConfig;
 
         clientConfig.LogValues();
     }

@@ -151,6 +151,7 @@ public static class LocaleUtils
     public const string UI_ERROR_RAID_INIT = "F_UI_ErrorRaidInit";
     public const string UI_HEADLESS_CONNECTED = "F_UI_HeadlessConnected";
     public const string UI_REVIVE_PLAYER = "F_UI_RevivePlayer";
+    public const string UI_REVIVING_PLAYER = "F_UI_RevivingPlayer";
 
     // Main Menu UI
     public const string UI_MMUI_ONLINE_PLAYERS = "F_MMUI_OnlinePlayers";
