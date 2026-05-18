@@ -37,7 +37,7 @@ public static class FikaUIGlobals
     /// </summary>
     /// <param name="overlayText">The text to display in the overlay.</param>
     /// <returns>The created <see cref="TextMeshProUGUI"/> component.</returns>
-    public static TextMeshProUGUI CreateOverlayText(string overlayText)
+    public static TextMeshProUGUI CreateOverlayText(string overlayText, Vector4 margin = default)
     {
         var obj = GameObject.Find("/Preloader UI/Preloader UI/Watermark");
         var labelObj = GameObject.Find("/Preloader UI/Preloader UI/Watermark/Label");
@@ -57,7 +57,7 @@ public static class FikaUIGlobals
         var text = obj.AddComponent<TextMeshProUGUI>();
         text.horizontalAlignment = HorizontalAlignmentOptions.Center;
         text.verticalAlignment = VerticalAlignmentOptions.Bottom;
-        text.margin = new Vector4(0, 0, 0, -350);
+        text.margin = margin == default ? new Vector4(0f, 0f, 0f, -350f) : margin;
         text.SetText(overlayText);
 
         return text;

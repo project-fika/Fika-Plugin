@@ -2,6 +2,8 @@
 using EFT.UI;
 using Fika.Core.Main.ClientClasses;
 using Fika.Core.Main.Utils;
+using Fika.Core.UI;
+using TMPro;
 
 namespace Fika.Core.Main.Components;
 
@@ -17,7 +19,7 @@ internal sealed class Bleedout : MonoBehaviour
 
     private float _giveUpTimer;
     private bool _givingUp;
-
+    private TextMeshProUGUI _giveUpText;
 
     private const float _giveUpTime = 3f;
 
@@ -26,6 +28,16 @@ internal sealed class Bleedout : MonoBehaviour
         _healthController = healthController;
         _bleedoutTime = healthController.BleedoutTime + 0.25f; // bad safety against delays
         _shouldBleed = healthController.ShouldBleedOut;
+        _giveUpText = FikaUIGlobals.CreateOverlayText(string.Format(LocaleUtils.UI_REVIVING_GIVE_UP.Localized(), $"'{GiveUpKey.MainKey}'"),
+            new Vector4(0f, 0f, 0f, -400f));
+    }
+
+    private void OnDestroy()
+    {
+        if (_giveUpText != null)
+        {
+            Destroy(_giveUpText);
+        }
     }
 
     private void Update()
