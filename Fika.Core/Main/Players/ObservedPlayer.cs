@@ -1296,6 +1296,7 @@ public sealed class ObservedPlayer : FikaPlayer
         {
             _healthBar.ToggleDowned(downed);
         }
+
         if (downed)
         {
             if (_reviveInteractable != null)
@@ -1310,9 +1311,13 @@ public sealed class ObservedPlayer : FikaPlayer
 
         if (_reviveInteractable == null)
         {
+#if DEBUG
+            FikaGlobals.LogWarning("ReviveInteractable was null");
+#endif
             return;
         }
 
+        _reviveInteractable.RemoveRagdoll();
         ClearReviveInteractable();
     }
 

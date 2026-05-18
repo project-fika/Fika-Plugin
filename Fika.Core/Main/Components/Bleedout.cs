@@ -6,10 +6,17 @@ namespace Fika.Core.Main.Components;
 
 internal sealed class Bleedout : MonoBehaviour
 {
+    private static GameUI GameUI => MonoBehaviourSingleton<GameUI>.Instance;
+
     private ClientHealthController _healthController;
     private float _bleedoutTime;
     private float _counter;
     private bool _shouldBleed;
+
+    private float _giveUpTimer;
+    private bool _givingUp;
+
+    private const float _giveUpTime = 3f;
 
     internal void Init(ClientHealthController healthController)
     {
@@ -25,23 +32,61 @@ internal sealed class Bleedout : MonoBehaviour
             return;
         }
 
-        _counter += Time.unscaledDeltaTime;
+        var unscaledDeltaTime = Time.unscaledDeltaTime;
+        _counter += unscaledDeltaTime;
+        CheckForKeys();
+
+        if (_givingUp)
+        {
+            _giveUpTimer += unscaledDeltaTime;
+            if (_giveUpTimer >= 3f)
+            {
+                BleedOut();
+                return;
+            }
+        }
+
         if (_counter >= _bleedoutTime)
         {
-            if (_healthController != null)
-            {
-                _healthController.BleedOut();
-            }
-            Destroy(this);
+            BleedOut();
+        }
+    }
+
+    private void BleedOut()
+    {
+        if (_healthController != null)
+        {
+            _healthController.BleedOut();
+        }
+        Destroy(this);
+    }
+
+    private void CheckForKeys()
+    {
+        if (Input.GetKeyDown(KeyCode.End))
+        {
+            _givingUp = true;
+            _giveUpTimer = 0f;
+            GameUI.BattleUiPanelExtraction.Show(LocaleUtils.UI_REVIVING_GIVING_UP.Localized(),
+            _giveUpTime);
+        }
+
+        if (Input.GetKeyUp(KeyCode.End))
+        {
+            _givingUp = false;
+            _giveUpTimer = 0f;
+            HideUI();
+            ShowUI();
         }
     }
 
     public void ShowRevive(string nickname)
     {
         _shouldBleed = false;
+        _givingUp = false;
+        _giveUpTimer = 0f;
 
-        var gameUi = MonoBehaviourSingleton<GameUI>.Instance;
-        gameUi.BattleUiPanelExtraction.Show(string.Format(LocaleUtils.UI_REVIVING_BEING_REVIVED_BY.Localized(), nickname)); 
+        GameUI.BattleUiPanelExtraction.Show(string.Format(LocaleUtils.UI_REVIVING_BEING_REVIVED_BY.Localized(), nickname));
     }
 
     public void HideRevive()
@@ -57,14 +102,12 @@ internal sealed class Bleedout : MonoBehaviour
             return;
         }
 
-        var gameUi = MonoBehaviourSingleton<GameUI>.Instance;
-        gameUi.BattleUiPanelExtraction.Show(LocaleUtils.UI_REVIVING_BLEEDING_OUT.Localized(),
+        GameUI.BattleUiPanelExtraction.Show(LocaleUtils.UI_REVIVING_BLEEDING_OUT.Localized(),
             _healthController.BleedoutTime - _counter);
     }
 
     public void HideUI()
     {
-        var gameUi = MonoBehaviourSingleton<GameUI>.Instance;
-        gameUi.BattleUiPanelExtraction.Close();
+        GameUI.BattleUiPanelExtraction.Close();
     }
 }
