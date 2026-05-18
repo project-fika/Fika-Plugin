@@ -368,7 +368,7 @@ public class FreeCameraController : MonoBehaviour
         if (FikaPlugin.Instance.Settings.ShowExtractMessage.Value)
         {
             var text = FikaPlugin.Instance.Settings.ExtractKey.Value.MainKey.ToString();
-            if (FikaPlugin.Instance.Settings.ExtractKey.Value.Modifiers.Count() > 0)
+            if (FikaPlugin.Instance.Settings.ExtractKey.Value.Modifiers.Any())
             {
                 var modifiers = string.Join(" + ", FikaPlugin.Instance.Settings.ExtractKey.Value.Modifiers);
                 text = modifiers + " + " + text;
