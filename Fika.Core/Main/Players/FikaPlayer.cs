@@ -16,6 +16,7 @@ using EFT.SynchronizableObjects;
 using EFT.Vehicle;
 using Fika.Core.Main.ClientClasses;
 using Fika.Core.Main.ClientClasses.HandsControllers;
+using Fika.Core.Main.Components;
 using Fika.Core.Main.GameMode;
 using Fika.Core.Main.HostClasses;
 using Fika.Core.Main.PacketHandlers;
@@ -80,10 +81,13 @@ public class FikaPlayer : LocalPlayer
     protected MongoID? _lastWeaponId;
     protected Action[] _armorUnsubcribes = new Action[Inventory.ArmorSlots.Length];
 
+    internal DamageInfoStruct LatestDamageInfo => LastDamageInfo;
+
     private bool _hasSkilledScav;
     private bool _shouldSendSideEffect;
     private VoipSettingsClass _voipHandler;
     private FikaVOIPController _voipController;
+    private Bleedout _bleedout;
     #endregion
 
     /// <summary>
@@ -255,13 +259,28 @@ public class FikaPlayer : LocalPlayer
             HideWeapon();
             ((SimpleCharacterController)CharacterController).IsMoveIgnored = true;
             MovementContext.IsAxesIgnored = true;
-            ((ClientHealthController)_healthController).Downed = true;
+            var clientHealthController = _healthController as ClientHealthController;
+            clientHealthController.Downed = true;
+            if (_bleedout != null)
+            {
+                Destroy(_bleedout);
+            }
+            _bleedout = gameObject.AddComponent<Bleedout>();
+            _bleedout.Init(clientHealthController);
+            _bleedout.ShowUI();
 
-            var deathEffect = CameraClass.Instance.Camera.GetComponent<DeathFade>();
+            var camera = CameraClass.Instance.Camera;
+            var deathEffect = camera.GetComponent<DeathFade>();
             if (deathEffect != null)
             {
                 deathEffect.enabled = true;
                 deathEffect.EnableEffect();
+            }
+            var fastBlur = camera.GetComponent<FastBlur>();
+            if (fastBlur != null)
+            {
+                fastBlur.enabled = true;
+                fastBlur.Die();
             }
         }
         else
@@ -272,19 +291,53 @@ public class FikaPlayer : LocalPlayer
             RevealWeapon();
             ((SimpleCharacterController)CharacterController).IsMoveIgnored = false;
             MovementContext.IsAxesIgnored = false;
-            ((ClientHealthController)_healthController).Revive();
+            var clientHealthController = _healthController as ClientHealthController;
+            clientHealthController.Revive();
+            if (_bleedout != null)
+            {
+                _bleedout.HideUI();
+                Destroy(_bleedout);
+            }
 
-            var deathEffect = CameraClass.Instance.Camera.GetComponent<DeathFade>();
+            var camera = CameraClass.Instance.Camera;
+            var deathEffect = camera.GetComponent<DeathFade>();
             if (deathEffect != null)
             {
                 deathEffect.enabled = true;
                 deathEffect.DisableEffect();
+            }
+            var fastBlur = camera.GetComponent<FastBlur>();
+            if (fastBlur != null)
+            {
+                fastBlur.Reset();
+                fastBlur.enabled = false;
             }
         }
 
         CommonPacket.Type = ECommonSubPacketType.DownedSync;
         CommonPacket.SubPacket = DownedSyncPacket.FromValue(downed);
         PacketSender.NetworkManager.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
+    }
+
+    public virtual void ToggleRevive(bool reviving, string nickname)
+    {
+#if DEBUG
+        FikaGlobals.LogInfo($"Being revived by {nickname}");
+#endif
+        if (_bleedout == null)
+        {
+            FikaGlobals.LogError("Bleedout component was null when attempting to set revive notification");
+            return;
+        }
+
+        if (reviving)
+        {
+            _bleedout.ShowRevive(nickname);
+            return;
+        }
+
+        _bleedout.HideRevive();
+        _bleedout.ShowUI();
     }
 
     public override void InitVoip(EVoipState voipState)

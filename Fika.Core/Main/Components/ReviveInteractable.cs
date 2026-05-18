@@ -47,14 +47,24 @@ internal sealed class ReviveInteractable : InteractableObject
             const float reviveTime = 5f;
             _owner.ShowObjectivesPanel(LocaleUtils.UI_REVIVING_PLAYER.Localized(), reviveTime);
             _localPlayer.CurrentManagedState.Plant(true, false, reviveTime, _revivePlayerDelegate);
+            var nickname = _localPlayer.Profile.GetCorrectedNickname();
+            _observedPlayer.ToggleRevive(true, nickname);
+
+            _observedPlayer.CommonPacket.Type = ECommonSubPacketType.RevivingPlayer;
+            _observedPlayer.CommonPacket.SubPacket = RevivingPlayerPacket.FromValue(true, nickname);
+            _observedPlayer.PacketSender.NetworkManager.SendNetReusable(ref _observedPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
         }
     }
 
     public void RevivePlayer(bool success)
     {
         _owner.CloseObjectivesPanel();
+        _observedPlayer.ToggleRevive(false, string.Empty);
         if (!success)
         {
+            _observedPlayer.CommonPacket.Type = ECommonSubPacketType.RevivingPlayer;
+            _observedPlayer.CommonPacket.SubPacket = RevivingPlayerPacket.FromValue(false, string.Empty);
+            _observedPlayer.PacketSender.NetworkManager.SendNetReusable(ref _observedPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
             return;
         }
 
@@ -62,8 +72,8 @@ internal sealed class ReviveInteractable : InteractableObject
         {
             if (_observedPlayer != null)
             {
-                _observedPlayer.CommonPacket.Type = ECommonSubPacketType.RevivePlayer;
-                _observedPlayer.CommonPacket.SubPacket = RevivePlayerPacket.FromValue();
+                _observedPlayer.CommonPacket.Type = ECommonSubPacketType.RevivedPlayer;
+                _observedPlayer.CommonPacket.SubPacket = RevivedPlayerPacket.FromValue();
                 _observedPlayer.PacketSender.NetworkManager.SendNetReusable(ref _observedPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
 
 #if DEBUG

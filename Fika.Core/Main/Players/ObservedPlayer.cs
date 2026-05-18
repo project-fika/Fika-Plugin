@@ -1134,6 +1134,8 @@ public sealed class ObservedPlayer : FikaPlayer
 
     public override void OnDead(EDamageType damageType)
     {
+        ClearReviveInteractable();
+
         if (HealthBar != null)
         {
             Destroy(HealthBar);
@@ -1288,8 +1290,12 @@ public sealed class ObservedPlayer : FikaPlayer
 #if DEBUG
         FikaGlobals.LogInfo($"Setting {Profile.GetCorrectedNickname()} downed to {downed}");
 #endif
-        Downed = Downed;
+        Downed = downed;
         NetworkHealthController.IsAlive = !Downed;
+        if (_healthBar != null)
+        {
+            _healthBar.ToggleDowned(downed);
+        }
         if (downed)
         {
             if (_reviveInteractable != null)
@@ -1308,6 +1314,17 @@ public sealed class ObservedPlayer : FikaPlayer
         }
 
         ClearReviveInteractable();
+    }
+
+    public override void ToggleRevive(bool reviving, string nickname)
+    {
+#if DEBUG
+        FikaGlobals.LogInfo($"{Profile.GetCorrectedNickname()} is being revived by {nickname}");
+#endif
+        if (_healthBar != null)
+        {
+            _healthBar.ToggleRevive(reviving, nickname);
+        }
     }
 
     internal void ClearReviveInteractable()
@@ -1715,6 +1732,7 @@ public sealed class ObservedPlayer : FikaPlayer
 
     public override void OnDestroy()
     {
+        ClearReviveInteractable();
         if (_followerCullingObject != null)
         {
             _followerCullingObject.enabled = false;

@@ -86,7 +86,12 @@ public enum ECommonSubPacketType : byte
     DownedSync,
 
     /// <summary>
-    /// Reviving another player
+    /// A player was revived
     /// </summary>
-    RevivePlayer
+    RevivedPlayer,
+
+    /// <summary>
+    /// A player is being revived or revive was cancelled
+    /// </summary>
+    RevivingPlayer
 }

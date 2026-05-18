@@ -33,7 +33,8 @@ internal sealed class CommonSubPacketPoolManager : BasePacketPoolManager<ECommon
             HealthSyncPacket.CreateInstance,          // ECommonSubPacketType.HealthSync = 13
             UsableItemPacket.CreateInstance,          // ECommonSubPacketType.UsableItem = 14
             DownedSyncPacket.CreateInstance,          // ECommonSubPacketType.DownedSync = 15
-            RevivePlayerPacket.CreateInstance         // ECommonSubPacketType.RevivePlayer = 16
+            RevivedPlayerPacket.CreateInstance,       // ECommonSubPacketType.RevivePlayer = 16
+            RevivingPlayerPacket.CreateInstance       // ECommonSubPacketType.RevivingPlayer = 17
         ];
     }
 }

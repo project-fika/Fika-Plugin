@@ -2,7 +2,9 @@
 
 using EFT;
 using EFT.InventoryLogic;
+using EFT.UI;
 using Fika.Core.Main.Players;
+using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Packets.Player.Common;
 using Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
@@ -11,18 +13,21 @@ namespace Fika.Core.Main.ClientClasses;
 public sealed class ClientHealthController(Profile.ProfileHealthClass healthInfo, Player player, InventoryController inventoryController, SkillManager skillManager, bool aiHealth) : GClass3010(healthInfo, player, inventoryController, skillManager, aiHealth)
 {
     public bool ReviveEnabled { get; } = FikaPlugin.Instance.Settings.ReviveConfig.Enabled;
-    public bool Downed { get; internal set; }
+    public bool Downed { get; internal set; }    
     public bool CanBeDowned
     {
         get
         {
-            return _maxRevives > 0 && _revives < _maxRevives;
+            return !_bledOut && _maxRevives > 0 && _revives < _maxRevives;
         }
     }
+    public float BleedoutTime { get; } = FikaPlugin.Instance.Settings.ReviveConfig.BleedoutTime;
+    public bool ShouldBleedOut => BleedoutTime > 0f;
 
     private readonly int _maxRevives = FikaPlugin.Instance.Settings.ReviveConfig.MaxRevives;
     private readonly bool _headshotKills = FikaPlugin.Instance.Settings.ReviveConfig.HeadshotKills;
     private int _revives;
+    private bool _bledOut;
 
     private readonly FikaPlayer _fikaPlayer = (FikaPlayer)player;
 
@@ -59,11 +64,29 @@ public sealed class ClientHealthController(Profile.ProfileHealthClass healthInfo
     {
         _revives++;
         Downed = false;
+
+        if (ShouldBleedOut)
+        {
+            var gameUi = MonoBehaviourSingleton<GameUI>.Instance;
+            gameUi.BattleUiPanelExtraction.Close();
+        }
+    }
+
+    public void BleedOut()
+    {
+        _bledOut = true;
+        IsAlive = true; // need to be alive to trigger Kill() again
+        Kill(_fikaPlayer.LatestDamageInfo.DamageType);
     }
 
     private bool TryProcessDownedState()
     {
         if (!ReviveEnabled)
+        {
+            return false;
+        }
+
+        if (_bledOut)
         {
             return false;
         }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using EFT;
 
 namespace Fika.Core.Main.Utils;
@@ -152,6 +153,10 @@ public static class LocaleUtils
     public const string UI_HEADLESS_CONNECTED = "F_UI_HeadlessConnected";
     public const string UI_REVIVE_PLAYER = "F_UI_RevivePlayer";
     public const string UI_REVIVING_PLAYER = "F_UI_RevivingPlayer";
+    public const string UI_REVIVING_DOWNED = "F_UI_Downed";
+    public const string UI_REVIVING_BEING_REVIVED = "F_UI_BeingRevived";
+    public const string UI_REVIVING_BEING_REVIVED_BY = "F_UI_BeingRevivedBy";
+    public const string UI_REVIVING_BLEEDING_OUT = "F_UI_BleedingOut";
 
     // Main Menu UI
     public const string UI_MMUI_ONLINE_PLAYERS = "F_MMUI_OnlinePlayers";

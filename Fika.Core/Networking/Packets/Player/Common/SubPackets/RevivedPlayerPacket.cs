@@ -4,18 +4,18 @@ using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
-public sealed class RevivePlayerPacket : IPoolSubPacket
+public sealed class RevivedPlayerPacket : IPoolSubPacket
 {
-    private RevivePlayerPacket() { }
+    private RevivedPlayerPacket() { }
 
-    public static RevivePlayerPacket CreateInstance()
+    public static RevivedPlayerPacket CreateInstance()
     {
         return new();
     }
 
-    public static RevivePlayerPacket FromValue()
+    public static RevivedPlayerPacket FromValue()
     {
-        return CommonSubPacketPoolManager.Instance.GetPacket<RevivePlayerPacket>(ECommonSubPacketType.RevivePlayer);
+        return CommonSubPacketPoolManager.Instance.GetPacket<RevivedPlayerPacket>(ECommonSubPacketType.RevivedPlayer);
     }
 
     public void Execute(FikaPlayer player = null)

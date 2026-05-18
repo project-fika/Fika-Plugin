@@ -15,6 +15,9 @@ public class PlayerPlateUI : MonoBehaviour
     public Image healthBarScreen;
     public Image healthNumberBackgroundScreen;
     public TextMeshProUGUI healthNumberScreen;
+    public Image downedStateBackgroundScreen;
+    public TextMeshProUGUI downedStateScreen;
+    public TextMeshProUGUI downedStateTimerScreen;
     public Image usecPlateScreen;
     public Image bearPlateScreen;
     public GameObject EffectsBackground;

@@ -110,6 +110,9 @@ public struct ClientReviveConfig
     [DataMember(Name = "maxRevives")]
     public int MaxRevives { get; set; }
 
+    [DataMember(Name = "bleedoutTime")]
+    public float BleedoutTime { get; set; }
+
     public readonly void LogValues()
     {
         foreach (var property in typeof(ClientReviveConfig).GetProperties())
