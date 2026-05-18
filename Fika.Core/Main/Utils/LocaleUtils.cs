@@ -278,6 +278,9 @@ public static class LocaleUtils
     public const string BEPINEX_PING_SOUND_T = "F_BepInEx_PingSound_T";
     public const string BEPINEX_PING_SOUND_D = "F_BepInEx_PingSound_D";
 
+    public const string BEPINEX_REVIVE_GIVE_UP_KEY_T = "F_BepInEx_GiveUpKey_T";
+    public const string BEPINEX_REVIVE_GIVE_UP_KEY_D = "F_BepInEx_GiveUpKey_D";
+
     public const string BEPINEX_FREE_CAM_BUTTON_T = "F_BepInEx_FreeCamButton_T";
     public const string BEPINEX_FREE_CAM_BUTTON_D = "F_BepInEx_FreeCamButton_D";
     public const string BEPINEX_SPECTATE_BOTS_T = "F_BepInEx_SpectateBots_T";

@@ -87,7 +87,7 @@ public sealed class FikaConfig(ConfigFile config)
     public ConfigEntry<EPingSound> PingSound { get; set; }
 
     // Coop | Revival
-    public ConfigEntry<bool> EnableReviveSystem { get; set; }
+    public ConfigEntry<KeyboardShortcut> GiveUpKey { get; set; }
 
     // Coop | Debug
     public ConfigEntry<KeyboardShortcut> FreeCamButton { get; set; }
@@ -673,14 +673,14 @@ public sealed class FikaConfig(ConfigFile config)
 
         const string coopDefaultRevivalHeader = "Coop | Revival";
 
-        EnableReviveSystem = SetupSetting(coopDefaultRevivalHeader, "Enable Revival System", true,
-            new ConfigDescription("Enable revival system", tags: new ConfigurationManagerAttributes
+        GiveUpKey = SetupSetting(coopDefaultRevivalHeader, "Give Up Key", new KeyboardShortcut(KeyCode.End),
+            new ConfigDescription(CleanConfigString(LocaleUtils.BEPINEX_REVIVE_GIVE_UP_KEY_D.Localized()), tags: new ConfigurationManagerAttributes
             {
                 Category = coopDefaultRevivalHeader,
-                DispName = "Enable Revival System",
+                DispName = LocaleUtils.BEPINEX_REVIVE_GIVE_UP_KEY_T.Localized(),
                 Order = 0
             }),
-            "Enable Revival System", ref failed, headers);
+            "Give Up Key", ref failed, headers);
 
         // Coop | Debug
 

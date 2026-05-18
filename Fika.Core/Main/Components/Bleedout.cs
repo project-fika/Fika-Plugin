@@ -1,4 +1,5 @@
-﻿using EFT.UI;
+﻿using BepInEx.Configuration;
+using EFT.UI;
 using Fika.Core.Main.ClientClasses;
 using Fika.Core.Main.Utils;
 
@@ -6,7 +7,8 @@ namespace Fika.Core.Main.Components;
 
 internal sealed class Bleedout : MonoBehaviour
 {
-    private static GameUI GameUI => MonoBehaviourSingleton<GameUI>.Instance;
+    private GameUI GameUI => MonoBehaviourSingleton<GameUI>.Instance;
+    private KeyboardShortcut GiveUpKey => FikaPlugin.Instance.Settings.GiveUpKey.Value;
 
     private ClientHealthController _healthController;
     private float _bleedoutTime;
@@ -15,6 +17,7 @@ internal sealed class Bleedout : MonoBehaviour
 
     private float _giveUpTimer;
     private bool _givingUp;
+
 
     private const float _giveUpTime = 3f;
 
@@ -63,7 +66,7 @@ internal sealed class Bleedout : MonoBehaviour
 
     private void CheckForKeys()
     {
-        if (Input.GetKeyDown(KeyCode.End))
+        if (Input.GetKeyDown(GiveUpKey.MainKey))
         {
             _givingUp = true;
             _giveUpTimer = 0f;
@@ -71,7 +74,7 @@ internal sealed class Bleedout : MonoBehaviour
             _giveUpTime);
         }
 
-        if (Input.GetKeyUp(KeyCode.End))
+        if (Input.GetKeyUp(GiveUpKey.MainKey))
         {
             _givingUp = false;
             _giveUpTimer = 0f;
