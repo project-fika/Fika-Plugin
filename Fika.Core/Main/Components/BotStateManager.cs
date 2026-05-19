@@ -57,7 +57,7 @@ public sealed class BotStateManager : MonoBehaviour
     {
         var component = game.gameObject.AddComponent<BotStateManager>();
         component._controller = hostGameController;
-        component._updateCount = 0;
+        component._updateCount = 0f;
         component._updatesPerTick = 1f / server.SendRate;
         component._bots = [];
         component._server = server;
