@@ -92,6 +92,7 @@ public struct ClientConfigModel
             if (value is ClientReviveConfig reviveConfig)
             {
                 reviveConfig.LogValues();
+                continue;
             }
 
             FikaGlobals.LogInfo($"[Config] {property.Name}: {value}");
@@ -107,11 +108,17 @@ public struct ClientReviveConfig
     [DataMember(Name = "headshotKills")]
     public bool HeadshotKills { get; set; }
 
+    [DataMember(Name = "grenadesKills")]
+    public bool GrenadesKills { get; set; }
+
     [DataMember(Name = "maxRevives")]
     public int MaxRevives { get; set; }
 
     [DataMember(Name = "bleedoutTime")]
     public float BleedoutTime { get; set; }
+
+    [DataMember(Name = "reviveTime")]
+    public float ReviveTime { get; set; }
 
     public readonly void LogValues()
     {

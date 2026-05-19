@@ -4,7 +4,6 @@ using EFT;
 using EFT.InventoryLogic;
 using EFT.UI;
 using Fika.Core.Main.Players;
-using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Packets.Player.Common;
 using Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
@@ -13,7 +12,7 @@ namespace Fika.Core.Main.ClientClasses;
 public sealed class ClientHealthController(Profile.ProfileHealthClass healthInfo, Player player, InventoryController inventoryController, SkillManager skillManager, bool aiHealth) : GClass3010(healthInfo, player, inventoryController, skillManager, aiHealth)
 {
     public bool ReviveEnabled { get; } = FikaPlugin.Instance.Settings.ReviveConfig.Enabled;
-    public bool Downed { get; internal set; }    
+    public bool Downed { get; internal set; }
     public bool CanBeDowned
     {
         get
@@ -26,6 +25,7 @@ public sealed class ClientHealthController(Profile.ProfileHealthClass healthInfo
 
     private readonly int _maxRevives = FikaPlugin.Instance.Settings.ReviveConfig.MaxRevives;
     private readonly bool _headshotKills = FikaPlugin.Instance.Settings.ReviveConfig.HeadshotKills;
+    private readonly bool _grenadesKills = FikaPlugin.Instance.Settings.ReviveConfig.GrenadesKills;
     private int _revives;
     private bool _bledOut;
 
@@ -37,6 +37,25 @@ public sealed class ClientHealthController(Profile.ProfileHealthClass healthInfo
         {
             return true;
         }
+    }
+
+    /// <summary>
+    /// Checks whether last damage should kill from a grenade or headshot
+    /// </summary>
+    /// <returns><see langword="true"/> if the damage should kill; <see langword="false"/> if not</returns>
+    public bool CheckIfDamageShouldInstantKill()
+    {
+        if (_grenadesKills && _fikaPlayer.LatestDamageInfo.DamageType is EDamageType.GrenadeFragment)
+        {
+            return true;
+        }
+
+        if (_fikaPlayer.LastDamagedBodyPart is EBodyPart.Head && _headshotKills)
+        {
+            return true;
+        }
+
+        return false;
     }
 
     public override void SendNetworkSyncPacket(NetworkHealthSyncPacketStruct packet)
@@ -101,15 +120,17 @@ public sealed class ClientHealthController(Profile.ProfileHealthClass healthInfo
             return false;
         }
 
-        if (_fikaPlayer.LastDamagedBodyPart is EBodyPart.Head)
+        if (_grenadesKills && _fikaPlayer.LatestDamageInfo.DamageType is EDamageType.GrenadeFragment)
         {
-            if (_headshotKills)
-            {
-                return false;
-            }
-
-            RestoreBodyPartNoEvents(EBodyPart.Head); // prevent blacked out head
+            return false;
         }
+
+        if (_fikaPlayer.LastDamagedBodyPart is EBodyPart.Head && _headshotKills)
+        {
+            return false;
+        }
+
+        RestoreBodyPartNoEvents(EBodyPart.Head); // prevent blacked out head
 
         _fikaPlayer.ToggleDowned(true);
         return true;

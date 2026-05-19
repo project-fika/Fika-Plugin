@@ -1,6 +1,7 @@
 ﻿using BepInEx.Configuration;
 using EFT.UI;
 using Fika.Core.Main.ClientClasses;
+using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.UI;
 using TMPro;
@@ -30,6 +31,8 @@ internal sealed class Bleedout : MonoBehaviour
         _shouldBleed = healthController.ShouldBleedOut;
         _giveUpText = FikaUIGlobals.CreateOverlayText(string.Format(LocaleUtils.UI_REVIVING_GIVE_UP.Localized(), $"'{GiveUpKey.MainKey}'"),
             new Vector4(0f, 0f, 0f, -400f));
+
+        InvokeRepeating(nameof(AgonySFX), 10f, 10f);
     }
 
     private void OnDestroy()
@@ -38,6 +41,7 @@ internal sealed class Bleedout : MonoBehaviour
         {
             Destroy(_giveUpText);
         }
+        CancelInvoke(nameof(AgonySFX));
     }
 
     private void Update()
@@ -65,6 +69,16 @@ internal sealed class Bleedout : MonoBehaviour
         {
             BleedOut();
         }
+    }
+
+    private void AgonySFX()
+    {
+        if (_healthController.Player == null || _healthController.Player.Speaker == null)
+        {
+            return;
+        }
+
+        _healthController.Player.Speaker.Play(EPhraseTrigger.OnAgony, _healthController.Player.HealthStatus, true);
     }
 
     private void BleedOut()

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using EFT;
 using EFT.AssetsManager;
 using EFT.Interactive;
@@ -12,6 +13,13 @@ namespace Fika.Core.Main.Components;
 
 internal sealed class ReviveInteractable : InteractableObject
 {
+    /// <summary>
+    /// If the player is currently being revived
+    /// </summary>
+    public bool BeingRevived { get; internal set; }
+
+    private float ReviveTime => FikaPlugin.Instance.Settings.ReviveConfig.ReviveTime;
+
     private ObservedPlayer _observedPlayer;
     private Action _startReviveDelegate;
     private Action<bool> _revivePlayerDelegate;
@@ -27,6 +35,11 @@ internal sealed class ReviveInteractable : InteractableObject
         component._revivePlayerDelegate = component.RevivePlayer;
         component.Init();
         return component;
+    }
+
+    private void OnDestroy()
+    {
+        CancelInvoke(nameof(AgonySFX));
     }
 
     private void Init()
@@ -73,6 +86,17 @@ internal sealed class ReviveInteractable : InteractableObject
         );
 
         _observedPlayer.enabled = false;
+        InvokeRepeating(nameof(AgonySFX), 10f, 10f);
+    }
+
+    private void AgonySFX()
+    {
+        if (_observedPlayer == null || _observedPlayer.Speaker == null)
+        {
+            return;
+        }
+
+        _observedPlayer.Speaker.Play(EPhraseTrigger.OnAgony, _observedPlayer.HealthStatus, true);
     }
 
     public void RemoveRagdoll()
@@ -116,6 +140,11 @@ internal sealed class ReviveInteractable : InteractableObject
 
     public ActionsReturnClass GetActions(GamePlayerOwner owner)
     {
+        if (BeingRevived)
+        {
+            return null;
+        }
+
         _owner = owner;
         _localPlayer = owner.Player as FikaPlayer;
 
@@ -133,7 +162,7 @@ internal sealed class ReviveInteractable : InteractableObject
     {
         if (_localPlayer.CurrentState is IdleStateClass)
         {
-            const float reviveTime = 5f;
+            var reviveTime = ReviveTime;
             _owner.ShowObjectivesPanel(LocaleUtils.UI_REVIVING_PLAYER.Localized(), reviveTime);
             _localPlayer.CurrentManagedState.Plant(true, false, reviveTime, _revivePlayerDelegate);
             var nickname = _localPlayer.Profile.GetCorrectedNickname();

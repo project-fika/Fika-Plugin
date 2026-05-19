@@ -159,6 +159,8 @@ public static class LocaleUtils
     public const string UI_REVIVING_BLEEDING_OUT = "F_UI_BleedingOut";
     public const string UI_REVIVING_GIVE_UP = "F_UI_GiveUp";
     public const string UI_REVIVING_GIVING_UP = "F_UI_GivingUp";
+    public const string UI_REVIVING_BEEN_DOWNED = "F_UI_BeenDowned";
+    public const string UI_REVIVING_BEEN_REVIVED = "F_UI_BeenRevived";
 
     // Main Menu UI
     public const string UI_MMUI_ONLINE_PLAYERS = "F_MMUI_OnlinePlayers";

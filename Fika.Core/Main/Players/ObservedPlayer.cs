@@ -1157,17 +1157,14 @@ public sealed class ObservedPlayer : FikaPlayer
                         ColorizeText(EColor.GREEN, nickname)));
                 }
             }
-            if (LocaleUtils.IsBoss(Profile.Info.Settings.Role, out var name) && IsObservedAI && LastAggressor != null)
+            if (LocaleUtils.IsBoss(Profile.Info.Settings.Role, out var name) && IsObservedAI && LastAggressor != null && LastAggressor is FikaPlayer aggressor)
             {
-                if (LastAggressor is FikaPlayer aggressor)
+                var aggressorNickname = !string.IsNullOrEmpty(LastAggressor.Profile.Info.MainProfileNickname) ? LastAggressor.Profile.Info.MainProfileNickname : LastAggressor.Profile.Nickname;
+                if (aggressor.gameObject.name.StartsWith("Player_") || aggressor.IsYourPlayer)
                 {
-                    var aggressorNickname = !string.IsNullOrEmpty(LastAggressor.Profile.Info.MainProfileNickname) ? LastAggressor.Profile.Info.MainProfileNickname : LastAggressor.Profile.Nickname;
-                    if (aggressor.gameObject.name.StartsWith("Player_") || aggressor.IsYourPlayer)
-                    {
-                        NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.KILLED_BOSS.Localized(),
-                        [ColorizeText(EColor.GREEN, LastAggressor.Profile.Info.MainProfileNickname), ColorizeText(EColor.BROWN, name)]),
-                        iconType: EFT.Communications.ENotificationIconType.Friend);
-                    }
+                    NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.KILLED_BOSS.Localized(),
+                    [ColorizeText(EColor.GREEN, LastAggressor.Profile.Info.MainProfileNickname), ColorizeText(EColor.BROWN, name)]),
+                    iconType: EFT.Communications.ENotificationIconType.Friend);
                 }
             }
         }
@@ -1288,7 +1285,7 @@ public sealed class ObservedPlayer : FikaPlayer
     public override void ToggleDowned(bool downed)
     {
 #if DEBUG
-        FikaGlobals.LogInfo($"Setting {Profile.GetCorrectedNickname()} downed to {downed}");
+        FikaGlobals.LogInfo($"Setting {Profile.GetCorrectedNickname()} downed state to {downed}");
 #endif
         Downed = downed;
         NetworkHealthController.IsAlive = !Downed;
@@ -1299,6 +1296,12 @@ public sealed class ObservedPlayer : FikaPlayer
 
         if (downed)
         {
+            if (FikaPlugin.Instance.Settings.ShowNotifications.Value)
+            {
+                NotificationManagerClass.DisplayWarningNotification(string.Format(LocaleUtils.UI_REVIVING_BEEN_DOWNED.Localized(),
+                                ColorizeText(EColor.GREEN, Profile.GetCorrectedNickname())));
+            }
+            Speaker.Play(EPhraseTrigger.OnAgony, HealthStatus, true);
             if (_reviveInteractable != null)
             {
                 FikaGlobals.LogWarning($"ReviveInteractable was not null on {Profile.GetCorrectedNickname()}");
@@ -1309,10 +1312,16 @@ public sealed class ObservedPlayer : FikaPlayer
             return;
         }
 
+        if (FikaPlugin.Instance.Settings.ShowNotifications.Value)
+        {
+            NotificationManagerClass.DisplayWarningNotification(string.Format(LocaleUtils.UI_REVIVING_BEEN_REVIVED.Localized(),
+                            ColorizeText(EColor.GREEN, Profile.GetCorrectedNickname())));
+        }
+
         if (_reviveInteractable == null)
         {
 #if DEBUG
-            FikaGlobals.LogWarning("ReviveInteractable was null");
+            FikaGlobals.LogWarning("ReviveInteractable was null, this is intentional if we revived");
 #endif
             return;
         }
@@ -1326,6 +1335,10 @@ public sealed class ObservedPlayer : FikaPlayer
 #if DEBUG
         FikaGlobals.LogInfo($"{Profile.GetCorrectedNickname()} is being revived by {nickname}");
 #endif
+        if (_reviveInteractable != null)
+        {
+            _reviveInteractable.BeingRevived = reviving;
+        }
         if (_healthBar != null)
         {
             _healthBar.ToggleRevive(reviving, nickname);

@@ -253,6 +253,7 @@ public class FikaPlayer : LocalPlayer
 
         if (downed)
         {
+            Speaker.Play(EPhraseTrigger.OnAgony, HealthStatus, true);
             ActiveHealthController.SetDamageCoeff(0f);
             ActiveHealthController.PauseAllEffects();
             MovementContext.IsInPronePose = true;

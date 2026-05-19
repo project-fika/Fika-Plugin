@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using BepInEx.Configuration;
 using Comfort.Common;
 using EFT.UI;
+using Fika.Core.Main.Patches.Revival;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Models;
@@ -893,6 +894,12 @@ public sealed class FikaConfig(ConfigFile config)
         InstantLoad = clientConfig.InstantLoad;
         FastLoad = clientConfig.FastLoad && !InstantLoad; // can only use one, prioritize InstantLoad
         ReviveConfig = clientConfig.ReviveConfig;
+
+        if (clientConfig.ReviveConfig.Enabled)
+        {
+            new ClientHealthController_Kill_Patch().Enable();
+            new GetActionsClass_GetAvailableActions_Patch().Enable();
+        }
 
         clientConfig.LogValues();
     }
