@@ -1571,7 +1571,6 @@ public sealed class ObservedPlayer : FikaPlayer
                 if (dogtag != null)
                 {
                     var result = InteractionsHandlerClass.Discard(dogtag, InventoryController);
-                    FikaGlobals.LogInfo($"Remove dogtag was {result.Succeeded}");
                 }
             }
         }
