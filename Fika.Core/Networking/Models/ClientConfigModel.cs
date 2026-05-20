@@ -111,6 +111,9 @@ public struct ClientReviveConfig
     [DataMember(Name = "grenadesKills")]
     public bool GrenadesKills { get; set; }
 
+    [DataMember(Name = "allowLooting")]
+    public bool AllowLooting { get; set; }
+
     [DataMember(Name = "maxRevives")]
     public int MaxRevives { get; set; }
 

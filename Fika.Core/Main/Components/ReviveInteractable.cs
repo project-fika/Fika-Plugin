@@ -1,8 +1,9 @@
 ﻿using System;
-using System.Collections;
+using Comfort.Common;
 using EFT;
 using EFT.AssetsManager;
 using EFT.Interactive;
+using EFT.InventoryLogic;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Packets.Player.Common;
@@ -19,10 +20,13 @@ internal sealed class ReviveInteractable : InteractableObject
     public bool BeingRevived { get; internal set; }
 
     private float ReviveTime => FikaPlugin.Instance.Settings.ReviveConfig.ReviveTime;
+    private bool AllowLooting => FikaPlugin.Instance.Settings.ReviveConfig.AllowLooting;
 
     private ObservedPlayer _observedPlayer;
     private Action _startReviveDelegate;
     private Action<bool> _revivePlayerDelegate;
+    private Action _startSearchingDelegate;
+    private Callback _finishLootingDelegate;
     private GamePlayerOwner _owner;
     private FikaPlayer _localPlayer;
     private RagdollClass _ragdoll;
@@ -33,6 +37,8 @@ internal sealed class ReviveInteractable : InteractableObject
         component._observedPlayer = observedPlayer;
         component._startReviveDelegate = component.StartRevive;
         component._revivePlayerDelegate = component.RevivePlayer;
+        component._startSearchingDelegate = component.StartSearching;
+        component._finishLootingDelegate = component.FinishLooting;
         component.Init();
         return component;
     }
@@ -154,8 +160,33 @@ internal sealed class ReviveInteractable : InteractableObject
             Action = _startReviveDelegate,
             Name = string.Format(LocaleUtils.UI_REVIVE_PLAYER.Localized(), _observedPlayer.Profile.GetCorrectedNickname())
         });
+        if (AllowLooting)
+        {
+            actions.Actions.Add(new ActionsTypesClass
+            {
+                Action = _startSearchingDelegate,
+                Name = "Search"
+            });
+        }
 
         return actions;
+    }
+
+    private void StartSearching()
+    {
+        _localPlayer.SaveInteractionRayInfo();
+        _localPlayer.Interact(_observedPlayer.InventoryController, _finishLootingDelegate);
+    }
+
+    private void FinishLooting(IResult result)
+    {
+        if (result.Failed)
+        {
+            return;
+        }
+
+        _owner.ShowInventoryScreenLoot((CompoundItem)_observedPlayer.InventoryController.RootItem, FikaGlobals.EmptyActionDelegate);
+        _localPlayer.StatisticsManager.OnInteractWithLootContainer(_observedPlayer.InventoryController.RootItem);
     }
 
     public void StartRevive()

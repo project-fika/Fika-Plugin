@@ -1564,6 +1564,16 @@ public sealed class ObservedPlayer : FikaPlayer
                     ColorizeText(EColor.GREEN, Profile.Info.MainProfileNickname)),
                 EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.Friend);
             }
+
+            if (Profile.Side is not EPlayerSide.Savage)
+            {
+                var dogtag = Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem;
+                if (dogtag != null)
+                {
+                    var result = InteractionsHandlerClass.Discard(dogtag, InventoryController);
+                    FikaGlobals.LogInfo($"Remove dogtag was {result.Succeeded}");
+                }
+            }
         }
     }
 
