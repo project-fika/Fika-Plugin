@@ -2,6 +2,7 @@
 
 public class FreecamUI : MonoBehaviour
 {
+    public GameObject OverlayGroup;
     public TextMeshProUGUI JumpText;
     public TextMeshProUGUI SwapMode;
     public TextMeshProUGUI DetachText;

@@ -141,7 +141,7 @@ public partial class FreeCamera : MonoBehaviour
         _showOverlay = FikaPlugin.Instance.Settings.KeybindOverlay.Value;
         if (IsActive)
         {
-            _freecamUI.gameObject.SetActive(_showOverlay);
+            _freecamUI.OverlayGroup.SetActive(_showOverlay);
         }
     }
 
@@ -696,9 +696,10 @@ public partial class FreeCamera : MonoBehaviour
 
         if (active)
         {
+            _freecamUI.gameObject.SetActive(true);
             if (_showOverlay)
             {
-                _freecamUI.gameObject.SetActive(true);
+                _freecamUI.OverlayGroup.SetActive(true);
                 _freecamUI.VisionText.SetText("N: Enable nightvision");
             }
             _nightVisionActive = false;
