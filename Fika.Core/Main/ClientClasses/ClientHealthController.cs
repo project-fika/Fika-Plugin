@@ -131,6 +131,7 @@ public sealed class ClientHealthController(Profile.ProfileHealthClass healthInfo
         }
 
         RestoreBodyPartNoEvents(EBodyPart.Head); // prevent blacked out head
+        RestoreBodyPartNoEvents(EBodyPart.Chest); // prevent blacked out chest
 
         _fikaPlayer.ToggleDowned(true);
         return true;
