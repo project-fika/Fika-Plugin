@@ -126,6 +126,11 @@ public sealed class ClientHealthController(Profile.ProfileHealthClass healthInfo
             return false;
         }
 
+        if ((_fikaPlayer.LatestDamageInfo.DamageType & (EDamageType.Exhaustion | EDamageType.Dehydration)) != 0) // starving / dehydration will not trigger downed
+        {
+            return false;
+        }
+
         if (_fikaPlayer.LastDamagedBodyPart is EBodyPart.Head && _headshotKills)
         {
             return false;
