@@ -54,7 +54,10 @@ public static class FikaUIGlobals
         }
 
         obj.SetActive(true);
-        var text = obj.AddComponent<TextMeshProUGUI>();
+        if (!obj.TryGetComponent<TextMeshProUGUI>(out var text))
+        {
+            text = obj.AddComponent<TextMeshProUGUI>();
+        }
         text.horizontalAlignment = HorizontalAlignmentOptions.Center;
         text.verticalAlignment = VerticalAlignmentOptions.Bottom;
         text.margin = margin == default ? new Vector4(0f, 0f, 0f, -350f) : margin;
