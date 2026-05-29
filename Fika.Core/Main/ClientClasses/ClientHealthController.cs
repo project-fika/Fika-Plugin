@@ -1,5 +1,6 @@
 ﻿// © 2026 Lacyway All Rights Reserved
 
+using System;
 using EFT;
 using EFT.InventoryLogic;
 using EFT.UI;
@@ -133,8 +134,31 @@ public sealed class ClientHealthController(Profile.ProfileHealthClass healthInfo
         RestoreBodyPartNoEvents(EBodyPart.Head); // prevent blacked out head
         RestoreBodyPartNoEvents(EBodyPart.Chest); // prevent blacked out chest
 
+        RemoveAllBleedEffects();
+
         _fikaPlayer.ToggleDowned(true);
         return true;
+    }
+
+    /// <summary>
+    /// Removes all bleed effects from the health controller
+    /// </summary>
+    /// <remarks>Mainly used to prevent instantly broken limbs after revive</remarks>
+    private void RemoveAllBleedEffects()
+    {
+        foreach (var effect in IReadOnlyList_0)
+        {
+            if (effect is HeavyBleeding heavyBleeding)
+            {
+                heavyBleeding.ForceRemove();
+                continue;
+            }
+
+            if (effect is LightBleeding lightBleeding)
+            {
+                lightBleeding.ForceRemove();
+            }
+        }
     }
 
     private void RestoreBodyPartNoEvents(EBodyPart bodyPart)
