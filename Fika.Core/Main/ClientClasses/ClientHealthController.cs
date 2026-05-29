@@ -131,6 +131,8 @@ public sealed class ClientHealthController(Profile.ProfileHealthClass healthInfo
             return false;
         }
 
+        CurrentScreenSingletonClass.Instance.CloseAllScreensForced();
+
         RestoreBodyPartNoEvents(EBodyPart.Head); // prevent blacked out head
         RestoreBodyPartNoEvents(EBodyPart.Chest); // prevent blacked out chest
 
