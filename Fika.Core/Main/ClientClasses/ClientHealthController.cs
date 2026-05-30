@@ -153,15 +153,15 @@ public sealed class ClientHealthController(Profile.ProfileHealthClass healthInfo
     /// <remarks>Mainly used to prevent instantly broken limbs after revive</remarks>
     private void RemoveAllBleedEffects()
     {
-        foreach (var effect in IReadOnlyList_0)
+        for (var i = IReadOnlyList_0.Count - 1; i >= 0; i--)
         {
-            if (effect is HeavyBleeding heavyBleeding)
+            if (IReadOnlyList_0[i] is HeavyBleeding heavyBleeding)
             {
                 heavyBleeding.ForceRemove();
                 continue;
             }
 
-            if (effect is LightBleeding lightBleeding)
+            if (IReadOnlyList_0[i] is LightBleeding lightBleeding)
             {
                 lightBleeding.ForceRemove();
             }
