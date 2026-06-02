@@ -18,7 +18,7 @@ public sealed class ClientHealthController(Profile.ProfileHealthClass healthInfo
     {
         get
         {
-            return !_bledOut && _maxRevives > 0 && _revives < _maxRevives;
+            return !_bledOut && (_maxRevives == 0 || _revives < _maxRevives);
         }
     }
     public float BleedoutTime { get; } = FikaPlugin.Instance.Settings.ReviveConfig.BleedoutTime;
