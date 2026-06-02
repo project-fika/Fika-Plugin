@@ -1,9 +1,9 @@
 ﻿// © 2026 Lacyway All Rights Reserved
 
-using System;
 using EFT;
 using EFT.InventoryLogic;
 using EFT.UI;
+using EFT.UI.Screens;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Packets.Player.Common;
 using Fika.Core.Networking.Packets.Player.Common.SubPackets;
@@ -136,7 +136,7 @@ public sealed class ClientHealthController(Profile.ProfileHealthClass healthInfo
             return false;
         }
 
-        CurrentScreenSingletonClass.Instance.CloseCurrentScreenForced();
+        CurrentScreenSingletonClass.Instance.ToggleScreen(EEftScreenType.Inventory);
 
         RestoreBodyPartNoEvents(EBodyPart.Head); // prevent blacked out head
         RestoreBodyPartNoEvents(EBodyPart.Chest); // prevent blacked out chest
