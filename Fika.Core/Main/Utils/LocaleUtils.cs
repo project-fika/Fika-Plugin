@@ -139,6 +139,8 @@ public static class LocaleUtils
     public const string UI_INIT_WEATHER = "F_UI_InitWeather";
     public const string UI_NOTIFICATION_STARTED_RAID = "F_Notification_RaidStarted";
     public const string UI_NOTIFICATION_RECEIVED_ITEM = "F_Notification_ItemReceived";
+    public const string UI_NOTIFICATION_RECEIVED_ITEM_STACK = "F_Notification_ItemStackReceived";
+    public const string UI_NOTIFICATION_RECEIVED_MULTIPLE_ITEMS = "F_Notification_MultipleItemReceived";
     public const string UI_NOTIFICATION_RAIDSETTINGS_DISABLED = "F_Notification_RaidSettingsDisabled";
     public const string UI_EXTRACT_MESSAGE = "F_UI_ExtractMessage";
     public const string UI_DOWNLOAD_PROFILE = "F_UI_DownloadProfile";

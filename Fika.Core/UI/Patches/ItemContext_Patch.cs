@@ -10,6 +10,7 @@ using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Http;
 using Fika.Core.UI.Models;
 using HarmonyLib;
+using Newtonsoft.Json;
 using SPT.Reflection.Patching;
 using TMPro;
 using static Fika.Core.UI.FikaUIGlobals;
@@ -20,9 +21,10 @@ namespace Fika.Core.UI.Patches;
 /// Used to send items to other players
 /// </summary>
 [IgnoreAutoPatch]
-public class ItemContext_Patch : ModulePatch
+public sealed class ItemContext_Patch : ModulePatch
 {
     private static int _lastIndex;
+    private static readonly MongoID _uiFixesParent = new("55d7217a4bdc2d86028b456d");
 
     protected override MethodBase GetTargetMethod()
     {
@@ -64,7 +66,7 @@ public class ItemContext_Patch : ModulePatch
                 return;
             }
 
-            if (item.Parent.Container.ParentItem.TemplateId == "55d7217a4bdc2d86028b456d") // Fix for UI Fixes
+            if (item.Parent.Container.ParentItem.TemplateId == _uiFixesParent) // Fix for UI Fixes
             {
                 return;
             }
@@ -105,6 +107,11 @@ public class ItemContext_Patch : ModulePatch
 
                 AvailableReceiversRequest body = new(itemContext.Item.Id);
                 var availableUsers = FikaRequestHandler.AvailableReceivers(body);
+
+                var items = MultiSelect.Count > 0 ? MultiSelect.Items.Select(i => i.Id).ToArray() : [item.Id];
+#if DEBUG
+                FikaGlobals.LogInfo($"{items.Length} items are selected");
+#endif
 
                 // convert availableUsers.Keys
                 List<TMP_Dropdown.OptionData> optionDatas = [];
@@ -174,7 +181,11 @@ public class ItemContext_Patch : ModulePatch
                             Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.TradeOperationComplete);
                             Singleton<ClientApplication<ISession>>.Instance
                                 .GetClientBackEndSession()
-                                .SendOperationRightNow(new { Action = "SendToPlayer", id = itemContext.Item.Id, target = availableUsers[player] }, ar =>
+                                .SendOperationRightNow(new SendItemsPayload
+                                {
+                                    ItemIds = items,
+                                    Target = availableUsers[player]
+                                }, ar =>
                                 {
                                     if (ar.Failed)
                                     {
@@ -191,5 +202,17 @@ public class ItemContext_Patch : ModulePatch
                 });
             }, CacheResourcesPopAbstractClass.Pop<Sprite>("Characteristics/Icons/UnloadAmmo"));
         }
+    }
+
+    public sealed class SendItemsPayload : GClass3472
+    {
+        [JsonProperty("Action")]
+        public string Action = "SendToPlayer";
+
+        [JsonProperty("itemIds")]
+        public string[] ItemIds;
+
+        [JsonProperty("target")]
+        public string Target;
     }
 }
