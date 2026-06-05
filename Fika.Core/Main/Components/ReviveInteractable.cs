@@ -209,6 +209,12 @@ internal sealed class ReviveInteractable : InteractableObject
     {
         _owner.CloseObjectivesPanel();
         _observedPlayer.ToggleRevive(false, string.Empty);
+
+        if (!_localPlayer.HealthController.IsAlive)
+        {
+            return;
+        }
+
         if (!success)
         {
             _observedPlayer.CommonPacket.Type = ECommonSubPacketType.RevivingPlayer;
