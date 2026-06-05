@@ -52,42 +52,28 @@ public sealed class WorldInteractionPacket : IPoolSubPacket
                 Action action;
                 if (InteractionType == EInteractionType.Unlock && InteractionStage == EInteractionStage.Start)
                 {
-                    KeyHandler keyHandler = new(player);
-
-                    if (string.IsNullOrEmpty(ItemId))
+                    var success = GetKeyHandler(player, worldInteractiveObject, out var keyHandler);
+                    if (!success)
                     {
-                        FikaGlobals.LogWarning("WorldInteractionPacket: ItemID was null!");
-                        return;
-                    }
-
-                    var result = player.FindItemById(ItemId, false, false);
-                    if (!result.Succeeded)
-                    {
-                        FikaGlobals.LogWarning("WorldInteractionPacket: Could not find item: " + ItemId);
-                        return;
-                    }
-
-                    var keyComponent = result.Value.GetItemComponent<KeyComponent>();
-                    if (keyComponent == null)
-                    {
-                        FikaGlobals.LogWarning("WorldInteractionPacket: keyComponent was null!");
-                        return;
-                    }
-
-#if DEBUG
-                    FikaGlobals.LogInfo($"Using key with {keyComponent.NumberOfUsages} current uses, {keyComponent.Template.MaximumNumberOfUsage} maximum");
-#endif
-
-                    keyHandler.UnlockResult = worldInteractiveObject.UnlockOperation(keyComponent, player, worldInteractiveObject);
-                    if (keyHandler.UnlockResult.Error != null)
-                    {
-                        FikaGlobals.LogWarning("WorldInteractionPacket: Error when processing unlockResult: " + keyHandler.UnlockResult.Error);
                         return;
                     }
 
                     interactionResult = keyHandler.UnlockResult.Value;
                     keyHandler.UnlockResult.Value.RaiseEvents(player.InventoryController, CommandStatus.Begin);
                     action = new(keyHandler.HandleKeyEvent);
+                }
+                else if (worldInteractiveObject is Switch && InteractionStage is EInteractionStage.Execute) // edge case for switches, e.g. labyrinth puzzles
+                {
+                    var success = GetKeyHandler(player, worldInteractiveObject, out var keyHandler);
+                    if (!success)
+                    {
+                        return;
+                    }
+
+                    keyHandler.UnlockResult.Value.RaiseEvents(player.InventoryController, CommandStatus.Begin);
+                    keyHandler.UnlockResult.Value.RaiseEvents(player.InventoryController, CommandStatus.Succeed);
+                    player.vmethod_1(worldInteractiveObject, keyHandler.UnlockResult.Value);
+                    return;
                 }
                 else
                 {
@@ -115,6 +101,43 @@ public sealed class WorldInteractionPacket : IPoolSubPacket
         {
             FikaGlobals.LogError("WorldInteractionPacket: WorldInteractiveObject was null or disabled!");
         }
+    }
+
+    private bool GetKeyHandler(FikaPlayer player, WorldInteractiveObject worldInteractiveObject, out KeyHandler keyHandler)
+    {
+        keyHandler = new(player);
+        if (string.IsNullOrEmpty(ItemId))
+        {
+            FikaGlobals.LogWarning("WorldInteractionPacket: ItemID was null!");
+            return false;
+        }
+
+        var result = player.FindItemById(ItemId, false, false);
+        if (!result.Succeeded)
+        {
+            FikaGlobals.LogWarning("WorldInteractionPacket: Could not find item: " + ItemId);
+            return false;
+        }
+
+        var keyComponent = result.Value.GetItemComponent<KeyComponent>();
+        if (keyComponent == null)
+        {
+            FikaGlobals.LogWarning("WorldInteractionPacket: keyComponent was null!");
+            return false;
+        }
+
+#if DEBUG
+        FikaGlobals.LogInfo($"Using key with {keyComponent.NumberOfUsages} current uses, {keyComponent.Template.MaximumNumberOfUsage} maximum");
+#endif
+
+        keyHandler.UnlockResult = worldInteractiveObject.UnlockOperation(keyComponent, player, worldInteractiveObject);
+        if (keyHandler.UnlockResult.Error != null)
+        {
+            FikaGlobals.LogWarning("WorldInteractionPacket: Error when processing unlockResult: " + keyHandler.UnlockResult.Error);
+            return false;
+        }
+
+        return true;
     }
 
     public void Serialize(NetDataWriter writer)
