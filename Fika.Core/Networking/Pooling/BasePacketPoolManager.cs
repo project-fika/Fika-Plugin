@@ -27,7 +27,7 @@ public abstract class BasePacketPoolManager<TEnum, TType>
 
     /// <summary>
     /// Creates a pool of packets for each packet type based on the registered factory functions.
-    /// Initializes pools with an initial capacity of 2.
+    /// Initializes pools with an initial capacity of 1.
     /// </summary>
     public void CreatePool()
     {
@@ -36,7 +36,7 @@ public abstract class BasePacketPoolManager<TEnum, TType>
             _pool = new PacketPool<TType>[_subPacketFactories.Length];
             for (var i = 0; i < _subPacketFactories.Length; i++)
             {
-                _pool[i] = new(2, _subPacketFactories[i]);
+                _pool[i] = new(1, _subPacketFactories[i]);
             }
         }
 

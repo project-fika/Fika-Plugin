@@ -46,7 +46,7 @@ namespace Fika.Core;
 [BepInDependency("com.SPT.debugging", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after spt-debugging, that way we can disable its patches
 public class FikaPlugin : BaseUnityPlugin
 {
-    public const string FikaVersion = "2.2.6";
+    public const string FikaVersion = "2.3.0";
     public const string FikaNATPunchMasterServer = "natpunch.project-fika.com";
     public const ushort FikaNATPunchMasterPort = 6790;
 
@@ -65,6 +65,7 @@ public class FikaPlugin : BaseUnityPlugin
     public string[] LocalIPs { get; internal set; }
     public IPAddress WanIP { get; internal set; }
     public FikaConfig Settings { get; internal set; }
+    public GameUI GameUi => MonoBehaviourSingleton<GameUI>.Instance;
 
     internal static uint Crc32 { get; set; }
     internal InternalBundleLoader BundleLoaderPlugin { get; private set; }

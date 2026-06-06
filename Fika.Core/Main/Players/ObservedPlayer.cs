@@ -167,6 +167,8 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
+    public bool Downed { get; internal set; }
+
     public float TurnOffFbbikAt;
 
     internal ObservedState CurrentPlayerState;
@@ -188,6 +190,7 @@ public sealed class ObservedPlayer : FikaPlayer
     private bool _isServer;
     private VoiceBroadcastTrigger _voiceBroadcastTrigger;
     private SoundSettingsControllerClass _soundSettings;
+    private ReviveInteractable _reviveInteractable;
     private bool _voipAssigned;
     private int _frameSkip;
     private bool _isZombie;
@@ -1131,6 +1134,8 @@ public sealed class ObservedPlayer : FikaPlayer
 
     public override void OnDead(EDamageType damageType)
     {
+        ClearReviveInteractable();
+
         if (HealthBar != null)
         {
             Destroy(HealthBar);
@@ -1152,17 +1157,14 @@ public sealed class ObservedPlayer : FikaPlayer
                         ColorizeText(EColor.GREEN, nickname)));
                 }
             }
-            if (LocaleUtils.IsBoss(Profile.Info.Settings.Role, out var name) && IsObservedAI && LastAggressor != null)
+            if (LocaleUtils.IsBoss(Profile.Info.Settings.Role, out var name) && IsObservedAI && LastAggressor != null && LastAggressor is FikaPlayer aggressor)
             {
-                if (LastAggressor is FikaPlayer aggressor)
+                var aggressorNickname = !string.IsNullOrEmpty(LastAggressor.Profile.Info.MainProfileNickname) ? LastAggressor.Profile.Info.MainProfileNickname : LastAggressor.Profile.Nickname;
+                if (aggressor.gameObject.name.StartsWith("Player_") || aggressor.IsYourPlayer)
                 {
-                    var aggressorNickname = !string.IsNullOrEmpty(LastAggressor.Profile.Info.MainProfileNickname) ? LastAggressor.Profile.Info.MainProfileNickname : LastAggressor.Profile.Nickname;
-                    if (aggressor.gameObject.name.StartsWith("Player_") || aggressor.IsYourPlayer)
-                    {
-                        NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.KILLED_BOSS.Localized(),
-                        [ColorizeText(EColor.GREEN, LastAggressor.Profile.Info.MainProfileNickname), ColorizeText(EColor.BROWN, name)]),
-                        iconType: EFT.Communications.ENotificationIconType.Friend);
-                    }
+                    NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.KILLED_BOSS.Localized(),
+                    [ColorizeText(EColor.GREEN, LastAggressor.Profile.Info.MainProfileNickname), ColorizeText(EColor.BROWN, name)]),
+                    iconType: EFT.Communications.ENotificationIconType.Friend);
                 }
             }
         }
@@ -1280,7 +1282,80 @@ public sealed class ObservedPlayer : FikaPlayer
         // Do nothing
     }
 
-    public void CreateObservedCompass()
+    public override void ToggleDowned(bool downed)
+    {
+#if DEBUG
+        FikaGlobals.LogInfo($"Setting {Profile.GetCorrectedNickname()} downed state to {downed}");
+#endif
+        Downed = downed;
+        NetworkHealthController.IsAlive = !Downed;
+        if (_healthBar != null)
+        {
+            _healthBar.ToggleDowned(downed);
+        }
+
+        if (downed)
+        {
+            if (FikaPlugin.Instance.Settings.ShowNotifications.Value)
+            {
+                NotificationManagerClass.DisplayWarningNotification(string.Format(LocaleUtils.UI_REVIVING_BEEN_DOWNED.Localized(),
+                                ColorizeText(EColor.GREEN, Profile.GetCorrectedNickname())));
+            }
+            Speaker.Play(EPhraseTrigger.OnAgony, HealthStatus, true);
+            if (_reviveInteractable != null)
+            {
+                FikaGlobals.LogWarning($"ReviveInteractable was not null on {Profile.GetCorrectedNickname()}");
+                ClearReviveInteractable();
+            }
+
+            _reviveInteractable = ReviveInteractable.Create(this);
+            return;
+        }
+
+        if (FikaPlugin.Instance.Settings.ShowNotifications.Value)
+        {
+            NotificationManagerClass.DisplayWarningNotification(string.Format(LocaleUtils.UI_REVIVING_BEEN_REVIVED.Localized(),
+                            ColorizeText(EColor.GREEN, Profile.GetCorrectedNickname())));
+        }
+
+        if (_reviveInteractable == null)
+        {
+#if DEBUG
+            FikaGlobals.LogWarning("ReviveInteractable was null, this is intentional if we revived");
+#endif
+            return;
+        }
+
+        _reviveInteractable.RemoveRagdoll();
+        ClearReviveInteractable();
+    }
+
+    public override void ToggleRevive(bool reviving, string nickname)
+    {
+#if DEBUG
+        FikaGlobals.LogInfo($"{Profile.GetCorrectedNickname()} is being revived by {nickname}");
+#endif
+        if (_reviveInteractable != null)
+        {
+            _reviveInteractable.BeingRevived = reviving;
+        }
+        if (_healthBar != null)
+        {
+            _healthBar.ToggleRevive(reviving, nickname);
+        }
+    }
+
+    internal void ClearReviveInteractable()
+    {
+        var interactable = _reviveInteractable;
+        if (interactable != null)
+        {
+            Destroy(interactable);
+        }
+        _reviveInteractable = null;
+    }
+
+    internal void CreateObservedCompass()
     {
         const string bundlePath = "assets/content/weapons/additional_hands/item_compass.bundle";
         if (!_compassLoaded)
@@ -1489,6 +1564,15 @@ public sealed class ObservedPlayer : FikaPlayer
                     ColorizeText(EColor.GREEN, Profile.Info.MainProfileNickname)),
                 EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.Friend);
             }
+
+            if (Profile.Side is not EPlayerSide.Savage)
+            {
+                var dogtag = Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem;
+                if (dogtag != null)
+                {
+                    var result = InteractionsHandlerClass.Discard(dogtag, InventoryController);
+                }
+            }
         }
     }
 
@@ -1675,6 +1759,7 @@ public sealed class ObservedPlayer : FikaPlayer
 
     public override void OnDestroy()
     {
+        ClearReviveInteractable();
         if (_followerCullingObject != null)
         {
             _followerCullingObject.enabled = false;
@@ -1702,12 +1787,9 @@ public sealed class ObservedPlayer : FikaPlayer
         }
         _observedSlotViewHandlers.Clear();
         _observedCorpseCulling?.Dispose();
-        if (HealthController.IsAlive)
+        if (HealthController.IsAlive && !Singleton<IFikaNetworkManager>.Instance.ObservedPlayers.Remove(this) && !Profile.Nickname.StartsWith("headless_"))
         {
-            if (!Singleton<IFikaNetworkManager>.Instance.ObservedPlayers.Remove(this) && !Profile.Nickname.StartsWith("headless_"))
-            {
-                FikaGlobals.LogWarning($"Failed to remove {ProfileId}, {Profile.Nickname} from observed list");
-            }
+            FikaGlobals.LogWarning($"Failed to remove {ProfileId}, {Profile.Nickname} from observed list");
         }
         base.OnDestroy();
     }

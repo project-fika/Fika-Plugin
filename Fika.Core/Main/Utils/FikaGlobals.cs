@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using BepInEx.Configuration;
@@ -31,6 +32,10 @@ public static class FikaGlobals
     /// Use when no callback is needed to reduce allocations
     /// </summary>
     public static Callback EmptyCallbackDelegate => EmptyCallback;
+    /// <summary>
+    /// Use when no callback is needed to reduce allocations
+    /// </summary>
+    public static Action EmptyActionDelegate => EmptyAction;
 
     public const int PingRange = 1000;
 

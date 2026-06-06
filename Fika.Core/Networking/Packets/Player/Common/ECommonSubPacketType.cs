@@ -78,5 +78,20 @@ public enum ECommonSubPacketType : byte
     /// <summary>
     /// Usable item being used
     /// </summary>
-    UsableItem
+    UsableItem,
+
+    /// <summary>
+    /// Syncing downed state
+    /// </summary>
+    DownedSync,
+
+    /// <summary>
+    /// A player was revived
+    /// </summary>
+    RevivedPlayer,
+
+    /// <summary>
+    /// A player is being revived or revive was cancelled
+    /// </summary>
+    RevivingPlayer
 }

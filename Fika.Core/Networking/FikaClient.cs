@@ -446,7 +446,7 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
 
     public void OnPeerConnected(NetPeer peer)
     {
-        NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.CONNECTED_TO_SERVER.Localized(), peer.Port),
+        NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.CONNECTED_TO_SERVER.Localized(), FikaBackendUtils.RemoteEndPoint.Port),
             ENotificationDurationType.Default, ENotificationIconType.Friend);
 
         var ownProfile = FikaGlobals.GetLiteProfile(FikaBackendUtils.IsScav);

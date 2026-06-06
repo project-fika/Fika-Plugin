@@ -17,21 +17,24 @@ internal sealed class CommonSubPacketPoolManager : BasePacketPoolManager<ECommon
     {
         _subPacketFactories =
         [
-            PhrasePacket.CreateInstance,           // ECommonSubPacketType.Phrase = 0
-            WorldInteractionPacket.CreateInstance, // ECommonSubPacketType.WorldInteraction = 1
-            ContainerInteractionPacket.CreateInstance, // ECommonSubPacketType.ContainerInteraction = 2
-            ProceedPacket.CreateInstance,           // ECommonSubPacketType.Proceed = 3
-            HeadLightsPacket.CreateInstance,        // ECommonSubPacketType.HeadLights = 4
-            InventoryChangedPacket.CreateInstance,  // ECommonSubPacketType.InventoryChanged = 5
-            DropPacket.CreateInstance,               // ECommonSubPacketType.Drop = 6
-            StationaryPacket.CreateInstance,         // ECommonSubPacketType.Stationary = 7
+            PhrasePacket.CreateInstance,              // ECommonSubPacketType.Phrase = 0
+            WorldInteractionPacket.CreateInstance,    // ECommonSubPacketType.WorldInteraction = 1
+            ContainerInteractionPacket.CreateInstance,// ECommonSubPacketType.ContainerInteraction = 2
+            ProceedPacket.CreateInstance,             // ECommonSubPacketType.Proceed = 3
+            HeadLightsPacket.CreateInstance,          // ECommonSubPacketType.HeadLights = 4
+            InventoryChangedPacket.CreateInstance,    // ECommonSubPacketType.InventoryChanged = 5
+            DropPacket.CreateInstance,                // ECommonSubPacketType.Drop = 6
+            StationaryPacket.CreateInstance,          // ECommonSubPacketType.Stationary = 7
             VaultPacket.CreateInstance,               // ECommonSubPacketType.Vault = 8
             InteractionPacket.CreateInstance,         // ECommonSubPacketType.Interaction = 9
             MountingPacket.CreateInstance,            // ECommonSubPacketType.Mounting = 10
             DamagePacket.CreateInstance,              // ECommonSubPacketType.Damage = 11
             ArmorDamagePacket.CreateInstance,         // ECommonSubPacketType.ArmorDamage = 12
             HealthSyncPacket.CreateInstance,          // ECommonSubPacketType.HealthSync = 13
-            UsableItemPacket.CreateInstance           // ECommonSubPacketType.UsableItem = 14
+            UsableItemPacket.CreateInstance,          // ECommonSubPacketType.UsableItem = 14
+            DownedSyncPacket.CreateInstance,          // ECommonSubPacketType.DownedSync = 15
+            RevivedPlayerPacket.CreateInstance,       // ECommonSubPacketType.RevivePlayer = 16
+            RevivingPlayerPacket.CreateInstance       // ECommonSubPacketType.RevivingPlayer = 17
         ];
     }
 }

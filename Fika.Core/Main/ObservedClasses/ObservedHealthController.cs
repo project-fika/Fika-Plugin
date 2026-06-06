@@ -125,7 +125,7 @@ public sealed class ObservedHealthController(byte[] serializedState, ObservedPla
 
     private class EffectHandler(ObservedHealthController healthController)
     {
-        private readonly ObservedHealthController healthController = healthController;
+        private readonly ObservedHealthController _healthController = healthController;
         public readonly List<NetworkBodyEffectsAbstractClass> PausedEffects = [];
         public readonly List<PausedEffectsStruct> PausedEffectsInfo = [];
 
@@ -137,9 +137,9 @@ public sealed class ObservedHealthController(byte[] serializedState, ObservedPla
                     PausedEffectsInfo[i].BodyPart, PausedEffectsInfo[i].Strength, PausedEffectsInfo[i].CurrentStrength,
                     PausedEffectsInfo[i].DelayTime, PausedEffectsInfo[i].StateTime, PausedEffectsInfo[i].WorkStateTime,
                     PausedEffectsInfo[i].BuildUpTime, PausedEffectsInfo[i].ResidueStateTime, PausedEffectsInfo[i].State);
-                healthController.AddEffectToList(PausedEffects[i]);
+                _healthController.AddEffectToList(PausedEffects[i]);
                 PausedEffects[i].UnPauseEffect();
-                healthController.Gclass835_0.Return(PausedEffectsInfo[i]);
+                _healthController.Gclass835_0.Return(PausedEffectsInfo[i]);
             }
         }
     }

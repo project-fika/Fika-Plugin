@@ -43,6 +43,7 @@ public partial class LiteNetManager : IEnumerable<LiteNetPeer>
         object IEnumerator.Current => _p;
     }
 
+#if DEBUG || SIMULATE_NETWORK
     private struct IncomingData
     {
         public NetPacket Data;
@@ -51,7 +52,6 @@ public partial class LiteNetManager : IEnumerable<LiteNetPeer>
     }
     private readonly List<IncomingData> _pingSimulationList = new List<IncomingData>();
 
-#if DEBUG || SIMULATE_NETWORK
     private struct OutboundDelayedPacket
     {
         public byte[] Data;
@@ -581,6 +581,7 @@ public partial class LiteNetManager : IEnumerable<LiteNetPeer>
             return;
         }
 
+#if DEBUG || SIMULATE_NETWORK
         var time = DateTime.UtcNow;
         lock (_pingSimulationList)
         {
@@ -596,7 +597,6 @@ public partial class LiteNetManager : IEnumerable<LiteNetPeer>
             }
         }
 
-#if DEBUG || SIMULATE_NETWORK
         lock (_outboundSimulationList)
         {
             for (var i = 0; i < _outboundSimulationList.Count; i++)
@@ -805,6 +805,7 @@ public partial class LiteNetManager : IEnumerable<LiteNetPeer>
             return;
         }
 
+#if DEBUG || SIMULATE_NETWORK
         var roundTripLatency = _randomGenerator.Next(SimulationMinLatency, SimulationMaxLatency);
         var inboundLatency = roundTripLatency / 2;
         if (inboundLatency > MinLatencyThreshold)
@@ -821,6 +822,7 @@ public partial class LiteNetManager : IEnumerable<LiteNetPeer>
             // hold packet
             _dropPacket = true;
         }
+#endif
     }
 
     [Conditional("DEBUG"), Conditional("SIMULATE_NETWORK")]
@@ -867,11 +869,8 @@ public partial class LiteNetManager : IEnumerable<LiteNetPeer>
 #endif
 
 #if DEBUG || SIMULATE_NETWORK
-    private bool HandleSimulateOutboundPacketLoss()
-    {
-        var shouldDrop = SimulatePacketLoss && _randomGenerator.NextDouble() * 100 < SimulationPacketLossChance;
-        return shouldDrop;
-    }
+    private bool HandleSimulateOutboundPacketLoss() => //Should Drop?
+            SimulatePacketLoss && _randomGenerator.NextDouble() * 100 < SimulationPacketLossChance;
 #endif
 
     internal virtual bool CustomMessageHandle(NetPacket packet, IPEndPoint remoteEndPoint) =>
@@ -1595,6 +1594,11 @@ public partial class LiteNetManager : IEnumerable<LiteNetPeer>
 
         NetDebug.Write("[NM] Stop");
 
+        //Little hack so shutdown message will not be queued by Outbound latency simulation
+        //In real world packet will be delayed by routers not by application(that closes) logic
+        var simLat = SimulateLatency;
+        SimulateLatency = false;
+
         //Send last disconnect
         for (var netPeer = _headPeer; netPeer != null; netPeer = netPeer.NextPeer)
         {
@@ -1603,6 +1607,9 @@ public partial class LiteNetManager : IEnumerable<LiteNetPeer>
 
         //Stop
         CloseSocket();
+
+        //Return setting
+        SimulateLatency = simLat;
 
 #if UNITY_SOCKET_FIX
         if (_useSocketFix)
@@ -1624,32 +1631,16 @@ public partial class LiteNetManager : IEnumerable<LiteNetPeer>
         _peerIds = new ConcurrentQueue<int>();
         _lastPeerId = 0;
 
-        ClearPingSimulationList();
-        ClearOutboundSimulationList();
+#if DEBUG || SIMULATE_NETWORK
+        lock (_pingSimulationList)
+            _pingSimulationList.Clear();
+        lock (_outboundSimulationList)
+            _outboundSimulationList.Clear();
+#endif
 
         _connectedPeersCount = 0;
         _pendingEventHead = null;
         _pendingEventTail = null;
-    }
-
-    [Conditional("DEBUG"), Conditional("SIMULATE_NETWORK")]
-    private void ClearPingSimulationList()
-    {
-        lock (_pingSimulationList)
-        {
-            _pingSimulationList.Clear();
-        }
-    }
-
-    [Conditional("DEBUG"), Conditional("SIMULATE_NETWORK")]
-    private void ClearOutboundSimulationList()
-    {
-#if DEBUG || SIMULATE_NETWORK
-        lock (_outboundSimulationList)
-        {
-            _outboundSimulationList.Clear();
-        }
-#endif
     }
 
     /// <summary>

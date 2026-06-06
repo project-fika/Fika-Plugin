@@ -47,10 +47,15 @@ public sealed class HealthSyncPacket : IPoolSubPacket
                 {
                     observedPlayer.TriggerZones.AddRange(TriggerZones);
                 }
+                if (!observedPlayer.NetworkHealthController.IsAlive) // prevent downed players from not fully dying
+                {
+                    observedPlayer.NetworkHealthController.IsAlive = true;
+                }
             }
             observedPlayer.NetworkHealthController.HandleSyncPacket(Packet);
             return;
         }
+
         FikaGlobals.LogError($"OnHealthSyncPacketReceived::Player with id {player.NetId} was not observed. Name: {player.Profile.GetCorrectedNickname()}");
     }
 

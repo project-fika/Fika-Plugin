@@ -20,7 +20,7 @@ public class FikaCommands
 #pragma warning restore RCS1102
 {
 #if DEBUG
-    [ConsoleCommand("bring", "", null, "Teleports all AI to yourself as the host", [])]
+    [ConsoleCommand("bring", description: "Teleports all AI to yourself as the host")]
     public static void Bring()
     {
         if (!CheckForGame())
@@ -107,7 +107,19 @@ public class FikaCommands
         }
     }
 
-    [ConsoleCommand("god", "", null, "Set god mode on/off", [])]
+    [ConsoleCommand("setDowned", description: "Sets local player to downed/not downed")]
+    public static void SetDowned([ConsoleArgument(true, "if downed or not")] bool downed)
+    {
+        if (!CheckForGame())
+        {
+            return;
+        }
+
+        var localPlayer = (FikaPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+        localPlayer.ToggleDowned(downed);
+    }
+
+    [ConsoleCommand("god", description: "Set god mode on/off")]
     public static void God([ConsoleArgument(false, "true or false to toggle god mode")] bool state)
     {
         if (!CheckForGame())
@@ -134,7 +146,7 @@ public class FikaCommands
         }
     }
 
-    [ConsoleCommand("extract", "", null, "Extract from raid", [])]
+    [ConsoleCommand("extract", description: "Extract from raid")]
     public static void Extract()
     {
         var game = Singleton<IFikaGame>.Instance;
@@ -161,7 +173,7 @@ public class FikaCommands
         coopGame.Extract(localPlayer, null);
     }
 
-    [ConsoleCommand("despawnAllAi", "", null, "Despawns all AI bots", [])]
+    [ConsoleCommand("despawnAllAi", description: "Despawns all AI bots")]
     public static void DespawnAllAI()
     {
         var fikaGame = Singleton<IFikaGame>.Instance;
@@ -195,7 +207,7 @@ public class FikaCommands
         }
     }
 
-    [ConsoleCommand("stoptimer", "", null, "Stops the game timer", [])]
+    [ConsoleCommand("stoptimer", description: "Stops the game timer")]
     public static void StopTimer()
     {
         var fikaGame = Singleton<IFikaGame>.Instance;
@@ -220,7 +232,7 @@ public class FikaCommands
         }
     }
 
-    [ConsoleCommand("goToBTR", "", null, "Teleports you to the BTR if active", [])]
+    [ConsoleCommand("goToBTR", description: "Teleports you to the BTR if active")]
     public static void GoToBTR()
     {
         var fikaGame = Singleton<IFikaGame>.Instance;
@@ -255,7 +267,7 @@ public class FikaCommands
         }
     }
 
-    [ConsoleCommand("spawnItem", "", null, "Spawns an item from a templateId")]
+    [ConsoleCommand("spawnItem", description: "Spawns an item from a templateId")]
     public static void SpawnItem([ConsoleArgument("", "The templateId to spawn an item from")] string templateId,
         [ConsoleArgument(1, "The amount to spawn if the item can stack")] int amount = 1)
     {
@@ -304,7 +316,7 @@ public class FikaCommands
     /// </summary>
     /// <param name="wildSpawnType"></param>
     /// <param name="amount"></param>
-    [ConsoleCommand("spawnNPC", "", null, "Spawn NPC with specified WildSpawnType")]
+    [ConsoleCommand("spawnNPC", description: "Spawn NPC with specified WildSpawnType")]
     public static void SpawnNPC([ConsoleArgument("assault", "The WildSpawnType to spawn (use help for a list)")] string wildSpawnType, [ConsoleArgument(1, "The amount of AI to spawn")] int amount)
     {
         if (string.IsNullOrEmpty(wildSpawnType) || string.Equals(wildSpawnType, "help", StringComparison.OrdinalIgnoreCase))
@@ -370,7 +382,7 @@ public class FikaCommands
         LogInfo($"SpawnNPC completed, requested {amount} of {wildSpawnType}");
     }
 
-    [ConsoleCommand("spawnAirdrop", "", null, "Spawns an airdrop")]
+    [ConsoleCommand("spawnAirdrop", description: "Spawns an airdrop")]
     public static void SpawnAirdrop()
     {
         if (!CheckForGame())
@@ -424,7 +436,7 @@ public class FikaCommands
     }
 #endif
 
-    [ConsoleCommand("debug", "", null, "Toggle debug window", [])]
+    [ConsoleCommand("debug", description: "Toggle debug window")]
     public static void Debug(bool state)
     {
         var fikaGame = Singleton<IFikaGame>.Instance;
@@ -443,7 +455,7 @@ public class FikaCommands
         coopGame.ToggleDebug(state);
     }
 
-    [ConsoleCommand("openAdminUI", "", null, "Opens the Admin UI as the raid host", [])]
+    [ConsoleCommand("openAdminUI", description: "Opens the Admin UI as the raid host")]
     public static void OpenAdminUI()
     {
         if (!CheckForGame())
@@ -461,7 +473,7 @@ public class FikaCommands
         Singleton<FikaServer>.Instance.ToggleAdminUI();
     }
 
-    [ConsoleCommand("clear", "", null, "Clears the console output", [])]
+    [ConsoleCommand("clear", description: "Clears the console output")]
     public static void Clear()
     {
         Singleton<PreloaderUI>.Instance.Console.Clear();

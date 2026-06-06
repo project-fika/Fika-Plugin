@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using EFT;
 
 namespace Fika.Core.Main.Utils;
@@ -138,6 +139,8 @@ public static class LocaleUtils
     public const string UI_INIT_WEATHER = "F_UI_InitWeather";
     public const string UI_NOTIFICATION_STARTED_RAID = "F_Notification_RaidStarted";
     public const string UI_NOTIFICATION_RECEIVED_ITEM = "F_Notification_ItemReceived";
+    public const string UI_NOTIFICATION_RECEIVED_ITEM_STACK = "F_Notification_ItemStackReceived";
+    public const string UI_NOTIFICATION_RECEIVED_MULTIPLE_ITEMS = "F_Notification_MultipleItemReceived";
     public const string UI_NOTIFICATION_RAIDSETTINGS_DISABLED = "F_Notification_RaidSettingsDisabled";
     public const string UI_EXTRACT_MESSAGE = "F_UI_ExtractMessage";
     public const string UI_DOWNLOAD_PROFILE = "F_UI_DownloadProfile";
@@ -150,6 +153,16 @@ public static class LocaleUtils
     public const string UI_DISABLED_BY_HOST = "F_UI_DisabledByServerHost";
     public const string UI_ERROR_RAID_INIT = "F_UI_ErrorRaidInit";
     public const string UI_HEADLESS_CONNECTED = "F_UI_HeadlessConnected";
+    public const string UI_REVIVE_PLAYER = "F_UI_RevivePlayer";
+    public const string UI_REVIVING_PLAYER = "F_UI_RevivingPlayer";
+    public const string UI_REVIVING_DOWNED = "F_UI_Downed";
+    public const string UI_REVIVING_BEING_REVIVED = "F_UI_BeingRevived";
+    public const string UI_REVIVING_BEING_REVIVED_BY = "F_UI_BeingRevivedBy";
+    public const string UI_REVIVING_BLEEDING_OUT = "F_UI_BleedingOut";
+    public const string UI_REVIVING_GIVE_UP = "F_UI_GiveUp";
+    public const string UI_REVIVING_GIVING_UP = "F_UI_GivingUp";
+    public const string UI_REVIVING_BEEN_DOWNED = "F_UI_BeenDowned";
+    public const string UI_REVIVING_BEEN_REVIVED = "F_UI_BeenRevived";
 
     // Main Menu UI
     public const string UI_MMUI_ONLINE_PLAYERS = "F_MMUI_OnlinePlayers";
@@ -268,6 +281,9 @@ public static class LocaleUtils
     public const string BEPINEX_PING_RANGE_D = "F_BepInEx_PingRange_D";
     public const string BEPINEX_PING_SOUND_T = "F_BepInEx_PingSound_T";
     public const string BEPINEX_PING_SOUND_D = "F_BepInEx_PingSound_D";
+
+    public const string BEPINEX_REVIVE_GIVE_UP_KEY_T = "F_BepInEx_GiveUpKey_T";
+    public const string BEPINEX_REVIVE_GIVE_UP_KEY_D = "F_BepInEx_GiveUpKey_D";
 
     public const string BEPINEX_FREE_CAM_BUTTON_T = "F_BepInEx_FreeCamButton_T";
     public const string BEPINEX_FREE_CAM_BUTTON_D = "F_BepInEx_FreeCamButton_D";

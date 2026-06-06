@@ -47,6 +47,10 @@ public sealed class FikaHealthBar : MonoBehaviour
     private int _destroyedLimbs;
     private bool _showLimbs;
 
+    private bool _downed;
+    private bool _updateDowned;
+    private float _downedTimer;
+
     private static readonly int _checkLayers = LayerMask.GetMask(["HighPolyCollider", "Terrain", "Player"]);
     private static readonly int _playerLayer = LayerMask.NameToLayer("Player");
 
@@ -80,12 +84,17 @@ public sealed class FikaHealthBar : MonoBehaviour
 
     private void Update()
     {
+        var deltaTime = Time.deltaTime;
         if (_currentPlayer != null)
         {
             UpdateScreenSpacePosition();
+            if (_updateDowned && _downed)
+            {
+                UpdateDowned(deltaTime);
+            }
             if (FikaPlugin.Instance.Settings.UseOcclusion.Value)
             {
-                _counter += Time.deltaTime;
+                _counter += deltaTime;
                 if (_counter > 1f)
                 {
                     _counter = 0f;
@@ -97,6 +106,35 @@ public sealed class FikaHealthBar : MonoBehaviour
         {
             Destroy(this);
         }
+    }
+
+    private void UpdateDowned(float deltaTime)
+    {
+        _downedTimer -= deltaTime;
+        _playerPlate.downedStateTimerScreen.SetText("{0:1}", _downedTimer);
+
+        if (_downedTimer <= 0f)
+        {
+            _updateDowned = false;
+            _playerPlate.downedStateBackgroundScreen.gameObject.SetActive(false);
+            _playerPlate.downedStateScreen.gameObject.SetActive(false);
+            _playerPlate.downedStateTimerScreen.gameObject.SetActive(false);
+        }
+    }
+
+    public void ToggleRevive(bool reviving, string nickname)
+    {
+        if (reviving)
+        {
+            _playerPlate.downedStateTimerScreen.gameObject.SetActive(false);
+            _playerPlate.downedStateScreen.SetText(string.Format(LocaleUtils.UI_REVIVING_BEING_REVIVED_BY.Localized(), nickname));
+            _updateDowned = false;
+            return;
+        }
+
+        _playerPlate.downedStateTimerScreen.gameObject.SetActive(true);
+        _playerPlate.downedStateScreen.SetText(LocaleUtils.UI_REVIVING_DOWNED.Localized());
+        _updateDowned = true;
     }
 
     private void CheckForOcclusion()
@@ -216,7 +254,6 @@ public sealed class FikaHealthBar : MonoBehaviour
         }
     }
 
-
     private void CreateHealthBar()
     {
         var uiPrefab = InternalBundleLoader.Instance.GetFikaAsset(InternalBundleLoader.EFikaAsset.PlayerUI);
@@ -254,8 +291,6 @@ public sealed class FikaHealthBar : MonoBehaviour
 
         SetPlayerPlateFactionVisibility(FikaPlugin.Instance.Settings.UsePlateFactionSide.Value);
         SetPlayerPlateHealthVisibility(FikaPlugin.Instance.Settings.HideHealthBar.Value);
-
-        _playerPlate.gameObject.SetActive(FikaPlugin.Instance.Settings.UseNamePlates.Value);
 
         if (FikaPlugin.Instance.Settings.ShowEffects.Value)
         {
@@ -295,15 +330,23 @@ public sealed class FikaHealthBar : MonoBehaviour
         _bodyParts[EBodyPart.Common].SetActive(false);
 
         UpdateHealth();
+        ToggleNamePlate();
     }
 
+    private void ToggleNamePlate()
+    {
+        var useNamePlates = FikaPlugin.Instance.Settings.UseNamePlates.Value;
+        _playerPlate.gameObject.SetActive(useNamePlates);
+        enabled = useNamePlates;
+    }
+
+    #region events
     private void ShowBrokenLimbs_SettingChanged(object sender, EventArgs e)
     {
         _showLimbs = FikaPlugin.Instance.Settings.ShowBrokenLimbs.Value;
         RefreshLimbs(_showLimbs);
     }
 
-    #region events
     private void UseHealthNumber_SettingChanged(object sender, EventArgs e)
     {
         UpdateHealth();
@@ -396,7 +439,7 @@ public sealed class FikaHealthBar : MonoBehaviour
 
     private void UseNamePlates_SettingChanged(object sender, EventArgs e)
     {
-        _playerPlate.gameObject.SetActive(FikaPlugin.Instance.Settings.UseNamePlates.Value);
+        ToggleNamePlate();
     }
     #endregion
 
@@ -537,6 +580,27 @@ public sealed class FikaHealthBar : MonoBehaviour
             var color = screenObject.color;
             color.a = alpha;
             screenObject.color = color;
+        }
+    }
+
+    public void ToggleDowned(bool downed)
+    {
+        SetPlayerPlateHealthVisibility(downed);
+        _playerPlate.downedStateBackgroundScreen.gameObject.SetActive(downed);
+        _playerPlate.downedStateScreen.gameObject.SetActive(downed);
+        _playerPlate.downedStateTimerScreen.gameObject.SetActive(downed);
+
+        if (downed)
+        {
+            _playerPlate.downedStateScreen.SetText(LocaleUtils.UI_REVIVING_DOWNED.Localized()); // force downed message in case player was being revived before
+        }
+
+        _downed = downed;
+        var bleedoutTime = FikaPlugin.Instance.Settings.ReviveConfig.BleedoutTime;
+        _updateDowned = !Mathf.Approximately(bleedoutTime, 0f);
+        if (_updateDowned)
+        {
+            _downedTimer = bleedoutTime;
         }
     }
 
