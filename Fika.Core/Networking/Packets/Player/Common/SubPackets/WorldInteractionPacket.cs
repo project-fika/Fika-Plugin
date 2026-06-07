@@ -62,7 +62,7 @@ public sealed class WorldInteractionPacket : IPoolSubPacket
                     keyHandler.UnlockResult.Value.RaiseEvents(player.InventoryController, CommandStatus.Begin);
                     action = new(keyHandler.HandleKeyEvent);
                 }
-                else if (worldInteractiveObject is Switch && InteractionStage is EInteractionStage.Execute) // edge case for switches, e.g. labyrinth puzzles
+                else if (worldInteractiveObject is Switch && InteractionStage is EInteractionStage.Execute && !string.IsNullOrWhiteSpace(ItemId)) // edge case for switches, e.g. labyrinth puzzles
                 {
                     var success = GetKeyHandler(player, worldInteractiveObject, out var keyHandler);
                     if (!success)
@@ -108,21 +108,21 @@ public sealed class WorldInteractionPacket : IPoolSubPacket
         keyHandler = new(player);
         if (string.IsNullOrEmpty(ItemId))
         {
-            FikaGlobals.LogWarning("WorldInteractionPacket: ItemID was null!");
+            FikaGlobals.LogError("WorldInteractionPacket: ItemID was null!");
             return false;
         }
 
         var result = player.FindItemById(ItemId, false, false);
         if (!result.Succeeded)
         {
-            FikaGlobals.LogWarning("WorldInteractionPacket: Could not find item: " + ItemId);
+            FikaGlobals.LogError("WorldInteractionPacket: Could not find item: " + ItemId);
             return false;
         }
 
         var keyComponent = result.Value.GetItemComponent<KeyComponent>();
         if (keyComponent == null)
         {
-            FikaGlobals.LogWarning("WorldInteractionPacket: keyComponent was null!");
+            FikaGlobals.LogError("WorldInteractionPacket: keyComponent was null!");
             return false;
         }
 
@@ -133,7 +133,7 @@ public sealed class WorldInteractionPacket : IPoolSubPacket
         keyHandler.UnlockResult = worldInteractiveObject.UnlockOperation(keyComponent, player, worldInteractiveObject);
         if (keyHandler.UnlockResult.Error != null)
         {
-            FikaGlobals.LogWarning("WorldInteractionPacket: Error when processing unlockResult: " + keyHandler.UnlockResult.Error);
+            FikaGlobals.LogError("WorldInteractionPacket: Error when processing unlockResult: " + keyHandler.UnlockResult.Error);
             return false;
         }
 
