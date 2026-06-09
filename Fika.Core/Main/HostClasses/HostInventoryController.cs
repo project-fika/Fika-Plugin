@@ -1,10 +1,10 @@
 ﻿using System.Threading.Tasks;
-using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
 using EFT.InventoryLogic.Operations;
 using EFT.UI;
+using Fika.Core.Main.BaseClasses;
 using Fika.Core.Main.ClientClasses;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
@@ -18,7 +18,7 @@ using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Main.HostClasses;
 
-public sealed class HostInventoryController : Player.PlayerOwnerInventoryController
+public sealed class HostInventoryController : BaseInventoryController
 {
     public FikaPlayer FikaPlayer { get; }
 
@@ -29,19 +29,16 @@ public sealed class HostInventoryController : Player.PlayerOwnerInventoryControl
             return false;
         }
     }
-    private readonly ManualLogSource _logger;
     private readonly Player _player;
-    private readonly bool _instantLoad;
     private readonly HostInventoryOperationHandlerPool _hostInventoryOperationHandlerPool;
 
-    public HostInventoryController(Player player, Profile profile, bool examined, bool instantLoad) : base(player, profile, examined)
+    public HostInventoryController(Player player, Profile profile, bool examined) : base(player, profile, examined)
     {
         _player = player;
         FikaPlayer = (FikaPlayer)player;
         PlayerSearchController = new PlayerSearchControllerClass(profile, this);
-        _instantLoad = instantLoad;
+
         _hostInventoryOperationHandlerPool = new HostInventoryOperationHandlerPool(8, HostInventoryOperationHandler.CreateInstance);
-        _logger = BepInEx.Logging.Logger.CreateLogSource(nameof(HostInventoryController));
     }
 
     public override IPlayerSearchController PlayerSearchController { get; }
@@ -86,21 +83,6 @@ public sealed class HostInventoryController : Player.PlayerOwnerInventoryControl
             await Task.Yield();
         }
         RunHostOperation(operation, callback);
-    }
-
-    public override Task<IResult> LoadMagazine(AmmoItemClass sourceAmmo, MagazineItemClass magazine, int loadCount, bool ignoreRestrictions)
-    {
-        if (_instantLoad)
-        {
-            if (Singleton<GUISounds>.Instantiated)
-            {
-                Singleton<GUISounds>.Instance.PlayUILoadSound();
-            }
-            var gstruct = (ignoreRestrictions ? magazine.ApplyWithoutRestrictions(this, sourceAmmo, int.MaxValue, true) : magazine.Apply(this, sourceAmmo, int.MaxValue, true));
-            return TryRunNetworkTransaction(gstruct, null);
-        }
-
-        return base.LoadMagazine(sourceAmmo, magazine, loadCount, ignoreRestrictions);
     }
 
     /// <summary>

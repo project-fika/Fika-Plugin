@@ -6,7 +6,6 @@ using EFT.UI;
 using Fika.Core.Bundles;
 using Fika.Core.ConsoleCommands;
 using Fika.Core.Main.Custom;
-using Fika.Core.Main.Patches.InventoryController;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Websocket;
@@ -147,8 +146,8 @@ public class FikaPlugin : BaseUnityPlugin
 
         if (Settings.FastLoad)
         {
-            _patchManager.EnablePatch(new LoadAmmo_Task_Transpiler());
-            _patchManager.EnablePatch(new ItemViewLoadAmmoComponent_Show_Patch());
+            /*_patchManager.EnablePatch(new LoadAmmo_Task_Transpiler());
+            _patchManager.EnablePatch(new ItemViewLoadAmmoComponent_Show_Patch());*/
         }
     }
 

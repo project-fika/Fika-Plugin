@@ -124,8 +124,8 @@ public class FikaPlayer : LocalPlayer
         };
 
         PlayerOwnerInventoryController inventoryController = FikaBackendUtils.IsServer
-            ? new HostInventoryController(player, profile, false, FikaPlugin.Instance.Settings.InstantLoad)
-            : new ClientInventoryController(player, profile, false, FikaPlugin.Instance.Settings.InstantLoad);
+            ? new HostInventoryController(player, profile, false)
+            : new ClientInventoryController(player, profile, false);
 
         LocalQuestControllerClass questController;
         if (FikaPlugin.Instance.Settings.SharedQuestProgression)
