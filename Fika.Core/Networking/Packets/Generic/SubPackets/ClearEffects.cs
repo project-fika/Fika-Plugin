@@ -41,7 +41,7 @@ public sealed class ClearEffects : IPoolSubPacket
         {
             if (playerToApply is ObservedPlayer observedPlayer)
             {
-                observedPlayer.HealthBar.ClearEffects();
+                observedPlayer.HealthBar.RemoveAllActiveEffects();
             }
         }
     }

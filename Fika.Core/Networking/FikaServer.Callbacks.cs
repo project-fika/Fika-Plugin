@@ -333,7 +333,7 @@ public sealed partial class FikaServer
 
                         SendDataToPeer(ref ownCharacterPacket, DeliveryMethod.ReliableOrdered, peer);
 
-                        observedPlayer.HealthBar.ClearEffects();
+                        observedPlayer.HealthBar.RemoveAllActiveEffects();
                         SendGenericPacket(EGenericSubPacketType.ClearEffects,
                             ClearEffects.FromValue(observedPlayer.NetId), true, peer);
                     }

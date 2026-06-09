@@ -1773,9 +1773,9 @@ public sealed class ObservedPlayer : FikaPlayer
                 HandsController.Destroy();
             }
         }
-        if (HealthBar != null)
+        if (_healthBar != null)
         {
-            Destroy(HealthBar);
+            Destroy(_healthBar);
         }
         if (Singleton<BetterAudio>.Instantiated)
         {
