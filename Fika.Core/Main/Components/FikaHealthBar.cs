@@ -306,10 +306,7 @@ public sealed class FikaHealthBar : MonoBehaviour
         FikaPlugin.Instance.Settings.ShowEffects.SettingChanged += ShowEffects_SettingChanged;
         FikaPlugin.Instance.Settings.ShowBrokenLimbs.SettingChanged += ShowBrokenLimbs_SettingChanged;
 
-        _currentPlayer.HealthController.HealthChangedEvent += HealthController_HealthChangedEvent;
-        _currentPlayer.HealthController.BodyPartDestroyedEvent += HealthController_BodyPartDestroyedEvent;
-        _currentPlayer.HealthController.BodyPartRestoredEvent += HealthController_BodyPartRestoredEvent;
-        _currentPlayer.HealthController.DiedEvent += HealthController_DiedEvent;
+        ToggleHealthControllerEvents(!FikaPlugin.Instance.Settings.HideHealthBar.Value);
 
         _playerPlate.SetHealthNumberText(100);
 
@@ -331,6 +328,30 @@ public sealed class FikaHealthBar : MonoBehaviour
 
         UpdateHealth();
         ToggleNamePlate();
+    }
+
+    private void ToggleHealthControllerEvents(bool enabled)
+    {
+        var healthController = _currentPlayer?.HealthController;
+        if (healthController == null)
+        {
+            return;
+        }
+
+        if (enabled)
+        {
+            healthController.HealthChangedEvent += HealthController_HealthChangedEvent;
+            healthController.BodyPartDestroyedEvent += HealthController_BodyPartDestroyedEvent;
+            healthController.BodyPartRestoredEvent += HealthController_BodyPartRestoredEvent;
+            healthController.DiedEvent += HealthController_DiedEvent;
+        }
+        else
+        {
+            healthController.HealthChangedEvent -= HealthController_HealthChangedEvent;
+            healthController.BodyPartDestroyedEvent -= HealthController_BodyPartDestroyedEvent;
+            healthController.BodyPartRestoredEvent -= HealthController_BodyPartRestoredEvent;
+            healthController.DiedEvent -= HealthController_DiedEvent;
+        }
     }
 
     private void ToggleNamePlate()
@@ -645,7 +666,7 @@ public sealed class FikaHealthBar : MonoBehaviour
         Destroy(this);
     }
 
-    private class HealthBarEffect
+    private sealed class HealthBarEffect
     {
         public int Amount { get; private set; }
 
