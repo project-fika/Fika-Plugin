@@ -43,7 +43,7 @@ public static class FikaBackendUtils
     /// <summary>
     /// The name of the local player PMC
     /// </summary>
-    public static string PMCName { get; internal set; }
+    public static string PMCName => Profile.Nickname;
     public static bool IsScav { get; internal set; }
     public static EClientType ClientType { get; internal set; } = EClientType.None;
     public static bool IsHeadless { get; set; }
@@ -144,10 +144,11 @@ public static class FikaBackendUtils
         result = new CreateMatch();
         errorMessage = "No server matches the data provided or the server no longer exists";
 
-        if (MatchMakerAcceptScreenInstance == null)
+        /*if (MatchMakerAcceptScreenInstance == null)
         {
+            FikaGlobals.LogError("Could not find MatchMakerAcceptScreen");
             return false;
-        }
+        }*/
 
         MatchJoinRequest body = new(serverId, profileId);
         result = FikaRequestHandler.RaidJoin(body);

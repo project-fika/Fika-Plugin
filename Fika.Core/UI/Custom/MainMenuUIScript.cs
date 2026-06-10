@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Comfort.Common;
 using EFT;
 using EFT.UI;
 using Fika.Core.Bundles;
 using Fika.Core.Main.Utils;
+using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
+using Fika.Core.Networking.Models;
 using Fika.Core.Networking.Models.Presence;
+using HarmonyLib;
 using JsonType;
 using static Fika.Core.UI.FikaUIGlobals;
 
@@ -199,6 +203,7 @@ public class MainMenuUIScript : MonoBehaviour
             if (presence.Activity is EFikaPlayerPresence.IN_RAID && presence.RaidInformation.HasValue)
             {
                 var information = presence.RaidInformation.Value;
+                FikaGlobals.LogInfo($"Got presense: {information.Started}, {information.MatchId}");
                 var side = information.Side == ESideType.Pmc ? "RaidSidePmc".Localized() : "RaidSideScav".Localized();
                 var time = ConvertToTime(information.Time, IsStaticTimeLocation(information.Location));
                 var tooltip = newPlayer.AddComponent<HoverTooltipArea>();
@@ -206,6 +211,112 @@ public class MainMenuUIScript : MonoBehaviour
                 tooltip.SetMessageText(string.Format(LocaleUtils.UI_MMUI_RAID_DETAILS.Localized(), side,
                     ColorizeText(EColor.BLUE, information.Location.Localized()),
                     BoldText(time)));
+
+                if (!information.Started)
+                {
+                    var buttonGo = mainMenuUIPlayer.JoinButton.transform.parent.gameObject;
+                    buttonGo.SetActive(true);
+                    var tooltip2 = buttonGo.AddComponent<HoverTooltipArea>();
+                    tooltip2.enabled = true;
+                    tooltip2.SetMessageText(LocaleUtils.UI_JOIN_RAID.Localized());
+                    mainMenuUIPlayer.JoinButton.onClick.AddListener(async () =>
+                    {
+                        if (!TarkovApplication.Exist(out var tarkovApplication))
+                        {
+                            FikaGlobals.LogError("OnFikaStartRaid: Could not find TarkovApplication");
+                            return;
+                        }
+
+                        var session = tarkovApplication.Session;
+                        if (session == null)
+                        {
+                            FikaGlobals.LogError("Session was null when starting the raid");
+                            return;
+                        }
+
+                        FikaBackendUtils.Profile = session.Profile;
+
+                        var location = session.LocationSettings.locations.Values
+                            .FirstOrDefault(l => l.Id == information.Location);
+
+                        if (location == null)
+                        {
+                            FikaGlobals.LogError($"Failed to find location {information.Location}");
+                            return;
+                        }
+
+                        NotificationManagerClass.DisplayMessageNotification(LocaleUtils.CONNECTING_TO_SESSION.Localized(),
+                            iconType: EFT.Communications.ENotificationIconType.EntryPoint);
+                        using var pingingClient = await NetManagerUtils.CreatePingingClient();
+
+                        if (pingingClient.Init(information.MatchId))
+                        {
+                            FikaGlobals.LogInfo("Attempting to connect to host session...");
+                            var knockMessage = FikaBackendUtils.ServerGuid.ToString();
+                            var success = await pingingClient.AttemptToPingHost(knockMessage, false);
+
+                            if (!success)
+                            {
+                                Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen(
+                                LocaleUtils.UI_ERROR_CONNECTING.Localized(),
+                                LocaleUtils.UI_UNABLE_TO_CONNECT.Localized(),
+                                ErrorScreen.EButtonType.OkButton, 10f);
+                                return;
+                            }
+                        }
+                        else
+                        {
+                            Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen(
+                                LocaleUtils.UI_ERROR_CONNECTING.Localized(),
+                                LocaleUtils.UI_PINGER_START_FAIL.Localized(),
+                                ErrorScreen.EButtonType.OkButton, 10f);
+                            return;
+                        }
+
+                        if (FikaBackendUtils.JoinMatch(FikaBackendUtils.Profile.Id, information.MatchId, out var result, out var errorMessage))
+                        {
+                            FikaBackendUtils.GroupId = result.ServerId;
+                            FikaBackendUtils.ClientType = EClientType.Client;
+
+                            AddPlayerRequest data = new(FikaBackendUtils.GroupId, FikaBackendUtils.Profile.Id, FikaBackendUtils.IsSpectator);
+                            FikaRequestHandler.UpdateAddPlayer(data);
+
+                            RaidSettings raidSettings = new()
+                            {
+                                Side = information.Side,
+                                PlayersSpawnPlace = default,
+                                MetabolismDisabled = default,
+                                BotSettings = default,
+                                WavesSettings = default,
+                                TimeAndWeatherSettings = default,
+                                SelectedDateTime = information.Time,
+                                SelectedLocation = location,
+                                isInTransition = false,
+                                RaidMode = ERaidMode.Local,
+                                IsPveOffline = true,
+                                OnlinePveRaid = false
+                            };
+
+                            var tarkovAppTraverse = Traverse.Create(tarkovApplication);
+                            tarkovAppTraverse.Field<RaidSettings>("_raidSettings").Value = raidSettings;
+                            tarkovAppTraverse.Field<MainMenuControllerClass>("mainMenuControllerClass").Value.MatchmakerPlayerControllerClass.MatchingStartTime = EFTDateTimeClass.Now;
+
+                            try
+                            {
+                                await tarkovApplication.method_41(raidSettings.TimeAndWeatherSettings);
+                            }
+                            catch (Exception ex)
+                            {
+                                Singleton<PreloaderUI>.Instance.ShowErrorScreen("ERROR JOINING",
+                                    $"Exception caught during raid init: {ex.Message}", Application.Quit);
+                            }
+                        }
+                        else
+                        {
+                            Singleton<PreloaderUI>.Instance.ShowErrorScreen("ERROR JOINING", errorMessage, null);
+                        }
+                    });
+                }
             }
             newPlayer.SetActive(true);
             _players.Add(newPlayer);

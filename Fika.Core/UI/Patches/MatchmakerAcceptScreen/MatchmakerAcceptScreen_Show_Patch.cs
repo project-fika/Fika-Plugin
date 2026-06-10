@@ -33,6 +33,5 @@ public class MatchmakerAcceptScreen_Show_Patch : ModulePatch
     {
         FikaBackendUtils.MatchMakerAcceptScreenInstance = __instance;
         FikaBackendUtils.Profile = session.Profile;
-        FikaBackendUtils.PMCName = session.Profile.Nickname;
     }
 }

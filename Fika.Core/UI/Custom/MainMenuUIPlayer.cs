@@ -9,6 +9,7 @@ public class MainMenuUIPlayer : MonoBehaviour
     public TextMeshProUGUI PlayerLevel;
     public TextMeshProUGUI PlayerStatus;
     public Image StatusImage;
+    public Button JoinButton;
 
     public void SetActivity(string nickname, int level, EFikaPlayerPresence presence)
     {

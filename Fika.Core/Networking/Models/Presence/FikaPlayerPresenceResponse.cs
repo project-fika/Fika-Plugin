@@ -45,10 +45,18 @@ public struct RaidInformation
     [DataMember(Name = "time")]
     public EDateTime Time;
 
-    public RaidInformation(string location, ESideType side, EDateTime time)
+    [DataMember(Name = "started")]
+    public bool Started;
+
+    [DataMember(Name = "matchId")]
+    public string MatchId;
+
+    public RaidInformation(string location, ESideType side, EDateTime time, bool started, string matchId)
     {
         Location = location;
         Side = side;
         Time = time;
+        Started = started;
+        MatchId = matchId;
     }
 }
