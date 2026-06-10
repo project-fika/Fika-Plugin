@@ -35,6 +35,18 @@ public class MainMenuUIScript : MonoBehaviour
         }
     }
 
+    public bool JoinInProgress
+    {
+        get => _joinInProgress;
+        set
+        {
+            lock (_joinInProgressLock)
+            {
+                _joinInProgress = value;
+            }
+        }
+    }
+
     private static MainMenuUIScript _instance;
 
     private Coroutine _queryRoutine;
@@ -46,6 +58,9 @@ public class MainMenuUIScript : MonoBehaviour
     private DateTime _lastSet;
     private RectTransform _transformToScale;
     private GInterface225<RaidSettings> _backendSession;
+
+    private bool _joinInProgress;
+    private object _joinInProgressLock = new();
 
     private const int _minSecondsToWait = 2;
 
@@ -214,6 +229,13 @@ public class MainMenuUIScript : MonoBehaviour
 
                 if (!information.Started)
                 {
+                    if (JoinInProgress)
+                    {
+                        return;
+                    }
+
+                    JoinInProgress = true;
+
                     var buttonGo = mainMenuUIPlayer.JoinButton.transform.parent.gameObject;
                     buttonGo.SetActive(true);
                     var tooltip2 = buttonGo.AddComponent<HoverTooltipArea>();
@@ -224,6 +246,7 @@ public class MainMenuUIScript : MonoBehaviour
                         if (!TarkovApplication.Exist(out var tarkovApplication))
                         {
                             FikaGlobals.LogError("OnFikaStartRaid: Could not find TarkovApplication");
+                            JoinInProgress = false;
                             return;
                         }
 
@@ -231,6 +254,7 @@ public class MainMenuUIScript : MonoBehaviour
                         if (session == null)
                         {
                             FikaGlobals.LogError("Session was null when starting the raid");
+                            JoinInProgress = false;
                             return;
                         }
 
@@ -242,6 +266,7 @@ public class MainMenuUIScript : MonoBehaviour
                         if (location == null)
                         {
                             FikaGlobals.LogError($"Failed to find location {information.Location}");
+                            JoinInProgress = false;
                             return;
                         }
 
@@ -261,6 +286,7 @@ public class MainMenuUIScript : MonoBehaviour
                                 LocaleUtils.UI_ERROR_CONNECTING.Localized(),
                                 LocaleUtils.UI_UNABLE_TO_CONNECT.Localized(),
                                 ErrorScreen.EButtonType.OkButton, 10f);
+                                JoinInProgress = false;
                                 return;
                             }
                         }
@@ -270,6 +296,7 @@ public class MainMenuUIScript : MonoBehaviour
                                 LocaleUtils.UI_ERROR_CONNECTING.Localized(),
                                 LocaleUtils.UI_PINGER_START_FAIL.Localized(),
                                 ErrorScreen.EButtonType.OkButton, 10f);
+                            JoinInProgress = false;
                             return;
                         }
 
@@ -309,12 +336,15 @@ public class MainMenuUIScript : MonoBehaviour
                             {
                                 Singleton<PreloaderUI>.Instance.ShowErrorScreen("ERROR JOINING",
                                     $"Exception caught during raid init: {ex.Message}", Application.Quit);
+                                JoinInProgress = false;
                             }
                         }
                         else
                         {
                             Singleton<PreloaderUI>.Instance.ShowErrorScreen("ERROR JOINING", errorMessage, null);
                         }
+
+                        JoinInProgress = false;
                     });
                 }
             }
