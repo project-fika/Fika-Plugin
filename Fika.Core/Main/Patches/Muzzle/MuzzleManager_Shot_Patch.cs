@@ -29,8 +29,7 @@ public sealed class MuzzleManager_Shot_Patch : ModulePatch
             {
                 var rootParticleSystem = container.RootParticleSystem;
                 var t = rootParticleSystem.transform;
-                t.position = pTransform.position;
-                t.rotation = pTransform.rotation;
+                t.SetPositionAndRotation(pTransform.position, pTransform.rotation);
 
                 rootParticleSystem.Stop(true);
                 rootParticleSystem.Play(true);
