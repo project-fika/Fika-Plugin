@@ -373,7 +373,7 @@ public partial class FreeCamera : MonoBehaviour
         {
             ClearAndAddPlayers();
 
-            if (_isFollowing)
+            if (_isFollowing && FikaPlugin.Instance.Settings.AllowSpectateFreeCam)
             {
                 DetachCamera();
             }
