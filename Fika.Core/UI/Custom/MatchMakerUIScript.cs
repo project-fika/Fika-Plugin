@@ -190,7 +190,8 @@ public class MatchMakerUIScript : MonoBehaviour
             List<TMP_Dropdown.OptionData> optionDatas = [];
 
             // Sort availableHeadlesses alphabetically by Alias
-            Array.Sort(availableHeadlesses, (x, y) => string.Compare(x.Alias, y.Alias, StringComparison.OrdinalIgnoreCase));
+            Array.Sort(availableHeadlesses,
+                (x, y) => string.Compare(x.Alias, y.Alias, StringComparison.OrdinalIgnoreCase));
             for (var i = 0; i < availableHeadlesses.Length; i++)
             {
                 var user = availableHeadlesses[i];

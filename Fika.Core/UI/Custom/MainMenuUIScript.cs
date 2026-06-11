@@ -60,7 +60,7 @@ public class MainMenuUIScript : MonoBehaviour
     private GInterface225<RaidSettings> _backendSession;
 
     private bool _joinInProgress;
-    private object _joinInProgressLock = new();
+    private readonly object _joinInProgressLock = new();
 
     private const int _minSecondsToWait = 2;
 
@@ -253,6 +253,8 @@ public class MainMenuUIScript : MonoBehaviour
                         var session = tarkovApplication.Session;
                         if (session == null)
                         {
+                            Singleton<PreloaderUI>.Instance.ShowErrorScreen("ERROR JOINING",
+                                "Session was null when starting the raid");
                             FikaGlobals.LogError("Session was null when starting the raid");
                             JoinInProgress = false;
                             return;
@@ -265,6 +267,8 @@ public class MainMenuUIScript : MonoBehaviour
 
                         if (location == null)
                         {
+                            Singleton<PreloaderUI>.Instance.ShowErrorScreen("ERROR JOINING",
+                                $"Failed to find location {information.Location}");
                             FikaGlobals.LogError($"Failed to find location {information.Location}");
                             JoinInProgress = false;
                             return;
@@ -324,9 +328,21 @@ public class MainMenuUIScript : MonoBehaviour
                                 OnlinePveRaid = false
                             };
 
+                            FikaBackendUtils.IsScav = raidSettings.IsScav;
+
                             var tarkovAppTraverse = Traverse.Create(tarkovApplication);
+                            var controller = tarkovAppTraverse.Field<MainMenuControllerClass>("mainMenuControllerClass").Value.MatchmakerPlayerControllerClass;
+
+                            if (raidSettings.Side is ESideType.Savage && ScavBlocked(session, out var minutesLeft))
+                            {
+                                Singleton<PreloaderUI>.Instance.ShowErrorScreen("ERROR JOINING",
+                                    string.Format(LocaleUtils.UI_SCAV_NOT_READY.Localized(), minutesLeft.ToString("F0")));
+                                JoinInProgress = false;
+                                return;
+                            }
+
                             tarkovAppTraverse.Field<RaidSettings>("_raidSettings").Value = raidSettings;
-                            tarkovAppTraverse.Field<MainMenuControllerClass>("mainMenuControllerClass").Value.MatchmakerPlayerControllerClass.MatchingStartTime = EFTDateTimeClass.Now;
+                            controller.MatchingStartTime = EFTDateTimeClass.Now;
 
                             try
                             {
@@ -351,6 +367,21 @@ public class MainMenuUIScript : MonoBehaviour
             newPlayer.SetActive(true);
             _players.Add(newPlayer);
         }
+    }
+
+    private bool ScavBlocked(ISession session, out double remainingMinutes)
+    {
+        var utcNowUnixInt = EFTDateTimeClass.UtcNowUnixInt;
+        var diffSeconds = session.ProfileOfPet.Info.SavageLockTime - (double)utcNowUnixInt;
+
+        if (diffSeconds > 0.0d)
+        {
+            remainingMinutes = diffSeconds / 60.0d;
+            return true;
+        }
+
+        remainingMinutes = 0.0d;
+        return false;
     }
 
     public void UpdatePresence(EFikaPlayerPresence presence)

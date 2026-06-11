@@ -137,6 +137,7 @@ public static class LocaleUtils
     public const string UI_FIKA_ALWAYS_COOP = "F_UI_FikaAlwaysCoop";
     public const string UI_UPNP_FAILED = "F_UI_UpnpFailed";
     public const string UI_INIT_WEATHER = "F_UI_InitWeather";
+    public const string UI_SCAV_NOT_READY = "F_UI_ScavNotReady";
     public const string UI_NOTIFICATION_STARTED_RAID = "F_Notification_RaidStarted";
     public const string UI_NOTIFICATION_RECEIVED_ITEM = "F_Notification_ItemReceived";
     public const string UI_NOTIFICATION_RECEIVED_ITEM_STACK = "F_Notification_ItemStackReceived";
