@@ -90,16 +90,27 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
         return executionResult;
     }
 
+    /// <summary>
+    /// Returns how many bullets should be loaded per tick into the <paramref name="magazine"/>
+    /// </summary>
+    /// <param name="magazine">The magazine to check the <see cref="MagazineItemClass.MaxCount"/> on</param>
+    /// <returns>The amount of bullets to load per tick</returns>
     private static int GetLoadPerTick(MagazineItemClass magazine)
     {
-        if (magazine.MaxCount <= 5)
+        var maxCount = magazine.MaxCount;
+        if (maxCount <= 5)
         {
             return 1;
         }
 
-        if (magazine.MaxCount == 10)
+        if (maxCount == 10)
         {
             return 2;
+        }
+
+        if (maxCount < 20)
+        {
+            return 3;
         }
 
         return 5;
