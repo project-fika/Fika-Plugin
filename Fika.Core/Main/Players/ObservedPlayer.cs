@@ -1710,6 +1710,23 @@ public sealed class ObservedPlayer : FikaPlayer
                 UpdateTriggerColliderSearcher(deltaTime, _cullingHandler.IsCloseToMyPlayerCamera);
             }
             _cullingHandler.ManualUpdate(deltaTime);
+            switch (_currentState)
+            {
+                case EPlayerState.Idle:
+                    TickIdleState();
+                    break;
+
+                case EPlayerState.Run:
+                case EPlayerState.MoveZombieState:
+                case EPlayerState.StartMoveZombieState:
+                case EPlayerState.EndMoveZombieState:
+                    TickRunState();
+                    break;
+
+                case EPlayerState.Sprint:
+                    TickSprintState();
+                    break;
+            }
         }
     }
 

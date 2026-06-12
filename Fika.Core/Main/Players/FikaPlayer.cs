@@ -4,8 +4,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.Threading.Tasks;
 using Comfort.Common;
+using CommonAssets.Scripts.Audio;
 using EFT;
 using EFT.Ballistics;
 using EFT.Communications;
@@ -88,6 +91,19 @@ public class FikaPlayer : LocalPlayer
     private VoipSettingsClass _voipHandler;
     private FikaVOIPController _voipController;
     private Bleedout _bleedout;
+
+    private bool _playedAtLeastOneStep1;
+    private float _sprintSurfaceCheck1 = 60f;
+    private float _runSurfaceCheck1 = 40f;
+    private float _landSurfaceCheck1 = 40f;
+    private float _proneSurfaceCheck1 = 30f;
+    protected EPlayerState _currentState;
+    private float _lastStepTime1;
+    private float _sign;
+    private float _turnSoundTimer;
+    private GInterface95 _specificStepAudioController1;
+
+    private static Func<Player, SurfaceSet> GetCurrentSet;
     #endregion
 
     /// <summary>
@@ -199,6 +215,253 @@ public class FikaPlayer : LocalPlayer
         OnPlayerSpawned?.Invoke(player);
 
         return player;
+    }
+
+    private void AssignGetCurrentSet()
+    {
+        var fieldInfo = typeof(Player).GetField("_currentSet",
+            BindingFlags.Instance | BindingFlags.NonPublic);
+
+        if (fieldInfo != null)
+        {
+            var targetParam = Expression.Parameter(typeof(Player), "instance");
+            var fieldAccess = Expression.Field(targetParam, fieldInfo);
+
+            GetCurrentSet = Expression.Lambda<Func<Player, SurfaceSet>>(fieldAccess, targetParam).Compile();
+        }
+        else
+        {
+            FikaGlobals.LogError("Failed to find private field _currentSet in base class.");
+        }
+    }
+
+    public override void InitAudioController()
+    {
+        base.InitAudioController();
+        SetupFikaAudio();
+    }
+
+    protected void SetupFikaAudio()
+    {
+        if (GetCurrentSet == null)
+        {
+            AssignGetCurrentSet();
+        }
+
+        MovementContext.OnStateChanged -= method_55;
+        MovementContext.OnStateChanged += MovementContext_OnStateChanged;
+
+        var traverse = Traverse.Create(this);
+        foreach (var sufaceSet in traverse.Field<Dictionary<BaseBallistic.ESurfaceSound, SurfaceSet>>("_soundBySurface").Value.Values)
+        {
+            _runSurfaceCheck1 = Math.Max(_runSurfaceCheck1, sufaceSet.RunSoundBank.Rolloff);
+            _sprintSurfaceCheck1 = Math.Max(_sprintSurfaceCheck1, sufaceSet.SprintSoundBank.Rolloff);
+            _landSurfaceCheck1 = Mathf.Max(_landSurfaceCheck1, sufaceSet.LandingSoundBank.Rolloff);
+            _proneSurfaceCheck1 = Mathf.Max(_proneSurfaceCheck1, sufaceSet.ProneSoundBank.Rolloff);
+        }
+
+        _specificStepAudioController1 = traverse.Field<GInterface95>("_specificStepAudioController").Value;
+
+        var idleField = traverse.Field<Coroutine>("_idleCoroutine");
+        if (idleField.Value != null)
+        {
+            StopCoroutine(idleField.Value);
+            idleField.Value = null;
+        }
+    }
+
+    protected void MovementContext_OnStateChanged(EPlayerState previousState, EPlayerState nextState)
+    {
+        method_43(NestedStepSoundSource);
+
+        switch (previousState)
+        {
+            case EPlayerState.Sprint:
+                _playedAtLeastOneStep1 = false;
+                if (!_playedAtLeastOneStep1 && CheckSurface(_sprintSurfaceCheck1))
+                {
+                    DefaultPlay(GetCurrentSet(this).SprintSoundBank, 1f, EAudioMovementState.Sprint);
+                }
+
+                if (nextState == EPlayerState.Transition || nextState == EPlayerState.Idle)
+                {
+                    var volumeMod = FirstPersonPointOfView ? GetCurrentSet(this).StopSoundBank.BaseVolume : 1f;
+                    DefaultPlay(GetCurrentSet(this).StopSoundBank,
+                        volumeMod * MovementContext.CovertMovementVolume, EAudioMovementState.Stop);
+                }
+                break;
+
+            case EPlayerState.Run:
+            case EPlayerState.MoveZombieState:
+            case EPlayerState.StartMoveZombieState:
+            case EPlayerState.EndMoveZombieState:
+                _playedAtLeastOneStep1 = false;
+                if (!_playedAtLeastOneStep1 && SinceLastStep > 0.66f)
+                {
+                    if (CheckSurface(_runSurfaceCheck1))
+                    {
+                        PlayStepSound();
+                    }
+                    _lastStepTime1 = Time.time;
+                }
+                break;
+        }
+
+        if (nextState == EPlayerState.Jump)
+        {
+            DefaultPlay(GetCurrentSet(this).JumpSoundBank, 1f, EAudioMovementState.Jump);
+            method_60(MovementContext.CovertEquipmentNoise, true);
+        }
+        else if (nextState == EPlayerState.Prone2Stand)
+        {
+            method_60(0.7f, true);
+        }
+        else if (nextState == EPlayerState.Transit2Prone)
+        {
+            var moveState = (previousState == EPlayerState.Sprint) ? EAudioMovementState.Drop : EAudioMovementState.None;
+            var finalVolume = 0.7f * MovementContext.CovertMovementVolume;
+
+            if (previousState == EPlayerState.Sprint)
+            {
+                DefaultPlay(GetCurrentSet(this).ProneDropSoundBank, finalVolume, moveState);
+            }
+            else
+            {
+                method_60(finalVolume, true);
+            }
+        }
+
+        _currentState = nextState;
+
+        if (CurrentState.Name != _currentState)
+        {
+            _playedAtLeastOneStep1 = false;
+        }
+    }
+
+    public override void ManualUpdate(float deltaTime, float? platformDeltaTime = null, int loop = 1)
+    {
+        base.ManualUpdate(deltaTime, platformDeltaTime, loop);
+        if (HealthController.IsAlive)
+        {
+            switch (_currentState)
+            {
+                case EPlayerState.Idle:
+                    TickIdleState();
+                    break;
+
+                case EPlayerState.Run:
+                case EPlayerState.MoveZombieState:
+                case EPlayerState.StartMoveZombieState:
+                case EPlayerState.EndMoveZombieState:
+                    TickRunState();
+                    break;
+
+                case EPlayerState.Sprint:
+                    TickSprintState();
+                    break;
+            }
+        }
+    }
+
+    protected void TickSprintState()
+    {
+        if (CurrentState.Name != _currentState)
+        {
+            return;
+        }
+
+        var currentSignValue = Single_0;
+        if (Math.Abs(_sign - currentSignValue) >= 1E-45f)
+        {
+            _sign = currentSignValue;
+            var elapsed = Time.time - _lastStepTime1;
+
+            if (elapsed > 0.2f && MovementContext.FreefallTime < 0.6f)
+            {
+                _playedAtLeastOneStep1 = true;
+                _lastStepTime1 = Time.time;
+                method_65(NestedStepSoundSource);
+
+                if (CheckSurface(_sprintSurfaceCheck1))
+                {
+                    UpdateMuffledState();
+                    var sprintBank = GetCurrentSet(this).SprintSoundBank;
+
+                    var volumeBase = FirstPersonPointOfView ? sprintBank.BaseVolume : 1f;
+                    var weightMod = 0.5f + (3f * Physical.Overweight);
+                    var finalVolume = method_64(EAudioMovementState.Sprint) * volumeBase * weightMod;
+
+                    method_66(EAudioMovementState.Sprint, false);
+
+                    sprintBank.Play(NestedStepSoundSource, EnvironmentType.Outdoor, Distance,
+                        finalVolume, Distance, FirstPersonPointOfView, true);
+                    _specificStepAudioController1.Play(EAudioMovementState.Sprint, Environment,
+                        Distance, finalVolume, Distance, FirstPersonPointOfView);
+
+                    method_60(1f, false);
+
+                    if (elapsed < 1.2f && FirstPersonPointOfView)
+                    {
+                        ProceduralWeaponAnimation.Walk.StepFrequency = 0.5f / Mathf.Clamp(elapsed, 0.3f, 0.8f);
+                    }
+                }
+            }
+        }
+    }
+
+    protected void TickRunState()
+    {
+        if (CurrentState.Name != _currentState)
+        {
+            return;
+        }
+
+        var single_ = Single_0;
+        if (Math.Abs(_sign - single_) >= 1E-45f)
+        {
+            _sign = single_;
+            var sinceLastStep = SinceLastStep;
+
+            if (sinceLastStep > 0.2f && MovementContext.FreefallTime < 1f)
+            {
+                _lastStepTime1 = Time.time;
+                _playedAtLeastOneStep1 = true;
+
+                if (CheckSurface(_runSurfaceCheck1))
+                {
+                    if (sinceLastStep < 1.2f && FirstPersonPointOfView)
+                    {
+                        var clampRange = Mathf.Clamp(sinceLastStep,
+                            0.7f - (MovementContext.SmoothedCharacterMovementSpeed / 2f), 1.2f);
+                        ProceduralWeaponAnimation.Walk.StepFrequency = 0.5f / clampRange;
+                    }
+                    PlayStepSound();
+                }
+            }
+        }
+    }
+
+    protected void TickIdleState()
+    {
+        if (CurrentState.Name != _currentState)
+        {
+            return;
+        }
+
+        var angleMagnitude = Math.Abs(HandsToBodyAngle);
+        if (angleMagnitude > EFTHardSettings.Instance.TURN_ANGLE)
+        {
+            if (Time.time >= _turnSoundTimer)
+            {
+                method_62(angleMagnitude);
+                _turnSoundTimer = Time.time + EFTHardSettings.Instance.TURN_SOUND_DELAY;
+            }
+        }
+        else
+        {
+            _turnSoundTimer = 0f;
+        }
     }
 
     protected void SubscribeToArmorChangeEvent()
