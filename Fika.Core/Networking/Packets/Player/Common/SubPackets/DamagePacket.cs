@@ -87,10 +87,10 @@ public sealed class DamagePacket : IPoolSubPacket
     {
         NetId = reader.GetInt();
 
-        Damage = reader.GetFloat();
-        Absorbed = reader.GetFloat();
-        PenetrationPower = reader.GetFloat();
-        ArmorDamage = reader.GetFloat();
+        Damage = reader.GetPackedFloat(0f, 1000f);
+        Absorbed = reader.GetPackedFloat(0f, 1000f);
+        PenetrationPower = reader.GetPackedFloat(0f, 200f, EFloatCompression.High);
+        ArmorDamage = reader.GetPackedFloat(0f, 200f, EFloatCompression.High);
 
         Direction = reader.GetUnmanaged<Vector3>();
         Point = reader.GetUnmanaged<Vector3>();
@@ -113,10 +113,10 @@ public sealed class DamagePacket : IPoolSubPacket
     {
         writer.Put(NetId);
 
-        writer.Put(Damage);
-        writer.Put(Absorbed);
-        writer.Put(PenetrationPower);
-        writer.Put(ArmorDamage);
+        writer.PutPackedFloat(Damage, 0f, 1000f);
+        writer.PutPackedFloat(Absorbed, 0f, 1000f);
+        writer.PutPackedFloat(PenetrationPower, 0f, 200f, EFloatCompression.High);
+        writer.PutPackedFloat(ArmorDamage, 0f, 200f, EFloatCompression.High);
 
         writer.PutUnmanaged(Direction);
         writer.PutUnmanaged(Point);
