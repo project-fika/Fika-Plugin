@@ -33,16 +33,13 @@ public sealed class ClearEffects : IPoolSubPacket
         var coopHandler = Singleton<IFikaNetworkManager>.Instance.CoopHandler;
         if (coopHandler == null)
         {
-            FikaGlobals.LogError("ClientExtract: CoopHandler was null!");
+            FikaGlobals.LogError("ClearEffects: CoopHandler was null!");
             return;
         }
 
-        if (coopHandler.Players.TryGetValue(NetId, out var playerToApply))
+        if (coopHandler.Players.TryGetValue(NetId, out var playerToApply) && playerToApply is ObservedPlayer observedPlayer)
         {
-            if (playerToApply is ObservedPlayer observedPlayer)
-            {
-                observedPlayer.HealthBar.RemoveAllActiveEffects();
-            }
+            observedPlayer.HealthBar.RemoveAllActiveEffects();
         }
     }
 
