@@ -273,6 +273,8 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         if (FikaBackendUtils.IsReconnect && !FikaBackendUtils.ReconnectPosition.Equals(Vector3.zero))
         {
             fikaPlayer.Teleport(FikaBackendUtils.ReconnectPosition);
+            fikaPlayer.MovementContext.Rotation = FikaBackendUtils.ReconnectRotation;
+            fikaPlayer.MovementContext.CachedRotation = FikaBackendUtils.ReconnectRotation;
         }
 
         return fikaPlayer;

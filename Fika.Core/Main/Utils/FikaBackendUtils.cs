@@ -61,7 +61,8 @@ public static class FikaBackendUtils
     public static FikaCustomRaidSettings CustomRaidSettings { get; set; } = new();
 
     internal static bool RequestFikaWorld;
-    internal static Vector3 ReconnectPosition = Vector3.zero;
+    internal static Vector3 ReconnectPosition;
+    internal static Vector2 ReconnectRotation;
 
     internal static MatchMakerAcceptScreen MatchMakerAcceptScreenInstance { get; set; }
     internal static PlayersRaidReadyPanel PlayersRaidReadyPanel { get; set; }
@@ -85,6 +86,7 @@ public static class FikaBackendUtils
         RequestFikaWorld = false;
         IsReconnect = false;
         ReconnectPosition = Vector3.zero;
+        ReconnectRotation = Vector2.zero;
         GroupPlayers?.Clear();
         DissonanceComms_Start_Patch.IsReady = false;
     }

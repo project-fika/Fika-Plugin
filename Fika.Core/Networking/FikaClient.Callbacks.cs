@@ -689,6 +689,7 @@ public sealed partial class FikaClient
                         coopGame.Profile_0.Health = packet.ProfileHealthClass;
                     }
                     FikaBackendUtils.ReconnectPosition = packet.PlayerPosition;
+                    FikaBackendUtils.ReconnectRotation = packet.PlayerRotation;
                     break;
                 case ReconnectPacket.EReconnectDataType.Finished:
                     fikaGame.GameController.GameInstance.SetMatchmakerStatus(LocaleUtils.UI_FINISH_RECONNECT.Localized());

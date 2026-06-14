@@ -5,7 +5,7 @@ using EFT.Interactive;
 
 namespace Fika.Core.Networking.Packets.World;
 
-public class ReconnectPacket : INetSerializable
+public sealed class ReconnectPacket : INetSerializable
 {
     public bool IsRequest;
     public bool InitialRequest;
@@ -15,6 +15,7 @@ public class ReconnectPacket : INetSerializable
     public Profile Profile;
     public Profile.ProfileHealthClass ProfileHealthClass;
     public Vector3 PlayerPosition;
+    public Vector2 PlayerRotation;
 
     public List<SmokeGrenadeDataPacketStruct> ThrowableData;
     public List<WorldInteractiveObject.WorldInteractiveDataPacketStruct> InteractivesData;
@@ -47,6 +48,7 @@ public class ReconnectPacket : INetSerializable
                     Profile = reader.GetProfile();
                     ProfileHealthClass = SimpleZlib.Decompress(reader.GetByteArray()).ParseJsonTo<Profile.ProfileHealthClass>();
                     PlayerPosition = reader.GetUnmanaged<Vector3>();
+                    PlayerRotation = reader.GetUnmanaged<Vector2>();
                     break;
                 case EReconnectDataType.Finished:
                 default:
@@ -81,6 +83,7 @@ public class ReconnectPacket : INetSerializable
                     writer.PutProfile(Profile);
                     writer.PutByteArray(SimpleZlib.CompressToBytes(ProfileHealthClass.ToJson(), 4));
                     writer.PutUnmanaged(PlayerPosition);
+                    writer.PutUnmanaged(PlayerRotation);
                     break;
                 case EReconnectDataType.Finished:
                 default:

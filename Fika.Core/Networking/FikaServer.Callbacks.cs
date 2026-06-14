@@ -328,7 +328,8 @@ public sealed partial class FikaServer
                             Type = EReconnectDataType.OwnCharacter,
                             Profile = observedPlayer.Profile,
                             ProfileHealthClass = observedPlayer.NetworkHealthController.Store(),
-                            PlayerPosition = observedPlayer.Position
+                            PlayerPosition = observedPlayer.Position,
+                            PlayerRotation = observedPlayer.Rotation
                         };
 
                         SendDataToPeer(ref ownCharacterPacket, DeliveryMethod.ReliableOrdered, peer);
