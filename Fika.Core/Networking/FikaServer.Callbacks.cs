@@ -336,6 +336,8 @@ public sealed partial class FikaServer
                         observedPlayer.HealthBar.RemoveAllActiveEffects();
                         SendGenericPacket(EGenericSubPacketType.ClearEffects,
                             ClearEffects.FromValue(observedPlayer.NetId), true, peer);
+
+                        break;
                     }
                 }
 
