@@ -337,6 +337,10 @@ public sealed partial class FikaServer
                         SendGenericPacket(EGenericSubPacketType.ClearEffects,
                             ClearEffects.FromValue(observedPlayer.NetId), true, peer);
 
+                        observedPlayer.Snapshotter.Clear();
+                        SendGenericPacket(EGenericSubPacketType.ClearSnapshotter,
+                           ClearSnapshotter.FromValue(observedPlayer.NetId), true, peer);
+
                         break;
                     }
                 }

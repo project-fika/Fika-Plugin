@@ -36,6 +36,7 @@ internal sealed class GenericSubPacketPoolManager : BasePacketPoolManager<EGener
             SendCharacterPacket.CreateInstance,         // EGenericSubPacketType.SendCharacterPacket = 16
             SyncableItemPacket.CreateInstance,          // EGenericSubPacketType.SyncableItem = 17
             SpawnAI.CreateInstance,                     // EGenericSubPacketType.SyncableItem = 18
+            ClearSnapshotter.CreateInstance,            // EGenericSubPacketType.ClearSnapshotter = 19
         ];
     }
 }
