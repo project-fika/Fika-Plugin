@@ -504,7 +504,7 @@ public static class FikaGlobals
         }
         else
         {
-            throw new NullReferenceException($"Failed to find private field [{fieldName}] in base class.");
+            throw new NullReferenceException($"Failed to find private field [{fieldName}] in {typeof(T).Name}.");
         }
     }
 
@@ -533,7 +533,7 @@ public static class FikaGlobals
         }
         else
         {
-            throw new NullReferenceException($"Failed to find private field [{fieldName}] in base class.");
+            throw new NullReferenceException($"Failed to find private field [{fieldName}] in {typeof(T).Name}.");
         }
     }
 }
