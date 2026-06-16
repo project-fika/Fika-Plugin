@@ -462,11 +462,11 @@ public class LiteNetPeer : IPEndPoint
     }
 
     //Reject
-    internal void Reject(NetConnectRequestPacket requestData, byte[] data, int start, int length)
+    internal void Reject(NetConnectRequestPacket requestData, ReadOnlySpan<byte> data)
     {
         _connectTime = requestData.ConnectionTime;
         _connectNum = requestData.ConnectionNumber;
-        Shutdown(data, start, length, false);
+        Shutdown(data, false);
     }
 
     internal bool ProcessConnectAccept(NetConnectAcceptPacket packet)
@@ -737,6 +737,9 @@ public class LiteNetPeer : IPEndPoint
     public void Disconnect(byte[] data, int start, int count) =>
         NetManager.DisconnectPeer(this, data, start, count);
 
+    public void Disconnect(ReadOnlySpan<byte> data) =>
+            NetManager.DisconnectPeer(this, data);
+
     public void Disconnect() =>
         NetManager.DisconnectPeer(this);
 
@@ -771,7 +774,7 @@ public class LiteNetPeer : IPEndPoint
     /// Queued reliable packets are bypassed and dropped immediately.
     /// </param>
     /// <returns>A <see cref="ShutdownResult"/> indicating the state change transition.</returns>
-    internal ShutdownResult Shutdown(byte[] data, int start, int length, bool force)
+    internal ShutdownResult Shutdown(ReadOnlySpan<byte> data, bool force)
     {
         lock (_shutdownLock)
         {
@@ -797,16 +800,16 @@ public class LiteNetPeer : IPEndPoint
             Interlocked.Exchange(ref _timeSinceLastPacket, 0);
 
             //send shutdown packet
-            _shutdownPacket = new NetPacket(PacketProperty.Disconnect, length) { ConnectionNumber = _connectNum };
+            _shutdownPacket = new NetPacket(PacketProperty.Disconnect, data.Length) { ConnectionNumber = _connectNum };
             FastBitConverter.GetBytes(_shutdownPacket.RawData, 1, _connectTime);
             if (_shutdownPacket.Size >= _mtu)
             {
                 //Drop additional data
                 NetDebug.WriteError("[Peer] Disconnect additional data size more than MTU - 8!");
             }
-            else if (data != null && length > 0)
+            else if (!data.IsEmpty)
             {
-                Buffer.BlockCopy(data, start, _shutdownPacket.RawData, 9, length);
+                data.CopyTo(_shutdownPacket.RawData.AsSpan(9));
             }
             _connectionState = ConnectionState.ShutdownRequested;
             NetDebug.Write("[Peer] Send disconnect");
