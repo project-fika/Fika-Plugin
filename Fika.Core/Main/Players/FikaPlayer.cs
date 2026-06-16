@@ -92,18 +92,18 @@ public class FikaPlayer : LocalPlayer
     private FikaVOIPController _voipController;
     private Bleedout _bleedout;
 
-    private bool _playedAtLeastOneStep1;
-    private float _sprintSurfaceCheck1 = 60f;
-    private float _runSurfaceCheck1 = 40f;
-    private float _landSurfaceCheck1 = 40f;
-    private float _proneSurfaceCheck1 = 30f;
     protected EPlayerState _currentState;
-    private float _lastStepTime1;
     private float _sign;
     private float _turnSoundTimer;
-    private GInterface95 _specificStepAudioController1;
 
-    private static Func<Player, SurfaceSet> GetCurrentSet;
+    private static Func<Player, SurfaceSet> _getCurrentSet;
+    private static Func<Player, float> _getLastStepTime;
+    private static Action<Player, float> _setLastStepTime;
+    private static Action<Player, bool> _setPlayedAtLeastOneStep;
+    private static Func<Player, bool> _getPlayedAtLeastOneStep;
+    private static Func<Player, float> _getSprintSurfaceCheck;
+    private static Func<Player, float> _getRunSurfaceCheck;
+    private static Func<Player, GInterface95> _getSpecificStepAudioController;
     #endregion
 
     /// <summary>
@@ -219,20 +219,19 @@ public class FikaPlayer : LocalPlayer
 
     private void AssignGetCurrentSet()
     {
-        var fieldInfo = typeof(Player).GetField("_currentSet",
-            BindingFlags.Instance | BindingFlags.NonPublic);
+        _getCurrentSet = FikaGlobals.CreateGetter<Player, SurfaceSet>("_currentSet");
 
-        if (fieldInfo != null)
-        {
-            var targetParam = Expression.Parameter(typeof(Player), "instance");
-            var fieldAccess = Expression.Field(targetParam, fieldInfo);
+        _getLastStepTime = FikaGlobals.CreateGetter<Player, float>("_lastStepTime");
+        _setLastStepTime = FikaGlobals.CreateSetter<Player, float>("_lastStepTime");
 
-            GetCurrentSet = Expression.Lambda<Func<Player, SurfaceSet>>(fieldAccess, targetParam).Compile();
-        }
-        else
-        {
-            FikaGlobals.LogError("Failed to find private field _currentSet in base class.");
-        }
+        _getPlayedAtLeastOneStep = FikaGlobals.CreateGetter<Player, bool>("_playedAtLeastOneStep");
+        _setPlayedAtLeastOneStep = FikaGlobals.CreateSetter<Player, bool>("_playedAtLeastOneStep");
+
+        _getSprintSurfaceCheck = FikaGlobals.CreateGetter<Player, float>("_sprintSurfaceCheck");
+
+        _getRunSurfaceCheck = FikaGlobals.CreateGetter<Player, float>("_runSurfaceCheck");
+
+        _getSpecificStepAudioController = FikaGlobals.CreateGetter<Player, GInterface95>("_specificStepAudioController");
     }
 
     public override void InitAudioController()
@@ -243,7 +242,7 @@ public class FikaPlayer : LocalPlayer
 
     protected void SetupFikaAudio()
     {
-        if (GetCurrentSet == null)
+        if (_getCurrentSet == null)
         {
             AssignGetCurrentSet();
         }
@@ -252,16 +251,6 @@ public class FikaPlayer : LocalPlayer
         MovementContext.OnStateChanged += MovementContext_OnStateChanged;
 
         var traverse = Traverse.Create(this);
-        foreach (var sufaceSet in traverse.Field<Dictionary<BaseBallistic.ESurfaceSound, SurfaceSet>>("_soundBySurface").Value.Values)
-        {
-            _runSurfaceCheck1 = Math.Max(_runSurfaceCheck1, sufaceSet.RunSoundBank.Rolloff);
-            _sprintSurfaceCheck1 = Math.Max(_sprintSurfaceCheck1, sufaceSet.SprintSoundBank.Rolloff);
-            _landSurfaceCheck1 = Mathf.Max(_landSurfaceCheck1, sufaceSet.LandingSoundBank.Rolloff);
-            _proneSurfaceCheck1 = Mathf.Max(_proneSurfaceCheck1, sufaceSet.ProneSoundBank.Rolloff);
-        }
-
-        _specificStepAudioController1 = traverse.Field<GInterface95>("_specificStepAudioController").Value;
-
         var idleField = traverse.Field<Coroutine>("_idleCoroutine");
         if (idleField.Value != null)
         {
@@ -277,16 +266,16 @@ public class FikaPlayer : LocalPlayer
         switch (previousState)
         {
             case EPlayerState.Sprint:
-                _playedAtLeastOneStep1 = false;
-                if (!_playedAtLeastOneStep1 && CheckSurface(_sprintSurfaceCheck1))
+                _setPlayedAtLeastOneStep(this, false);
+                if (!_getPlayedAtLeastOneStep(this) && CheckSurface(_getSprintSurfaceCheck(this)))
                 {
-                    DefaultPlay(GetCurrentSet(this).SprintSoundBank, 1f, EAudioMovementState.Sprint);
+                    DefaultPlay(_getCurrentSet(this).SprintSoundBank, 1f, EAudioMovementState.Sprint);
                 }
 
                 if (nextState == EPlayerState.Transition || nextState == EPlayerState.Idle)
                 {
-                    var volumeMod = FirstPersonPointOfView ? GetCurrentSet(this).StopSoundBank.BaseVolume : 1f;
-                    DefaultPlay(GetCurrentSet(this).StopSoundBank,
+                    var volumeMod = FirstPersonPointOfView ? _getCurrentSet(this).StopSoundBank.BaseVolume : 1f;
+                    DefaultPlay(_getCurrentSet(this).StopSoundBank,
                         volumeMod * MovementContext.CovertMovementVolume, EAudioMovementState.Stop);
                 }
                 break;
@@ -295,21 +284,21 @@ public class FikaPlayer : LocalPlayer
             case EPlayerState.MoveZombieState:
             case EPlayerState.StartMoveZombieState:
             case EPlayerState.EndMoveZombieState:
-                _playedAtLeastOneStep1 = false;
-                if (!_playedAtLeastOneStep1 && SinceLastStep > 0.66f)
+                _setPlayedAtLeastOneStep(this, false);
+                if (!_getPlayedAtLeastOneStep(this) && SinceLastStep > 0.66f)
                 {
-                    if (CheckSurface(_runSurfaceCheck1))
+                    if (CheckSurface(_getRunSurfaceCheck(this)))
                     {
                         PlayStepSound();
                     }
-                    _lastStepTime1 = Time.time;
+                    _setLastStepTime(this, Time.time);
                 }
                 break;
         }
 
         if (nextState == EPlayerState.Jump)
         {
-            DefaultPlay(GetCurrentSet(this).JumpSoundBank, 1f, EAudioMovementState.Jump);
+            DefaultPlay(_getCurrentSet(this).JumpSoundBank, 1f, EAudioMovementState.Jump);
             method_60(MovementContext.CovertEquipmentNoise, true);
         }
         else if (nextState == EPlayerState.Prone2Stand)
@@ -323,7 +312,7 @@ public class FikaPlayer : LocalPlayer
 
             if (previousState == EPlayerState.Sprint)
             {
-                DefaultPlay(GetCurrentSet(this).ProneDropSoundBank, finalVolume, moveState);
+                DefaultPlay(_getCurrentSet(this).ProneDropSoundBank, finalVolume, moveState);
             }
             else
             {
@@ -335,7 +324,7 @@ public class FikaPlayer : LocalPlayer
 
         if (CurrentState.Name != _currentState)
         {
-            _playedAtLeastOneStep1 = false;
+            _setPlayedAtLeastOneStep(this, false);
         }
     }
 
@@ -375,18 +364,18 @@ public class FikaPlayer : LocalPlayer
         if (Math.Abs(_sign - currentSignValue) >= 1E-45f)
         {
             _sign = currentSignValue;
-            var elapsed = Time.time - _lastStepTime1;
+            var elapsed = Time.time - _getLastStepTime(this);
 
             if (elapsed > 0.2f && MovementContext.FreefallTime < 0.6f)
             {
-                _playedAtLeastOneStep1 = true;
-                _lastStepTime1 = Time.time;
+                _setPlayedAtLeastOneStep(this, true);
+                _setLastStepTime(this, Time.time);
                 method_65(NestedStepSoundSource);
 
-                if (CheckSurface(_sprintSurfaceCheck1))
+                if (CheckSurface(_getSprintSurfaceCheck(this)))
                 {
                     UpdateMuffledState();
-                    var sprintBank = GetCurrentSet(this).SprintSoundBank;
+                    var sprintBank = _getCurrentSet(this).SprintSoundBank;
 
                     var volumeBase = FirstPersonPointOfView ? sprintBank.BaseVolume : 1f;
                     var weightMod = 0.5f + (3f * Physical.Overweight);
@@ -396,7 +385,7 @@ public class FikaPlayer : LocalPlayer
 
                     sprintBank.Play(NestedStepSoundSource, EnvironmentType.Outdoor, Distance,
                         finalVolume, Distance, FirstPersonPointOfView, true);
-                    _specificStepAudioController1.Play(EAudioMovementState.Sprint, Environment,
+                    _getSpecificStepAudioController(this).Play(EAudioMovementState.Sprint, Environment,
                         Distance, finalVolume, Distance, FirstPersonPointOfView);
 
                     method_60(1f, false);
@@ -422,13 +411,12 @@ public class FikaPlayer : LocalPlayer
         {
             _sign = single_;
             var sinceLastStep = SinceLastStep;
-
             if (sinceLastStep > 0.2f && MovementContext.FreefallTime < 1f)
             {
-                _lastStepTime1 = Time.time;
-                _playedAtLeastOneStep1 = true;
+                _setLastStepTime(this, Time.time);
+                _setPlayedAtLeastOneStep(this, true);
 
-                if (CheckSurface(_runSurfaceCheck1))
+                if (CheckSurface(_getRunSurfaceCheck(this)))
                 {
                     if (sinceLastStep < 1.2f && FirstPersonPointOfView)
                     {

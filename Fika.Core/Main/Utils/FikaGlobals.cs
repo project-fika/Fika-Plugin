@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
@@ -478,5 +479,61 @@ public static class FikaGlobals
         }
 
         return true;
+    }
+
+    /// <summary>
+    /// Dynamically creates and compiles a high-performance getter delegate for a private instance field using Expression Trees.
+    /// </summary>
+    /// <typeparam name="T">The declaring <see cref="Type"/> of the class containing the field.</typeparam>
+    /// <typeparam name="TResult">The <see cref="Type"/> of the field value to retrieve.</typeparam>
+    /// <param name="fieldName">The exact case-sensitive name of the private field.</param>
+    /// <returns>A compiled <see cref="Func{T, TResult}"/> delegate that yields the field value when invoked.</returns>
+    /// <exception cref="NullReferenceException">Thrown when the specified <paramref name="fieldName"/> cannot be found via reflection.</exception>
+    public static Func<T,TResult> CreateGetter<T,TResult>(string fieldName)
+    {
+        var fieldInfo = typeof(T).GetField(fieldName,
+            BindingFlags.Instance | BindingFlags.NonPublic);
+
+        if (fieldInfo != null)
+        {
+            var targetParam = Expression.Parameter(typeof(T), "instance");
+            var fieldAccess = Expression.Field(targetParam, fieldInfo);
+
+            return Expression.Lambda<Func<T, TResult>>(fieldAccess, targetParam)
+                .Compile();
+        }
+        else
+        {
+            throw new NullReferenceException($"Failed to find private field [{fieldName}] in base class.");
+        }
+    }
+
+    /// <summary>
+    /// Dynamically creates and compiles a high-performance setter delegate for a private instance field using Expression Trees.
+    /// </summary>
+    /// <typeparam name="T">The declaring <see cref="Type"/> of the class containing the field.</typeparam>
+    /// <typeparam name="TResult">The <see cref="Type"/> of the field value to assign.</typeparam>
+    /// <param name="fieldName">The exact case-sensitive name of the private field.</param>
+    /// <returns>A compiled <see cref="Action{T, TResult}"/> delegate that assigns a new value to the field when invoked.</returns>
+    /// <exception cref="NullReferenceException">Thrown when the specified <paramref name="fieldName"/> cannot be found via reflection.</exception>
+    public static Action<T,TResult> CreateSetter<T, TResult>(string fieldName)
+    {
+        var fieldInfo = typeof(T).GetField(fieldName,
+            BindingFlags.Instance | BindingFlags.NonPublic);
+
+        if (fieldInfo != null)
+        {
+            var targetParam = Expression.Parameter(typeof(T), "instance");
+            var fieldAccess = Expression.Field(targetParam, fieldInfo);
+            var valueParam = Expression.Parameter(typeof(TResult), "value");
+            var assignExpr = Expression.Assign(fieldAccess, valueParam);
+
+            return Expression.Lambda<Action<T, TResult>>(assignExpr, targetParam, valueParam)
+                .Compile();
+        }
+        else
+        {
+            throw new NullReferenceException($"Failed to find private field [{fieldName}] in base class.");
+        }
     }
 }
