@@ -305,7 +305,7 @@ public partial class LiteNetManager : IEnumerable<LiteNetPeer>
         DisconnectReason reason,
         SocketError socketErrorCode,
         NetPacket eventData) =>
-        DisconnectPeer(peer, reason, socketErrorCode, true, null, 0, 0, eventData);
+        DisconnectPeer(peer, reason, socketErrorCode, true, ReadOnlySpan<byte>.Empty, eventData);
 
     /// <summary>
     /// Disconnects a peer and handles internal state cleanup.
@@ -327,12 +327,10 @@ public partial class LiteNetManager : IEnumerable<LiteNetPeer>
         DisconnectReason reason,
         SocketError socketErrorCode,
         bool force,
-        byte[] data,
-        int start,
-        int count,
+        ReadOnlySpan<byte> data,
         NetPacket eventData)
     {
-        var shutdownResult = peer.Shutdown(data, start, count, force);
+        var shutdownResult = peer.Shutdown(data, force);
         if (shutdownResult == ShutdownResult.None)
         {
             return;
@@ -658,16 +656,16 @@ public partial class LiteNetManager : IEnumerable<LiteNetPeer>
     protected virtual LiteConnectionRequest CreateConnectionRequest(IPEndPoint remoteEndPoint, NetConnectRequestPacket requestPacket) =>
         new LiteConnectionRequest(remoteEndPoint, requestPacket, this);
 
-    internal LiteNetPeer OnConnectionSolved(LiteConnectionRequest request, byte[] rejectData, int start, int length)
+    internal LiteNetPeer OnConnectionSolved(LiteConnectionRequest request, ReadOnlySpan<byte> rejectData)
     {
         LiteNetPeer netPeer = null;
 
         if (request.Result == ConnectionRequestResult.RejectForce)
         {
             NetDebug.Write(NetLogLevel.Trace, "[NM] Peer connect reject force.");
-            if (rejectData != null && length > 0)
+            if (!rejectData.IsEmpty)
             {
-                var shutdownPacket = PoolGetWithProperty(PacketProperty.Disconnect, length);
+                var shutdownPacket = PoolGetWithProperty(PacketProperty.Disconnect, rejectData.Length);
                 shutdownPacket.ConnectionNumber = request.InternalPacket.ConnectionNumber;
                 FastBitConverter.GetBytes(shutdownPacket.RawData, 1, request.InternalPacket.ConnectionTime);
                 if (shutdownPacket.Size >= NetConstants.PossibleMtu[0])
@@ -676,7 +674,7 @@ public partial class LiteNetManager : IEnumerable<LiteNetPeer>
                 }
                 else
                 {
-                    Buffer.BlockCopy(rejectData, start, shutdownPacket.RawData, 9, length);
+                    rejectData.CopyTo(shutdownPacket.RawData.AsSpan(9));
                 }
 
                 SendRawAndRecycle(shutdownPacket, request.RemoteEndPoint);
@@ -697,7 +695,7 @@ public partial class LiteNetManager : IEnumerable<LiteNetPeer>
                 else if (request.Result == ConnectionRequestResult.Reject)
                 {
                     netPeer = CreateRejectPeer(request.RemoteEndPoint, GetNextPeerId());
-                    netPeer.Reject(request.InternalPacket, rejectData, start, length);
+                    netPeer.Reject(request.InternalPacket, rejectData);
                     AddPeer(netPeer);
                     NetDebug.Write(NetLogLevel.Trace, "[NM] Peer connect reject.");
                 }
@@ -1602,7 +1600,7 @@ public partial class LiteNetManager : IEnumerable<LiteNetPeer>
         //Send last disconnect
         for (var netPeer = _headPeer; netPeer != null; netPeer = netPeer.NextPeer)
         {
-            netPeer.Shutdown(null, 0, 0, !sendDisconnectMessages);
+            netPeer.Shutdown(ReadOnlySpan<byte>.Empty, !sendDisconnectMessages);
         }
 
         //Stop
@@ -1693,7 +1691,7 @@ public partial class LiteNetManager : IEnumerable<LiteNetPeer>
     /// Disconnect all peers without any additional data
     /// </summary>
     public void DisconnectAll() =>
-        DisconnectAll(null, 0, 0);
+        DisconnectAll(ReadOnlySpan<byte>.Empty);
 
     /// <summary>
     /// Disconnect all peers with shutdown message
@@ -1701,7 +1699,16 @@ public partial class LiteNetManager : IEnumerable<LiteNetPeer>
     /// <param name="data">Data to send (must be less or equal MTU)</param>
     /// <param name="start">Data start</param>
     /// <param name="count">Data count</param>
-    public void DisconnectAll(byte[] data, int start, int count)
+    public void DisconnectAll(byte[] data, int start, int count) =>
+        DisconnectAll(new ReadOnlySpan<byte>(data, start, count));
+
+    /// <summary>
+    /// Disconnect all peers with shutdown message
+    /// </summary>
+    /// <param name="data">Data to send (must be less or equal MTU)</param>
+    /// <param name="start">Data start</param>
+    /// <param name="count">Data count</param>
+    public void DisconnectAll(ReadOnlySpan<byte> data)
     {
         //Send disconnect packets
         _peersLock.EnterReadLock();
@@ -1713,8 +1720,6 @@ public partial class LiteNetManager : IEnumerable<LiteNetPeer>
                 0,
                 false,
                 data,
-                start,
-                count,
                 null);
         }
         _peersLock.ExitReadLock();
@@ -1732,7 +1737,7 @@ public partial class LiteNetManager : IEnumerable<LiteNetPeer>
     /// </summary>
     /// <param name="peer">peer to disconnect</param>
     public void DisconnectPeer(LiteNetPeer peer) =>
-        DisconnectPeer(peer, null, 0, 0);
+        DisconnectPeer(peer, ReadOnlySpan<byte>.Empty);
 
     /// <summary>
     /// Disconnect peer from server and send additional data (Size must be less or equal MTU - 8)
@@ -1740,7 +1745,7 @@ public partial class LiteNetManager : IEnumerable<LiteNetPeer>
     /// <param name="peer">peer to disconnect</param>
     /// <param name="data">additional data</param>
     public void DisconnectPeer(LiteNetPeer peer, byte[] data) =>
-        DisconnectPeer(peer, data, 0, data.Length);
+        DisconnectPeer(peer, new ReadOnlySpan<byte>(data));
 
     /// <summary>
     /// Disconnect peer from server and send additional data (Size must be less or equal MTU - 8)
@@ -1748,7 +1753,7 @@ public partial class LiteNetManager : IEnumerable<LiteNetPeer>
     /// <param name="peer">peer to disconnect</param>
     /// <param name="writer">additional data</param>
     public void DisconnectPeer(LiteNetPeer peer, NetDataWriter writer) =>
-        DisconnectPeer(peer, writer.Data, 0, writer.Length);
+        DisconnectPeer(peer, writer.AsReadOnlySpan());
 
     /// <summary>
     /// Disconnect peer from server and send additional data (Size must be less or equal MTU - 8)
@@ -1757,7 +1762,15 @@ public partial class LiteNetManager : IEnumerable<LiteNetPeer>
     /// <param name="data">additional data</param>
     /// <param name="start">data start</param>
     /// <param name="count">data length</param>
-    public void DisconnectPeer(LiteNetPeer peer, byte[] data, int start, int count)
+    public void DisconnectPeer(LiteNetPeer peer, byte[] data, int start, int count) =>
+        DisconnectPeer(peer, new ReadOnlySpan<byte>(data, start, count));
+
+    /// <summary>
+    /// Disconnect peer from server and send additional data (Size must be less or equal MTU - 8)
+    /// </summary>
+    /// <param name="peer">peer to disconnect</param>
+    /// <param name="data">additional data</param>
+    public void DisconnectPeer(LiteNetPeer peer, ReadOnlySpan<byte> data)
     {
         DisconnectPeer(
             peer,
@@ -1765,8 +1778,6 @@ public partial class LiteNetManager : IEnumerable<LiteNetPeer>
             0,
             false,
             data,
-            start,
-            count,
             null);
     }
 
