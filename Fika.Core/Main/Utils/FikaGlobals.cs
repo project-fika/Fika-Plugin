@@ -489,7 +489,7 @@ public static class FikaGlobals
     /// <param name="fieldName">The exact case-sensitive name of the private field.</param>
     /// <returns>A compiled <see cref="Func{T, TResult}"/> delegate that yields the field value when invoked.</returns>
     /// <exception cref="NullReferenceException">Thrown when the specified <paramref name="fieldName"/> cannot be found via reflection.</exception>
-    public static Func<T,TResult> CreateGetter<T,TResult>(string fieldName)
+    public static Func<T, TResult> CreateGetter<T, TResult>(string fieldName)
     {
         var fieldInfo = typeof(T).GetField(fieldName,
             BindingFlags.Instance | BindingFlags.NonPublic);
@@ -516,7 +516,7 @@ public static class FikaGlobals
     /// <param name="fieldName">The exact case-sensitive name of the private field.</param>
     /// <returns>A compiled <see cref="Action{T, TResult}"/> delegate that assigns a new value to the field when invoked.</returns>
     /// <exception cref="NullReferenceException">Thrown when the specified <paramref name="fieldName"/> cannot be found via reflection.</exception>
-    public static Action<T,TResult> CreateSetter<T, TResult>(string fieldName)
+    public static Action<T, TResult> CreateSetter<T, TResult>(string fieldName)
     {
         var fieldInfo = typeof(T).GetField(fieldName,
             BindingFlags.Instance | BindingFlags.NonPublic);

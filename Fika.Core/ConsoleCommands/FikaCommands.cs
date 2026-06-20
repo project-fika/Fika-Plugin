@@ -119,6 +119,46 @@ public class FikaCommands
         localPlayer.ToggleDowned(downed);
     }
 
+    [ConsoleCommand("heal", description: "Heals local player fully")]
+    public static void Heal()
+    {
+        if (!CheckForGame())
+        {
+            return;
+        }
+
+        var localPlayer = (FikaPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+        localPlayer.ActiveHealthController.RestoreFullHealth();
+    }
+
+    [ConsoleCommand("killMe", description: "Kills the local player")]
+    public static void KillMe()
+    {
+        if (!CheckForGame())
+        {
+            return;
+        }
+
+        var localPlayer = (FikaPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+        localPlayer.KillMe(EBodyPartColliderType.HeadCommon, 10_000f);
+    }
+
+    [ConsoleCommand("destroyLimb", description: "Destroys a limb")]
+    public static void DestroyLimb([ConsoleArgument(EBodyPart.Stomach, "the limb to destroy")] EBodyPart bodyPart)
+    {
+        if (!CheckForGame())
+        {
+            return;
+        }
+
+        var localPlayer = (FikaPlayer)Singleton<GameWorld>.Instance.MainPlayer;
+        if (localPlayer.ActiveHealthController.Dictionary_0.TryGetValue(bodyPart, out var partState))
+        {
+            localPlayer.ActiveHealthController.ChangeHealth(bodyPart, -partState.Health.Current, GClass3051.UndefinedDamage);
+            localPlayer.ActiveHealthController.DestroyBodyPart(bodyPart, EDamageType.Undefined);
+        }
+    }
+
     [ConsoleCommand("god", description: "Set god mode on/off")]
     public static void God([ConsoleArgument(false, "true or false to toggle god mode")] bool state)
     {

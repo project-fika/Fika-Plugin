@@ -4,6 +4,7 @@ using EFT;
 using EFT.InventoryLogic;
 using EFT.UI;
 using EFT.UI.Screens;
+using Fika.Core.Main.Components;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Packets.Player.Common;
 using Fika.Core.Networking.Packets.Player.Common.SubPackets;
@@ -18,9 +19,10 @@ public sealed class ClientHealthController(Profile.ProfileHealthClass healthInfo
     {
         get
         {
-            return !_bledOut && (_maxRevives == 0 || _revives < _maxRevives);
+            return !_bledOut && (_maxRevives == 0 || _revives < _maxRevives) && CanBeRevivedByOtherPlayer();
         }
     }
+
     public float BleedoutTime { get; } = FikaPlugin.Instance.Settings.ReviveConfig.BleedoutTime;
     public bool ShouldBleedOut => BleedoutTime > 0f;
 
@@ -38,6 +40,25 @@ public sealed class ClientHealthController(Profile.ProfileHealthClass healthInfo
         {
             return true;
         }
+    }
+
+    public void EnableMetabolism()
+    {
+        Boolean_0 = false;
+    }
+
+    /// <summary>
+    /// Checks if any other players are alive that can revive
+    /// </summary>
+    /// <returns><see langword="true"/> if someone can revive; otherwise <see langword="false"/></returns>
+    private bool CanBeRevivedByOtherPlayer()
+    {
+        if (CoopHandler.TryGetCoopHandler(out var coopHandler))
+        {
+            return !coopHandler.AreAllHumanPlayersDead();
+        }
+
+        return false;
     }
 
     /// <summary>
@@ -84,6 +105,15 @@ public sealed class ClientHealthController(Profile.ProfileHealthClass healthInfo
     {
         _revives++;
         Downed = false;
+        if (Energy.Current <= 20f)
+        {
+            ChangeEnergy(20f);
+        }
+
+        if (Hydration.Current <= 20f)
+        {
+            ChangeHydration(20f);
+        }
 
         if (ShouldBleedOut)
         {
@@ -121,17 +151,12 @@ public sealed class ClientHealthController(Profile.ProfileHealthClass healthInfo
             return false;
         }
 
-        if (_grenadesKills && _fikaPlayer.LatestDamageInfo.DamageType is EDamageType.GrenadeFragment)
+        if (CheckIfDamageShouldInstantKill())
         {
             return false;
         }
 
         if ((_fikaPlayer.LatestDamageInfo.DamageType & (EDamageType.Exhaustion | EDamageType.Dehydration)) != 0) // starving / dehydration will not trigger downed
-        {
-            return false;
-        }
-
-        if (_fikaPlayer.LastDamagedBodyPart is EBodyPart.Head && _headshotKills)
         {
             return false;
         }

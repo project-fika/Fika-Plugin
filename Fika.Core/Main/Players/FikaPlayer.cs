@@ -79,6 +79,16 @@ public class FikaPlayer : LocalPlayer
         }
     }
 
+    public bool Downed
+    {
+        get;
+        internal set
+        {
+            field = value;
+            OnPlayerDownedChanged?.Invoke(this, value);
+        }
+    }
+
     protected MongoID? _lastWeaponId;
     protected Action[] _armorUnsubcribes = new Action[Inventory.ArmorSlots.Length];
 
@@ -116,6 +126,10 @@ public class FikaPlayer : LocalPlayer
     /// Invoked when a player is killed
     /// </summary>
     public static Action<FikaPlayer> OnPlayerDeath { get; set; }
+    /// <summary>
+    /// Invoked when a player down state changes
+    /// </summary>
+    public static Action<FikaPlayer, bool> OnPlayerDownedChanged { get; set; }
 
     public static async Task<FikaPlayer> Create(GameWorld gameWorld, int playerId, Vector3 position,
         Quaternion rotation, string layerName, string prefix, EPointOfView pointOfView, Profile profile,
@@ -500,11 +514,14 @@ public class FikaPlayer : LocalPlayer
             return;
         }
 
+        Downed = downed;
+
         if (downed)
         {
             Speaker.Play(EPhraseTrigger.OnAgony, HealthStatus, true);
             ActiveHealthController.SetDamageCoeff(0f);
             ActiveHealthController.PauseAllEffects();
+            ActiveHealthController.DisableMetabolism();
             MovementContext.IsInPronePose = true;
             HideWeapon();
             ((SimpleCharacterController)CharacterController).IsMoveIgnored = true;
@@ -542,6 +559,7 @@ public class FikaPlayer : LocalPlayer
             ((SimpleCharacterController)CharacterController).IsMoveIgnored = false;
             MovementContext.IsAxesIgnored = false;
             var clientHealthController = _healthController as ClientHealthController;
+            clientHealthController.EnableMetabolism();
             clientHealthController.Revive();
             if (_bleedout != null)
             {
