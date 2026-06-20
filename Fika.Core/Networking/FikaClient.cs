@@ -165,7 +165,7 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
         _myProfileId = FikaBackendUtils.Profile.ProfileId;
         _genericPacket = new();
 
-        RegisterPacketsAndTypes();
+        await RegisterPacketsAndTypes();
 
 #if DEBUG
         AddDebugPackets();
@@ -235,7 +235,7 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
         return;
     }
 
-    private void RegisterPacketsAndTypes()
+    private Task RegisterPacketsAndTypes()
     {
         PoolUtils.CreateAll();
 
@@ -282,6 +282,8 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
         RegisterNetReusable<WeaponPacket>(OnWeaponPacketReceived);
         RegisterNetReusable<CommonPlayerPacket>(OnCommonPlayerPacketReceived);
         RegisterNetReusable<GenericPacket>(OnGenericPacketReceived);
+
+        return Task.CompletedTask;
     }
 
 #if DEBUG
