@@ -218,7 +218,9 @@ public class MainMenuUIScript : MonoBehaviour
             if (presence.Activity is EFikaPlayerPresence.IN_RAID && presence.RaidInformation.HasValue)
             {
                 var information = presence.RaidInformation.Value;
-                FikaGlobals.LogInfo($"Got presense: {information.Started}, {information.MatchId}");
+#if DEBUG
+                FikaGlobals.LogInfo($"Got presense: {information.Started}, {information.MatchId}"); 
+#endif
                 var side = information.Side == ESideType.Pmc ? "RaidSidePmc".Localized() : "RaidSideScav".Localized();
                 var time = ConvertToTime(information.Time, IsStaticTimeLocation(information.Location));
                 var tooltip = newPlayer.AddComponent<HoverTooltipArea>();
