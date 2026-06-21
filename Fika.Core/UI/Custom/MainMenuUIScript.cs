@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Comfort.Common;
 using EFT;
+using EFT.InventoryLogic;
 using EFT.UI;
 using Fika.Core.Bundles;
 using Fika.Core.Main.Utils;
@@ -219,7 +220,7 @@ public class MainMenuUIScript : MonoBehaviour
             {
                 var information = presence.RaidInformation.Value;
 #if DEBUG
-                FikaGlobals.LogInfo($"Got presense: {information.Started}, {information.MatchId}"); 
+                FikaGlobals.LogInfo($"Got presense: {information.Started}, {information.MatchId}");
 #endif
                 var side = information.Side == ESideType.Pmc ? "RaidSidePmc".Localized() : "RaidSideScav".Localized();
                 var time = ConvertToTime(information.Time, IsStaticTimeLocation(information.Location));
@@ -231,13 +232,6 @@ public class MainMenuUIScript : MonoBehaviour
 
                 if (!information.Started)
                 {
-                    if (JoinInProgress)
-                    {
-                        continue;
-                    }
-
-                    JoinInProgress = true;
-
                     var buttonGo = mainMenuUIPlayer.JoinButton.transform.parent.gameObject;
                     buttonGo.SetActive(true);
                     var tooltip2 = buttonGo.AddComponent<HoverTooltipArea>();
@@ -282,6 +276,29 @@ public class MainMenuUIScript : MonoBehaviour
                             JoinInProgress = false;
                             return;
                         }
+
+                        var tarkovAppTraverse = Traverse.Create(tarkovApplication);
+                        var mmc = tarkovAppTraverse.Field<MainMenuControllerClass>("mainMenuControllerClass").Value;
+
+#if !DEBUG
+                        if (location.AccessKeys.Length > 0 && information.Side is ESideType.Pmc)
+                        {
+                            var playerLevel = session.Profile.Info.Level;
+                            if (playerLevel >= location.MinPlayerLvlAccessKeys)
+                            {
+                                var playerItems = mmc.InventoryController.Inventory.GetPlayerItems(EPlayerItems.Equipment);
+                                var item = playerItems.FirstOrDefault(i => mmc.InventoryController.Examined(i) && location.AccessKeys.Contains(i.StringTemplateId));
+                                if (item == null)
+                                {
+                                    NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.MISSING_KEY_FOR_LOCATION.Localized(),
+                                        $"{location.AccessKeys[0]} Name".Localized()),
+                                        iconType: EFT.Communications.ENotificationIconType.Alert);
+                                    JoinInProgress = false;
+                                    return;
+                                }
+                            }
+                        }
+#endif
 
                         NotificationManagerClass.DisplayMessageNotification(LocaleUtils.CONNECTING_TO_SESSION.Localized(),
                             iconType: EFT.Communications.ENotificationIconType.EntryPoint);
@@ -339,8 +356,7 @@ public class MainMenuUIScript : MonoBehaviour
 
                             FikaBackendUtils.IsScav = raidSettings.IsScav;
 
-                            var tarkovAppTraverse = Traverse.Create(tarkovApplication);
-                            var controller = tarkovAppTraverse.Field<MainMenuControllerClass>("mainMenuControllerClass").Value.MatchmakerPlayerControllerClass;
+                            var controller = mmc.MatchmakerPlayerControllerClass;
 
                             if (raidSettings.Side is ESideType.Savage && ScavBlocked(session, out var minutesLeft))
                             {

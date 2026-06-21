@@ -60,6 +60,7 @@ public static class LocaleUtils
     public const string PEER_CONNECTED = "F_Client_PeerConnected";
     public const string PEER_DISCONNECTED = "F_Client_PeerDisconnected";
     public const string CONNECTING_TO_SESSION = "F_Client_ConnectingToSession";
+    public const string MISSING_KEY_FOR_LOCATION = "F_Client_MissingKeyForLocation";
     public const string ITEM_BLACKLISTED = "F_Client_ItemIsBlacklisted";
     public const string ITEM_CONTAINS_BLACKLISTED = "F_Client_ItemsContainsBlacklisted";
     public const string SAVED_PROFILE = "F_Client_SavedProfile";
