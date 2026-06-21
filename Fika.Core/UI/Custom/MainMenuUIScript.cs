@@ -245,6 +245,13 @@ public class MainMenuUIScript : MonoBehaviour
                     tooltip2.SetMessageText(LocaleUtils.UI_JOIN_RAID.Localized());
                     mainMenuUIPlayer.JoinButton.onClick.AddListener(async () =>
                     {
+                        if (JoinInProgress)
+                        {
+                            return;
+                        }
+
+                        JoinInProgress = true;
+
                         if (!TarkovApplication.Exist(out var tarkovApplication))
                         {
                             FikaGlobals.LogError("OnFikaStartRaid: Could not find TarkovApplication");
