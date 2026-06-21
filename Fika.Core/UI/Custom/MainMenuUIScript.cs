@@ -233,7 +233,7 @@ public class MainMenuUIScript : MonoBehaviour
                 {
                     if (JoinInProgress)
                     {
-                        return;
+                        continue;
                     }
 
                     JoinInProgress = true;
