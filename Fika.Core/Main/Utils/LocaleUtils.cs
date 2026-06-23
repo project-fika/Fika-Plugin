@@ -200,6 +200,8 @@ public static class LocaleUtils
     public const string BEPINEX_AUTO_EXTRACT_D = "F_BepInEx_AutoExtract_D";
     public const string BEPINEX_SHOW_EXTRACT_MESSAGE_T = "F_BepInEx_ShowExtractMessage_T";
     public const string BEPINEX_SHOW_EXTRACT_MESSAGE_D = "F_BepInEx_ShowExtractMessage_D";
+    public const string BEPINEX_SHOW_PLAYER_LIST_T = "F_BepInEx_ShowPlayersList_T";
+    public const string BEPINEX_SHOW_PLAYER_LIST_D = "F_BepInEx_ShowPlayersList_D";
     public const string BEPINEX_EXTRACT_KEY_T = "F_BepInEx_ExtractKey_T";
     public const string BEPINEX_EXTRACT_KEY_D = "F_BepInEx_ExtractKey_D";
     public const string BEPINEX_ENABLE_CHAT_T = "F_BepInEx_EnableChat_T";

@@ -285,11 +285,10 @@ public sealed class FikaConfig(ConfigFile config)
             "Extract Key", ref failed, headers);
 
         ShowPlayerList = SetupSetting(coopDefaultHeader, "Show In-Game Player List", true,
-            new ConfigDescription(LocaleUtils.BEPINEX_SHOW_EXTRACT_MESSAGE_D.Localized(), tags: new ConfigurationManagerAttributes // TODO
+            new ConfigDescription(LocaleUtils.BEPINEX_SHOW_PLAYER_LIST_D.Localized(), tags: new ConfigurationManagerAttributes
             {
                 Category = coopHeader,
-                /* DispName = LocaleUtils.BEPINEX_SHOW_EXTRACT_MESSAGE_T.Localized(), */ // TODO
-                DispName = "Show Player List",
+                DispName = LocaleUtils.BEPINEX_SHOW_PLAYER_LIST_T.Localized(),
                 Order = 4
             }),
             "Show In-Game Player List", ref failed, headers);
