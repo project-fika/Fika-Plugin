@@ -210,7 +210,9 @@ public class NetPeer : LiteNetPeer
     {
         var idx = channelNumber * NetConstants.ChannelTypeCount +
                   (byte)(ordered ? DeliveryMethod.ReliableOrdered : DeliveryMethod.ReliableUnordered);
-        return ((ReliableChannel)_channels[idx])?.PacketsInQueue ?? 0;
+        return _channels != null
+                ? ((ReliableChannel)_channels[idx])?.PacketsInQueue ?? 0
+                : 0;
     }
 
     /// <summary>
