@@ -33,9 +33,10 @@ public sealed partial class FikaClient
 {
     private void OnClearSnapshotterPacketReceived(ClearSnapshotterPacket packet)
     {
-        if (_coopHandler.Players.TryGetValue(packet.NetId, out var player))
+        if (_coopHandler.Players.TryGetValue(packet.NetId, out var player) && player is ObservedPlayer observedPlayer)
         {
-            player.Snapshotter.Clear();
+            observedPlayer.HealthBar.RemoveAllActiveEffects();
+            observedPlayer.Snapshotter.Clear();
             return;
         }
 

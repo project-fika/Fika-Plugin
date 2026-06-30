@@ -37,9 +37,10 @@ public sealed partial class FikaServer
 {
     private void OnClearSnapshotterPacketReceived(ClearSnapshotterPacket packet, NetPeer _)
     {
-        if (_coopHandler.Players.TryGetValue(packet.NetId, out var player))
+        if (_coopHandler.Players.TryGetValue(packet.NetId, out var player) && player is ObservedPlayer observedPlayer)
         {
-            player.Snapshotter.Clear();
+            observedPlayer.HealthBar.RemoveAllActiveEffects();
+            observedPlayer.Snapshotter.Clear();
             return;
         }
 
@@ -347,10 +348,6 @@ public sealed partial class FikaServer
                         };
 
                         SendDataToPeer(ref ownCharacterPacket, DeliveryMethod.ReliableOrdered, peer);
-
-                        observedPlayer.HealthBar.RemoveAllActiveEffects();
-                        SendGenericPacket(EGenericSubPacketType.ClearEffects,
-                            ClearEffects.FromValue(observedPlayer.NetId), true, peer);
 
                         break;
                     }

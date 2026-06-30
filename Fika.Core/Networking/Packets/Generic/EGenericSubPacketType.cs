@@ -26,11 +26,6 @@ public enum EGenericSubPacketType : byte
     ExfilCountdown,
 
     /// <summary>
-    /// Clear all active effects.
-    /// </summary>
-    ClearEffects,
-
-    /// <summary>
     /// Update backend data.
     /// </summary>
     UpdateBackendData,
@@ -93,7 +88,7 @@ public enum EGenericSubPacketType : byte
     /// <summary>
     /// Syncable item, e.g. window or lamp
     /// </summary>
-    SyncableItem,    
+    SyncableItem,
 
     /// <summary>
     /// AI loaded by all clients
