@@ -561,6 +561,7 @@ public class FikaPlayer : LocalPlayer
             var clientHealthController = _healthController as ClientHealthController;
             clientHealthController.EnableMetabolism();
             clientHealthController.Revive();
+            UpdateSpeedLimitByHealth();
             if (_bleedout != null)
             {
                 _bleedout.HideUI();
