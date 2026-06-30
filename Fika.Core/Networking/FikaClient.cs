@@ -310,7 +310,6 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
     {
         _netClient?.PollEvents();
 
-        var unscaledDeltaTime = Time.unscaledDeltaTime;
         var networkTime = NetworkTimeSync.NetworkTime;
         for (var i = 0; i < ObservedPlayers.Count; i++)
         {
