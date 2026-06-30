@@ -98,12 +98,7 @@ public enum EGenericSubPacketType : byte
     /// <summary>
     /// AI loaded by all clients
     /// </summary>
-    SpawnAI,
-
-    /// <summary>
-    /// Clear the snapshotter on player
-    /// </summary>
-    ClearSnapshotter
+    SpawnAI
 
     /// <summary>
     /// Train synchronization event (commented out).

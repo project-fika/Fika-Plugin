@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+#if DEBUG
+using Fika.Core.Main.Utils;
+#endif
 
 namespace Fika.Core.Networking.Snapshotting;
 
@@ -159,10 +162,15 @@ public sealed class PlayerSnapshotter<T> where T : struct, ISnapshot
     /// </summary>
     public void Clear()
     {
+        Array.Clear(_buffer, 0, _buffer.Length);
         _totalAdded = 0;
         _timeSync = default;
         _adaptiveJitterBuffer = default;
         _lastLocalTime = 0;
         _lastRemoteTime = 0;
+
+#if DEBUG
+        FikaGlobals.LogWarning("Cleared snapshotter");
+#endif
     }
 }

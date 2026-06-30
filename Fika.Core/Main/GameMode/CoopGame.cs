@@ -26,6 +26,7 @@ using Fika.Core.Modding.Events;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Models;
+using Fika.Core.Networking.Packets.Communication;
 using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
 using Fika.Core.Networking.Packets.World;
@@ -437,6 +438,12 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         {
             await Task.Delay(1000);
         } while (!client.ReconnectDone);
+
+        var packet = new ClearSnapshotterPacket
+        {
+            NetId = client.NetId
+        };
+        client.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
     }
 
 

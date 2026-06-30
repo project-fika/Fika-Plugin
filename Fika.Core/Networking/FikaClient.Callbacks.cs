@@ -31,6 +31,17 @@ namespace Fika.Core.Networking;
 
 public sealed partial class FikaClient
 {
+    private void OnClearSnapshotterPacketReceived(ClearSnapshotterPacket packet)
+    {
+        if (_coopHandler.Players.TryGetValue(packet.NetId, out var player))
+        {
+            player.Snapshotter.Clear();
+            return;
+        }
+
+        _logger.LogError($"Could not find player {packet.NetId} to reset snapshotter");
+    }
+
     private void OnSyncEventPacketReceived(SyncEventPacket packet)
     {
         _logger.LogInfo($"Received sync event: {packet.Type}");

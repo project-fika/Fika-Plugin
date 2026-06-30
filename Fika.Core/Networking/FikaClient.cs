@@ -276,6 +276,7 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
         RegisterPacket<LoadingScreenPacket>(OnLoadingScreenPacketReceived);
         RegisterPacket<LoadingScreenPlayersPacket>(OnLoadingScreenPlayersPacketReceived);
         RegisterPacket<SyncEventPacket>(OnSyncEventPacketReceived);
+        RegisterPacket<ClearSnapshotterPacket>(OnClearSnapshotterPacketReceived);
 
         RegisterReusable<WorldPacket>(OnWorldPacketReceived);
 
