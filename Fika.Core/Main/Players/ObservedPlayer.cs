@@ -1242,7 +1242,7 @@ public sealed class ObservedPlayer : FikaPlayer
             return;
         }
 
-        if (aggressor.GroupId == "Fika" && !aggressor.IsYourPlayer)
+        if (string.Equals(aggressor.GroupId, FikaGlobals.FikaGroupId, StringComparison.Ordinal) && !aggressor.IsYourPlayer)
         {
             var mainPlayer = (FikaPlayer)Singleton<GameWorld>.Instance.MainPlayer;
             if (mainPlayer == null)

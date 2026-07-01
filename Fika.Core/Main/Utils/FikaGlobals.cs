@@ -26,6 +26,7 @@ public static class FikaGlobals
     public const string TransitTraderId = "656f0f98d80a697f855d34b1";
     public const string TransitTraderName = "BTR";
     public const string DefaultTransitId = "66f5750951530ca5ae09876d";
+    public const string FikaGroupId = "Fika";
 
     public static int PingMask = LayerMask.GetMask(["HighPolyCollider", "Interactive", "Deadbody", "Player", "Loot", "Terrain"]);
 
@@ -315,7 +316,7 @@ public static class FikaGlobals
     /// <returns>True if in the player group</returns>
     public static bool IsGroupMember(this Player player)
     {
-        return player.GroupId == "Fika";
+        return string.Equals(player.GroupId, FikaGroupId, StringComparison.Ordinal);
     }
 
     /// <summary>

@@ -672,7 +672,9 @@ public class FikaPlayer : LocalPlayer
 
     public override void ApplyDamageInfo(DamageInfoStruct damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, float absorbed)
     {
-        if (IsYourPlayer && damageInfo.Player != null && !FikaPlugin.Instance.Settings.FriendlyFire && damageInfo.Player.iPlayer.GroupId == GroupId)
+        if (IsYourPlayer && damageInfo.Player != null
+            && !FikaPlugin.Instance.Settings.FriendlyFire
+            && string.Equals(damageInfo.Player.iPlayer.GroupId, GroupId, StringComparison.Ordinal))
         {
             return;
         }
@@ -928,7 +930,7 @@ public class FikaPlayer : LocalPlayer
             return;
         }
 
-        if (!IsYourPlayer && LastAggressor.GroupId != "Fika")
+        if (!IsYourPlayer && !string.Equals(LastAggressor.GroupId, FikaGlobals.FikaGroupId, StringComparison.OrdinalIgnoreCase))
         {
 #if DEBUG
             FikaGlobals.LogWarning($"Skipping because {LastAggressor.Profile.Nickname} is not a player");
@@ -1674,7 +1676,9 @@ public class FikaPlayer : LocalPlayer
             if (player != null)
             {
                 damageInfo.Player = player;
-                if (IsYourPlayer && !FikaPlugin.Instance.Settings.FriendlyFire && damageInfo.Player.iPlayer.GroupId == GroupId)
+                if (IsYourPlayer
+                    && !FikaPlugin.Instance.Settings.FriendlyFire
+                    && string.Equals(damageInfo.Player.iPlayer.GroupId, GroupId, StringComparison.Ordinal))
                 {
                     return;
                 }
