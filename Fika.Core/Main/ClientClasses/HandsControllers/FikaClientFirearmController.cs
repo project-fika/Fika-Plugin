@@ -534,7 +534,7 @@ public class FikaClientFirearmController : Player.FirearmController
     private void SendAbortReloadPacket(int amount)
     {
         _packet.Type = EFirearmSubPacketType.ReloadWithAmmo;
-        _packet.SubPacket = ReloadWithAmmoPacket.FromValue(true, EReloadWithAmmoStatus.AbortReload, amount);
+        _packet.SubPacket = ReloadWithAmmoPacket.FromValue(EReloadWithAmmoStatus.AbortReload, amount);
         _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
     }
 
@@ -557,7 +557,7 @@ public class FikaClientFirearmController : Player.FirearmController
         if (_fikaPlayer.HealthController.IsAlive)
         {
             _packet.Type = EFirearmSubPacketType.ReloadWithAmmo;
-            _packet.SubPacket = ReloadWithAmmoPacket.FromValue(true, EReloadWithAmmoStatus.EndReload, amount);
+            _packet.SubPacket = ReloadWithAmmoPacket.FromValue(EReloadWithAmmoStatus.EndReload, amount);
             _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
         }
     }
@@ -799,7 +799,7 @@ public class FikaClientFirearmController : Player.FirearmController
             if (_fikaPlayer.HealthController.IsAlive)
             {
                 _coopClientFirearmController._packet.Type = EFirearmSubPacketType.ReloadWithAmmo;
-                _coopClientFirearmController._packet.SubPacket = ReloadWithAmmoPacket.FromValue(true, EReloadWithAmmoStatus.StartReload, ammoIds: _ammoIds);
+                _coopClientFirearmController._packet.SubPacket = ReloadWithAmmoPacket.FromValue(EReloadWithAmmoStatus.StartReload, ammoIds: _ammoIds);
                 _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _coopClientFirearmController._packet, DeliveryMethod.ReliableOrdered, true);
             }
         }
