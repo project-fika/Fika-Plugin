@@ -546,7 +546,7 @@ public static class FikaSerializationExtensions
     /// <summary>
     /// Writes a <see cref="Profile.ProfileHealthClass"/> into a raw <see cref="byte"/>[]
     /// </summary>
-    /// <param name="health"></param>
+    /// <param name="health">The health info to serialize</param>
     /// <returns><see cref="byte"/>[]</returns>
     public static byte[] SerializeHealthInfo(this Profile.ProfileHealthClass health)
     {
