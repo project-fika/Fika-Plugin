@@ -102,11 +102,26 @@ public sealed class DamagePacket : IPoolSubPacket
         ArmorPlateCollider = reader.GetEnum<EArmorPlateCollider>();
         Material = reader.GetEnum<MaterialType>();
 
-        BlockedBy = reader.GetNullableMongoID();
-        DeflectedBy = reader.GetNullableMongoID();
-        ProfileId = reader.GetNullableMongoID();
-        WeaponId = reader.GetNullableMongoID();
-        SourceId = reader.GetNullableMongoID();
+        if (reader.GetBool())
+        {
+            BlockedBy = reader.GetMongoID();
+        }
+        if (reader.GetBool())
+        {
+            DeflectedBy = reader.GetMongoID();
+        }
+        if (reader.GetBool())
+        {
+            ProfileId = reader.GetMongoID();
+        }
+        if (reader.GetBool())
+        {
+            WeaponId = reader.GetMongoID();
+        }
+        if (reader.GetBool())
+        {
+            SourceId = reader.GetMongoID();
+        }
     }
 
     public void Serialize(NetDataWriter writer)
@@ -128,11 +143,31 @@ public sealed class DamagePacket : IPoolSubPacket
         writer.PutEnum(ArmorPlateCollider);
         writer.PutEnum(Material);
 
-        writer.PutNullableMongoID(BlockedBy);
-        writer.PutNullableMongoID(DeflectedBy);
-        writer.PutNullableMongoID(ProfileId);
-        writer.PutNullableMongoID(WeaponId);
-        writer.PutNullableMongoID(SourceId);
+        writer.Put(BlockedBy.HasValue);
+        if (BlockedBy.HasValue)
+        {
+            writer.PutMongoID(BlockedBy.Value);
+        }
+        writer.Put(DeflectedBy.HasValue);
+        if (DeflectedBy.HasValue)
+        {
+            writer.PutMongoID(DeflectedBy.Value);
+        }
+        writer.Put(ProfileId.HasValue);
+        if (ProfileId.HasValue)
+        {
+            writer.PutMongoID(ProfileId.Value);
+        }
+        writer.Put(WeaponId.HasValue);
+        if (WeaponId.HasValue)
+        {
+            writer.PutMongoID(WeaponId.Value);
+        }
+        writer.Put(SourceId.HasValue);
+        if (SourceId.HasValue)
+        {
+            writer.PutMongoID(SourceId.Value);
+        }
     }
 
     public void Dispose()
