@@ -15,12 +15,11 @@ public sealed class ReloadMagPacket : IPoolSubPacket
 
     }
 
-    public static ReloadMagPacket FromValue(MongoID magId, byte[] locationDescription, bool reload)
+    public static ReloadMagPacket FromValue(MongoID magId, byte[] locationDescription)
     {
         var packet = FirearmSubPacketPoolManager.Instance.GetPacket<ReloadMagPacket>(EFirearmSubPacketType.ReloadMag);
         packet.MagId = magId;
         packet.LocationDescription = locationDescription;
-        packet.Reload = reload;
         return packet;
     }
 
@@ -31,7 +30,6 @@ public sealed class ReloadMagPacket : IPoolSubPacket
 
     public MongoID MagId;
     public byte[] LocationDescription;
-    public bool Reload;
 
     public void Execute(FikaPlayer player)
     {
@@ -92,28 +90,19 @@ public sealed class ReloadMagPacket : IPoolSubPacket
 
     public void Serialize(NetDataWriter writer)
     {
-        writer.Put(Reload);
-        if (Reload)
-        {
-            writer.PutMongoID(MagId);
-            writer.PutByteArray(LocationDescription);
-        }
+        writer.PutMongoID(MagId);
+        writer.PutByteArray(LocationDescription);
     }
 
     public void Deserialize(NetDataReader reader)
     {
-        Reload = reader.GetBool();
-        if (Reload)
-        {
-            MagId = reader.GetMongoID();
-            LocationDescription = reader.GetByteArray();
-        }
+        MagId = reader.GetMongoID();
+        LocationDescription = reader.GetByteArray();
     }
 
     public void Dispose()
     {
         MagId = default;
         LocationDescription = null;
-        Reload = false;
     }
 }
