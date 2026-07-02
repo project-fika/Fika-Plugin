@@ -746,7 +746,7 @@ public class FikaClientFirearmController : Player.FirearmController
                 _coopClientFirearmController._packet.Type = EFirearmSubPacketType.CylinderMag;
                 _coopClientFirearmController._packet.SubPacket = CylinderMagPacket.FromValue(EReloadWithAmmoStatus.StartReload,
                     _cylinderMagazine.CurrentCamoraIndex, 0, true,
-                    _coopClientFirearmController.Item.CylinderHammerClosed, true, _ammoIds);
+                    _coopClientFirearmController.Item.CylinderHammerClosed, _ammoIds);
                 _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _coopClientFirearmController._packet, DeliveryMethod.ReliableOrdered, true);
             }
         }
