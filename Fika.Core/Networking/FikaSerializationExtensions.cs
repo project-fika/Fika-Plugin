@@ -305,8 +305,7 @@ public static class FikaSerializationExtensions
     /// <summary>
     /// Serializes a <see cref="List{WorldInteractiveObject.WorldInteractiveDataPacketStruct}"/> of <see cref="WorldInteractiveObject"/> data
     /// </summary>
-    /// <param name="writer"></param>
-    /// <param name="interactiveObjectsData"></param>
+    /// <param name="interactiveObjectsData">The interactive states to serialize</param>
     public static void PutInteractivesStates(this NetDataWriter writer, List<WorldInteractiveObject.WorldInteractiveDataPacketStruct> interactiveObjectsData)
     {
         writer.Put(interactiveObjectsData.Count);
@@ -321,7 +320,6 @@ public static class FikaSerializationExtensions
     /// <summary>
     /// Deserializes a <see cref="List{WorldInteractiveObject.WorldInteractiveDataPacketStruct}"/> of <see cref="WorldInteractiveObject"/> data
     /// </summary>
-    /// <param name="reader"></param>
     /// <returns>A <see cref="List{T}"/> of <see cref="WorldInteractiveObject.WorldInteractiveDataPacketStruct"/></returns>
     public static List<WorldInteractiveObject.WorldInteractiveDataPacketStruct> GetInteractivesStates(this NetDataReader reader)
     {
@@ -344,8 +342,7 @@ public static class FikaSerializationExtensions
     /// <summary>
     /// Serializes a <see cref="Dictionary{int, byte}"/> of <see cref="LampController"/> information
     /// </summary>
-    /// <param name="writer"></param>
-    /// <param name="lampStates"></param>
+    /// <param name="lampStates">The lamp states to serialize</param>
     public static void PutLampStates(this NetDataWriter writer, Dictionary<int, byte> lampStates)
     {
         var amount = lampStates.Count;
@@ -360,7 +357,6 @@ public static class FikaSerializationExtensions
     /// <summary>
     /// Deserializes a <see cref="Dictionary{int, byte}"/> of <see cref="LampController"/> information
     /// </summary>
-    /// <param name="reader"></param>
     /// <returns>A <see cref="Dictionary{TKey, TValue}"/> of information for <see cref="LampController"/>s</returns>
     public static Dictionary<int, byte> GetLampStates(this NetDataReader reader)
     {
@@ -377,8 +373,7 @@ public static class FikaSerializationExtensions
     /// <summary>
     /// Serializes a <see cref="Dictionary{int, Vector3}"/> of <see cref="WindowBreaker"/> information
     /// </summary>
-    /// <param name="writer"></param>
-    /// <param name="windowBreakerStates"></param>
+    /// <param name="windowBreakerStates">The window breaker states to serialize</param>
     public static void PutWindowBreakerStates(this NetDataWriter writer, Dictionary<int, Vector3> windowBreakerStates)
     {
         var amount = windowBreakerStates.Count;
@@ -393,7 +388,6 @@ public static class FikaSerializationExtensions
     /// <summary>
     /// Deserializes a <see cref="Dictionary{int, Vector3}"/> of <see cref="WindowBreaker"/> information
     /// </summary>
-    /// <param name="reader"></param>
     /// <returns>A <see cref="Dictionary{TKey, TValue}"/> of information for <see cref="WindowBreaker"/>s</returns>
     public static Dictionary<int, Vector3> GetWindowBreakerStates(this NetDataReader reader)
     {
@@ -410,8 +404,7 @@ public static class FikaSerializationExtensions
     /// <summary>
     /// Serializes a <see cref="MongoID"/>
     /// </summary>
-    /// <param name="writer"></param>
-    /// <param name="mongoId"></param>
+    /// <param name="mongoId">The <see cref="MongoID"/> to serialize</param>
     public static void PutMongoID(this NetDataWriter writer, MongoID mongoId)
     {
         writer.Put(mongoId.TimeStamp);
@@ -421,7 +414,6 @@ public static class FikaSerializationExtensions
     /// <summary>
     /// Deserializes a <see cref="MongoID"/>
     /// </summary>
-    /// <param name="reader"></param>
     /// <returns>A new <see cref="MongoID"/></returns>
     public static MongoID GetMongoID(this NetDataReader reader)
     {
@@ -440,8 +432,7 @@ public static class FikaSerializationExtensions
     /// <summary>
     /// Serializes a <see cref="MongoID"/>? (nullable)
     /// </summary>
-    /// <param name="writer"></param>
-    /// <param name="mongoId"></param>
+    /// <param name="mongoId">The nullable <see cref="MongoID"/> to serialize</param>
     public static void PutNullableMongoID(this NetDataWriter writer, MongoID? mongoId)
     {
         writer.Put(mongoId.HasValue);
@@ -454,7 +445,6 @@ public static class FikaSerializationExtensions
     /// <summary>
     /// Deserializes a <see cref="MongoID"/>? (nullable)
     /// </summary>
-    /// <param name="reader"></param>
     /// <returns>A new <see cref="MongoID"/>? (nullable)</returns>
     public static MongoID? GetNullableMongoID(this NetDataReader reader)
     {
@@ -467,10 +457,32 @@ public static class FikaSerializationExtensions
     }
 
     /// <summary>
+    /// Tries to read a nullable <see cref="MongoID"/> from the stream.
+    /// </summary>
+    /// <param name="reader">The <see cref="NetDataReader"/> instance reading the data.</param>
+    /// <param name="mongoId">
+    /// When this method returns, contains the <see cref="MongoID"/> read from the stream if it exists;
+    /// otherwise, <see langword="null"/>. This parameter is passed uninitialized.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> if a <see cref="MongoID"/> was successfully read; otherwise, <see langword="false"/>.
+    /// </returns>
+    public static bool TryGetNullableMongoId(this NetDataReader reader, out MongoID? mongoId)
+    {
+        if (!reader.GetBool())
+        {
+            mongoId = null;
+            return false;
+        }
+
+        mongoId = reader.GetMongoID();
+        return true;
+    }
+
+    /// <summary>
     /// Serializes a <see cref="TraderServicesClass"/>
     /// </summary>
-    /// <param name="writer"></param>
-    /// <param name="traderService"></param>
+    /// <param name="traderService">The trader service to serialize</param>
     public static void PutTraderService(this NetDataWriter writer, TraderServicesClass traderService)
     {
         writer.PutMongoID(traderService.TraderId);
@@ -500,7 +512,6 @@ public static class FikaSerializationExtensions
     /// <summary>
     /// Deserializes a <see cref="TraderServicesClass"/>
     /// </summary>
-    /// <param name="reader"></param>
     /// <returns>A <see cref="TraderServicesClass"/></returns>
     public static TraderServicesClass GetTraderService(this NetDataReader reader)
     {
