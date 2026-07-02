@@ -661,13 +661,11 @@ public sealed partial class FikaServer
     {
         if (_coopHandler.Players.TryGetValue(packet.NetId, out var playerToApply))
         {
-            using var eftReader = PacketToEFTReaderAbstractClass.Get(packet.OperationBytes);
             try
             {
                 if (playerToApply.InventoryController is Interface18 inventoryController)
                 {
-                    var descriptor = eftReader.ReadPolymorph<BaseDescriptorClass>();
-                    var result = inventoryController.CreateOperationFromDescriptor(descriptor);
+                    var result = inventoryController.CreateOperationFromDescriptor(packet.Descriptor);
 #if DEBUG
                     if (result.Succeeded)
                     {

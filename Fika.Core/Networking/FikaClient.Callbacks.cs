@@ -707,8 +707,6 @@ public sealed partial class FikaClient
                     fikaGame.GameController.GameInstance.SetMatchmakerStatus(LocaleUtils.UI_FINISH_RECONNECT.Localized());
                     ReconnectDone = true;
                     break;
-                default:
-                    break;
             }
         }
     }
@@ -718,8 +716,8 @@ public sealed partial class FikaClient
         var fikaGame = Singleton<IFikaGame>.Instance;
         if (fikaGame != null)
         {
-            using var eftReader = PacketToEFTReaderAbstractClass.Get(packet.Data);
-            var lootData = eftReader.ReadEFTLootDataDescriptor();
+            var reader = new NetDataReader(packet.Data);
+            var lootData = reader.GetEFTLootDataDescriptor();
             var lootItems = EFTItemSerializerClass.DeserializeLootData(lootData);
 #if RELEASE
             if (lootItems.Count < 1)

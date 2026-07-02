@@ -15,11 +15,11 @@ public sealed class ReloadMagPacket : IPoolSubPacket
 
     }
 
-    public static ReloadMagPacket FromValue(MongoID magId, byte[] locationDescription)
+    public static ReloadMagPacket FromValue(MongoID magId, ItemAddress gridItemAddress)
     {
         var packet = FirearmSubPacketPoolManager.Instance.GetPacket<ReloadMagPacket>(EFirearmSubPacketType.ReloadMag);
         packet.MagId = magId;
-        packet.LocationDescription = locationDescription;
+        packet.GridItemAddress = gridItemAddress;
         return packet;
     }
 
@@ -29,7 +29,8 @@ public sealed class ReloadMagPacket : IPoolSubPacket
     }
 
     public MongoID MagId;
-    public byte[] LocationDescription;
+    public ItemAddress GridItemAddress;
+    public GClass1950 Descriptor;
 
     public void Execute(FikaPlayer player)
     {
@@ -60,16 +61,11 @@ public sealed class ReloadMagPacket : IPoolSubPacket
                 throw;
             }
             ItemAddress gridItemAddress = null;
-            if (LocationDescription != null)
+            if (Descriptor != null)
             {
                 try
                 {
-                    using var eftReader = PacketToEFTReaderAbstractClass.Get(LocationDescription);
-                    if (LocationDescription.Length != 0)
-                    {
-                        var descriptor = eftReader.ReadPolymorph<GClass1950>();
-                        gridItemAddress = player.InventoryController.ToItemAddress(descriptor);
-                    }
+                    gridItemAddress = player.InventoryController.ToItemAddress(Descriptor);
                 }
                 catch (GException4 exception2)
                 {
@@ -91,18 +87,28 @@ public sealed class ReloadMagPacket : IPoolSubPacket
     public void Serialize(NetDataWriter writer)
     {
         writer.PutMongoID(MagId);
-        writer.PutByteArray(LocationDescription);
+        var exists = GridItemAddress != null;
+        writer.Put(exists);
+        if (exists)
+        {
+            writer.PutPolymorph(GridItemAddress.ToDescriptor());
+        }
     }
 
     public void Deserialize(NetDataReader reader)
     {
         MagId = reader.GetMongoID();
-        LocationDescription = reader.GetByteArray();
+        var exists = reader.GetBool();
+        if (exists)
+        {
+            Descriptor = reader.GetPolymorph<GClass1950>();
+        }
     }
 
     public void Dispose()
     {
         MagId = default;
-        LocationDescription = null;
+        GridItemAddress = null;
+        Descriptor = null;
     }
 }

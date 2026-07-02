@@ -13,11 +13,11 @@ public sealed class ReloadBarrelsPacket : IPoolSubPacket
 
     }
 
-    public static ReloadBarrelsPacket FromValue(string[] ammoIds, byte[] locationDescription)
+    public static ReloadBarrelsPacket FromValue(string[] ammoIds, ItemAddress placeToPutContainedAmmoMagazine)
     {
         var packet = FirearmSubPacketPoolManager.Instance.GetPacket<ReloadBarrelsPacket>(EFirearmSubPacketType.ReloadBarrels);
         packet.AmmoIds = ammoIds;
-        packet.LocationDescription = locationDescription;
+        packet.PlaceToPutContainedAmmoMagazine = placeToPutContainedAmmoMagazine;
         return packet;
     }
 
@@ -27,7 +27,8 @@ public sealed class ReloadBarrelsPacket : IPoolSubPacket
     }
 
     public string[] AmmoIds;
-    public byte[] LocationDescription;
+    public ItemAddress PlaceToPutContainedAmmoMagazine;
+    public GClass1950 Descriptor;
 
     public void Execute(FikaPlayer player)
     {
@@ -37,18 +38,16 @@ public sealed class ReloadBarrelsPacket : IPoolSubPacket
             AmmoPackReloadingClass ammoPack = new(ammo);
             ItemAddress gridItemAddress = null;
 
-            using var eftReader = PacketToEFTReaderAbstractClass.Get(LocationDescription);
-            try
+            if (Descriptor != null)
             {
-                if (LocationDescription.Length > 0)
+                try
                 {
-                    var descriptor = eftReader.ReadPolymorph<GClass1950>();
-                    gridItemAddress = player.InventoryController.ToItemAddress(descriptor);
+                    gridItemAddress = player.InventoryController.ToItemAddress(Descriptor);
                 }
-            }
-            catch (GException4 exception2)
-            {
-                FikaGlobals.LogError(exception2);
+                catch (GException4 exception2)
+                {
+                    FikaGlobals.LogError(exception2);
+                }
             }
 
             if (ammoPack != null)
@@ -66,18 +65,28 @@ public sealed class ReloadBarrelsPacket : IPoolSubPacket
     public void Serialize(NetDataWriter writer)
     {
         writer.PutArray(AmmoIds);
-        writer.PutByteArray(LocationDescription);
+        var exists = PlaceToPutContainedAmmoMagazine != null;
+        writer.Put(exists);
+        if (exists)
+        {
+            writer.PutPolymorph(PlaceToPutContainedAmmoMagazine.ToDescriptor());
+        }
     }
 
     public void Deserialize(NetDataReader reader)
     {
         AmmoIds = reader.GetStringArray();
-        LocationDescription = reader.GetByteArray();
+        var exists = reader.GetBool();
+        if (exists)
+        {
+            Descriptor = reader.GetPolymorph<GClass1950>();
+        }
     }
 
     public void Dispose()
     {
         AmmoIds = null;
-        LocationDescription = null;
+        PlaceToPutContainedAmmoMagazine = null;
+        Descriptor = null;
     }
 }

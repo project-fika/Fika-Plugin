@@ -87,6 +87,8 @@ public class HostGameController : BaseGameController, IBotGame
     /// </summary>
     private readonly float _botTimeoutDelay = 0.25f;
 
+    private readonly NetDataWriter _writer = new();
+
     public GameStatus Status
     {
         get
@@ -915,11 +917,11 @@ public class HostGameController : BaseGameController, IBotGame
             location.Loot = [];
         }
 
-        var lootDescriptor = EFTItemSerializerClass.SerializeLootData(location.Loot, FikaGlobals.SearchControllerSerializer);
-        var eftWriter = WriterPoolManager.GetWriter();
-        eftWriter.WriteEFTLootDataDescriptor(lootDescriptor);
-        LootData = eftWriter.ToArray();
-        WriterPoolManager.ReturnWriter(eftWriter);
+        var lootDescriptor = EFTItemSerializerClass.SerializeLootData(location.Loot,
+            FikaGlobals.SearchControllerSerializer);
+        _writer.PutEFTLootDataDescriptor(lootDescriptor);
+        LootData = _writer.CopyData();
+        _writer.Reset();
         return Task.CompletedTask;
     }
 
@@ -954,7 +956,7 @@ public class HostGameController : BaseGameController, IBotGame
             }
             foreach (var stationaryWeapon in LocationScene.GetAllObjects<StationaryWeapon>(false))
             {
-                if (!(stationaryWeapon == null) && stationaryWeapon.ItemController != null)
+                if (stationaryWeapon != null && stationaryWeapon.ItemController != null)
                 {
                     list.Add(new LootItemPositionClass
                     {
@@ -970,11 +972,10 @@ public class HostGameController : BaseGameController, IBotGame
             list.Sort(LootCompare);
 
             var lootDescriptor = EFTItemSerializerClass.SerializeLootData(list, FikaGlobals.SearchControllerSerializer);
-            var eftWriter = WriterPoolManager.GetWriter();
-            eftWriter.WriteEFTLootDataDescriptor(lootDescriptor);
+            _writer.PutEFTLootDataDescriptor(lootDescriptor);
 
-            var data = eftWriter.ToArray();
-            WriterPoolManager.ReturnWriter(eftWriter);
+            var data = _writer.CopyData();
+            _writer.Reset();
             return data;
         }
 

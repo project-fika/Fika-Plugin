@@ -24,6 +24,9 @@ namespace Fika.Core.Networking;
 /// </summary>
 public static class FikaSerializationExtensions
 {
+    private static readonly NetDataWriter _bufferWriter = new(true, 1024);
+    private static readonly NetDataReader _bufferReader = new();
+
     /// <summary>
     /// Serializes a <see cref="PhysicalStateStruct"/> struct to the <paramref name="writer"/>
     /// </summary>
@@ -153,11 +156,8 @@ public static class FikaSerializationExtensions
     /// <param name="item">The <see cref="Item"/> to serialize</param>
     public static void PutItem(this NetDataWriter writer, Item item)
     {
-        var eftWriter = WriterPoolManager.GetWriter();
         var descriptor = EFTItemSerializerClass.SerializeItem(item, FikaGlobals.SearchControllerSerializer);
-        eftWriter.WriteEFTItemDescriptor(descriptor);
-        writer.PutByteArray(eftWriter.ToArray());
-        WriterPoolManager.ReturnWriter(eftWriter);
+        writer.PutEFTItemDescriptor(descriptor);
     }
 
     /// <summary>
@@ -168,22 +168,19 @@ public static class FikaSerializationExtensions
     /// <returns>The deserialized <see cref="Item"/></returns>
     public static Item GetItem(this NetDataReader reader)
     {
-        using var eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
-        return EFTItemSerializerClass.DeserializeItem(eftReader.ReadEFTItemDescriptor(), Singleton<ItemFactoryClass>.Instance, []);
+        return EFTItemSerializerClass.DeserializeItem(reader.GetEFTItemDescriptor(), Singleton<ItemFactoryClass>.Instance, []);
     }
 
 
     /// <summary>
     /// Reads an <see cref="InventoryEquipment"/> serialized from <see cref="PutItem(NetDataWriter, Item)"/> and converts it into an <see cref="Inventory"/>
     /// </summary>
-    /// <param name="reader"></param>
     /// <returns>An <see cref="Inventory"/></returns>
     public static Inventory GetInventoryFromEquipment(this NetDataReader reader)
     {
-        using var eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
         return new EFTInventoryClass()
         {
-            Equipment = eftReader.ReadEFTItemDescriptor()
+            Equipment = reader.GetEFTItemDescriptor()
         }.ToInventory();
     }
 
@@ -194,10 +191,9 @@ public static class FikaSerializationExtensions
     /// <param name="descriptor">The <see cref="InventoryDescriptorClass"/> instance to serialize</param>
     public static void PutItemDescriptor(this NetDataWriter writer, InventoryDescriptorClass descriptor)
     {
-        var eftWriter = WriterPoolManager.GetWriter();
-        eftWriter.WriteEFTItemDescriptor(descriptor);
-        writer.CompressAndPutByteArray(eftWriter.ToArray());
-        WriterPoolManager.ReturnWriter(eftWriter);
+        _bufferWriter.PutEFTItemDescriptor(descriptor);
+        writer.CompressAndPutByteArray(_bufferWriter.Data);
+        _bufferWriter.Reset();
     }
 
     /// <summary>
@@ -207,8 +203,8 @@ public static class FikaSerializationExtensions
     /// <returns>The deserialized <see cref="InventoryDescriptorClass"/> instance</returns>
     public static InventoryDescriptorClass GetItemDescriptor(this NetDataReader reader)
     {
-        using var eftReader = PacketToEFTReaderAbstractClass.Get(reader.DecompressAndGetByteArray());
-        return eftReader.ReadEFTItemDescriptor();
+        _bufferReader.SetSource(reader.DecompressAndGetByteArray());
+        return _bufferReader.GetEFTItemDescriptor();
     }
 
     /// <summary>
@@ -218,8 +214,7 @@ public static class FikaSerializationExtensions
     /// <returns>The deserialized <see cref="Item"/> instance representing the airdrop item</returns>
     public static Item GetAirdropItem(this NetDataReader reader)
     {
-        using var eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
-        var item = EFTItemSerializerClass.DeserializeItem(eftReader.ReadEFTItemDescriptor(), Singleton<ItemFactoryClass>.Instance, []);
+        var item = EFTItemSerializerClass.DeserializeItem(reader.GetEFTItemDescriptor(), Singleton<ItemFactoryClass>.Instance, []);
 
         GClass1404 enumerable = [new LootItemPositionClass()];
         enumerable[0].Item = item;
@@ -285,10 +280,9 @@ public static class FikaSerializationExtensions
     /// <param name="profile">The <see cref="Profile"/> to serialize</param>
     public static void PutProfile(this NetDataWriter writer, Profile profile)
     {
-        var eftWriter = WriterPoolManager.GetWriter();
-        eftWriter.WriteEFTProfileDescriptor(new(profile, FikaGlobals.SearchControllerSerializer));
-        writer.CompressAndPutByteArray(eftWriter.ToArray());
-        WriterPoolManager.ReturnWriter(eftWriter);
+        _bufferWriter.PutEFTProfileDescriptor(new(profile, FikaGlobals.SearchControllerSerializer));
+        writer.CompressAndPutByteArray(_bufferWriter.Data);
+        _bufferWriter.Reset();
     }
 
     /// <summary>
@@ -298,8 +292,8 @@ public static class FikaSerializationExtensions
     /// <returns>The deserialized <see cref="Profile"/></returns>
     public static Profile GetProfile(this NetDataReader reader)
     {
-        using var eftReader = PacketToEFTReaderAbstractClass.Get(reader.DecompressAndGetByteArray());
-        return new(eftReader.ReadEFTProfileDescriptor());
+        _bufferReader.SetSource(reader.DecompressAndGetByteArray());
+        return new Profile(_bufferReader.GetEFTProfileDescriptor());
     }
 
     /// <summary>
@@ -891,7 +885,7 @@ public static class FikaSerializationExtensions
     /// <param name="packet"></param>
     public static void PutCorpseSyncPacket(this NetDataWriter writer, CorpseSyncPackets packet)
     {
-        writer.PutItemDescriptor(packet.InventoryDescriptor);
+        writer.PutEFTItemDescriptor(packet.InventoryDescriptor);
 
         writer.PutUnmanaged(packet.Direction);
         writer.PutUnmanaged(packet.Point);
@@ -910,7 +904,7 @@ public static class FikaSerializationExtensions
     {
         return new CorpseSyncPackets()
         {
-            InventoryDescriptor = reader.GetItemDescriptor(),
+            InventoryDescriptor = reader.GetEFTItemDescriptor(),
 
             Direction = reader.GetUnmanaged<Vector3>(),
             Point = reader.GetUnmanaged<Vector3>(),
