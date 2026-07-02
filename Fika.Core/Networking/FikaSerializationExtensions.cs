@@ -1231,6 +1231,23 @@ public static class FikaSerializationExtensions
         };
     }
 
+    /// <summary>
+    /// Serializes a TimeSpan structure as a 64-bit integer tick count into the writer stream.
+    /// </summary>
+    public static void PutTimeSpan(this NetDataWriter writer, TimeSpan target)
+    {
+        writer.Put(target.Ticks);
+    }
+
+    /// <summary>
+    /// Deserializes a 64-bit integer tick count from the reader stream and reconstructs a TimeSpan structure.
+    /// </summary>
+    public static TimeSpan GetTimeSpan(this NetDataReader reader)
+    {
+        var ticks = reader.GetLong();
+        return new TimeSpan(ticks);
+    }
+
     public static void PutFirearmSubPacket(this NetDataWriter writer, ISubPacket packet, EFirearmSubPacketType type)
     {
         switch (type)
@@ -1270,7 +1287,7 @@ public static class FikaSerializationExtensions
             case EFirearmSubPacketType.Loot:
                 break;
             default:
-                FikaGlobals.LogError("PutFirearmSubPacket: type was outside of bounds!");
+                FikaGlobals.LogError("Type was outside of bounds!");
                 break;
         }
     }
@@ -1289,7 +1306,7 @@ public static class FikaSerializationExtensions
             case ERequestSubPacketType.CharacterSync:
                 return new RequestCharactersPacket(reader);
             default:
-                FikaGlobals.LogError("GetRequestSubPacket: type was outside of bounds!");
+                FikaGlobals.LogError("Type was outside of bounds!");
                 return null;
         }
     }
