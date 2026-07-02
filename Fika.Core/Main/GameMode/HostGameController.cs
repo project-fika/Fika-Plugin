@@ -212,6 +212,11 @@ public class HostGameController : BaseGameController, IBotGame
             return null;
         }
 
+        var isBtrShooter = profile.Info.Settings.Role is WildSpawnType.shooterBTR;
+        if (isBtrShooter)
+        {
+            position += (Vector3.up * -5f);
+        }
         netId = _server.PopNetId();
 
         profile.SetSpawnedInSession(profile.Info.Side == EPlayerSide.Savage || FikaPlugin.Instance.Settings.PMCFoundInRaid);
@@ -274,7 +279,7 @@ public class HostGameController : BaseGameController, IBotGame
         }
         _coopHandler.Players.Add(fikaBot.NetId, fikaBot);
 
-        if (profile.Info.Settings.Role != WildSpawnType.shooterBTR)
+        if (!isBtrShooter)
         {
             _botStateManager.AddBot(fikaBot);
         }
