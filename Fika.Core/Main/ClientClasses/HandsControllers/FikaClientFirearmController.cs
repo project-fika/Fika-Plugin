@@ -782,7 +782,7 @@ public class FikaClientFirearmController : Player.FirearmController
             if (_fikaPlayer.HealthController.IsAlive)
             {
                 _coopClientFirearmController._packet.Type = EFirearmSubPacketType.ReloadBarrels;
-                _coopClientFirearmController._packet.SubPacket = ReloadBarrelsPacket.FromValue(true, ammoIds, locationDescription);
+                _coopClientFirearmController._packet.SubPacket = ReloadBarrelsPacket.FromValue(ammoIds, locationDescription);
                 _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _coopClientFirearmController._packet, DeliveryMethod.ReliableOrdered, true);
             }
         }

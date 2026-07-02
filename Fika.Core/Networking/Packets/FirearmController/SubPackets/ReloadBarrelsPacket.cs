@@ -13,10 +13,9 @@ public sealed class ReloadBarrelsPacket : IPoolSubPacket
 
     }
 
-    public static ReloadBarrelsPacket FromValue(bool reload, string[] ammoIds, byte[] locationDescription)
+    public static ReloadBarrelsPacket FromValue(string[] ammoIds, byte[] locationDescription)
     {
         var packet = FirearmSubPacketPoolManager.Instance.GetPacket<ReloadBarrelsPacket>(EFirearmSubPacketType.ReloadBarrels);
-        packet.Reload = reload;
         packet.AmmoIds = ammoIds;
         packet.LocationDescription = locationDescription;
         return packet;
@@ -29,7 +28,6 @@ public sealed class ReloadBarrelsPacket : IPoolSubPacket
 
     public string[] AmmoIds;
     public byte[] LocationDescription;
-    public bool Reload;
 
     public void Execute(FikaPlayer player)
     {
@@ -67,27 +65,18 @@ public sealed class ReloadBarrelsPacket : IPoolSubPacket
 
     public void Serialize(NetDataWriter writer)
     {
-        writer.Put(Reload);
-        if (Reload)
-        {
-            writer.PutArray(AmmoIds);
-            writer.PutByteArray(LocationDescription);
-        }
+        writer.PutArray(AmmoIds);
+        writer.PutByteArray(LocationDescription);
     }
 
     public void Deserialize(NetDataReader reader)
     {
-        Reload = reader.GetBool();
-        if (Reload)
-        {
-            AmmoIds = reader.GetStringArray();
-            LocationDescription = reader.GetByteArray();
-        }
+        AmmoIds = reader.GetStringArray();
+        LocationDescription = reader.GetByteArray();
     }
 
     public void Dispose()
     {
-        Reload = false;
         AmmoIds = null;
         LocationDescription = null;
     }
