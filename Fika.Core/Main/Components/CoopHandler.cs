@@ -150,7 +150,7 @@ public class CoopHandler : MonoBehaviour
     /// Checks if all human players are alive/downed
     /// </summary>
     /// <returns><see langword="true"/> if everyone is dead; otherwise <see langword="false"/></returns>
-    public bool AreAllHumanPlayersDead([CallerMemberName] string caller = "")
+    public bool AreAllHumanPlayersDead()
     {
         var deadPlayers = 0;
         for (var i = 0; i < HumanPlayers.Count; i++)
@@ -168,7 +168,6 @@ public class CoopHandler : MonoBehaviour
         }
 
         var areAllDead = deadPlayers >= (AmountOfHumans - 1);
-        FikaGlobals.LogInfo($"Are all dead: {areAllDead}, caller: {caller}");
         return deadPlayers >= (AmountOfHumans - 1);
     }
 
