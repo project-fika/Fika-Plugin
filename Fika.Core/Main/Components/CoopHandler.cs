@@ -434,7 +434,7 @@ public class CoopHandler : MonoBehaviour
 
         var gameWorld = Singleton<GameWorld>.Instance;
 
-        if (isAi && profile.Info.Settings.Role != WildSpawnType.shooterBTR) // spawn underground until everyone has loaded the AI
+        if (isAi) // spawn underground until everyone has loaded the AI
         {
             position = new(0f, -5000f, 0f);
         }
@@ -481,7 +481,7 @@ public class CoopHandler : MonoBehaviour
 
         Singleton<IFikaNetworkManager>.Instance.ObservedPlayers.Add(otherPlayer);
 #if DEBUG
-        _logger.LogInfo($"SpawnObservedPlayer: {profile.Nickname} spawning with NetId {netId}");
+        _logger.LogInfo($"SpawnObservedPlayer: {profile.GetCorrectedNickname()} spawning with NetId {netId} at [{position:F1}]");
 #endif
 
         if (!Players.ContainsKey(netId))
@@ -515,10 +515,6 @@ public class CoopHandler : MonoBehaviour
         }
 
         otherPlayer.InitObservedPlayer();
-
-#if DEBUG
-        _logger.LogInfo($"CreateLocalPlayer::{profile.GetCorrectedNickname()}::Spawned.");
-#endif
 
         var controllerType = spawnObject.ControllerType;
         var itemId = spawnObject.ItemId;
