@@ -71,7 +71,7 @@ public class FikaPlugin : BaseUnityPlugin
     internal FikaNotificationManager NotificationManager { get; set; }
 
 #if RELEASE || GOLDMASTER
-    private static readonly Version _requiredServerVersion = new("2.3.2");
+    private static readonly Version _requiredServerVersion = new("2.3.4");
 #endif
     private PatchManager _patchManager;
     private TarkovApplication _tarkovApp;
