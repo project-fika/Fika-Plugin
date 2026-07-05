@@ -32,15 +32,45 @@ internal sealed class Bleedout : MonoBehaviour
         _giveUpText = FikaUIGlobals.CreateOverlayText(string.Format(LocaleUtils.UI_REVIVING_GIVE_UP.Localized(), $"'{GiveUpKey.MainKey}'"),
             new Vector4(0f, 0f, 0f, -400f));
 
+        FikaPlayer.OnPlayerDeath += OnPlayerDeath;
+        FikaPlayer.OnPlayerDownedChanged += OnPlayerDownedChange;
+
         InvokeRepeating(nameof(AgonySFX), 10f, 10f);
+    }
+
+    private void OnPlayerDownedChange(FikaPlayer player, bool downed)
+    {
+        if (downed)
+        {
+            OnPlayerDeath(player);
+        }
+    }
+
+    private void OnPlayerDeath(FikaPlayer player)
+    {
+        if (player.IsYourPlayer || player.IsAI)
+        {
+            return;
+        }
+
+        if (CoopHandler.TryGetCoopHandler(out var coopHandler) && coopHandler.AreAllHumanPlayersDead())
+        {
+            FikaPlayer.OnPlayerDeath -= OnPlayerDeath;
+            FikaPlayer.OnPlayerDownedChanged -= OnPlayerDownedChange;
+            BleedOut();
+        }
     }
 
     private void OnDestroy()
     {
+        FikaPlayer.OnPlayerDeath -= OnPlayerDeath;
+        FikaPlayer.OnPlayerDownedChanged -= OnPlayerDownedChange;
+
         if (_giveUpText != null)
         {
             Destroy(_giveUpText);
         }
+        HideUI();
         CancelInvoke(nameof(AgonySFX));
     }
 

@@ -14,6 +14,9 @@ namespace Fika.Core.Main.Components;
 
 internal sealed class ReviveInteractable : InteractableObject
 {
+    private static readonly int _playerLayer = LayerMask.NameToLayer("Player");
+    private static readonly int _ragdollLayer = LayerMask.NameToLayer("Deadbody");
+
     /// <summary>
     /// If the player is currently being revived
     /// </summary>
@@ -70,8 +73,7 @@ internal sealed class ReviveInteractable : InteractableObject
 
         _observedPlayer.ProceduralWeaponAnimation.OnPreCollision -= _observedPlayer.IkStoreRaw;
 
-        var num = LayerMask.NameToLayer("Deadbody");
-        TransformHelperClass.SetLayersRecursively(_observedPlayer.gameObject, num);
+        TransformHelperClass.SetLayersRecursively(_observedPlayer.gameObject, _ragdollLayer);
 
         var poolObject = _observedPlayer.gameObject.GetComponent<PlayerPoolObject>();
         _ragdoll = new RagdollClass
@@ -122,6 +124,8 @@ internal sealed class ReviveInteractable : InteractableObject
         _observedPlayer.ArmsAnimatorCommon.enabled = true;
         _observedPlayer._characterController.isEnabled = true;
         _observedPlayer.POM.On();
+
+        TransformHelperClass.SetLayersRecursively(_observedPlayer.gameObject, _playerLayer);
 
         foreach (var joint in _observedPlayer.gameObject.GetComponentsInChildren<CharacterJoint>())
         {

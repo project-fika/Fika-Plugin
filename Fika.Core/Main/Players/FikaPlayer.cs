@@ -4,8 +4,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
 using System.Threading.Tasks;
 using Comfort.Common;
 using CommonAssets.Scripts.Audio;
@@ -81,6 +79,16 @@ public class FikaPlayer : LocalPlayer
         }
     }
 
+    public bool Downed
+    {
+        get;
+        internal set
+        {
+            field = value;
+            OnPlayerDownedChanged?.Invoke(this, value);
+        }
+    }
+
     protected MongoID? _lastWeaponId;
     protected Action[] _armorUnsubcribes = new Action[Inventory.ArmorSlots.Length];
 
@@ -118,6 +126,10 @@ public class FikaPlayer : LocalPlayer
     /// Invoked when a player is killed
     /// </summary>
     public static Action<FikaPlayer> OnPlayerDeath { get; set; }
+    /// <summary>
+    /// Invoked when a player down state changes
+    /// </summary>
+    public static Action<FikaPlayer, bool> OnPlayerDownedChanged { get; set; }
 
     public static async Task<FikaPlayer> Create(GameWorld gameWorld, int playerId, Vector3 position,
         Quaternion rotation, string layerName, string prefix, EPointOfView pointOfView, Profile profile,
@@ -502,11 +514,14 @@ public class FikaPlayer : LocalPlayer
             return;
         }
 
+        Downed = downed;
+
         if (downed)
         {
             Speaker.Play(EPhraseTrigger.OnAgony, HealthStatus, true);
             ActiveHealthController.SetDamageCoeff(0f);
             ActiveHealthController.PauseAllEffects();
+            ActiveHealthController.DisableMetabolism();
             MovementContext.IsInPronePose = true;
             HideWeapon();
             ((SimpleCharacterController)CharacterController).IsMoveIgnored = true;
@@ -544,7 +559,9 @@ public class FikaPlayer : LocalPlayer
             ((SimpleCharacterController)CharacterController).IsMoveIgnored = false;
             MovementContext.IsAxesIgnored = false;
             var clientHealthController = _healthController as ClientHealthController;
+            clientHealthController.EnableMetabolism();
             clientHealthController.Revive();
+            UpdateSpeedLimitByHealth();
             if (_bleedout != null)
             {
                 _bleedout.HideUI();
@@ -655,7 +672,9 @@ public class FikaPlayer : LocalPlayer
 
     public override void ApplyDamageInfo(DamageInfoStruct damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, float absorbed)
     {
-        if (IsYourPlayer && damageInfo.Player != null && !FikaPlugin.Instance.Settings.FriendlyFire && damageInfo.Player.iPlayer.GroupId == GroupId)
+        if (IsYourPlayer && damageInfo.Player != null
+            && !FikaPlugin.Instance.Settings.FriendlyFire
+            && string.Equals(damageInfo.Player.iPlayer.GroupId, GroupId, StringComparison.Ordinal))
         {
             return;
         }
@@ -911,7 +930,7 @@ public class FikaPlayer : LocalPlayer
             return;
         }
 
-        if (!IsYourPlayer && LastAggressor.GroupId != "Fika")
+        if (!IsYourPlayer && !string.Equals(LastAggressor.GroupId, FikaGlobals.FikaGroupId, StringComparison.OrdinalIgnoreCase))
         {
 #if DEBUG
             FikaGlobals.LogWarning($"Skipping because {LastAggressor.Profile.Nickname} is not a player");
@@ -1657,7 +1676,9 @@ public class FikaPlayer : LocalPlayer
             if (player != null)
             {
                 damageInfo.Player = player;
-                if (IsYourPlayer && !FikaPlugin.Instance.Settings.FriendlyFire && damageInfo.Player.iPlayer.GroupId == GroupId)
+                if (IsYourPlayer
+                    && !FikaPlugin.Instance.Settings.FriendlyFire
+                    && string.Equals(damageInfo.Player.iPlayer.GroupId, GroupId, StringComparison.Ordinal))
                 {
                     return;
                 }

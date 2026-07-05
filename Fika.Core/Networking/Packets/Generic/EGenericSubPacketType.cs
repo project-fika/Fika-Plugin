@@ -26,11 +26,6 @@ public enum EGenericSubPacketType : byte
     ExfilCountdown,
 
     /// <summary>
-    /// Clear all active effects.
-    /// </summary>
-    ClearEffects,
-
-    /// <summary>
     /// Update backend data.
     /// </summary>
     UpdateBackendData,
@@ -93,17 +88,12 @@ public enum EGenericSubPacketType : byte
     /// <summary>
     /// Syncable item, e.g. window or lamp
     /// </summary>
-    SyncableItem,    
+    SyncableItem,
 
     /// <summary>
     /// AI loaded by all clients
     /// </summary>
-    SpawnAI,
-
-    /// <summary>
-    /// Clear the snapshotter on player
-    /// </summary>
-    ClearSnapshotter
+    SpawnAI
 
     /// <summary>
     /// Train synchronization event (commented out).

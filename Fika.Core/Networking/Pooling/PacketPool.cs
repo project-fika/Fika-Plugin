@@ -52,7 +52,8 @@ public class PacketPool<T> : IDisposable
             return item;
         }
 #if DEBUG
-        FikaGlobals.LogError($"[{typeof(T).Name}] Pool empty. Allocating new instance.");
+        var concreteType = _constructor.Method.ReturnType;
+        FikaGlobals.LogError($"[{concreteType.Name}] Pool empty. Allocating new instance.");
 #endif
         return _constructor();
     }

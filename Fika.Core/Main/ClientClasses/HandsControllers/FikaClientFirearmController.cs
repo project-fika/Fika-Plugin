@@ -534,7 +534,7 @@ public class FikaClientFirearmController : Player.FirearmController
     private void SendAbortReloadPacket(int amount)
     {
         _packet.Type = EFirearmSubPacketType.ReloadWithAmmo;
-        _packet.SubPacket = ReloadWithAmmoPacket.FromValue(true, EReloadWithAmmoStatus.AbortReload, amount);
+        _packet.SubPacket = ReloadWithAmmoPacket.FromValue(EReloadWithAmmoStatus.AbortReload, amount);
         _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
     }
 
@@ -557,7 +557,7 @@ public class FikaClientFirearmController : Player.FirearmController
         if (_fikaPlayer.HealthController.IsAlive)
         {
             _packet.Type = EFirearmSubPacketType.ReloadWithAmmo;
-            _packet.SubPacket = ReloadWithAmmoPacket.FromValue(true, EReloadWithAmmoStatus.EndReload, amount);
+            _packet.SubPacket = ReloadWithAmmoPacket.FromValue(EReloadWithAmmoStatus.EndReload, amount);
             _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
         }
     }
@@ -587,7 +587,7 @@ public class FikaClientFirearmController : Player.FirearmController
             base.SwitchToIdle();
         }
 
-        private FikaClientFirearmController coopClientFirearmController = (FikaClientFirearmController)controller;
+        private readonly FikaClientFirearmController coopClientFirearmController = (FikaClientFirearmController)controller;
     }
 
     private class AmmoPackReloadInternalOneChamberOperation(Player.FirearmController controller) : AmmoPackReloadInternalOneChamberOperationClass(controller)
@@ -691,46 +691,29 @@ public class FikaClientFirearmController : Player.FirearmController
             _hasSent = false;
         }
 
-        private FikaClientFirearmController _coopClientFirearmController = (FikaClientFirearmController)controller;
+        private readonly FikaClientFirearmController _coopClientFirearmController = (FikaClientFirearmController)controller;
         private bool _hasSent;
     }
 
-    private class ReloadMagHandler(FikaPlayer fikaPlayer, FikaClientFirearmController coopClientFirearmController, ItemAddress gridItemAddress, MagazineItemClass magazine)
+    private sealed class ReloadMagHandler(FikaPlayer fikaPlayer, FikaClientFirearmController coopClientFirearmController, ItemAddress gridItemAddress, MagazineItemClass magazine)
     {
         private readonly FikaPlayer _fikaPlayer = fikaPlayer;
         private readonly FikaClientFirearmController _coopClientFirearmController = coopClientFirearmController;
         private readonly ItemAddress _gridItemAddress = gridItemAddress;
         private readonly MagazineItemClass _magazine = magazine;
 
-        public void Process(IResult result)
+        public void Process(IResult _)
         {
-            var itemAddress = _gridItemAddress;
-            var descriptor = itemAddress?.ToDescriptor();
-            var eftWriter = WriterPoolManager.GetWriter();
-
-            byte[] locationDescription;
-            if (descriptor != null)
-            {
-                eftWriter.WritePolymorph(descriptor);
-                locationDescription = eftWriter.ToArray();
-            }
-            else
-            {
-                locationDescription = [];
-            }
-
-            WriterPoolManager.ReturnWriter(eftWriter);
-
             if (_fikaPlayer.HealthController.IsAlive)
             {
                 _coopClientFirearmController._packet.Type = EFirearmSubPacketType.ReloadMag;
-                _coopClientFirearmController._packet.SubPacket = ReloadMagPacket.FromValue(_magazine.Id, locationDescription, true);
+                _coopClientFirearmController._packet.SubPacket = ReloadMagPacket.FromValue(_magazine.Id, _gridItemAddress);
                 _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _coopClientFirearmController._packet, DeliveryMethod.ReliableOrdered, true);
             }
         }
     }
 
-    private class ReloadCylinderMagazineHandler(FikaPlayer fikaPlayer, FikaClientFirearmController coopClientFirearmController, bool quickReload, string[] ammoIds, List<int> shellsIndexes, CylinderMagazineItemClass cylinderMagazine)
+    private sealed class ReloadCylinderMagazineHandler(FikaPlayer fikaPlayer, FikaClientFirearmController coopClientFirearmController, bool quickReload, string[] ammoIds, List<int> shellsIndexes, CylinderMagazineItemClass cylinderMagazine)
     {
         private readonly FikaPlayer _fikaPlayer = fikaPlayer;
         private readonly FikaClientFirearmController _coopClientFirearmController = coopClientFirearmController;
@@ -739,67 +722,49 @@ public class FikaClientFirearmController : Player.FirearmController
         public readonly List<int> ShellsIndexes = shellsIndexes;
         private readonly CylinderMagazineItemClass _cylinderMagazine = cylinderMagazine;
 
-        public void Process(IResult result)
+        public void Process(IResult _)
         {
             if (_fikaPlayer.HealthController.IsAlive)
             {
                 _coopClientFirearmController._packet.Type = EFirearmSubPacketType.CylinderMag;
                 _coopClientFirearmController._packet.SubPacket = CylinderMagPacket.FromValue(EReloadWithAmmoStatus.StartReload,
                     _cylinderMagazine.CurrentCamoraIndex, 0, true,
-                    _coopClientFirearmController.Item.CylinderHammerClosed, true, _ammoIds);
+                    _coopClientFirearmController.Item.CylinderHammerClosed, _ammoIds);
                 _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _coopClientFirearmController._packet, DeliveryMethod.ReliableOrdered, true);
             }
         }
     }
 
-    private class ReloadBarrelsHandler(FikaPlayer fikaPlayer, FikaClientFirearmController coopClientFirearmController, ItemAddress placeToPutContainedAmmoMagazine, AmmoPackReloadingClass ammoPack)
+    private sealed class ReloadBarrelsHandler(FikaPlayer fikaPlayer, FikaClientFirearmController coopClientFirearmController, ItemAddress placeToPutContainedAmmoMagazine, AmmoPackReloadingClass ammoPack)
     {
         private readonly FikaPlayer _fikaPlayer = fikaPlayer;
         private readonly FikaClientFirearmController _coopClientFirearmController = coopClientFirearmController;
         private readonly ItemAddress _placeToPutContainedAmmoMagazine = placeToPutContainedAmmoMagazine;
         private readonly AmmoPackReloadingClass _ammoPack = ammoPack;
 
-        public void Process(IResult result)
+        public void Process(IResult _)
         {
-            var itemAddress = _placeToPutContainedAmmoMagazine;
-            var descriptor = itemAddress?.ToDescriptor();
-            var eftWriter = WriterPoolManager.GetWriter();
-            var ammoIds = _ammoPack.GetReloadingAmmoIds();
-
-            byte[] locationDescription;
-            if (descriptor != null)
-            {
-                eftWriter.WritePolymorph(descriptor);
-                locationDescription = eftWriter.ToArray();
-            }
-            else
-            {
-                locationDescription = [];
-            }
-
-            WriterPoolManager.ReturnWriter(eftWriter);
-
             if (_fikaPlayer.HealthController.IsAlive)
             {
                 _coopClientFirearmController._packet.Type = EFirearmSubPacketType.ReloadBarrels;
-                _coopClientFirearmController._packet.SubPacket = ReloadBarrelsPacket.FromValue(true, ammoIds, locationDescription);
+                _coopClientFirearmController._packet.SubPacket = ReloadBarrelsPacket.FromValue(_ammoPack.GetReloadingAmmoIds(), _placeToPutContainedAmmoMagazine);
                 _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _coopClientFirearmController._packet, DeliveryMethod.ReliableOrdered, true);
             }
         }
     }
 
-    private class ReloadWithAmmoHandler(FikaPlayer fikaPlayer, FikaClientFirearmController coopClientFirearmController, string[] ammoIds)
+    private sealed class ReloadWithAmmoHandler(FikaPlayer fikaPlayer, FikaClientFirearmController coopClientFirearmController, string[] ammoIds)
     {
         private readonly FikaPlayer _fikaPlayer = fikaPlayer;
         private readonly FikaClientFirearmController _coopClientFirearmController = coopClientFirearmController;
         private readonly string[] _ammoIds = ammoIds;
 
-        public void Process(IResult result)
+        public void Process(IResult _)
         {
             if (_fikaPlayer.HealthController.IsAlive)
             {
                 _coopClientFirearmController._packet.Type = EFirearmSubPacketType.ReloadWithAmmo;
-                _coopClientFirearmController._packet.SubPacket = ReloadWithAmmoPacket.FromValue(true, EReloadWithAmmoStatus.StartReload, ammoIds: _ammoIds);
+                _coopClientFirearmController._packet.SubPacket = ReloadWithAmmoPacket.FromValue(EReloadWithAmmoStatus.StartReload, ammoIds: _ammoIds);
                 _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _coopClientFirearmController._packet, DeliveryMethod.ReliableOrdered, true);
             }
         }

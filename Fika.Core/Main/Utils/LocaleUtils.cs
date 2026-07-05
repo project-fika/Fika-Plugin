@@ -60,6 +60,7 @@ public static class LocaleUtils
     public const string PEER_CONNECTED = "F_Client_PeerConnected";
     public const string PEER_DISCONNECTED = "F_Client_PeerDisconnected";
     public const string CONNECTING_TO_SESSION = "F_Client_ConnectingToSession";
+    public const string MISSING_KEY_FOR_LOCATION = "F_Client_MissingKeyForLocation";
     public const string ITEM_BLACKLISTED = "F_Client_ItemIsBlacklisted";
     public const string ITEM_CONTAINS_BLACKLISTED = "F_Client_ItemsContainsBlacklisted";
     public const string SAVED_PROFILE = "F_Client_SavedProfile";
@@ -199,6 +200,8 @@ public static class LocaleUtils
     public const string BEPINEX_AUTO_EXTRACT_D = "F_BepInEx_AutoExtract_D";
     public const string BEPINEX_SHOW_EXTRACT_MESSAGE_T = "F_BepInEx_ShowExtractMessage_T";
     public const string BEPINEX_SHOW_EXTRACT_MESSAGE_D = "F_BepInEx_ShowExtractMessage_D";
+    public const string BEPINEX_SHOW_PLAYER_LIST_T = "F_BepInEx_ShowPlayersList_T";
+    public const string BEPINEX_SHOW_PLAYER_LIST_D = "F_BepInEx_ShowPlayersList_D";
     public const string BEPINEX_EXTRACT_KEY_T = "F_BepInEx_ExtractKey_T";
     public const string BEPINEX_EXTRACT_KEY_D = "F_BepInEx_ExtractKey_D";
     public const string BEPINEX_ENABLE_CHAT_T = "F_BepInEx_EnableChat_T";

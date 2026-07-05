@@ -18,14 +18,13 @@ public sealed class InventoryPacket : IPoolSubPacket
         var packet = GenericSubPacketPoolManager.Instance.GetPacket<InventoryPacket>(EGenericSubPacketType.InventoryOperation);
         packet.NetId = netId;
         packet.CallbackId = operation.Id;
-        packet.WriteOperation(operation);
+        packet.Descriptor = operation.ToDescriptor();
         return packet;
     }
 
     public int NetId;
     public ushort CallbackId;
-    public byte[] OperationBytes;
-
+    public BaseDescriptorClass Descriptor;
 
     [Obsolete("Not used for inventory packets", true)]
     public void Execute(FikaPlayer player = null)
@@ -33,32 +32,24 @@ public sealed class InventoryPacket : IPoolSubPacket
         // unused
     }
 
-    public void WriteOperation(BaseInventoryOperationClass operation)
-    {
-        var eftWriter = WriterPoolManager.GetWriter();
-        eftWriter.WritePolymorph(operation.ToDescriptor());
-        OperationBytes = eftWriter.ToArray();
-        WriterPoolManager.ReturnWriter(eftWriter);
-    }
-
     public void Serialize(NetDataWriter writer)
     {
         writer.Put(NetId);
         writer.Put(CallbackId);
-        writer.PutByteArray(OperationBytes);
+        writer.PutPolymorph(Descriptor);
     }
 
     public void Deserialize(NetDataReader reader)
     {
         NetId = reader.GetInt();
         CallbackId = reader.GetUShort();
-        OperationBytes = reader.GetByteArray();
+        Descriptor = reader.GetPolymorph<BaseDescriptorClass>();
     }
 
     public void Dispose()
     {
         NetId = 0;
         CallbackId = 0;
-        OperationBytes = null;
+        Descriptor = null;
     }
 }

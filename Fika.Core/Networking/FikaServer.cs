@@ -447,6 +447,7 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
         RegisterPacket<EventControllerInteractPacket, NetPeer>(OnEventControllerInteractPacketReceived);
         RegisterPacket<LoadingScreenPacket, NetPeer>(OnLoadingScreenPacketReceived);
         RegisterPacket<LoadingScreenPlayersPacket, NetPeer>(OnLoadingScreenPlayersPacketReceived);
+        RegisterPacket<ClearSnapshotterPacket, NetPeer>(OnClearSnapshotterPacketReceived);
 
         RegisterReusable<WorldPacket, NetPeer>(OnWorldPacketReceived);
 
@@ -540,14 +541,13 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
     {
         _netServer?.PollEvents();
 
-        var unscaledDeltaTime = Time.unscaledDeltaTime;
         var networkTime = NetworkTimeSync.NetworkTime;
         for (var i = 0; i < ObservedPlayers.Count; i++)
         {
             ObservedPlayers[i].ManualStateUpdate(networkTime);
         }
 
-        _statisticsCounter += unscaledDeltaTime;
+        _statisticsCounter += Time.unscaledDeltaTime;
         if (_statisticsCounter > _sendThreshold)
         {
             _statisticsCounter -= _sendThreshold;

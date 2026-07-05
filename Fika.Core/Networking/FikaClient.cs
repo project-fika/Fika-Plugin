@@ -165,7 +165,7 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
         _myProfileId = FikaBackendUtils.Profile.ProfileId;
         _genericPacket = new();
 
-        RegisterPacketsAndTypes();
+        await RegisterPacketsAndTypes();
 
 #if DEBUG
         AddDebugPackets();
@@ -235,7 +235,7 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
         return;
     }
 
-    private void RegisterPacketsAndTypes()
+    private Task RegisterPacketsAndTypes()
     {
         PoolUtils.CreateAll();
 
@@ -276,12 +276,15 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
         RegisterPacket<LoadingScreenPacket>(OnLoadingScreenPacketReceived);
         RegisterPacket<LoadingScreenPlayersPacket>(OnLoadingScreenPlayersPacketReceived);
         RegisterPacket<SyncEventPacket>(OnSyncEventPacketReceived);
+        RegisterPacket<ClearSnapshotterPacket>(OnClearSnapshotterPacketReceived);
 
         RegisterReusable<WorldPacket>(OnWorldPacketReceived);
 
         RegisterNetReusable<WeaponPacket>(OnWeaponPacketReceived);
         RegisterNetReusable<CommonPlayerPacket>(OnCommonPlayerPacketReceived);
         RegisterNetReusable<GenericPacket>(OnGenericPacketReceived);
+
+        return Task.CompletedTask;
     }
 
 #if DEBUG
@@ -308,7 +311,6 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
     {
         _netClient?.PollEvents();
 
-        var unscaledDeltaTime = Time.unscaledDeltaTime;
         var networkTime = NetworkTimeSync.NetworkTime;
         for (var i = 0; i < ObservedPlayers.Count; i++)
         {
@@ -633,9 +635,9 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
 
     private void HandleInventoryPacket(InventoryPacket packet, FikaPlayer player)
     {
-        if (packet.OperationBytes.Length == 0)
+        if (packet.Descriptor == null)
         {
-            FikaGlobals.LogError($"ConvertInventoryPacket::Bytes were null!");
+            FikaGlobals.LogError("ConvertInventoryPacket::Descriptor was null!");
             return;
         }
 
@@ -646,9 +648,7 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
             {
                 if (controller is Interface18 networkController)
                 {
-                    using var eftReader = PacketToEFTReaderAbstractClass.Get(packet.OperationBytes);
-                    var descriptor = eftReader.ReadPolymorph<BaseDescriptorClass>();
-                    var result = networkController.CreateOperationFromDescriptor(descriptor);
+                    var result = networkController.CreateOperationFromDescriptor(packet.Descriptor);
                     if (!result.Succeeded)
                     {
                         FikaGlobals.LogError($"ConvertInventoryPacket::Unable to process descriptor from netId {packet.NetId}, error: {result.Error}");

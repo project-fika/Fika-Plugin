@@ -26,6 +26,7 @@ public static class FikaGlobals
     public const string TransitTraderId = "656f0f98d80a697f855d34b1";
     public const string TransitTraderName = "BTR";
     public const string DefaultTransitId = "66f5750951530ca5ae09876d";
+    public const string FikaGroupId = "Fika";
 
     public static int PingMask = LayerMask.GetMask(["HighPolyCollider", "Interactive", "Deadbody", "Player", "Loot", "Terrain"]);
 
@@ -315,7 +316,7 @@ public static class FikaGlobals
     /// <returns>True if in the player group</returns>
     public static bool IsGroupMember(this Player player)
     {
-        return player.GroupId == "Fika";
+        return string.Equals(player.GroupId, FikaGroupId, StringComparison.Ordinal);
     }
 
     /// <summary>
@@ -489,7 +490,7 @@ public static class FikaGlobals
     /// <param name="fieldName">The exact case-sensitive name of the private field.</param>
     /// <returns>A compiled <see cref="Func{T, TResult}"/> delegate that yields the field value when invoked.</returns>
     /// <exception cref="NullReferenceException">Thrown when the specified <paramref name="fieldName"/> cannot be found via reflection.</exception>
-    public static Func<T,TResult> CreateGetter<T,TResult>(string fieldName)
+    public static Func<T, TResult> CreateGetter<T, TResult>(string fieldName)
     {
         var fieldInfo = typeof(T).GetField(fieldName,
             BindingFlags.Instance | BindingFlags.NonPublic);
@@ -516,7 +517,7 @@ public static class FikaGlobals
     /// <param name="fieldName">The exact case-sensitive name of the private field.</param>
     /// <returns>A compiled <see cref="Action{T, TResult}"/> delegate that assigns a new value to the field when invoked.</returns>
     /// <exception cref="NullReferenceException">Thrown when the specified <paramref name="fieldName"/> cannot be found via reflection.</exception>
-    public static Action<T,TResult> CreateSetter<T, TResult>(string fieldName)
+    public static Action<T, TResult> CreateSetter<T, TResult>(string fieldName)
     {
         var fieldInfo = typeof(T).GetField(fieldName,
             BindingFlags.Instance | BindingFlags.NonPublic);

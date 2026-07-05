@@ -35,7 +35,19 @@ namespace Fika.Core.Networking;
 
 public sealed partial class FikaServer
 {
-    private void OnLoadingScreenPlayersPacketReceived(LoadingScreenPlayersPacket packet, NetPeer peer)
+    private void OnClearSnapshotterPacketReceived(ClearSnapshotterPacket packet, NetPeer _)
+    {
+        if (_coopHandler.Players.TryGetValue(packet.NetId, out var player) && player is ObservedPlayer observedPlayer)
+        {
+            observedPlayer.HealthBar.RemoveAllActiveEffects();
+            observedPlayer.Snapshotter.Clear();
+            return;
+        }
+
+        _logger.LogError($"Could not find player {packet.NetId} to reset snapshotter");
+    }
+
+    private void OnLoadingScreenPlayersPacketReceived(LoadingScreenPlayersPacket packet, NetPeer _)
     {
         if (LoadingScreenUI.Instance != null)
         {
@@ -323,6 +335,9 @@ public sealed partial class FikaServer
                 {
                     if (player.ProfileId == packet.ProfileId && player is ObservedPlayer observedPlayer)
                     {
+#if DEBUG
+                        _logger.LogInfo($"Found player to send back: {observedPlayer.Profile.GetCorrectedNickname()}");
+#endif
                         ReconnectPacket ownCharacterPacket = new()
                         {
                             Type = EReconnectDataType.OwnCharacter,
@@ -333,14 +348,6 @@ public sealed partial class FikaServer
                         };
 
                         SendDataToPeer(ref ownCharacterPacket, DeliveryMethod.ReliableOrdered, peer);
-
-                        observedPlayer.HealthBar.RemoveAllActiveEffects();
-                        SendGenericPacket(EGenericSubPacketType.ClearEffects,
-                            ClearEffects.FromValue(observedPlayer.NetId), true, peer);
-
-                        observedPlayer.Snapshotter.Clear();
-                        SendGenericPacket(EGenericSubPacketType.ClearSnapshotter,
-                           ClearSnapshotter.FromValue(observedPlayer.NetId), true, peer);
 
                         break;
                     }
@@ -654,13 +661,11 @@ public sealed partial class FikaServer
     {
         if (_coopHandler.Players.TryGetValue(packet.NetId, out var playerToApply))
         {
-            using var eftReader = PacketToEFTReaderAbstractClass.Get(packet.OperationBytes);
             try
             {
                 if (playerToApply.InventoryController is Interface18 inventoryController)
                 {
-                    var descriptor = eftReader.ReadPolymorph<BaseDescriptorClass>();
-                    var result = inventoryController.CreateOperationFromDescriptor(descriptor);
+                    var result = inventoryController.CreateOperationFromDescriptor(packet.Descriptor);
 #if DEBUG
                     if (result.Succeeded)
                     {

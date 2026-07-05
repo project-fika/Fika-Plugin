@@ -24,6 +24,9 @@ namespace Fika.Core.Networking;
 /// </summary>
 public static class FikaSerializationExtensions
 {
+    private static readonly NetDataWriter _bufferWriter = new(true, 1024);
+    private static readonly NetDataReader _bufferReader = new();
+
     /// <summary>
     /// Serializes a <see cref="PhysicalStateStruct"/> struct to the <paramref name="writer"/>
     /// </summary>
@@ -153,11 +156,8 @@ public static class FikaSerializationExtensions
     /// <param name="item">The <see cref="Item"/> to serialize</param>
     public static void PutItem(this NetDataWriter writer, Item item)
     {
-        var eftWriter = WriterPoolManager.GetWriter();
         var descriptor = EFTItemSerializerClass.SerializeItem(item, FikaGlobals.SearchControllerSerializer);
-        eftWriter.WriteEFTItemDescriptor(descriptor);
-        writer.PutByteArray(eftWriter.ToArray());
-        WriterPoolManager.ReturnWriter(eftWriter);
+        writer.PutEFTItemDescriptor(descriptor);
     }
 
     /// <summary>
@@ -168,22 +168,19 @@ public static class FikaSerializationExtensions
     /// <returns>The deserialized <see cref="Item"/></returns>
     public static Item GetItem(this NetDataReader reader)
     {
-        using var eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
-        return EFTItemSerializerClass.DeserializeItem(eftReader.ReadEFTItemDescriptor(), Singleton<ItemFactoryClass>.Instance, []);
+        return EFTItemSerializerClass.DeserializeItem(reader.GetEFTItemDescriptor(), Singleton<ItemFactoryClass>.Instance, []);
     }
 
 
     /// <summary>
     /// Reads an <see cref="InventoryEquipment"/> serialized from <see cref="PutItem(NetDataWriter, Item)"/> and converts it into an <see cref="Inventory"/>
     /// </summary>
-    /// <param name="reader"></param>
     /// <returns>An <see cref="Inventory"/></returns>
     public static Inventory GetInventoryFromEquipment(this NetDataReader reader)
     {
-        using var eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
         return new EFTInventoryClass()
         {
-            Equipment = eftReader.ReadEFTItemDescriptor()
+            Equipment = reader.GetEFTItemDescriptor()
         }.ToInventory();
     }
 
@@ -194,10 +191,9 @@ public static class FikaSerializationExtensions
     /// <param name="descriptor">The <see cref="InventoryDescriptorClass"/> instance to serialize</param>
     public static void PutItemDescriptor(this NetDataWriter writer, InventoryDescriptorClass descriptor)
     {
-        var eftWriter = WriterPoolManager.GetWriter();
-        eftWriter.WriteEFTItemDescriptor(descriptor);
-        writer.CompressAndPutByteArray(eftWriter.ToArray());
-        WriterPoolManager.ReturnWriter(eftWriter);
+        _bufferWriter.PutEFTItemDescriptor(descriptor);
+        writer.CompressAndPutByteArray(_bufferWriter.Data);
+        _bufferWriter.Reset();
     }
 
     /// <summary>
@@ -207,8 +203,8 @@ public static class FikaSerializationExtensions
     /// <returns>The deserialized <see cref="InventoryDescriptorClass"/> instance</returns>
     public static InventoryDescriptorClass GetItemDescriptor(this NetDataReader reader)
     {
-        using var eftReader = PacketToEFTReaderAbstractClass.Get(reader.DecompressAndGetByteArray());
-        return eftReader.ReadEFTItemDescriptor();
+        _bufferReader.SetSource(reader.DecompressAndGetByteArray());
+        return _bufferReader.GetEFTItemDescriptor();
     }
 
     /// <summary>
@@ -218,8 +214,7 @@ public static class FikaSerializationExtensions
     /// <returns>The deserialized <see cref="Item"/> instance representing the airdrop item</returns>
     public static Item GetAirdropItem(this NetDataReader reader)
     {
-        using var eftReader = PacketToEFTReaderAbstractClass.Get(reader.GetByteArray());
-        var item = EFTItemSerializerClass.DeserializeItem(eftReader.ReadEFTItemDescriptor(), Singleton<ItemFactoryClass>.Instance, []);
+        var item = EFTItemSerializerClass.DeserializeItem(reader.GetEFTItemDescriptor(), Singleton<ItemFactoryClass>.Instance, []);
 
         GClass1404 enumerable = [new LootItemPositionClass()];
         enumerable[0].Item = item;
@@ -285,10 +280,9 @@ public static class FikaSerializationExtensions
     /// <param name="profile">The <see cref="Profile"/> to serialize</param>
     public static void PutProfile(this NetDataWriter writer, Profile profile)
     {
-        var eftWriter = WriterPoolManager.GetWriter();
-        eftWriter.WriteEFTProfileDescriptor(new(profile, FikaGlobals.SearchControllerSerializer));
-        writer.CompressAndPutByteArray(eftWriter.ToArray());
-        WriterPoolManager.ReturnWriter(eftWriter);
+        _bufferWriter.PutEFTProfileDescriptor(new(profile, FikaGlobals.SearchControllerSerializer));
+        writer.CompressAndPutByteArray(_bufferWriter.Data);
+        _bufferWriter.Reset();
     }
 
     /// <summary>
@@ -298,15 +292,14 @@ public static class FikaSerializationExtensions
     /// <returns>The deserialized <see cref="Profile"/></returns>
     public static Profile GetProfile(this NetDataReader reader)
     {
-        using var eftReader = PacketToEFTReaderAbstractClass.Get(reader.DecompressAndGetByteArray());
-        return new(eftReader.ReadEFTProfileDescriptor());
+        _bufferReader.SetSource(reader.DecompressAndGetByteArray());
+        return new Profile(_bufferReader.GetEFTProfileDescriptor());
     }
 
     /// <summary>
     /// Serializes a <see cref="List{WorldInteractiveObject.WorldInteractiveDataPacketStruct}"/> of <see cref="WorldInteractiveObject"/> data
     /// </summary>
-    /// <param name="writer"></param>
-    /// <param name="interactiveObjectsData"></param>
+    /// <param name="interactiveObjectsData">The interactive states to serialize</param>
     public static void PutInteractivesStates(this NetDataWriter writer, List<WorldInteractiveObject.WorldInteractiveDataPacketStruct> interactiveObjectsData)
     {
         writer.Put(interactiveObjectsData.Count);
@@ -321,7 +314,6 @@ public static class FikaSerializationExtensions
     /// <summary>
     /// Deserializes a <see cref="List{WorldInteractiveObject.WorldInteractiveDataPacketStruct}"/> of <see cref="WorldInteractiveObject"/> data
     /// </summary>
-    /// <param name="reader"></param>
     /// <returns>A <see cref="List{T}"/> of <see cref="WorldInteractiveObject.WorldInteractiveDataPacketStruct"/></returns>
     public static List<WorldInteractiveObject.WorldInteractiveDataPacketStruct> GetInteractivesStates(this NetDataReader reader)
     {
@@ -344,8 +336,7 @@ public static class FikaSerializationExtensions
     /// <summary>
     /// Serializes a <see cref="Dictionary{int, byte}"/> of <see cref="LampController"/> information
     /// </summary>
-    /// <param name="writer"></param>
-    /// <param name="lampStates"></param>
+    /// <param name="lampStates">The lamp states to serialize</param>
     public static void PutLampStates(this NetDataWriter writer, Dictionary<int, byte> lampStates)
     {
         var amount = lampStates.Count;
@@ -360,7 +351,6 @@ public static class FikaSerializationExtensions
     /// <summary>
     /// Deserializes a <see cref="Dictionary{int, byte}"/> of <see cref="LampController"/> information
     /// </summary>
-    /// <param name="reader"></param>
     /// <returns>A <see cref="Dictionary{TKey, TValue}"/> of information for <see cref="LampController"/>s</returns>
     public static Dictionary<int, byte> GetLampStates(this NetDataReader reader)
     {
@@ -377,8 +367,7 @@ public static class FikaSerializationExtensions
     /// <summary>
     /// Serializes a <see cref="Dictionary{int, Vector3}"/> of <see cref="WindowBreaker"/> information
     /// </summary>
-    /// <param name="writer"></param>
-    /// <param name="windowBreakerStates"></param>
+    /// <param name="windowBreakerStates">The window breaker states to serialize</param>
     public static void PutWindowBreakerStates(this NetDataWriter writer, Dictionary<int, Vector3> windowBreakerStates)
     {
         var amount = windowBreakerStates.Count;
@@ -393,7 +382,6 @@ public static class FikaSerializationExtensions
     /// <summary>
     /// Deserializes a <see cref="Dictionary{int, Vector3}"/> of <see cref="WindowBreaker"/> information
     /// </summary>
-    /// <param name="reader"></param>
     /// <returns>A <see cref="Dictionary{TKey, TValue}"/> of information for <see cref="WindowBreaker"/>s</returns>
     public static Dictionary<int, Vector3> GetWindowBreakerStates(this NetDataReader reader)
     {
@@ -410,8 +398,7 @@ public static class FikaSerializationExtensions
     /// <summary>
     /// Serializes a <see cref="MongoID"/>
     /// </summary>
-    /// <param name="writer"></param>
-    /// <param name="mongoId"></param>
+    /// <param name="mongoId">The <see cref="MongoID"/> to serialize</param>
     public static void PutMongoID(this NetDataWriter writer, MongoID mongoId)
     {
         writer.Put(mongoId.TimeStamp);
@@ -421,7 +408,6 @@ public static class FikaSerializationExtensions
     /// <summary>
     /// Deserializes a <see cref="MongoID"/>
     /// </summary>
-    /// <param name="reader"></param>
     /// <returns>A new <see cref="MongoID"/></returns>
     public static MongoID GetMongoID(this NetDataReader reader)
     {
@@ -440,8 +426,7 @@ public static class FikaSerializationExtensions
     /// <summary>
     /// Serializes a <see cref="MongoID"/>? (nullable)
     /// </summary>
-    /// <param name="writer"></param>
-    /// <param name="mongoId"></param>
+    /// <param name="mongoId">The nullable <see cref="MongoID"/> to serialize</param>
     public static void PutNullableMongoID(this NetDataWriter writer, MongoID? mongoId)
     {
         writer.Put(mongoId.HasValue);
@@ -454,7 +439,6 @@ public static class FikaSerializationExtensions
     /// <summary>
     /// Deserializes a <see cref="MongoID"/>? (nullable)
     /// </summary>
-    /// <param name="reader"></param>
     /// <returns>A new <see cref="MongoID"/>? (nullable)</returns>
     public static MongoID? GetNullableMongoID(this NetDataReader reader)
     {
@@ -467,10 +451,32 @@ public static class FikaSerializationExtensions
     }
 
     /// <summary>
+    /// Tries to read a nullable <see cref="MongoID"/> from the stream.
+    /// </summary>
+    /// <param name="reader">The <see cref="NetDataReader"/> instance reading the data.</param>
+    /// <param name="mongoId">
+    /// When this method returns, contains the <see cref="MongoID"/> read from the stream if it exists;
+    /// otherwise, <see langword="null"/>. This parameter is passed uninitialized.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> if a <see cref="MongoID"/> was successfully read; otherwise, <see langword="false"/>.
+    /// </returns>
+    public static bool TryGetNullableMongoId(this NetDataReader reader, out MongoID? mongoId)
+    {
+        if (!reader.GetBool())
+        {
+            mongoId = null;
+            return false;
+        }
+
+        mongoId = reader.GetMongoID();
+        return true;
+    }
+
+    /// <summary>
     /// Serializes a <see cref="TraderServicesClass"/>
     /// </summary>
-    /// <param name="writer"></param>
-    /// <param name="traderService"></param>
+    /// <param name="traderService">The trader service to serialize</param>
     public static void PutTraderService(this NetDataWriter writer, TraderServicesClass traderService)
     {
         writer.PutMongoID(traderService.TraderId);
@@ -500,7 +506,6 @@ public static class FikaSerializationExtensions
     /// <summary>
     /// Deserializes a <see cref="TraderServicesClass"/>
     /// </summary>
-    /// <param name="reader"></param>
     /// <returns>A <see cref="TraderServicesClass"/></returns>
     public static TraderServicesClass GetTraderService(this NetDataReader reader)
     {
@@ -535,7 +540,7 @@ public static class FikaSerializationExtensions
     /// <summary>
     /// Writes a <see cref="Profile.ProfileHealthClass"/> into a raw <see cref="byte"/>[]
     /// </summary>
-    /// <param name="health"></param>
+    /// <param name="health">The health info to serialize</param>
     /// <returns><see cref="byte"/>[]</returns>
     public static byte[] SerializeHealthInfo(this Profile.ProfileHealthClass health)
     {
@@ -880,7 +885,7 @@ public static class FikaSerializationExtensions
     /// <param name="packet"></param>
     public static void PutCorpseSyncPacket(this NetDataWriter writer, CorpseSyncPackets packet)
     {
-        writer.PutItemDescriptor(packet.InventoryDescriptor);
+        writer.PutEFTItemDescriptor(packet.InventoryDescriptor);
 
         writer.PutUnmanaged(packet.Direction);
         writer.PutUnmanaged(packet.Point);
@@ -899,7 +904,7 @@ public static class FikaSerializationExtensions
     {
         return new CorpseSyncPackets()
         {
-            InventoryDescriptor = reader.GetItemDescriptor(),
+            InventoryDescriptor = reader.GetEFTItemDescriptor(),
 
             Direction = reader.GetUnmanaged<Vector3>(),
             Point = reader.GetUnmanaged<Vector3>(),
@@ -1220,6 +1225,23 @@ public static class FikaSerializationExtensions
         };
     }
 
+    /// <summary>
+    /// Serializes a TimeSpan structure as a 64-bit integer tick count into the writer stream.
+    /// </summary>
+    public static void PutTimeSpan(this NetDataWriter writer, TimeSpan target)
+    {
+        writer.Put(target.Ticks);
+    }
+
+    /// <summary>
+    /// Deserializes a 64-bit integer tick count from the reader stream and reconstructs a TimeSpan structure.
+    /// </summary>
+    public static TimeSpan GetTimeSpan(this NetDataReader reader)
+    {
+        var ticks = reader.GetLong();
+        return new TimeSpan(ticks);
+    }
+
     public static void PutFirearmSubPacket(this NetDataWriter writer, ISubPacket packet, EFirearmSubPacketType type)
     {
         switch (type)
@@ -1259,7 +1281,7 @@ public static class FikaSerializationExtensions
             case EFirearmSubPacketType.Loot:
                 break;
             default:
-                FikaGlobals.LogError("PutFirearmSubPacket: type was outside of bounds!");
+                FikaGlobals.LogError("Type was outside of bounds!");
                 break;
         }
     }
@@ -1278,7 +1300,7 @@ public static class FikaSerializationExtensions
             case ERequestSubPacketType.CharacterSync:
                 return new RequestCharactersPacket(reader);
             default:
-                FikaGlobals.LogError("GetRequestSubPacket: type was outside of bounds!");
+                FikaGlobals.LogError("Type was outside of bounds!");
                 return null;
         }
     }

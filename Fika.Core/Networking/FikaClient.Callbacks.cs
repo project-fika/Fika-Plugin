@@ -31,6 +31,18 @@ namespace Fika.Core.Networking;
 
 public sealed partial class FikaClient
 {
+    private void OnClearSnapshotterPacketReceived(ClearSnapshotterPacket packet)
+    {
+        if (_coopHandler.Players.TryGetValue(packet.NetId, out var player) && player is ObservedPlayer observedPlayer)
+        {
+            observedPlayer.HealthBar.RemoveAllActiveEffects();
+            observedPlayer.Snapshotter.Clear();
+            return;
+        }
+
+        _logger.LogError($"Could not find player {packet.NetId} to reset snapshotter");
+    }
+
     private void OnSyncEventPacketReceived(SyncEventPacket packet)
     {
         _logger.LogInfo($"Received sync event: {packet.Type}");
@@ -695,8 +707,6 @@ public sealed partial class FikaClient
                     fikaGame.GameController.GameInstance.SetMatchmakerStatus(LocaleUtils.UI_FINISH_RECONNECT.Localized());
                     ReconnectDone = true;
                     break;
-                default:
-                    break;
             }
         }
     }
@@ -706,8 +716,8 @@ public sealed partial class FikaClient
         var fikaGame = Singleton<IFikaGame>.Instance;
         if (fikaGame != null)
         {
-            using var eftReader = PacketToEFTReaderAbstractClass.Get(packet.Data);
-            var lootData = eftReader.ReadEFTLootDataDescriptor();
+            var reader = new NetDataReader(packet.Data);
+            var lootData = reader.GetEFTLootDataDescriptor();
             var lootItems = EFTItemSerializerClass.DeserializeLootData(lootData);
 #if RELEASE
             if (lootItems.Count < 1)

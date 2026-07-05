@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace Fika.Core.Networking.Pooling;
@@ -6,6 +7,7 @@ namespace Fika.Core.Networking.Pooling;
 /// <summary>
 /// Provides a static pool manager for <see cref="EFTWriterClass"/> instances to optimize object reuse and reduce allocations.
 /// </summary>
+[Obsolete("Use EFTSerializationExtensions instead", true)]
 public static class WriterPoolManager
 {
     /// <summary>
@@ -26,6 +28,7 @@ public static class WriterPoolManager
     /// </summary>
     /// <param name="writer">The <see cref="EFTWriterClass"/> instance to return to the pool.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [Obsolete("Use EFTSerializationExtensions instead", true)]
     public static void ReturnWriter(EFTWriterClass writer)
     {
         _writers.Push(writer);
@@ -37,6 +40,7 @@ public static class WriterPoolManager
     /// </summary>
     /// <returns>An <see cref="EFTWriterClass"/> instance ready for use.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [Obsolete("Use EFTSerializationExtensions instead", true)]
     public static EFTWriterClass GetWriter()
     {
         if (_writers.Count == 0)
