@@ -317,16 +317,7 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
             ObservedPlayers[i].ManualStateUpdate(networkTime);
         }
 
-        while (_inventoryOperations.Count > 0)
-        {
-            if (_inventoryOperations.Peek().WaitingForForeignEvents())
-            {
-                break;
-            }
-
-            _inventoryOperations.Dequeue()
-                .method_1(_handleInventoryOperationCallback);
-        }
+        HandleInventoryOperations();
 
         if (Input.GetKeyDown(FikaPlugin.Instance.Settings.ChatKey.Value.MainKey))
         {
@@ -334,6 +325,23 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
             {
                 _fikaChat.ToggleChat();
             }
+        }
+    }
+
+    /// <summary>
+    /// Processes queued <see cref="BaseInventoryOperationClass"/>
+    /// </summary>
+    private void HandleInventoryOperations()
+    {
+        while (_inventoryOperations.Count > 0)
+        {
+            if (_inventoryOperations.Peek().WaitingForForeignEvents())
+            {
+                return;
+            }
+
+            _inventoryOperations.Dequeue()
+                .method_1(_handleInventoryOperationCallback);
         }
     }
 
@@ -637,7 +645,7 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
     {
         if (packet.Descriptor == null)
         {
-            FikaGlobals.LogError("ConvertInventoryPacket::Descriptor was null!");
+            _logger.LogError("HandleInventoryPacket::Descriptor was null!");
             return;
         }
 
@@ -651,21 +659,26 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
                     var result = networkController.CreateOperationFromDescriptor(packet.Descriptor);
                     if (!result.Succeeded)
                     {
-                        FikaGlobals.LogError($"ConvertInventoryPacket::Unable to process descriptor from netId {packet.NetId}, error: {result.Error}");
+                        _logger.LogError($"HandleInventoryPacket::Unable to process descriptor from netId {packet.NetId}, error: {result.Error}");
                         return;
                     }
 
                     _inventoryOperations.Enqueue(result.Value);
+                    HandleInventoryOperations();
+                }
+                else
+                {
+                    _logger.LogError($"Player {player.Profile.GetCorrectedNickname()} is not allowed to process inventory operations. Operation: {packet.Descriptor.GetType().Name}");
                 }
             }
             catch (Exception exception)
             {
-                FikaGlobals.LogError($"ConvertInventoryPacket::Exception thrown: {exception}");
+                _logger.LogError($"HandleInventoryPacket::Exception thrown: {exception}");
             }
         }
         else
         {
-            FikaGlobals.LogError("ConvertInventoryPacket: inventory was null!");
+            _logger.LogError("HandleInventoryPacket: inventory was null!");
         }
     }
 
@@ -673,7 +686,7 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
     {
         if (result.Failed)
         {
-            FikaGlobals.LogError($"Error in operation: {result.Error}");
+            _logger.LogError($"Error in operation: {result.Error}");
         }
     }
 }
