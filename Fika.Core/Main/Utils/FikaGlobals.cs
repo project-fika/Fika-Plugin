@@ -322,6 +322,24 @@ public static class FikaGlobals
     /// <summary>
     /// Unsubscribes all delegates from an <see cref="Action{T}"/>
     /// </summary>
+    /// <param name="action"></param>
+    public static Action ClearDelegates(Action action)
+    {
+        var list = action.GetInvocationList();
+        for (var i = 0; i < list.Length; i++)
+        {
+#if DEBUG
+            LogWarning($"Clearing {list[i].Method.Name}");
+#endif
+            action = (Action)Delegate.Remove(action, list[i]);
+        }
+
+        return action;
+    }
+
+    /// <summary>
+    /// Unsubscribes all delegates from an <see cref="Action{T}"/>
+    /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="action"></param>
     public static Action<T> ClearDelegates<T>(Action<T> action) where T : class
