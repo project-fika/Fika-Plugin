@@ -52,7 +52,10 @@ public static class FikaBackendUtils
     /// <summary>
     /// If this client is a headless client
     /// </summary>
-    /// <remarks>Headless clients are always raid hosts (<see cref="IsServer"/> is always <see langword="true"/>)</remarks>
+    /// <remarks>
+    /// Headless clients are always raid hosts (<see cref="IsServer"/> is always <see langword="true"/>) <br/>
+    /// This check should mainly be used to prevent GPU/animation logic, etc.
+    /// </remarks>
     public static bool IsHeadless { get; set; }
     /// <summary>
     /// If current session is a reconnect session
