@@ -44,14 +44,39 @@ public static class FikaBackendUtils
     /// The name of the local player PMC
     /// </summary>
     public static string PMCName => Profile.Nickname;
+    /// <summary>
+    /// If the current raid is a scav raid
+    /// </summary>
     public static bool IsScav { get; internal set; }
     public static EClientType ClientType { get; internal set; } = EClientType.None;
+    /// <summary>
+    /// If this client is a headless client
+    /// </summary>
+    /// <remarks>Headless clients are always raid hosts (<see cref="IsServer"/> is always <see langword="true"/>)</remarks>
     public static bool IsHeadless { get; set; }
+    /// <summary>
+    /// If current session is a reconnect session
+    /// </summary>
     public static bool IsReconnect { get; internal set; }
+    /// <summary>
+    /// If the raid host is a headless client
+    /// </summary>
     public static bool IsHeadlessGame { get; set; }
+    /// <summary>
+    /// If this client requested the headless session
+    /// </summary>
     public static bool IsHeadlessRequester { get; set; }
+    /// <summary>
+    /// If the current raid is a transit
+    /// </summary>
     public static bool IsTransit { get; set; }
+    /// <summary>
+    /// If the current session is spectator only
+    /// </summary>
     public static bool IsSpectator { get; internal set; }
+    /// <summary>
+    /// If the host is using NAT punching
+    /// </summary>
     public static bool IsHostNatPunch { get; internal set; }
     public static IPEndPoint RemoteEndPoint { get; internal set; }
     public static ushort LocalPort { get; internal set; }
@@ -91,6 +116,10 @@ public static class FikaBackendUtils
         DissonanceComms_Start_Patch.IsReady = false;
     }
 
+    /// <summary>
+    /// If this client is hosting the raid
+    /// </summary>
+    /// <remarks>A headless client is always server</remarks>
     public static bool IsServer
     {
         get
@@ -98,6 +127,9 @@ public static class FikaBackendUtils
             return ClientType == EClientType.Host;
         }
     }
+    /// <summary>
+    /// If this client joined a raid
+    /// </summary>
     public static bool IsClient
     {
         get
@@ -105,6 +137,9 @@ public static class FikaBackendUtils
             return ClientType == EClientType.Client;
         }
     }
+    /// <summary>
+    /// If this client is hosting the raid and no clients are connectec
+    /// </summary>
     public static bool IsSinglePlayer
     {
         get
@@ -115,6 +150,9 @@ public static class FikaBackendUtils
     }
     public static string GroupId { get; internal set; }
     public static string RaidCode { get; internal set; }
+    /// <summary>
+    /// The <see cref="Guid"/> of the current raid session
+    /// </summary>
     public static Guid ServerGuid { get; internal set; }
     public static RaidTransitionInfoClass TransitData
     {
