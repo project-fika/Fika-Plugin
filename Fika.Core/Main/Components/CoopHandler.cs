@@ -594,7 +594,7 @@ public class CoopHandler : MonoBehaviour
         Extracted
     }
 
-    public class SpawnObject(Profile profile, Vector3 position, bool isAlive, bool isAI, int netId, MongoID currentId, ushort firstOperationId, bool isZombie)
+    public sealed class SpawnObject(Profile profile, Vector3 position, bool isAlive, bool isAI, int netId, MongoID currentId, ushort firstOperationId, bool isZombie)
     {
         public Profile Profile = profile;
         public Vector3 Position = position;
