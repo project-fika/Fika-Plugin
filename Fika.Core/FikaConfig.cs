@@ -829,7 +829,7 @@ public sealed class FikaConfig(ConfigFile config)
             "Disable Bot Metabolism", ref failed, headers);
 
         StrictInventorySync = SetupSetting("Gameplay", "Strict Inventory Sync",
-            false, new ConfigDescription(LocaleUtils.BEPINEX_STRICT_INVENTORY_SYNC_D.Localized(),
+            true, new ConfigDescription(LocaleUtils.BEPINEX_STRICT_INVENTORY_SYNC_D.Localized(),
             tags: new ConfigurationManagerAttributes
             {
                 Category = LocaleUtils.BEPINEX_H_GAMEPLAY.Localized(),
