@@ -42,6 +42,11 @@ public interface IFikaNetworkManager
     bool AllowVOIP { get; set; }
 
     /// <summary>
+    /// Whether strict inventory sync is enabled
+    /// </summary>
+    bool StrictInventorySync { get; set; }
+
+    /// <summary>
     /// Gets or sets the list of observed players in the session.
     /// </summary>
     List<ObservedPlayer> ObservedPlayers { get; set; }

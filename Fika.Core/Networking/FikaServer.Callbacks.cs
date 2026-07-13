@@ -35,6 +35,43 @@ namespace Fika.Core.Networking;
 
 public sealed partial class FikaServer
 {
+    private void OnProceedRequestPacketReceived(ProceedRequestPacket packet, NetPeer peer)
+    {
+        var response = new ProceedResponsePacket
+        {
+            CallbackId = packet.CallbackId
+        };
+
+        if (!CoopHandler.Players.TryGetValue(packet.NetId, out var player))
+        {
+            response.Error = $"Could not find player with id {packet.NetId}";
+            SendDataToPeer(ref response, DeliveryMethod.ReliableOrdered, peer);
+            return;
+        }
+
+        var search = player.FindItemById(packet.ItemId, false, false);
+        if (search.Failed)
+        {
+            response.Error = $"Could not find item with id {packet.ItemId}";
+            SendDataToPeer(ref response, DeliveryMethod.ReliableOrdered, peer);
+            return;
+        }
+
+        var item = search.Value;
+        if (item.CurrentAddress != null)
+        {
+            var result = item.CheckAction(null);
+            if (result.Failed)
+            {
+                response.Error = $"Player cannot equip item with id {packet.ItemId}: {result.Error}";
+                SendDataToPeer(ref response, DeliveryMethod.ReliableOrdered, peer);
+                return;
+            }
+        }
+
+        SendDataToPeer(ref response, DeliveryMethod.ReliableOrdered, peer);
+    }
+
     private void OnClearSnapshotterPacketReceived(ClearSnapshotterPacket packet, NetPeer _)
     {
         if (_coopHandler.Players.TryGetValue(packet.NetId, out var player) && player is ObservedPlayer observedPlayer)
@@ -145,7 +182,8 @@ public sealed partial class FikaServer
         {
             SendRate = _sendRate,
             NetId = netId,
-            AllowVOIP = AllowVOIP
+            AllowVOIP = AllowVOIP,
+            StrictSync = StrictInventorySync
         };
         SendDataToPeer(ref response, DeliveryMethod.ReliableOrdered, peer);
     }

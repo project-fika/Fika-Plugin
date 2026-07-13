@@ -97,6 +97,7 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
             _coopHandler = value;
         }
     }
+    public bool StrictInventorySync { get; set; }
     public Queue<BaseInventoryOperationClass> InventoryOperations
     {
         get
@@ -277,6 +278,7 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
         RegisterPacket<LoadingScreenPlayersPacket>(OnLoadingScreenPlayersPacketReceived);
         RegisterPacket<SyncEventPacket>(OnSyncEventPacketReceived);
         RegisterPacket<ClearSnapshotterPacket>(OnClearSnapshotterPacketReceived);
+        RegisterPacket<ProceedResponsePacket>(OnProceedResponsePacketReceived);
 
         RegisterReusable<WorldPacket>(OnWorldPacketReceived);
 

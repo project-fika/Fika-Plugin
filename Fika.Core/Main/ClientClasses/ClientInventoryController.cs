@@ -32,7 +32,7 @@ public sealed class ClientInventoryController : BaseInventoryController
     private readonly Player _player;
     private readonly ClientInventoryOperationHandlerPool _clientInventoryOperationHandlerPool;
 
-    public ClientInventoryController(Player player, Profile profile, bool examined) : base(player, profile, examined)
+    public ClientInventoryController(Player player, Profile profile, bool examined, bool strictSync) : base(player, profile, examined, strictSync)
     {
         _player = player;
         FikaPlayer = (FikaPlayer)player;

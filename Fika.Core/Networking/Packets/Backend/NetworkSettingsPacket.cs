@@ -7,6 +7,7 @@ public struct NetworkSettingsPacket : INetSerializable
     public int SendRate;
     public int NetId;
     public bool AllowVOIP;
+    public bool StrictSync;
 
     public void Deserialize(NetDataReader reader)
     {
@@ -19,6 +20,7 @@ public struct NetworkSettingsPacket : INetSerializable
         SendRate = reader.GetInt();
         NetId = reader.GetInt();
         AllowVOIP = reader.GetBool();
+        StrictSync = reader.GetBool();
     }
 
     public readonly void Serialize(NetDataWriter writer)
@@ -35,5 +37,6 @@ public struct NetworkSettingsPacket : INetSerializable
         writer.Put(SendRate);
         writer.Put(NetId);
         writer.Put(AllowVOIP);
+        writer.Put(StrictSync);
     }
 }

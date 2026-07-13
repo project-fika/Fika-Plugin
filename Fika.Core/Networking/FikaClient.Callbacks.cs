@@ -31,6 +31,11 @@ namespace Fika.Core.Networking;
 
 public sealed partial class FikaClient
 {
+    private void OnProceedResponsePacketReceived(ProceedResponsePacket packet)
+    {
+        MyPlayer.HandleCallbackResponse(packet.CallbackId, packet.Error);
+    }
+
     private void OnClearSnapshotterPacketReceived(ClearSnapshotterPacket packet)
     {
         if (_coopHandler.Players.TryGetValue(packet.NetId, out var player) && player is ObservedPlayer observedPlayer)
@@ -470,6 +475,7 @@ public sealed partial class FikaClient
         _sendRate = packet.SendRate;
         NetId = packet.NetId;
         AllowVOIP = packet.AllowVOIP;
+        StrictInventorySync = packet.StrictSync;
 
         _genericPacket.NetId = packet.NetId;
 

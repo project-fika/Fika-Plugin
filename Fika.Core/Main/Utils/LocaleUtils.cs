@@ -349,4 +349,6 @@ public static class LocaleUtils
 
     public const string BEPINEX_DISABLE_BOT_METABOLISM_T = "F_BepInEx_DisableBotMetabolism_T";
     public const string BEPINEX_DISABLE_BOT_METABOLISM_D = "F_BepInEx_DisableBotMetabolism_D";
+    public const string BEPINEX_STRICT_INVENTORY_SYNC_T = "F_BepInEx_StrictInventorySync_T";
+    public const string BEPINEX_STRICT_INVENTORY_SYNC_D = "F_BepInEx_StrictInventorySync_D";
 }
