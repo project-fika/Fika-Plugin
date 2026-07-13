@@ -2395,7 +2395,7 @@ public sealed class ObservedPlayer : FikaPlayer
 
         internal AbstractHandsController ReturnController()
         {
-            return QuickUseItemController.smethod_6<QuickUseItemController>(_fikaPlayer, Item);
+            return ObservedQuickUseItemController.Create(_fikaPlayer, Item);
         }
     }
 }
