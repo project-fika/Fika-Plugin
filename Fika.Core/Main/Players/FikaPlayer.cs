@@ -2503,9 +2503,9 @@ public class FikaPlayer : LocalPlayer
         public Process<QuickKnifeKickController, GInterface207> Process;
         public Action ConfirmCallback;
 
-        internal QuickKnifeKickController ReturnController()
+        internal FikaClientQuickKnifeController ReturnController()
         {
-            return QuickKnifeKickController.smethod_9<QuickKnifeKickController>(_fikaPlayer, Knife);
+            return FikaClientQuickKnifeController.Create(_fikaPlayer, Knife);
         }
 
         internal void HandleCallbackResponse(bool succeed)

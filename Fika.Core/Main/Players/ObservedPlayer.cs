@@ -2373,7 +2373,7 @@ public sealed class ObservedPlayer : FikaPlayer
 
         internal AbstractHandsController ReturnController()
         {
-            return QuickKnifeKickController.smethod_9<QuickKnifeKickController>(_fikaPlayer, Knife);
+            return ObservedQuickKnifeController.Create(_fikaPlayer, Knife);
         }
     }
 

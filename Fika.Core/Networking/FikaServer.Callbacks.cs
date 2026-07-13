@@ -14,6 +14,8 @@ using Fika.Core.Networking.Packets.Communication;
 #if DEBUG
 using Fika.Core.Networking.Packets.Debug;
 using EFT.UI;
+using static Fika.Core.Networking.Packets.Debug.CommandPacket;
+using Fika.Core.ConsoleCommands;
 #endif
 using Fika.Core.Networking.Packets.FirearmController;
 using Fika.Core.Networking.Packets.Generic;
@@ -26,15 +28,79 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using static Fika.Core.Networking.Packets.World.ReconnectPacket;
-#if DEBUG
-using static Fika.Core.Networking.Packets.Debug.CommandPacket;
-using Fika.Core.ConsoleCommands;
-#endif
+using EFT.NetworkPackets;
 
 namespace Fika.Core.Networking;
 
 public sealed partial class FikaServer
 {
+    private void OnKnifeHitPacketReceived(KnifeHitPacket packet, NetPeer _)
+    {
+        var gameWorld = Singleton<GameWorld>.Instance;
+        if (gameWorld == null)
+        {
+            FikaGlobals.LogError("GameWorld was null when receiving KnifeHitPacket");
+            return;
+        }
+
+        if (gameWorld is not FikaHostGameWorld hostGameWorld)
+        {
+            FikaGlobals.LogError($"GameWorld not a FikaHostGameWorld, was: {gameWorld.GetType().Name}");
+            return;
+        }
+
+        switch (packet.HitType)
+        {
+            case EHitType.Window:
+                {
+                    if (!hostGameWorld.Windows.TryGetByKey(packet.HitId, out var window))
+                    {
+                        FikaGlobals.LogError($"Could not find window with NetId {packet.HitId}");
+                        return;
+                    }
+
+                    var damageInfo = new DamageInfoStruct
+                    {
+                        HitPoint = packet.HitPoint
+                    };
+                    window.MakeHit(in damageInfo);
+                }
+                break;
+            case EHitType.Btr:
+                {
+                    if (!CoopHandler.Players.TryGetValue(packet.NetId, out var player))
+                    {
+                        FikaGlobals.LogError($"Could not find player with NetId {packet.NetId}");
+                        return;
+                    }
+
+                    if (hostGameWorld.BtrController != null)
+                    {
+                        hostGameWorld.BtrController.HitFromPlayer(player);
+                    }
+                }
+                break;
+            case EHitType.Default:
+            case EHitType.Lamp:
+                {
+                    if (!hostGameWorld.TurnablesDict.TryGetValue(packet.HitId, out var turnable))
+                    {
+                        FikaGlobals.LogError($"Could not find turnable with NetId {packet.HitId}");
+                        return;
+                    }
+
+                    turnable.method_0(new DamageInfoStruct
+                    {
+                        HitPoint = packet.HitPoint
+                    });
+                }
+                break;
+            case EHitType.Tripwire:
+            case EHitType.Event:
+                break;
+        }
+    }
+
     private void OnProceedRequestPacketReceived(ProceedRequestPacket packet, NetPeer peer)
     {
         var response = new ProceedResponsePacket
