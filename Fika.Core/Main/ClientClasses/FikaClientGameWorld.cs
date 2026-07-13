@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Comfort.Common;
 using EFT;
+using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
 using Fika.Core.Main.Utils;
@@ -17,6 +18,7 @@ namespace Fika.Core.Main.ClientClasses;
 public class FikaClientGameWorld : ClientLocalGameWorld
 {
     public FikaClientWorld FikaClientWorld { get; private set; }
+    public Dictionary<int, Turnable> TurnableDict => Turnables;
 
     public static FikaClientGameWorld Create(GameObject gameObject, PoolManagerClass objectsFactory, EUpdateQueue updateQueue, string currentProfileId)
     {
