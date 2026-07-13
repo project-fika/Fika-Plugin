@@ -118,7 +118,7 @@ public class FikaPlugin : BaseUnityPlugin
     {
         Instance = this;
         _patchManager = new(this, true);
-        Settings = new(Config);
+        Settings = new FikaConfig(Config);
 
         GetNatPunchServerConfig();
         EnableModulePatches();
