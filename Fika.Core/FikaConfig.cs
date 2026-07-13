@@ -834,7 +834,7 @@ public sealed class FikaConfig(ConfigFile config)
             {
                 Category = LocaleUtils.BEPINEX_H_GAMEPLAY.Localized(),
                 DispName = LocaleUtils.BEPINEX_STRICT_INVENTORY_SYNC_T.Localized(),
-                Order = 1
+                Order = 2
             }),
             "Strict Inventory Sync", ref failed, headers);
 
