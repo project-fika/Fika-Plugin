@@ -59,11 +59,14 @@ public class FikaPlayer : LocalPlayer
     public CommonPlayerPacket CommonPacket;
     public virtual bool LeftStanceDisabled { get; internal set; }
     public DateTime TalkDateTime { get; internal set; }
+    /// <summary>
+    /// If this player is waiting for callbacks from the host
+    /// </summary>
     public bool WaitingForCallback
     {
         get
         {
-            if (!BaseInventoryController.StrictSync)
+            if (!_baseInventoryController.StrictSync)
             {
                 return false;
             }
@@ -94,7 +97,6 @@ public class FikaPlayer : LocalPlayer
             OnPlayerDownedChanged?.Invoke(this, value);
         }
     }
-    public BaseInventoryController BaseInventoryController => _inventoryController as BaseInventoryController;
 
     protected MongoID? _lastWeaponId;
     protected Action[] _armorUnsubcribes = new Action[Inventory.ArmorSlots.Length];
@@ -113,6 +115,7 @@ public class FikaPlayer : LocalPlayer
 
     private uint _proceedCallbackId;
     private readonly Dictionary<uint, Callback> _proceedCallbacks = [];
+    private BaseInventoryController _baseInventoryController;
 
     private static Func<Player, SurfaceSet> _getCurrentSet;
     private static Func<Player, float> _getLastStepTime;
@@ -165,9 +168,15 @@ public class FikaPlayer : LocalPlayer
             ? new HostInventoryController(player, profile, false, strictSync)
             : new ClientInventoryController(player, profile, false, strictSync);
 
+        player._baseInventoryController = inventoryController as BaseInventoryController;
+
         if (strictSync)
         {
             FikaGlobals.LogInfo("Using strict inventory sync");
+        }
+        else
+        {
+            FikaGlobals.LogWarning("Strict inventory sync disable - limited/no support will be given for this raid");
         }
 
         LocalQuestControllerClass questController;
@@ -808,7 +817,7 @@ public class FikaPlayer : LocalPlayer
         var handler = new EmptyHandsControllerHandler(this, scheduled);
         var func = new Func<EmptyHandsController>(handler.ReturnController);
         handler.Process = new Process<EmptyHandsController, GInterface198>(this, func, null);
-        if (withNetwork && FikaBackendUtils.IsClient && BaseInventoryController.StrictSync)
+        if (withNetwork && FikaBackendUtils.IsClient && _baseInventoryController.StrictSync)
         {
             handler.ConfirmCallback = new(handler.SendCallbackRequest);
         }
@@ -825,7 +834,7 @@ public class FikaPlayer : LocalPlayer
         FoodControllerHandler handler = new(this, foodDrink, amount, bodyparts, animationVariant);
         Func<MedsController> func = new(handler.ReturnController);
 
-        if (FikaBackendUtils.IsClient && BaseInventoryController.StrictSync)
+        if (FikaBackendUtils.IsClient && _baseInventoryController.StrictSync)
         {
             handler.Process = new(this, func, foodDrink, false, confirmation: AbstractProcess.Confirmation.Unknown);
             handler.ConfirmCallback = new(handler.SendCallbackRequest);
@@ -844,7 +853,7 @@ public class FikaPlayer : LocalPlayer
 
         Func<MedsController> func = new(handler.ReturnController);
 
-        if (FikaBackendUtils.IsClient && BaseInventoryController.StrictSync)
+        if (FikaBackendUtils.IsClient && _baseInventoryController.StrictSync)
         {
             handler.Process = new(this, func, meds, false, confirmation: AbstractProcess.Confirmation.Unknown);
             handler.ConfirmCallback = new(handler.SendCallbackRequest);
@@ -865,7 +874,7 @@ public class FikaPlayer : LocalPlayer
 
             Func<PortableRangeFinderController> rangeFinderFunc = new(rangeFinderHandler.ReturnController);
 
-            if (FikaBackendUtils.IsClient && BaseInventoryController.StrictSync)
+            if (FikaBackendUtils.IsClient && _baseInventoryController.StrictSync)
             {
                 rangeFinderHandler.Process = new(this, rangeFinderFunc, item, false, confirmation: AbstractProcess.Confirmation.Unknown);
                 rangeFinderHandler.ConfirmCallback = new(rangeFinderHandler.SendCallbackRequest);
@@ -883,7 +892,7 @@ public class FikaPlayer : LocalPlayer
 
         Func<UsableItemController> func = new(handler.ReturnController);
 
-        if (FikaBackendUtils.IsClient && BaseInventoryController.StrictSync)
+        if (FikaBackendUtils.IsClient && _baseInventoryController.StrictSync)
         {
             handler.Process = new(this, func, item, false, confirmation: AbstractProcess.Confirmation.Unknown);
             handler.ConfirmCallback = new(handler.SendCallbackRequest);
@@ -902,7 +911,7 @@ public class FikaPlayer : LocalPlayer
 
         Func<QuickUseItemController> func = new(handler.ReturnController);
 
-        if (FikaBackendUtils.IsClient && BaseInventoryController.StrictSync)
+        if (FikaBackendUtils.IsClient && _baseInventoryController.StrictSync)
         {
             handler.Process = new(this, func, item, true, confirmation: AbstractProcess.Confirmation.Unknown);
             handler.ConfirmCallback = new(handler.SendCallbackRequest);
@@ -921,7 +930,7 @@ public class FikaPlayer : LocalPlayer
 
         Func<KnifeController> func = new(handler.ReturnController);
 
-        if (FikaBackendUtils.IsClient && BaseInventoryController.StrictSync)
+        if (FikaBackendUtils.IsClient && _baseInventoryController.StrictSync)
         {
             handler.Process = new(this, func, handler.Knife.Item, false, confirmation: AbstractProcess.Confirmation.Unknown);
             handler.ConfirmCallback = new(handler.SendCallbackRequest);
@@ -940,7 +949,7 @@ public class FikaPlayer : LocalPlayer
 
         Func<QuickKnifeKickController> func = new(handler.ReturnController);
 
-        if (FikaBackendUtils.IsClient && BaseInventoryController.StrictSync)
+        if (FikaBackendUtils.IsClient && _baseInventoryController.StrictSync)
         {
             handler.Process = new(this, func, handler.Knife.Item, true, confirmation: AbstractProcess.Confirmation.Unknown);
             handler.ConfirmCallback = new(handler.SendCallbackRequest);
@@ -959,7 +968,7 @@ public class FikaPlayer : LocalPlayer
 
         Func<QuickGrenadeThrowHandsController> func = new(handler.ReturnController);
 
-        if (FikaBackendUtils.IsClient && BaseInventoryController.StrictSync)
+        if (FikaBackendUtils.IsClient && _baseInventoryController.StrictSync)
         {
             handler.Process = new(this, func, throwWeap, false, confirmation: AbstractProcess.Confirmation.Unknown);
             handler.ConfirmCallback = new(handler.SendCallbackRequest);
@@ -978,7 +987,7 @@ public class FikaPlayer : LocalPlayer
 
         Func<GrenadeHandsController> func = new(handler.ReturnController);
 
-        if (FikaBackendUtils.IsClient && BaseInventoryController.StrictSync)
+        if (FikaBackendUtils.IsClient && _baseInventoryController.StrictSync)
         {
             handler.Process = new(this, func, throwWeap, false, confirmation: AbstractProcess.Confirmation.Unknown);
             handler.ConfirmCallback = new(handler.SendCallbackRequest);
@@ -1001,7 +1010,7 @@ public class FikaPlayer : LocalPlayer
         }
         Func<FirearmController> func = new(handler.ReturnController);
 
-        if (FikaBackendUtils.IsClient && BaseInventoryController.StrictSync)
+        if (FikaBackendUtils.IsClient && _baseInventoryController.StrictSync)
         {
             handler.Process = new Process<FirearmController, IFirearmHandsController>(this, func, handler.Weapon, flag, confirmation: AbstractProcess.Confirmation.Unknown);
             handler.ConfirmCallback = new(handler.SendCallbackRequest);

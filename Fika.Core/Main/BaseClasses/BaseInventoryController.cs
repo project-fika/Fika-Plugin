@@ -6,7 +6,6 @@ using EFT;
 using EFT.InventoryLogic;
 using EFT.InventoryLogic.Operations;
 using EFT.UI;
-using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.BaseClasses;
 
@@ -15,16 +14,19 @@ namespace Fika.Core.Main.BaseClasses;
 /// </summary>
 public class BaseInventoryController : Player.PlayerOwnerInventoryController
 {
+    /// <summary>
+    /// Whether strict inventory syncing is active
+    /// </summary>
     public bool StrictSync { get; }
 
-    private readonly bool _instantLoad;
-    private readonly bool _fastLoad;
+    protected readonly bool _instantLoad;
+    protected readonly bool _fastLoad;
 
     public BaseInventoryController(Player player, Profile profile, bool examined, bool strictSync) : base(player, profile, examined)
     {
         _instantLoad = FikaPlugin.Instance.Settings.InstantLoad;
         _fastLoad = !_instantLoad && FikaPlugin.Instance.Settings.FastLoad;
-        StrictSync = strictSync;        
+        StrictSync = strictSync;
     }
 
     public override SearchContentOperation vmethod_2(SearchableItemItemClass item)
