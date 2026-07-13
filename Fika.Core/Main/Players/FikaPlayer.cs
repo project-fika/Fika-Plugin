@@ -54,7 +54,7 @@ public class FikaPlayer : LocalPlayer
     public CorpseSyncPackets CorpseSyncPacket;
     public int NetId;
     public bool IsObservedAI;
-    public Dictionary<uint, Action<ServerOperationStatus>> OperationCallbacks = [];
+    public readonly Dictionary<uint, Action<ServerOperationStatus>> OperationCallbacks = [];
     public PlayerSnapshotter<PlayerStateSnapshot> Snapshotter;
     public CommonPlayerPacket CommonPacket;
     public virtual bool LeftStanceDisabled { get; internal set; }
@@ -112,7 +112,7 @@ public class FikaPlayer : LocalPlayer
     private float _turnSoundTimer;
 
     private uint _proceedCallbackId;
-    private Dictionary<uint, Callback> _proceedCallbacks = [];
+    private readonly Dictionary<uint, Callback> _proceedCallbacks = [];
 
     private static Func<Player, SurfaceSet> _getCurrentSet;
     private static Func<Player, float> _getLastStepTime;
