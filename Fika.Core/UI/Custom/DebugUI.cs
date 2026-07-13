@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Comfort.Common;
 using EFT.UI;
@@ -52,6 +53,8 @@ public class DebugUI : MonoBehaviour
         }
     }
 
+    private Color DefaultColor;
+
     protected void Awake()
     {
         _isServer = FikaBackendUtils.IsServer;
@@ -72,6 +75,8 @@ public class DebugUI : MonoBehaviour
             FikaGlobals.LogError("FikaDebug: CoopHandler was null!");
             Destroy(gameObject);
         }
+
+        DefaultColor = AlivePlayersText.color;
 
         var sizeDelta = Frame.sizeDelta;
         var borderSizeDelta = Border.sizeDelta;
@@ -113,10 +118,61 @@ public class DebugUI : MonoBehaviour
         }
         else
         {
-            PingText.SetText("Ping: {0}", Ping);
-            RTTText.SetText("RTT: {0}", RTT);
-            ServerFPSText.SetText("Server FPS: {0}", ServerFPS);
+            var ping = Ping;
+            PingText.SetText("Ping: {0}", ping);
+            PingText.color = GetPingColor(ping);
+            var rtt = RTT;
+            RTTText.SetText("RTT: {0}", rtt);
+            RTTText.color = GetRTTColor(rtt);
+            var serverFps = ServerFPS;
+            ServerFPSText.SetText("Server FPS: {0}", serverFps);
+            ServerFPSText.color = GetServerFPSColor(serverFps);
         }
+    }
+
+    private Color GetServerFPSColor(int serverFps)
+    {
+        if (serverFps < 30)
+        {
+            return Color.red;
+        }
+
+        if (serverFps < 50)
+        {
+            return Color.yellow;
+        }
+
+        return DefaultColor;
+    }
+
+    private Color GetRTTColor(int rtt)
+    {
+        if (rtt < 0.0 || rtt > 120.0)
+        {
+            return Color.red;
+        }
+
+        if (rtt > 60.0)
+        {
+            return Color.yellow;
+        }
+
+        return DefaultColor;
+    }
+
+    private Color GetPingColor(int ping)
+    {
+        if (ping <= 75)
+        {
+            return DefaultColor;
+        }
+
+        if (ping <= 125)
+        {
+            return Color.yellow;
+        }
+
+        return Color.red;
     }
 
     private void CheckAndAdd()
