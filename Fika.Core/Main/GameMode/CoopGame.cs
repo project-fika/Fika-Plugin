@@ -737,7 +737,9 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
             FikaBackendUtils.ResetTransitData();
         }
 
+#if DEBUG
         _logger.LogDebug("Stop");
+#endif
 
         ToggleDebug(false);
 
