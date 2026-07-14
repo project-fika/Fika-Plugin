@@ -86,7 +86,7 @@ internal sealed class ObservedGrenadeController : Player.GrenadeHandsController
     }
 }
 
-public class ObservedTripwireState(Player.GrenadeHandsController controller, FikaPlayer player) : Player.GrenadeHandsController.TripwireStateManagerClass(controller)
+public sealed class ObservedTripwireState(Player.GrenadeHandsController controller, FikaPlayer player) : Player.GrenadeHandsController.TripwireStateManagerClass(controller)
 {
     private readonly FikaPlayer _fikaPlayer = player;
 
