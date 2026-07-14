@@ -24,7 +24,6 @@ internal static class MultiSelect
     private static MethodInfo _getItemsMethod;
     private static MethodInfo _applyMethod;
 
-
     /// <summary>
     /// The number of items in the current selection, 0 if UI Fixes is not present.
     /// </summary>
