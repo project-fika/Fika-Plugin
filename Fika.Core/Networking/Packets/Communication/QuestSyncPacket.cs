@@ -1,5 +1,4 @@
 ﻿using EFT;
-using EFT.Quests;
 
 namespace Fika.Core.Networking.Packets.Communication;
 

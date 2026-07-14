@@ -102,7 +102,7 @@ public class FikaClientKnifeController : Player.KnifeController
     {
         if (FikaBackendUtils.IsServer)
         {
-            return base.vmethod_0(hit, ballisticCollider); 
+            return base.vmethod_0(hit, ballisticCollider);
         }
 
         var shotInfo = base.vmethod_0(hit, ballisticCollider);

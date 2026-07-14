@@ -582,7 +582,10 @@ public partial class LiteNetManager
 
         var result = SendRawCore(message, start, length, remoteEndPoint);
         if (expandedPacket != null)
+        {
             PoolRecycle(expandedPacket);
+        }
+
         return result;
     }
 

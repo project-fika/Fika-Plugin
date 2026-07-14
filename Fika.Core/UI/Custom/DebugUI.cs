@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Comfort.Common;
 using EFT.UI;

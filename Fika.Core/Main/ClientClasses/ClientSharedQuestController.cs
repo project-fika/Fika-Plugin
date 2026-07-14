@@ -17,7 +17,7 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
     private readonly List<string> _lastFromNetwork = [];
     private readonly HashSet<string> _acceptedTypes = [];
     private readonly HashSet<string> _lootedTemplateIds = [];
-    
+
     private bool _isItemBeingDropped;
 
     public override void Init()
