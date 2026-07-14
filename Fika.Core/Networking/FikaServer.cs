@@ -452,6 +452,7 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
         RegisterPacket<ClearSnapshotterPacket, NetPeer>(OnClearSnapshotterPacketReceived);
         RegisterPacket<ProceedRequestPacket, NetPeer>(OnProceedRequestPacketReceived);
         RegisterPacket<KnifeHitPacket, NetPeer>(OnKnifeHitPacketReceived);
+        RegisterPacket<QuestSyncPacket, NetPeer>(OnQuestSyncPacketReceived);
 
         RegisterReusable<WorldPacket, NetPeer>(OnWorldPacketReceived);
 

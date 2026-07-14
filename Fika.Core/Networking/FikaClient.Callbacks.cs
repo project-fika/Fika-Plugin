@@ -713,6 +713,16 @@ public sealed partial class FikaClient
                     fikaGame.GameController.GameInstance.SetMatchmakerStatus(LocaleUtils.UI_FINISH_RECONNECT.Localized());
                     ReconnectDone = true;
                     break;
+                case ReconnectPacket.EReconnectDataType.Quests:
+                    if (MyPlayer != null && MyPlayer.AbstractQuestControllerClass is ClientQuestController clientQuestController)
+                    {
+                        clientQuestController.ReceiveReconnectQuestSync(packet.QuestSyncPackets);
+                    }
+                    else
+                    {
+                        _logger.LogError("Could not find own player to resync quests from host during reconnect");
+                    }
+                    break;
             }
         }
     }

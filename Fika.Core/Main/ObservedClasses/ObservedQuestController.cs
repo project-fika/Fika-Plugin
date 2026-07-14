@@ -2,17 +2,147 @@
 using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
+using EFT.Quests;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Packets.Backend;
+using Fika.Core.Networking.Packets.Communication;
 
 namespace Fika.Core.Main.ObservedClasses;
 
 public class ObservedQuestController(Profile profile, InventoryController inventoryController, IPlayerSearchController searchController, IQuestActions session)
     : GClass4007(profile, inventoryController, searchController, session)
 {
+    private Dictionary<int, List<QuestInformation>> _quests;
+    private List<ZoneDropInformation> _zoneDrops;
+    private List<string> _visitedPlaces;
+    private List<MongoID> _lootedQuestItems;
+
     public override void Run()
     {
-        // do nothing
+        if (FikaBackendUtils.IsServer)
+        {
+            _quests = [];
+            _zoneDrops = [];
+            _visitedPlaces = [];
+            _lootedQuestItems = [];
+        }
+    }
+
+    public void UpdateQuestStatusForClient(QuestSyncPacket packet)
+    {
+        if (packet.Type is QuestSyncPacket.EQuestSyncType.ItemDrop)
+        {
+#if DEBUG
+            FikaGlobals.LogInfo($"Received item drop quest status from client for zone [{packet.ZoneId}]");
+#endif
+            UpdateClientZoneDrop(packet.ItemId, packet.ZoneId);
+            return;
+        }
+
+        if (packet.Type is QuestSyncPacket.EQuestSyncType.PlaceVisited)
+        {
+#if DEBUG
+            FikaGlobals.LogInfo($"Received visited place for zone [{packet.ZoneId}]");
+#endif
+            _visitedPlaces.Add(packet.ZoneId);
+            return;
+        }
+
+        if (packet.Type is QuestSyncPacket.EQuestSyncType.PickUpQuestItem)
+        {
+#if DEBUG
+            FikaGlobals.LogInfo($"Received loot quest item [{packet.ItemId.Value}]");
+#endif
+            _lootedQuestItems.Add(packet.ItemId.Value);
+            return;
+        }
+
+#if DEBUG
+        FikaGlobals.LogInfo($"Received from client for quest [{packet.QuestId}] for conditional [{packet.ConditionId}] with a value of [{packet.Value}]");
+#endif
+
+        if (!_quests.TryGetValue(packet.QuestId, out var questInformation))
+        {
+            questInformation = [];
+            _quests.Add(packet.QuestId, questInformation);
+        }
+
+        for (var i = 0; i < questInformation.Count; i++)
+        {
+            var quest = questInformation[i];
+            if (quest.ConditionId == packet.ConditionId)
+            {
+                quest.Value = packet.Value;
+
+                return;
+            }
+        }
+
+        questInformation.Add(new QuestInformation
+        {
+            ConditionId = packet.ConditionId,
+            Value = packet.Value
+        });
+    }
+
+    private void UpdateClientZoneDrop(MongoID? itemId, string zoneId)
+    {
+        _zoneDrops.Add(new ZoneDropInformation(itemId, zoneId));
+    }
+
+    public bool TryGetReconnectQuestSyncPackets(out List<QuestSyncPacket> packets)
+    {
+        if (_quests.Count == 0 && _zoneDrops.Count == 0 && _visitedPlaces.Count == 0 && _lootedQuestItems.Count == 0)
+        {
+            packets = null;
+            return false;
+        }
+
+        packets = new List<QuestSyncPacket>(_quests.Count + _zoneDrops.Count + _visitedPlaces.Count + _lootedQuestItems.Count);
+        foreach ((var questId, var questInformation) in _quests)
+        {
+            foreach (var quest in questInformation)
+            {
+                packets.Add(new QuestSyncPacket
+                {
+                    Type = QuestSyncPacket.EQuestSyncType.Conditional,
+                    QuestId = questId,
+                    ConditionId = quest.ConditionId,
+                    Value = quest.Value
+                });
+            }
+        }
+
+        for (var i = 0; i < _zoneDrops.Count; i++)
+        {
+            var zoneDrop = _zoneDrops[i];
+            packets.Add(new QuestSyncPacket
+            {
+                Type = QuestSyncPacket.EQuestSyncType.ItemDrop,
+                ItemId = zoneDrop.ItemId,
+                ZoneId = zoneDrop.ZoneId
+            });
+        }
+
+        for (var i = 0; i < _visitedPlaces.Count; i++)
+        {
+            packets.Add(new QuestSyncPacket
+            {
+                Type = QuestSyncPacket.EQuestSyncType.PlaceVisited,
+                ZoneId = _visitedPlaces[i]
+            });
+        }
+
+        for (var i = 0; i < _lootedQuestItems.Count; i++)
+        {
+            packets.Add(new QuestSyncPacket
+            {
+                Type = QuestSyncPacket.EQuestSyncType.PickUpQuestItem,
+                ItemId = _lootedQuestItems[i]
+            });
+        }
+
+        return true;
     }
 
     public override void ManageConditional(QuestClass conditional)
@@ -44,7 +174,7 @@ public class ObservedQuestController(Profile profile, InventoryController invent
                         {
                             items = item,
                             MongoID_0 = MongoID.Generate(true),
-                            type = EFT.Quests.ERewardType.Item
+                            type = ERewardType.Item
                         });
                     }
 
@@ -110,4 +240,18 @@ public class ObservedQuestController(Profile profile, InventoryController invent
                 break;
         }
     }
+}
+
+public sealed class QuestInformation
+{
+    public MongoID ConditionId { get; set; }
+
+    public int Value { get; set; }
+}
+
+public sealed class ZoneDropInformation(MongoID? itemId, string zoneId)
+{
+    public MongoID? ItemId { get; set; } = itemId;
+
+    public string ZoneId { get; set; } = zoneId;
 }

@@ -34,6 +34,22 @@ namespace Fika.Core.Networking;
 
 public sealed partial class FikaServer
 {
+    private void OnQuestSyncPacketReceived(QuestSyncPacket packet, NetPeer peer)
+    {
+        if (!CoopHandler.Players.TryGetValue(packet.NetId, out var player))
+        {
+            _logger.LogError($"Could not find player with id [{packet.NetId}] when trying to sync quest packet");
+        }
+
+        if (player.AbstractQuestControllerClass is ObservedQuestController observedQuestController)
+        {
+            observedQuestController.UpdateQuestStatusForClient(packet);
+            return;
+        }
+
+        _logger.LogError($"QuestController on player [{player.Profile.GetCorrectedNickname()}] was not of type observed, was [{player.AbstractQuestControllerClass.GetType().Name}]");
+    }
+
     private void OnKnifeHitPacketReceived(KnifeHitPacket packet, NetPeer _)
     {
         var gameWorld = Singleton<GameWorld>.Instance;
@@ -603,6 +619,29 @@ public sealed partial class FikaServer
             }
 
             SendDataToPeer(ref stashesPacket, DeliveryMethod.ReliableOrdered, peer);
+
+            foreach (var player in _coopHandler.HumanPlayers)
+            {
+                if (player.ProfileId == packet.ProfileId && player is ObservedPlayer observedPlayer && observedPlayer.AbstractQuestControllerClass is ObservedQuestController questController)
+                {
+                    if (questController.TryGetReconnectQuestSyncPackets(out var packets))
+                    {
+                        ReconnectPacket questSyncPacket = new()
+                        {
+                            Type = EReconnectDataType.Quests,
+                            QuestSyncPackets = packets
+                        };
+
+#if DEBUG
+                        _logger.LogInfo($"Sending {packets.Count} quest sync packets back to reconnecting client {observedPlayer.Profile.GetCorrectedNickname()}");
+#endif
+
+                        SendDataToPeer(ref questSyncPacket, DeliveryMethod.ReliableOrdered, peer);
+                    }
+
+                    break;
+                }
+            }
 
             ReconnectPacket finishPacket = new()
             {
