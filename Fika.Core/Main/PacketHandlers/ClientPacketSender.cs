@@ -71,9 +71,9 @@ public class ClientPacketSender : MonoBehaviour, IPacketSender
     {
         enabled = true;
         SendState = true;
-        if (_player.AbstractQuestControllerClass is ClientSharedQuestController sharedQuestController)
+        if (_player.AbstractQuestControllerClass is ClientQuestController clientQuestController)
         {
-            sharedQuestController.LateInit();
+            clientQuestController.LateInit();
         }
     }
 
