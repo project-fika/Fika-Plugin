@@ -40,8 +40,6 @@ public struct InRaidQuestPacket : INetSerializable
                     }
                 }
                 break;
-            default:
-                break;
         }
     }
 
