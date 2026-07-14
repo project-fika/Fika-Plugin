@@ -597,6 +597,7 @@ public class FikaPlayer : LocalPlayer
             ActiveHealthController.PauseAllEffects();
             ActiveHealthController.DisableMetabolism();
             MovementContext.IsInPronePose = true;
+            HandsController.FastForwardCurrentState();
             HideWeapon();
             ((SimpleCharacterController)CharacterController).IsMoveIgnored = true;
             MovementContext.IsAxesIgnored = true;
