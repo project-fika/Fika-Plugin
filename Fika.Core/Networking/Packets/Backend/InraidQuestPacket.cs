@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace Fika.Core.Networking.Packets.Backend;
 
-public class InRaidQuestPacket : INetSerializable
+public struct InRaidQuestPacket : INetSerializable
 {
     public int NetId;
     public InraidQuestType Type;
@@ -45,7 +45,7 @@ public class InRaidQuestPacket : INetSerializable
         }
     }
 
-    public void Serialize(NetDataWriter writer)
+    public readonly void Serialize(NetDataWriter writer)
     {
         writer.Put(NetId);
         writer.Put((byte)Type);
@@ -68,8 +68,6 @@ public class InRaidQuestPacket : INetSerializable
                         writer.PutMongoID(ItemIdsToRemove[i]);
                     }
                 }
-                break;
-            default:
                 break;
         }
     }
