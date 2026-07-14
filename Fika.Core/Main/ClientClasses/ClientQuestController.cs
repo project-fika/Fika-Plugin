@@ -56,6 +56,7 @@ public class ClientQuestController(Profile profile, InventoryController inventor
         base.Dispose();
         _player.Profile.OnItemZoneDropped -= Profile_OnItemZoneDropped;
         _player.OnSpecialPlaceVisited -= Player_OnSpecialPlaceVisited;
+        _player.InventoryController.AddItemEvent -= InventoryController_AddItemEvent;
     }
 
     private void Player_OnSpecialPlaceVisited(string zoneId, int experience)
