@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Comfort.Common;
 using EFT;
+using EFT.InventoryLogic;
 using EFT.UI;
 using Fika.Core.Bundles;
 using Fika.Core.Main.Utils;
