@@ -35,12 +35,12 @@ public sealed class RevivedPlayerPacket : IPoolSubPacket
 
     public void Deserialize(NetDataReader reader)
     {
-        
+
     }
 
     public void Serialize(NetDataWriter writer)
     {
-        
+
     }
 
     public void Dispose()

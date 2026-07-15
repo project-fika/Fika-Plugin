@@ -440,7 +440,9 @@ public sealed class FikaHealthBar : MonoBehaviour
 
     private void HideHealthBar_SettingChanged(object sender, EventArgs e)
     {
-        SetPlayerPlateHealthVisibility(FikaPlugin.Instance.Settings.HideHealthBar.Value);
+        var value = FikaPlugin.Instance.Settings.HideHealthBar.Value;
+        SetPlayerPlateHealthVisibility(value);
+        ToggleHealthControllerEvents(!value);
     }
 
     private void UseNamePlates_SettingChanged(object sender, EventArgs e)

@@ -25,7 +25,7 @@ public sealed class CancelGrenadePacket : IPoolSubPacket
     {
         if (player.HandsController is ObservedGrenadeController grenadeController)
         {
-            grenadeController.vmethod_3();
+            grenadeController.CurrentOperation.PutGrenadeBack();
         }
     }
 

@@ -7,9 +7,6 @@ using EFT.InventoryLogic;
 using EFT.UI;
 using HarmonyLib;
 
-#pragma warning disable IDE0161 // Not using file scoped namespace for back-compat
-#pragma warning disable IDE0300 // Using legacy collection initalization for back-compat
-
 namespace Fika.Core.Main.Utils;
 
 /// <summary>
@@ -26,7 +23,6 @@ internal static class MultiSelect
     private static MethodInfo _getCountMethod;
     private static MethodInfo _getItemsMethod;
     private static MethodInfo _applyMethod;
-
 
     /// <summary>
     /// The number of items in the current selection, 0 if UI Fixes is not present.

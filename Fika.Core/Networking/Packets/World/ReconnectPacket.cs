@@ -2,6 +2,7 @@
 using ComponentAce.Compression.Libs.zlib;
 using EFT;
 using EFT.Interactive;
+using Fika.Core.Networking.Packets.Communication;
 
 namespace Fika.Core.Networking.Packets.World;
 
@@ -21,6 +22,7 @@ public sealed class ReconnectPacket : INetSerializable
     public List<WorldInteractiveObject.WorldInteractiveDataPacketStruct> InteractivesData;
     public Dictionary<int, byte> LampStates;
     public Dictionary<int, Vector3> WindowBreakerStates;
+    public List<QuestSyncPacket> QuestSyncPackets;
 
     public void Deserialize(NetDataReader reader)
     {
@@ -50,8 +52,13 @@ public sealed class ReconnectPacket : INetSerializable
                     PlayerPosition = reader.GetUnmanaged<Vector3>();
                     PlayerRotation = reader.GetUnmanaged<Vector2>();
                     break;
-                case EReconnectDataType.Finished:
-                default:
+                case EReconnectDataType.Quests:
+                    var count = reader.GetUShort();
+                    QuestSyncPackets = new List<QuestSyncPacket>(count);
+                    for (var i = 0; i < count; i++)
+                    {
+                        QuestSyncPackets.Add(reader.Get<QuestSyncPacket>());
+                    }
                     break;
             }
         }
@@ -85,8 +92,13 @@ public sealed class ReconnectPacket : INetSerializable
                     writer.PutUnmanaged(PlayerPosition);
                     writer.PutUnmanaged(PlayerRotation);
                     break;
-                case EReconnectDataType.Finished:
-                default:
+                case EReconnectDataType.Quests:
+                    var count = QuestSyncPackets.Count;
+                    writer.Put((ushort)count);
+                    for (var i = 0; i < count; i++)
+                    {
+                        writer.Put(QuestSyncPackets[i]);
+                    }
                     break;
             }
         }
@@ -99,6 +111,7 @@ public sealed class ReconnectPacket : INetSerializable
         LampControllers,
         Windows,
         OwnCharacter,
+        Quests,
         Finished
     }
 }

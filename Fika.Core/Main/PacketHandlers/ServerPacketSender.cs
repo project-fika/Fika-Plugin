@@ -21,7 +21,7 @@ using Fika.Core.UI.Custom;
 
 namespace Fika.Core.Main.PacketHandlers;
 
-public class ServerPacketSender : MonoBehaviour, IPacketSender
+public sealed class ServerPacketSender : MonoBehaviour, IPacketSender
 {
     public bool Enabled { get; set; }
     public bool SendState { get; set; }
@@ -72,9 +72,9 @@ public class ServerPacketSender : MonoBehaviour, IPacketSender
         enabled = true;
         Enabled = true;
         SendState = true;
-        if (_player.AbstractQuestControllerClass is ClientSharedQuestController sharedQuestController)
+        if (_player.AbstractQuestControllerClass is ClientQuestController clientQuestController)
         {
-            sharedQuestController.LateInit();
+            clientQuestController.LateInit();
         }
     }
 
@@ -88,7 +88,7 @@ public class ServerPacketSender : MonoBehaviour, IPacketSender
         NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered);
     }
 
-    protected void Update()
+    private void Update()
     {
         if (!SendState)
         {
@@ -109,7 +109,7 @@ public class ServerPacketSender : MonoBehaviour, IPacketSender
         NetworkManager.SendPlayerState(ref state);
     }
 
-    protected void LateUpdate()
+    private void LateUpdate()
     {
         if (CanPing)
         {

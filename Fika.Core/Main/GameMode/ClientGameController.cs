@@ -401,11 +401,13 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
             sharedQuestController.ToggleQuestSharing(false);
         }
 
+#if !DEBUG
         var matchEndConfig = Singleton<BackendConfigSettingsClass>.Instance.Experience.MatchEnd;
         if (player.Profile.EftStats.SessionCounters.GetAllInt([CounterTag.Exp]) < matchEndConfig.SurvivedExpRequirement && coopGame.PastTime < matchEndConfig.SurvivedTimeRequirement)
         {
             coopGame.ExitStatus = ExitStatus.Runner;
-        }
+        } 
+#endif
 
         if (exfiltrationPoint != null)
         {

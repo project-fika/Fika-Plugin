@@ -32,7 +32,7 @@ public sealed class HostInventoryController : BaseInventoryController
     private readonly Player _player;
     private readonly HostInventoryOperationHandlerPool _hostInventoryOperationHandlerPool;
 
-    public HostInventoryController(Player player, Profile profile, bool examined) : base(player, profile, examined)
+    public HostInventoryController(Player player, Profile profile, bool examined, bool strictSync) : base(player, profile, examined, strictSync)
     {
         _player = player;
         FikaPlayer = (FikaPlayer)player;

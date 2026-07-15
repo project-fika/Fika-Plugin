@@ -215,7 +215,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         var fikaPlayer = await FikaPlayer.Create(gameWorld, playerId, position, rotation, "Player", "Main_", EPointOfView.FirstPerson,
             profile, false, UpdateQueue, armsUpdateMode, Player.EUpdateMode.Auto,
             BackendConfigAbstractClass.Config.CharacterController.ClientPlayerMode, getSensitivity, getAimingSensitivity,
-            statisticsManager, new ClientViewFilter(), session, playerId);
+            statisticsManager, new ClientViewFilter(), session, playerId, Singleton<IFikaNetworkManager>.Instance.StrictInventorySync);
 
         fikaPlayer.Location = Location_0.Id;
         var coopHandler = GameController.CoopHandler;
@@ -737,7 +737,9 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
             FikaBackendUtils.ResetTransitData();
         }
 
+#if DEBUG
         _logger.LogDebug("Stop");
+#endif
 
         ToggleDebug(false);
 

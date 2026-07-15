@@ -17,11 +17,12 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
     private readonly List<string> _lastFromNetwork = [];
     private readonly HashSet<string> _acceptedTypes = [];
     private readonly HashSet<string> _lootedTemplateIds = [];
-    private bool _canSendAndReceive = true;
+
     private bool _isItemBeingDropped;
 
     public override void Init()
     {
+        _canSendAndReceive = true;
         base.Init();
         var array = (FikaPlugin.EQuestSharingTypes[])Enum.GetValues(typeof(FikaPlugin.EQuestSharingTypes));
         for (var i = 0; i < array.Length; i++)
@@ -58,15 +59,22 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
     /// <summary>
     /// Used to prevent errors when subscribing to the event
     /// </summary>
-    public void LateInit()
+    public override void LateInit()
     {
+        base.LateInit();
         if (_acceptedTypes.Contains("PlaceBeacon"))
         {
-            _player.Profile.OnItemZoneDropped += Profile_OnItemZoneDropped;
+            _player.Profile.OnItemZoneDropped += Shared_Profile_OnItemZoneDropped;
         }
     }
 
-    private void Profile_OnItemZoneDropped(string itemId, string zoneId)
+    public override void Dispose()
+    {
+        base.Dispose();
+        _player.Profile.OnItemZoneDropped -= Shared_Profile_OnItemZoneDropped;
+    }
+
+    private void Shared_Profile_OnItemZoneDropped(string itemId, string zoneId)
     {
         if (!_canSendAndReceive)
         {
@@ -80,7 +88,7 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
 
         QuestDropItemPacket packet = new(_player.Profile.Info.MainProfileNickname, itemId, zoneId);
 #if DEBUG
-        FikaGlobals.LogInfo($"Profile_OnItemZoneDropped: Sending quest progress itemId:{itemId} zoneId:{zoneId}");
+        FikaGlobals.LogInfo($"Profile_OnItemZoneDropped: Sending quest progress itemId: {itemId} zoneId: {zoneId}");
 #endif
         _player.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
     }

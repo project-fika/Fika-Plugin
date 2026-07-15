@@ -1,6 +1,7 @@
 ﻿using Comfort.Common;
 using EFT;
 using EFT.Interactive;
+using Fika.Core.Main.ClientClasses;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Pooling;
@@ -30,20 +31,32 @@ public sealed class SyncableItemPacket : IPoolSubPacket
         var packet = GenericSubPacketPoolManager.Instance.GetPacket<SyncableItemPacket>(EGenericSubPacketType.SyncableItem);
         packet.NetId = netId;
         packet.SyncType = ESyncType.WindowBreak;
-        packet.WindowStates = hitPoint;
+        packet.HitPoint = hitPoint;
         return packet;
     }
 
     public int NetId;
     public ESyncType SyncType;
     public Turnable.EState LampStates;
-    public Vector3 WindowStates;
+    public Vector3 HitPoint;
 
     public void Execute(FikaPlayer player = null)
     {
         if (SyncType is ESyncType.LampState)
         {
-            // nothing yet
+            if (Singleton<GameWorld>.Instance is FikaClientGameWorld clientGameWorld)
+            {
+                if (!clientGameWorld.TurnableDict.TryGetValue(NetId, out var turnable))
+                {
+                    FikaGlobals.LogWarning($"Could not find 'Turnable' with Id [{NetId}]");
+                    return;
+                }
+
+                if (turnable.LampState != LampStates)
+                {
+                    turnable.Switch(LampStates);
+                }
+            }
         }
         else
         {
@@ -51,9 +64,9 @@ public sealed class SyncableItemPacket : IPoolSubPacket
             {
                 DamageInfoStruct damageInfoStruct = new()
                 {
-                    HitPoint = WindowStates
+                    HitPoint = HitPoint
                 };
-                windowBreaker.MakeHit(in damageInfoStruct, false);
+                windowBreaker.MakeHit(in damageInfoStruct);
             }
             else
             {
@@ -72,7 +85,7 @@ public sealed class SyncableItemPacket : IPoolSubPacket
         }
         else
         {
-            WindowStates = reader.GetUnmanaged<Vector3>();
+            HitPoint = reader.GetUnmanaged<Vector3>();
         }
     }
 
@@ -86,7 +99,7 @@ public sealed class SyncableItemPacket : IPoolSubPacket
         }
         else
         {
-            writer.PutUnmanaged(WindowStates);
+            writer.PutUnmanaged(HitPoint);
         }
     }
 
@@ -98,7 +111,7 @@ public sealed class SyncableItemPacket : IPoolSubPacket
         }
         else
         {
-            WindowStates = default;
+            HitPoint = default;
         }
         SyncType = default;
     }

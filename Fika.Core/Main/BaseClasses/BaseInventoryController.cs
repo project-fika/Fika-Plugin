@@ -14,13 +14,19 @@ namespace Fika.Core.Main.BaseClasses;
 /// </summary>
 public class BaseInventoryController : Player.PlayerOwnerInventoryController
 {
-    private readonly bool _instantLoad;
-    private readonly bool _fastLoad;
+    /// <summary>
+    /// Whether strict inventory syncing is active
+    /// </summary>
+    public bool StrictSync { get; }
 
-    public BaseInventoryController(Player player, Profile profile, bool examined) : base(player, profile, examined)
+    protected readonly bool _instantLoad;
+    protected readonly bool _fastLoad;
+
+    public BaseInventoryController(Player player, Profile profile, bool examined, bool strictSync) : base(player, profile, examined)
     {
         _instantLoad = FikaPlugin.Instance.Settings.InstantLoad;
         _fastLoad = !_instantLoad && FikaPlugin.Instance.Settings.FastLoad;
+        StrictSync = strictSync;
     }
 
     public override SearchContentOperation vmethod_2(SearchableItemItemClass item)

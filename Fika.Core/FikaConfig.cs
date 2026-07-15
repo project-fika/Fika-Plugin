@@ -109,6 +109,7 @@ public sealed class FikaConfig(ConfigFile config)
 
     // Gameplay
     public ConfigEntry<bool> DisableBotMetabolism { get; set; }
+    public ConfigEntry<bool> StrictInventorySync { get; set; }
     #endregion
 
     #region client config values
@@ -826,6 +827,16 @@ public sealed class FikaConfig(ConfigFile config)
                 Order = 1
             }),
             "Disable Bot Metabolism", ref failed, headers);
+
+        StrictInventorySync = SetupSetting("Gameplay", "Strict Inventory Sync",
+            true, new ConfigDescription(LocaleUtils.BEPINEX_STRICT_INVENTORY_SYNC_D.Localized(),
+            tags: new ConfigurationManagerAttributes
+            {
+                Category = LocaleUtils.BEPINEX_H_GAMEPLAY.Localized(),
+                DispName = LocaleUtils.BEPINEX_STRICT_INVENTORY_SYNC_T.Localized(),
+                Order = 2
+            }),
+            "Strict Inventory Sync", ref failed, headers);
 
         if (failed)
         {

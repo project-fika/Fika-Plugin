@@ -39,69 +39,69 @@ public readonly struct PlayerStateSnapshot : ISnapshot
 public readonly struct PlayerStateData
 {
     /// <summary>
-/// Size in bytes of a <see cref="PlayerStateData"/>
-/// </summary>
-public static readonly byte PacketSize = (byte)Unsafe.SizeOf<PlayerStateData>();
+    /// Size in bytes of a <see cref="PlayerStateData"/>
+    /// </summary>
+    public static readonly byte PacketSize = (byte)Unsafe.SizeOf<PlayerStateData>();
 
-/// <summary>12 bytes, offset 0</summary>
-public readonly Vector3 Position;
+    /// <summary>12 bytes, offset 0</summary>
+    public readonly Vector3 Position;
 
-/// <summary>4 bytes, offset 12</summary>
-private readonly float _rotYaw;
+    /// <summary>4 bytes, offset 12</summary>
+    private readonly float _rotYaw;
 
-/// <summary>2 bytes, offset 16</summary>
-private readonly ushort _tiltPacked;
+    /// <summary>2 bytes, offset 16</summary>
+    private readonly ushort _tiltPacked;
 
-/// <summary>2 bytes, offset 18</summary>
-private readonly ushort _movementSpeedPacked;
+    /// <summary>2 bytes, offset 18</summary>
+    private readonly ushort _movementSpeedPacked;
 
-/// <summary>2 bytes, offset 20</summary>
-private readonly ushort _sprintSpeedPacked;
+    /// <summary>2 bytes, offset 20</summary>
+    private readonly ushort _sprintSpeedPacked;
 
-/// <summary>2 bytes, offset 22</summary>
-private readonly ushort _poseLevelPacked;
+    /// <summary>2 bytes, offset 22</summary>
+    private readonly ushort _poseLevelPacked;
 
-/// <summary>2 bytes, offset 24</summary>
-private readonly ushort _weaponOverlapPacked;
+    /// <summary>2 bytes, offset 24</summary>
+    private readonly ushort _weaponOverlapPacked;
 
-/// <summary>1 byte, offset 26</summary>
-private readonly byte _headRotYawPacked;
+    /// <summary>1 byte, offset 26</summary>
+    private readonly byte _headRotYawPacked;
 
-/// <summary>1 byte, offset 27</summary>
-private readonly byte _headRotPitchPacked;
+    /// <summary>1 byte, offset 27</summary>
+    private readonly byte _headRotPitchPacked;
 
-/// <summary>1 byte, offset 28</summary>
-private readonly byte _rotPitchPacked;
+    /// <summary>1 byte, offset 28</summary>
+    private readonly byte _rotPitchPacked;
 
-/// <summary>1 byte, offset 29</summary>
-private readonly byte _moveDirXPacked;
+    /// <summary>1 byte, offset 29</summary>
+    private readonly byte _moveDirXPacked;
 
-/// <summary>1 byte, offset 30</summary>
-private readonly byte _moveDirYPacked;
+    /// <summary>1 byte, offset 30</summary>
+    private readonly byte _moveDirYPacked;
 
-/// <summary>2 bytes, offset 31</summary>
-public readonly ushort NetId;
+    /// <summary>2 bytes, offset 31</summary>
+    public readonly ushort NetId;
 
-/// <summary>1 byte, offset 33</summary>
-private readonly byte _stepPacked;
+    /// <summary>1 byte, offset 33</summary>
+    private readonly byte _stepPacked;
 
-/// <summary>1 byte, offset 34</summary>
-private readonly byte _blindfirePacked;
+    /// <summary>1 byte, offset 34</summary>
+    private readonly byte _blindfirePacked;
 
-/// <summary>1 byte, offset 35</summary>
-public readonly EPlayerState State;
+    /// <summary>1 byte, offset 35</summary>
+    public readonly EPlayerState State;
 
-/// <summary>1 byte, offset 36</summary>
-private readonly byte _boolFlags;
+    /// <summary>1 byte, offset 36</summary>
+    private readonly byte _boolFlags;
 
-/// <summary>1 byte, offset 37</summary>
-private readonly byte _velocityDirXPacked;
+    /// <summary>1 byte, offset 37</summary>
+    private readonly byte _velocityDirXPacked;
 
-/// <summary>1 byte, offset 38</summary>
-private readonly byte _velocityDirYPacked;
+    /// <summary>1 byte, offset 38</summary>
+    private readonly byte _velocityDirYPacked;
 
-/// <summary>1 byte, offset 39</summary>
-private readonly byte _velocityDirZPacked;
+    /// <summary>1 byte, offset 39</summary>
+    private readonly byte _velocityDirZPacked;
 
     public BasePhysicalClass.PhysicalStateStruct Physical
     {

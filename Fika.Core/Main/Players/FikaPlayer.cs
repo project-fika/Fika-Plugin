@@ -15,6 +15,7 @@ using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
 using EFT.Vehicle;
+using Fika.Core.Main.BaseClasses;
 using Fika.Core.Main.ClientClasses;
 using Fika.Core.Main.ClientClasses.HandsControllers;
 using Fika.Core.Main.Components;
@@ -26,6 +27,7 @@ using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Models;
 using Fika.Core.Networking.Packets.Communication;
+using Fika.Core.Networking.Packets.FirearmController;
 using Fika.Core.Networking.Packets.FirearmController.SubPackets;
 using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
@@ -52,16 +54,23 @@ public class FikaPlayer : LocalPlayer
     public CorpseSyncPackets CorpseSyncPacket;
     public int NetId;
     public bool IsObservedAI;
-    public Dictionary<uint, Action<ServerOperationStatus>> OperationCallbacks = [];
+    public readonly Dictionary<uint, Action<ServerOperationStatus>> OperationCallbacks = [];
     public PlayerSnapshotter<PlayerStateSnapshot> Snapshotter;
     public CommonPlayerPacket CommonPacket;
     public virtual bool LeftStanceDisabled { get; internal set; }
     public DateTime TalkDateTime { get; internal set; }
+    /// <summary>
+    /// If this player is waiting for callbacks from the host
+    /// </summary>
     public bool WaitingForCallback
     {
         get
         {
-            return OperationCallbacks.Count > 0;
+            if (!_baseInventoryController.StrictSync)
+            {
+                return false;
+            }
+            return OperationCallbacks.Count > 0 || _proceedCallbacks.Count > 0;
         }
     }
     public ClientMovementContext ClientMovementContext
@@ -104,6 +113,10 @@ public class FikaPlayer : LocalPlayer
     private float _sign;
     private float _turnSoundTimer;
 
+    private uint _proceedCallbackId;
+    private readonly Dictionary<uint, Callback> _proceedCallbacks = [];
+    private BaseInventoryController _baseInventoryController;
+
     private static Func<Player, SurfaceSet> _getCurrentSet;
     private static Func<Player, float> _getLastStepTime;
     private static Action<Player, float> _setLastStepTime;
@@ -136,7 +149,7 @@ public class FikaPlayer : LocalPlayer
         bool aiControl, EUpdateQueue updateQueue, EUpdateMode armsUpdateMode, EUpdateMode bodyUpdateMode,
         CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity,
         Func<float> getAimingSensitivity, IStatisticsManager statisticsManager, IViewFilter filter, ISession session,
-        int netId)
+        int netId, bool strictSync)
     {
         var useSimpleAnimator = profile.Info.Settings.UseSimpleAnimator;
         var resourceKey = useSimpleAnimator ? ResourceKeyManagerAbstractClass.ZOMBIE_BUNDLE_NAME : ResourceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME;
@@ -152,8 +165,19 @@ public class FikaPlayer : LocalPlayer
         };
 
         PlayerOwnerInventoryController inventoryController = FikaBackendUtils.IsServer
-            ? new HostInventoryController(player, profile, false)
-            : new ClientInventoryController(player, profile, false);
+            ? new HostInventoryController(player, profile, false, strictSync)
+            : new ClientInventoryController(player, profile, false, strictSync);
+
+        player._baseInventoryController = inventoryController as BaseInventoryController;
+
+        if (strictSync)
+        {
+            FikaGlobals.LogInfo("Using strict inventory sync");
+        }
+        else
+        {
+            FikaGlobals.LogWarning("Strict inventory sync disable - limited/no support will be given for this raid");
+        }
 
         LocalQuestControllerClass questController;
         if (FikaPlugin.Instance.Settings.SharedQuestProgression)
@@ -227,6 +251,56 @@ public class FikaPlayer : LocalPlayer
         OnPlayerSpawned?.Invoke(player);
 
         return player;
+    }
+
+    private uint GetNextAvailableId()
+    {
+        while (_proceedCallbacks.ContainsKey(++_proceedCallbackId))
+        {
+
+        }
+        return _proceedCallbackId;
+    }
+
+    private uint CreateProceedCallback(Action<bool> confirmAction)
+    {
+        var id = GetNextAvailableId();
+        var handler = new ProceedCallbackHandler(confirmAction);
+        _proceedCallbacks[id] = handler.Handle;
+#if DEBUG
+        FikaGlobals.LogWarning($"Got callback {id} for proceed callback");
+#endif
+        return id;
+    }
+
+    internal void HandleCallbackResponse(uint callbackId, string error)
+    {
+        var success = string.IsNullOrWhiteSpace(error);
+        if (!success)
+        {
+            FikaGlobals.LogError($"Could not execute callback with id {callbackId} on the server: {error}");
+        }
+
+        if (!_proceedCallbacks.TryGetValue(callbackId, out var callback))
+        {
+            FikaGlobals.LogError($"Could not get callback with id {callback}");
+            return;
+        }
+
+        _proceedCallbacks.Remove(callbackId);
+
+#if DEBUG
+        FikaGlobals.LogInfo($"Callback was success: {success}");
+#endif
+
+        if (success)
+        {
+            callback.Succeed();
+        }
+        else
+        {
+            callback.Fail(error);
+        }
     }
 
     private void AssignGetCurrentSet()
@@ -523,6 +597,7 @@ public class FikaPlayer : LocalPlayer
             ActiveHealthController.PauseAllEffects();
             ActiveHealthController.DisableMetabolism();
             MovementContext.IsInPronePose = true;
+            HandsController.FastForwardCurrentState();
             HideWeapon();
             ((SimpleCharacterController)CharacterController).IsMoveIgnored = true;
             MovementContext.IsAxesIgnored = true;
@@ -740,20 +815,36 @@ public class FikaPlayer : LocalPlayer
     #region Proceed
     public override void Proceed(bool withNetwork, Callback<GInterface198> callback, bool scheduled = true)
     {
-        base.Proceed(withNetwork, callback, scheduled);
-        CommonPacket.Type = ECommonSubPacketType.Proceed;
-        CommonPacket.SubPacket = ProceedPacket.FromValue(default, default, 0f, 0, EProceedType.EmptyHands, scheduled);
-        PacketSender.NetworkManager.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
+        var handler = new EmptyHandsControllerHandler(this, scheduled);
+        var func = new Func<EmptyHandsController>(handler.ReturnController);
+        handler.Process = new Process<EmptyHandsController, GInterface198>(this, func, null);
+        if (withNetwork && FikaBackendUtils.IsClient && _baseInventoryController.StrictSync)
+        {
+            handler.ConfirmCallback = new(handler.SendCallbackRequest);
+        }
+        else
+        {
+            handler.ConfirmCallback = new(handler.SendPacket);
+        }
+        handler.Process.method_0(new(handler.HandleResult), callback, scheduled);
     }
 
     public override void Proceed(FoodDrinkItemClass foodDrink, float amount, Callback<GInterface203> callback, int animationVariant, bool scheduled = true)
     {
         GStruct382<EBodyPart> bodyparts = new(EBodyPart.Head);
         FoodControllerHandler handler = new(this, foodDrink, amount, bodyparts, animationVariant);
-
         Func<MedsController> func = new(handler.ReturnController);
-        handler.Process = new(this, func, foodDrink, false);
-        handler.ConfirmCallback = new(handler.SendPacket);
+
+        if (FikaBackendUtils.IsClient && _baseInventoryController.StrictSync)
+        {
+            handler.Process = new(this, func, foodDrink, false, confirmation: AbstractProcess.Confirmation.Unknown);
+            handler.ConfirmCallback = new(handler.SendCallbackRequest);
+        }
+        else
+        {
+            handler.Process = new(this, func, foodDrink, false);
+            handler.ConfirmCallback = new(handler.SendPacket);
+        }
         handler.Process.method_0(new(handler.HandleResult), callback, scheduled);
     }
 
@@ -762,8 +853,17 @@ public class FikaPlayer : LocalPlayer
         MedsControllerHandler handler = new(this, meds, bodyParts, animationVariant);
 
         Func<MedsController> func = new(handler.ReturnController);
-        handler.Process = new(this, func, meds, false);
-        handler.ConfirmCallback = new(handler.SendPacket);
+
+        if (FikaBackendUtils.IsClient && _baseInventoryController.StrictSync)
+        {
+            handler.Process = new(this, func, meds, false, confirmation: AbstractProcess.Confirmation.Unknown);
+            handler.ConfirmCallback = new(handler.SendCallbackRequest);
+        }
+        else
+        {
+            handler.Process = new(this, func, meds, false);
+            handler.ConfirmCallback = new(handler.SendPacket);
+        }
         handler.Process.method_0(new(handler.HandleResult), callback, scheduled);
     }
 
@@ -774,8 +874,17 @@ public class FikaPlayer : LocalPlayer
             PortableRangeFinderControllerHandler rangeFinderHandler = new(this, item);
 
             Func<PortableRangeFinderController> rangeFinderFunc = new(rangeFinderHandler.ReturnController);
-            rangeFinderHandler.Process = new(this, rangeFinderFunc, item, false);
-            rangeFinderHandler.ConfirmCallback = new(rangeFinderHandler.SendPacket);
+
+            if (FikaBackendUtils.IsClient && _baseInventoryController.StrictSync)
+            {
+                rangeFinderHandler.Process = new(this, rangeFinderFunc, item, false, confirmation: AbstractProcess.Confirmation.Unknown);
+                rangeFinderHandler.ConfirmCallback = new(rangeFinderHandler.SendCallbackRequest);
+            }
+            else
+            {
+                rangeFinderHandler.Process = new(this, rangeFinderFunc, item, false);
+                rangeFinderHandler.ConfirmCallback = new(rangeFinderHandler.SendPacket);
+            }
             rangeFinderHandler.Process.method_0(new(rangeFinderHandler.HandleResult), callback, scheduled);
             return;
         }
@@ -783,8 +892,17 @@ public class FikaPlayer : LocalPlayer
         UsableItemControllerHandler handler = new(this, item);
 
         Func<UsableItemController> func = new(handler.ReturnController);
-        handler.Process = new(this, func, item, false);
-        handler.ConfirmCallback = new(handler.SendPacket);
+
+        if (FikaBackendUtils.IsClient && _baseInventoryController.StrictSync)
+        {
+            handler.Process = new(this, func, item, false, confirmation: AbstractProcess.Confirmation.Unknown);
+            handler.ConfirmCallback = new(handler.SendCallbackRequest);
+        }
+        else
+        {
+            handler.Process = new(this, func, item, false);
+            handler.ConfirmCallback = new(handler.SendPacket);
+        }
         handler.Process.method_0(new(handler.HandleResult), callback, scheduled);
     }
 
@@ -793,8 +911,17 @@ public class FikaPlayer : LocalPlayer
         QuickUseItemControllerHandler handler = new(this, item);
 
         Func<QuickUseItemController> func = new(handler.ReturnController);
-        handler.Process = new(this, func, item, true);
-        handler.ConfirmCallback = new(handler.SendPacket);
+
+        if (FikaBackendUtils.IsClient && _baseInventoryController.StrictSync)
+        {
+            handler.Process = new(this, func, item, true, confirmation: AbstractProcess.Confirmation.Unknown);
+            handler.ConfirmCallback = new(handler.SendCallbackRequest);
+        }
+        else
+        {
+            handler.Process = new(this, func, item, true);
+            handler.ConfirmCallback = new(handler.SendPacket);
+        }
         handler.Process.method_0(new(handler.HandleResult), callback, scheduled);
     }
 
@@ -803,8 +930,17 @@ public class FikaPlayer : LocalPlayer
         KnifeControllerHandler handler = new(this, knife);
 
         Func<KnifeController> func = new(handler.ReturnController);
-        handler.Process = new(this, func, handler.Knife.Item, false);
-        handler.ConfirmCallback = new(handler.SendPacket);
+
+        if (FikaBackendUtils.IsClient && _baseInventoryController.StrictSync)
+        {
+            handler.Process = new(this, func, handler.Knife.Item, false, confirmation: AbstractProcess.Confirmation.Unknown);
+            handler.ConfirmCallback = new(handler.SendCallbackRequest);
+        }
+        else
+        {
+            handler.Process = new(this, func, handler.Knife.Item, false);
+            handler.ConfirmCallback = new(handler.SendPacket);
+        }
         handler.Process.method_0(new(handler.HandleResult), callback, scheduled);
     }
 
@@ -813,8 +949,17 @@ public class FikaPlayer : LocalPlayer
         QuickKnifeControllerHandler handler = new(this, knife);
 
         Func<QuickKnifeKickController> func = new(handler.ReturnController);
-        handler.Process = new(this, func, handler.Knife.Item, true);
-        handler.ConfirmCallback = new(handler.SendPacket);
+
+        if (FikaBackendUtils.IsClient && _baseInventoryController.StrictSync)
+        {
+            handler.Process = new(this, func, handler.Knife.Item, true, confirmation: AbstractProcess.Confirmation.Unknown);
+            handler.ConfirmCallback = new(handler.SendCallbackRequest);
+        }
+        else
+        {
+            handler.Process = new(this, func, handler.Knife.Item, true);
+            handler.ConfirmCallback = new(handler.SendPacket);
+        }
         handler.Process.method_0(new(handler.HandleResult), callback, scheduled);
     }
 
@@ -823,8 +968,17 @@ public class FikaPlayer : LocalPlayer
         QuickGrenadeControllerHandler handler = new(this, throwWeap);
 
         Func<QuickGrenadeThrowHandsController> func = new(handler.ReturnController);
-        handler.Process = new(this, func, throwWeap, false);
-        handler.ConfirmCallback = new(handler.SendPacket);
+
+        if (FikaBackendUtils.IsClient && _baseInventoryController.StrictSync)
+        {
+            handler.Process = new(this, func, throwWeap, false, confirmation: AbstractProcess.Confirmation.Unknown);
+            handler.ConfirmCallback = new(handler.SendCallbackRequest);
+        }
+        else
+        {
+            handler.Process = new(this, func, throwWeap, false);
+            handler.ConfirmCallback = new(handler.SendPacket);
+        }
         handler.Process.method_0(new(handler.HandleResult), callback, scheduled);
     }
 
@@ -833,8 +987,17 @@ public class FikaPlayer : LocalPlayer
         GrenadeControllerHandler handler = new(this, throwWeap);
 
         Func<GrenadeHandsController> func = new(handler.ReturnController);
-        handler.Process = new(this, func, throwWeap, false);
-        handler.ConfirmCallback = new(handler.SendPacket);
+
+        if (FikaBackendUtils.IsClient && _baseInventoryController.StrictSync)
+        {
+            handler.Process = new(this, func, throwWeap, false, confirmation: AbstractProcess.Confirmation.Unknown);
+            handler.ConfirmCallback = new(handler.SendCallbackRequest);
+        }
+        else
+        {
+            handler.Process = new(this, func, throwWeap, false);
+            handler.ConfirmCallback = new(handler.SendPacket);
+        }
         handler.Process.method_0(new(handler.HandleResult), callback, scheduled);
     }
 
@@ -847,8 +1010,17 @@ public class FikaPlayer : LocalPlayer
             flag = firearmController.CheckForFastWeaponSwitch(handler.Weapon);
         }
         Func<FirearmController> func = new(handler.ReturnController);
-        handler.Process = new Process<FirearmController, IFirearmHandsController>(this, func, handler.Weapon, flag);
-        handler.ConfirmCallback = new(handler.SendPacket);
+
+        if (FikaBackendUtils.IsClient && _baseInventoryController.StrictSync)
+        {
+            handler.Process = new Process<FirearmController, IFirearmHandsController>(this, func, handler.Weapon, flag, confirmation: AbstractProcess.Confirmation.Unknown);
+            handler.ConfirmCallback = new(handler.SendCallbackRequest);
+        }
+        else
+        {
+            handler.Process = new Process<FirearmController, IFirearmHandsController>(this, func, handler.Weapon, flag);
+            handler.ConfirmCallback = new(handler.SendPacket);
+        }
         handler.Process.method_0(new(handler.HandleResult), callback, scheduled);
     }
     #endregion
@@ -1919,6 +2091,56 @@ public class FikaPlayer : LocalPlayer
         }
     }
 
+    private sealed class EmptyHandsControllerHandler(FikaPlayer fikaPlayer, bool scheduled)
+    {
+        private readonly FikaPlayer _fikaPlayer = fikaPlayer;
+        private readonly bool _scheduled = scheduled;
+        public Process<EmptyHandsController, GInterface198> Process;
+        public Action ConfirmCallback;
+
+        internal EmptyHandsController ReturnController()
+        {
+            return EmptyHandsController.smethod_6<EmptyHandsController>(_fikaPlayer);
+        }
+
+        internal void HandleCallbackResponse(bool succeed)
+        {
+            if (succeed)
+            {
+                SendPacket();
+            }
+            Process.method_1(succeed);
+        }
+
+        internal void SendCallbackRequest()
+        {
+            var client = Singleton<FikaClient>.Instance;
+            var id = _fikaPlayer.CreateProceedCallback(HandleCallbackResponse);
+            var packet = new ProceedRequestPacket
+            {
+                NetId = _fikaPlayer.NetId,
+                CallbackId = id,
+                ProceedType = EProceedType.EmptyHands
+            };
+            client.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+        }
+
+        internal void SendPacket()
+        {
+            _fikaPlayer.CommonPacket.Type = ECommonSubPacketType.Proceed;
+            _fikaPlayer.CommonPacket.SubPacket = ProceedPacket.FromValue(default, default, 0f, 0, EProceedType.EmptyHands, _scheduled);
+            _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _fikaPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
+        }
+
+        internal void HandleResult(IResult result)
+        {
+            if (result.Succeed)
+            {
+                ConfirmCallback();
+            }
+        }
+    }
+
     private sealed class FirearmControllerHandler(FikaPlayer fikaPlayer, Weapon weapon)
     {
         private readonly FikaPlayer _fikaPlayer = fikaPlayer;
@@ -1929,6 +2151,29 @@ public class FikaPlayer : LocalPlayer
         internal FikaClientFirearmController ReturnController()
         {
             return FikaClientFirearmController.Create(_fikaPlayer, Weapon);
+        }
+
+        internal void HandleCallbackResponse(bool succeed)
+        {
+            if (succeed)
+            {
+                SendPacket();
+            }
+            Process.method_1(succeed);
+        }
+
+        internal void SendCallbackRequest()
+        {
+            var client = Singleton<FikaClient>.Instance;
+            var id = _fikaPlayer.CreateProceedCallback(HandleCallbackResponse);
+            var packet = new ProceedRequestPacket
+            {
+                NetId = _fikaPlayer.NetId,
+                CallbackId = id,
+                ProceedType = EProceedType.Weapon,
+                ItemId = Weapon.Id
+            };
+            client.SendData(ref packet, DeliveryMethod.ReliableOrdered);
         }
 
         internal void SendPacket()
@@ -1960,6 +2205,29 @@ public class FikaPlayer : LocalPlayer
             return FikaClientUsableItemController.Create(_fikaPlayer, _item);
         }
 
+        internal void HandleCallbackResponse(bool succeed)
+        {
+            if (succeed)
+            {
+                SendPacket();
+            }
+            Process.method_1(succeed);
+        }
+
+        internal void SendCallbackRequest()
+        {
+            var client = Singleton<FikaClient>.Instance;
+            var id = _fikaPlayer.CreateProceedCallback(HandleCallbackResponse);
+            var packet = new ProceedRequestPacket
+            {
+                NetId = _fikaPlayer.NetId,
+                CallbackId = id,
+                ProceedType = EProceedType.UsableItem,
+                ItemId = _item.Id
+            };
+            client.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+        }
+
         internal void SendPacket()
         {
             _fikaPlayer.CommonPacket.Type = ECommonSubPacketType.Proceed;
@@ -1986,6 +2254,29 @@ public class FikaPlayer : LocalPlayer
         internal FikaClientPortableRangeFinderController ReturnController()
         {
             return FikaClientPortableRangeFinderController.Create(_fikaPlayer, _item);
+        }
+
+        internal void HandleCallbackResponse(bool succeed)
+        {
+            if (succeed)
+            {
+                SendPacket();
+            }
+            Process.method_1(succeed);
+        }
+
+        internal void SendCallbackRequest()
+        {
+            var client = Singleton<FikaClient>.Instance;
+            var id = _fikaPlayer.CreateProceedCallback(HandleCallbackResponse);
+            var packet = new ProceedRequestPacket
+            {
+                NetId = _fikaPlayer.NetId,
+                CallbackId = id,
+                ProceedType = EProceedType.UsableItem,
+                ItemId = _item.Id
+            };
+            client.SendData(ref packet, DeliveryMethod.ReliableOrdered);
         }
 
         internal void SendPacket()
@@ -2016,6 +2307,29 @@ public class FikaPlayer : LocalPlayer
             return QuickUseItemController.smethod_6<QuickUseItemController>(_fikaPlayer, _item);
         }
 
+        internal void HandleCallbackResponse(bool succeed)
+        {
+            if (succeed)
+            {
+                SendPacket();
+            }
+            Process.method_1(succeed);
+        }
+
+        internal void SendCallbackRequest()
+        {
+            var client = Singleton<FikaClient>.Instance;
+            var id = _fikaPlayer.CreateProceedCallback(HandleCallbackResponse);
+            var packet = new ProceedRequestPacket
+            {
+                NetId = _fikaPlayer.NetId,
+                CallbackId = id,
+                ProceedType = EProceedType.QuickUse,
+                ItemId = _item.Id
+            };
+            client.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+        }
+
         internal void SendPacket()
         {
             _fikaPlayer.CommonPacket.Type = ECommonSubPacketType.Proceed;
@@ -2044,6 +2358,29 @@ public class FikaPlayer : LocalPlayer
         internal MedsController ReturnController()
         {
             return MedsController.smethod_6<MedsController>(_fikaPlayer, _meds, _bodyParts, 1f, _animationVariant);
+        }
+
+        internal void HandleCallbackResponse(bool succeed)
+        {
+            if (succeed)
+            {
+                SendPacket();
+            }
+            Process.method_1(succeed);
+        }
+
+        internal void SendCallbackRequest()
+        {
+            var client = Singleton<FikaClient>.Instance;
+            var id = _fikaPlayer.CreateProceedCallback(HandleCallbackResponse);
+            var packet = new ProceedRequestPacket
+            {
+                NetId = _fikaPlayer.NetId,
+                CallbackId = id,
+                ProceedType = EProceedType.MedsClass,
+                ItemId = _meds.Id
+            };
+            client.SendData(ref packet, DeliveryMethod.ReliableOrdered);
         }
 
         internal void SendPacket()
@@ -2078,6 +2415,29 @@ public class FikaPlayer : LocalPlayer
             return MedsController.smethod_6<MedsController>(_fikaPlayer, _foodDrink, _bodyParts, _amount, _animationVariant);
         }
 
+        internal void HandleCallbackResponse(bool succeed)
+        {
+            if (succeed)
+            {
+                SendPacket();
+            }
+            Process.method_1(succeed);
+        }
+
+        internal void SendCallbackRequest()
+        {
+            var client = Singleton<FikaClient>.Instance;
+            var id = _fikaPlayer.CreateProceedCallback(HandleCallbackResponse);
+            var packet = new ProceedRequestPacket
+            {
+                NetId = _fikaPlayer.NetId,
+                CallbackId = id,
+                ProceedType = EProceedType.FoodClass,
+                ItemId = _foodDrink.Id
+            };
+            client.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+        }
+
         internal void SendPacket()
         {
             _fikaPlayer.CommonPacket.Type = ECommonSubPacketType.Proceed;
@@ -2107,6 +2467,29 @@ public class FikaPlayer : LocalPlayer
             return FikaClientKnifeController.Create(_fikaPlayer, Knife);
         }
 
+        internal void HandleCallbackResponse(bool succeed)
+        {
+            if (succeed)
+            {
+                SendPacket();
+            }
+            Process.method_1(succeed);
+        }
+
+        internal void SendCallbackRequest()
+        {
+            var client = Singleton<FikaClient>.Instance;
+            var id = _fikaPlayer.CreateProceedCallback(HandleCallbackResponse);
+            var packet = new ProceedRequestPacket
+            {
+                NetId = _fikaPlayer.NetId,
+                CallbackId = id,
+                ProceedType = EProceedType.Knife,
+                ItemId = Knife.Item.Id
+            };
+            client.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+        }
+
         internal void SendPacket()
         {
             _fikaPlayer.CommonPacket.Type = ECommonSubPacketType.Proceed;
@@ -2130,9 +2513,32 @@ public class FikaPlayer : LocalPlayer
         public Process<QuickKnifeKickController, GInterface207> Process;
         public Action ConfirmCallback;
 
-        internal QuickKnifeKickController ReturnController()
+        internal FikaClientQuickKnifeController ReturnController()
         {
-            return QuickKnifeKickController.smethod_9<QuickKnifeKickController>(_fikaPlayer, Knife);
+            return FikaClientQuickKnifeController.Create(_fikaPlayer, Knife);
+        }
+
+        internal void HandleCallbackResponse(bool succeed)
+        {
+            if (succeed)
+            {
+                SendPacket();
+            }
+            Process.method_1(succeed);
+        }
+
+        internal void SendCallbackRequest()
+        {
+            var client = Singleton<FikaClient>.Instance;
+            var id = _fikaPlayer.CreateProceedCallback(HandleCallbackResponse);
+            var packet = new ProceedRequestPacket
+            {
+                NetId = _fikaPlayer.NetId,
+                CallbackId = id,
+                ProceedType = EProceedType.QuickKnifeKick,
+                ItemId = Knife.Item.Id
+            };
+            client.SendData(ref packet, DeliveryMethod.ReliableOrdered);
         }
 
         internal void SendPacket()
@@ -2163,6 +2569,29 @@ public class FikaPlayer : LocalPlayer
             return FikaClientGrenadeController.Create(_fikaPlayer, _throwWeap);
         }
 
+        internal void HandleCallbackResponse(bool succeed)
+        {
+            if (succeed)
+            {
+                SendPacket();
+            }
+            Process.method_1(succeed);
+        }
+
+        internal void SendCallbackRequest()
+        {
+            var client = Singleton<FikaClient>.Instance;
+            var id = _fikaPlayer.CreateProceedCallback(HandleCallbackResponse);
+            var packet = new ProceedRequestPacket
+            {
+                NetId = _fikaPlayer.NetId,
+                CallbackId = id,
+                ProceedType = EProceedType.GrenadeClass,
+                ItemId = _throwWeap.Id
+            };
+            client.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+        }
+
         internal void SendPacket()
         {
             _fikaPlayer.CommonPacket.Type = ECommonSubPacketType.Proceed;
@@ -2191,6 +2620,29 @@ public class FikaPlayer : LocalPlayer
             return FikaClientQuickGrenadeController.Create(_fikaPlayer, _throwWeap);
         }
 
+        internal void HandleCallbackResponse(bool succeed)
+        {
+            if (succeed)
+            {
+                SendPacket();
+            }
+            Process.method_1(succeed);
+        }
+
+        internal void SendCallbackRequest()
+        {
+            var client = Singleton<FikaClient>.Instance;
+            var id = _fikaPlayer.CreateProceedCallback(HandleCallbackResponse);
+            var packet = new ProceedRequestPacket
+            {
+                NetId = _fikaPlayer.NetId,
+                CallbackId = id,
+                ProceedType = EProceedType.QuickGrenadeThrow,
+                ItemId = _throwWeap.Id
+            };
+            client.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+        }
+
         internal void SendPacket()
         {
             _fikaPlayer.CommonPacket.Type = ECommonSubPacketType.Proceed;
@@ -2207,13 +2659,13 @@ public class FikaPlayer : LocalPlayer
         }
     }
 
-    private class DropHandler(FikaPlayer fikaPlayer)
+    private sealed class ProceedCallbackHandler(Action<bool> confirmAction)
     {
-        private readonly FikaPlayer _fikaPlayer = fikaPlayer;
+        private readonly Action<bool> _confirmAction = confirmAction;
 
-        internal void HandleResult()
+        public void Handle(IResult result)
         {
-
+            _confirmAction(result.Succeed);
         }
     }
 }

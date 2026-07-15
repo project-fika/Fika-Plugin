@@ -2,17 +2,22 @@
 
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading.Tasks;
 using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Main.Players;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.ObservedClasses.HandsControllers;
 
 internal sealed class ObservedMedsController : Player.MedsController
 {
     private FikaPlayer _fikaPlayer;
-    private GStruct382<EBodyPart> _healParts;
+    private int _animation;
+
+    private readonly static FieldInfo _onOutUseAction = typeof(Player.MedsController)
+        .GetField("action_0", BindingFlags.NonPublic | BindingFlags.Instance);
 
     private ObservedMedsOperation ObservedOperation
     {
@@ -25,8 +30,10 @@ internal sealed class ObservedMedsController : Player.MedsController
     public static ObservedMedsController Create(FikaPlayer player, Item item, GStruct382<EBodyPart> bodyParts, float amount, int animationVariant)
     {
         var controller = smethod_6<ObservedMedsController>(player, item, bodyParts, amount, animationVariant);
+        var action = (Action)_onOutUseAction.GetValue(controller);
+        _onOutUseAction.SetValue(controller, FikaGlobals.ClearDelegates(action));
         controller._fikaPlayer = player;
-        controller._healParts = bodyParts;
+        controller._animation = animationVariant;
         return controller;
     }
 
@@ -117,7 +124,7 @@ internal sealed class ObservedMedsController : Player.MedsController
         ObservedOperation.HideObservedWeaponComplete();
     }
 
-    private class ObservedMedsOperation(Player.MedsController controller) : ObservedMedsControllerClass(controller)
+    private sealed class ObservedMedsOperation(Player.MedsController controller) : ObservedMedsControllerClass(controller)
     {
         private readonly ObservedMedsController _observedMedsController = (ObservedMedsController)controller;
         private int _animation;
@@ -127,16 +134,10 @@ internal sealed class ObservedMedsController : Player.MedsController
         {
             State = Player.EOperationState.Executing;
             SetLeftStanceAnimOnStartOperation();
-            callback();
-            if (_observedMedsController.Item.TryGetItemComponent(out AnimationVariantsComponent animationVariantsComponent))
-            {
-                _animation = UnityEngine.Random.Range(0, animationVariantsComponent.VariantsNumber);
-            }
-            else
-            {
-                _animation = 0;
-            }
-            _observedMedsController.FirearmsAnimator.SetActiveParam(true, false);
+            callback?.Invoke();
+            _animation = _observedMedsController._animation;
+            ObservedMedsController_OnOutUseEvent();
+            _observedMedsController.FirearmsAnimator.SetAnimationVariant(_animation);
             _observedMedsController._fikaPlayer.HealthController.EffectRemovedEvent += HealthController_EffectRemovedEvent;
             _observedMedsController.OnOutUseEvent += ObservedMedsController_OnOutUseEvent;
         }
@@ -172,23 +173,22 @@ internal sealed class ObservedMedsController : Player.MedsController
             {
                 var animator = _observedMedsController.FirearmsAnimator;
 
-                animator.SetActiveParam(false, false);
                 if (animator.HasNextLimb())
                 {
+                    animator.SetActiveParam(false, false);
                     animator.SetNextLimb(true);
                 }
 
                 var mult = _observedMedsController._fikaPlayer.Skills.SurgerySpeed.Value / 100f;
                 animator.SetUseTimeMultiplier(1f + mult);
 
-                var variant = 0;
                 _animation++;
+                var variant = 0;
                 if (_observedMedsController.Item.TryGetItemComponent(out AnimationVariantsComponent animationVariantsComponent))
                 {
                     variant = animationVariantsComponent.VariantsNumber;
                 }
                 var newAnim = (int)Mathf.Repeat(_animation, variant);
-
                 animator.SetAnimationVariant(newAnim);
             }
         }

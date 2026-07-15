@@ -9,7 +9,7 @@ using Fika.Core.Networking.Packets.Player;
 
 namespace Fika.Core.Main.PacketHandlers;
 
-public class BotPacketSender : MonoBehaviour, IPacketSender
+public sealed class BotPacketSender : MonoBehaviour, IPacketSender
 {
     public bool SendState { get; set; }
     public IFikaNetworkManager NetworkManager { get; set; }

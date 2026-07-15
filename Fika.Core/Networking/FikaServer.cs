@@ -110,6 +110,7 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
             _coopHandler = value;
         }
     }
+    public bool StrictInventorySync { get; set; }
     /// <summary>
     /// Max MTU used for <see cref="DeliveryMethod.Unreliable"/> batching
     /// </summary>
@@ -176,6 +177,7 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
         BotInventoryOperationHandlerPool.Create();
         ObservedPlayers = [];
         PlayerAmount = 1;
+        StrictInventorySync = FikaPlugin.Instance.Settings.StrictInventorySync.Value;
 
         ReadyClients = 0;
 
@@ -211,7 +213,7 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
             NetId = NetId
         };
 
-        RegisterPacketsAndTypes();
+        await RegisterPacketsAndTypes();
         var pmcName = FikaBackendUtils.IsHeadless ? "Headless" : FikaBackendUtils.PMCName;
         LoadingScreenUI.Instance.AddPlayer(NetId, pmcName);
 
@@ -416,7 +418,7 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
         return;
     }
 
-    private void RegisterPacketsAndTypes()
+    private Task RegisterPacketsAndTypes()
     {
         PoolUtils.CreateAll();
 
@@ -448,12 +450,17 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
         RegisterPacket<LoadingScreenPacket, NetPeer>(OnLoadingScreenPacketReceived);
         RegisterPacket<LoadingScreenPlayersPacket, NetPeer>(OnLoadingScreenPlayersPacketReceived);
         RegisterPacket<ClearSnapshotterPacket, NetPeer>(OnClearSnapshotterPacketReceived);
+        RegisterPacket<ProceedRequestPacket, NetPeer>(OnProceedRequestPacketReceived);
+        RegisterPacket<KnifeHitPacket, NetPeer>(OnKnifeHitPacketReceived);
+        RegisterPacket<QuestSyncPacket, NetPeer>(OnQuestSyncPacketReceived);
 
         RegisterReusable<WorldPacket, NetPeer>(OnWorldPacketReceived);
 
         RegisterNetReusable<WeaponPacket, NetPeer>(OnWeaponPacketReceived);
         RegisterNetReusable<CommonPlayerPacket, NetPeer>(OnCommonPlayerPacketReceived);
         RegisterNetReusable<GenericPacket, NetPeer>(OnGenericPacketReceived);
+
+        return Task.CompletedTask;
     }
 
 #if DEBUG

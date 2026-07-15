@@ -1631,9 +1631,14 @@ public partial class LiteNetManager : IEnumerable<LiteNetPeer>
 
 #if DEBUG || SIMULATE_NETWORK
         lock (_pingSimulationList)
+        {
             _pingSimulationList.Clear();
+        }
+
         lock (_outboundSimulationList)
+        {
             _outboundSimulationList.Clear();
+        }
 #endif
 
         _connectedPeersCount = 0;

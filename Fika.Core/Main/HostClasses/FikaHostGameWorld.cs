@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
+using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
 using Fika.Core.Main.Utils;
@@ -29,6 +30,7 @@ public class FikaHostGameWorld : ClientLocalGameWorld
     }
 
     public FikaHostWorld FikaHostWorld { get; private set; }
+    public Dictionary<int, Turnable> TurnablesDict => Turnables;
 
     public static FikaHostGameWorld Create(GameObject gameObject, PoolManagerClass objectsFactory, EUpdateQueue updateQueue, string currentProfileId)
     {
@@ -63,6 +65,13 @@ public class FikaHostGameWorld : ClientLocalGameWorld
         }
         ClientSynchronizableObjectLogicProcessor.RemoveNonActiveAndStaticObjects();
         ClientSynchronizableObjectLogicProcessor.ManualUpdate(dt);
+    }
+
+    public override void ChangeLampState(Turnable turnable, Turnable.EState state)
+    {
+        base.ChangeLampState(turnable, state);
+        Server.SendGenericPacket(EGenericSubPacketType.SyncableItem,
+            SyncableItemPacket.FromValue(turnable.NetId, state), true);
     }
 
     public override void AfterPlayerTick(float dt)
