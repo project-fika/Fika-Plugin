@@ -1823,6 +1823,11 @@ public class FikaPlayer : LocalPlayer
 
     public virtual void HandleDamagePacket(DamagePacket packet)
     {
+        if (_healthController == null || !_healthController.IsAlive)
+        {
+            return;
+        }
+
         DamageInfoStruct damageInfo = new()
         {
             Damage = packet.Damage,
