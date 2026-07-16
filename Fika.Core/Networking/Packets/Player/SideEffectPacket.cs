@@ -1,19 +1,21 @@
-﻿namespace Fika.Core.Networking.Packets.Player;
+﻿using EFT;
 
-public sealed class SideEffectPacket : INetSerializable
+namespace Fika.Core.Networking.Packets.Player;
+
+public struct SideEffectPacket : INetSerializable
 {
-    public string ItemId;
+    public MongoID ItemId;
     public float Value;
 
     public void Deserialize(NetDataReader reader)
     {
-        ItemId = reader.GetString();
+        ItemId = reader.GetMongoID();
         Value = reader.GetFloat();
     }
 
-    public void Serialize(NetDataWriter writer)
+    public readonly void Serialize(NetDataWriter writer)
     {
-        writer.Put(ItemId);
+        writer.PutMongoID(ItemId);
         writer.Put(Value);
     }
 }
