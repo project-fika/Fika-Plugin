@@ -1,6 +1,7 @@
 ﻿// © 2026 Lacyway All Rights Reserved
 
 using System.Collections.Generic;
+using System.Linq;
 using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
@@ -59,6 +60,79 @@ public sealed class ObservedInventoryController : Player.PlayerInventoryControll
     {
         ThrowItem(item, false, callback);
         return true;
+    }
+
+    public override GStruct155 CheckItemAction(Item item, ItemAddress location)
+    {
+        if (item.CurrentAddress == null)
+        {
+            return default;
+        }
+        if (!item.CheckForLockable(out var lockableComponent))
+        {
+            return new InteractionsHandlerClass.GClass1593(lockableComponent);
+        }
+        if (location != null && !location.Container.ParentItem.CheckForLockable(out lockableComponent))
+        {
+            return new InteractionsHandlerClass.GClass1593(lockableComponent);
+        }
+        var flag = false;
+        foreach (var geventArgs2 in List_0)
+        {
+            var lambda = new Class2447();
+            if (geventArgs2 is GEventArgs7 geventArgs3 && (geventArgs3.TargetItem == item || geventArgs3.Item == item))
+            {
+                flag = true;
+            }
+            if (geventArgs2 is GEventArgs8 geventArgs4 && (geventArgs4.FromItem == item || geventArgs4.Item == item || geventArgs4.TargetItem == item))
+            {
+                flag = true;
+            }
+            if (geventArgs2 is GEventArgs2 geventArgs5 && item == geventArgs5.To.Container.ParentItem)
+            {
+                flag = true;
+            }
+            if (geventArgs2 is GEventArgs3 geventArgs6)
+            {
+                if (item.Parent.Container.ParentItem == geventArgs6.Item)
+                {
+                    flag = true;
+                }
+                if (object.Equals(geventArgs6.From, location))
+                {
+                    flag = true;
+                }
+            }
+            lambda.inOutHandsProcess = geventArgs2 as GEventArgs17;
+            if (lambda.inOutHandsProcess != null)
+            {
+                if (item.GetAllParentItemsAndSelf(false).Any(lambda.method_1))
+                {
+                    flag = true;
+                }
+                if (location?.Container.ParentItem.GetAllParentItemsAndSelf(false).Any(lambda.method_1) == true)
+                {
+                    flag = true;
+                }
+            }
+            if (item == geventArgs2.Item)
+            {
+                flag = true;
+            }
+            if (location != null && geventArgs2.Location != null && smethod_0(item, location, geventArgs2.Item, geventArgs2.Location))
+            {
+                flag = true;
+            }
+            if (flag)
+            {
+                return new GClass1561(item, ParentItem.GetRootItem());
+            }
+        }
+        if (!method_16(item, location))
+        {
+            return default;
+        }
+        return new GClass1568(item, location);
     }
 
     public override bool CheckOverLimit(IEnumerable<Item> items, [CanBeNull] ItemAddress to, bool useItemCountInEquipment, out InteractionsHandlerClass.GClass1609 error)
