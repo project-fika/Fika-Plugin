@@ -163,6 +163,19 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
             UseNativeSockets = NativeSocket.IsSupported
         };
 
+        if (FikaPlugin.Instance.Settings.SimulateLag.Value)
+        {
+            _netServer.SimulateLatency = true;
+            _netServer.SimulationMinLatency = FikaPlugin.Instance.Settings.MinLatency.Value;
+            _netServer.SimulationMaxLatency = FikaPlugin.Instance.Settings.MaxLatency.Value;
+        }
+
+        if (FikaPlugin.Instance.Settings.SimulatePacketLoss.Value)
+        {
+            _netServer.SimulatePacketLoss = true;
+            _netServer.SimulationPacketLossChance = FikaPlugin.Instance.Settings.PacketLossChance.Value;
+        }
+
         AllowVOIP = FikaPlugin.Instance.Settings.AllowVOIP.Value;
 
         _packetProcessor = new();

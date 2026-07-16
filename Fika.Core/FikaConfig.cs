@@ -34,6 +34,11 @@ public sealed class FikaConfig(ConfigFile config)
     public ConfigEntry<bool> NoLoot { get; set; }
     public ConfigEntry<ELoadPriority> LoadPriority { get; set; }
     public ConfigEntry<int> MaxBundleLock { get; set; }
+    public ConfigEntry<bool> SimulateLag { get; set; }
+    public ConfigEntry<bool> SimulatePacketLoss { get; set; }
+    public ConfigEntry<int> MinLatency { get; set; }
+    public ConfigEntry<int> MaxLatency { get; set; }
+    public ConfigEntry<int> PacketLossChance { get; set; }
 
     // Coop
     public ConfigEntry<bool> UseHeadlessIfAvailable { get; set; }
@@ -177,6 +182,53 @@ public sealed class FikaConfig(ConfigFile config)
 
         var advancedHeader = LocaleUtils.BEPINEX_H_ADVANCED.Localized();
         const string advancedDefaultHeader = "Advanced";
+
+        SimulateLag = SetupSetting(advancedDefaultHeader, "Simulate Lag", false,
+            new ConfigDescription("Simulates network latency, meant to be used for debugging", tags: new ConfigurationManagerAttributes
+            {
+                IsAdvanced = true,
+                Category = advancedHeader,
+                DispName = "Simulate Lag",
+                Order = 10
+            }), "Simulate Lag", ref failed, headers);
+
+        SimulatePacketLoss = SetupSetting(advancedDefaultHeader, "Simulate Packet Loss", false,
+            new ConfigDescription("Simulates network packet loss, meant to be used for debugging", tags: new ConfigurationManagerAttributes
+            {
+                IsAdvanced = true,
+                Category = advancedHeader,
+                DispName = "Simulate Packet Loss",
+                Order = 9
+            }), "Simulate Packet Loss", ref failed, headers);
+
+        MinLatency = SetupSetting(advancedDefaultHeader, "Maximum Latency", 0,
+            new ConfigDescription("Maximum latency during lag simulation", tags: new ConfigurationManagerAttributes
+            {
+                IsAdvanced = true,
+                Category = advancedHeader,
+                DispName = "Maximum Latency",
+                Order = 8
+            }), "Maximum Latency", ref failed, headers);
+
+        MinLatency = SetupSetting(advancedDefaultHeader, "Minimum Latency", 0,
+            new ConfigDescription("Minimum latency during lag simulation", tags: new ConfigurationManagerAttributes
+            {
+                IsAdvanced = true,
+                Category = advancedHeader,
+                DispName = "Minimum Latency",
+                Order = 7
+            }), "Minimum Latency", ref failed, headers);
+
+        PacketLossChance = SetupSetting(advancedDefaultHeader, "Packet Loss Chance", 0,
+            new ConfigDescription("Chance of packet loss (0-100%) during lag simulation",
+            new AcceptableValueRange<int>(0, 100),
+            tags: new ConfigurationManagerAttributes
+            {
+                IsAdvanced = true,
+                Category = advancedHeader,
+                DispName = "Packet Loss Chance",
+                Order = 6
+            }), "Packet Loss Chance", ref failed, headers);
 
         OfficialVersion = SetupSetting(advancedDefaultHeader, "Show Official Version", false,
                 new ConfigDescription(LocaleUtils.BEPINEX_OFFICIAL_VERSION_D.Localized(), tags: new ConfigurationManagerAttributes
