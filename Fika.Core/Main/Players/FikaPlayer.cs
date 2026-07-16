@@ -214,6 +214,10 @@ public class FikaPlayer : LocalPlayer
             statisticsManager, questController, achievementsController, prestigeController, dialogController, filter,
             voipState, false, false);
 
+#if DEBUG
+        profile.Skills.SurgerySpeed.Value = 5f;
+#endif
+
         foreach (var magazineClass in player.Inventory.GetPlayerItems(EPlayerItems.NonQuestItems).OfType<MagazineItemClass>())
         {
             player.InventoryController.StrictCheckMagazine(magazineClass, true, player.Profile.MagDrillsMastering, false, false);
