@@ -1797,30 +1797,6 @@ public class FikaPlayer : LocalPlayer
         }
     }
 
-    /*public void SendArmorDamagePacket()
-    {
-        int amount = _preAllocatedArmorComponents.Count;
-        if (amount > 0)
-        {
-            string[] ids = new string[amount];
-            float[] durabilities = new float[amount];
-
-            for (int i = 0; i < amount; i++)
-            {
-                ids[i] = _preAllocatedArmorComponents[i].Item.Id;
-                durabilities[i] = _preAllocatedArmorComponents[i].Repairable.Durability;
-            }
-
-            ArmorDamagePacket packet = new()
-            {
-                NetId = NetId,
-                ItemIds = ids,
-                Durabilities = durabilities,
-            };
-            PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
-        }
-    }*/
-
     public virtual void HandleDamagePacket(DamagePacket packet)
     {
         if (_healthController == null || !_healthController.IsAlive)
