@@ -98,7 +98,7 @@ public sealed class ObservedInventoryController : Player.PlayerInventoryControll
                 {
                     flag = true;
                 }
-                if (object.Equals(geventArgs6.From, location))
+                if (Equals(geventArgs6.From, location))
                 {
                     flag = true;
                 }
