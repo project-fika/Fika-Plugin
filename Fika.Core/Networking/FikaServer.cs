@@ -930,6 +930,13 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
 
     private void DisconnectHeadless()
     {
+        if (!Singleton<IFikaGame>.Instantiated)
+        {
+            _logger.LogError("Headless is trying to disconnect when there is no FikaGame started, stopping client...");
+            Application.Quit();
+            return;
+        }
+
         Singleton<IFikaGame>.Instance.Stop(null, ExitStatus.Survived, "");
     }
 
