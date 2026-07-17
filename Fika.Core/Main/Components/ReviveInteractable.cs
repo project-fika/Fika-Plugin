@@ -71,6 +71,7 @@ internal sealed class ReviveInteractable : InteractableObject
         _observedPlayer._characterController.isEnabled = false;
         _observedPlayer.POM.Off();
         _observedPlayer.HandsController.FastForwardCurrentState();
+        _observedPlayer.HandsController.OnPlayerDead();
 
         _observedPlayer.ProceduralWeaponAnimation.OnPreCollision -= _observedPlayer.IkStoreRaw;
 
