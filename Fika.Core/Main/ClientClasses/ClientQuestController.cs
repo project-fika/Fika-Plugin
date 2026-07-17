@@ -31,6 +31,11 @@ public class ClientQuestController(Profile profile, InventoryController inventor
         _player.InventoryController.AddItemEvent += InventoryController_AddItemEvent;
     }
 
+    public void ToggleSend(bool enabled)
+    {
+        _sendQuestSync = enabled;
+    }
+
     private void InventoryController_AddItemEvent(GEventArgs2 eventArgs)
     {
         if (eventArgs.Status != CommandStatus.Succeed || !_isClient || !_sendQuestSync)
