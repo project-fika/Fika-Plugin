@@ -602,7 +602,8 @@ public class FikaPlayer : LocalPlayer
             ActiveHealthController.DisableMetabolism();
             MovementContext.IsInPronePose = true;
             HandsController.FastForwardCurrentState();
-            HideWeapon();
+            TrySaveLastItemInHands();
+            Proceed(false, null);
             ((SimpleCharacterController)CharacterController).IsMoveIgnored = true;
             MovementContext.IsAxesIgnored = true;
             var clientHealthController = _healthController as ClientHealthController;
@@ -634,7 +635,7 @@ public class FikaPlayer : LocalPlayer
             ActiveHealthController.SetDamageCoeff(1f);
             ActiveHealthController.UnpauseAllEffects();
             ActiveHealthController.IsAlive = true;
-            RevealWeapon();
+            TrySetLastEquippedWeapon(true);
             ((SimpleCharacterController)CharacterController).IsMoveIgnored = false;
             MovementContext.IsAxesIgnored = false;
             var clientHealthController = _healthController as ClientHealthController;
