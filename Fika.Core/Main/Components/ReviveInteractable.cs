@@ -55,6 +55,8 @@ internal sealed class ReviveInteractable : InteractableObject
     {
         if (FikaBackendUtils.IsHeadless)
         {
+            _observedPlayer.HandsController.FastForwardCurrentState();
+            _observedPlayer.HandsController.OnPlayerDead();
             return;
         }
 
