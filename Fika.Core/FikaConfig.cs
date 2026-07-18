@@ -758,7 +758,7 @@ public sealed class FikaConfig(ConfigFile config)
             }),
             "UDP Port", ref failed, headers);
 
-        UseUPnP = SetupSetting(networkDefaultHeader, "Use Port Mapping", true,
+        UseUPnP = SetupSetting(networkDefaultHeader, "Use Port Mapping", false,
             new ConfigDescription(LocaleUtils.BEPINEX_USE_UPNP_D.Localized(), tags: new ConfigurationManagerAttributes
             {
                 Category = networkHeader,
@@ -768,7 +768,7 @@ public sealed class FikaConfig(ConfigFile config)
             }),
             "Use UPnP", ref failed, headers);
 
-        UseNATPunching = SetupSetting(networkDefaultHeader, "Use NAT Punching", true,
+        UseNATPunching = SetupSetting(networkDefaultHeader, "Use NAT Punching", false,
             new ConfigDescription(LocaleUtils.BEPINEX_USE_NAT_PUNCH_D.Localized(), tags: new ConfigurationManagerAttributes
             {
                 Category = networkHeader,
