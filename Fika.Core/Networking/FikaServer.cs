@@ -222,30 +222,26 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
 #endif            
         await NetManagerUtils.CreateCoopHandler();
 
-        if (FikaPlugin.Instance.Settings.UseUPnP.Value && !FikaPlugin.Instance.Settings.UseNATPunching.Value)
-        {
-            var upnpFailed = false;
+        var portMapped=false;
 
+        if (FikaPlugin.Instance.Settings.UseUPnP.Value)
+        {
             try
             {
                 NatDiscoverer discoverer = new();
                 CancellationTokenSource cts = new(10000);
-                var device = await discoverer.DiscoverDeviceAsync(PortMapper.Upnp, cts);
+                var device = await discoverer.DiscoverDeviceAsync(PortMapper.Upnp | PortMapper.Pmp, cts);
                 var extIp = await device.GetExternalIPAsync();
                 _externalIp = extIp.MapToIPv4().ToString();
 
                 await device.CreatePortMapAsync(new Mapping(Protocol.Udp, _port, _port, 300, "Fika UDP"));
+
+                _logger.LogInfo("Port Mapping Succeeded");
+                portMapped=true;
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Error when attempting to map UPnP. Make sure the selected port is not already open! Exception: {ex.Message}");
-                upnpFailed = true;
-            }
-
-            if (upnpFailed)
-            {
-                Singleton<PreloaderUI>.Instance.ShowErrorScreen("Network Error", LocaleUtils.UI_UPNP_FAILED.Localized());
-                throw new MappingException("Error during mapping. Check log file for more information.");
+                _logger.LogWarning($"Port Mapping Failed: {ex.Message}");
             }
         }
         else if (FikaPlugin.Instance.Settings.ForceIP.Value != "")
@@ -263,8 +259,13 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
             _externalIp = FikaPlugin.Instance.WanIP.ToString();
         }
 
-        if (FikaPlugin.Instance.Settings.UseNATPunching.Value)
+        var useNATPunching = !portMapped && FikaPlugin.Instance.Settings.UseNATPunching.Value &&
+            (FikaPlugin.Instance.NatPunchServerEnable || FikaPlugin.Instance.Settings.UseFikaNATPunchServer.Value);
+
+        if (useNATPunching)
         {
+            _logger.LogInfo("NAT Punching Enabled");
+
             _netServer.NatPunchModule.UnsyncedEvents = true;
             _netServer.NatPunchModule.Init(this);
             _netServer.Start();
@@ -339,7 +340,7 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
                 iconType: EFT.Communications.ENotificationIconType.Alert);
         }
 
-        SetHostRequest body = new([.. ipAddresses], _port, FikaPlugin.Instance.Settings.UseNATPunching.Value,
+        SetHostRequest body = new([.. ipAddresses], _port, useNATPunching,
             FikaPlugin.Instance.Settings.UseFikaNATPunchServer.Value, FikaBackendUtils.IsHeadless);
         FikaRequestHandler.UpdateSetHost(body);
 
