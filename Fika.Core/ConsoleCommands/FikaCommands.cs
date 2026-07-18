@@ -115,7 +115,7 @@ public class FikaCommands
             return;
         }
 
-        if (Singleton<IFikaNetworkManager>.Instantiated)
+        if (!Singleton<IFikaNetworkManager>.Instantiated)
         {
             return;
         }
