@@ -1304,6 +1304,10 @@ public class FikaPlayer : LocalPlayer
             {
                 return;
             }
+            if (FikaBackendUtils.IsClient)
+            {
+                _inventoryController.ExecuteStationaryOperation(stationaryWeapon, CheckIfStationarySucceeded);
+            }
         }
 
         base.OperateStationaryWeapon(stationaryWeapon, command);
@@ -1311,6 +1315,21 @@ public class FikaPlayer : LocalPlayer
         CommonPacket.Type = ECommonSubPacketType.Stationary;
         CommonPacket.SubPacket = StationaryPacket.FromValue((EStationaryCommand)command, stationaryWeapon.Id);
         PacketSender.NetworkManager.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
+    }
+
+    private void CheckIfStationarySucceeded(IResult result)
+    {
+        if (result.Succeed)
+        {
+            return;
+        }
+        MovementContext.PlayerAnimatorSetStationary(false);
+        MovementContext.PlayerAnimatorSetApproached(true);
+        CurrentManagedState.DropStationary();
+        if (MovementContext.StationaryWeapon != null)
+        {
+            MovementContext.StationaryWeapon.Unlock(ProfileId);
+        }
     }
 
     // Start
