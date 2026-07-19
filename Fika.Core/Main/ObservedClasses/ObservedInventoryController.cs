@@ -7,6 +7,7 @@ using EFT;
 using EFT.InventoryLogic;
 using EFT.InventoryLogic.Operations;
 using Fika.Core.Main.Players;
+using Fika.Core.Main.Utils;
 using HarmonyLib;
 using JetBrains.Annotations;
 
@@ -77,29 +78,80 @@ public sealed class ObservedInventoryController : Player.PlayerInventoryControll
             return new InteractionsHandlerClass.GClass1593(lockableComponent);
         }
         var flag = false;
+        if (item is CompoundItem compoundItem)
+        {
+            foreach (var item2 in compoundItem.GetAllItems())
+            {
+                foreach (var geventArgs in List_0)
+                {
+                    // this block is redundant during this check and isn't really meant to be used as it triggers a deny if player drags currently equipped item out of a slot
+                    /*if (item2 == geventArgs.Item)
+                    {
+                        FikaGlobals.LogError($"{item2.LocalizedShortName()} was same as queued process: {geventArgs.Item.LocalizedShortName()}");
+                        flag = true;
+                    }*/
+                    if (geventArgs.Location != null && geventArgs.Location.Container.ParentItem == item2)
+                    {
+#if DEBUG
+                        FikaGlobals.LogError($"{item2.LocalizedShortName()} was parentItem of: {geventArgs.Item.LocalizedShortName()}");
+#endif
+                        flag = true;
+                    }
+                    if (location != null && geventArgs.Location != null && smethod_0(item2, location, geventArgs.Item, geventArgs.Location))
+                    {
+#if DEBUG
+                        FikaGlobals.LogError($"{item2.LocalizedShortName()} failed to process on smethod_0");
+#endif
+                        flag = true;
+                    }
+                    if (flag)
+                    {
+#if DEBUG
+                        FikaGlobals.LogError($"Flag hit, gevent was {geventArgs.GetType().Name}");
+#endif
+                        return new GClass1561(item, ParentItem.GetRootItem());
+                    }
+                }
+            }
+        }
         foreach (var geventArgs2 in List_0)
         {
             var lambda = new Class2447();
             if (geventArgs2 is GEventArgs7 geventArgs3 && (geventArgs3.TargetItem == item || geventArgs3.Item == item))
             {
+#if DEBUG
+                FikaGlobals.LogError($"{item.LocalizedShortName()} was in a GEventArgs7");
+#endif
                 flag = true;
             }
             if (geventArgs2 is GEventArgs8 geventArgs4 && (geventArgs4.FromItem == item || geventArgs4.Item == item || geventArgs4.TargetItem == item))
             {
+#if DEBUG
+                FikaGlobals.LogError($"{item.LocalizedShortName()} was in a GEventArgs8");
+#endif
                 flag = true;
             }
             if (geventArgs2 is GEventArgs2 geventArgs5 && item == geventArgs5.To.Container.ParentItem)
             {
+#if DEBUG
+                FikaGlobals.LogError($"{item.LocalizedShortName()} was in a GEventArgs2");
+#endif
                 flag = true;
             }
             if (geventArgs2 is GEventArgs3 geventArgs6)
             {
                 if (item.Parent.Container.ParentItem == geventArgs6.Item)
                 {
+#if DEBUG
+                    FikaGlobals.LogError($"{item.LocalizedShortName()} was in a GEventArgs3 and ParentItem was event Item");
+#endif
                     flag = true;
                 }
                 if (Equals(geventArgs6.From, location))
                 {
+#if DEBUG
+                    FikaGlobals.LogError($"{item.LocalizedShortName()} was in a GEventArgs6 and From was same as Location");
+#endif
                     flag = true;
                 }
             }
@@ -108,23 +160,38 @@ public sealed class ObservedInventoryController : Player.PlayerInventoryControll
             {
                 if (item.GetAllParentItemsAndSelf(false).Any(lambda.method_1))
                 {
+#if DEBUG
+                    FikaGlobals.LogError($"{item.LocalizedShortName()} failed to pass GetAllParentItemsAndSelf");
+#endif
                     flag = true;
                 }
                 if (location?.Container.ParentItem.GetAllParentItemsAndSelf(false).Any(lambda.method_1) == true)
                 {
+#if DEBUG
+                    FikaGlobals.LogError($"{item.LocalizedShortName()} location failed to pass GetAllParentItemsAndSelf");
+#endif
                     flag = true;
                 }
             }
             if (item == geventArgs2.Item)
             {
+#if DEBUG
+                FikaGlobals.LogError($"{item.LocalizedShortName()} item was same as GEventArgs2.Item");
+#endif
                 flag = true;
             }
             if (location != null && geventArgs2.Location != null && smethod_0(item, location, geventArgs2.Item, geventArgs2.Location))
             {
+#if DEBUG
+                FikaGlobals.LogError($"{item.LocalizedShortName()} failed to process smethod_0 v2");
+#endif
                 flag = true;
             }
             if (flag)
             {
+#if DEBUG
+                FikaGlobals.LogError($"Flag hit, gevent was {geventArgs2.GetType().Name}");
+#endif
                 return new GClass1561(item, ParentItem.GetRootItem());
             }
         }
@@ -217,7 +284,7 @@ public sealed class ObservedInventoryController : Player.PlayerInventoryControll
             return;
         }
 
-        if ((item.Parent != to || operation is FoldOperationClass) && handler.player_0.HandsController.CanExecute(operation))
+        if (operation is FoldOperationClass && handler.player_0.HandsController.CanExecute(operation))
         {
             Traverse.Create(handler.player_0).Field<Callback>("_setInHandsCallback").Value = handler.callback;
             RaiseInOutProcessEvents(new(handler.player_0.HandsController.Item, CommandStatus.Begin, this));
