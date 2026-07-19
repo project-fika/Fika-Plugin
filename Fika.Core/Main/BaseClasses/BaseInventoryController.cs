@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Comfort.Common;
@@ -96,6 +97,42 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
         return executionResult;
     }
 
+    public override Task<IResult> UnloadMagazine(MagazineItemClass magazine, bool equipmentBlocked)
+    {
+        if (_instantLoad)
+        {
+            return UnloadAmmoInstantly(magazine, equipmentBlocked);
+        }
+
+        if (_fastLoad)
+        {
+            return QuickUnloadMagazine(magazine);
+        }
+
+        return base.UnloadMagazine(magazine, equipmentBlocked);
+    }
+
+    private async Task<IResult> QuickUnloadMagazine(MagazineItemClass magazine)
+    {
+        StopProcesses();
+        var unloadSpeed = 100f - Profile.Skills.MagDrillsUnloadSpeed + magazine.LoadUnloadModifier;
+        var unloadOneAmmoSpeed = Singleton<BackendConfigSettingsClass>.Instance.BaseUnloadTime * unloadSpeed / 100f;
+        var unloadPerTick = GetLoadPerTick(magazine);
+
+        var awaitClear = await method_30();
+        if (awaitClear.Failed)
+        {
+            return awaitClear;
+        }
+
+        Interface19_0 = new CustomAmmoUnloader(this, magazine, unloadPerTick, unloadOneAmmoSpeed, Profile.Skills.MagDrillsLoadProgression);
+        var result = await Interface19_0.Start();
+
+        Interface19_0 = null;
+
+        return result;
+    }
+
     /// <summary>
     /// Returns how many bullets should be loaded per tick into the <paramref name="magazine"/>
     /// </summary>
@@ -166,7 +203,7 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
             var cancellationHandlerSource = new TaskCompletionSource<IResult>();
             _cts.Token.Register(cancellationHandlerSource.Succeed);
             RaiseEvents(CommandStatus.Begin);
-            var result = await await Task.WhenAny(DoLoadLoop(), cancellationHandlerSource.Task);
+            var result = await await Task.WhenAny(DoLoadLoopAsync(), cancellationHandlerSource.Task);
 
             Proceed(result.Succeed);
             return result;
@@ -222,7 +259,7 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
             }
         }
 
-        public async Task<IResult> DoLoadLoop()
+        public async Task<IResult> DoLoadLoopAsync()
         {
             var loadedCount = 0;
 
@@ -292,4 +329,211 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
             Singleton<GUISounds>.Instance.PlayUILoadSound();
         }
     }
+
+    private sealed class CustomAmmoUnloader : Interface19
+    {
+        private readonly BaseInventoryController _inventoryController;
+        private readonly MagazineItemClass _magazine;
+        private readonly int _unloadPerTick;
+        private readonly float _baseUnloadSpeed;
+        private readonly bool _isElite;
+        private readonly int _totalAmmoCount;
+
+        private float _currentUnloadSpeed;
+        private int _remainingAmmoCount;
+        private CancellationTokenSource _cts;
+        private Item _currentAmmoItem;
+        private Item _targetItem;
+
+        public CustomAmmoUnloader(BaseInventoryController baseInventoryController, MagazineItemClass magazine, int unloadPerTick, float unloadOneAmmoSpeed, bool isElite)
+        {
+            _inventoryController = baseInventoryController;
+            _magazine = magazine;
+            _unloadPerTick = unloadPerTick;
+            _baseUnloadSpeed = unloadOneAmmoSpeed;
+            _isElite = isElite;
+
+            _currentUnloadSpeed = unloadOneAmmoSpeed;
+            _totalAmmoCount = magazine.Cartridges.Items.Sum(i => i.StackObjectsCount);
+            _remainingAmmoCount = _totalAmmoCount;
+        }
+
+        public async Task<IResult> Start()
+        {
+            Cancel();
+
+            if (_remainingAmmoCount == 0)
+            {
+                return new GClass1562(_magazine).ToResult();
+            }
+
+            _cts = new CancellationTokenSource();
+            var cancellationTcs = new TaskCompletionSource<IResult>();
+
+            _cts.Token.Register(() => cancellationTcs.TrySetResult(SuccessfulResult.New));
+
+            var loopResult = await await Task.WhenAny(DoUnloadLoopAsync(), cancellationTcs.Task);
+
+            Proceed(loopResult.Succeed);
+            return loopResult;
+        }
+
+        public void Cancel()
+        {
+            if (_cts == null)
+            {
+                return;
+            }
+
+            _cts.Cancel(false);
+            _cts.Dispose();
+            _cts = null;
+        }
+
+        public void Proceed(bool success)
+        {
+            if (_cts?.IsCancellationRequested != false)
+            {
+                return;
+            }
+
+            Cancel();
+            RaiseUnloadEvent(success ? CommandStatus.Succeed : CommandStatus.Failed);
+        }
+
+        public void TryProceedForItem(Item item)
+        {
+            if (_magazine == item || _currentAmmoItem == item || _targetItem == item)
+            {
+                Proceed(true);
+            }
+        }
+
+        private void PlayUnloadSound()
+        {
+            if (!Singleton<GUISounds>.Instantiated)
+            {
+                return;
+            }
+            Singleton<GUISounds>.Instance.PlayUIUnloadSound();
+        }
+
+        private async Task<IResult> DoUnloadLoopAsync()
+        {
+            var delayTask = GetDelayTask();
+
+            while (!_cts.IsCancellationRequested)
+            {
+                if (_magazine.Cartridges.Items.LastOrDefault() is not AmmoItemClass ammoItem)
+                {
+                    break;
+                }
+
+                var findPlaceResult = InteractionsHandlerClass.QuickFindAppropriatePlace(ammoItem, _inventoryController,
+                    _inventoryController.Inventory.Equipment.ToEnumerable(),
+                    InteractionsHandlerClass.EMoveItemOrder.UnloadAmmo, true);
+
+                if (findPlaceResult.Failed)
+                {
+                    return findPlaceResult.ToResult();
+                }
+
+                ItemAddress targetAddress = null;
+                Item targetItem = null;
+                var interactionValue = findPlaceResult.Value;
+
+                if (interactionValue is GInterface428 moveOperation)
+                {
+                    targetAddress = moveOperation.To;
+                }
+                else if (interactionValue is GInterface429 mergeOperation)
+                {
+                    targetItem = mergeOperation.TargetItem;
+                }
+
+                if (targetAddress == null && targetItem == null)
+                {
+                    break;
+                }
+
+                if (_currentAmmoItem != ammoItem || targetItem != _targetItem)
+                {
+                    if (_currentAmmoItem != null)
+                    {
+                        RaiseUnloadEvent(CommandStatus.Succeed);
+                    }
+                    _currentAmmoItem = ammoItem;
+                    _targetItem = targetItem;
+                    RaiseUnloadEvent(CommandStatus.Begin);
+                }
+
+                await delayTask;
+
+                if (_cts.IsCancellationRequested)
+                {
+                    break;
+                }
+
+                delayTask = GetDelayTask();
+
+                if (_isElite)
+                {
+                    var speedModifier = _baseUnloadSpeed * Singleton<BackendConfigSettingsClass>.Instance.LoadTimeSpeedProgress / 100f;
+                    _currentUnloadSpeed = Mathf.Clamp(_currentUnloadSpeed - speedModifier, _baseUnloadSpeed * 40f / 100f, 10f);
+                }
+
+                var applyResult = (_targetItem != null)
+                    ? AmmoItemClass.ApplyToAmmo(_currentAmmoItem, _targetItem, _unloadPerTick, _inventoryController, true)
+                    : AmmoItemClass.ApplyToAddress(_currentAmmoItem, targetAddress, _unloadPerTick, _inventoryController, true);
+
+                if (applyResult.Failed)
+                {
+                    return applyResult.ToResult();
+                }
+
+                GInterface432 operationResult = new GClass3420(applyResult.Value);
+                var operation = _inventoryController.ConvertOperationResultToOperation(operationResult) as GClass3514;
+
+                var executionTcs = new TaskCompletionSource<IResult>();
+
+                _inventoryController.vmethod_1(operation, new Callback(res => executionTcs.SetResult(res)));
+
+                var executionResult = await executionTcs.Task;
+                if (executionResult.Failed)
+                {
+                    return executionResult;
+                }
+
+                _remainingAmmoCount -= _unloadPerTick;
+                _currentAmmoItem.RaiseRefreshEvent(false, true);
+                _magazine.RaiseRefreshEvent(_remainingAmmoCount == 0, true);
+                _targetItem?.RaiseRefreshEvent(false, true);
+
+                PlayUnloadSound();
+            }
+
+            return SuccessfulResult.New;
+        }
+
+        private void RaiseUnloadEvent(CommandStatus status)
+        {
+            var owner = _magazine.Parent.GetOwner();
+            var unloadCount = Mathf.CeilToInt((float)_totalAmmoCount / _unloadPerTick);
+
+            var eventArgs = new GEventArgs8(_currentAmmoItem, _targetItem, _magazine, _totalAmmoCount - _remainingAmmoCount, unloadCount,
+                                            _baseUnloadSpeed, status, _inventoryController);
+
+            owner.RaiseUnloadMagazineEvent(eventArgs);
+            if (owner != _inventoryController)
+            {
+                _inventoryController.RaiseUnloadMagazineEvent(eventArgs);
+            }
+        }
+
+        private Task GetDelayTask()
+        {
+            return Task.Delay(Mathf.CeilToInt(_currentUnloadSpeed * 1000f));
+        }
+    }
 }
+
