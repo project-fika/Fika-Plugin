@@ -14,7 +14,7 @@ public struct InRaidQuestPacket : INetSerializable
     public void Deserialize(NetDataReader reader)
     {
         NetId = reader.GetInt();
-        Type = (InraidQuestType)reader.GetByte();
+        Type = reader.GetEnum<InraidQuestType>();
         switch (Type)
         {
             case InraidQuestType.Finish:
@@ -46,7 +46,7 @@ public struct InRaidQuestPacket : INetSerializable
     public readonly void Serialize(NetDataWriter writer)
     {
         writer.Put(NetId);
-        writer.Put((byte)Type);
+        writer.PutEnum(Type);
         switch (Type)
         {
             case InraidQuestType.Finish:
