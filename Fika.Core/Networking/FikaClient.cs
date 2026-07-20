@@ -149,19 +149,6 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
             UseNativeSockets = NativeSocket.IsSupported
         };
 
-        if (FikaPlugin.Instance.Settings.SimulateLag.Value)
-        {
-            _netClient.SimulateLatency = true;
-            _netClient.SimulationMinLatency = FikaPlugin.Instance.Settings.MinLatency.Value;
-            _netClient.SimulationMaxLatency = FikaPlugin.Instance.Settings.MaxLatency.Value;
-        }
-
-        if (FikaPlugin.Instance.Settings.SimulatePacketLoss.Value)
-        {
-            _netClient.SimulatePacketLoss = true;
-            _netClient.SimulationPacketLossChance = FikaPlugin.Instance.Settings.PacketLossChance.Value;
-        }
-
         _packetProcessor = new();
         _dataWriter = new();
         _logger = Logger.CreateLogSource("Fika.Client");
@@ -380,7 +367,7 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
 
     public void SendData<T>(ref T packet, DeliveryMethod deliveryMethod, bool broadcast = false) where T : INetSerializable
     {
-        var peer = _netClient.FirstPeer;
+        var peer = ServerConnection;
         if (peer != null)
         {
             _dataWriter.Reset();

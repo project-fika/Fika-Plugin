@@ -166,19 +166,6 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
             UseNativeSockets = NativeSocket.IsSupported
         };
 
-        if (FikaPlugin.Instance.Settings.SimulateLag.Value)
-        {
-            _netServer.SimulateLatency = true;
-            _netServer.SimulationMinLatency = FikaPlugin.Instance.Settings.MinLatency.Value;
-            _netServer.SimulationMaxLatency = FikaPlugin.Instance.Settings.MaxLatency.Value;
-        }
-
-        if (FikaPlugin.Instance.Settings.SimulatePacketLoss.Value)
-        {
-            _netServer.SimulatePacketLoss = true;
-            _netServer.SimulationPacketLossChance = FikaPlugin.Instance.Settings.PacketLossChance.Value;
-        }
-
         AllowVOIP = FikaPlugin.Instance.Settings.AllowVOIP.Value;
 
         _packetProcessor = new();
@@ -933,6 +920,13 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
 
     private void DisconnectHeadless()
     {
+        if (!Singleton<IFikaGame>.Instantiated)
+        {
+            _logger.LogError("Headless is trying to disconnect when there is no FikaGame started, stopping client...");
+            Application.Quit();
+            return;
+        }
+
         Singleton<IFikaGame>.Instance.Stop(null, ExitStatus.Survived, "");
     }
 

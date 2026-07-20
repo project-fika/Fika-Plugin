@@ -108,7 +108,9 @@ public class ClientQuestController(Profile profile, InventoryController inventor
             var counter = conditional.ConditionCountersManager.GetCounter(condition.id);
             if (counter == null)
             {
+#if DEBUG
                 FikaGlobals.LogWarning($"There was no counter for condition [{condition.id}]");
+#endif
                 return;
             }
 

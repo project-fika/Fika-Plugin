@@ -8,6 +8,7 @@ using EFT;
 using EFT.InventoryLogic;
 using EFT.InventoryLogic.Operations;
 using Fika.Core.Main.Players;
+using Fika.Core.Main.Utils;
 using HarmonyLib;
 using JetBrains.Annotations;
 
@@ -78,29 +79,80 @@ public sealed class ObservedInventoryController : Player.PlayerInventoryControll
             return new ItemManipulator.ContainerLockedError(lockableComponent);
         }
         var flag = false;
+        if (item is CompoundItem compoundItem)
+        {
+            foreach (var item2 in compoundItem.GetAllItems())
+            {
+                foreach (var geventArgs in ActiveEvents)
+                {
+                    // this block is redundant during this check and isn't really meant to be used as it triggers a deny if player drags currently equipped item out of a slot
+                    /*if (item2 == geventArgs.Item)
+                    {
+                        FikaGlobals.LogError($"{item2.LocalizedShortName()} was same as queued process: {geventArgs.Item.LocalizedShortName()}");
+                        flag = true;
+                    }*/
+                    if (geventArgs.Location != null && geventArgs.Location.Container.ParentItem == item2)
+                    {
+#if DEBUG
+                        FikaGlobals.LogError($"{item2.LocalizedShortName()} was parentItem of: {geventArgs.Item.LocalizedShortName()}");
+#endif
+                        flag = true;
+                    }
+                    if (location != null && geventArgs.Location != null && CheckLocation(item2, location, geventArgs.Item, geventArgs.Location))
+                    {
+#if DEBUG
+                        FikaGlobals.LogError($"{item2.LocalizedShortName()} failed to process on CheckLocation");
+#endif
+                        flag = true;
+                    }
+                    if (flag)
+                    {
+#if DEBUG
+                        FikaGlobals.LogError($"Flag hit, gevent was {geventArgs.GetType().Name}");
+#endif
+                        return new PlayerIsBusyError(item, ParentItem.GetRootItem());
+                    }
+                }
+            }
+        }
         foreach (var geventArgs2 in ActiveEvents)
         {
             var lambda = new CG_CheckItemAction();
             if (geventArgs2 is LoadMagazineEventArgs geventArgs3 && (geventArgs3.TargetItem == item || geventArgs3.Item == item))
             {
+#if DEBUG
+                FikaGlobals.LogError($"{item.LocalizedShortName()} was in a GEventArgs7");
+#endif
                 flag = true;
             }
             if (geventArgs2 is UnloadMagazineEventArgs geventArgs4 && (geventArgs4.FromItem == item || geventArgs4.Item == item || geventArgs4.TargetItem == item))
             {
+#if DEBUG
+                FikaGlobals.LogError($"{item.LocalizedShortName()} was in a GEventArgs8");
+#endif
                 flag = true;
             }
             if (geventArgs2 is AddItemEventArgs geventArgs5 && item == geventArgs5.To.Container.ParentItem)
             {
+#if DEBUG
+                FikaGlobals.LogError($"{item.LocalizedShortName()} was in a GEventArgs2");
+#endif
                 flag = true;
             }
             if (geventArgs2 is RemoveItemEventArgs geventArgs6)
             {
                 if (item.Parent.Container.ParentItem == geventArgs6.Item)
                 {
+#if DEBUG
+                    FikaGlobals.LogError($"{item.LocalizedShortName()} was in a GEventArgs3 and ParentItem was event Item");
+#endif
                     flag = true;
                 }
-                if (object.Equals(geventArgs6.From, location))
+                if (Equals(geventArgs6.From, location))
                 {
+#if DEBUG
+                    FikaGlobals.LogError($"{item.LocalizedShortName()} was in a GEventArgs6 and From was same as Location");
+#endif
                     flag = true;
                 }
             }
@@ -109,19 +161,31 @@ public sealed class ObservedInventoryController : Player.PlayerInventoryControll
             {
                 if (item.GetAllParentItemsAndSelf(false).Any(lambda.method_1))
                 {
+#if DEBUG
+                    FikaGlobals.LogError($"{item.LocalizedShortName()} failed to pass GetAllParentItemsAndSelf");
+#endif
                     flag = true;
                 }
                 if (location?.Container.ParentItem.GetAllParentItemsAndSelf(false).Any(lambda.method_1) == true)
                 {
+#if DEBUG
+                    FikaGlobals.LogError($"{item.LocalizedShortName()} location failed to pass GetAllParentItemsAndSelf");
+#endif
                     flag = true;
                 }
             }
             if (item == geventArgs2.Item)
             {
+#if DEBUG
+                FikaGlobals.LogError($"{item.LocalizedShortName()} item was same as GEventArgs2.Item");
+#endif
                 flag = true;
             }
             if (location != null && geventArgs2.Location != null && CheckLocation(item, location, geventArgs2.Item, geventArgs2.Location))
             {
+#if DEBUG
+                FikaGlobals.LogError($"{item.LocalizedShortName()} failed to process CheckLocation v2");
+#endif
                 flag = true;
             }
             if (flag)
