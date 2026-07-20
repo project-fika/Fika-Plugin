@@ -19,15 +19,15 @@ public class RocketProjectile_Launch_Patch : ModulePatch
     }
 
     [PatchPrefix]
-    public static bool Prefix(RocketProjectile __instance, ref bool ___bool_0, ref Coroutine ___coroutine_0, BackblastModel ___rocketLauncherConeBlastClass)
+    public static bool Prefix(RocketProjectile __instance, ref bool ____isLaunched, ref Coroutine ____coneBlastCoroutine, BackblastModel ____backBlastModel)
     {
         if (Singleton<GameWorld>.Instance is ClientLocalGameWorld && FikaBackendUtils.IsServer)
         {
-            ___coroutine_0 = __instance.StartCoroutine(___rocketLauncherConeBlastClass.ConeBlast(___coroutine_0));
+            ____coneBlastCoroutine = __instance.StartCoroutine(____backBlastModel.ConeBlast(____coneBlastCoroutine));
         }
         __instance.CreateShot();
         __instance.SetVisibleModel(true);
-        ___bool_0 = true;
+        ____isLaunched = true;
 
         return false;
     }

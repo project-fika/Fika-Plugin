@@ -36,7 +36,7 @@ public class FixSavageInventoryScreenPatch_Override : ModulePatch
     }
 
     [PatchPrefix]
-    public static void PatchPrefix(ref IEftSession ___ISession)
+    public static void PatchPrefix(ref IEftSession ____session)
     {
         Profile profile = new(GetProfileAtEndOfRaidPatch_Override.ProfileDescriptor);
 
@@ -45,7 +45,7 @@ public class FixSavageInventoryScreenPatch_Override : ModulePatch
             return;
         }
 
-        var session = (ClientBackendSession)___ISession;
+        var session = (ClientBackendSession)____session;
         session.AllProfiles =
         [
             session.AllProfiles.First(x => x.Side != EPlayerSide.Savage),

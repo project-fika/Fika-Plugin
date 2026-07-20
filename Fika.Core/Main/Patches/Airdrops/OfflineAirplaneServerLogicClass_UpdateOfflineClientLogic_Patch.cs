@@ -15,11 +15,11 @@ public class OfflineAirplaneServerLogicClass_UpdateOfflineClientLogic_Patch : Mo
     }
 
     [PatchPostfix]
-    public static void Postfix(SynchronizableObjectPacket ___AirplaneDataPacketStruct)
+    public static void Postfix(SynchronizableObjectPacket ____offlineSyncPacket)
     {
         var hostWorld = Singleton<FikaHostGameWorld>.Instance.FikaHostWorld;
-        hostWorld.WorldPacket.SyncObjectPackets.Add(___AirplaneDataPacketStruct);
-        if (___AirplaneDataPacketStruct.Outdated)
+        hostWorld.WorldPacket.SyncObjectPackets.Add(____offlineSyncPacket);
+        if (____offlineSyncPacket.Outdated)
         {
             hostWorld.SetCritical();
         }

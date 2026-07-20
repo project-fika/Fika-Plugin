@@ -17,8 +17,8 @@ public class BotReload_AddAmmoToMagazines_Patch : ModulePatch
     }
 
     [PatchPostfix]
-    public static void Postfix(BotOwner ___BotOwner_0)
+    public static void Postfix(BotOwner ____owner)
     {
-        ___BotOwner_0.ShootData.BlockFor(0.7f);
+        ____owner.ShootData.BlockFor(0.7f);
     }
 }

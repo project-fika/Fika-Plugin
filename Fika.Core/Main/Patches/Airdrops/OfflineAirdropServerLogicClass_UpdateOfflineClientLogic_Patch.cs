@@ -15,11 +15,11 @@ public class OfflineAirdropServerLogicClass_UpdateOfflineClientLogic_Patch : Mod
     }
 
     [PatchPostfix]
-    public static void Postfix(SynchronizableObjectPacket ___AirplaneDataPacketStruct)
+    public static void Postfix(SynchronizableObjectPacket ____offlineSyncPacket)
     {
         var hostWorld = Singleton<FikaHostGameWorld>.Instance.FikaHostWorld;
-        hostWorld.WorldPacket.SyncObjectPackets.Add(___AirplaneDataPacketStruct);
-        if (___AirplaneDataPacketStruct.PacketData.AirdropDataPacket.FallingStage is EAirdropFallingStage.Landed)
+        hostWorld.WorldPacket.SyncObjectPackets.Add(____offlineSyncPacket);
+        if (____offlineSyncPacket.PacketData.AirdropDataPacket.FallingStage is EAirdropFallingStage.Landed)
         {
             hostWorld.SetCritical();
         }

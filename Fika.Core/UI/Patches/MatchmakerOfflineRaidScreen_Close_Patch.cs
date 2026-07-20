@@ -14,11 +14,11 @@ public sealed class MatchmakerOfflineRaidScreen_Close_Patch : ModulePatch
     }
 
     [PatchPrefix]
-    public static void Prefix(ref RaidSettings ___raidSettings_0, RaidSettings ___raidSettings_1)
+    public static void Prefix(ref RaidSettings ____raidSettings, RaidSettings ____offlineRaidSettings)
     {
-        ___raidSettings_0.TimeAndWeatherSettings = ___raidSettings_1.TimeAndWeatherSettings;
-        ___raidSettings_0.WavesSettings = ___raidSettings_1.WavesSettings;
-        ___raidSettings_0.MetabolismDisabled = ___raidSettings_1.MetabolismDisabled;
-        ___raidSettings_0.PlayersSpawnPlace = ___raidSettings_1.PlayersSpawnPlace;
+        ____raidSettings.TimeAndWeatherSettings = ____offlineRaidSettings.TimeAndWeatherSettings;
+        ____raidSettings.WavesSettings = ____offlineRaidSettings.WavesSettings;
+        ____raidSettings.MetabolismDisabled = ____offlineRaidSettings.MetabolismDisabled;
+        ____raidSettings.PlayersSpawnPlace = ____offlineRaidSettings.PlayersSpawnPlace;
     }
 }

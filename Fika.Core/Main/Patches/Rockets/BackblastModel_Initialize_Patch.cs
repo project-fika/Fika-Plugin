@@ -8,7 +8,7 @@ namespace Fika.Core.Main.Patches.Rockets;
 /// <summary>
 /// Do not run method unless server to avoid double damage
 /// </summary>
-public class RocketLauncherConeBlastClass_Initialize_Patch : ModulePatch
+public class BackblastModel_Initialize_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

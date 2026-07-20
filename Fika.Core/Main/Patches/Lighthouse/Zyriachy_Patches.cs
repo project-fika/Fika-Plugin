@@ -12,7 +12,7 @@ public static class Zyriachy_Patches
     /// <summary>
     /// Search for 'Zryachiy don't have controllable zone FIX it' string in assembly to find class
     /// </summary>
-    public class ZyriachyBossLogicClass_Activate_Patch : ModulePatch
+    public class BossZryachiy_Activate_Patch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
@@ -21,9 +21,9 @@ public static class Zyriachy_Patches
         }
 
         [PatchPostfix]
-        public static void Postfix(ref BotOwner ___BotOwner_0)
+        public static void Postfix(ref BotOwner ____owner)
         {
-            ___BotOwner_0.GetPlayer.OnPlayerDead += OnZryachiyDead;
+            ____owner.GetPlayer.OnPlayerDead += OnZryachiyDead;
         }
 
         private static void OnZryachiyDead(Player player, IPlayer lastAggressor, DamageInfo damageInfo, EBodyPart part)

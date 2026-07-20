@@ -17,25 +17,25 @@ public class BufferZoneController_OnGameTypeSeted_Patch : ModulePatch
     }
 
     [PatchPrefix]
-    public static bool Prefix(EGameType gameType, BufferZoneController __instance, ref bool ___Bool_1, ref Action ___action_0)
+    public static bool Prefix(EGameType gameType, BufferZoneController __instance, ref bool ____isOfflineMode, ref Action ____onInitialized)
     {
         AbstractGame.OnGameTypeSetted -= __instance.OnGameTypeSeted;
 
-        ___Bool_1 = gameType == EGameType.Offline;
+        ____isOfflineMode = gameType == EGameType.Offline;
 
         if (FikaBackendUtils.IsClient)
         {
-            ___Bool_1 = false;
+            ____isOfflineMode = false;
         }
 
-        if (___Bool_1)
+        if (____isOfflineMode)
         {
             Player.OnPlayerDeadStatic += __instance.OnPlayerKilled;
             LighthouseTraderZone.OnPlayerAllowStatusChanged += __instance.OnPlayerAllowStatusChanged;
         }
 
         // Fire OnInitialized
-        ___action_0?.Invoke();
+        ____onInitialized?.Invoke();
 
         // Skip the original method
         return false;

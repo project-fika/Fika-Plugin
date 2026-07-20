@@ -7,7 +7,7 @@ namespace Fika.Core.UI.Patches;
 /// <summary>
 /// This allows all game editions to edit the <see cref="RaidSettings"/>
 /// </summary>
-public class MainMenuControllerClass_method_55_Patch : ModulePatch
+public class MainMenuShowOperation_method_55_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

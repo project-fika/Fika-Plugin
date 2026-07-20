@@ -43,8 +43,8 @@ public sealed class TarkovApplication_LocalGameCreator_Patch : ModulePatch
     public static bool Prefix(ref Task __result, TarkovApplication __instance, TimeAndWeatherSettings timeAndWeather,
         RaidSettings ____raidSettings, InputTree ____inputTree, GameDateTime ____localGameDateTime,
         float ____fixedDeltaTime, ClientMetricsEvents metricsEvents,
-        ClientMetricsConfig metricsConfig, GameWorld gameWorld, MainMenuShowOperation ___mainMenuControllerClass,
-        CompositeDisposable ___compositeDisposableClass, BundleLock ___BundleLock)
+        ClientMetricsConfig metricsConfig, GameWorld gameWorld, MainMenuShowOperation ____menuOperation,
+        CompositeDisposable ____unsubscriber, BundleLock ___BundleLock)
     {
 #if DEBUG
         Logger.LogInfo("TarkovApplication_LocalGameCreator_Patch:Prefix");
@@ -52,16 +52,16 @@ public sealed class TarkovApplication_LocalGameCreator_Patch : ModulePatch
 #endif
         __result = CreateFikaGame(__instance, timeAndWeather, ____raidSettings,
             ____inputTree, ____localGameDateTime, ____fixedDeltaTime,
-            metricsEvents, metricsConfig, gameWorld, ___mainMenuControllerClass,
-            ___compositeDisposableClass, ___BundleLock);
+            metricsEvents, metricsConfig, gameWorld, ____menuOperation,
+            ____unsubscriber, ___BundleLock);
         return false;
     }
 
     public static async Task CreateFikaGame(TarkovApplication instance, TimeAndWeatherSettings timeAndWeather,
         RaidSettings raidSettings, InputTree inputTree, GameDateTime localGameDateTime, float fixedDeltaTime,
         ClientMetricsEvents metricsEvents, ClientMetricsConfig metricsConfig,
-        GameWorld gameWorld, MainMenuShowOperation ___mainMenuController,
-        CompositeDisposable compositeDisposableClass, BundleLock bundleLock)
+        GameWorld gameWorld, MainMenuShowOperation menuOperation,
+        CompositeDisposable unsubscriber, BundleLock bundleLock)
     {
         var isServer = FikaBackendUtils.IsServer;
         var isTransit = FikaBackendUtils.IsTransit;
@@ -204,8 +204,8 @@ public sealed class TarkovApplication_LocalGameCreator_Patch : ModulePatch
         startHandler.CoopGame = coopGame;
 
         Singleton<AbstractGame>.Create(coopGame);
-        compositeDisposableClass.AddDisposable(coopGame);
-        compositeDisposableClass.AddDisposable(startHandler.ReleaseSingleton);
+        unsubscriber.AddDisposable(coopGame);
+        unsubscriber.AddDisposable(startHandler.ReleaseSingleton);
         metricsEvents.SetGameCreated();
         FikaEventDispatcher.DispatchEvent(new AbstractGameCreatedEvent(coopGame));
 
@@ -221,7 +221,7 @@ public sealed class TarkovApplication_LocalGameCreator_Patch : ModulePatch
 
         await coopGame.InitPlayer(raidSettings.BotSettings);
         UnityEngine.Object.DestroyImmediate(MonoBehaviourSingleton<MenuUI>.Instance.gameObject);
-        ___mainMenuController?.Unsubscribe();
+        menuOperation?.Unsubscribe();
         bundleLock.MaxConcurrentOperations = FikaPlugin.Instance.Settings.MaxBundleLock.Value;
         gameWorld.OnGameStarted();
         updater.Dispose();

@@ -18,7 +18,10 @@ public class BTRView_GoOut_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(BTRView).GetMethod(nameof(BTRView.GoOut));
+        // BTRView has a GoOut(Player, ...) and a GoOut(ObservedPlayerView, ...) overload,
+        // so the parameter types must be given to disambiguate.
+        return typeof(BTRView).GetMethod(nameof(BTRView.GoOut),
+            [typeof(Player), typeof(BTRSide), typeof(byte), typeof(bool)]);
     }
 
     [PatchPrefix]

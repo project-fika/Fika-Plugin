@@ -19,7 +19,8 @@ public class BTRView_GoIn_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(BTRView).GetMethod(nameof(BTRView.GoIn));
+        return typeof(BTRView).GetMethod(nameof(BTRView.GoIn),
+            [typeof(Player), typeof(BTRSide), typeof(byte), typeof(bool)]);
     }
 
     [PatchPrefix]

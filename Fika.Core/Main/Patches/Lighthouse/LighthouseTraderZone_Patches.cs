@@ -21,7 +21,7 @@ public static class LighthouseTraderZone_Patches
 
         [PatchPrefix]
         public static bool Prefix(Player player, LighthouseTraderZone __instance, ref List<Player> ___allPlayersInZone,
-            ref List<Player> ___allowedPlayers, ref List<Player> ___unallowedPlayers, ref Action<string, bool> ___action_0)
+            ref List<Player> ___allowedPlayers, ref List<Player> ___unallowedPlayers, ref Action<string, bool> ____onPlayerAllowStatusChanged)
         {
             if (!CoopHandler.TryGetCoopHandler(out var coopHandler))
             {
@@ -53,7 +53,7 @@ public static class LighthouseTraderZone_Patches
             if (!__instance.IsValidPlayer(radioTransmitterRecodableComponent.Handler))
             {
                 ___unallowedPlayers.Add(player);
-                ___action_0?.Invoke(player.ProfileId, false);
+                ____onPlayerAllowStatusChanged?.Invoke(player.ProfileId, false);
             }
             else
             {
@@ -66,7 +66,7 @@ public static class LighthouseTraderZone_Patches
                     player.ActiveHealthController.OnApplyDamageByPlayer += __instance.SetAgressor;
                 }
 
-                ___action_0?.Invoke(player.ProfileId, true);
+                ____onPlayerAllowStatusChanged?.Invoke(player.ProfileId, true);
             }
 
             ___allPlayersInZone.Add(player);
@@ -85,7 +85,7 @@ public static class LighthouseTraderZone_Patches
 
         [PatchPrefix]
         public static bool Prefix(Player player, LighthouseTraderZone __instance, ref List<Player> ___allPlayersInZone,
-            ref List<Player> ___allowedPlayers, ref List<Player> ___unallowedPlayers, ref Action<string, bool> ___action_0)
+            ref List<Player> ___allowedPlayers, ref List<Player> ___unallowedPlayers, ref Action<string, bool> ____onPlayerAllowStatusChanged)
         {
             if (!CoopHandler.TryGetCoopHandler(out var coopHandler))
             {
