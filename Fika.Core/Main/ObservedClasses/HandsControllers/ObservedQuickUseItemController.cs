@@ -10,7 +10,7 @@ public sealed class ObservedQuickUseItemController : Player.QuickUseItemControll
 {
     public static ObservedQuickUseItemController Create(ObservedPlayer player, Item item)
     {
-        return smethod_6<ObservedQuickUseItemController>(player, item);
+        return CreateController<ObservedQuickUseItemController>(player, item);
     }
 
     public override Dictionary<Type, OperationFactoryDelegate> GetOperationFactoryDelegates()
@@ -18,35 +18,35 @@ public sealed class ObservedQuickUseItemController : Player.QuickUseItemControll
         return new Dictionary<Type, OperationFactoryDelegate>
         {
             {
-                typeof(GClass2058),
+                typeof(Player.QuickUseItemController.QuickUseOperation),
                 new OperationFactoryDelegate(CreateObservedQuickUseItemControllerOperation)
             }
         };
     }
 
-    public Player.BaseAnimationOperationClass CreateObservedQuickUseItemControllerOperation()
+    public Player.ObjectInHandsOperation CreateObservedQuickUseItemControllerOperation()
     {
         return new ObservedQuickUseItemControllerOperation(this);
     }
 
-    public sealed class ObservedQuickUseItemControllerOperation(ObservedQuickUseItemController controller) : GClass2058(controller)
+    public sealed class ObservedQuickUseItemControllerOperation(ObservedQuickUseItemController controller) : Player.QuickUseItemController.QuickUseOperation(controller)
     {
         /// <summary>
-        /// Used to prevent nullref due to BSG never assigning Action_1
+        /// Used to prevent nullref due to BSG never assigning _onControllerDestroyed
         /// </summary>
         public override void OnUseAction()
         {
-            QuickUseItemController_0.FirearmsAnimator.SetActiveParam(false, true);
-            QuickUseItemController_0.method_4();
-            if (QuickUseItemController_0.Destroyed)
+            Controller.FirearmsAnimator.SetActiveParam(false, true);
+            Controller.RemoveItemFromHand();
+            if (Controller.Destroyed)
             {
                 return;
             }
-            if (Callback_0 != null)
+            if (_onUseCallback != null)
             {
-                var callback_ = Callback_0;
-                Callback_0 = null;
-                callback_(QuickUseItemController_0);
+                var callback_ = _onUseCallback;
+                _onUseCallback = null;
+                callback_(Controller);
             }
         }
     }

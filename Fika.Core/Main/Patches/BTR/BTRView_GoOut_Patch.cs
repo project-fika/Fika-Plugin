@@ -60,14 +60,14 @@ public class BTRView_GoOut_Patch : ModulePatch
     {
         try
         {
-            var cancellationToken = view.method_12(observedPlayer);
+            var cancellationToken = view.PlayerToken(observedPlayer);
             observedPlayer.BtrState = EPlayerBtrState.GoOut;
             var soundController = Traverse.Create(view).Field<BtrSoundController>("_soundController").Value;
             if (soundController != null)
             {
                 soundController.UpdateBtrAudioRoom(EnvironmentType.Outdoor, observedPlayer);
             }
-            await view.method_16(observedPlayer.MovementContext.PlayerAnimator, fast, true, cancellationToken);
+            await view.GoOutAnimation(observedPlayer.MovementContext.PlayerAnimator, fast, true, cancellationToken);
             ValueTuple<Vector3, Vector3> valueTuple = side.GoOutPoints();
             side.ApplyPlayerRotation(observedPlayer.MovementContext, valueTuple.Item1, valueTuple.Item2 + Vector3.up * 1.9f);
             observedPlayer.BtrState = EPlayerBtrState.Outside;

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EFT.GlobalEvents;
+using System;
 using System.Reflection;
 using System.Threading.Tasks;
 using Audio.Vehicles.BTR;
@@ -62,7 +63,7 @@ public class BTRView_GoIn_Patch : ModulePatch
     {
         try
         {
-            var cancellationToken = view.method_12(observedPlayer);
+            var cancellationToken = view.PlayerToken(observedPlayer);
             observedPlayer.MovementContext.IsAxesIgnored = true;
             observedPlayer.BtrState = EPlayerBtrState.Approach;
             if (!fast)
@@ -83,12 +84,12 @@ public class BTRView_GoIn_Patch : ModulePatch
             {
                 soundController.UpdateBtrAudioRoom(EnvironmentType.Indoor, observedPlayer);
             }
-            await view.method_15(observedPlayer.MovementContext.PlayerAnimator, fast, true, cancellationToken);
+            await view.GoInAnimation(observedPlayer.MovementContext.PlayerAnimator, fast, true, cancellationToken);
             if (!cancellationToken.IsCancellationRequested)
             {
-                if (view.method_18() == 1)
+                if (view.GetBusyPlacesCount() == 1)
                 {
-                    GlobalEventHandlerClass.CreateEvent<GClass3544>().Invoke(observedPlayer.Side);
+                    GlobalEventsController.CreateEvent<BtrFirstPassengerGoInEvent>().Invoke(observedPlayer.Side);
                 }
                 observedPlayer.BtrState = EPlayerBtrState.Inside;
             }

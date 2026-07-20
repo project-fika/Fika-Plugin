@@ -8,7 +8,7 @@ public class ObservedMountedState : MovementState
 {
     public ObservedMountedState(MovementContext movementContext, Player observedPlayer) : base(movementContext)
     {
-        _mountingMovementSettings = Singleton<BackendConfigSettingsClass>.Instance.MountingSettings.MovementSettings;
+        _mountingMovementSettings = Singleton<GlobalConfiguration>.Instance.MountingSettings.MovementSettings;
         _player = observedPlayer;
         RotationSpeedClamp = _mountingMovementSettings.RotationSpeedClamp;
         StateSensitivity = _mountingMovementSettings.SensitivityMultiplier;
@@ -142,12 +142,12 @@ public class ObservedMountedState : MovementState
         }
         _playerMountingPointData.TransitionMounting = true;
         _playerMountingPointData.TransitionProgress = 0f;
-        MovementContext.method_25();
+        MovementContext.SetAnimatorLeftStanceInOneFrame();
         MovementContext.RotationAction = MovementContext.MountingRotationFunction;
         MovementContext.SetPitchSmoothly(PitchLimitX, PitchLimitY);
         _bool_0 = MovementContext.CanUseProp.Value;
         _bool_1 = false;
-        _player.OnMounting(MountingPacketStruct.EMountingCommand.Enter);
+        _player.OnMounting(EFT.MountingPacket.EMountingCommand.Enter);
         _float_5 = _playerMountingPointData.MountPointData.MountSideDirection != EMountSideDirection.Forward || MovementContext.IsInPronePose
             ? MovementContext.Pitch < MovementContext.PitchLimit.x ? PitchLimitX : MovementContext.Pitch > MovementContext.PitchLimit.y ? MovementContext.PitchLimit.y : MovementContext.Pitch : 0f;
         var num5 = Mathf.InverseLerp(PitchLimitX, PitchLimitY, _float_5);
@@ -176,8 +176,8 @@ public class ObservedMountedState : MovementState
         MovementContext.IgnoreDeltaMovement = false;
         MovementContext.MountedSmoothedTilt = 0f;
         MovementContext.MountedSmoothedTiltForCamera = 0f;
-        MovementContext.SetYawLimit(Player.PlayerMovementConstantsClass.FULL_YAW_RANGE);
-        MovementContext.SetPitchSmoothly(MovementContext.IsInPronePose ? Player.PlayerMovementConstantsClass.PRONE_POSE_ROTATION_PITCH_RANGE : Player.PlayerMovementConstantsClass.STAND_POSE_ROTATION_PITCH_RANGE);
+        MovementContext.SetYawLimit(Player.Constants.FULL_YAW_RANGE);
+        MovementContext.SetPitchSmoothly(MovementContext.IsInPronePose ? Player.Constants.PRONE_POSE_ROTATION_PITCH_RANGE : Player.Constants.STAND_POSE_ROTATION_PITCH_RANGE);
         MovementContext.RotationAction = MovementContext.DefaultRotationFunction;
         MovementContext.CanUseProp.Value = _bool_0;
         _player.ProceduralWeaponAnimation.SetStrategy(EPointOfView.ThirdPerson);
@@ -213,13 +213,13 @@ public class ObservedMountedState : MovementState
         if (_float_4 <= _playerMountingPointData.CurrentApproachTime)
         {
             UpdateApproach(deltaTime * Time.timeScale);
-            _player.OnMounting(MountingPacketStruct.EMountingCommand.Update);
+            _player.OnMounting(EFT.MountingPacket.EMountingCommand.Update);
             return;
         }
         MovementContext.SetYawLimit(_playerMountingPointData.YawLimit);
         MovementContext.SetPitchSmoothly(PitchLimitX, PitchLimitY);
         UpdateState();
-        _player.OnMounting(MountingPacketStruct.EMountingCommand.Update);
+        _player.OnMounting(EFT.MountingPacket.EMountingCommand.Update);
     }
 
     public void UpdateState()
@@ -391,7 +391,7 @@ public class ObservedMountedState : MovementState
         {
             MovementContext.PlayerAnimatorSetTilt(MovementContext.MountedSmoothedTilt);
         }
-        _player.OnMounting(MountingPacketStruct.EMountingCommand.StartLeaving);
+        _player.OnMounting(EFT.MountingPacket.EMountingCommand.StartLeaving);
         var onExitMountedState = _playerMountingPointData.OnExitMountedState;
         if (onExitMountedState == null)
         {

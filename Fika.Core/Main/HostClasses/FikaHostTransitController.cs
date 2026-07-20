@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using CommonAssets.Scripts.Game;
+using JsonType;
+using System.Collections.Generic;
 using Comfort.Common;
 using EFT;
 using EFT.Communications;
@@ -13,9 +15,9 @@ using Fika.Core.Networking.Packets.Communication;
 
 namespace Fika.Core.Main.HostClasses;
 
-public class FikaHostTransitController : LocalGameTransitControllerClass
+public class FikaHostTransitController : LocalTransitController
 {
-    public FikaHostTransitController(BackendConfigSettingsClass.TransitSettingsClass settings, LocationSettingsClass.Location.TransitParameters[] parameters, Profile profile, LocalRaidSettings localRaidSettings)
+    public FikaHostTransitController(GlobalConfiguration.TransitGlobalSettings settings, LocationSettings.Location.TransitParameters[] parameters, Profile profile, LocalRaidSettings localRaidSettings)
         : base(settings, parameters, profile, localRaidSettings)
     {
         _localRaidSettings = localRaidSettings;
@@ -54,17 +56,17 @@ public class FikaHostTransitController : LocalGameTransitControllerClass
 
     private void OnHostPlayerEnter(TransitPoint point, Player player)
     {
-        if (!method_11(player, point.parameters.id, out var _))
+        if (!TryGetAccessToLocation(player, point.parameters.id, out var _))
         {
             if (player.IsYourPlayer)
             {
-                method_13();
+                AccessNotGrantedNotification();
             }
             return;
         }
         else
         {
-            if (!method_11(player, point.parameters.id, out var _))
+            if (!TryGetAccessToLocation(player, point.parameters.id, out var _))
             {
                 return;
             }
@@ -85,7 +87,7 @@ public class FikaHostTransitController : LocalGameTransitControllerClass
 
             if (player.IsYourPlayer)
             {
-                method_14(point.parameters.id, player, method_17());
+                ShowInteraction(point.parameters.id, player, GetSelectedTime());
                 return;
             }
 
@@ -103,7 +105,7 @@ public class FikaHostTransitController : LocalGameTransitControllerClass
             _server.SendData(ref packet, DeliveryMethod.ReliableOrdered);
             return;
         }
-        Dictionary_0[point.parameters.id].GroupEnter(player);
+        pointsById[point.parameters.id].GroupEnter(player);
     }
 
     private void OnHostPlayerExit(TransitPoint point, Player player)
@@ -122,7 +124,7 @@ public class FikaHostTransitController : LocalGameTransitControllerClass
         }
         if (player.IsYourPlayer)
         {
-            method_18(player);
+            Cancel(player);
             return;
         }
 
@@ -183,7 +185,7 @@ public class FikaHostTransitController : LocalGameTransitControllerClass
         {
             if (GamePlayerOwner.MyPlayer.Id == timer.Key)
             {
-                method_12(pointId);
+                ShowPanel(pointId);
                 MonoBehaviourSingleton<GameUI>.Instance.LocationTransitTimerPanel.Display();
                 MonoBehaviourSingleton<GameUI>.Instance.LocationTransitTimerPanel.Show((float)timer.Value);
             }
@@ -206,8 +208,8 @@ public class FikaHostTransitController : LocalGameTransitControllerClass
     {
         if (GamePlayerOwner.MyPlayer.Id == playerId)
         {
-            NotificationManagerClass.DisplayWarningNotification("Transit/InactivePoint".Localized(null), ENotificationDurationType.Default);
-            method_12(pointId);
+            NotificationManager.DisplayWarningNotification("Transit/InactivePoint".Localized(null), ENotificationDurationType.Default);
+            ShowPanel(pointId);
             return;
         }
 
@@ -225,9 +227,9 @@ public class FikaHostTransitController : LocalGameTransitControllerClass
         _server.SendData(ref packet, DeliveryMethod.ReliableOrdered);
     }
 
-    public override void InteractWithTransit(Player player, TransitInteractionPacketStruct packet)
+    public override void InteractWithTransit(Player player, InteractWithTransitPacket packet)
     {
-        var point = Dictionary_0[packet.pointId];
+        var point = pointsById[packet.pointId];
         if (point == null)
         {
             return;
@@ -240,21 +242,21 @@ public class FikaHostTransitController : LocalGameTransitControllerClass
 
         if (player.IsYourPlayer)
         {
-            method_18(player);
+            Cancel(player);
             transitPlayers.Add(player.ProfileId, player.Id);
             profileKeys[player.ProfileId] = packet.keyId;
-            Dictionary_0[packet.pointId].GroupEnter(player);
-            ExfiltrationControllerClass.Instance.BannedPlayers.Add(player.Id);
-            ExfiltrationControllerClass.Instance.CancelExtractionForPlayer(player);
-            ExfiltrationControllerClass.Instance.DisableExitsInteraction();
+            pointsById[packet.pointId].GroupEnter(player);
+            ExfiltrationController.Instance.BannedPlayers.Add(player.Id);
+            ExfiltrationController.Instance.CancelExtractionForPlayer(player);
+            ExfiltrationController.Instance.DisableExitsInteraction();
             return;
         }
 
         transitPlayers[player.ProfileId] = player.Id;
         profileKeys[player.ProfileId] = packet.keyId;
-        Dictionary_0[packet.pointId].GroupEnter(player);
-        ExfiltrationControllerClass.Instance.BannedPlayers.Add(player.Id);
-        ExfiltrationControllerClass.Instance.CancelExtractionForPlayer(player);
+        pointsById[packet.pointId].GroupEnter(player);
+        ExfiltrationController.Instance.BannedPlayers.Add(player.Id);
+        ExfiltrationController.Instance.CancelExtractionForPlayer(player);
     }
 
     private bool CheckForPlayers(Player player, int pointId)
@@ -289,7 +291,7 @@ public class FikaHostTransitController : LocalGameTransitControllerClass
         {
             if (player.IsYourPlayer)
             {
-                NotificationManagerClass.DisplayWarningNotification(TransitMessagesEvent.EType.NonAllTeammates.ToString(), ENotificationDurationType.Default);
+                NotificationManager.DisplayWarningNotification(TransitMessagesEvent.EType.NonAllTeammates.ToString(), ENotificationDurationType.Default);
                 return false;
             }
 
@@ -324,7 +326,7 @@ public class FikaHostTransitController : LocalGameTransitControllerClass
                 tarkovApplication.transitionStatus = new(location, false, _localRaidSettings.playerSide, eraidMode, _localRaidSettings.timeVariant);
             }
             var profileId = player.ProfileId;
-            AlreadyTransitDataClass gclass = new()
+            LocationTransit gclass = new()
             {
                 hash = hash,
                 playersCount = playersCount,
@@ -376,7 +378,7 @@ public class FikaHostTransitController : LocalGameTransitControllerClass
     public void Init()
     {
         EnablePoints(true);
-        method_8(Dictionary_0.Values, GamePlayerOwner.MyPlayer, false);
-        method_2(Dictionary_0.Values, GamePlayerOwner.MyPlayer);
+        SetTimers(pointsById.Values, GamePlayerOwner.MyPlayer, false);
+        HandleExits(pointsById.Values, GamePlayerOwner.MyPlayer);
     }
 }

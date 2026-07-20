@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Diz.Jobs;
+using EFT.Weather;
+using JsonType;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -13,7 +16,7 @@ using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.FirearmController;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
 using Fika.Core.Networking.Packets.Player.Common.SubPackets;
-using static BasePhysicalClass;
+using static PhysicalBase;
 using static Fika.Core.Networking.Packets.World.RequestSubPackets;
 
 namespace Fika.Core.Networking;
@@ -27,11 +30,11 @@ public static class FikaSerializationExtensions
     private static readonly NetDataReader _bufferReader = new();
 
     /// <summary>
-    /// Serializes a <see cref="PhysicalStateStruct"/> struct to the <paramref name="writer"/>
+    /// Serializes a <see cref="PhysicalBase.StaminaStruct"/> struct to the <paramref name="writer"/>
     /// </summary>
     /// <param name="writer">The <see cref="NetDataWriter"/> to write data to</param>
-    /// <param name="physical">The <see cref="PhysicalStateStruct"/> to serialize</param>
-    public static void PutPhysical(this NetDataWriter writer, PhysicalStateStruct physical)
+    /// <param name="physical">The <see cref="PhysicalBase.StaminaStruct"/> to serialize</param>
+    public static void PutPhysical(this NetDataWriter writer, PhysicalBase.StaminaStruct physical)
     {
         byte flags = 0;
 
@@ -54,11 +57,11 @@ public static class FikaSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes a <see cref="PhysicalStateStruct"/> struct from the <paramref name="reader"/>
+    /// Deserializes a <see cref="PhysicalBase.StaminaStruct"/> struct from the <paramref name="reader"/>
     /// </summary>
     /// <param name="reader">The <see cref="NetDataReader"/> to read data from</param>
-    /// <returns>The deserialized <see cref="PhysicalStateStruct"/></returns>
-    public static PhysicalStateStruct GetPhysical(this NetDataReader reader)
+    /// <returns>The deserialized <see cref="PhysicalBase.StaminaStruct"/></returns>
+    public static PhysicalBase.StaminaStruct GetPhysical(this NetDataReader reader)
     {
         var flags = reader.GetByte();
         return new()
@@ -155,7 +158,7 @@ public static class FikaSerializationExtensions
     /// <param name="item">The <see cref="Item"/> to serialize</param>
     public static void PutItem(this NetDataWriter writer, Item item)
     {
-        var descriptor = EFTItemSerializerClass.SerializeItem(item, FikaGlobals.SearchControllerSerializer);
+        var descriptor = ItemBinarySerializer.SerializeItem(item, FikaGlobals.SearchControllerSerializer);
         writer.PutEFTItemDescriptor(descriptor);
     }
 
@@ -167,7 +170,7 @@ public static class FikaSerializationExtensions
     /// <returns>The deserialized <see cref="Item"/></returns>
     public static Item GetItem(this NetDataReader reader)
     {
-        return EFTItemSerializerClass.DeserializeItem(reader.GetEFTItemDescriptor(), Singleton<ItemFactoryClass>.Instance, []);
+        return ItemBinarySerializer.DeserializeItem(reader.GetEFTItemDescriptor(), Singleton<ItemFactory>.Instance, []);
     }
 
 
@@ -177,18 +180,18 @@ public static class FikaSerializationExtensions
     /// <returns>An <see cref="Inventory"/></returns>
     public static Inventory GetInventoryFromEquipment(this NetDataReader reader)
     {
-        return new EFTInventoryClass()
+        return new InventoryDescriptor()
         {
             Equipment = reader.GetEFTItemDescriptor()
         }.ToInventory();
     }
 
     /// <summary>
-    /// Writes an <see cref="InventoryDescriptorClass"/>
+    /// Writes an <see cref="ItemDescriptor"/>
     /// </summary>
     /// <param name="writer">The writer to write data to</param>
-    /// <param name="descriptor">The <see cref="InventoryDescriptorClass"/> instance to serialize</param>
-    public static void PutItemDescriptor(this NetDataWriter writer, InventoryDescriptorClass descriptor)
+    /// <param name="descriptor">The <see cref="ItemDescriptor"/> instance to serialize</param>
+    public static void PutItemDescriptor(this NetDataWriter writer, ItemDescriptor descriptor)
     {
         _bufferWriter.PutEFTItemDescriptor(descriptor);
         writer.CompressAndPutByteArray(_bufferWriter.Data);
@@ -196,11 +199,11 @@ public static class FikaSerializationExtensions
     }
 
     /// <summary>
-    /// Reads and returns an <see cref="InventoryDescriptorClass"/>
+    /// Reads and returns an <see cref="ItemDescriptor"/>
     /// </summary>
     /// <param name="reader">The reader to read the serialized inventory descriptor data from</param>
-    /// <returns>The deserialized <see cref="InventoryDescriptorClass"/> instance</returns>
-    public static InventoryDescriptorClass GetItemDescriptor(this NetDataReader reader)
+    /// <returns>The deserialized <see cref="ItemDescriptor"/> instance</returns>
+    public static ItemDescriptor GetItemDescriptor(this NetDataReader reader)
     {
         _bufferReader.SetSource(reader.DecompressAndGetByteArray());
         return _bufferReader.GetEFTItemDescriptor();
@@ -213,26 +216,26 @@ public static class FikaSerializationExtensions
     /// <returns>The deserialized <see cref="Item"/> instance representing the airdrop item</returns>
     public static Item GetAirdropItem(this NetDataReader reader)
     {
-        var item = EFTItemSerializerClass.DeserializeItem(reader.GetEFTItemDescriptor(), Singleton<ItemFactoryClass>.Instance, []);
+        var item = ItemBinarySerializer.DeserializeItem(reader.GetEFTItemDescriptor(), Singleton<ItemFactory>.Instance, []);
 
-        GClass1404 enumerable = [new LootItemPositionClass()];
+        LootData enumerable = [new JsonLootItem()];
         enumerable[0].Item = item;
         Item[] array = [.. enumerable.Select(FikaGlobals.GetLootItemPositionItem)];
-        ResourceKey[] resourceKeys = [.. array.OfType<GClass3248>().GetAllItemsFromCollections()
-            .Concat(array.Where(AirdropSynchronizableObject.Class2123.class2123_0.method_1))
-            .SelectMany(AirdropSynchronizableObject.Class2123.class2123_0.method_2)];
-        Singleton<PoolManagerClass>.Instance.LoadBundlesAndCreatePools(PoolManagerClass.PoolsCategory.Raid, PoolManagerClass.AssemblyType.Online,
-            resourceKeys, JobPriorityClass.Immediate).HandleExceptions();
+        ResourceKey[] resourceKeys = [.. array.OfType<ContainerCollection>().GetAllItemsFromCollections()
+            .Concat(array.Where(AirdropSynchronizableObject.CG_ParseItemData.CG_ParseItemData.method_1))
+            .SelectMany(AirdropSynchronizableObject.CG_ParseItemData.CG_ParseItemData.method_2)];
+        Singleton<ObjectsFactory>.Instance.LoadBundlesAndCreatePools(ObjectsFactory.PoolsCategory.Raid, ObjectsFactory.AssemblyType.Online,
+            resourceKeys, JobYieldPriority.Immediate).HandleExceptions();
 
         return item;
     }
 
     /// <summary>
-    /// Serializes a <see cref="List{T}"/> of <see cref="SmokeGrenadeDataPacketStruct"/>
+    /// Serializes a <see cref="List{T}"/> of <see cref="SmokeGrenadeNetworkData"/>
     /// </summary>
     /// <param name="writer">The <see cref="NetDataWriter"/> to write data to</param>
-    /// <param name="throwables">The list of <see cref="SmokeGrenadeDataPacketStruct"/> to serialize</param>
-    public static void PutThrowableData(this NetDataWriter writer, List<SmokeGrenadeDataPacketStruct> throwables)
+    /// <param name="throwables">The list of <see cref="SmokeGrenadeNetworkData"/> to serialize</param>
+    public static void PutThrowableData(this NetDataWriter writer, List<SmokeGrenadeNetworkData> throwables)
     {
         writer.Put(throwables.Count);
         foreach (var data in throwables)
@@ -247,17 +250,17 @@ public static class FikaSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes a <see cref="List{T}"/> of <see cref="SmokeGrenadeDataPacketStruct"/>
+    /// Deserializes a <see cref="List{T}"/> of <see cref="SmokeGrenadeNetworkData"/>
     /// </summary>
     /// <param name="reader">The <see cref="NetDataReader"/> to read data from</param>
-    /// <returns>A <see cref="List{T}"/> of <see cref="SmokeGrenadeDataPacketStruct"/></returns>
-    public static List<SmokeGrenadeDataPacketStruct> GetThrowableData(this NetDataReader reader)
+    /// <returns>A <see cref="List{T}"/> of <see cref="SmokeGrenadeNetworkData"/></returns>
+    public static List<SmokeGrenadeNetworkData> GetThrowableData(this NetDataReader reader)
     {
         var amount = reader.GetInt();
-        List<SmokeGrenadeDataPacketStruct> throwables = new(amount);
+        List<SmokeGrenadeNetworkData> throwables = new(amount);
         for (var i = 0; i < amount; i++)
         {
-            SmokeGrenadeDataPacketStruct data = new()
+            SmokeGrenadeNetworkData data = new()
             {
                 Id = reader.GetString(),
                 Position = reader.GetUnmanaged<Vector3>(),
@@ -296,10 +299,10 @@ public static class FikaSerializationExtensions
     }
 
     /// <summary>
-    /// Serializes a <see cref="List{WorldInteractiveObject.WorldInteractiveDataPacketStruct}"/> of <see cref="WorldInteractiveObject"/> data
+    /// Serializes a <see cref="List{WorldInteractiveObject.InteractiveObjectStatusInfo}"/> of <see cref="WorldInteractiveObject"/> data
     /// </summary>
     /// <param name="interactiveObjectsData">The interactive states to serialize</param>
-    public static void PutInteractivesStates(this NetDataWriter writer, List<WorldInteractiveObject.WorldInteractiveDataPacketStruct> interactiveObjectsData)
+    public static void PutInteractivesStates(this NetDataWriter writer, List<WorldInteractiveObject.InteractiveObjectStatusInfo> interactiveObjectsData)
     {
         writer.Put(interactiveObjectsData.Count);
         for (var i = 0; i < interactiveObjectsData.Count; i++)
@@ -311,16 +314,16 @@ public static class FikaSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes a <see cref="List{WorldInteractiveObject.WorldInteractiveDataPacketStruct}"/> of <see cref="WorldInteractiveObject"/> data
+    /// Deserializes a <see cref="List{WorldInteractiveObject.InteractiveObjectStatusInfo}"/> of <see cref="WorldInteractiveObject"/> data
     /// </summary>
-    /// <returns>A <see cref="List{T}"/> of <see cref="WorldInteractiveObject.WorldInteractiveDataPacketStruct"/></returns>
-    public static List<WorldInteractiveObject.WorldInteractiveDataPacketStruct> GetInteractivesStates(this NetDataReader reader)
+    /// <returns>A <see cref="List{T}"/> of <see cref="WorldInteractiveObject.InteractiveObjectStatusInfo"/></returns>
+    public static List<WorldInteractiveObject.InteractiveObjectStatusInfo> GetInteractivesStates(this NetDataReader reader)
     {
         var amount = reader.GetInt();
-        List<WorldInteractiveObject.WorldInteractiveDataPacketStruct> interactivesStates = new(amount);
+        List<WorldInteractiveObject.InteractiveObjectStatusInfo> interactivesStates = new(amount);
         for (var i = 0; i < amount; i++)
         {
-            WorldInteractiveObject.WorldInteractiveDataPacketStruct data = new()
+            WorldInteractiveObject.InteractiveObjectStatusInfo data = new()
             {
                 NetId = reader.GetInt(),
                 State = reader.GetByte(),
@@ -400,8 +403,8 @@ public static class FikaSerializationExtensions
     /// <param name="mongoId">The <see cref="MongoID"/> to serialize</param>
     public static void PutMongoID(this NetDataWriter writer, MongoID mongoId)
     {
-        writer.Put(mongoId.TimeStamp);
-        writer.Put(mongoId.Counter);
+        writer.Put(mongoId._timeStamp);
+        writer.Put(mongoId._counter);
     }
 
     /// <summary>
@@ -412,12 +415,12 @@ public static class FikaSerializationExtensions
     {
         MongoID id = new()
         {
-            TimeStamp = reader.GetUInt(),
-            Counter = reader.GetULong()
+            _timeStamp = reader.GetUInt(),
+            _counter = reader.GetULong()
         };
 
-        id.StringID = NetworkUtils.FormatMongoId(id.TimeStamp, id.Counter);
-        id.method_0();
+        id._stringID = NetworkUtils.FormatMongoId(id._timeStamp, id._counter);
+        id.Init();
 
         return id;
     }
@@ -473,10 +476,10 @@ public static class FikaSerializationExtensions
     }
 
     /// <summary>
-    /// Serializes a <see cref="TraderServicesClass"/>
+    /// Serializes a <see cref="TraderServiceAvailabilityData"/>
     /// </summary>
     /// <param name="traderService">The trader service to serialize</param>
-    public static void PutTraderService(this NetDataWriter writer, TraderServicesClass traderService)
+    public static void PutTraderService(this NetDataWriter writer, TraderServiceAvailabilityData traderService)
     {
         writer.PutMongoID(traderService.TraderId);
         writer.PutEnum(traderService.ServiceType);
@@ -503,12 +506,12 @@ public static class FikaSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes a <see cref="TraderServicesClass"/>
+    /// Deserializes a <see cref="TraderServiceAvailabilityData"/>
     /// </summary>
-    /// <returns>A <see cref="TraderServicesClass"/></returns>
-    public static TraderServicesClass GetTraderService(this NetDataReader reader)
+    /// <returns>A <see cref="TraderServiceAvailabilityData"/></returns>
+    public static TraderServiceAvailabilityData GetTraderService(this NetDataReader reader)
     {
-        TraderServicesClass traderService = new()
+        TraderServiceAvailabilityData traderService = new()
         {
             TraderId = reader.GetMongoID(),
             ServiceType = reader.GetEnum<ETraderServiceType>(),
@@ -537,11 +540,11 @@ public static class FikaSerializationExtensions
     }
 
     /// <summary>
-    /// Writes a <see cref="Profile.ProfileHealthClass"/> into a raw <see cref="byte"/>[]
+    /// Writes a <see cref="Profile.HealthInfo"/> into a raw <see cref="byte"/>[]
     /// </summary>
     /// <param name="health">The health info to serialize</param>
     /// <returns><see cref="byte"/>[]</returns>
-    public static byte[] SerializeHealthInfo(this Profile.ProfileHealthClass health)
+    public static byte[] SerializeHealthInfo(this Profile.HealthInfo health)
     {
         using MemoryStream stream = new();
         using BinaryWriter writer = new(stream);
@@ -586,11 +589,11 @@ public static class FikaSerializationExtensions
     }
 
     /// <summary>
-    /// Writes a <see cref="Profile.ProfileHealthClass.ValueInfo"/> into <see cref="byte"/>s
+    /// Writes a <see cref="Profile.HealthInfo.ValueInfo"/> into <see cref="byte"/>s
     /// </summary>
     /// <param name="writer"></param>
     /// <param name="valueInfo"></param>
-    public static void WriteValueInfo(this BinaryWriter writer, Profile.ProfileHealthClass.ValueInfo valueInfo)
+    public static void WriteValueInfo(this BinaryWriter writer, Profile.HealthInfo.ValueInfo valueInfo)
     {
         writer.Write(valueInfo.Current);
         writer.Write(valueInfo.Minimum);
@@ -598,11 +601,11 @@ public static class FikaSerializationExtensions
     }
 
     /// <summary>
-    /// Serializes a <see cref="ArtilleryPacketStruct"/>
+    /// Serializes a <see cref="ArtilleryProjectileSyncPacket"/>
     /// </summary>
     /// <param name="writer"></param>
     /// <param name="artilleryStruct"></param>
-    public static void PutArtilleryStruct(this NetDataWriter writer, ArtilleryPacketStruct artilleryStruct)
+    public static void PutArtilleryStruct(this NetDataWriter writer, ArtilleryProjectileSyncPacket artilleryStruct)
     {
         writer.Put(artilleryStruct.id);
         writer.PutUnmanaged(artilleryStruct.position);
@@ -610,11 +613,11 @@ public static class FikaSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes a <see cref="ArtilleryPacketStruct"/>
+    /// Deserializes a <see cref="ArtilleryProjectileSyncPacket"/>
     /// </summary>
     /// <param name="reader"></param>
-    /// <returns>A <see cref="ArtilleryPacketStruct"/> with data</returns>
-    public static ArtilleryPacketStruct GetArtilleryStruct(this NetDataReader reader)
+    /// <returns>A <see cref="ArtilleryProjectileSyncPacket"/> with data</returns>
+    public static ArtilleryProjectileSyncPacket GetArtilleryStruct(this NetDataReader reader)
     {
         return new()
         {
@@ -625,11 +628,11 @@ public static class FikaSerializationExtensions
     }
 
     /// <summary>
-    /// Serializes a <see cref="GrenadeDataPacketStruct"/>
+    /// Serializes a <see cref="GrenadeSyncPacket"/>
     /// </summary>
     /// <param name="writer"></param>
     /// <param name="grenadeStruct"></param>
-    public static void PutGrenadeStruct(this NetDataWriter writer, GrenadeDataPacketStruct grenadeStruct)
+    public static void PutGrenadeStruct(this NetDataWriter writer, GrenadeSyncPacket grenadeStruct)
     {
         writer.Put(grenadeStruct.Id);
         writer.PutUnmanaged(grenadeStruct.Position);
@@ -644,13 +647,13 @@ public static class FikaSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes a <see cref="GrenadeDataPacketStruct"/>
+    /// Deserializes a <see cref="GrenadeSyncPacket"/>
     /// </summary>
     /// <param name="reader"></param>
-    /// <returns>A <see cref="GrenadeDataPacketStruct"/> with data</returns>
-    public static GrenadeDataPacketStruct GetGrenadeStruct(this NetDataReader reader)
+    /// <returns>A <see cref="GrenadeSyncPacket"/> with data</returns>
+    public static GrenadeSyncPacket GetGrenadeStruct(this NetDataReader reader)
     {
-        GrenadeDataPacketStruct grenadeStruct = new()
+        GrenadeSyncPacket grenadeStruct = new()
         {
             Id = reader.GetInt(),
             Position = reader.GetUnmanaged<Vector3>(),
@@ -670,11 +673,11 @@ public static class FikaSerializationExtensions
     }
 
     /// <summary>
-    /// Serializes a <see cref="AirplaneDataPacketStruct"/>
+    /// Serializes a <see cref="SynchronizableObjectPacket"/>
     /// </summary>
     /// <param name="writer"></param>
     /// <param name="airplaneDataPacketStruct"></param>
-    public static void PutAirplaneDataPacketStruct(this NetDataWriter writer, AirplaneDataPacketStruct airplaneDataPacketStruct)
+    public static void PutAirplaneDataPacketStruct(this NetDataWriter writer, SynchronizableObjectPacket airplaneDataPacketStruct)
     {
         writer.PutEnum(airplaneDataPacketStruct.ObjectType);
         writer.Put((byte)airplaneDataPacketStruct.ObjectId);
@@ -708,13 +711,13 @@ public static class FikaSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes a <see cref="AirplaneDataPacketStruct"/>
+    /// Deserializes a <see cref="SynchronizableObjectPacket"/>
     /// </summary>
     /// <param name="reader"></param>
     /// <returns></returns>
-    public static AirplaneDataPacketStruct GetAirplaneDataPacketStruct(this NetDataReader reader)
+    public static SynchronizableObjectPacket GetAirplaneDataPacketStruct(this NetDataReader reader)
     {
-        AirplaneDataPacketStruct packet = new()
+        SynchronizableObjectPacket packet = new()
         {
             ObjectType = reader.GetEnum<SynchronizableObjectType>(),
             ObjectId = reader.GetByte(),
@@ -815,11 +818,11 @@ public static class FikaSerializationExtensions
     }
 
     /// <summary>
-    /// Serializes a <see cref="WeatherClass"/>
+    /// Serializes a <see cref="WeatherNode"/>
     /// </summary>
     /// <param name="writer"></param>
     /// <param name="weatherClass"></param>
-    public static void PutWeatherClass(this NetDataWriter writer, WeatherClass weatherClass)
+    public static void PutWeatherClass(this NetDataWriter writer, WeatherNode weatherClass)
     {
         writer.Put(weatherClass.Time);
 
@@ -845,13 +848,13 @@ public static class FikaSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes a <see cref="WeatherClass"/>
+    /// Deserializes a <see cref="WeatherNode"/>
     /// </summary>
     /// <param name="reader"></param>
-    /// <returns>A <see cref="WeatherClass"/> with data</returns>
-    public static WeatherClass GetWeatherClass(this NetDataReader reader)
+    /// <returns>A <see cref="WeatherNode"/> with data</returns>
+    public static WeatherNode GetWeatherClass(this NetDataReader reader)
     {
-        return new WeatherClass()
+        return new WeatherNode()
         {
             Time = reader.GetLong(),
 
@@ -915,11 +918,11 @@ public static class FikaSerializationExtensions
     }
 
     /// <summary>
-    /// Writes a <see cref="RagdollPacketStruct"/>
+    /// Writes a <see cref="CorpseSyncPacket"/>
     /// </summary>
     /// <param name="writer">The writer to write data to</param>
-    /// <param name="packet">The <see cref="RagdollPacketStruct"/> instance to serialize</param>
-    public static void PutRagdollStruct(this NetDataWriter writer, RagdollPacketStruct packet)
+    /// <param name="packet">The <see cref="CorpseSyncPacket"/> instance to serialize</param>
+    public static void PutRagdollStruct(this NetDataWriter writer, CorpseSyncPacket packet)
     {
         writer.Put(packet.Id);
         writer.PutUnmanaged(packet.Position);
@@ -937,13 +940,13 @@ public static class FikaSerializationExtensions
     }
 
     /// <summary>
-    /// Reads a <see cref="RagdollPacketStruct"/>
+    /// Reads a <see cref="CorpseSyncPacket"/>
     /// </summary>
     /// <param name="reader">The reader to read data from.</param>
-    /// <returns>The deserialized <see cref="RagdollPacketStruct"/></returns>
-    public static RagdollPacketStruct GetRagdollStruct(this NetDataReader reader)
+    /// <returns>The deserialized <see cref="CorpseSyncPacket"/></returns>
+    public static CorpseSyncPacket GetRagdollStruct(this NetDataReader reader)
     {
-        RagdollPacketStruct packet = new()
+        CorpseSyncPacket packet = new()
         {
             Id = reader.GetInt(),
             Position = reader.GetUnmanaged<Vector3>(),
@@ -952,7 +955,7 @@ public static class FikaSerializationExtensions
 
         if (packet.Done)
         {
-            packet.TransformSyncs = new GStruct138[12];
+            packet.TransformSyncs = new TransformSync[12];
             for (var i = 0; i < 12; i++)
             {
                 packet.TransformSyncs[i] = new()
@@ -967,11 +970,11 @@ public static class FikaSerializationExtensions
     }
 
     /// <summary>
-    /// Writes a <see cref="LootSyncStruct"/>
+    /// Writes a <see cref="EFT.LootSyncPacket"/>
     /// </summary>
     /// <param name="writer">The writer to write data to</param>
-    /// <param name="packet">The <see cref="LootSyncStruct"/> to serialize</param>
-    public static void PutLootSyncStruct(this NetDataWriter writer, LootSyncStruct packet)
+    /// <param name="packet">The <see cref="EFT.LootSyncPacket"/> to serialize</param>
+    public static void PutLootSyncStruct(this NetDataWriter writer, EFT.LootSyncPacket packet)
     {
         writer.Put(packet.Id);
         writer.PutUnmanaged(packet.Position);
@@ -986,13 +989,13 @@ public static class FikaSerializationExtensions
     }
 
     /// <summary>
-    /// Reads a <see cref="LootSyncStruct"/>
+    /// Reads a <see cref="EFT.LootSyncPacket"/>
     /// </summary>
     /// <param name="reader">The reader to read data from</param>
-    /// <returns>The deserialized <see cref="LootSyncStruct"/></returns>
-    public static LootSyncStruct GetLootSyncStruct(this NetDataReader reader)
+    /// <returns>The deserialized <see cref="EFT.LootSyncPacket"/></returns>
+    public static EFT.LootSyncPacket GetLootSyncStruct(this NetDataReader reader)
     {
-        LootSyncStruct data = new()
+        EFT.LootSyncPacket data = new()
         {
             Id = reader.GetInt(),
             Position = reader.GetUnmanaged<Vector3>(),
@@ -1185,8 +1188,8 @@ public static class FikaSerializationExtensions
     /// <param name="gameDateTime">The <see cref="GameDateTime"/> to serialize</param>
     public static void PutGameDateTime(this NetDataWriter writer, GameDateTime gameDateTime)
     {
-        writer.Put(gameDateTime.DateTime_0.ToBinary());
-        writer.Put(gameDateTime.DateTime_1.ToBinary());
+        writer.Put(gameDateTime.StatedRealDateTime.ToBinary());
+        writer.Put(gameDateTime.StatedGameDateTime.ToBinary());
         writer.Put(gameDateTime.TimeFactor);
         writer.Put(gameDateTime.TimeFactorMod);
     }

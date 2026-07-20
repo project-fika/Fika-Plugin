@@ -4,7 +4,7 @@ using EFT;
 
 namespace Fika.Core.Main.ObservedClasses.MovementStates;
 
-public class ObservedRunState : RunStateClass
+public class ObservedRunState : MovePlayerState
 {
     public ObservedRunState(MovementContext movementContext) : base(movementContext)
     {
@@ -18,26 +18,26 @@ public class ObservedRunState : RunStateClass
 
     public override void ManualAnimatorMoveUpdate(float deltaTime)
     {
-        if (Bool_0)
+        if (IsStateHasExit)
         {
             return;
         }
         SetupDirection(deltaTime);
-        if (Bool_3)
+        if (_resetSidestepValue)
         {
-            MovementContext.SetSidestep(Mathf.Lerp(Float_11, 0f, Float_12 / Float_13));
-            Float_12 += deltaTime;
-            if (Float_12 > Float_13)
+            MovementContext.SetSidestep(Mathf.Lerp(_initialSidestepValue, 0f, _resetSidestepTime / _resetSidestepDuration));
+            _resetSidestepTime += deltaTime;
+            if (_resetSidestepTime > _resetSidestepDuration)
             {
                 MovementContext.SetSidestep(0f);
-                Bool_3 = false;
+                _resetSidestepValue = false;
             }
         }
-        method_0(deltaTime);
-        if (Bool_1)
+        UpdateRotation(deltaTime);
+        if (_sprintPressedAndPostponed)
         {
             MovementContext.EnableSprint(true);
-            Bool_1 = false;
+            _sprintPressedAndPostponed = false;
         }
         if (MovementContext.IsSprintEnabled)
         {
@@ -48,7 +48,7 @@ public class ObservedRunState : RunStateClass
     private void SetupDirection(float deltaTime)
     {
         MovementContext.MovementDirection = Direction;
-        method_3(GClass2076.ConvertToMovementDirection(Direction), deltaTime);
+        SetSmoothDiscreteDirection(MovementDirectionExtension.ConvertToMovementDirection(Direction), deltaTime);
     }
 
     public override void UpdatePosition(float deltaTime)

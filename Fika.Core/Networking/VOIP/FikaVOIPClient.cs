@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Dissonance.Integrations.MirrorIgnorance;
+using System;
 using Comfort.Common;
 using Dissonance.Networking;
 
@@ -20,8 +21,8 @@ public class FikaVOIPClient(ICommsNetworkState network) : BaseClient<FikaVOIPSer
 
     public override void SendVoiceData(ArraySegment<byte> encodedAudio)
     {
-        TalkClass.SetTalkDateTime();
-        if (!TalkClass.Blocked)
+        VoiceClient.SetTalkDateTime();
+        if (!VoiceClient.Blocked)
         {
             base.SendVoiceData(encodedAudio);
         }

@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using EFT;
+using System.Reflection;
 using System.Threading.Tasks;
 using SPT.Reflection.Patching;
 
@@ -10,8 +11,8 @@ internal class LocaleClass_ReloadBackendLocale_Patch : ModulePatch
 
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(LocaleClass)
-            .GetMethod(nameof(LocaleClass.ReloadBackendLocale));
+        return typeof(DataPrepareOperation)
+            .GetMethod(nameof(DataPrepareOperation.ReloadBackendLocale));
     }
 
     [PatchPostfix]

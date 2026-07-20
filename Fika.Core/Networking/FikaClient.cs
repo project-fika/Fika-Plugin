@@ -6,7 +6,10 @@ using Dissonance;
 using Dissonance.Integrations.MirrorIgnorance;
 using EFT;
 using EFT.Communications;
+using EFT.InventoryLogic;
+using EFT.Settings;
 using EFT.UI;
+using EFT.Vehicle;
 using Fika.Core.Main.ClientClasses;
 using Fika.Core.Main.Components;
 using Fika.Core.Main.Patches.VOIP;
@@ -98,7 +101,7 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
         }
     }
     public bool StrictInventorySync { get; set; }
-    public Queue<BaseInventoryOperationClass> InventoryOperations
+    public Queue<EFT.InventoryLogic.Operations.AbstractOperation> InventoryOperations
     {
         get
         {
@@ -123,7 +126,7 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
     private NetDataWriter _dataWriter;
     private FikaChatUIScript _fikaChat;
     private string _myProfileId;
-    private Queue<BaseInventoryOperationClass> _inventoryOperations;
+    private Queue<EFT.InventoryLogic.Operations.AbstractOperation> _inventoryOperations;
     private List<int> _missingIds;
     private GenericPacket _genericPacket;
     private DateTime _startTime;
@@ -214,13 +217,13 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
     {
         var voipHandler = FikaGlobals.VOIPHandler;
 
-        var controller = Singleton<SharedGameSettingsClass>.Instance.Sound.Controller;
+        var controller = Singleton<SettingsManager>.Instance.Sound.Controller;
         if (voipHandler.MicrophoneChecked)
         {
             controller.ResetVoipDisabledReason();
             DissonanceComms.ClientPlayerId = FikaGlobals.GetProfile(RaidSide == ESideType.Savage).ProfileId;
-            await LoadSceneClass.LoadScene(AssetsManagerSingletonClass.Manager,
-                SceneResourceKeyAbstractClass.DissonanceSetupScene, UnityEngine.SceneManagement.LoadSceneMode.Additive);
+            await AssetsManagerExtension.LoadScene(EFT.Assets.Manager,
+                Scenes.DissonanceSetupScene, UnityEngine.SceneManagement.LoadSceneMode.Additive);
 
             MirrorIgnoranceCommsNetwork mirrorCommsNetwork;
             do
@@ -344,7 +347,7 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
     }
 
     /// <summary>
-    /// Processes queued <see cref="BaseInventoryOperationClass"/>
+    /// Processes queued <see cref="EFT.InventoryLogic.Operations.AbstractOperation"/>
     /// </summary>
     private void HandleInventoryOperations()
     {
@@ -356,7 +359,7 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
             }
 
             _inventoryOperations.Dequeue()
-                .method_1(_handleInventoryOperationCallback);
+                .Execute(_handleInventoryOperationCallback);
         }
     }
 
@@ -471,7 +474,7 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
 
     public void OnPeerConnected(NetPeer peer)
     {
-        NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.CONNECTED_TO_SERVER.Localized(), FikaBackendUtils.RemoteEndPoint.Port),
+        NotificationManager.DisplayMessageNotification(string.Format(LocaleUtils.CONNECTED_TO_SERVER.Localized(), FikaBackendUtils.RemoteEndPoint.Port),
             ENotificationDurationType.Default, ENotificationIconType.Friend);
 
         var ownProfile = FikaGlobals.GetLiteProfile(FikaBackendUtils.IsScav);
@@ -527,10 +530,10 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
                 }
                 break;
             case EPacketType.BTR:
-                var data = reader.GetUnmanaged<BTRDataPacketStruct>();
-                if (BTRControllerClass.Instance.BtrView != null)
+                var data = reader.GetUnmanaged<ShapshotBTRMessage>();
+                if (BtrController.Instance.BtrView != null)
                 {
-                    BTRControllerClass.Instance.BtrView.SyncViewFromServer(ref data);
+                    BtrController.Instance.BtrView.SyncViewFromServer(ref data);
                 }
                 break;
             case EPacketType.VOIP:
@@ -568,7 +571,7 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
         _logger.LogInfo("[CLIENT] We disconnected because " + disconnectInfo.Reason);
         if (disconnectInfo.Reason is DisconnectReason.Timeout)
         {
-            NotificationManagerClass.DisplayWarningNotification(LocaleUtils.LOST_CONNECTION.Localized());
+            NotificationManager.DisplayWarningNotification(LocaleUtils.LOST_CONNECTION.Localized());
             MyPlayer.PacketSender.DestroyThis();
             Destroy(this);
             Singleton<FikaClient>.Release(this);
@@ -579,7 +582,7 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
             var reason = disconnectInfo.AdditionalData.GetString();
             if (!string.IsNullOrEmpty(reason))
             {
-                NotificationManagerClass.DisplayWarningNotification(reason);
+                NotificationManager.DisplayWarningNotification(reason);
                 return;
             }
 
@@ -669,7 +672,7 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
         {
             try
             {
-                if (controller is Interface18 networkController)
+                if (controller is IOperationHandler networkController)
                 {
                     var result = networkController.CreateOperationFromDescriptor(packet.Descriptor);
                     if (!result.Succeeded)

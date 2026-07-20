@@ -28,18 +28,18 @@ public static class LighthouseTraderZone_Patches
                 return false;
             }
 
-            player.OnPlayerDead += __instance.method_7;
+            player.OnPlayerDead += __instance.OnPlayerDieInZone;
             var flag = player.RecodableItemsHandler.TryToGetRecodableComponent(out RadioTransmitterRecodableComponent radioTransmitterRecodableComponent);
 
-            if (player.IsAI && __instance.method_3(player))
+            if (player.IsAI && __instance.IsValidAiPlayer(player))
             {
                 ___allowedPlayers.Add(player);
                 ___allPlayersInZone.Add(player);
 
                 if (coopHandler.MyPlayer == player)
                 {
-                    //Todo: Might have to patch method_6 as the host and other clients might need to know IsAgressorInLighthouseTraderZone
-                    player.ActiveHealthController.OnApplyDamageByPlayer += __instance.method_6;
+                    //Todo: Might have to patch SetAgressor as the host and other clients might need to know IsAgressorInLighthouseTraderZone
+                    player.ActiveHealthController.OnApplyDamageByPlayer += __instance.SetAgressor;
                 }
 
                 return false;
@@ -50,7 +50,7 @@ public static class LighthouseTraderZone_Patches
                 ___allPlayersInZone.Add(player);
                 return false;
             }
-            if (!__instance.method_4(radioTransmitterRecodableComponent.Handler))
+            if (!__instance.IsValidPlayer(radioTransmitterRecodableComponent.Handler))
             {
                 ___unallowedPlayers.Add(player);
                 ___action_0?.Invoke(player.ProfileId, false);
@@ -58,12 +58,12 @@ public static class LighthouseTraderZone_Patches
             else
             {
                 ___allowedPlayers.Add(player);
-                radioTransmitterRecodableComponent.OnRadioTransmitterStatusChanged += __instance.method_9;
+                radioTransmitterRecodableComponent.OnRadioTransmitterStatusChanged += __instance.OnPlayerChangeRadioTransmitterStatus;
 
                 if (coopHandler.MyPlayer == player)
                 {
-                    //Todo: Might have to patch method_6 as the host and other clients might need to know IsAgressorInLighthouseTraderZone
-                    player.ActiveHealthController.OnApplyDamageByPlayer += __instance.method_6;
+                    //Todo: Might have to patch SetAgressor as the host and other clients might need to know IsAgressorInLighthouseTraderZone
+                    player.ActiveHealthController.OnApplyDamageByPlayer += __instance.SetAgressor;
                 }
 
                 ___action_0?.Invoke(player.ProfileId, true);
@@ -92,7 +92,7 @@ public static class LighthouseTraderZone_Patches
                 return false;
             }
 
-            player.OnPlayerDead -= __instance.method_7;
+            player.OnPlayerDead -= __instance.OnPlayerDieInZone;
             player.RecodableItemsHandler.TryToGetRecodableComponent(out RadioTransmitterRecodableComponent radioTransmitterRecodableComponent);
 
             if (___allowedPlayers.Contains(player))
@@ -101,12 +101,12 @@ public static class LighthouseTraderZone_Patches
 
                 if (radioTransmitterRecodableComponent != null)
                 {
-                    radioTransmitterRecodableComponent.OnRadioTransmitterStatusChanged -= __instance.method_9;
+                    radioTransmitterRecodableComponent.OnRadioTransmitterStatusChanged -= __instance.OnPlayerChangeRadioTransmitterStatus;
                 }
 
                 if (coopHandler.MyPlayer == player)
                 {
-                    player.ActiveHealthController.OnApplyDamageByPlayer += __instance.method_6;
+                    player.ActiveHealthController.OnApplyDamageByPlayer += __instance.SetAgressor;
                 }
             }
             else

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Diz.LanguageExtensions;
+using System;
 using Comfort.Common;
 using EFT;
 using Fika.Core.Main.Utils;
@@ -14,7 +15,7 @@ namespace Fika.Core.Networking;
 
 public sealed class InventoryOperationHandler : IDisposable
 {
-    public void Set(OperationDataStruct operationResult, ushort operationId, int netId, NetPeer peer, FikaServer server)
+    public void Set(OperationCreationResult operationResult, ushort operationId, int netId, NetPeer peer, FikaServer server)
     {
         OperationResult = operationResult;
         _operationId = operationId;
@@ -34,7 +35,7 @@ public sealed class InventoryOperationHandler : IDisposable
     }
 
     public Callback HandleResultDelegate;
-    public OperationDataStruct OperationResult;
+    public OperationCreationResult OperationResult;
 
     private ushort _operationId;
     private int _netId;

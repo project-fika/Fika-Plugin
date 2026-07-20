@@ -16,7 +16,7 @@ namespace Fika.Core.Main.ObservedClasses.HandsControllers;
 
 public sealed class ObservedFirearmController : FirearmController
 {
-    public WeaponManagerClass WeaponManager
+    public Firearms WeaponManager
     {
         get
         {
@@ -40,8 +40,8 @@ public sealed class ObservedFirearmController : FirearmController
     private float _overlapCounter;
     private bool _hasFired;
     private WeaponPrefab _weaponPrefab;
-    private WeaponManagerClass _weaponManager;
-    private UnderbarrelManagerClass _underBarrelManager;
+    private Firearms _weaponManager;
+    private Player.FirearmController.UnderbarrelContainer _underBarrelManager;
     private bool _boltActionReload;
     private bool _isThrowingPatron;
     private bool _stationaryWeapon;
@@ -58,12 +58,12 @@ public sealed class ObservedFirearmController : FirearmController
             {
                 if (FirearmsAnimator != null)
                 {
-                    method_64(); // Reset animator flags 
+                    ResetAimingAnimationsFlags(); // Reset animator flags 
                 }
                 return;
             }
             _isAiming = value;
-            method_63(_isAiming); // Set animator flags
+            SetAimingInAnimator(_isAiming); // Set animator flags
             _observedPlayer.ProceduralWeaponAnimation.IsAiming = _isAiming;
         }
     }
@@ -80,36 +80,36 @@ public sealed class ObservedFirearmController : FirearmController
     {
         // Check for GClass increments..
         var operationFactoryDelegates = base.GetOperationFactoryDelegates();
-        operationFactoryDelegates[typeof(GClass2037)] = new OperationFactoryDelegate(Idle1);
+        operationFactoryDelegates[typeof(Player.FirearmController.Idling)] = new OperationFactoryDelegate(Idle1);
         // Look for operations that implement OnShellEjectEvent and ThrowPatronAsLoot
-        operationFactoryDelegates[typeof(MutliBarrelReloadOperationClass)] = new OperationFactoryDelegate(ThrowPatron1);
-        operationFactoryDelegates[typeof(SingleBarrelReloadOperationClass)] = new OperationFactoryDelegate(ThrowPatron2);
-        operationFactoryDelegates[typeof(FixMalfunctionOperationClass)] = new OperationFactoryDelegate(ThrowPatron3);
-        operationFactoryDelegates[typeof(RechamberOperationClass)] = new OperationFactoryDelegate(ThrowPatron4);
+        operationFactoryDelegates[typeof(Player.FirearmController.ReloadMultiBarrelOperation)] = new OperationFactoryDelegate(ThrowPatron1);
+        operationFactoryDelegates[typeof(Player.FirearmController.ReloadSingleBarrelOperation)] = new OperationFactoryDelegate(ThrowPatron2);
+        operationFactoryDelegates[typeof(Player.FirearmController.RepairMalfunction)] = new OperationFactoryDelegate(ThrowPatron3);
+        operationFactoryDelegates[typeof(Player.FirearmController.RechamberOperation)] = new OperationFactoryDelegate(ThrowPatron4);
         return operationFactoryDelegates;
     }
 
-    private BaseAnimationOperationClass ThrowPatron1()
+    private Player.ObjectInHandsOperation ThrowPatron1()
     {
         return new ObservedThrowPatronOperation1(this);
     }
 
-    private BaseAnimationOperationClass ThrowPatron2()
+    private Player.ObjectInHandsOperation ThrowPatron2()
     {
         return new ObservedThrowPatronOperation2(this);
     }
 
-    private BaseAnimationOperationClass ThrowPatron3()
+    private Player.ObjectInHandsOperation ThrowPatron3()
     {
         return new ObservedThrowPatronOperation3(this);
     }
 
-    private BaseAnimationOperationClass ThrowPatron4()
+    private Player.ObjectInHandsOperation ThrowPatron4()
     {
         return new ObservedThrowPatronOperation4(this);
     }
 
-    private BaseAnimationOperationClass Idle1()
+    private Player.ObjectInHandsOperation Idle1()
     {
         return new ObservedIdleOperation(this);
     }
@@ -118,19 +118,19 @@ public sealed class ObservedFirearmController : FirearmController
     {
         _objectInHandsAnimator.SetAiming(false);
         _weaponPrefab = ControllerGameObject.GetComponent<WeaponPrefab>();
-        _weaponManager = _weaponPrefab.ObjectInHands as WeaponManagerClass;
+        _weaponManager = _weaponPrefab.ObjectInHands as Firearms;
         if (UnderbarrelWeapon != null)
         {
             var weaponTraverse = Traverse.Create(this);
-            _underBarrelManager = weaponTraverse.Field<UnderbarrelManagerClass>("underbarrelManagerClass").Value;
+            _underBarrelManager = weaponTraverse.Field<Player.FirearmController.UnderbarrelContainer>("_underbarrelContainer").Value;
         }
-        IsRevolver = Weapon is RevolverItemClass;
+        IsRevolver = Weapon is Revolver;
         _stationaryWeapon = Weapon.IsStationaryWeapon;
     }
 
     public static ObservedFirearmController Create(ObservedPlayer player, Weapon weapon)
     {
-        var controller = smethod_6<ObservedFirearmController>(player, weapon);
+        var controller = CreateController<ObservedFirearmController>(player, weapon);
         controller._observedPlayer = player;
         return controller;
     }
@@ -154,10 +154,10 @@ public sealed class ObservedFirearmController : FirearmController
     private void SetObservedAim(bool isAiming)
     {
         IsAiming = isAiming;
-        _player.method_60(0.2f, false);
+        _player.PlayGearSound(0.2f, false);
         if (isAiming)
         {
-            method_60();
+            PlayAimingSound();
         }
     }
 
@@ -180,23 +180,23 @@ public sealed class ObservedFirearmController : FirearmController
         }
     }
 
-    public override void ReloadMag(MagazineItemClass magazine, ItemAddress itemAddress, Callback callback)
+    public override void ReloadMag(Magazine magazine, ItemAddress itemAddress, Callback callback)
     {
         _player.MovementContext.PlayerAnimator.AnimatedInteractions.ForceStopInteractions();
         CurrentOperation.ReloadMag(magazine, itemAddress, callback, null);
     }
 
-    public override void QuickReloadMag(MagazineItemClass magazine, Callback callback)
+    public override void QuickReloadMag(Magazine magazine, Callback callback)
     {
         CurrentOperation.QuickReloadMag(magazine, callback, null);
     }
 
-    public override void ReloadGrenadeLauncher(AmmoPackReloadingClass foundItem, Callback callback)
+    public override void ReloadGrenadeLauncher(AmmoPack foundItem, Callback callback)
     {
         CurrentOperation.ReloadGrenadeLauncher(foundItem, callback);
     }
 
-    public override void ReloadCylinderMagazine(AmmoPackReloadingClass ammoPack, Callback callback, bool quickReload = false)
+    public override void ReloadCylinderMagazine(AmmoPack ammoPack, Callback callback, bool quickReload = false)
     {
         if (Item.GetCurrentMagazine() == null)
         {
@@ -206,7 +206,7 @@ public sealed class ObservedFirearmController : FirearmController
         CurrentOperation.ReloadCylinderMagazine(ammoPack, callback, null, quickReload);
     }
 
-    public override void ReloadWithAmmo(AmmoPackReloadingClass ammoPack, Callback callback)
+    public override void ReloadWithAmmo(AmmoPack ammoPack, Callback callback)
     {
         if (IsRevolver)
         {
@@ -217,7 +217,7 @@ public sealed class ObservedFirearmController : FirearmController
         CurrentOperation.ReloadWithAmmo(ammoPack, callback, null);
     }
 
-    public override void ReloadBarrels(AmmoPackReloadingClass ammoPack, ItemAddress placeToPutContainedAmmoMagazine, Callback callback)
+    public override void ReloadBarrels(AmmoPack ammoPack, ItemAddress placeToPutContainedAmmoMagazine, Callback callback)
     {
         if (ammoPack.AmmoCount > 0)
         {
@@ -308,7 +308,7 @@ public sealed class ObservedFirearmController : FirearmController
         {
             var magazine = Item.GetCurrentMagazine();
             var weapon = Weapon;
-            if (magazine != null && magazine is not CylinderMagazineItemClass && weapon.HasChambers)
+            if (magazine != null && magazine is not CylinderMagazine && weapon.HasChambers)
             {
                 magazine.Cartridges.PopTo(_observedPlayer.InventoryController, Item.Chambers[0].CreateItemAddress());
             }
@@ -341,7 +341,7 @@ public sealed class ObservedFirearmController : FirearmController
         }
     }
 
-    public override void SetScopeMode(FirearmScopeStateStruct[] scopeStates)
+    public override void SetScopeMode(ScopeState[] scopeStates)
     {
         _player.ProceduralWeaponAnimation.ObservedCalibration();
         base.SetScopeMode(scopeStates);
@@ -383,13 +383,13 @@ public sealed class ObservedFirearmController : FirearmController
     /// <param name="rocketClass">The ammo to shoot</param>
     /// <param name="shotPosition">Start position</param>
     /// <param name="shotForward">The forward velocity</param>
-    public void HandleRocketShot(AmmoItemClass rocketClass, Vector3 shotPosition, Vector3 shotForward)
+    public void HandleRocketShot(Ammo rocketClass, Vector3 shotPosition, Vector3 shotForward)
     {
         FirearmsAnimator.SetFire(true);
 
         // Handle the rocket shot
         rocketClass.IsUsed = true;
-        var smokePort = TransformHelperClass.FindTransformRecursiveContains(WeaponRoot.transform, "smokeport", false);
+        var smokePort = TransformTools.FindTransformRecursiveContains(WeaponRoot.transform, "smokeport", false);
         InitiateRocket(rocketClass, shotPosition, shotForward, smokePort);
         Weapon.FirstLoadedChamberSlot.RemoveItem();
         WeaponManager.MoveAmmoFromChamberToShellPort(true, 0);
@@ -426,7 +426,7 @@ public sealed class ObservedFirearmController : FirearmController
                     break;
             }
 
-            var ammo = (AmmoItemClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), packet.AmmoTemplate, null);
+            var ammo = (Ammo)Singleton<ItemFactory>.Instance.CreateItem(MongoID.Generate(), packet.AmmoTemplate, null);
             Weapon.MalfState.MalfunctionedAmmo = ammo;
             Weapon.MalfState.AmmoToFire = ammo;
 
@@ -458,7 +458,7 @@ public sealed class ObservedFirearmController : FirearmController
                 if (Weapon.HasChambers)
                 {
                     var firstChamber = Weapon.Chambers[0];
-                    if (firstChamber.ContainedItem is AmmoItemClass)
+                    if (firstChamber.ContainedItem is Ammo)
                     {
                         firstChamber.RemoveItemWithoutRestrictions();
                     }
@@ -473,7 +473,7 @@ public sealed class ObservedFirearmController : FirearmController
             if (Weapon.HasChambers)
             {
                 var firstChamber = Weapon.Chambers[0];
-                if (firstChamber.ContainedItem is AmmoItemClass)
+                if (firstChamber.ContainedItem is Ammo)
                 {
                     firstChamber.RemoveItemWithoutRestrictions();
                 }
@@ -483,7 +483,7 @@ public sealed class ObservedFirearmController : FirearmController
                     var currentMagazine = Weapon.GetCurrentMagazine();
                     if (currentMagazine != null)
                     {
-                        var fedAmmo = (AmmoItemClass)currentMagazine.Cartridges.PopToNowhere(_observedPlayer.InventoryController).Value.ResultItem;
+                        var fedAmmo = (Ammo)currentMagazine.Cartridges.PopToNowhere(_observedPlayer.InventoryController).Value.ResultItem;
                         if (fedAmmo != null)
                         {
                             Weapon.MalfState.MalfunctionedAmmo = fedAmmo;
@@ -517,7 +517,7 @@ public sealed class ObservedFirearmController : FirearmController
         if (IsRevolver)
         {
             var revolver = Weapon;
-            var cylinderMagazine = (CylinderMagazineItemClass)revolver.GetCurrentMagazine();
+            var cylinderMagazine = (CylinderMagazine)revolver.GetCurrentMagazine();
 
             revolver.CylinderHammerClosed = revolver.FireMode.FireMode == Weapon.EFireMode.doubleaction;
             FirearmsAnimator.SetCamoraFireIndex(cylinderMagazine.CurrentCamoraIndex);
@@ -544,14 +544,14 @@ public sealed class ObservedFirearmController : FirearmController
     private void HandleRevolverShot(ShotInfoPacket packet, InventoryController inventoryController)
     {
         var revolver = Weapon;
-        var cylinderMagazine = (CylinderMagazineItemClass)revolver.GetCurrentMagazine();
+        var cylinderMagazine = (CylinderMagazine)revolver.GetCurrentMagazine();
 
-        var ammo = (AmmoItemClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), packet.AmmoTemplate, null);
+        var ammo = (Ammo)Singleton<ItemFactory>.Instance.CreateItem(MongoID.Generate(), packet.AmmoTemplate, null);
         _observedPlayer.TurnOffFbbikAt = Time.time + 0.6f;
         InitiateShot(Item, ammo, packet.ShotPosition, packet.ShotDirection,
             CurrentFireport.position, packet.ChamberIndex, packet.Overheat);
 
-        var pitchMult = method_61();
+        var pitchMult = CalculateBaseAimingVolume();
         WeaponSoundPlayer.FireBullet(ammo, packet.ShotPosition, packet.ShotDirection,
             pitchMult, Malfunction, false, IsBirstOf2Start);
 
@@ -606,7 +606,7 @@ public sealed class ObservedFirearmController : FirearmController
 
     private void HandleObservedShot(ShotInfoPacket packet, InventoryController inventoryController)
     {
-        var ammo = (AmmoItemClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), packet.AmmoTemplate, null);
+        var ammo = (Ammo)Singleton<ItemFactory>.Instance.CreateItem(MongoID.Generate(), packet.AmmoTemplate, null);
         _observedPlayer.TurnOffFbbikAt = Time.time + 0.6f;
         InitiateShot(Item, ammo, packet.ShotPosition, packet.ShotDirection,
             CurrentFireport.position, packet.ChamberIndex, packet.Overheat);
@@ -624,7 +624,7 @@ public sealed class ObservedFirearmController : FirearmController
             _triggerPressed = true;
         }
 
-        var pitchMult = method_61();
+        var pitchMult = CalculateBaseAimingVolume();
         WeaponSoundPlayer.FireBullet(ammo, packet.ShotPosition, packet.ShotDirection,
             pitchMult, Malfunction, false, IsBirstOf2Start);
 
@@ -656,7 +656,7 @@ public sealed class ObservedFirearmController : FirearmController
         {
             if (UnderbarrelWeapon != null)
             {
-                if (UnderbarrelWeapon.Chamber.ContainedItem is AmmoItemClass grenadeBullet && !grenadeBullet.IsUsed)
+                if (UnderbarrelWeapon.Chamber.ContainedItem is Ammo grenadeBullet && !grenadeBullet.IsUsed)
                 {
                     grenadeBullet.IsUsed = true;
                     UnderbarrelWeapon.Chamber.RemoveItem();
@@ -670,7 +670,7 @@ public sealed class ObservedFirearmController : FirearmController
             {
                 var slot = weapon.FirstLoadedChamberSlot;
                 var index = Array.IndexOf(weapon.Chambers, slot);
-                if (slot.ContainedItem is AmmoItemClass grenadeBullet && !grenadeBullet.IsUsed)
+                if (slot.ContainedItem is Ammo grenadeBullet && !grenadeBullet.IsUsed)
                 {
                     grenadeBullet.IsUsed = true;
                     slot.RemoveItem();
@@ -714,7 +714,7 @@ public sealed class ObservedFirearmController : FirearmController
 
         ammo.IsUsed = true;
 
-        /*magazine is not CylinderMagazineItemClass &&*/
+        /*magazine is not CylinderMagazine &&*/
         if (magazine?.Count > 0 && !weapon.BoltAction)
         {
             if (hasChambers && magazine.IsAmmoCompatible(Item.Chambers) && Item.Chambers[0].ContainedItem == null)
@@ -735,7 +735,7 @@ public sealed class ObservedFirearmController : FirearmController
 
         if (ammo.AmmoTemplate.IsLightAndSoundShot)
         {
-            method_62(packet.ShotPosition, packet.ShotDirection);
+            LightAndSoundShotVisualEffect(packet.ShotPosition, packet.ShotDirection);
             LightAndSoundShot(packet.ShotPosition, packet.ShotDirection, ammo.AmmoTemplate);
         }
     }
@@ -757,7 +757,7 @@ public sealed class ObservedFirearmController : FirearmController
     private void HandleBarrelOnlyShot(Weapon weapon, int index)
     {
         var ammoSlot = weapon.Chambers[index];
-        if (ammoSlot.ContainedItem is AmmoItemClass bullet && !bullet.IsUsed)
+        if (ammoSlot.ContainedItem is Ammo bullet && !bullet.IsUsed)
         {
             bullet.IsUsed = true;
             if (!bullet.AmmoTemplate.RemoveShellAfterFire)
@@ -780,13 +780,13 @@ public sealed class ObservedFirearmController : FirearmController
         _boltActionReload = true;
     }
 
-    public List<AmmoItemClass> FindAmmoByIds(string[] ammoIds)
+    public List<Ammo> FindAmmoByIds(string[] ammoIds)
     {
         _preallocatedAmmoList.Clear();
         foreach (var id in ammoIds)
         {
             var gstruct = _player.FindItemById(id);
-            if (gstruct.Succeeded && gstruct.Value is AmmoItemClass bulletClass)
+            if (gstruct.Succeeded && gstruct.Value is Ammo bulletClass)
             {
                 _preallocatedAmmoList.Add(bulletClass);
             }
@@ -795,7 +795,7 @@ public sealed class ObservedFirearmController : FirearmController
     }
 
 
-    private void HandleShellEvent(WeaponManagerClass weaponEffectsManager, int chamberIndex, AmmoItemClass ammo, MagazineItemClass magazine)
+    private void HandleShellEvent(Firearms weaponEffectsManager, int chamberIndex, Ammo ammo, Magazine magazine)
     {
         weaponEffectsManager.DestroyPatronInWeapon(chamberIndex);
         if (!ammo.AmmoTemplate.RemoveShellAfterFire)
@@ -822,7 +822,7 @@ public sealed class ObservedFirearmController : FirearmController
         }
     }
 
-    private class ObservedIdleOperation(FirearmController controller) : GClass2037(controller)
+    private class ObservedIdleOperation(FirearmController controller) : Player.FirearmController.Idling(controller)
     {
         public override void ProcessRemoveOneOffWeapon()
         {
@@ -830,29 +830,29 @@ public sealed class ObservedFirearmController : FirearmController
         }
     }
 
-    private class ObservedThrowPatronOperation1(FirearmController controller) : MutliBarrelReloadOperationClass(controller)
+    private class ObservedThrowPatronOperation1(FirearmController controller) : Player.FirearmController.ReloadMultiBarrelOperation(controller)
     {
         private readonly ObservedFirearmController _observedController = (ObservedFirearmController)controller;
 
-        public override void Start(ReloadMultiBarrelResultClass reloadMultiBarrelResult, Callback callback)
+        public override void Start(Player.FirearmController.ReloadMultiBarrelResult reloadMultiBarrelResult, Callback callback)
         {
             _observedController._isThrowingPatron = true;
             base.Start(reloadMultiBarrelResult, callback);
         }
     }
 
-    private class ObservedThrowPatronOperation2(FirearmController controller) : SingleBarrelReloadOperationClass(controller)
+    private class ObservedThrowPatronOperation2(FirearmController controller) : Player.FirearmController.ReloadSingleBarrelOperation(controller)
     {
         private readonly ObservedFirearmController _observedController = (ObservedFirearmController)controller;
 
-        public override void Start(ReloadSingleBarrelResultClass reloadSingleBarrelResult, Callback callback)
+        public override void Start(Player.FirearmController.ReloadSingleBarrelResult reloadSingleBarrelResult, Callback callback)
         {
             _observedController._isThrowingPatron = true;
             base.Start(reloadSingleBarrelResult, callback);
         }
     }
 
-    private class ObservedThrowPatronOperation3(FirearmController controller) : FixMalfunctionOperationClass(controller)
+    private class ObservedThrowPatronOperation3(FirearmController controller) : Player.FirearmController.RepairMalfunction(controller)
     {
         private readonly ObservedFirearmController _observedController = (ObservedFirearmController)controller;
 
@@ -863,11 +863,11 @@ public sealed class ObservedFirearmController : FirearmController
         }
     }
 
-    private class ObservedThrowPatronOperation4(FirearmController controller) : RechamberOperationClass(controller)
+    private class ObservedThrowPatronOperation4(FirearmController controller) : Player.FirearmController.RechamberOperation(controller)
     {
         private readonly ObservedFirearmController _observedController = (ObservedFirearmController)controller;
 
-        public override void Start(AmmoItemClass ammo, Callback callback)
+        public override void Start(Ammo ammo, Callback callback)
         {
             _observedController._isThrowingPatron = true;
             base.Start(ammo, callback);

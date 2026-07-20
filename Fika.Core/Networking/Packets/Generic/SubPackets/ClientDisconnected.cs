@@ -1,4 +1,6 @@
-﻿using Fika.Core.Main.Players;
+﻿using EFT;
+using EFT.Communications;
+using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Pooling;
 using static Fika.Core.UI.FikaUIGlobals;
@@ -26,7 +28,7 @@ public sealed class ClientDisconnected : IPoolSubPacket
     public void Execute(FikaPlayer player = null)
     {
         var message = string.Format(LocaleUtils.UI_PLAYER_DISCONNECTED.Localized(), ColorizeText(EColor.BLUE, Name));
-        NotificationManagerClass.DisplayMessageNotification(message);
+        NotificationManager.DisplayMessageNotification(message);
     }
 
     public void Serialize(NetDataWriter writer)

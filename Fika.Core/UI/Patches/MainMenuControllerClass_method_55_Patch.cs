@@ -1,17 +1,18 @@
 ﻿using System.Reflection;
 using SPT.Reflection.Patching;
+using EFT;
 
 namespace Fika.Core.UI.Patches;
 
 /// <summary>
-/// This allows all game editions to edit the <see cref="EFT.RaidSettings"/>
+/// This allows all game editions to edit the <see cref="RaidSettings"/>
 /// </summary>
 public class MainMenuControllerClass_method_55_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(MainMenuControllerClass)
-            .GetMethod(nameof(MainMenuControllerClass.method_55));
+        return typeof(MainMenuShowOperation)
+            .GetMethod(nameof(MainMenuShowOperation.method_55));
     }
 
     [PatchPrefix]

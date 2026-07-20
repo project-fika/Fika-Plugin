@@ -1,11 +1,12 @@
 ﻿using Comfort.Common;
 using EFT;
 using EFT.Ballistics;
+using EFT.HealthSystem;
 using Fika.Core.Main.Players;
 
 namespace Fika.Core.Main.ObservedClasses.PlayerBridge;
 
-public sealed class ObservedClientBridge(ObservedPlayer observedPlayer) : BodyPartCollider.IPlayerBridge
+public sealed class ObservedClientBridge(ObservedPlayer observedPlayer) : BodyPartCollider.IObserverToPlayerBridge
 {
     private readonly ObservedPlayer _observedPlayer = observedPlayer;
 
@@ -33,7 +34,7 @@ public sealed class ObservedClientBridge(ObservedPlayer observedPlayer) : BodyPa
         }
     }
 
-    public void ApplyDamageInfo(DamageInfoStruct damageInfo, EBodyPart bodyPartType, EBodyPartColliderType bodyPartCollider, float absorbed)
+    public void ApplyDamageInfo(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType bodyPartCollider, float absorbed)
     {
         if (damageInfo.DamageType.IsEnvironmental() || damageInfo.DamageType is EDamageType.Landmine or EDamageType.Artillery)
         {
@@ -46,7 +47,7 @@ public sealed class ObservedClientBridge(ObservedPlayer observedPlayer) : BodyPa
         }
     }
 
-    public ShotInfoClass ApplyShot(DamageInfoStruct damageInfo, EBodyPart bodyPart, EBodyPartColliderType bodyPartCollider, EArmorPlateCollider armorPlateCollider, ShotIdStruct shotId)
+    public PlayerHitInfo ApplyShot(DamageInfo damageInfo, EBodyPart bodyPart, EBodyPartColliderType bodyPartCollider, EArmorPlateCollider armorPlateCollider, ShotId shotId)
     {
         if (damageInfo.Player != null && damageInfo.Player.iPlayer.IsYourPlayer)
         {
@@ -73,12 +74,12 @@ public sealed class ObservedClientBridge(ObservedPlayer observedPlayer) : BodyPa
         return _observedPlayer.IsShotDeflectedByHeavyArmor(colliderType, armorPlateCollider, shotSeed);
     }
 
-    public bool SetShotStatus(BodyPartCollider bodypart, EftBulletClass shot, Vector3 hitpoint, Vector3 shotNormal, Vector3 shotDirection)
+    public bool SetShotStatus(BodyPartCollider bodypart, Shot shot, Vector3 hitpoint, Vector3 shotNormal, Vector3 shotDirection)
     {
         return _observedPlayer.SetShotStatus(bodypart, shot, hitpoint, shotNormal, shotDirection);
     }
 
-    public bool TryGetArmorResistData(BodyPartCollider bodyPart, float penetrationPower, out ArmorResistanceStruct armorResistanceData)
+    public bool TryGetArmorResistData(BodyPartCollider bodyPart, float penetrationPower, out ArmorResistanceData armorResistanceData)
     {
         return _observedPlayer.TryGetArmorResistData(bodyPart, penetrationPower, out armorResistanceData);
     }

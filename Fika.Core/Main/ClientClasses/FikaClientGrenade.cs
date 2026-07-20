@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using EFT;
+using System.Collections;
 
 namespace Fika.Core.Main.ClientClasses;
 
@@ -6,12 +7,12 @@ public class FikaClientGrenade : ObservedGrenade
 {
     private const float _smoothSpeed = 10f;
 
-    private GrenadeDataPacketStruct _packet;
+    private GrenadeSyncPacket _packet;
     private bool _hasPacket;
 
     private Coroutine _interpolationRoutine;
 
-    public override void ApplyNetPacket(GrenadeDataPacketStruct packet)
+    public override void ApplyNetPacket(GrenadeSyncPacket packet)
     {
         _packet = packet;
         _hasPacket = true;
@@ -23,7 +24,7 @@ public class FikaClientGrenade : ObservedGrenade
         if (_packet.Done)
         {
             transform.SetPositionAndRotation(_packet.Position, _packet.Rotation);
-            method_1(_packet);
+            SetVelocity(_packet);
             OnDoneFromNet();
 
             _hasPacket = false;
@@ -52,7 +53,7 @@ public class FikaClientGrenade : ObservedGrenade
                 }
                 else
                 {
-                    method_1(_packet);
+                    SetVelocity(_packet);
                 }
             }
         }

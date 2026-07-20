@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using EFT;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
@@ -14,8 +15,8 @@ internal class LabsKeycardDebugPatch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(MainMenuControllerClass)
-            .GetMethod(nameof(MainMenuControllerClass.method_53));
+        return typeof(MainMenuShowOperation)
+            .GetMethod(nameof(MainMenuShowOperation.method_53));
     }
 
     [PatchTranspiler]

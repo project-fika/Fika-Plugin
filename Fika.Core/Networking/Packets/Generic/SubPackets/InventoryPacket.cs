@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EFT;
+using System;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Pooling;
 
@@ -13,7 +14,7 @@ public sealed class InventoryPacket : IPoolSubPacket
         return new();
     }
 
-    public static InventoryPacket FromValue(int netId, BaseInventoryOperationClass operation)
+    public static InventoryPacket FromValue(int netId, EFT.InventoryLogic.Operations.AbstractOperation operation)
     {
         var packet = GenericSubPacketPoolManager.Instance.GetPacket<InventoryPacket>(EGenericSubPacketType.InventoryOperation);
         packet.NetId = netId;
@@ -24,7 +25,7 @@ public sealed class InventoryPacket : IPoolSubPacket
 
     public int NetId;
     public ushort CallbackId;
-    public BaseDescriptorClass Descriptor;
+    public InventoryOperationDescriptor Descriptor;
 
     [Obsolete("Not used for inventory packets", true)]
     public void Execute(FikaPlayer player = null)
@@ -43,7 +44,7 @@ public sealed class InventoryPacket : IPoolSubPacket
     {
         NetId = reader.GetInt();
         CallbackId = reader.GetUShort();
-        Descriptor = reader.GetPolymorph<BaseDescriptorClass>();
+        Descriptor = reader.GetPolymorph<InventoryOperationDescriptor>();
     }
 
     public void Dispose()

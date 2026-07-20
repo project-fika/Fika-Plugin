@@ -1,4 +1,5 @@
-﻿using Fika.Core.Main.Utils;
+﻿using EFT;
+using Fika.Core.Main.Utils;
 using TMPro;
 using UnityEngine.UI;
 

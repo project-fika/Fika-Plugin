@@ -4,7 +4,7 @@ using EFT.Interactive;
 
 namespace Fika.Core.Main.ObservedClasses.MovementStates;
 
-public class ObservedBreachDoorState(MovementContext movementContext) : BreachDoorStateClass(movementContext)
+public class ObservedBreachDoorState(MovementContext movementContext) : BreachDoorState(movementContext)
 {
     public override void ManualAnimatorMoveUpdate(float deltaTime)
     {
@@ -16,18 +16,18 @@ public class ObservedBreachDoorState(MovementContext movementContext) : BreachDo
         {
             return;
         }
-        if (Bool_0)
+        if (_hit)
         {
             return;
         }
-        Bool_0 = true;
+        _hit = true;
         if (MovementContext.NextBreachResult)
         {
-            Door_0.KickOpen(MovementContext.TransformPosition, false);
+            _door.KickOpen(MovementContext.TransformPosition, false);
         }
         else
         {
-            Door_0.FailBreach(MovementContext.TransformPosition);
+            _door.FailBreach(MovementContext.TransformPosition);
         }
         MovementContext.OnBreach();
     }

@@ -11,7 +11,7 @@ internal sealed class ObservedEmptyHandsController : Player.EmptyHandsController
 
     public static ObservedEmptyHandsController Create(ObservedPlayer observedPlayer)
     {
-        var controller = smethod_6<ObservedEmptyHandsController>(observedPlayer);
+        var controller = CreateController<ObservedEmptyHandsController>(observedPlayer);
         controller._observedPlayer = observedPlayer;
         return controller;
     }

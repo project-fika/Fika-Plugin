@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using EFT.RocketLauncher;
+using System.Reflection;
 using Fika.Core.Main.Utils;
 using SPT.Reflection.Patching;
 
@@ -11,8 +12,8 @@ public class RocketLauncherConeBlastClass_Initialize_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(RocketLauncherConeBlastClass)
-            .GetMethod(nameof(RocketLauncherConeBlastClass.Initialize));
+        return typeof(BackblastModel)
+            .GetMethod(nameof(BackblastModel.Initialize));
     }
 
     [PatchPrefix]

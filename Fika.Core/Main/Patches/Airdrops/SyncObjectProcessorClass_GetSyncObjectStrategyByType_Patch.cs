@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using EFT.Airdrop;
+using System.Reflection;
 using EFT.SynchronizableObjects;
 using Fika.Core.Main.Utils;
 using SPT.Reflection.Patching;
@@ -9,22 +10,22 @@ public class SyncObjectProcessorClass_GetSyncObjectStrategyByType_Patch : Module
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(SyncObjectProcessorClass).GetMethod(nameof(SyncObjectProcessorClass.GetSyncObjectStrategyByType), BindingFlags.Static | BindingFlags.Public);
+        return typeof(SynchronizableObjectLogicProcessor).GetMethod(nameof(SynchronizableObjectLogicProcessor.GetSyncObjectStrategyByType), BindingFlags.Static | BindingFlags.Public);
     }
 
     [PatchPrefix]
-    public static bool Prefix(SynchronizableObjectType type, ref ISynchronizableObject __result)
+    public static bool Prefix(SynchronizableObjectType type, ref ISynchronizableLogic __result)
     {
         switch (type)
         {
             case SynchronizableObjectType.Tripwire:
-                __result = new TripwireLogicClass();
+                __result = new BaseTripwire();
                 break;
             case SynchronizableObjectType.AirPlane:
-                __result = new AirplaneLogicClass(FikaBackendUtils.IsServer);
+                __result = new ClientAirPlane(FikaBackendUtils.IsServer);
                 break;
             case SynchronizableObjectType.AirDrop:
-                __result = new AirdropLogicClass(FikaBackendUtils.IsServer);
+                __result = new ClientAirDrop(FikaBackendUtils.IsServer);
                 break;
             default:
                 break;

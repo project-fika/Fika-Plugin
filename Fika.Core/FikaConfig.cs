@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using BepInEx.Configuration;
 using Comfort.Common;
+using EFT;
 using EFT.UI;
 using Fika.Core.Main.Patches.Revival;
 using Fika.Core.Main.Utils;

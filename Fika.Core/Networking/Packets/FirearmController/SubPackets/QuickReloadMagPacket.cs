@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EFT.InventoryLogic;
+using System;
 using EFT;
 using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
@@ -42,7 +43,7 @@ public sealed class QuickReloadMagPacket : IPoolSubPacket
                     FikaGlobals.LogError(result.Error);
                     return;
                 }
-                if (result.Value is MagazineItemClass magazine)
+                if (result.Value is Magazine magazine)
                 {
                     controller.FastForwardCurrentState();
                     controller.QuickReloadMag(magazine, null);

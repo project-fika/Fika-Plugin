@@ -2,7 +2,7 @@
 
 namespace Fika.Core.Main.ClientClasses;
 
-public class FikaClientGrenadeFactory : GrenadeFactoryClass
+public class FikaClientGrenadeFactory : GrenadeFactory
 {
     public override Grenade AddGrenade(GameObject gameObject)
     {

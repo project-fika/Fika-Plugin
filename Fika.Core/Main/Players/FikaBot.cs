@@ -8,6 +8,7 @@ using EFT;
 using EFT.Ballistics;
 using EFT.HealthSystem;
 using EFT.InventoryLogic;
+using EFT.Communications;
 using Fika.Core.Main.BotClasses;
 using Fika.Core.Main.Components;
 using Fika.Core.Main.GameMode;
@@ -49,10 +50,10 @@ public sealed class FikaBot : FikaPlayer
         string layerName, string prefix, EPointOfView pointOfView, Profile profile, bool aiControl,
         EUpdateQueue updateQueue, EUpdateMode armsUpdateMode, EUpdateMode bodyUpdateMode,
         CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity,
-        Func<float> getAimingSensitivity, IViewFilter filter, MongoID currentId, ushort nextOperationId)
+        Func<float> getAimingSensitivity, ICustomizationFilter filter, MongoID currentId, ushort nextOperationId)
     {
         var useSimpleAnimator = profile.Info.Settings.UseSimpleAnimator;
-        var resourceKey = useSimpleAnimator ? ResourceKeyManagerAbstractClass.ZOMBIE_BUNDLE_NAME : ResourceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME;
+        var resourceKey = useSimpleAnimator ? InGameBundles.ZOMBIE_BUNDLE_NAME : InGameBundles.PLAYER_BUNDLE_NAME;
         var player = Create<FikaBot>(gameWorld, resourceKey, playerId, position, updateQueue, armsUpdateMode,
             bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix, aiControl, useSimpleAnimator);
 
@@ -77,21 +78,21 @@ public sealed class FikaBot : FikaPlayer
             EVoipState.NotAvailable, aiControl, false);
 
         player.Pedometer.Stop();
-        player._handsController = EmptyHandsController.smethod_6<EmptyHandsController>(player);
+        player._handsController = EmptyHandsController.CreateController<EmptyHandsController>(player);
         player._handsController.Spawn(1f, FikaGlobals.EmptyAction);
 
-        player.AIData = new PlayerAIDataClass(null, player)
+        player.AIData = new AIData(null, player)
         {
             IsAI = true
         };
 
         var botTraverse = Traverse.Create(player);
-        botTraverse.Field<LocalPlayerCullingHandlerClass>("localPlayerCullingHandlerClass").Value = new();
-        botTraverse.Field<LocalPlayerCullingHandlerClass>("localPlayerCullingHandlerClass").Value.Initialize(player, player.PlayerBones);
+        botTraverse.Field<OfflinePlayerCulling>("botPlayerCulling").Value = new();
+        botTraverse.Field<OfflinePlayerCulling>("botPlayerCulling").Value.Initialize(player, player.PlayerBones);
 
         if (FikaBackendUtils.IsHeadless)
         {
-            botTraverse.Field<LocalPlayerCullingHandlerClass>("localPlayerCullingHandlerClass").Value.SetMode(LocalPlayerCullingHandlerClass.EMode.Disabled);
+            botTraverse.Field<OfflinePlayerCulling>("botPlayerCulling").Value.SetMode(OfflinePlayerCulling.EMode.Disabled);
         }
 
         player.AggressorFound = false;
@@ -115,12 +116,12 @@ public sealed class FikaBot : FikaPlayer
         // Do nothing
     }
 
-    public override void OnSkillLevelChanged(AbstractSkillClass skill)
+    public override void OnSkillLevelChanged(BaseSkill skill)
     {
         // Do nothing
     }
 
-    public override void OnWeaponMastered(MasterSkillClass masterSkill)
+    public override void OnWeaponMastered(Mastering masterSkill)
     {
         // Do nothing
     }
@@ -154,7 +155,7 @@ public sealed class FikaBot : FikaPlayer
         }
     }
 
-    public override void OnPhraseTold(EPhraseTrigger @event, TaggedClip clip, TagBank bank, PhraseSpeakerClass speaker)
+    public override void OnPhraseTold(EPhraseTrigger @event, TaggedClip clip, TagBank bank, BaseSpeaker speaker)
     {
         if (_isHeadless)
         {
@@ -171,7 +172,7 @@ public sealed class FikaBot : FikaPlayer
         }
     }
 
-    public override void OnBeenKilledByAggressor(IPlayer aggressor, DamageInfoStruct damageInfo, EBodyPart bodyPart, EDamageType lethalDamageType)
+    public override void OnBeenKilledByAggressor(IPlayer aggressor, DamageInfo damageInfo, EBodyPart bodyPart, EDamageType lethalDamageType)
     {
         base.OnBeenKilledByAggressor(aggressor, damageInfo, bodyPart, lethalDamageType);
 
@@ -208,7 +209,7 @@ public sealed class FikaBot : FikaPlayer
         }
     }
 
-    public override ShotInfoClass ApplyShot(DamageInfoStruct damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, ShotIdStruct shotId)
+    public override PlayerHitInfo ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, ShotId shotId)
     {
         var activeHealthController = ActiveHealthController;
         if (activeHealthController != null && !activeHealthController.IsAlive)
@@ -218,10 +219,10 @@ public sealed class FikaBot : FikaPlayer
         var flag = damageInfo.DeflectedBy != null;
         var damage = damageInfo.Damage;
         var list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
-        method_97(list);
+        ProceedArmorDamaged(list);
         var materialType = flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1)
             ? MaterialType.Body : list[0].Material);
-        ShotInfoClass hitInfo = new()
+        PlayerHitInfo hitInfo = new()
         {
             PoV = PointOfView,
             Penetrated = damageInfo.Penetrated,
@@ -244,7 +245,7 @@ public sealed class FikaBot : FikaPlayer
         return hitInfo;
     }
 
-    public override void ApplyDamageInfo(DamageInfoStruct damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, float absorbed)
+    public override void ApplyDamageInfo(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, float absorbed)
     {
         if (damageInfo.Weapon != null)
         {
@@ -253,7 +254,7 @@ public sealed class FikaBot : FikaPlayer
         base.ApplyDamageInfo(damageInfo, bodyPartType, colliderType, absorbed);
     }
 
-    public override void ApplyExplosionDamageToArmor(Dictionary<ExplosiveHitArmorColliderStruct, float> armorDamage, DamageInfoStruct damageInfo)
+    public override void ApplyExplosionDamageToArmor(Dictionary<ExplosionDamageInfo, float> armorDamage, DamageInfo damageInfo)
     {
         foreach (var armorComponent in _preAllocatedArmorComponents)
         {
@@ -268,7 +269,7 @@ public sealed class FikaBot : FikaPlayer
             if (num > 0f)
             {
                 num = armorComponent.ApplyExplosionDurabilityDamage(num, damageInfo, _preAllocatedArmorComponents);
-                method_96(num, armorComponent);
+                OnArmorDamaged(num, armorComponent);
                 OnArmorPointsChanged(armorComponent);
             }
         }
@@ -287,7 +288,7 @@ public sealed class FikaBot : FikaPlayer
         Func<FirearmController> func = new(handler.ReturnController);
         handler.Process = new Process<FirearmController, IFirearmHandsController>(this, func, handler.Weapon, flag);
         handler.ConfirmCallback = new(handler.SendPacket);
-        handler.Process.method_0(new(handler.HandleResult), callback, scheduled);
+        handler.Process.Proceed(new(handler.HandleResult), callback, scheduled);
     }
 
     public override void OnDead(EDamageType damageType)
@@ -304,7 +305,7 @@ public sealed class FikaBot : FikaPlayer
                 {
                     if (aggressor.gameObject.name.StartsWith("Player_") || aggressor.IsYourPlayer)
                     {
-                        NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.KILLED_BOSS.Localized(),
+                        NotificationManager.DisplayMessageNotification(string.Format(LocaleUtils.KILLED_BOSS.Localized(),
                             [ColorizeText(EColor.GREEN, LastAggressor.Profile.Info.MainProfileNickname), ColorizeText(EColor.BROWN, name)]),
                             iconType: EFT.Communications.ENotificationIconType.Friend);
                     }

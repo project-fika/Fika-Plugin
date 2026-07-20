@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using EFT.Ballistics;
+using System.Reflection;
 using Comfort.Common;
 using EFT;
 using EFT.BufferZone;
@@ -15,8 +16,8 @@ public static class Zyriachy_Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(ZyriachyBossLogicClass)
-                .GetMethod(nameof(ZyriachyBossLogicClass.Activate));
+            return typeof(BossZryachiy)
+                .GetMethod(nameof(BossZryachiy.Activate));
         }
 
         [PatchPostfix]
@@ -25,7 +26,7 @@ public static class Zyriachy_Patches
             ___BotOwner_0.GetPlayer.OnPlayerDead += OnZryachiyDead;
         }
 
-        private static void OnZryachiyDead(Player player, IPlayer lastAggressor, DamageInfoStruct damageInfo, EBodyPart part)
+        private static void OnZryachiyDead(Player player, IPlayer lastAggressor, DamageInfo damageInfo, EBodyPart part)
         {
             player.OnPlayerDead -= OnZryachiyDead;
             Singleton<GameWorld>.Instance.BufferZoneController.SetInnerZoneAvailabilityStatus(false,

@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using EFT;
+using System.Reflection;
 using EFT.UI;
 using HarmonyLib;
 using SPT.Common.Http;
@@ -19,7 +20,7 @@ public class FikaVersionLabel_Patch : ModulePatch
 
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(VersionNumberClass).GetMethod(nameof(VersionNumberClass.Create),
+        return typeof(Version).GetMethod(nameof(Version.Create),
             BindingFlags.Static | BindingFlags.Public);
     }
 
@@ -67,6 +68,6 @@ public class FikaVersionLabel_Patch : ModulePatch
         // Game mode
         //preloaderUiTraverse.Field("string_4").SetValue("PvE");
         // Update version label
-        preloaderUiTraverse.Method("method_6").GetValue();
+        preloaderUiTraverse.Method("RefreshCornerLabel").GetValue();
     }
 }

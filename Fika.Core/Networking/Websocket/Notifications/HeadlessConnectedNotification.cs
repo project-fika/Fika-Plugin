@@ -1,11 +1,12 @@
-﻿using EFT.Communications;
+﻿using EFT;
+using EFT.Communications;
 using Fika.Core.Main.Utils;
 using Fika.Core.UI;
 using Newtonsoft.Json;
 
 namespace Fika.Core.Networking.Websocket.Notifications;
 
-public class HeadlessConnectedNotification : NotificationAbstractClass
+public class HeadlessConnectedNotification : Notification
 {
     public override ENotificationIconType Icon
     {

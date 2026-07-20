@@ -7,7 +7,7 @@ namespace Fika.Core.Main.HostClasses;
 public sealed class HostInventoryOperationHandler : IDisposable
 {
     public HostInventoryController InventoryController;
-    public BaseInventoryOperationClass Operation;
+    public EFT.InventoryLogic.Operations.AbstractOperation Operation;
     public Callback Callback;
 
     public Callback HandleResultDelegate;
@@ -22,7 +22,7 @@ public sealed class HostInventoryOperationHandler : IDisposable
         HandleResultDelegate = HandleResult;
     }
 
-    public void Set(HostInventoryController inventoryController, BaseInventoryOperationClass operation, Callback callback)
+    public void Set(HostInventoryController inventoryController, EFT.InventoryLogic.Operations.AbstractOperation operation, Callback callback)
     {
         InventoryController = inventoryController;
         Operation = operation;

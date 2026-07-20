@@ -11,7 +11,7 @@ namespace Fika.Core.Main.Patches.Overrides;
 
 public class GetProfileAtEndOfRaidPatch_Override : ModulePatch
 {
-    public static CompleteProfileDescriptorClass ProfileDescriptor { get; private set; }
+    public static ProfileDescriptor ProfileDescriptor { get; private set; }
 
     protected override MethodBase GetTargetMethod()
     {
@@ -21,7 +21,7 @@ public class GetProfileAtEndOfRaidPatch_Override : ModulePatch
     [PatchPrefix]
     public static void PatchPrefix(CoopGame __instance)
     {
-        ProfileDescriptor = new CompleteProfileDescriptorClass(__instance.Profile_0, FikaGlobals.SearchControllerSerializer);
+        ProfileDescriptor = new ProfileDescriptor(__instance.Profile, FikaGlobals.SearchControllerSerializer);
     }
 }
 /// <summary>
@@ -32,11 +32,11 @@ public class FixSavageInventoryScreenPatch_Override : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return AccessTools.Method(typeof(PostRaidHealthScreenClass), nameof(PostRaidHealthScreenClass.method_2));
+        return AccessTools.Method(typeof(SessionResultShowOperation), nameof(SessionResultShowOperation.Init));
     }
 
     [PatchPrefix]
-    public static void PatchPrefix(ref ISession ___ISession)
+    public static void PatchPrefix(ref IEftSession ___ISession)
     {
         Profile profile = new(GetProfileAtEndOfRaidPatch_Override.ProfileDescriptor);
 
@@ -45,7 +45,7 @@ public class FixSavageInventoryScreenPatch_Override : ModulePatch
             return;
         }
 
-        var session = (ProfileEndpointFactoryAbstractClass)___ISession;
+        var session = (ClientBackendSession)___ISession;
         session.AllProfiles =
         [
             session.AllProfiles.First(x => x.Side != EPlayerSide.Savage),

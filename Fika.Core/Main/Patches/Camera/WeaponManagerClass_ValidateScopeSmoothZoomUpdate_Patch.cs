@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using EFT;
+using System.Reflection;
 using SPT.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.Camera;
@@ -7,11 +8,11 @@ public class WeaponManagerClass_ValidateScopeSmoothZoomUpdate_Patch : ModulePatc
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(WeaponManagerClass).GetMethod(nameof(WeaponManagerClass.ValidateScopeSmoothZoomUpdate));
+        return typeof(Firearms).GetMethod(nameof(Firearms.ValidateScopeSmoothZoomUpdate));
     }
 
     [PatchPrefix]
-    public static bool Prefix(WeaponManagerClass __instance)
+    public static bool Prefix(Firearms __instance)
     {
         if (__instance.Player != null && !__instance.Player.IsYourPlayer)
         {

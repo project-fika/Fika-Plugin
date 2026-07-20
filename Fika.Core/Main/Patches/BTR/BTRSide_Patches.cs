@@ -28,9 +28,9 @@ public class BTRSide_Patches
             }
 
             player.Transform.Original.parent = ____startPoint;
-            __instance.method_8(player);
+            __instance.ResetPlayerTransform(player);
             Passengers.Add(new ValueTuple<BTRSide, Player, int>(__instance, player, placeId));
-            __instance.method_9();
+            __instance.ApplyLocalPassenger();
             return false;
         }
     }
@@ -64,11 +64,11 @@ public class BTRSide_Patches
         }
     }
 
-    public class BTRSide_method_9_Patch : ModulePatch
+    public class BTRSide_ApplyLocalPassenger_Patch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(BTRSide).GetMethod(nameof(BTRSide.method_9));
+            return typeof(BTRSide).GetMethod(nameof(BTRSide.ApplyLocalPassenger));
         }
 
         [PatchPrefix]
@@ -91,7 +91,7 @@ public class BTRSide_Patches
                             }
                         case EPlayerBtrState.Inside:
                             {
-                                tuple.Item2.Teleport(__instance.method_11(tuple.Item3));
+                                tuple.Item2.Teleport(__instance.PlacePosition(tuple.Item3));
                                 (var start, var target) = __instance.GoInPoints();
                                 __instance.ApplyPlayerRotation(tuple.Item2.MovementContext, start, target);
                                 var num = Mathf.Lerp(0f, 0.05f, Mathf.InverseLerp(0f, __instance.BtrView.MoveSpeed, __instance.BtrView.CurrentSpeed));

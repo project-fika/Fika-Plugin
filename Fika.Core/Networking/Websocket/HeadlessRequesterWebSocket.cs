@@ -112,7 +112,7 @@ public class HeadlessRequesterWebSocket
             return;
         }
 
-        var tarkovApplication = (TarkovApplication)Singleton<ClientApplication<ISession>>.Instance;
+        var tarkovApplication = (TarkovApplication)Singleton<ClientApplication<IEftSession>>.Instance;
 
         var success = await MatchMakerUIScript.JoinMatch(tarkovApplication.Session.Profile.Id, data.MatchId,
             null, false);
@@ -120,7 +120,7 @@ public class HeadlessRequesterWebSocket
         if (success)
         {
             FikaBackendUtils.MatchMakerAcceptScreenInstance
-                .method_22()
+                .GameStart()
                 .HandleExceptions();
         }
 

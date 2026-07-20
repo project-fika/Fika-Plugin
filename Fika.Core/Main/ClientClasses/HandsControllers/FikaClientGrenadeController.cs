@@ -17,9 +17,9 @@ public class FikaClientGrenadeController : Player.GrenadeHandsController
     private bool _isClient;
     private WeaponPacket _packet;
 
-    public static FikaClientGrenadeController Create(FikaPlayer player, ThrowWeapItemClass item)
+    public static FikaClientGrenadeController Create(FikaPlayer player, ThrowWeap item)
     {
-        var controller = smethod_9<FikaClientGrenadeController>(player, item);
+        var controller = CreateController<FikaClientGrenadeController>(player, item);
         controller._fikaPlayer = player;
         controller._isClient = FikaBackendUtils.IsClient;
         controller._packet = new()
@@ -151,7 +151,7 @@ public class FikaClientGrenadeController : Player.GrenadeHandsController
         base.PullRingForLowThrow();
     }
 
-    public override void vmethod_2(float timeSinceSafetyLevelRemoved, Vector3 position, Quaternion rotation, Vector3 force, bool lowThrow)
+    public override void ThrowGrenade(float timeSinceSafetyLevelRemoved, Vector3 position, Quaternion rotation, Vector3 force, bool lowThrow)
     {
         _packet.Type = EFirearmSubPacketType.Grenade;
         _packet.SubPacket = GrenadePacket.FromValue(
@@ -166,7 +166,7 @@ public class FikaClientGrenadeController : Player.GrenadeHandsController
             false
         );
         _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
-        base.vmethod_2(timeSinceSafetyLevelRemoved, position, rotation, force, lowThrow);
+        base.ThrowGrenade(timeSinceSafetyLevelRemoved, position, rotation, force, lowThrow);
     }
 
     public override void PlantTripwire()
@@ -198,9 +198,9 @@ public class FikaClientGrenadeController : Player.GrenadeHandsController
         var currentOperation = CurrentOperation;
         if (currentOperation != null)
         {
-            if (currentOperation is not Class1277)
+            if (currentOperation is not Player.GrenadeHandsController.Idling)
             {
-                if (currentOperation is TripwireStateManagerClass)
+                if (currentOperation is Player.GrenadeHandsController.PlantTripwireOperation)
                 {
                     _packet.Type = EFirearmSubPacketType.Grenade;
                     _packet.SubPacket = GrenadePacket.FromValue(
@@ -237,7 +237,7 @@ public class FikaClientGrenadeController : Player.GrenadeHandsController
         base.ChangeFireMode(fireMode);
     }
 
-    public override void ActualDrop(Result<IHandsThrowController> controller, float animationSpeed, Action callback, bool fastDrop)
+    public override void ActualDrop(Result<IGrenadeController> controller, float animationSpeed, Action callback, bool fastDrop)
     {
         _packet.Type = EFirearmSubPacketType.CancelGrenade;
         _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);

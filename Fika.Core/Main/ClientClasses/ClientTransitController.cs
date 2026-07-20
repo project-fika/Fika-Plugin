@@ -1,4 +1,5 @@
-﻿using System;
+﻿using JsonType;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Comfort.Common;
@@ -11,9 +12,9 @@ using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.ClientClasses;
 
-public class ClientTransitController : GClass1906
+public class ClientTransitController : NetworkTransitController
 {
-    public ClientTransitController(BackendConfigSettingsClass.TransitSettingsClass settings, LocationSettingsClass.Location.TransitParameters[] parameters, Profile profile, LocalRaidSettings localRaidSettings)
+    public ClientTransitController(GlobalConfiguration.TransitGlobalSettings settings, LocationSettings.Location.TransitParameters[] parameters, Profile profile, LocalRaidSettings localRaidSettings)
         : base(settings, parameters)
     {
         OnPlayerEnter += OnClientPlayerEnter;
@@ -21,21 +22,21 @@ public class ClientTransitController : GClass1906
         var array = localRaidSettings.transition.visitedLocations.EmptyIfNull()
             .Append(localRaidSettings.location)
             .ToArray();
-        summonedTransits[profile.Id] = new TransitDataClass(localRaidSettings.transition.transitionRaidId, localRaidSettings.transition.transitionCount, array,
+        summonedTransits[profile.Id] = new Transit(localRaidSettings.transition.transitionRaidId, localRaidSettings.transition.transitionCount, array,
             localRaidSettings.transitionType.HasFlagNoBox(ELocationTransition.Event));
         TransferItemsController.InitItemControllerServer(FikaGlobals.TransitTraderId, FikaGlobals.TransitTraderName);
         _localRaidSettings = localRaidSettings;
 
-        Action_0();
+        action_0();
 
-        Action_0 = GlobalEventHandlerClass.Instance.SubscribeOnEvent(new Action<TransitInitEvent>(OnInitEvent));
+        action_0 = GlobalEventsController.Instance.SubscribeOnEvent(new Action<TransitInitEvent>(OnInitEvent));
 
         ReEnablePoints();
     }
 
     private void ReEnablePoints()
     {
-        foreach (var transitPoint in Dictionary_0.Values)
+        foreach (var transitPoint in pointsById.Values)
         {
             transitPoint.gameObject.SetActive(true);
         }
@@ -44,7 +45,7 @@ public class ClientTransitController : GClass1906
     private void OnInitEvent(TransitInitEvent initEvent)
     {
         FikaGlobals.LogInfo($"Received TransitInitEvent from server with {initEvent.Points.Count} points");
-        if (!smethod_2(initEvent.PlayerId, out var player))
+        if (!IsTargetPlayer(initEvent.PlayerId, out var player))
         {
 #if DEBUG
             FikaGlobals.LogWarning($"[{initEvent.PlayerId}] was not my player");
@@ -54,12 +55,12 @@ public class ClientTransitController : GClass1906
 
         /*var transit = summonedTransits[player.ProfileId];
         summonedTransits[player.ProfileId].events = initEvent.EventPlayer;*/
-        var list = method_21(initEvent.Points, player.Side);
-        method_8(list, player, false);
-        method_2(list, player);
+        var list = GetTransitPoints(initEvent.Points, player.Side);
+        SetTimers(list, player, false);
+        HandleExits(list, player);
     }
 
-    public TransitInteractionPacketStruct InteractPacket { get; set; }
+    public InteractWithTransitPacket InteractPacket { get; set; }
 
     private readonly LocalRaidSettings _localRaidSettings;
 
@@ -96,12 +97,12 @@ public class ClientTransitController : GClass1906
 
     public void HandleClientExtract(int transitId, int playerId)
     {
-        if (!smethod_2(playerId, out var myPlayer))
+        if (!IsTargetPlayer(playerId, out var myPlayer))
         {
             return;
         }
 
-        if (!Dictionary_0.TryGetValue(transitId, out var transitPoint))
+        if (!pointsById.TryGetValue(transitId, out var transitPoint))
         {
             FikaGlobals.LogError("FikaClientTransitController::HandleClientExtract: Could not find transit point with id: " + transitId);
             return;
@@ -124,7 +125,7 @@ public class ClientTransitController : GClass1906
             isSolo = true
         });
 
-        AlreadyTransitDataClass gclass = new()
+        LocationTransit gclass = new()
         {
             hash = Guid.NewGuid().ToString(),
             playersCount = 1,
@@ -154,17 +155,17 @@ public class ClientTransitController : GClass1906
     public void UpdateTimers()
     {
         var list = new List<TransitPoint>();
-        foreach (var transitPoint in Dictionary_0.Values)
+        foreach (var transitPoint in pointsById.Values)
         {
-            if (!method_7(transitPoint))
+            if (!IsVisibleTransitPoint(transitPoint))
             {
-                HashSet_0.Add(transitPoint);
+                _waitForVisibleTransitPoints.Add(transitPoint);
             }
             else
             {
                 list.Add(transitPoint);
             }
         }
-        method_8(list, GamePlayerOwner.MyPlayer, false);
+        SetTimers(list, GamePlayerOwner.MyPlayer, false);
     }
 }

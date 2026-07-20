@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EFT.Communications;
+using System;
 using Comfort.Common;
 using EFT.UI;
 using Fika.Core.Bundles;
@@ -50,7 +51,7 @@ public class AdminSettingsUIScript : MonoBehaviour
             _adminSettingsUI.SharedQuestProgressionCheck.isOn, _adminSettingsUI.AverageLevelCheck.isOn);
         var resp = FikaRequestHandler.SaveServerSettings(req);
 
-        NotificationManagerClass.DisplayMessageNotification(resp.Success.ToString());
+        NotificationManager.DisplayMessageNotification(resp.Success.ToString());
 
         Destroy(this);
     }

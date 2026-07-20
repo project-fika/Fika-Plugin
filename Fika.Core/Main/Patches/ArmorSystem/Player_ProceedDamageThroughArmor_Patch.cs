@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using EFT.Ballistics;
+using System.Collections.Generic;
 using System.Reflection;
 using EFT;
 using EFT.InventoryLogic;
@@ -20,7 +21,7 @@ internal class Player_ProceedDamageThroughArmor_Patch : ModulePatch
     }
 
     [PatchPrefix]
-    public static bool Prefix(ref DamageInfoStruct damageInfo, EBodyPartColliderType colliderType,
+    public static bool Prefix(ref DamageInfo damageInfo, EBodyPartColliderType colliderType,
         EArmorPlateCollider armorPlateCollider, List<ArmorComponent> ____preAllocatedArmorComponents,
         ref List<ArmorComponent> __result, Player __instance, bool damageInfoIsLocal = true)
     {
@@ -58,7 +59,7 @@ internal class Player_ProceedDamageThroughArmor_Patch : ModulePatch
                             __instance.Skills.HeavyVestBluntThroughputDamageReduction
                         );
 
-                        __instance.method_96(armorDamageDealt, armor);
+                        __instance.OnArmorDamaged(armorDamageDealt, armor);
                     }
 
                     hasBlockedShot = (armor.Item.Id == damageInfo.BlockedBy);

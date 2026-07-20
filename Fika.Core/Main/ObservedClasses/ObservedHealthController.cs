@@ -1,5 +1,6 @@
 ﻿// © 2026 Lacyway All Rights Reserved
 
+using EFT.NetworkPackets;
 using System;
 using System.Collections.Generic;
 using EFT;
@@ -10,7 +11,7 @@ using Fika.Core.Main.Players;
 namespace Fika.Core.Main.ObservedClasses;
 
 public sealed class ObservedHealthController(byte[] serializedState, ObservedPlayer player, InventoryController inventory, SkillManager skills)
-    : NetworkHealthControllerAbstractClass(serializedState, inventory, skills)
+    : NetworkHealthController(serializedState, inventory, skills)
 {
     public override Player Player
     {
@@ -25,7 +26,7 @@ public sealed class ObservedHealthController(byte[] serializedState, ObservedPla
         return false;
     }
 
-    public override bool ApplyItem(Item item, GStruct382<EBodyPart> bodyPart, float? amount = null)
+    public override bool ApplyItem(Item item, OneAndList<EBodyPart> bodyPart, float? amount = null)
     {
         return false;
     }
@@ -38,68 +39,68 @@ public sealed class ObservedHealthController(byte[] serializedState, ObservedPla
     public void PauseAllEffects()
     {
         EffectHandler handler = new(this);
-        for (var i = List_1.Count - 1; i >= 0; i--)
+        for (var i = _effects.Count - 1; i >= 0; i--)
         {
-            handler.PausedEffects.Add(List_1[i]);
-            var gstruct = Gclass835_0.Withdraw();
-            gstruct.SaveInfo(List_1[i].Id, List_1[i].HealthController, List_1[i].Type, List_1[i].BodyPart, List_1[i].Strength,
-                List_1[i].CurrentStrength, List_1[i].DelayTime, List_1[i].StateTime, List_1[i].WorkStateTime, List_1[i].BuildUpTime,
-                List_1[i].ResidueTime, List_1[i].State);
-            method_0(List_1[i]);
-            List_1[i].ForceRemove();
+            handler.PausedEffects.Add(_effects[i]);
+            var gstruct = _effectsInfoPool.Withdraw();
+            gstruct.SaveInfo(_effects[i].Id, _effects[i].HealthController, _effects[i].Type, _effects[i].BodyPart, _effects[i].Strength,
+                _effects[i].CurrentStrength, _effects[i].DelayTime, _effects[i].StateTime, _effects[i].WorkStateTime, _effects[i].BuildUpTime,
+                _effects[i].ResidueTime, _effects[i].State);
+            RemoveEffectFromBodyPart(_effects[i]);
+            _effects[i].ForceRemove();
             handler.PausedEffectsInfo.Add(gstruct);
         }
 
-        Action_2 = new Action(handler.UnpauseEffects);
+        _unpauseEffectsAction = new Action(handler.UnpauseEffects);
     }
 
-    public override Profile.ProfileHealthClass Store(Profile.ProfileHealthClass health = null)
+    public override Profile.HealthInfo Store(Profile.HealthInfo health = null)
     {
-        Profile.ProfileHealthClass profileHealthClass;
+        Profile.HealthInfo profileHealthClass;
         if ((profileHealthClass = health) == null)
         {
-            Profile.ProfileHealthClass profileHealthClass2 = new()
+            Profile.HealthInfo profileHealthClass2 = new()
             {
-                BodyParts = GClass866<EBodyPart>.GetDictWith<Profile.ProfileHealthClass.ProfileBodyPartHealthClass>(),
-                Energy = new Profile.ProfileHealthClass.ValueInfo
+                BodyParts = EnumHelper<EBodyPart>.GetDictWith<Profile.HealthInfo.BodyPartInfo>(),
+                Energy = new Profile.HealthInfo.ValueInfo
                 {
-                    Current = HealthValue_0.Current,
-                    Minimum = HealthValue_0.Minimum,
-                    Maximum = HealthValue_0.Maximum
+                    Current = healthValue_0.Current,
+                    Minimum = healthValue_0.Minimum,
+                    Maximum = healthValue_0.Maximum
                 },
-                Hydration = new Profile.ProfileHealthClass.ValueInfo
+                Hydration = new Profile.HealthInfo.ValueInfo
                 {
-                    Current = HealthValue_1.Current,
-                    Minimum = HealthValue_1.Minimum,
-                    Maximum = HealthValue_1.Maximum
+                    Current = healthValue_1.Current,
+                    Minimum = healthValue_1.Minimum,
+                    Maximum = healthValue_1.Maximum
                 },
-                Temperature = new Profile.ProfileHealthClass.ValueInfo
+                Temperature = new Profile.HealthInfo.ValueInfo
                 {
-                    Current = HealthValue_2.Current,
-                    Minimum = HealthValue_2.Minimum,
-                    Maximum = HealthValue_2.Maximum
+                    Current = healthValue_2.Current,
+                    Minimum = healthValue_2.Minimum,
+                    Maximum = healthValue_2.Maximum
                 }
             };
             profileHealthClass = profileHealthClass2;
-            profileHealthClass2.Poison = new Profile.ProfileHealthClass.ValueInfo
+            profileHealthClass2.Poison = new Profile.HealthInfo.ValueInfo
             {
-                Current = HealthValue_3.Current,
-                Minimum = HealthValue_3.Minimum,
-                Maximum = HealthValue_3.Maximum
+                Current = healthValue_3.Current,
+                Minimum = healthValue_3.Minimum,
+                Maximum = healthValue_3.Maximum
             };
         }
         health = profileHealthClass;
-        foreach (var keyValuePair in Dictionary_0)
+        foreach (var keyValuePair in BodyState)
         {
             keyValuePair.Deconstruct(out var ebodyPart, out var bodyPartState);
             var ebodyPart2 = ebodyPart;
             var bodyPartState2 = bodyPartState;
             if (!health.BodyParts.TryGetValue(ebodyPart2, out var gclass))
             {
-                gclass = new Profile.ProfileHealthClass.ProfileBodyPartHealthClass();
+                gclass = new Profile.HealthInfo.BodyPartInfo();
                 health.BodyParts.Add(ebodyPart2, gclass);
             }
-            gclass.Health = new Profile.ProfileHealthClass.ValueInfo
+            gclass.Health = new Profile.HealthInfo.ValueInfo
             {
                 Current = bodyPartState2.Health.Current,
                 Maximum = bodyPartState2.Health.Maximum
@@ -107,9 +108,9 @@ public sealed class ObservedHealthController(byte[] serializedState, ObservedPla
             gclass.Effects ??= [];
         }
 
-        foreach (var gclass in IReadOnlyList_0)
+        foreach (var gclass in Effects)
         {
-            if (gclass is GInterface333 && gclass.State != EEffectState.Residued) // We only resync effects that are in-game effects, check for GClass increments, e.g. Dehydration or Exhaustion
+            if (gclass is IRestorable && gclass.State != EEffectState.Residued) // We only resync effects that are in-game effects, check for GClass increments, e.g. Dehydration or Exhaustion
             {
                 var gclass2 = health.BodyParts[gclass.BodyPart];
                 gclass2.Effects ??= [];
@@ -126,8 +127,8 @@ public sealed class ObservedHealthController(byte[] serializedState, ObservedPla
     private class EffectHandler(ObservedHealthController healthController)
     {
         private readonly ObservedHealthController _healthController = healthController;
-        public readonly List<NetworkBodyEffectsAbstractClass> PausedEffects = [];
-        public readonly List<PausedEffectsStruct> PausedEffectsInfo = [];
+        public readonly List<NetworkHealthController.Effect> PausedEffects = [];
+        public readonly List<EffectInfoStorage> PausedEffectsInfo = [];
 
         public void UnpauseEffects()
         {
@@ -139,7 +140,7 @@ public sealed class ObservedHealthController(byte[] serializedState, ObservedPla
                     PausedEffectsInfo[i].BuildUpTime, PausedEffectsInfo[i].ResidueStateTime, PausedEffectsInfo[i].State);
                 _healthController.AddEffectToList(PausedEffects[i]);
                 PausedEffects[i].UnPauseEffect();
-                _healthController.Gclass835_0.Return(PausedEffectsInfo[i]);
+                _healthController._effectsInfoPool.Return(PausedEffectsInfo[i]);
             }
         }
     }

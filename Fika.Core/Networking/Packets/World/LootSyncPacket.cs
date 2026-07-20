@@ -2,7 +2,7 @@
 
 public struct LootSyncPacket : INetSerializable
 {
-    public LootSyncStruct Data;
+    public EFT.LootSyncPacket Data;
 
     public void Deserialize(NetDataReader reader)
     {

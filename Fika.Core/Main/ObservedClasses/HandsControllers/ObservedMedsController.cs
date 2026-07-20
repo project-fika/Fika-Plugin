@@ -1,5 +1,7 @@
 ﻿// © 2026 Lacyway All Rights Reserved
 
+using EFT.HealthSystem;
+using EFT.NetworkPackets;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -27,9 +29,9 @@ internal sealed class ObservedMedsController : Player.MedsController
         }
     }
 
-    public static ObservedMedsController Create(FikaPlayer player, Item item, GStruct382<EBodyPart> bodyParts, float amount, int animationVariant)
+    public static ObservedMedsController Create(FikaPlayer player, Item item, OneAndList<EBodyPart> bodyParts, float amount, int animationVariant)
     {
-        var controller = smethod_6<ObservedMedsController>(player, item, bodyParts, amount, animationVariant);
+        var controller = CreateController<ObservedMedsController>(player, item, bodyParts, amount, animationVariant);
         var action = (Action)_onOutUseAction.GetValue(controller);
         _onOutUseAction.SetValue(controller, FikaGlobals.ClearDelegates(action));
         controller._fikaPlayer = player;
@@ -41,7 +43,7 @@ internal sealed class ObservedMedsController : Player.MedsController
     {
         return new Dictionary<Type, OperationFactoryDelegate> {
             {
-                typeof(ObservedMedsControllerClass),
+                typeof(Player.MedsController.MedsInHandsOperation),
                 new OperationFactoryDelegate(GetObservedMedsOperation)
             },
             {
@@ -94,7 +96,7 @@ internal sealed class ObservedMedsController : Player.MedsController
         ObservedOperation.HideObservedWeapon();
     }
 
-    private Player.BaseAnimationOperationClass GetObservedMedsOperation()
+    private Player.ObjectInHandsOperation GetObservedMedsOperation()
     {
         return new ObservedMedsOperation(this);
     }
@@ -124,7 +126,7 @@ internal sealed class ObservedMedsController : Player.MedsController
         ObservedOperation.HideObservedWeaponComplete();
     }
 
-    private sealed class ObservedMedsOperation(Player.MedsController controller) : ObservedMedsControllerClass(controller)
+    private sealed class ObservedMedsOperation(Player.MedsController controller) : Player.MedsController.MedsInHandsOperation(controller)
     {
         private readonly ObservedMedsController _observedMedsController = (ObservedMedsController)controller;
         private int _animation;
@@ -151,10 +153,10 @@ internal sealed class ObservedMedsController : Player.MedsController
             }
         }
 
-        public void HealthController_EffectRemovedEvent(IEffect effect)
+        public void HealthController_EffectRemovedEvent(IHealthEffect effect)
         {
             // Look for GClass increments
-            if (effect is not GInterface376)
+            if (effect is not IMedEffect)
             {
                 return;
             }

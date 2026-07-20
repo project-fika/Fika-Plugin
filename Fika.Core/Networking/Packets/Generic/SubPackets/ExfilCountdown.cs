@@ -1,4 +1,5 @@
 ﻿using Comfort.Common;
+using CommonAssets.Scripts.Game;
 using EFT.Interactive;
 using Fika.Core.Main.GameMode;
 using Fika.Core.Main.Players;
@@ -36,7 +37,7 @@ public sealed class ExfilCountdown : IPoolSubPacket
             return;
         }
 
-        if (ExfiltrationControllerClass.Instance != null)
+        if (ExfiltrationController.Instance != null)
         {
             var fikaGame = Singleton<IFikaGame>.Instance;
             if (fikaGame == null)
@@ -45,7 +46,7 @@ public sealed class ExfilCountdown : IPoolSubPacket
                 return;
             }
 
-            var exfilController = ExfiltrationControllerClass.Instance;
+            var exfilController = ExfiltrationController.Instance;
             foreach (var exfiltrationPoint in exfilController.ExfiltrationPoints)
             {
                 if (exfiltrationPoint.Settings.Name == ExfilName)

@@ -2,6 +2,7 @@
 
 using EFT;
 using EFT.InventoryLogic;
+using EFT.NetworkPackets;
 using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
@@ -18,9 +19,9 @@ internal sealed class HandsControllerFactory(ObservedPlayer player, Item item = 
     public ObservedPlayer Player = player;
     public Item Item = item;
     public KnifeComponent KnifeComponent = knifeComponent;
-    public MedsItemClass MedsItem;
-    public FoodDrinkItemClass FoodItem;
-    public GStruct382<EBodyPart> BodyParts;
+    public Meds MedsItem;
+    public FoodDrink FoodItem;
+    public OneAndList<EBodyPart> BodyParts;
     public float Amount;
     public int AnimationVariant;
 
@@ -45,7 +46,7 @@ internal sealed class HandsControllerFactory(ObservedPlayer player, Item item = 
     /// <returns>A new <see cref="ObservedGrenadeController"/> or null if the action failed.</returns>
     public Player.GrenadeHandsController CreateObservedGrenadeController()
     {
-        if (Item is ThrowWeapItemClass grenade)
+        if (Item is ThrowWeap grenade)
         {
             return ObservedGrenadeController.Create(Player, grenade);
         }
@@ -60,7 +61,7 @@ internal sealed class HandsControllerFactory(ObservedPlayer player, Item item = 
     /// <returns>A new <see cref="ObservedQuickGrenadeController"/> or null if the action failed.</returns>
     public Player.QuickGrenadeThrowHandsController CreateObservedQuickGrenadeController()
     {
-        if (Item is ThrowWeapItemClass grenade)
+        if (Item is ThrowWeap grenade)
         {
             return ObservedQuickGrenadeController.Create(Player, grenade);
         }

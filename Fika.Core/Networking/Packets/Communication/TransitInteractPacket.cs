@@ -1,11 +1,12 @@
-﻿using JsonType;
+﻿using EFT;
+using JsonType;
 
 namespace Fika.Core.Networking.Packets.Communication;
 
 public struct TransitInteractPacket : INetSerializable
 {
     public int NetId;
-    public TransitInteractionPacketStruct Data;
+    public InteractWithTransitPacket Data;
 
     public void Deserialize(NetDataReader reader)
     {

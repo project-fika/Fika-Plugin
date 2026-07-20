@@ -1,6 +1,7 @@
 ﻿// © 2026 Lacyway All Rights Reserved
 
 using EFT;
+using EFT.HealthSystem;
 using EFT.InventoryLogic;
 using EFT.UI;
 using EFT.UI.Screens;
@@ -11,7 +12,7 @@ using Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
 namespace Fika.Core.Main.ClientClasses;
 
-public sealed class ClientHealthController(Profile.ProfileHealthClass healthInfo, Player player, InventoryController inventoryController, SkillManager skillManager, bool aiHealth) : GClass3010(healthInfo, player, inventoryController, skillManager, aiHealth)
+public sealed class ClientHealthController(Profile.HealthInfo healthInfo, Player player, InventoryController inventoryController, SkillManager skillManager, bool aiHealth) : PlayerHealthController(healthInfo, player, inventoryController, skillManager, aiHealth)
 {
     public bool ReviveEnabled { get; } = FikaPlugin.Instance.Settings.ReviveConfig.Enabled;
     public bool Downed { get; internal set; }
@@ -44,7 +45,7 @@ public sealed class ClientHealthController(Profile.ProfileHealthClass healthInfo
 
     public void EnableMetabolism()
     {
-        Boolean_0 = false;
+        MetabolismDisabled = false;
     }
 
     /// <summary>
@@ -80,9 +81,9 @@ public sealed class ClientHealthController(Profile.ProfileHealthClass healthInfo
         return false;
     }
 
-    public override void SendNetworkSyncPacket(NetworkHealthSyncPacketStruct packet)
+    public override void SendNetworkSyncPacket(SyncHealthPacket packet)
     {
-        if (packet.SyncType == NetworkHealthSyncPacketStruct.ESyncType.IsAlive && !packet.Data.IsAlive.IsAlive)
+        if (packet.SyncType == SyncHealthPacket.ESyncType.IsAlive && !packet.Data.IsAlive.IsAlive)
         {
             if (!TryProcessDownedState())
             {
@@ -91,7 +92,7 @@ public sealed class ClientHealthController(Profile.ProfileHealthClass healthInfo
             return;
         }
 
-        if (packet.SyncType is NetworkHealthSyncPacketStruct.ESyncType.ApplyDamage)
+        if (packet.SyncType is SyncHealthPacket.ESyncType.ApplyDamage)
         {
             return;
         }
@@ -161,7 +162,7 @@ public sealed class ClientHealthController(Profile.ProfileHealthClass healthInfo
             return false;
         }
 
-        CurrentScreenSingletonClass.Instance.ToggleScreen(EEftScreenType.Inventory);
+        EftScreenManager.Instance.ToggleScreen(EEftScreenType.Inventory);
 
         RestoreBodyPartNoEvents(EBodyPart.Head); // prevent blacked out head
         RestoreBodyPartNoEvents(EBodyPart.Chest); // prevent blacked out chest
@@ -178,15 +179,15 @@ public sealed class ClientHealthController(Profile.ProfileHealthClass healthInfo
     /// <remarks>Mainly used to prevent instantly broken limbs after revive</remarks>
     private void RemoveAllBleedEffects()
     {
-        for (var i = IReadOnlyList_0.Count - 1; i >= 0; i--)
+        for (var i = Effects.Count - 1; i >= 0; i--)
         {
-            if (IReadOnlyList_0[i] is HeavyBleeding heavyBleeding)
+            if (Effects[i] is HeavyBleeding heavyBleeding)
             {
                 heavyBleeding.ForceRemove();
                 continue;
             }
 
-            if (IReadOnlyList_0[i] is LightBleeding lightBleeding)
+            if (Effects[i] is LightBleeding lightBleeding)
             {
                 lightBleeding.ForceRemove();
             }
@@ -195,14 +196,14 @@ public sealed class ClientHealthController(Profile.ProfileHealthClass healthInfo
 
     private void RestoreBodyPartNoEvents(EBodyPart bodyPart)
     {
-        var limb = Dictionary_0[bodyPart];
+        var limb = BodyState[bodyPart];
         if (limb.IsDestroyed)
         {
             limb.IsDestroyed = false;
             limb.Health.Current = 1f;
 
-            method_44(bodyPart, EDamageType.Medicine);
-            method_36(bodyPart);
+            NetworkSyncDestroyedBodyPart(bodyPart, EDamageType.Medicine);
+            NetworkSyncBodyHealth(bodyPart);
         }
     }
 }

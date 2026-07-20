@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Diz.LanguageExtensions;
+using System.Collections.Generic;
 using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
@@ -9,8 +10,8 @@ using Fika.Core.Networking.Packets.Communication;
 
 namespace Fika.Core.Main.ObservedClasses;
 
-public class ObservedQuestController(Profile profile, InventoryController inventoryController, IPlayerSearchController searchController, IQuestActions session)
-    : GClass4007(profile, inventoryController, searchController, session)
+public class ObservedQuestController(Profile profile, InventoryController inventoryController, IPlayerSearchController searchController, IQuestSession session)
+    : QuestControllerClientLocalGame(profile, inventoryController, searchController, session)
 {
     private Dictionary<int, List<QuestInformation>> _quests;
     private List<ZoneDropInformation> _zoneDrops;
@@ -145,18 +146,18 @@ public class ObservedQuestController(Profile profile, InventoryController invent
         return true;
     }
 
-    public override void ManageConditional(QuestClass conditional)
+    public override void ManageConditional(Quest conditional)
     {
         // do nothing
     }
 
     public override void Dispose()
     {
-        CompositeDisposableClass.Dispose();
+        _disposable.Dispose();
         ConditionalBook.Dispose();
         foreach (var quest in ConditionalBook)
         {
-            method_3(quest);
+            RemovedConditionalHandlers(quest);
         }
     }
 
@@ -167,23 +168,23 @@ public class ObservedQuestController(Profile profile, InventoryController invent
             case InRaidQuestPacket.InraidQuestType.Finish:
                 {
                     FikaGlobals.LogInfo($"Processing {packet.Items.Count} items from quest reward for {Profile.Info.MainProfileNickname}");
-                    List<QuestRewardDataClass> readList = [];
+                    List<QuestReward> readList = [];
                     foreach (var item in packet.Items)
                     {
                         readList.Add(new()
                         {
                             items = item,
-                            MongoID_0 = MongoID.Generate(true),
+                            _stashId = MongoID.Generate(true),
                             type = ERewardType.Item
                         });
                     }
 
                     var generatedItems = 0;
-                    List<GClass3411> results = [];
-                    GStruct153 appendResult = default;
+                    List<MoveResult> results = [];
+                    OperationResult appendResult = default;
                     foreach (var item in readList)
                     {
-                        appendResult = item.TryAppendClaimResults(InventoryController_0, results, out var clonedCount);
+                        appendResult = item.TryAppendClaimResults(InventoryController, results, out var clonedCount);
                         generatedItems += clonedCount;
                         if (appendResult.Failed)
                         {
@@ -195,7 +196,7 @@ public class ObservedQuestController(Profile profile, InventoryController invent
                         results.RollBack();
                         for (var i = 0; i < generatedItems; i++)
                         {
-                            InventoryController_0.RollBack();
+                            InventoryController.RollBack();
                         }
                         return;
                     }
@@ -219,11 +220,11 @@ public class ObservedQuestController(Profile profile, InventoryController invent
                         itemsToRemove.Add(result.Value);
                     }
 
-                    List<GStruct154<GClass3408>> list = [];
-                    GStruct154<GClass3408> discardResult = default;
+                    List<OperationResult<DiscardResult>> list = [];
+                    OperationResult<DiscardResult> discardResult = default;
                     for (var i = 0; i < itemsToRemove.Count; i++)
                     {
-                        discardResult = InteractionsHandlerClass.Discard(itemsToRemove[i], InventoryController_0, false);
+                        discardResult = ItemManipulator.Discard(itemsToRemove[i], InventoryController, false);
                         if (discardResult.Failed)
                         {
                             break;

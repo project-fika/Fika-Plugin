@@ -1,4 +1,5 @@
-﻿using EFT.Communications;
+﻿using EFT;
+using EFT.Communications;
 using Fika.Core.Main.Utils;
 using JsonType;
 using Newtonsoft.Json;
@@ -6,7 +7,7 @@ using static Fika.Core.UI.FikaUIGlobals;
 
 namespace Fika.Core.Networking.Websocket.Notifications;
 
-public class StartRaidNotification : NotificationAbstractClass
+public class StartRaidNotification : Notification
 {
     public override ENotificationIconType Icon
     {

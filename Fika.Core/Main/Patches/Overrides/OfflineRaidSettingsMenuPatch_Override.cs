@@ -34,7 +34,7 @@ public sealed class OfflineRaidSettingsMenuPatch_Override : ModulePatch
         var captionText = __instance.gameObject.transform.GetChild(0).GetChild(1).GetComponent<LocalizedText>();
         if (captionText != null)
         {
-            captionText.method_2(LocaleUtils.UI_COOP_RAID_SETTINGS.Localized());
+            captionText.SetLabelText(LocaleUtils.UI_COOP_RAID_SETTINGS.Localized());
         }
 
         // Reset this one as otherwise it sticks
@@ -86,7 +86,7 @@ public sealed class OfflineRaidSettingsMenuPatch_Override : ModulePatch
         }
 
         // Remove redundant settings and add our own "Random" to make the setting clear, while also renaming index 0 to "Together"
-        var labelList = Traverse.Create(____playersSpawnPlaceDropdown).Field<List<BaseDropDownBox.Struct1160>>("list_0").Value;
+        var labelList = Traverse.Create(____playersSpawnPlaceDropdown).Field<List<BaseDropDownBox.DropDownItem>>("_values").Value;
         labelList.Clear();
         labelList.Add(new()
         {
@@ -162,7 +162,7 @@ public sealed class OfflineRaidSettingsMenuPatch_Override : ModulePatch
         }
 
         FikaBackendUtils.CustomRaidSettings.UseCustomWeather = enabled;
-        _instance.method_4();
+        _instance.UpdateRaidSettings();
     }
 }
 

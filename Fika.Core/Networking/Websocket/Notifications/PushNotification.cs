@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace Fika.Core.Networking.Websocket.Notifications;
 
-public class PushNotification : NotificationAbstractClass
+public class PushNotification : Notification
 {
     //Todo: We can eventually implement more stuff here for users to use such as the notification duration and it's color.
     public override ENotificationIconType Icon

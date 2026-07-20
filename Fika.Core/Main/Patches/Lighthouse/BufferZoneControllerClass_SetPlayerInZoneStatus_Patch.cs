@@ -12,8 +12,8 @@ public class BufferZoneControllerClass_SetPlayerInZoneStatus_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(BufferZoneControllerClass)
-            .GetMethod(nameof(BufferZoneControllerClass.SetPlayerInZoneStatus));
+        return typeof(BufferZoneController)
+            .GetMethod(nameof(BufferZoneController.SetPlayerInZoneStatus));
     }
 
     [PatchPostfix]

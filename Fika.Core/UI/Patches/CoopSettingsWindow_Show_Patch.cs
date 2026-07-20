@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using EFT;
 using EFT.UI;
 using EFT.UI.Matchmaker;
 using Fika.Core.Main.Utils;
@@ -19,7 +20,7 @@ public class CoopSettingsWindow_Show_Patch : ModulePatch
         var localizedText = __instance.gameObject.transform.GetChild(0).GetChild(0).GetChild(1).GetComponent<LocalizedText>();
         if (localizedText != null)
         {
-            localizedText.method_2(LocaleUtils.UI_COOP_RAID_SETTINGS.Localized());
+            localizedText.SetLabelText(LocaleUtils.UI_COOP_RAID_SETTINGS.Localized());
         }
     }
 }

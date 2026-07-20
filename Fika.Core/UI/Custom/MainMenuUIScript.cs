@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EFT.Communications;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -58,7 +59,7 @@ public class MainMenuUIScript : MonoBehaviour
     private DateTime _lastRefresh;
     private DateTime _lastSet;
     private RectTransform _transformToScale;
-    private GInterface225<RaidSettings> _backendSession;
+    private IMatchmakerSession<RaidSettings> _backendSession;
 
     private bool _joinInProgress;
     private readonly object _joinInProgressLock = new();
@@ -278,7 +279,7 @@ public class MainMenuUIScript : MonoBehaviour
                         }
 
                         var tarkovAppTraverse = Traverse.Create(tarkovApplication);
-                        var mmc = tarkovAppTraverse.Field<MainMenuControllerClass>("mainMenuControllerClass").Value;
+                        var mmc = tarkovAppTraverse.Field<MainMenuShowOperation>("_menuOperation").Value;
 
 #if !DEBUG
                         if (location.AccessKeys.Length > 0 && information.Side is ESideType.Pmc)
@@ -290,7 +291,7 @@ public class MainMenuUIScript : MonoBehaviour
                                 var item = playerItems.FirstOrDefault(i => mmc.InventoryController.Examined(i) && location.AccessKeys.Contains(i.StringTemplateId));
                                 if (item == null)
                                 {
-                                    NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.MISSING_KEY_FOR_LOCATION.Localized(),
+                                    NotificationManager.DisplayMessageNotification(string.Format(LocaleUtils.MISSING_KEY_FOR_LOCATION.Localized(),
                                         $"{location.AccessKeys[0]} Name".Localized()),
                                         iconType: EFT.Communications.ENotificationIconType.Alert);
                                     JoinInProgress = false;
@@ -300,7 +301,7 @@ public class MainMenuUIScript : MonoBehaviour
                         }
 #endif
 
-                        NotificationManagerClass.DisplayMessageNotification(LocaleUtils.CONNECTING_TO_SESSION.Localized(),
+                        NotificationManager.DisplayMessageNotification(LocaleUtils.CONNECTING_TO_SESSION.Localized(),
                             iconType: EFT.Communications.ENotificationIconType.EntryPoint);
                         using var pingingClient = await NetManagerUtils.CreatePingingClient();
 
@@ -356,7 +357,7 @@ public class MainMenuUIScript : MonoBehaviour
 
                             FikaBackendUtils.IsScav = raidSettings.IsScav;
 
-                            var controller = mmc.MatchmakerPlayerControllerClass;
+                            var controller = mmc.MatchmakerPlayersController;
 
                             if (raidSettings.Side is ESideType.Savage && ScavBlocked(session, out var minutesLeft))
                             {
@@ -367,11 +368,11 @@ public class MainMenuUIScript : MonoBehaviour
                             }
 
                             tarkovAppTraverse.Field<RaidSettings>("_raidSettings").Value = raidSettings;
-                            controller.MatchingStartTime = EFTDateTimeClass.Now;
+                            controller.MatchingStartTime = DateTimeExtensions.Now;
 
                             try
                             {
-                                await tarkovApplication.method_41(raidSettings.TimeAndWeatherSettings);
+                                await tarkovApplication.LocalGameMatching(raidSettings.TimeAndWeatherSettings);
                             }
                             catch (Exception ex)
                             {
@@ -394,9 +395,9 @@ public class MainMenuUIScript : MonoBehaviour
         }
     }
 
-    private bool ScavBlocked(ISession session, out double remainingMinutes)
+    private bool ScavBlocked(IEftSession session, out double remainingMinutes)
     {
-        var utcNowUnixInt = EFTDateTimeClass.UtcNowUnixInt;
+        var utcNowUnixInt = DateTimeExtensions.UtcNowUnixInt;
         var diffSeconds = session.ProfileOfPet.Info.SavageLockTime - (double)utcNowUnixInt;
 
         if (diffSeconds > 0.0d)

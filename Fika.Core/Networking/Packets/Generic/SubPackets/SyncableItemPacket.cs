@@ -1,5 +1,6 @@
 ﻿using Comfort.Common;
 using EFT;
+using EFT.Ballistics;
 using EFT.Interactive;
 using Fika.Core.Main.ClientClasses;
 using Fika.Core.Main.Players;
@@ -62,7 +63,7 @@ public sealed class SyncableItemPacket : IPoolSubPacket
         {
             if (Singleton<GameWorld>.Instance.Windows.TryGetByKey(NetId, out var windowBreaker))
             {
-                DamageInfoStruct damageInfoStruct = new()
+                DamageInfo damageInfoStruct = new()
                 {
                     HitPoint = HitPoint
                 };

@@ -1,4 +1,7 @@
-﻿using System;
+﻿using CommonAssets.Scripts.Game;
+using EFT.Airdrop;
+using EFT.BufferZone;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -32,19 +35,19 @@ public class FikaHostGameWorld : ClientLocalGameWorld
     public FikaHostWorld FikaHostWorld { get; private set; }
     public Dictionary<int, Turnable> TurnablesDict => Turnables;
 
-    public static FikaHostGameWorld Create(GameObject gameObject, PoolManagerClass objectsFactory, EUpdateQueue updateQueue, string currentProfileId)
+    public static FikaHostGameWorld Create(GameObject gameObject, ObjectsFactory objectsFactory, EUpdateQueue updateQueue, string currentProfileId)
     {
         var gameWorld = gameObject.AddComponent<FikaHostGameWorld>();
         gameWorld.ObjectsFactory = objectsFactory;
-        Traverse.Create(gameWorld).Field<EUpdateQueue>("eupdateQueue_0").Value = updateQueue;
+        Traverse.Create(gameWorld).Field<EUpdateQueue>("_updateQueue").Value = updateQueue;
         gameWorld.SpeakerManager = gameObject.AddComponent<SpeakerManager>();
-        gameWorld.ExfiltrationController = new ExfiltrationControllerClass();
-        gameWorld.BufferZoneController = new BufferZoneControllerClass();
+        gameWorld.ExfiltrationController = new ExfiltrationController();
+        gameWorld.BufferZoneController = new BufferZoneController();
         gameWorld.CurrentProfileId = currentProfileId;
         gameWorld.UnityTickListener = GameWorldUnityTickListener.Create(gameObject, gameWorld);
         gameWorld.AudioSourceCulling = gameObject.GetOrAddComponent<AudioSourceCulling>();
         gameWorld.FikaHostWorld = FikaHostWorld.Create(gameWorld);
-        gameWorld.FikaHostWorld.method_0();
+        gameWorld.FikaHostWorld.RegisterNetworkInteractionObjects();
         Singleton<FikaHostGameWorld>.Create(gameWorld);
         return gameWorld;
     }
@@ -79,13 +82,13 @@ public class FikaHostGameWorld : ClientLocalGameWorld
         // Do nothing
     }
 
-    public override GrenadeFactoryClass CreateGrenadeFactory()
+    public override GrenadeFactory CreateGrenadeFactory()
     {
         return new HostGrenadeFactory();
     }
 
-    public override async Task InitLevel(ItemFactoryClass itemFactory, ObjectsFactoryDataClass config, bool loadBundlesAndCreatePools = true,
-        List<ResourceKey> resources = null, IProgress<LoadingProgressStruct> progress = null, CancellationToken ct = default)
+    public override async Task InitLevel(ItemFactory itemFactory, ObjectsFactoryConfig config, bool loadBundlesAndCreatePools = true,
+        List<ResourceKey> resources = null, IProgress<InitLevelProgress> progress = null, CancellationToken ct = default)
     {
         await base.InitLevel(itemFactory, config, loadBundlesAndCreatePools, resources, progress, ct);
         MineManager.OnExplosion += OnMineExplode;
@@ -116,23 +119,23 @@ public class FikaHostGameWorld : ClientLocalGameWorld
 
     public override void InitAirdrop(string lootTemplateId = null, bool takeNearbyPoint = false, Vector3 position = default)
     {
-        var gameObject = method_20(takeNearbyPoint, position);
+        var gameObject = TakeAirdropPoint(takeNearbyPoint, position);
         if (gameObject == null)
         {
             FikaGlobals.LogError("There are no airdrop points here!");
             return;
         }
         var synchronizableObject = ClientSynchronizableObjectLogicProcessor.TakeFromPool(SynchronizableObjectType.AirPlane);
-        if (synchronizableObject.Logic is AirplaneLogicClass airplaneLogicClass && airplaneLogicClass.offlineMode)
+        if (synchronizableObject.Logic is ClientAirPlane airplaneLogicClass && airplaneLogicClass.offlineMode)
         {
             airplaneLogicClass.OfflineServerLogic.ContainerTemplateId = lootTemplateId;
         }
         ClientSynchronizableObjectLogicProcessor.InitSyncObject(synchronizableObject, gameObject.transform.position, Vector3.forward, -1);
     }
 
-    public override SyncObjectProcessorClass SyncObjectProcessorFactory()
+    public override SynchronizableObjectLogicProcessor SyncObjectProcessorFactory()
     {
-        ClientSynchronizableObjectLogicProcessor = new SynchronizableObjectLogicProcessorClass
+        ClientSynchronizableObjectLogicProcessor = new ClientSynchronizableObjectLogicProcessor
         {
             TripwireManager = new(Singleton<GameWorld>.Instance)
         };
@@ -141,7 +144,7 @@ public class FikaHostGameWorld : ClientLocalGameWorld
 
     public override void PlantTripwire(Item item, string profileId, Vector3 fromPosition, Vector3 toPosition)
     {
-        if (item is not ThrowWeapItemClass grenadeClass)
+        if (item is not ThrowWeap grenadeClass)
         {
             return;
         }
@@ -149,7 +152,7 @@ public class FikaHostGameWorld : ClientLocalGameWorld
         if (SynchronizableObjectLogicProcessor.TripwireManager == null)
         {
             FikaGlobals.LogError("TripwireManager was null! Creating new...");
-            SynchronizableObjectLogicProcessor.TripwireManager = new GClass2649(this);
+            SynchronizableObjectLogicProcessor.TripwireManager = new TripwireManager(this);
         }
 
         var tripwireSynchronizableObject = (TripwireSynchronizableObject)SynchronizableObjectLogicProcessor.TakeFromPool(SynchronizableObjectType.Tripwire);
@@ -158,7 +161,7 @@ public class FikaHostGameWorld : ClientLocalGameWorld
         tripwireSynchronizableObject.SetupGrenade(grenadeClass, profileId, fromPosition, toPosition);
         SynchronizableObjectLogicProcessor.TripwireManager.AddTripwire(tripwireSynchronizableObject);
         var vector = (fromPosition + toPosition) * 0.5f;
-        Singleton<BotEventHandler>.Instance.PlantTripwire(tripwireSynchronizableObject, vector);
+        Singleton<GlobalEventDispatcher>.Instance.PlantTripwire(tripwireSynchronizableObject, vector);
 
         SpawnSyncObjectPacket packet = new()
         {
@@ -181,7 +184,7 @@ public class FikaHostGameWorld : ClientLocalGameWorld
 
     public override void TriggerTripwire(TripwireSynchronizableObject tripwire)
     {
-        AirplaneDataPacketStruct packet = new()
+        SynchronizableObjectPacket packet = new()
         {
             ObjectType = SynchronizableObjectType.Tripwire,
             ObjectId = tripwire.ObjectId,
@@ -204,7 +207,7 @@ public class FikaHostGameWorld : ClientLocalGameWorld
 
     public override void DeActivateTripwire(TripwireSynchronizableObject tripwire)
     {
-        AirplaneDataPacketStruct packet = new()
+        SynchronizableObjectPacket packet = new()
         {
             ObjectType = SynchronizableObjectType.Tripwire,
             ObjectId = tripwire.ObjectId,

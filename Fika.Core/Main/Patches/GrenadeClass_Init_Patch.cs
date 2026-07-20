@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using EFT.InventoryLogic;
+using System.Reflection;
 using Comfort.Common;
 using Fika.Core.Main.GameMode;
 using SPT.Reflection.Patching;
@@ -12,12 +13,12 @@ public class GrenadeClass_Init_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(GrenadeFactoryClass)
-            .GetMethod(nameof(GrenadeFactoryClass.Create));
+        return typeof(GrenadeFactory)
+            .GetMethod(nameof(GrenadeFactory.Create));
     }
 
     [PatchPostfix]
-    public static void Postfix(ThrowWeapItemClass item)
+    public static void Postfix(ThrowWeap item)
     {
         var fikaGame = Singleton<IFikaGame>.Instance;
         if (fikaGame != null)

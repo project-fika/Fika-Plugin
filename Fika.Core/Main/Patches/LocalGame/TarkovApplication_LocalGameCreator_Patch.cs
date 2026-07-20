@@ -1,4 +1,10 @@
-﻿using System;
+﻿using Diz.Resources;
+using EFT.Ballistics;
+using EFT.Communications;
+using EFT.UI.Matchmaker;
+using EFT.Utilities;
+using JsonType;
+using System;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -30,15 +36,15 @@ public sealed class TarkovApplication_LocalGameCreator_Patch : ModulePatch
     protected override MethodBase GetTargetMethod()
     {
         return typeof(TarkovApplication)
-            .GetMethod(nameof(TarkovApplication.method_49));
+            .GetMethod(nameof(TarkovApplication.LocalGameCreate));
     }
 
     [PatchPrefix]
     public static bool Prefix(ref Task __result, TarkovApplication __instance, TimeAndWeatherSettings timeAndWeather,
         RaidSettings ____raidSettings, InputTree ____inputTree, GameDateTime ____localGameDateTime,
-        float ____fixedDeltaTime, MetricsEventsClass metricsEvents,
-        MetricsConfigClass metricsConfig, GameWorld gameWorld, MainMenuControllerClass ___mainMenuControllerClass,
-        CompositeDisposableClass ___compositeDisposableClass, BundleLockClass ___BundleLock)
+        float ____fixedDeltaTime, ClientMetricsEvents metricsEvents,
+        ClientMetricsConfig metricsConfig, GameWorld gameWorld, MainMenuShowOperation ___mainMenuControllerClass,
+        CompositeDisposable ___compositeDisposableClass, BundleLock ___BundleLock)
     {
 #if DEBUG
         Logger.LogInfo("TarkovApplication_LocalGameCreator_Patch:Prefix");
@@ -53,9 +59,9 @@ public sealed class TarkovApplication_LocalGameCreator_Patch : ModulePatch
 
     public static async Task CreateFikaGame(TarkovApplication instance, TimeAndWeatherSettings timeAndWeather,
         RaidSettings raidSettings, InputTree inputTree, GameDateTime localGameDateTime, float fixedDeltaTime,
-        MetricsEventsClass metricsEvents, MetricsConfigClass metricsConfig,
-        GameWorld gameWorld, MainMenuControllerClass ___mainMenuController,
-        CompositeDisposableClass compositeDisposableClass, BundleLockClass bundleLock)
+        ClientMetricsEvents metricsEvents, ClientMetricsConfig metricsConfig,
+        GameWorld gameWorld, MainMenuShowOperation ___mainMenuController,
+        CompositeDisposable compositeDisposableClass, BundleLock bundleLock)
     {
         var isServer = FikaBackendUtils.IsServer;
         var isTransit = FikaBackendUtils.IsTransit;
@@ -84,9 +90,9 @@ public sealed class TarkovApplication_LocalGameCreator_Patch : ModulePatch
 
         metricsEvents.SetGamePrepared();
 
-        if (Singleton<NotificationManagerClass>.Instantiated)
+        if (Singleton<NotificationManager>.Instantiated)
         {
-            Singleton<NotificationManagerClass>.Instance.Deactivate();
+            Singleton<NotificationManager>.Instance.Deactivate();
         }
 
         var session = instance.Session;
@@ -100,7 +106,7 @@ public sealed class TarkovApplication_LocalGameCreator_Patch : ModulePatch
 
         profile.Inventory.Stash = null;
         profile.Inventory.QuestStashItems = null;
-        profile.Inventory.DiscardLimits = Singleton<ItemFactoryClass>.Instance.GetDiscardLimits();
+        profile.Inventory.DiscardLimits = Singleton<ItemFactory>.Instance.GetDiscardLimits();
 
 #if DEBUG
         Logger.LogInfo("TarkovApplication_LocalGameCreator_Patch:Postfix: Attempt to set Raid Settings");
@@ -131,11 +137,11 @@ public sealed class TarkovApplication_LocalGameCreator_Patch : ModulePatch
             transitionType = raidSettings.transitionType
         };
         var applicationTraverse = Traverse.Create(instance);
-        applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value = localRaidSettings;
+        applicationTraverse.Field<LocalRaidSettings>("_localRaidSettings").Value = localRaidSettings;
 
         var localSettings = await instance.Session.LocalRaidStarted(localRaidSettings);
         raidSettings.BotSettings.ExcludedBosses = localSettings.excludedBosses;
-        var raidSettingsToUpdate = applicationTraverse.Field<LocalRaidSettings>("localRaidSettings_0").Value;
+        var raidSettingsToUpdate = applicationTraverse.Field<LocalRaidSettings>("_localRaidSettings").Value;
         var escapeTimeLimit = raidSettings.IsScav ? RaidChangesUtil.NewEscapeTimeMinutes : raidSettings.SelectedLocation.EscapeTimeLimit;
         raidSettings.SelectedLocation = localSettings.locationLoot;
         raidSettings.SelectedLocation.EscapeTimeLimit = escapeTimeLimit;
@@ -155,7 +161,7 @@ public sealed class TarkovApplication_LocalGameCreator_Patch : ModulePatch
 
         if (!isServer)
         {
-            instance.MatchmakerPlayerControllerClass.UpdateMatchingStatus("Joining coop game...");
+            instance.Matchmaker.UpdateMatchingStatus("Joining coop game...");
 
             RaidSettingsRequest data = new();
             var raidSettingsResponse = await FikaRequestHandler.GetRaidSettings(data);
@@ -175,7 +181,7 @@ public sealed class TarkovApplication_LocalGameCreator_Patch : ModulePatch
         }
         else
         {
-            instance.MatchmakerPlayerControllerClass.UpdateMatchingStatus("Hosting coop game...");
+            instance.Matchmaker.UpdateMatchingStatus("Hosting coop game...");
             Singleton<FikaServer>.Instance.LocationReceived = true;
         }
 
@@ -193,7 +199,7 @@ public sealed class TarkovApplication_LocalGameCreator_Patch : ModulePatch
             MonoBehaviourSingleton<GameUI>.Instance, raidSettings.SelectedLocation,
             timeAndWeather, raidSettings.WavesSettings, raidSettings.SelectedDateTime, startHandler.HandleStop,
             fixedDeltaTime, instance.PlayerUpdateQueue, instance.Session, raidLimits, metricsEvents,
-            new MetricsCollectorClass(metricsConfig, instance), localRaidSettings, raidSettings);
+            new ClientMetricsCollector(metricsConfig, instance), localRaidSettings, raidSettings);
 
         startHandler.CoopGame = coopGame;
 
@@ -203,7 +209,7 @@ public sealed class TarkovApplication_LocalGameCreator_Patch : ModulePatch
         metricsEvents.SetGameCreated();
         FikaEventDispatcher.DispatchEvent(new AbstractGameCreatedEvent(coopGame));
 
-        ScreenUpdater updater = new(instance.MatchmakerPlayerControllerClass, coopGame);
+        ScreenUpdater updater = new(instance.Matchmaker, coopGame);
         if (!isServer)
         {
             coopGame.SetMatchmakerStatus("Coop game joined");
@@ -246,17 +252,17 @@ public sealed class TarkovApplication_LocalGameCreator_Patch : ModulePatch
     }
 
     private class StartHandler(TarkovApplication tarkovApplication, Profile pmcProfile, Profile scavProfile,
-        LocationSettingsClass.Location location)
+        LocationSettings.Location location)
     {
         private readonly TarkovApplication _tarkovApplication = tarkovApplication;
         private readonly Profile _pmcProfile = pmcProfile;
         private readonly Profile _scavProfile = scavProfile;
-        private readonly LocationSettingsClass.Location _location = location;
+        private readonly LocationSettings.Location _location = location;
         public CoopGame CoopGame;
 
-        public void HandleStop(Result<ExitStatus, TimeSpan, MetricsClass> result)
+        public void HandleStop(Result<ExitStatus, TimeSpan, ClientMetrics> result)
         {
-            _tarkovApplication.method_52(_pmcProfile.Id, _scavProfile, _location, result);
+            _tarkovApplication.OnGameEnd(_pmcProfile.Id, _scavProfile, _location, result);
         }
 
         public void ReleaseSingleton()
@@ -277,7 +283,7 @@ public sealed class TarkovApplication_LocalGameCreator_Patch : ModulePatch
         // Small delay to ensure the teleport command is processed first
         await Task.Delay(250);
 
-        DamageInfoStruct damageInfo = new()
+        DamageInfo damageInfo = new()
         {
             Damage = 1000,
             DamageType = EDamageType.Impact
@@ -290,10 +296,10 @@ public sealed class TarkovApplication_LocalGameCreator_Patch : ModulePatch
 
 internal class ScreenUpdater : IDisposable
 {
-    private readonly MatchmakerPlayerControllerClass _matchmakerPlayerControllerClass;
+    private readonly MatchmakerPlayersController _matchmakerPlayerControllerClass;
     private readonly CoopGame _coopGame;
 
-    public ScreenUpdater(MatchmakerPlayerControllerClass controller, CoopGame game)
+    public ScreenUpdater(MatchmakerPlayersController controller, CoopGame game)
     {
         _matchmakerPlayerControllerClass = controller;
         _coopGame = game;

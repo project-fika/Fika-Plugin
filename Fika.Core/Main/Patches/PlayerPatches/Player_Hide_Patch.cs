@@ -13,7 +13,7 @@ public class Player_Hide_Patch : ModulePatch
     }
 
     [PatchPrefix]
-    public static bool Prefix(LocalPlayerCullingHandlerClass ___localPlayerCullingHandlerClass)
+    public static bool Prefix(OfflinePlayerCulling ___localPlayerCullingHandlerClass)
     {
         ___localPlayerCullingHandlerClass.Hide();
         return false;

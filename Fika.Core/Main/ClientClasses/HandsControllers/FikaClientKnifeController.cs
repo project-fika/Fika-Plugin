@@ -11,6 +11,7 @@ using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.FirearmController;
 using Fika.Core.Networking.Packets.FirearmController.SubPackets;
 using Fika.Core.Networking.Packets.World;
+using KnifePacket = Fika.Core.Networking.Packets.FirearmController.SubPackets.KnifePacket;
 
 namespace Fika.Core.Main.ClientClasses.HandsControllers;
 
@@ -21,7 +22,7 @@ public class FikaClientKnifeController : Player.KnifeController
 
     public static FikaClientKnifeController Create(FikaPlayer player, KnifeComponent item)
     {
-        var controller = smethod_9<FikaClientKnifeController>(player, item);
+        var controller = CreateController<FikaClientKnifeController>(player, item);
         controller._fikaPlayer = player;
         controller._packet = new()
         {
@@ -98,14 +99,14 @@ public class FikaClientKnifeController : Player.KnifeController
         _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
     }
 
-    public override ShotInfoClass vmethod_0(Player.GStruct182 hit, BallisticCollider ballisticCollider)
+    public override PlayerHitInfo ProcessHit(Player.KnifeRaycastHit hit, BallisticCollider ballisticCollider)
     {
         if (FikaBackendUtils.IsServer)
         {
-            return base.vmethod_0(hit, ballisticCollider);
+            return base.ProcessHit(hit, ballisticCollider);
         }
 
-        var shotInfo = base.vmethod_0(hit, ballisticCollider);
+        var shotInfo = base.ProcessHit(hit, ballisticCollider);
         if (ballisticCollider == null || ballisticCollider.HitType == EHitType.Default)
         {
             return shotInfo;

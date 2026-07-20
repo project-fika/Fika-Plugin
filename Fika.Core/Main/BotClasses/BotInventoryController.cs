@@ -11,6 +11,7 @@ using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
 using Fika.Core.Networking.Pooling;
 using JetBrains.Annotations;
+using Diz.LanguageExtensions;
 using static EFT.Player;
 
 namespace Fika.Core.Main.BotClasses;
@@ -30,9 +31,9 @@ public sealed class BotInventoryController : PlayerInventoryController
     public BotInventoryController(Player player, Profile profile, bool examined, MongoID currentId, ushort nextOperationId) : base(player, profile, examined)
     {
         _fikaBot = (FikaBot)player;
-        MongoID_0 = currentId;
-        Ushort_0 = nextOperationId;
-        PlayerSearchController = new BotSearchControllerClass(profile);
+        _currentId = currentId;
+        _nextOperationId = nextOperationId;
+        PlayerSearchController = new BotSearchController(profile);
         _botInventoryOperationHandlerPool = BotInventoryOperationHandlerPool.Instance;
     }
 
@@ -61,7 +62,7 @@ public sealed class BotInventoryController : PlayerInventoryController
         _botInventoryOperationHandlerPool.ReturnHandler(handler);
     }
 
-    public override void vmethod_1(BaseInventoryOperationClass operation, [CanBeNull] Callback callback)
+    public override void Execute(EFT.InventoryLogic.Operations.AbstractOperation operation, [CanBeNull] Callback callback)
     {
 #if DEBUG
         FikaGlobals.LogInfo($"Sending bot operation {operation.GetType()} from {_fikaBot.Profile.Nickname}");
@@ -74,19 +75,19 @@ public sealed class BotInventoryController : PlayerInventoryController
     /// <summary>
     /// Override to not replicate the tripwire
     /// </summary>
-    public override void PlantTripwire(ThrowWeapItemClass grenade, PlantingKitsItemClass plantingKit, Vector3 fromPosition, Vector3 toPosition, Callback callback = null)
+    public override void PlantTripwire(ThrowWeap grenade, PlantingKit plantingKit, Vector3 fromPosition, Vector3 toPosition, Callback callback = null)
     {
-        var gstruct = InteractionsHandlerClass.SimulatePlantTripwire(this, grenade, plantingKit);
+        var gstruct = ItemManipulator.SimulatePlantTripwire(this, grenade, plantingKit);
         if (!gstruct.Failed)
         {
-            HandleOperation(new GClass3492(method_12(), this, gstruct.Value, fromPosition, toPosition, _fikaBot), callback)
+            HandleOperation(new PlantTripwireOperation(GetAndIncrementNextOperationId(), this, gstruct.Value, fromPosition, toPosition, _fikaBot), callback)
                 .HandleExceptions();
             return;
         }
         callback?.Invoke(gstruct.ToResult());
     }
 
-    private async Task HandleOperation(BaseInventoryOperationClass operation, Callback callback)
+    private async Task HandleOperation(EFT.InventoryLogic.Operations.AbstractOperation operation, Callback callback)
     {
         if (_fikaBot.HealthController.IsAlive)
         {
@@ -95,15 +96,15 @@ public sealed class BotInventoryController : PlayerInventoryController
         RunBotOperation(operation, callback);
     }
 
-    private void RunBotOperation(BaseInventoryOperationClass operation, Callback callback)
+    private void RunBotOperation(EFT.InventoryLogic.Operations.AbstractOperation operation, Callback callback)
     {
         var handler = _botInventoryOperationHandlerPool.Get();
         handler.Set(this, operation, callback);
         try
         {
-            if (vmethod_0(operation))
+            if (CanExecute(operation))
             {
-                handler.Operation.method_1(handler.HandleResult);
+                handler.Operation.Execute(handler.HandleResult);
                 return;
             }
             handler.Operation.Dispose();
@@ -115,8 +116,8 @@ public sealed class BotInventoryController : PlayerInventoryController
         }
     }
 
-    public override SearchContentOperation vmethod_2(SearchableItemItemClass item)
+    public override SearchContentOperation CreateSearchOperation(SearchableItem item)
     {
-        return new SearchContentOperationResultClass(method_12(), this, PlayerSearchController, Profile, item);
+        return new SinglePlayerSearchContentOperation(GetAndIncrementNextOperationId(), this, PlayerSearchController, Profile, item);
     }
 }

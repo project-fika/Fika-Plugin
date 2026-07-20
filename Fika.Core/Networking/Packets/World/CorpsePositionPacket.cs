@@ -1,8 +1,10 @@
-﻿namespace Fika.Core.Networking.Packets.World;
+﻿using EFT;
+using JsonType;
+namespace Fika.Core.Networking.Packets.World;
 
 public struct CorpsePositionPacket : INetSerializable
 {
-    public RagdollPacketStruct Data;
+    public CorpseSyncPacket Data;
 
     public void Deserialize(NetDataReader reader)
     {
@@ -15,7 +17,7 @@ public struct CorpsePositionPacket : INetSerializable
 
         if (Data.Done)
         {
-            Data.TransformSyncs = new GStruct138[12];
+            Data.TransformSyncs = new TransformSync[12];
             for (var i = 0; i < 12; i++)
             {
                 Data.TransformSyncs[i] = new()

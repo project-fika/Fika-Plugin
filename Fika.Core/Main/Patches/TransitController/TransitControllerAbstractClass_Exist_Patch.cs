@@ -10,13 +10,13 @@ public class TransitControllerAbstractClass_Exist_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(TransitControllerAbstractClass)
-            .GetMethod(nameof(TransitControllerAbstractClass.Exist))
-            .MakeGenericMethod(typeof(TransitInteractionControllerAbstractClass));
+        return typeof(EFT.TransitController)
+            .GetMethod(nameof(EFT.TransitController.Exist))
+            .MakeGenericMethod(typeof(EFT.ClientTransitController));
     }
 
     [PatchPrefix]
-    public static bool Prefix(ref bool __result, ref TransitControllerAbstractClass transitController)
+    public static bool Prefix(ref bool __result, ref EFT.TransitController transitController)
     {
         if (FikaGlobals.IsInRaid)
         {

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Diz.Binding;
+using EFT.Settings.Sound;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using Dissonance;
@@ -13,7 +15,7 @@ class FikaVOIPController : IPlayerVoipController, IDisposable
 {
     private static readonly TimeSpan _hearingDetectionTime = TimeSpan.FromSeconds(2.0);
 
-    public FikaVOIPController(FikaPlayer localPlayer, SoundSettingsControllerClass soundSettings)
+    public FikaVOIPController(FikaPlayer localPlayer, SoundSettingsGroup soundSettings)
     {
         var voipState = localPlayer.VoipState;
         LocalPlayer = localPlayer;
@@ -96,7 +98,7 @@ class FikaVOIPController : IPlayerVoipController, IDisposable
             SetDefaultMicrophone();
             return;
         }
-        if (SoundSettingsControllerClass.IsValidMicrophone(device))
+        if (SoundSettingsGroup.IsValidMicrophone(device))
         {
             FikaGlobals.LogInfo($"VoipMicrophone set device: {device}");
             DissonanceComms.MicrophoneName = device;
@@ -108,7 +110,7 @@ class FikaVOIPController : IPlayerVoipController, IDisposable
 
     private void SetDefaultMicrophone()
     {
-        var defaultMicrophone = SoundSettingsControllerClass.DefaultMicrophone;
+        var defaultMicrophone = SoundSettingsGroup.DefaultMicrophone;
         if (defaultMicrophone != null)
         {
             FikaGlobals.LogInfo($"VoipMicrophone set default: {defaultMicrophone}");
@@ -339,7 +341,7 @@ class FikaVOIPController : IPlayerVoipController, IDisposable
 
         public override EVoipControllerStatus StopTalk()
         {
-            LimitChecker.InsertTimeState(struct510.DateTime_1, EFTDateTimeClass.UtcNow);
+            LimitChecker.InsertTimeState(struct510.DateTime_1, DateTimeExtensions.UtcNow);
             return Controller.method_3(Controller._readyState);
         }
 
@@ -353,7 +355,7 @@ class FikaVOIPController : IPlayerVoipController, IDisposable
 
         private void method_0()
         {
-            var utcNow = EFTDateTimeClass.UtcNow;
+            var utcNow = DateTimeExtensions.UtcNow;
             LimitChecker.InsertTimeState(struct510.DateTime_1, utcNow);
             Controller.method_3(Controller._limitedState);
         }
@@ -470,7 +472,7 @@ class FikaVOIPController : IPlayerVoipController, IDisposable
     private Struct510 method_8()
     {
         var num = 0;
-        var utcNow = EFTDateTimeClass.UtcNow;
+        var utcNow = DateTimeExtensions.UtcNow;
         var dateTime = utcNow;
         var dateTime2 = dateTime;
         var timeSpan = TimeSpan.Zero;
@@ -514,7 +516,7 @@ class FikaVOIPController : IPlayerVoipController, IDisposable
     private DateTime? _nullable_0;
 
     public FikaPlayer LocalPlayer { get; set; }
-    public SoundSettingsControllerClass SoundSettings { get; set; }
+    public SoundSettingsGroup SoundSettings { get; set; }
 
     public DissonanceComms DissonanceComms
     {
@@ -529,9 +531,9 @@ class FikaVOIPController : IPlayerVoipController, IDisposable
     public TimeSpan SpeakingSecondsLimit { get; set; }
     public TimeSpan SpeakDelayBetweenLimit { get; set; }
 
-    public BindableStateClass<EVoipControllerStatus> Status { get; }
-    public BindableStateClass<bool> HasInteraction { get; }
-    public BindableStateClass<bool> TalkDetected { get; }
+    public BindableState<EVoipControllerStatus> Status { get; }
+    public BindableState<bool> HasInteraction { get; }
+    public BindableState<bool> TalkDetected { get; }
     public TimeSpan TimeToNextStatus
     {
         get
@@ -548,11 +550,11 @@ class FikaVOIPController : IPlayerVoipController, IDisposable
     private readonly BlockedState _blockedState;
     private readonly BannedState _bannedState;
     private VOIPState _currentState;
-    private readonly CompositeDisposableClass _compositeDisposableClass = new(2);
+    private readonly CompositeDisposable _compositeDisposableClass = new(2);
 
     public void method_2()
     {
-        _nullable_0 = new DateTime?(EFTDateTimeClass.UtcNow);
+        _nullable_0 = new DateTime?(DateTimeExtensions.UtcNow);
     }
 
     public EVoipControllerStatus method_3(VOIPState state)
@@ -638,7 +640,7 @@ class FikaVOIPController : IPlayerVoipController, IDisposable
 
     public void method_12()
     {
-        var timeSpan = EFTDateTimeClass.UtcNow - LocalPlayer.HearingDateTime;
+        var timeSpan = DateTimeExtensions.UtcNow - LocalPlayer.HearingDateTime;
         var flag = timeSpan <= _hearingDetectionTime;
         TalkDetected.Value = flag;
         if (!flag)
@@ -646,7 +648,7 @@ class FikaVOIPController : IPlayerVoipController, IDisposable
             return;
         }
         var timeSpan2 = _hearingDetectionTime - timeSpan;
-        _nullable_0 = new DateTime?(EFTDateTimeClass.UtcNow + timeSpan2);
+        _nullable_0 = new DateTime?(DateTimeExtensions.UtcNow + timeSpan2);
         HasInteraction.Value = true;
     }
 
@@ -676,7 +678,7 @@ class FikaVOIPController : IPlayerVoipController, IDisposable
                 return;
             }
 
-            var dateTime = EFTDateTimeClass.UtcNow - _interval;
+            var dateTime = DateTimeExtensions.UtcNow - _interval;
             var num = _timeStates.Count - 1;
             while (num >= 0 && !(_timeStates[num].To >= dateTime))
             {
@@ -726,7 +728,7 @@ class FikaVOIPController : IPlayerVoipController, IDisposable
             {
                 return true;
             }
-            var dateTime = EFTDateTimeClass.UtcNow - _activationsInterval;
+            var dateTime = DateTimeExtensions.UtcNow - _activationsInterval;
             var from = _timeStates[(_activationsLimit - 1)].From;
             return dateTime >= from;
         }
@@ -756,13 +758,13 @@ class FikaVOIPController : IPlayerVoipController, IDisposable
 
         public Struct510(in DateTime dateTime)
         {
-            DateTime_1 = EFTDateTimeClass.UtcNow;
+            DateTime_1 = DateTimeExtensions.UtcNow;
             Created = dateTime;
         }
 
         public Struct510(in TimeSpan timeSpan)
         {
-            DateTime_1 = EFTDateTimeClass.UtcNow;
+            DateTime_1 = DateTimeExtensions.UtcNow;
             Created = DateTime_1 + timeSpan;
         }
 
@@ -782,7 +784,7 @@ class FikaVOIPController : IPlayerVoipController, IDisposable
         {
             get
             {
-                var timeSpan = Created - EFTDateTimeClass.UtcNow;
+                var timeSpan = Created - DateTimeExtensions.UtcNow;
                 if (!(timeSpan > TimeSpan.Zero))
                 {
                     return TimeSpan.Zero;
@@ -813,7 +815,7 @@ class FikaVOIPController : IPlayerVoipController, IDisposable
 
     public void method_1()
     {
-        if (_nullable_0 != null && !(_nullable_0.Value > EFTDateTimeClass.UtcNow))
+        if (_nullable_0 != null && !(_nullable_0.Value > DateTimeExtensions.UtcNow))
         {
             _nullable_0 = null;
             HasInteraction.Value = false;

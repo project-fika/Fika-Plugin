@@ -18,19 +18,19 @@ public class FikaClientQuickKnifeController : Player.QuickKnifeKickController
 
     public static FikaClientQuickKnifeController Create(FikaPlayer player, KnifeComponent item)
     {
-        var controller = smethod_9<FikaClientQuickKnifeController>(player, item);
+        var controller = CreateController<FikaClientQuickKnifeController>(player, item);
         controller._fikaPlayer = player;
         return controller;
     }
 
-    public override ShotInfoClass vmethod_0(Player.GStruct182 hit, BallisticCollider ballisticCollider)
+    public override PlayerHitInfo ProcessHit(Player.KnifeRaycastHit hit, BallisticCollider ballisticCollider)
     {
         if (FikaBackendUtils.IsServer)
         {
-            return base.vmethod_0(hit, ballisticCollider);
+            return base.ProcessHit(hit, ballisticCollider);
         }
 
-        var shotInfo = base.vmethod_0(hit, ballisticCollider);
+        var shotInfo = base.ProcessHit(hit, ballisticCollider);
         if (ballisticCollider == null || ballisticCollider.HitType == EHitType.Default)
         {
             return shotInfo;

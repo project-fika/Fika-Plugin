@@ -1,5 +1,7 @@
 ﻿// © 2026 Lacyway All Rights Reserved
 
+using EFT.Ballistics;
+using EFT.CameraControl;
 using System;
 using System.Collections.Generic;
 using Comfort.Common;
@@ -26,7 +28,7 @@ public sealed class FikaHealthBar : MonoBehaviour
     /// <see cref="ActiveHealthController.Wound"/>, <see cref="ActiveHealthController.Encumbered"/>, <see cref="ActiveHealthController.OverEncumbered"/>, <br/>
     /// <see cref="ActiveHealthController.MildMusclePain"/>, <see cref="ActiveHealthController.SevereMusclePain"/>
     /// </summary>
-    private static readonly Type[] _ignoredTypes = [typeof(GInterface362), typeof(GInterface364), typeof(GInterface365), typeof(GInterface379), typeof(GInterface380)];
+    private static readonly Type[] _ignoredTypes = [typeof(IWound), typeof(IEncumbered), typeof(IOverEncumbered), typeof(IMildMusclePain), typeof(ISevereMusclePain)];
 
     private const float _tweenLength = 0.25f;
 
@@ -245,7 +247,7 @@ public sealed class FikaHealthBar : MonoBehaviour
         _alphaGroup = _playerPlate.AlphaGroup;
         _plateRectTransform = _playerPlate.ScalarObjectScreen.GetComponent<RectTransform>();
         _playerPlate.SetNameText(_currentPlayer.Profile.Info.MainProfileNickname);
-        _camera = CameraClass.Instance.Camera;
+        _camera = CameraManager.Instance.Camera;
         if (FikaPlugin.DevelopersList.ContainsKey(_currentPlayer.Profile.Nickname.ToLower()))
         {
             _playerPlate.playerNameScreen.color = new Color(0, 6f, 1, 1);
@@ -366,7 +368,7 @@ public sealed class FikaHealthBar : MonoBehaviour
         UpdateHealth();
     }
 
-    private void HealthController_EffectRemovedEvent(IEffect effect)
+    private void HealthController_EffectRemovedEvent(IHealthEffect effect)
     {
         for (var i = 0; i < _effects.Count; i++)
         {
@@ -384,7 +386,7 @@ public sealed class FikaHealthBar : MonoBehaviour
         }
     }
 
-    private void HealthController_EffectAddedEvent(IEffect effect)
+    private void HealthController_EffectAddedEvent(IHealthEffect effect)
     {
         AddEffect(effect);
     }
@@ -428,7 +430,7 @@ public sealed class FikaHealthBar : MonoBehaviour
         UpdateHealth();
     }
 
-    private void HealthController_HealthChangedEvent(EBodyPart bodyPart, float arg2, DamageInfoStruct arg3)
+    private void HealthController_HealthChangedEvent(EBodyPart bodyPart, float arg2, DamageInfo arg3)
     {
         UpdateHealth();
     }
@@ -451,7 +453,7 @@ public sealed class FikaHealthBar : MonoBehaviour
     }
     #endregion
 
-    private void AddEffect(IEffect effect)
+    private void AddEffect(IHealthEffect effect)
     {
         for (var i = 0; i < _ignoredTypes.Length; i++)
         {
@@ -675,7 +677,7 @@ public sealed class FikaHealthBar : MonoBehaviour
 
         private GameObject _effectObject;
 
-        public void Init(GameObject initObject, IEffect effect, Sprite effectSprite)
+        public void Init(GameObject initObject, IHealthEffect effect, Sprite effectSprite)
         {
             _effectObject = initObject;
             _effectObject.SetActive(true);

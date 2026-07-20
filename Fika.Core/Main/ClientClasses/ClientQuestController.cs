@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Diz.LanguageExtensions;
+using JsonType;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
 using Comfort.Common;
@@ -10,11 +12,12 @@ using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Backend;
 using Fika.Core.Networking.Packets.Communication;
+using Diz.Utils;
 
 namespace Fika.Core.Main.ClientClasses;
 
-public class ClientQuestController(Profile profile, InventoryController inventoryController, IPlayerSearchController searchController, IQuestActions session, FikaPlayer player)
-    : GClass4007(profile, inventoryController, searchController, session)
+public class ClientQuestController(Profile profile, InventoryController inventoryController, IPlayerSearchController searchController, IQuestSession session, FikaPlayer player)
+    : QuestControllerClientLocalGame(profile, inventoryController, searchController, session)
 {
     protected readonly FikaPlayer _player = player;
     protected bool _canSendAndReceive;
@@ -36,7 +39,7 @@ public class ClientQuestController(Profile profile, InventoryController inventor
         _sendQuestSync = enabled;
     }
 
-    private void InventoryController_AddItemEvent(GEventArgs2 eventArgs)
+    private void InventoryController_AddItemEvent(AddItemEventArgs eventArgs)
     {
         if (eventArgs.Status != CommandStatus.Succeed || !_isClient || !_sendQuestSync)
         {
@@ -97,7 +100,7 @@ public class ClientQuestController(Profile profile, InventoryController inventor
         Singleton<FikaClient>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
     }
 
-    public override void OnConditionValueChanged(QuestClass conditional, EQuestStatus status, Condition condition, bool notify = true)
+    public override void OnConditionValueChanged(Quest conditional, EQuestStatus status, Condition condition, bool notify = true)
     {
         base.OnConditionValueChanged(conditional, status, condition, notify);
         if (_isClient && _sendQuestSync)
@@ -121,9 +124,9 @@ public class ClientQuestController(Profile profile, InventoryController inventor
         }
     }
 
-    public override async Task<GStruct154<GStruct426<QuestClass>>> FinishQuest(QuestClass quest, bool runNetworkTransaction)
+    public override async Task<OperationResult<ConditionalFinishResult<Quest>>> FinishQuest(Quest quest, bool runNetworkTransaction)
     {
-        List<FlatItemsDataClass[]> items = [];
+        List<FlatItem[]> items = [];
         var hasRewards = false;
         if (quest.Rewards.TryGetValue(EQuestStatus.Success, out var list))
         {
@@ -153,7 +156,7 @@ public class ClientQuestController(Profile profile, InventoryController inventor
         return finishResult;
     }
 
-    public override async Task<IResult> HandoverItem(QuestClass quest, ConditionItem condition, Item[] items, bool runNetworkTransaction)
+    public override async Task<IResult> HandoverItem(Quest quest, ConditionItem condition, Item[] items, bool runNetworkTransaction)
     {
         List<MongoID> itemIds = [];
         var hasNonQuestItem = false;
@@ -230,7 +233,7 @@ public class ClientQuestController(Profile profile, InventoryController inventor
     private void LootReconnectQuestItem(MongoID itemId)
     {
         var gameWorld = (FikaClientGameWorld)_player.GameWorld;
-        var lootItems = (List<LootItemPositionClass>)typeof(GameWorld)
+        var lootItems = (List<JsonLootItem>)typeof(GameWorld)
             .GetField("list_1", BindingFlags.NonPublic | BindingFlags.Instance)
             .GetValue(gameWorld);
 
@@ -248,9 +251,9 @@ public class ClientQuestController(Profile profile, InventoryController inventor
             {
                 var item = gameWorld.CreateReconnectQuestItem(lootItem, true, _player);
                 var playerInventory = _player.InventoryController;
-                var pickupResult = InteractionsHandlerClass.QuickFindAppropriatePlace(item, playerInventory,
+                var pickupResult = ItemManipulator.QuickFindAppropriatePlace(item, playerInventory,
                     playerInventory.Inventory.Equipment.ToEnumerable(),
-                    InteractionsHandlerClass.EMoveItemOrder.PickUp, true);
+                    ItemManipulator.EMoveItemOrder.PickUp, true);
 
                 if (pickupResult.Succeeded && playerInventory.CanExecute(pickupResult.Value))
                 {

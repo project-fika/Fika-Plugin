@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using EFT.UI;
+using System.Linq;
 using System.Reflection;
 using EFT;
 using Fika.Core.Main.Components;
@@ -11,14 +12,14 @@ internal sealed class GetActionsClass_GetAvailableActions_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(GetActionsClass)
+        return typeof(InteractionContextHelper)
             .GetMethods()
-            .First(x => x.Name == nameof(GetActionsClass.GetAvailableActions)
+            .First(x => x.Name == nameof(InteractionContextHelper.GetAvailableActions)
                 && x.GetParameters()[0].ParameterType.Equals(typeof(GamePlayerOwner)));
     }
 
     [PatchPrefix]
-    public static bool Prefix(GamePlayerOwner owner, GInterface177 interactive, ref ActionsReturnClass __result)
+    public static bool Prefix(GamePlayerOwner owner, IInteractive interactive, ref AvailableInteractionState __result)
     {
         if (interactive is not ReviveInteractable reviveInteractable)
         {

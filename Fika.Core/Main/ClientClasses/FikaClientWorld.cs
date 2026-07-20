@@ -12,8 +12,8 @@ namespace Fika.Core.Main.ClientClasses;
 /// </summary>
 public class FikaClientWorld : World
 {
-    public List<LootSyncStruct> LootSyncPackets;
-    public List<AirplaneDataPacketStruct> SyncObjectPackets;
+    public List<EFT.LootSyncPacket> LootSyncPackets;
+    public List<SynchronizableObjectPacket> SyncObjectPackets;
     public WorldPacket WorldPacket;
 
     private FikaClientGameWorld _clientGameWorld;
@@ -44,7 +44,7 @@ public class FikaClientWorld : World
         _clientGameWorld.ClientSynchronizableObjectLogicProcessor.ProcessSyncObjectPackets(SyncObjectPackets);
     }
 
-    public void AddLootSyncStruct(LootSyncStruct syncStruct)
+    public void AddLootSyncStruct(EFT.LootSyncPacket syncStruct)
     {
         if (WorldPacket.LootSyncStructs.Count >= 8)
         {
@@ -76,7 +76,7 @@ public class FikaClientWorld : World
         }
     }
 
-    public void UpdateLootItems(GClass818<int, LootItem> lootItems)
+    public void UpdateLootItems(DictionaryListHydra<int, LootItem> lootItems)
     {
         for (var i = LootSyncPackets.Count - 1; i >= 0; i--)
         {

@@ -77,7 +77,7 @@ public class ObservedMovementContext : MovementContext
         }
         if (Platform == null)
         {
-            method_8(deltaTime);
+            DampPlatformMotion(deltaTime);
         }
     }
 
@@ -169,7 +169,7 @@ public class ObservedMovementContext : MovementContext
 
         CheckFlying(deltaTime);
         SmoothPoseLevel(deltaTime);
-        method_13(deltaTime);
+        SmoothTilt(deltaTime);
     }
 
     public override void UpdateGroundCollision(float deltaTime)
@@ -198,10 +198,10 @@ public class ObservedMovementContext : MovementContext
         var y = TransformPosition.y;
         if (IsGrounded)
         {
-            var fallHeight = StartFallingHeight - y;
-            var jumpHeight = y - StartFlyHeight;
-            StartFallingHeight = y;
-            if (!PreviousGroundResult)
+            var fallHeight = _startFallingHeight - y;
+            var jumpHeight = y - _startFlyHeight;
+            _startFallingHeight = y;
+            if (!_previousGroundResult)
             {
                 FreefallTime = 0f;
                 OnGrounded?.Invoke(fallHeight, jumpHeight);
@@ -212,17 +212,17 @@ public class ObservedMovementContext : MovementContext
         else
         {
             FreefallTime += deltaTime;
-            if (PreviousGroundResult)
+            if (_previousGroundResult)
             {
-                StartFlyHeight = y;
+                _startFlyHeight = y;
             }
-            if (y > StartFallingHeight)
+            if (y > _startFallingHeight)
             {
-                StartFallingHeight = y;
+                _startFallingHeight = y;
             }
         }
 
-        PreviousGroundResult = IsGrounded;
+        _previousGroundResult = IsGrounded;
     }
 
     public override void WeightRelatedValuesUpdated()
@@ -260,17 +260,17 @@ public class ObservedMovementContext : MovementContext
 
     public override void SmoothPoseLevel(float deltaTime)
     {
-        var num = Math.Abs(SmoothedPoseLevel - PoseLevel_1);
+        var num = Math.Abs(SmoothedPoseLevel - _poseLevel);
         if (num < 1E-45f)
         {
             return;
         }
         if (num > 0.001f)
         {
-            SmoothedPoseLevel = Mathf.Lerp(SmoothedPoseLevel, PoseLevel_1, deltaTime * EFTHardSettings.Instance.POSE_CHANGING_SPEED * TransitionSpeed);
+            SmoothedPoseLevel = Mathf.Lerp(SmoothedPoseLevel, _poseLevel, deltaTime * EFTHardSettings.Instance.POSE_CHANGING_SPEED * TransitionSpeed);
             return;
         }
-        SmoothedPoseLevel = PoseLevel_1;
+        SmoothedPoseLevel = _poseLevel;
     }
 
     public override void SetStationaryWeapon(Action<Player.AbstractHandsController, Player.AbstractHandsController> callback)
@@ -284,9 +284,9 @@ public class ObservedMovementContext : MovementContext
         OnHandsControllerChanged += handler.HandleSwap;
     }
 
-    public override void DropStationary(StationaryPacketStruct.EStationaryCommand command)
+    public override void DropStationary(StationaryWeaponPacket.EStationaryCommand command)
     {
-        if (command is StationaryPacketStruct.EStationaryCommand.Leave)
+        if (command is StationaryWeaponPacket.EStationaryCommand.Leave)
         {
             PlayerAnimatorSetStationary(false);
             RotationAction = DefaultRotationFunction;

@@ -32,7 +32,7 @@ public sealed class StationaryPacket : IPoolSubPacket
     {
         var stationaryWeapon = Command == EStationaryCommand.Occupy
             ? Singleton<GameWorld>.Instance.FindStationaryWeapon(Id) : null;
-        player.ObservedStationaryInteract(stationaryWeapon, (StationaryPacketStruct.EStationaryCommand)Command);
+        player.ObservedStationaryInteract(stationaryWeapon, (StationaryWeaponPacket.EStationaryCommand)Command);
     }
 
     public void Serialize(NetDataWriter writer)

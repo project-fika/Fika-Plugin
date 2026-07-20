@@ -71,7 +71,7 @@ public class FikaPlugin : BaseUnityPlugin
     internal FikaNotificationManager NotificationManager { get; set; }
 
 #if RELEASE || GOLDMASTER
-    private static readonly Version _requiredServerVersion = new("2.3.5");
+    private static readonly System.Version _requiredServerVersion = new("2.3.5");
 #endif
     private PatchManager _patchManager;
     private TarkovApplication _tarkovApp;
@@ -134,7 +134,7 @@ public class FikaPlugin : BaseUnityPlugin
 
         BundleLoaderPlugin = new();
 
-        BotSettingsRepoClass.Init();
+        WildSpawnTypeExtension.Init();
 
         BotDifficulties = FikaRequestHandler.GetBotDifficulties();
         ConsoleScreen.Processor.RegisterCommandGroup<FikaCommands>();
@@ -184,7 +184,7 @@ public class FikaPlugin : BaseUnityPlugin
     {
         var version = FikaRequestHandler.CheckServerVersion().Version;
         var failed = true;
-        if (Version.TryParse(version, out var serverVersion))
+        if (System.Version.TryParse(version, out var serverVersion))
         {
             if (serverVersion >= _requiredServerVersion)
             {

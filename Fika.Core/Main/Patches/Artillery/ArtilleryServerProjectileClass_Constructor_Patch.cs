@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using CommonAssets.Scripts.ArtilleryShelling;
+using System.Linq;
 using System.Reflection;
 using Comfort.Common;
 using Fika.Core.Main.GameMode;
@@ -10,11 +11,11 @@ public class ArtilleryServerProjectileClass_Constructor_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(ArtilleryServerProjectileClass).GetConstructors().Single();
+        return typeof(ArtilleryProjectileServer).GetConstructors().Single();
     }
 
     [PatchPrefix]
-    public static bool Prefix(ArtilleryServerProjectileClass __instance)
+    public static bool Prefix(ArtilleryProjectileServer __instance)
     {
         __instance.speed = 50f;
         __instance.arcHeight = -150f;
@@ -22,7 +23,7 @@ public class ArtilleryServerProjectileClass_Constructor_Patch : ModulePatch
         __instance.zoneID = "";
         var fikaGame = Singleton<IFikaGame>.Instance;
         (fikaGame.GameController as HostGameController).UpdateByUnity += __instance.OnUpdate;
-        __instance.MineDataClass = new();
+        __instance._explosiveItem = new();
         return false;
     }
 }

@@ -6,6 +6,7 @@ using EFT;
 using EFT.InventoryLogic;
 using EFT.InventoryLogic.Operations;
 using EFT.UI;
+using Diz.LanguageExtensions;
 
 namespace Fika.Core.Main.BaseClasses;
 
@@ -29,12 +30,12 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
         StrictSync = strictSync;
     }
 
-    public override SearchContentOperation vmethod_2(SearchableItemItemClass item)
+    public override SearchContentOperation CreateSearchOperation(SearchableItem item)
     {
         throw new NotImplementedException();
     }
 
-    public override Task<IResult> LoadMagazine(AmmoItemClass sourceAmmo, MagazineItemClass magazine, int loadCount, bool ignoreRestrictions)
+    public override Task<IResult> LoadMagazine(Ammo sourceAmmo, Magazine magazine, int loadCount, bool ignoreRestrictions)
     {
         if (_instantLoad)
         {
@@ -58,7 +59,7 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
         return base.LoadMagazine(sourceAmmo, magazine, loadCount, ignoreRestrictions);
     }
 
-    private async Task<IResult> QuickLoadMagazine(AmmoItemClass sourceAmmo, MagazineItemClass magazine, int loadCount, bool ignoreRestrictions)
+    private async Task<IResult> QuickLoadMagazine(Ammo sourceAmmo, Magazine magazine, int loadCount, bool ignoreRestrictions)
     {
         if (loadCount <= 0)
         {
@@ -68,7 +69,7 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
         StopProcesses();
 
         var speedPercentage = 100f - Profile.Skills.MagDrillsLoadSpeed + magazine.LoadUnloadModifier;
-        var finalLoadSpeed = Singleton<BackendConfigSettingsClass>.Instance.BaseLoadTime * speedPercentage / 100f;
+        var finalLoadSpeed = Singleton<GlobalConfiguration>.Instance.BaseLoadTime * speedPercentage / 100f;
         var loadPerTick = GetLoadPerTick(magazine);
 
         var operationResult = ignoreRestrictions
@@ -80,18 +81,18 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
             return operationResult.ToResult();
         }
 
-        var readinessResult = await method_30();
+        var readinessResult = await WaitForProcess();
         if (readinessResult.Failed)
         {
             return readinessResult;
         }
 
-        Interface19_0 = new CustomAmmoLoader(this, magazine, sourceAmmo, loadCount,
+        _loadProcess = new CustomAmmoLoader(this, magazine, sourceAmmo, loadCount,
             Profile.Skills.MagDrillsLoadProgression, finalLoadSpeed, loadPerTick);
 
-        var executionResult = await Interface19_0.Start();
+        var executionResult = await _loadProcess.Start();
 
-        Interface19_0 = null;
+        _loadProcess = null;
 
         return executionResult;
     }
@@ -99,9 +100,9 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
     /// <summary>
     /// Returns how many bullets should be loaded per tick into the <paramref name="magazine"/>
     /// </summary>
-    /// <param name="magazine">The magazine to check the <see cref="MagazineItemClass.MaxCount"/> on</param>
+    /// <param name="magazine">The magazine to check the <see cref="Magazine.MaxCount"/> on</param>
     /// <returns>The amount of bullets to load per tick</returns>
-    private static int GetLoadPerTick(MagazineItemClass magazine)
+    private static int GetLoadPerTick(Magazine magazine)
     {
         var maxCount = magazine.MaxCount;
         if (maxCount <= 5)
@@ -124,11 +125,11 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
 
     public override IPlayerSearchController PlayerSearchController { get; }
 
-    private sealed class CustomAmmoLoader : Interface19
+    private sealed class CustomAmmoLoader : IMagazineLoadingProcess
     {
         private readonly InventoryController _inventoryController;
-        private readonly MagazineItemClass _magazine;
-        private readonly AmmoItemClass _sourceAmmo;
+        private readonly Magazine _magazine;
+        private readonly Ammo _sourceAmmo;
         private readonly int _totalLoadCount;
         private readonly bool _isElite;
         private readonly float _baseLoadSpeed;
@@ -142,7 +143,7 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
 
         public bool IsCancelled => _cts?.IsCancellationRequested != false;
 
-        public CustomAmmoLoader(InventoryController inventoryController, MagazineItemClass magazine, AmmoItemClass sourceAmmo,
+        public CustomAmmoLoader(InventoryController inventoryController, Magazine magazine, Ammo sourceAmmo,
             int count, bool elite, float loadOneAmmoSpeed, int loadPerTick)
         {
             _inventoryController = inventoryController;
@@ -207,7 +208,7 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
         public void RaiseEvents(CommandStatus status)
         {
             var loadCount = Mathf.CeilToInt((float)_totalLoadCount / _loadPerTick);
-            var geventArgs = new GEventArgs7(_sourceAmmo, _magazine,
+            var geventArgs = new LoadMagazineEventArgs(_sourceAmmo, _magazine,
                 loadCount, _baseLoadSpeed, status, _inventoryController);
             _magazineOwner.RaiseLoadMagazineEvent(geventArgs);
 
@@ -237,7 +238,7 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
 
                 if (_isElite)
                 {
-                    var progressModifier = Singleton<BackendConfigSettingsClass>.Instance.LoadTimeSpeedProgress;
+                    var progressModifier = Singleton<GlobalConfiguration>.Instance.LoadTimeSpeedProgress;
                     _currentLoadSpeed = Mathf.Clamp(_currentLoadSpeed - (_baseLoadSpeed * progressModifier / 100f), _baseLoadSpeed * 40f / 100f, 10f);
                 }
 
@@ -251,7 +252,7 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
                 var operation = _inventoryController.ConvertOperationResultToOperation(gstruct.Value);
                 var executionSource = new TaskCompletionSource<IResult>();
 
-                _inventoryController.vmethod_1(operation, executionSource.SetResult);
+                _inventoryController.Execute(operation, executionSource.SetResult);
 
                 var operationResult = await executionSource.Task;
 

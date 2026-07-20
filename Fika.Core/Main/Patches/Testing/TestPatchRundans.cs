@@ -11,14 +11,14 @@ public class TestPatchRundans : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return AccessTools.Method(typeof(RunddansControllerClass),
-            nameof(RunddansControllerClass.GetAvailableInteraction));
+        return AccessTools.Method(typeof(EFT.ClientRunddansController),
+            nameof(EFT.ClientRunddansController.GetAvailableInteraction));
     }
 
     [PatchPrefix]
-    public static void Prefix(GamePlayerOwner owner, int objectId, RunddansControllerClass __instance)
+    public static void Prefix(GamePlayerOwner owner, int objectId, EFT.ClientRunddansController __instance)
     {
-        if (!__instance.IsValid(owner.Player, out TransitInteractionControllerAbstractClass transitInteractionControllerAbstractClass, out var transitDataClass))
+        if (!__instance.IsValid(owner.Player, out EFT.ClientTransitController transitInteractionControllerAbstractClass, out var transitDataClass))
         {
             FikaGlobals.LogError($"Could not find transit data");
         }

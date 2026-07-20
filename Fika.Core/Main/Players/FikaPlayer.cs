@@ -5,8 +5,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Audio.AudioWeatherSystem;
 using Comfort.Common;
 using CommonAssets.Scripts.Audio;
+using Diz.LanguageExtensions;
 using EFT;
 using EFT.Ballistics;
 using EFT.Communications;
@@ -15,6 +17,13 @@ using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
 using EFT.Vehicle;
+using EFT.CameraControl;
+using EFT.Counters;
+using EFT.Dialogs;
+using EFT.Prestige;
+using EFT.Quests;
+using EFT.Settings;
+using EFT.Settings.Sound;
 using Fika.Core.Main.BaseClasses;
 using Fika.Core.Main.ClientClasses;
 using Fika.Core.Main.ClientClasses.HandsControllers;
@@ -40,6 +49,8 @@ using Fika.Core.Networking.VOIP;
 using HarmonyLib;
 using JsonType;
 using static Fika.Core.Main.ClientClasses.ClientInventoryController;
+using InteractionPacket = Fika.Core.Networking.Packets.Player.Common.SubPackets.InteractionPacket;
+using MountingPacket = Fika.Core.Networking.Packets.Player.Common.SubPackets.MountingPacket;
 
 namespace Fika.Core.Main.Players;
 
@@ -101,11 +112,11 @@ public class FikaPlayer : LocalPlayer
     protected MongoID? _lastWeaponId;
     protected Action[] _armorUnsubcribes = new Action[Inventory.ArmorSlots.Length];
 
-    internal DamageInfoStruct LatestDamageInfo => LastDamageInfo;
+    internal DamageInfo LatestDamageInfo => LastDamageInfo;
 
     private bool _hasSkilledScav;
     private bool _shouldSendSideEffect;
-    private VoipSettingsClass _voipHandler;
+    private VoipSettings _voipHandler;
     private FikaVOIPController _voipController;
     private Bleedout _bleedout;
 
@@ -124,7 +135,7 @@ public class FikaPlayer : LocalPlayer
     private static Func<Player, bool> _getPlayedAtLeastOneStep;
     private static Func<Player, float> _getSprintSurfaceCheck;
     private static Func<Player, float> _getRunSurfaceCheck;
-    private static Func<Player, GInterface95> _getSpecificStepAudioController;
+    private static Func<Player, IPlayerStepAudioController> _getSpecificStepAudioController;
     #endregion
 
     /// <summary>
@@ -148,17 +159,17 @@ public class FikaPlayer : LocalPlayer
         Quaternion rotation, string layerName, string prefix, EPointOfView pointOfView, Profile profile,
         bool aiControl, EUpdateQueue updateQueue, EUpdateMode armsUpdateMode, EUpdateMode bodyUpdateMode,
         CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity,
-        Func<float> getAimingSensitivity, IStatisticsManager statisticsManager, IViewFilter filter, ISession session,
+        Func<float> getAimingSensitivity, IStatisticsManager statisticsManager, ICustomizationFilter filter, IEftSession session,
         int netId, bool strictSync)
     {
         var useSimpleAnimator = profile.Info.Settings.UseSimpleAnimator;
-        var resourceKey = useSimpleAnimator ? ResourceKeyManagerAbstractClass.ZOMBIE_BUNDLE_NAME : ResourceKeyManagerAbstractClass.PLAYER_BUNDLE_NAME;
+        var resourceKey = useSimpleAnimator ? InGameBundles.ZOMBIE_BUNDLE_NAME : InGameBundles.PLAYER_BUNDLE_NAME;
         var player = Create<FikaPlayer>(gameWorld, resourceKey, playerId, position, updateQueue, armsUpdateMode,
                     bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix, false, useSimpleAnimator);
 
         player.IsYourPlayer = true;
         player.NetId = netId;
-        player._voipHandler = VoipSettingsClass.Default;
+        player._voipHandler = VoipSettings.Default;
         player.CommonPacket = new()
         {
             NetId = netId
@@ -179,7 +190,7 @@ public class FikaPlayer : LocalPlayer
             FikaGlobals.LogWarning("Strict inventory sync disable - limited/no support will be given for this raid");
         }
 
-        LocalQuestControllerClass questController;
+        QuestControllerClientBackend questController;
         if (FikaPlugin.Instance.Settings.SharedQuestProgression)
         {
             questController = new ClientSharedQuestController(profile, inventoryController, inventoryController.PlayerSearchController, session, player);
@@ -189,13 +200,13 @@ public class FikaPlayer : LocalPlayer
             questController = new ClientQuestController(profile, inventoryController, inventoryController.PlayerSearchController, session, player);
         }
         questController.Init();
-        LocalPlayerAchievementControllerClass achievementsController = new(profile, inventoryController, questController.Quests, session, true);
+        AchievementsControllerClientBackend achievementsController = new(profile, inventoryController, questController.Quests, session, true);
         achievementsController.Init();
         achievementsController.AchievementUnlocked += player.UnlockAchievement;
         achievementsController.Run();
         questController.Run();
-        ClientPlayerPrestigeControllerClass prestigeController = new(profile, inventoryController, questController.Quests, session);
-        GClass3619 dialogController = new(profile, questController, inventoryController);
+        PrestigeControllerClientGame prestigeController = new(profile, inventoryController, questController.Quests, session);
+        ClientDialogController dialogController = new(profile, questController, inventoryController);
 
         if (FikaBackendUtils.IsServer)
         {
@@ -206,7 +217,7 @@ public class FikaPlayer : LocalPlayer
             player.PacketSender = await ClientPacketSender.Create(player);
         }
 
-        var voipState = (!FikaBackendUtils.IsHeadless && Singleton<IFikaNetworkManager>.Instance.AllowVOIP && SoundSettingsControllerClass.CheckMicrophone())
+        var voipState = (!FikaBackendUtils.IsHeadless && Singleton<IFikaNetworkManager>.Instance.AllowVOIP && SoundSettingsGroup.CheckMicrophone())
             ? EVoipState.Available : EVoipState.NotAvailable;
 
         await player.Init(rotation, layerName, pointOfView, profile, inventoryController,
@@ -218,20 +229,20 @@ public class FikaPlayer : LocalPlayer
         profile.Skills.SurgerySpeed.Value = 5f;
 #endif
 
-        foreach (var magazineClass in player.Inventory.GetPlayerItems(EPlayerItems.NonQuestItems).OfType<MagazineItemClass>())
+        foreach (var magazineClass in player.Inventory.GetPlayerItems(EPlayerItems.NonQuestItems).OfType<Magazine>())
         {
             player.InventoryController.StrictCheckMagazine(magazineClass, true, player.Profile.MagDrillsMastering, false, false);
         }
 
-        var services = Traverse.Create(player).Field<HashSet<ETraderServiceType>>("hashSet_0").Value;
-        foreach (var etraderServiceType in Singleton<BackendConfigSettingsClass>.Instance.ServicesData.Keys)
+        var services = Traverse.Create(player).Field<HashSet<ETraderServiceType>>("_notYetPurchasedTraderServiceTypes").Value;
+        foreach (var etraderServiceType in Singleton<GlobalConfiguration>.Instance.ServicesData.Keys)
         {
             services.Add(etraderServiceType);
         }
 
-        player._handsController = EmptyHandsController.smethod_6<EmptyHandsController>(player);
+        player._handsController = EmptyHandsController.CreateController<EmptyHandsController>(player);
         player._handsController.Spawn(1f, FikaGlobals.EmptyAction);
-        player.AIData = new PlayerAIDataClass(null, player);
+        player.AIData = new AIData(null, player);
         player.AggressorFound = false;
         player._animators[0].enabled = true;
 
@@ -321,7 +332,7 @@ public class FikaPlayer : LocalPlayer
 
         _getRunSurfaceCheck = FikaGlobals.CreateGetter<Player, float>("_runSurfaceCheck");
 
-        _getSpecificStepAudioController = FikaGlobals.CreateGetter<Player, GInterface95>("_specificStepAudioController");
+        _getSpecificStepAudioController = FikaGlobals.CreateGetter<Player, IPlayerStepAudioController>("_specificStepAudioController");
     }
 
     public override void InitAudioController()
@@ -337,7 +348,7 @@ public class FikaPlayer : LocalPlayer
             AssignGetCurrentSet();
         }
 
-        MovementContext.OnStateChanged -= method_55;
+        MovementContext.OnStateChanged -= StateChangedHandler;
         MovementContext.OnStateChanged += MovementContext_OnStateChanged;
 
         var traverse = Traverse.Create(this);
@@ -351,7 +362,7 @@ public class FikaPlayer : LocalPlayer
 
     protected void MovementContext_OnStateChanged(EPlayerState previousState, EPlayerState nextState)
     {
-        method_43(NestedStepSoundSource);
+        ProcessPlayPrewarmSound(NestedStepSoundSource);
 
         switch (previousState)
         {
@@ -389,11 +400,11 @@ public class FikaPlayer : LocalPlayer
         if (nextState == EPlayerState.Jump)
         {
             DefaultPlay(_getCurrentSet(this).JumpSoundBank, 1f, EAudioMovementState.Jump);
-            method_60(MovementContext.CovertEquipmentNoise, true);
+            PlayGearSound(MovementContext.CovertEquipmentNoise, true);
         }
         else if (nextState == EPlayerState.Prone2Stand)
         {
-            method_60(0.7f, true);
+            PlayGearSound(0.7f, true);
         }
         else if (nextState == EPlayerState.Transit2Prone)
         {
@@ -406,7 +417,7 @@ public class FikaPlayer : LocalPlayer
             }
             else
             {
-                method_60(finalVolume, true);
+                PlayGearSound(finalVolume, true);
             }
         }
 
@@ -450,7 +461,7 @@ public class FikaPlayer : LocalPlayer
             return;
         }
 
-        var currentSignValue = Single_0;
+        var currentSignValue = LeftStanceCurrentCurveValue;
         if (Math.Abs(_sign - currentSignValue) >= 1E-45f)
         {
             _sign = currentSignValue;
@@ -460,7 +471,7 @@ public class FikaPlayer : LocalPlayer
             {
                 _setPlayedAtLeastOneStep(this, true);
                 _setLastStepTime(this, Time.time);
-                method_65(NestedStepSoundSource);
+                UpdateSourcePriority(NestedStepSoundSource);
 
                 if (CheckSurface(_getSprintSurfaceCheck(this)))
                 {
@@ -469,16 +480,16 @@ public class FikaPlayer : LocalPlayer
 
                     var volumeBase = FirstPersonPointOfView ? sprintBank.BaseVolume : 1f;
                     var weightMod = 0.5f + (3f * Physical.Overweight);
-                    var finalVolume = method_64(EAudioMovementState.Sprint) * volumeBase * weightMod;
+                    var finalVolume = CalculateMovementVolumeDefaultMultiplier(EAudioMovementState.Sprint) * volumeBase * weightMod;
 
-                    method_66(EAudioMovementState.Sprint, false);
+                    UpdateStepSourceRolloff(EAudioMovementState.Sprint, false);
 
                     sprintBank.Play(NestedStepSoundSource, EnvironmentType.Outdoor, Distance,
                         finalVolume, Distance, FirstPersonPointOfView, true);
                     _getSpecificStepAudioController(this).Play(EAudioMovementState.Sprint, Environment,
                         Distance, finalVolume, Distance, FirstPersonPointOfView);
 
-                    method_60(1f, false);
+                    PlayGearSound(1f, false);
 
                     if (elapsed < 1.2f && FirstPersonPointOfView)
                     {
@@ -496,7 +507,7 @@ public class FikaPlayer : LocalPlayer
             return;
         }
 
-        var single_ = Single_0;
+        var single_ = LeftStanceCurrentCurveValue;
         if (Math.Abs(_sign - single_) >= 1E-45f)
         {
             _sign = single_;
@@ -532,7 +543,7 @@ public class FikaPlayer : LocalPlayer
         {
             if (Time.time >= _turnSoundTimer)
             {
-                method_62(angleMagnitude);
+                PlayTurnSound(angleMagnitude);
                 _turnSoundTimer = Time.time + EFTHardSettings.Instance.TURN_SOUND_DELAY;
             }
         }
@@ -615,7 +626,7 @@ public class FikaPlayer : LocalPlayer
             _bleedout.Init(clientHealthController);
             _bleedout.ShowUI();
 
-            var camera = CameraClass.Instance.Camera;
+            var camera = CameraManager.Instance.Camera;
             var deathEffect = camera.GetComponent<DeathFade>();
             if (deathEffect != null)
             {
@@ -647,7 +658,7 @@ public class FikaPlayer : LocalPlayer
                 Destroy(_bleedout);
             }
 
-            var camera = CameraClass.Instance.Camera;
+            var camera = CameraManager.Instance.Camera;
             var deathEffect = camera.GetComponent<DeathFade>();
             if (deathEffect != null)
             {
@@ -692,7 +703,7 @@ public class FikaPlayer : LocalPlayer
     {
         if (_voipHandler.VoipEnabled && voipState != EVoipState.NotAvailable)
         {
-            var settings = Singleton<SharedGameSettingsClass>.Instance.Sound.Settings;
+            var settings = Singleton<SettingsManager>.Instance.Sound.Settings;
             if (!settings.VoipEnabled)
             {
                 voipState = EVoipState.Off;
@@ -713,7 +724,7 @@ public class FikaPlayer : LocalPlayer
         NestedStepSoundSource.SetBaseVolume(0.9f);
     }
 
-    public override BasePhysicalClass CreatePhysical()
+    public override PhysicalBase CreatePhysical()
     {
         return new FikaClientPhysical();
     }
@@ -731,9 +742,9 @@ public class FikaPlayer : LocalPlayer
                 GetCharacterControllerCommon, movement_MASK);
     }
 
-    public override void OnSkillLevelChanged(AbstractSkillClass skill)
+    public override void OnSkillLevelChanged(BaseSkill skill)
     {
-        NotificationManagerClass.DisplayNotification(new GClass2549(skill));
+        NotificationManager.DisplayNotification(new SkillLevelUpNotification(skill));
     }
 
     public override void SendVoiceMuffledState(bool isMuffled)
@@ -742,14 +753,14 @@ public class FikaPlayer : LocalPlayer
                 MuffledState.FromValue(NetId, isMuffled), true);
     }
 
-    public override void OnWeaponMastered(MasterSkillClass masterSkill)
+    public override void OnWeaponMastered(Mastering masterSkill)
     {
-        NotificationManagerClass.DisplayMessageNotification(string.Format("MasteringLevelUpMessage".Localized(null),
+        NotificationManager.DisplayMessageNotification(string.Format("MasteringLevelUpMessage".Localized(null),
             masterSkill.MasteringGroup.Id.Localized(null),
             masterSkill.Level.ToString()), ENotificationDurationType.Default, ENotificationIconType.Default, null);
     }
 
-    public override void ApplyDamageInfo(DamageInfoStruct damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, float absorbed)
+    public override void ApplyDamageInfo(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, float absorbed)
     {
         if (IsYourPlayer && damageInfo.Player != null
             && !FikaPlugin.Instance.Settings.FriendlyFire
@@ -766,7 +777,7 @@ public class FikaPlayer : LocalPlayer
         base.ApplyDamageInfo(damageInfo, bodyPartType, colliderType, absorbed);
     }
 
-    public override ShotInfoClass ApplyShot(DamageInfoStruct damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, ShotIdStruct shotId)
+    public override PlayerHitInfo ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, ShotId shotId)
     {
         if (damageInfo.DamageType is EDamageType.Sniper or EDamageType.Landmine)
         {
@@ -785,7 +796,7 @@ public class FikaPlayer : LocalPlayer
         return null;
     }
 
-    private ShotInfoClass SimulatedApplyShot(DamageInfoStruct damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider)
+    private PlayerHitInfo SimulatedApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider)
     {
         var activeHealthController = ActiveHealthController;
         if (activeHealthController != null && !activeHealthController.IsAlive)
@@ -795,10 +806,10 @@ public class FikaPlayer : LocalPlayer
         var flag = damageInfo.DeflectedBy != null;
         var damage = damageInfo.Damage;
         var list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
-        method_97(list);
+        ProceedArmorDamaged(list);
         var materialType = flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1)
             ? MaterialType.Body : list[0].Material);
-        ShotInfoClass hitInfo = new()
+        PlayerHitInfo hitInfo = new()
         {
             PoV = PointOfView,
             Penetrated = damageInfo.Penetrated,
@@ -817,11 +828,11 @@ public class FikaPlayer : LocalPlayer
     }
 
     #region Proceed
-    public override void Proceed(bool withNetwork, Callback<GInterface198> callback, bool scheduled = true)
+    public override void Proceed(bool withNetwork, Callback<IEmptyHandsController> callback, bool scheduled = true)
     {
         var handler = new EmptyHandsControllerHandler(this, scheduled);
         var func = new Func<EmptyHandsController>(handler.ReturnController);
-        handler.Process = new Process<EmptyHandsController, GInterface198>(this, func, null);
+        handler.Process = new Process<EmptyHandsController, IEmptyHandsController>(this, func, null);
         if (withNetwork && FikaBackendUtils.IsClient && _baseInventoryController.StrictSync)
         {
             handler.ConfirmCallback = new(handler.SendCallbackRequest);
@@ -830,12 +841,12 @@ public class FikaPlayer : LocalPlayer
         {
             handler.ConfirmCallback = new(handler.SendPacket);
         }
-        handler.Process.method_0(new(handler.HandleResult), callback, scheduled);
+        handler.Process.Proceed(new(handler.HandleResult), callback, scheduled);
     }
 
-    public override void Proceed(FoodDrinkItemClass foodDrink, float amount, Callback<GInterface203> callback, int animationVariant, bool scheduled = true)
+    public override void Proceed(FoodDrink foodDrink, float amount, Callback<IMedsController> callback, int animationVariant, bool scheduled = true)
     {
-        GStruct382<EBodyPart> bodyparts = new(EBodyPart.Head);
+        EFT.NetworkPackets.OneAndList<EBodyPart> bodyparts = new(EBodyPart.Head);
         FoodControllerHandler handler = new(this, foodDrink, amount, bodyparts, animationVariant);
         Func<MedsController> func = new(handler.ReturnController);
 
@@ -849,10 +860,10 @@ public class FikaPlayer : LocalPlayer
             handler.Process = new(this, func, foodDrink, false);
             handler.ConfirmCallback = new(handler.SendPacket);
         }
-        handler.Process.method_0(new(handler.HandleResult), callback, scheduled);
+        handler.Process.Proceed(new(handler.HandleResult), callback, scheduled);
     }
 
-    public override void Proceed(MedsItemClass meds, GStruct382<EBodyPart> bodyParts, Callback<GInterface203> callback, int animationVariant, bool scheduled = true)
+    public override void Proceed(Meds meds, EFT.NetworkPackets.OneAndList<EBodyPart> bodyParts, Callback<IMedsController> callback, int animationVariant, bool scheduled = true)
     {
         MedsControllerHandler handler = new(this, meds, bodyParts, animationVariant);
 
@@ -868,12 +879,12 @@ public class FikaPlayer : LocalPlayer
             handler.Process = new(this, func, meds, false);
             handler.ConfirmCallback = new(handler.SendPacket);
         }
-        handler.Process.method_0(new(handler.HandleResult), callback, scheduled);
+        handler.Process.Proceed(new(handler.HandleResult), callback, scheduled);
     }
 
-    public override void Proceed<T>(Item item, Callback<GInterface202> callback, bool scheduled = true)
+    public override void Proceed<T>(Item item, Callback<IUsableItemController> callback, bool scheduled = true)
     {
-        if (item is PortableRangeFinderItemClass)
+        if (item is PortableRangeFinder)
         {
             PortableRangeFinderControllerHandler rangeFinderHandler = new(this, item);
 
@@ -889,7 +900,7 @@ public class FikaPlayer : LocalPlayer
                 rangeFinderHandler.Process = new(this, rangeFinderFunc, item, false);
                 rangeFinderHandler.ConfirmCallback = new(rangeFinderHandler.SendPacket);
             }
-            rangeFinderHandler.Process.method_0(new(rangeFinderHandler.HandleResult), callback, scheduled);
+            rangeFinderHandler.Process.Proceed(new(rangeFinderHandler.HandleResult), callback, scheduled);
             return;
         }
 
@@ -907,10 +918,10 @@ public class FikaPlayer : LocalPlayer
             handler.Process = new(this, func, item, false);
             handler.ConfirmCallback = new(handler.SendPacket);
         }
-        handler.Process.method_0(new(handler.HandleResult), callback, scheduled);
+        handler.Process.Proceed(new(handler.HandleResult), callback, scheduled);
     }
 
-    public override void Proceed(Item item, Callback<IOnHandsUseCallback> callback, bool scheduled = true)
+    public override void Proceed(Item item, Callback<IQuickUseItem> callback, bool scheduled = true)
     {
         QuickUseItemControllerHandler handler = new(this, item);
 
@@ -926,7 +937,7 @@ public class FikaPlayer : LocalPlayer
             handler.Process = new(this, func, item, true);
             handler.ConfirmCallback = new(handler.SendPacket);
         }
-        handler.Process.method_0(new(handler.HandleResult), callback, scheduled);
+        handler.Process.Proceed(new(handler.HandleResult), callback, scheduled);
     }
 
     public override void Proceed(KnifeComponent knife, Callback<IKnifeController> callback, bool scheduled = true)
@@ -945,10 +956,10 @@ public class FikaPlayer : LocalPlayer
             handler.Process = new(this, func, handler.Knife.Item, false);
             handler.ConfirmCallback = new(handler.SendPacket);
         }
-        handler.Process.method_0(new(handler.HandleResult), callback, scheduled);
+        handler.Process.Proceed(new(handler.HandleResult), callback, scheduled);
     }
 
-    public override void Proceed(KnifeComponent knife, Callback<GInterface207> callback, bool scheduled = true)
+    public override void Proceed(KnifeComponent knife, Callback<IQuickKnifeKickController> callback, bool scheduled = true)
     {
         QuickKnifeControllerHandler handler = new(this, knife);
 
@@ -964,10 +975,10 @@ public class FikaPlayer : LocalPlayer
             handler.Process = new(this, func, handler.Knife.Item, true);
             handler.ConfirmCallback = new(handler.SendPacket);
         }
-        handler.Process.method_0(new(handler.HandleResult), callback, scheduled);
+        handler.Process.Proceed(new(handler.HandleResult), callback, scheduled);
     }
 
-    public override void Proceed(ThrowWeapItemClass throwWeap, Callback<GInterface206> callback, bool scheduled = true)
+    public override void Proceed(ThrowWeap throwWeap, Callback<IQuickGrenadeThrowController> callback, bool scheduled = true)
     {
         QuickGrenadeControllerHandler handler = new(this, throwWeap);
 
@@ -983,10 +994,10 @@ public class FikaPlayer : LocalPlayer
             handler.Process = new(this, func, throwWeap, false);
             handler.ConfirmCallback = new(handler.SendPacket);
         }
-        handler.Process.method_0(new(handler.HandleResult), callback, scheduled);
+        handler.Process.Proceed(new(handler.HandleResult), callback, scheduled);
     }
 
-    public override void Proceed(ThrowWeapItemClass throwWeap, Callback<IHandsThrowController> callback, bool scheduled = true)
+    public override void Proceed(ThrowWeap throwWeap, Callback<IGrenadeController> callback, bool scheduled = true)
     {
         GrenadeControllerHandler handler = new(this, throwWeap);
 
@@ -1002,7 +1013,7 @@ public class FikaPlayer : LocalPlayer
             handler.Process = new(this, func, throwWeap, false);
             handler.ConfirmCallback = new(handler.SendPacket);
         }
-        handler.Process.method_0(new(handler.HandleResult), callback, scheduled);
+        handler.Process.Proceed(new(handler.HandleResult), callback, scheduled);
     }
 
     public override void Proceed(Weapon weapon, Callback<IFirearmHandsController> callback, bool scheduled = true)
@@ -1025,7 +1036,7 @@ public class FikaPlayer : LocalPlayer
             handler.Process = new Process<FirearmController, IFirearmHandsController>(this, func, handler.Weapon, flag);
             handler.ConfirmCallback = new(handler.SendPacket);
         }
-        handler.Process.method_0(new(handler.HandleResult), callback, scheduled);
+        handler.Process.Proceed(new(handler.HandleResult), callback, scheduled);
     }
     #endregion
 
@@ -1037,7 +1048,7 @@ public class FikaPlayer : LocalPlayer
         base.DropCurrentController(callback, fastDrop, nextControllerItem);
     }
 
-    public override void OnBeenKilledByAggressor(IPlayer aggressor, DamageInfoStruct damageInfo, EBodyPart bodyPart, EDamageType lethalDamageType)
+    public override void OnBeenKilledByAggressor(IPlayer aggressor, DamageInfo damageInfo, EBodyPart bodyPart, EDamageType lethalDamageType)
     {
         base.OnBeenKilledByAggressor(aggressor, damageInfo, bodyPart, lethalDamageType);
 
@@ -1046,7 +1057,7 @@ public class FikaPlayer : LocalPlayer
         {
             if (fikaPlayer.Side == EPlayerSide.Savage)
             {
-                fikaPlayer.Loyalty.method_1(this);
+                fikaPlayer.Loyalty.MyPlayerIsSavage(this);
             }
 
             if (Side == EPlayerSide.Savage && fikaPlayer.Side != EPlayerSide.Savage && !fikaPlayer._hasSkilledScav)
@@ -1123,7 +1134,7 @@ public class FikaPlayer : LocalPlayer
         LastDamageInfo.Weapon = item;
     }
 
-    public void HandleTeammateKill(DamageInfoStruct damage, EBodyPart bodyPart,
+    public void HandleTeammateKill(DamageInfo damage, EBodyPart bodyPart,
         EPlayerSide playerSide, WildSpawnType role, string playerProfileId,
         float distance, List<string> targetEquipment,
         HealthEffects enemyEffects, List<string> zoneIds, FikaPlayer killer)
@@ -1171,17 +1182,17 @@ public class FikaPlayer : LocalPlayer
         for (var i = 0; i < list.Count; i++)
         {
             var value = list[i];
-            AbstractQuestControllerClass.CheckKillConditionCounter(value, playerProfileId, targetEquipment, damage.Weapon,
+            QuestController.CheckKillConditionCounter(value, playerProfileId, targetEquipment, damage.Weapon,
                             bodyPart, Location, distance, role.ToStringNoBox(), CurrentHour, enemyEffects,
                             killer.HealthController.BodyPartEffects, zoneIds, killer.HealthController.ActiveBuffsNames());
         }
     }
 
-    protected void HandleSharedExperience(bool countAsBoss, int experience, SessionCountersClass sessionCounters)
+    protected void HandleSharedExperience(bool countAsBoss, int experience, CountersCollection sessionCounters)
     {
         if (experience <= 0)
         {
-            experience = Singleton<BackendConfigSettingsClass>.Instance.Experience.Kill.VictimBotLevelExp;
+            experience = Singleton<GlobalConfiguration>.Instance.Experience.Kill.VictimBotLevelExp;
         }
 
         if (FikaPlugin.Instance.Settings.SharedKillExperience.Value && !countAsBoss)
@@ -1190,8 +1201,8 @@ public class FikaPlayer : LocalPlayer
 #if DEBUG
             FikaGlobals.LogInfo($"Received shared kill XP of {toReceive}");
 #endif
-            sessionCounters.AddLong(1L, SessionCounterTypesAbstractClass.Kills);
-            sessionCounters.AddInt(toReceive, SessionCounterTypesAbstractClass.ExpKillBase);
+            sessionCounters.AddLong(1L, PredefinedCounters.Kills);
+            sessionCounters.AddInt(toReceive, PredefinedCounters.ExpKillBase);
         }
 
         if (FikaPlugin.Instance.Settings.SharedBossExperience.Value && countAsBoss)
@@ -1200,8 +1211,8 @@ public class FikaPlayer : LocalPlayer
 #if DEBUG
             FikaGlobals.LogInfo($"Received shared boss XP of {toReceive}");
 #endif
-            sessionCounters.AddLong(1L, SessionCounterTypesAbstractClass.Kills);
-            sessionCounters.AddInt(toReceive, SessionCounterTypesAbstractClass.ExpKillBase);
+            sessionCounters.AddLong(1L, PredefinedCounters.Kills);
+            sessionCounters.AddInt(toReceive, PredefinedCounters.ExpKillBase);
         }
     }
 
@@ -1235,7 +1246,7 @@ public class FikaPlayer : LocalPlayer
     {
         if (PacketSender != null && PacketSender.NetworkManager != null)
         {
-            FirearmLightStateStruct[] lightStates = [.. _helmetLightControllers.Select(FikaGlobals.GetFirearmLightStates)];
+            LightsState[] lightStates = [.. _helmetLightControllers.Select(FikaGlobals.GetFirearmLightStates)];
 
             CommonPacket.Type = ECommonSubPacketType.HeadLights;
             CommonPacket.SubPacket = HeadLightsPacket.FromValue(lightStates.Length, isSilent, lightStates);
@@ -1252,7 +1263,7 @@ public class FikaPlayer : LocalPlayer
 
         if (HandsController is FikaClientFirearmController controller)
         {
-            FirearmLightStateStruct[] array = [.. controller.Item.AllSlots
+            LightsState[] array = [.. controller.Item.AllSlots
                 .Select(FikaGlobals.GetContainedItem)
                 .GetComponents<LightComponent>()
                 .Select(FikaGlobals.GetFirearmLightStatesFromComponent)];
@@ -1266,7 +1277,7 @@ public class FikaPlayer : LocalPlayer
         }
     }
 
-    public override void OnPhraseTold(EPhraseTrigger @event, TaggedClip clip, TagBank bank, PhraseSpeakerClass speaker)
+    public override void OnPhraseTold(EPhraseTrigger @event, TaggedClip clip, TagBank bank, BaseSpeaker speaker)
     {
         base.OnPhraseTold(@event, clip, bank, speaker);
 
@@ -1295,9 +1306,9 @@ public class FikaPlayer : LocalPlayer
         return observedCorpse;
     }
 
-    public override void OperateStationaryWeapon(StationaryWeapon stationaryWeapon, StationaryPacketStruct.EStationaryCommand command)
+    public override void OperateStationaryWeapon(StationaryWeapon stationaryWeapon, StationaryWeaponPacket.EStationaryCommand command)
     {
-        if (command is StationaryPacketStruct.EStationaryCommand.Occupy)
+        if (command is StationaryWeaponPacket.EStationaryCommand.Occupy)
         {
             if (WaitingForCallback || !HandsController.CanRemove())
             {
@@ -1313,33 +1324,33 @@ public class FikaPlayer : LocalPlayer
     }
 
     // Start
-    public override void vmethod_0(WorldInteractiveObject interactiveObject, InteractionResult interactionResult, Action callback)
+    public override void StartInteraction(WorldInteractiveObject interactiveObject, InteractionResult interactionResult, Action callback)
     {
         CommonPacket.Type = ECommonSubPacketType.WorldInteraction;
         CommonPacket.SubPacket = WorldInteractionPacket.FromValue(interactiveObject.Id, interactionResult.InteractionType,
-            EInteractionStage.Start, (interactionResult is KeyInteractionResultClass keyInteractionResult) ? keyInteractionResult.Key.Item.Id : null);
+            EInteractionStage.Start, (interactionResult is UnlockResult keyInteractionResult) ? keyInteractionResult.Key.Item.Id : null);
         PacketSender.NetworkManager.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
         CurrentManagedState.StartDoorInteraction(interactiveObject, interactionResult, callback);
         UpdateInteractionCast();
     }
 
     // Execute
-    public override void vmethod_1(WorldInteractiveObject door, InteractionResult interactionResult)
+    public override void ExecuteInteraction(WorldInteractiveObject door, InteractionResult interactionResult)
     {
-        base.vmethod_1(door, interactionResult);
+        base.ExecuteInteraction(door, interactionResult);
         if (!door.ForceLocalInteraction)
         {
             CommonPacket.Type = ECommonSubPacketType.WorldInteraction;
             CommonPacket.SubPacket = WorldInteractionPacket.FromValue(door.Id, interactionResult.InteractionType,
-                EInteractionStage.Execute, (interactionResult is KeyInteractionResultClass keyInteractionResult) ? keyInteractionResult.Key.Item.Id : null);
+                EInteractionStage.Execute, (interactionResult is UnlockResult keyInteractionResult) ? keyInteractionResult.Key.Item.Id : null);
             PacketSender.NetworkManager.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
         }
         UpdateInteractionCast();
     }
 
-    public override void vmethod_6(string itemId, string zoneId, bool successful)
+    public override void PlantItemNetwork(string itemId, string zoneId, bool successful)
     {
-        base.vmethod_6(itemId, zoneId, successful);
+        base.PlantItemNetwork(itemId, zoneId, successful);
         UpdateInteractionCast();
     }
 
@@ -1363,14 +1374,14 @@ public class FikaPlayer : LocalPlayer
         _triggerColliderSearcher.ManualUpdate(deltaTime);
     }
 
-    public override void OnMounting(MountingPacketStruct.EMountingCommand command)
+    public override void OnMounting(EFT.MountingPacket.EMountingCommand command)
     {
         var packet = MountingPacket.FromValue(command, MovementContext.IsInMountedState, MovementContext.IsInMountedState ? MovementContext.PlayerMountingPointData.MountPointData.MountDirection : default,
             MovementContext.IsInMountedState ? MovementContext.PlayerMountingPointData.MountPointData.MountPoint : default,
             MovementContext.IsInMountedState ? MovementContext.PlayerMountingPointData.CurrentMountingPointVerticalOffset : 0f,
            MovementContext.IsInMountedState ? (short)MovementContext.PlayerMountingPointData.MountPointData.MountSideDirection : (short)0);
 
-        if (command == MountingPacketStruct.EMountingCommand.Enter)
+        if (command == EFT.MountingPacket.EMountingCommand.Enter)
         {
             packet.TransitionTime = MovementContext.PlayerMountingPointData.CurrentApproachTime;
             packet.TargetPos = MovementContext.PlayerMountingPointData.PlayerTargetPos;
@@ -1385,11 +1396,11 @@ public class FikaPlayer : LocalPlayer
         CommonPacket.Type = ECommonSubPacketType.Mounting;
         CommonPacket.SubPacket = packet;
         PacketSender.NetworkManager.SendNetReusable(ref CommonPacket,
-            command is MountingPacketStruct.EMountingCommand.Update ? DeliveryMethod.Unreliable : DeliveryMethod.ReliableOrdered,
+            command is EFT.MountingPacket.EMountingCommand.Update ? DeliveryMethod.Unreliable : DeliveryMethod.ReliableOrdered,
             true);
     }
 
-    public override void vmethod_3(TransitControllerAbstractClass controller, int transitPointId, string keyId, EDateTime time)
+    public override void TransitInteraction(TransitController controller, int transitPointId, string keyId, EDateTime time)
     {
         var packet = controller.GetInteractPacket(transitPointId, keyId, time);
         if (FikaBackendUtils.IsServer)
@@ -1404,7 +1415,7 @@ public class FikaPlayer : LocalPlayer
                 Data = packet
             };
             Singleton<FikaClient>.Instance.SendData(ref interactPacket, DeliveryMethod.ReliableOrdered);
-            if (Singleton<GameWorld>.Instance.TransitController is ClientTransitController transitController)
+            if (Singleton<GameWorld>.Instance.TransitController is ClientClasses.ClientTransitController transitController)
             {
                 transitController.InteractPacket = packet;
             }
@@ -1412,10 +1423,10 @@ public class FikaPlayer : LocalPlayer
         UpdateInteractionCast();
     }
 
-    public override void vmethod_4(TripwireSynchronizableObject tripwire)
+    public override void TripwireInteraction(TripwireSynchronizableObject tripwire)
     {
-        base.vmethod_4(tripwire);
-        AirplaneDataPacketStruct data = new()
+        base.TripwireInteraction(tripwire);
+        SynchronizableObjectPacket data = new()
         {
             ObjectType = SynchronizableObjectType.Tripwire,
             ObjectId = tripwire.ObjectId,
@@ -1436,7 +1447,7 @@ public class FikaPlayer : LocalPlayer
                 DisarmTripwire.FromValue(data), true);
     }
 
-    public override void vmethod_5(GClass2282 controller, int objectId, EventObject.EInteraction interaction)
+    public override void EventObjectInteraction(EventObjectController controller, int objectId, EventObject.EInteraction interaction)
     {
         var packet = controller.GetInteractPacket(objectId, interaction);
         if (FikaBackendUtils.IsServer)
@@ -1460,7 +1471,7 @@ public class FikaPlayer : LocalPlayer
         Corpse.Ragdoll.ApplyImpulse(LastDamageInfo.HitCollider, LastDamageInfo.Direction, LastDamageInfo.HitPoint, _corpseAppliedForce);
     }
 
-    public void SetupCorpseSyncPacket(NetworkHealthSyncPacketStruct packet)
+    public void SetupCorpseSyncPacket(SyncHealthPacket packet)
     {
         var num = EFTHardSettings.Instance.HIT_FORCE;
         num *= 0.3f + (0.7f * Mathf.InverseLerp(50f, 20f, LastDamageInfo.PenetrationPower));
@@ -1474,7 +1485,7 @@ public class FikaPlayer : LocalPlayer
             }
         }
 
-        var inventoryDescriptor = EFTItemSerializerClass.SerializeItem(Inventory.Equipment, FikaGlobals.SearchControllerSerializer);
+        var inventoryDescriptor = ItemBinarySerializer.SerializeItem(Inventory.Equipment, FikaGlobals.SearchControllerSerializer);
 
         var packets = HealthSyncPacket.FromValue(packet);
         packets.BodyPart = LastBodyPart;
@@ -1582,7 +1593,7 @@ public class FikaPlayer : LocalPlayer
         var killerNickname = (hasAggressor && !string.IsNullOrEmpty(LastAggressor.Profile.Nickname)) ? LastAggressor.Profile.Nickname : string.Empty;
         var side = Side;
         var level = Profile.Info.Level;
-        var time = EFTDateTimeClass.UtcNow.ToLocalTime();
+        var time = DateTimeExtensions.UtcNow.ToLocalTime();
         var weaponName = LastAggressor != null ? (LastDamageInfo.Weapon != null ? LastDamageInfo.Weapon.ShortName : string.Empty) : "-";
         var groupId = GroupId;
 
@@ -1633,11 +1644,11 @@ public class FikaPlayer : LocalPlayer
         _openAction = null;
     }
 
-    public override void vmethod_2(BTRSide btr, byte placeId, EInteractionType interaction)
+    public override void BtrInteraction(BTRSide btr, byte placeId, EInteractionType interaction)
     {
         if (FikaBackendUtils.IsServer)
         {
-            base.vmethod_2(btr, placeId, interaction);
+            base.BtrInteraction(btr, placeId, interaction);
             return;
         }
 
@@ -1710,9 +1721,9 @@ public class FikaPlayer : LocalPlayer
         }
     }
 
-    public void ObservedStationaryInteract(StationaryWeapon stationaryWeapon, StationaryPacketStruct.EStationaryCommand command)
+    public void ObservedStationaryInteract(StationaryWeapon stationaryWeapon, StationaryWeaponPacket.EStationaryCommand command)
     {
-        if (command == StationaryPacketStruct.EStationaryCommand.Occupy)
+        if (command == StationaryWeaponPacket.EStationaryCommand.Occupy)
         {
             stationaryWeapon.SetOperator(ProfileId, false);
             MovementContext.StationaryWeapon = stationaryWeapon;
@@ -1722,7 +1733,7 @@ public class FikaPlayer : LocalPlayer
             MovementContext.PlayerAnimatorSetStationaryAnimation((int)stationaryWeapon.Animation);
             return;
         }
-        if (command == StationaryPacketStruct.EStationaryCommand.Leave)
+        if (command == StationaryWeaponPacket.EStationaryCommand.Leave)
         {
             return;
         }
@@ -1765,7 +1776,7 @@ public class FikaPlayer : LocalPlayer
         }
     }
 
-    public override void ApplyExplosionDamageToArmor(Dictionary<ExplosiveHitArmorColliderStruct, float> armorDamage, DamageInfoStruct damageInfo)
+    public override void ApplyExplosionDamageToArmor(Dictionary<ExplosionDamageInfo, float> armorDamage, DamageInfo damageInfo)
     {
         if (IsYourPlayer)
         {
@@ -1784,7 +1795,7 @@ public class FikaPlayer : LocalPlayer
                 if (num > 0f)
                 {
                     num = armorComponent.ApplyExplosionDurabilityDamage(num, damageInfo, _preAllocatedArmorComponents);
-                    method_96(num, armorComponent);
+                    OnArmorDamaged(num, armorComponent);
                     OnArmorPointsChanged(armorComponent);
                 }
             }
@@ -1808,7 +1819,7 @@ public class FikaPlayer : LocalPlayer
             return;
         }
 
-        DamageInfoStruct damageInfo = new()
+        DamageInfo damageInfo = new()
         {
             Damage = packet.Damage,
             DamageType = packet.DamageType,
@@ -1908,7 +1919,7 @@ public class FikaPlayer : LocalPlayer
         }
     }
 
-    public override bool SetShotStatus(BodyPartCollider bodypart, EftBulletClass shot, Vector3 hitpoint, Vector3 shotNormal, Vector3 shotDirection)
+    public override bool SetShotStatus(BodyPartCollider bodypart, Shot shot, Vector3 hitpoint, Vector3 shotNormal, Vector3 shotDirection)
     {
         var armorPlateCollider = bodypart as ArmorPlateCollider;
         var earmorPlateCollider = ((armorPlateCollider == null) ? 0 : armorPlateCollider.ArmorPlateColliderType);
@@ -1996,19 +2007,19 @@ public class FikaPlayer : LocalPlayer
         PacketSender.NetworkManager.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
     }
 
-    public void ReceiveTraderServicesData(List<TraderServicesClass> services)
+    public void ReceiveTraderServicesData(List<TraderServiceAvailabilityData> services)
     {
         if (!IsYourPlayer)
         {
             return;
         }
 
-        var servicesData = Singleton<BackendConfigSettingsClass>.Instance.ServicesData;
+        var servicesData = Singleton<GlobalConfiguration>.Instance.ServicesData;
 
         for (var i = 0; i < services.Count; i++)
         {
             var service = services[i];
-            BackendConfigSettingsClass.ServiceData serviceData = new(service, null);
+            GlobalConfiguration.ServiceData serviceData = new(service, null);
             if (servicesData.ContainsKey(serviceData.ServiceType))
             {
                 servicesData[serviceData.ServiceType] = serviceData;
@@ -2047,7 +2058,7 @@ public class FikaPlayer : LocalPlayer
     #region handlers
     public sealed class KeyHandler(FikaPlayer player)
     {
-        public GStruct156<KeyInteractionResultClass> UnlockResult;
+        public Option<UnlockResult> UnlockResult;
         private readonly FikaPlayer _player = player;
 
         internal void HandleKeyEvent()
@@ -2080,12 +2091,12 @@ public class FikaPlayer : LocalPlayer
     {
         private readonly FikaPlayer _fikaPlayer = fikaPlayer;
         private readonly bool _scheduled = scheduled;
-        public Process<EmptyHandsController, GInterface198> Process;
+        public Process<EmptyHandsController, IEmptyHandsController> Process;
         public Action ConfirmCallback;
 
         internal EmptyHandsController ReturnController()
         {
-            return EmptyHandsController.smethod_6<EmptyHandsController>(_fikaPlayer);
+            return EmptyHandsController.CreateController<EmptyHandsController>(_fikaPlayer);
         }
 
         internal void HandleCallbackResponse(bool succeed)
@@ -2094,7 +2105,7 @@ public class FikaPlayer : LocalPlayer
             {
                 SendPacket();
             }
-            Process.method_1(succeed);
+            Process.Confirm(succeed);
         }
 
         internal void SendCallbackRequest()
@@ -2144,7 +2155,7 @@ public class FikaPlayer : LocalPlayer
             {
                 SendPacket();
             }
-            Process.method_1(succeed);
+            Process.Confirm(succeed);
         }
 
         internal void SendCallbackRequest()
@@ -2182,7 +2193,7 @@ public class FikaPlayer : LocalPlayer
     {
         private readonly FikaPlayer _fikaPlayer = fikaPlayer;
         private readonly Item _item = item;
-        public Process<UsableItemController, GInterface202> Process;
+        public Process<UsableItemController, IUsableItemController> Process;
         public Action ConfirmCallback;
 
         internal FikaClientUsableItemController ReturnController()
@@ -2196,7 +2207,7 @@ public class FikaPlayer : LocalPlayer
             {
                 SendPacket();
             }
-            Process.method_1(succeed);
+            Process.Confirm(succeed);
         }
 
         internal void SendCallbackRequest()
@@ -2233,7 +2244,7 @@ public class FikaPlayer : LocalPlayer
     {
         private readonly FikaPlayer _fikaPlayer = fikaPlayer;
         private readonly Item _item = item;
-        public Process<PortableRangeFinderController, GInterface202> Process;
+        public Process<PortableRangeFinderController, IUsableItemController> Process;
         public Action ConfirmCallback;
 
         internal FikaClientPortableRangeFinderController ReturnController()
@@ -2247,7 +2258,7 @@ public class FikaPlayer : LocalPlayer
             {
                 SendPacket();
             }
-            Process.method_1(succeed);
+            Process.Confirm(succeed);
         }
 
         internal void SendCallbackRequest()
@@ -2284,12 +2295,12 @@ public class FikaPlayer : LocalPlayer
     {
         private readonly FikaPlayer _fikaPlayer = fikaPlayer;
         private readonly Item _item = item;
-        public Process<QuickUseItemController, IOnHandsUseCallback> Process;
+        public Process<QuickUseItemController, IQuickUseItem> Process;
         public Action ConfirmCallback;
 
         internal QuickUseItemController ReturnController()
         {
-            return QuickUseItemController.smethod_6<QuickUseItemController>(_fikaPlayer, _item);
+            return QuickUseItemController.CreateController<QuickUseItemController>(_fikaPlayer, _item);
         }
 
         internal void HandleCallbackResponse(bool succeed)
@@ -2298,7 +2309,7 @@ public class FikaPlayer : LocalPlayer
             {
                 SendPacket();
             }
-            Process.method_1(succeed);
+            Process.Confirm(succeed);
         }
 
         internal void SendCallbackRequest()
@@ -2331,18 +2342,18 @@ public class FikaPlayer : LocalPlayer
         }
     }
 
-    private sealed class MedsControllerHandler(FikaPlayer fikaPlayer, MedsItemClass meds, GStruct382<EBodyPart> bodyParts, int animationVariant)
+    private sealed class MedsControllerHandler(FikaPlayer fikaPlayer, Meds meds, EFT.NetworkPackets.OneAndList<EBodyPart> bodyParts, int animationVariant)
     {
         private readonly FikaPlayer _fikaPlayer = fikaPlayer;
-        private readonly MedsItemClass _meds = meds;
-        private readonly GStruct382<EBodyPart> _bodyParts = bodyParts;
+        private readonly Meds _meds = meds;
+        private readonly EFT.NetworkPackets.OneAndList<EBodyPart> _bodyParts = bodyParts;
         private readonly int _animationVariant = animationVariant;
-        public Process<MedsController, GInterface203> Process;
+        public Process<MedsController, IMedsController> Process;
         public Action ConfirmCallback;
 
         internal MedsController ReturnController()
         {
-            return MedsController.smethod_6<MedsController>(_fikaPlayer, _meds, _bodyParts, 1f, _animationVariant);
+            return MedsController.CreateController<MedsController>(_fikaPlayer, _meds, _bodyParts, 1f, _animationVariant);
         }
 
         internal void HandleCallbackResponse(bool succeed)
@@ -2351,7 +2362,7 @@ public class FikaPlayer : LocalPlayer
             {
                 SendPacket();
             }
-            Process.method_1(succeed);
+            Process.Confirm(succeed);
         }
 
         internal void SendCallbackRequest()
@@ -2385,19 +2396,19 @@ public class FikaPlayer : LocalPlayer
         }
     }
 
-    private sealed class FoodControllerHandler(FikaPlayer fikaPlayer, FoodDrinkItemClass foodDrink, float amount, GStruct382<EBodyPart> bodyParts, int animationVariant)
+    private sealed class FoodControllerHandler(FikaPlayer fikaPlayer, FoodDrink foodDrink, float amount, EFT.NetworkPackets.OneAndList<EBodyPart> bodyParts, int animationVariant)
     {
         private readonly FikaPlayer _fikaPlayer = fikaPlayer;
-        private readonly FoodDrinkItemClass _foodDrink = foodDrink;
+        private readonly FoodDrink _foodDrink = foodDrink;
         private readonly float _amount = amount;
-        private readonly GStruct382<EBodyPart> _bodyParts = bodyParts;
+        private readonly EFT.NetworkPackets.OneAndList<EBodyPart> _bodyParts = bodyParts;
         private readonly int _animationVariant = animationVariant;
-        public Process<MedsController, GInterface203> Process;
+        public Process<MedsController, IMedsController> Process;
         public Action ConfirmCallback;
 
         internal MedsController ReturnController()
         {
-            return MedsController.smethod_6<MedsController>(_fikaPlayer, _foodDrink, _bodyParts, _amount, _animationVariant);
+            return MedsController.CreateController<MedsController>(_fikaPlayer, _foodDrink, _bodyParts, _amount, _animationVariant);
         }
 
         internal void HandleCallbackResponse(bool succeed)
@@ -2406,7 +2417,7 @@ public class FikaPlayer : LocalPlayer
             {
                 SendPacket();
             }
-            Process.method_1(succeed);
+            Process.Confirm(succeed);
         }
 
         internal void SendCallbackRequest()
@@ -2458,7 +2469,7 @@ public class FikaPlayer : LocalPlayer
             {
                 SendPacket();
             }
-            Process.method_1(succeed);
+            Process.Confirm(succeed);
         }
 
         internal void SendCallbackRequest()
@@ -2495,7 +2506,7 @@ public class FikaPlayer : LocalPlayer
     {
         private readonly FikaPlayer _fikaPlayer = fikaPlayer;
         public readonly KnifeComponent Knife = knife;
-        public Process<QuickKnifeKickController, GInterface207> Process;
+        public Process<QuickKnifeKickController, IQuickKnifeKickController> Process;
         public Action ConfirmCallback;
 
         internal FikaClientQuickKnifeController ReturnController()
@@ -2509,7 +2520,7 @@ public class FikaPlayer : LocalPlayer
             {
                 SendPacket();
             }
-            Process.method_1(succeed);
+            Process.Confirm(succeed);
         }
 
         internal void SendCallbackRequest()
@@ -2542,11 +2553,11 @@ public class FikaPlayer : LocalPlayer
         }
     }
 
-    private sealed class GrenadeControllerHandler(FikaPlayer fikaPlayer, ThrowWeapItemClass throwWeap)
+    private sealed class GrenadeControllerHandler(FikaPlayer fikaPlayer, ThrowWeap throwWeap)
     {
         private readonly FikaPlayer _fikaPlayer = fikaPlayer;
-        private readonly ThrowWeapItemClass _throwWeap = throwWeap;
-        public Process<GrenadeHandsController, IHandsThrowController> Process;
+        private readonly ThrowWeap _throwWeap = throwWeap;
+        public Process<GrenadeHandsController, IGrenadeController> Process;
         public Action ConfirmCallback;
 
         internal FikaClientGrenadeController ReturnController()
@@ -2560,7 +2571,7 @@ public class FikaPlayer : LocalPlayer
             {
                 SendPacket();
             }
-            Process.method_1(succeed);
+            Process.Confirm(succeed);
         }
 
         internal void SendCallbackRequest()
@@ -2593,11 +2604,11 @@ public class FikaPlayer : LocalPlayer
         }
     }
 
-    private sealed class QuickGrenadeControllerHandler(FikaPlayer fikaPlayer, ThrowWeapItemClass throwWeap)
+    private sealed class QuickGrenadeControllerHandler(FikaPlayer fikaPlayer, ThrowWeap throwWeap)
     {
         private readonly FikaPlayer _fikaPlayer = fikaPlayer;
-        private readonly ThrowWeapItemClass _throwWeap = throwWeap;
-        public Process<QuickGrenadeThrowHandsController, GInterface206> Process;
+        private readonly ThrowWeap _throwWeap = throwWeap;
+        public Process<QuickGrenadeThrowHandsController, IQuickGrenadeThrowController> Process;
         public Action ConfirmCallback;
 
         internal FikaClientQuickGrenadeController ReturnController()
@@ -2611,7 +2622,7 @@ public class FikaPlayer : LocalPlayer
             {
                 SendPacket();
             }
-            Process.method_1(succeed);
+            Process.Confirm(succeed);
         }
 
         internal void SendCallbackRequest()

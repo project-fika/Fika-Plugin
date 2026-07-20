@@ -22,7 +22,7 @@ internal sealed class ObservedState
     public bool IsProne;
     public float PoseLevel;
     public bool IsSprinting;
-    public BasePhysicalClass.PhysicalStateStruct Stamina;
+    public PhysicalBase.StaminaStruct Stamina;
     public int Blindfire;
     public float WeaponOverlap;
     public bool LeftStanceDisabled;

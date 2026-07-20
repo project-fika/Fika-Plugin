@@ -1,4 +1,9 @@
-﻿using System;
+﻿using CommonAssets.Scripts.ArtilleryShelling.Client;
+using EFT.InventoryLogic;
+using EFT.Vehicle;
+using EFT.Weather;
+using JsonType;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,13 +37,15 @@ using Fika.Core.Networking.Packets.Generic.SubPackets;
 using Fika.Core.Networking.Packets.World;
 using HarmonyLib;
 using UnityEngine.Events;
-using static LocationSettingsClass;
+using static JsonType.LocationSettings;
+using ClientTransitController = Fika.Core.Main.ClientClasses.ClientTransitController;
+using ClientRunddansController = Fika.Core.Main.ClientClasses.ClientRunddansController;
 
 namespace Fika.Core.Main.GameMode;
 
 public abstract class BaseGameController
 {
-    public BaseGameController(IFikaGame game, EUpdateQueue updateQueue, GameWorld gameWorld, ISession session)
+    public BaseGameController(IFikaGame game, EUpdateQueue updateQueue, GameWorld gameWorld, IEftSession session)
     {
         _fikaGame = game;
         _abstractGame = (AbstractGame)game;
@@ -82,15 +89,15 @@ public abstract class BaseGameController
         }
     }
     public bool WeatherReady { get; internal set; }
-    public WeatherClass[] WeatherClasses { get; set; }
-    public SeasonsSettingsClass SeasonsSettings { get; set; }
+    public WeatherNode[] WeatherClasses { get; set; }
+    public SeasonsSettings SeasonsSettings { get; set; }
     public FikaExfilManager ExfilManager { get; set; }
 
     // Raid data
-    public List<ThrowWeapItemClass> ThrownGrenades { get; set; }
+    public List<ThrowWeap> ThrownGrenades { get; set; }
     public RaidSettings RaidSettings { get; set; }
-    public GClass1404 LootItems { get; set; } = [];
-    public LocationSettingsClass.Location Location { get; set; }
+    public LootData LootItems { get; set; } = [];
+    public LocationSettings.Location Location { get; set; }
     public Dictionary<string, Player> Bots = [];
     public CoopHandler CoopHandler
     {
@@ -127,14 +134,14 @@ public abstract class BaseGameController
     private DebugUI _debugUi;
     private ESeason _season;
 
-    protected SpawnPointManagerClass _spawnPoints;
+    protected SpawnPointsCollection _spawnPoints;
     protected ISpawnPoint _spawnPoint;
     protected Action _btrSpawn;
     protected CoopHandler _coopHandler;
     protected FikaPlayer _localPlayer;
     protected EUpdateQueue _updateQueue;
     protected GameWorld _gameWorld;
-    protected ISession _backendSession;
+    protected IEftSession _backendSession;
     protected Coroutine _extractRoutine;
 
     public void SetLocalPlayer(FikaPlayer player)
@@ -310,13 +317,13 @@ public abstract class BaseGameController
         _abstractGame.SetMatchmakerStatus(LocaleUtils.UI_FINISHING_RAID_INIT.Localized());
 
         WaitForEndOfFrame endOfFrame = new();
-        var musicTask = Singleton<GUISounds>.Instance.method_10(false, CancellationToken.None);
+        var musicTask = Singleton<GUISounds>.Instance.FadeBackgroundMusicAsync(false, CancellationToken.None);
         while (!musicTask.IsCompleted)
         {
             yield return endOfFrame;
         }
 
-        GClass2313.ResetAudioBuffer();
+        AudioUtils.ResetAudioBuffer();
 
         _gameWorld.TriggersModule = _abstractGame.gameObject.AddComponent<LocalFikaTriggersModule>();
         _gameWorld.FillLampControllers();
@@ -327,8 +334,8 @@ public abstract class BaseGameController
         WeatherReady = true;
         FikaBackendUtils.CustomRaidSettings.UseCustomWeather = false;
 
-        Class444 seasonController = new();
-        _gameWorld.GInterface29_0 = seasonController;
+        SeasonsController seasonController = new();
+        _gameWorld.SeasonsController = seasonController;
 
         LoadingScreenUI.Instance.UpdateAndBroadcast(100f);
 
@@ -353,7 +360,7 @@ public abstract class BaseGameController
     {
         FikaBackendUtils.GroupPlayers.Clear();
 
-        var timeBeforeDeployLocal = FikaBackendUtils.IsReconnect ? 3 : Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal;
+        var timeBeforeDeployLocal = FikaBackendUtils.IsReconnect ? 3 : Singleton<GlobalConfiguration>.Instance.TimeBeforeDeployLocal;
 #if DEBUG
         timeBeforeDeployLocal = 3;
 #endif
@@ -361,8 +368,8 @@ public abstract class BaseGameController
 
         NetManagerUtils.DisableLoadingScreenUI();
 
-        var dateTime = EFTDateTimeClass.Now.AddSeconds(timeBeforeDeployLocal);
-        new MatchmakerFinalCountdown.FinalCountdownScreenClass(profile, dateTime).ShowScreen(EScreenState.Root);
+        var dateTime = DateTimeExtensions.Now.AddSeconds(timeBeforeDeployLocal);
+        new MatchmakerFinalCountdown.FinalCountdownScreenController(profile, dateTime).ShowScreen(EScreenState.Root);
         if (MonoBehaviourSingleton<AmbientAudioSystem>.Instantiated)
         {
             MonoBehaviourSingleton<AmbientAudioSystem>.Instance.Initialize();
@@ -456,26 +463,26 @@ public abstract class BaseGameController
 
     public abstract void CreateSpawnSystem(Profile profile);
 
-    public void InitShellingController(BackendConfigSettingsClass instance, GameWorld gameWorld, LocationSettingsClass.Location location)
+    public void InitShellingController(GlobalConfiguration instance, GameWorld gameWorld, LocationSettings.Location location)
     {
         if (instance != null && instance.ArtilleryShelling != null && instance.ArtilleryShelling.ArtilleryMapsConfigs?.Keys.Contains(location.Id) == true)
         {
             if (IsServer)
             {
-                gameWorld.ServerShellingController = new ServerShellingControllerClass();
+                gameWorld.ServerShellingController = new ArtilleryShellingControllerServer();
             }
-            gameWorld.ClientShellingController = new ClientShellingControllerClass(IsServer);
+            gameWorld.ClientShellingController = new ArtilleryShellingControllerClient(IsServer);
         }
     }
 
-    public void InitHalloweenEvent(BackendConfigSettingsClass instance, GameWorld gameWorld, LocationSettingsClass.Location location)
+    public void InitHalloweenEvent(GlobalConfiguration instance, GameWorld gameWorld, LocationSettings.Location location)
     {
         if (instance != null && instance.EventSettings.EventActive && !instance.EventSettings.LocationsToIgnore.Contains(location.Id))
         {
 #if DEBUG
             Logger.LogWarning("Spawning halloween prefabs");
 #endif
-            gameWorld.HalloweenEventController = new HalloweenEventControllerClass();
+            gameWorld.HalloweenEventController = new HalloweenEventController();
             var gameObject = (GameObject)Resources.Load("Prefabs/HALLOWEEN_CONTROLLER");
             if (gameObject != null)
             {
@@ -493,7 +500,7 @@ public abstract class BaseGameController
         }
     }
 
-    public void InitBTRController(BackendConfigSettingsClass instance, GameWorld gameWorld, LocationSettingsClass.Location location)
+    public void InitBTRController(GlobalConfiguration instance, GameWorld gameWorld, LocationSettings.Location location)
     {
         if (FikaPlugin.Instance.Settings.UseBTR)
         {
@@ -504,7 +511,7 @@ public abstract class BaseGameController
                     Logger.LogInfo("Loading BTR data...");
 #if DEBUG
                     Logger.LogWarning("Spawning BTR controller and setting spawn chance to 100%");
-                    var settings = Singleton<BackendConfigSettingsClass>.Instance.BTRLocalSettings;
+                    var settings = Singleton<GlobalConfiguration>.Instance.BTRLocalSettings;
                     var mapSettings = settings.ServerMapBTRSettings.First(x => x.Value.MapID == gameWorld.LocationId);
                     var btrSettings = mapSettings.Value;
                     btrSettings.ChanceSpawn = 100;
@@ -513,16 +520,16 @@ public abstract class BaseGameController
                     btrSettings.PauseDurationRange = new(595, 600);
                     settings.ServerMapBTRSettings[mapSettings.Key] = btrSettings;
 #endif
-                    gameWorld.BtrController = new BTRControllerClass(gameWorld);
+                    gameWorld.BtrController = new BtrController(gameWorld);
                     if (IsServer)
                     {
-                        _btrSpawn = GlobalEventHandlerClass.Instance.SubscribeOnEvent<BtrSpawnOnThePathEvent>(OnBtrSpawn);
+                        _btrSpawn = GlobalEventsController.Instance.SubscribeOnEvent<BtrSpawnOnThePathEvent>(OnBtrSpawn);
                     }
                 }
             }
             else
             {
-                Logger.LogError("InitBTRController::BackendConfigSettingsClass was missing when initializing BTR!");
+                Logger.LogError("InitBTRController::GlobalConfiguration was missing when initializing BTR!");
             }
         }
     }
@@ -542,8 +549,8 @@ public abstract class BaseGameController
     /// <param name="profile"></param>
     /// <param name="localRaidSettings"></param>
     /// <param name="location"></param>
-    public virtual void InitializeTransitSystem(GameWorld gameWorld, BackendConfigSettingsClass instance, Profile profile,
-        LocalRaidSettings localRaidSettings, LocationSettingsClass.Location location)
+    public virtual void InitializeTransitSystem(GameWorld gameWorld, GlobalConfiguration instance, Profile profile,
+        LocalRaidSettings localRaidSettings, LocationSettings.Location location)
     {
         bool transitActive;
         if (instance == null)
@@ -569,11 +576,11 @@ public abstract class BaseGameController
         else
         {
             Logger.LogInfo("Transits are disabled");
-            TransitControllerAbstractClass.DisableTransitPoints();
+            EFT.TransitController.DisableTransitPoints();
         }
     }
 
-    public void InitializeRunddans(BackendConfigSettingsClass instance, GameWorld gameWorld, LocationSettingsClass.Location location)
+    public void InitializeRunddans(GlobalConfiguration instance, GameWorld gameWorld, LocationSettings.Location location)
     {
         // TODO: Add christmas event
         bool runddansActive;
@@ -594,11 +601,11 @@ public abstract class BaseGameController
         }
         else
         {
-            RunddansControllerAbstractClass.ToggleEventEnvironment(false);
+            RunddansController.ToggleEventEnvironment(false);
         }
     }
 
-    public abstract Task InitializeLoot(LocationSettingsClass.Location location);
+    public abstract Task InitializeLoot(LocationSettings.Location location);
 
     public Task SetupRaidCode()
     {
@@ -609,7 +616,7 @@ public abstract class BaseGameController
             // Raid code
             preloaderUiTraverse.Field("string_3").SetValue($"{raidCode}");
             // Update version label
-            preloaderUiTraverse.Method("method_6").GetValue();
+            preloaderUiTraverse.Method("RefreshCornerLabel").GetValue();
 
             Logger.LogInfo($"MatchingType: {FikaBackendUtils.ClientType}, Raid Code: {raidCode}");
         }
@@ -693,7 +700,7 @@ public abstract class BaseGameController
         {
             Logger.LogInfo($"Received date from server, was [{coopGame.GameDateTime.Calculate():G}] - new [{gameDateTime.Calculate():G}]");
             coopGame.GameDateTime = gameDateTime;
-            coopGame.GameWorld_0.GameDateTime = gameDateTime;
+            coopGame.GameWorld.GameDateTime = gameDateTime;
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using EFT.Airdrop;
+using System.Reflection;
 using Comfort.Common;
 using Fika.Core.Main.HostClasses;
 using SPT.Reflection.Patching;
@@ -9,12 +10,12 @@ public class OfflineAirplaneServerLogicClass_UpdateOfflineClientLogic_Patch : Mo
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(OfflineAirplaneServerLogicClass)
-            .GetMethod(nameof(OfflineAirplaneServerLogicClass.UpdateOfflineClientLogic));
+        return typeof(ServerPlane)
+            .GetMethod(nameof(ServerPlane.UpdateOfflineClientLogic));
     }
 
     [PatchPostfix]
-    public static void Postfix(AirplaneDataPacketStruct ___AirplaneDataPacketStruct)
+    public static void Postfix(SynchronizableObjectPacket ___AirplaneDataPacketStruct)
     {
         var hostWorld = Singleton<FikaHostGameWorld>.Instance.FikaHostWorld;
         hostWorld.WorldPacket.SyncObjectPackets.Add(___AirplaneDataPacketStruct);

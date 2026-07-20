@@ -1,5 +1,7 @@
 ﻿using Comfort.Common;
+using EFT;
 using EFT.AssetsManager;
+using EFT.Communications;
 using Fika.Core.Main.GameMode;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
@@ -54,7 +56,7 @@ public sealed class ClientExtract : IPoolSubPacket
                     if (FikaPlugin.Instance.Settings.ShowNotifications.Value)
                     {
                         var nickname = !string.IsNullOrEmpty(playerToApply.Profile.Info.MainProfileNickname) ? playerToApply.Profile.Info.MainProfileNickname : playerToApply.Profile.Nickname;
-                        NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.GROUP_MEMBER_EXTRACTED.Localized(),
+                        NotificationManager.DisplayMessageNotification(string.Format(LocaleUtils.GROUP_MEMBER_EXTRACTED.Localized(),
                             ColorizeText(EColor.GREEN, nickname)),
                         EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
                     }

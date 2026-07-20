@@ -7,7 +7,7 @@ using SPT.Reflection.Patching;
 namespace Fika.Core.Main.Patches.MovementContextPatches;
 
 /// <summary>
-/// Stops unnecessary static lookups to <see cref="BackendConfigAbstractClass.Config"/>
+/// Stops unnecessary static lookups to <see cref="AppEnvironment.Config"/>
 /// </summary>
 internal class MovementContext_RestorePreviousYaw_Transpiler : ModulePatch
 {

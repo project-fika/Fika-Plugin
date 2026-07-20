@@ -1,4 +1,5 @@
-﻿using EFT.InventoryLogic;
+﻿using EFT;
+using EFT.InventoryLogic;
 using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
@@ -28,14 +29,14 @@ public sealed class ReloadBarrelsPacket : IPoolSubPacket
 
     public string[] AmmoIds;
     public ItemAddress PlaceToPutContainedAmmoMagazine;
-    public GClass1950 Descriptor;
+    public ItemAddressDescriptor Descriptor;
 
     public void Execute(FikaPlayer player)
     {
         if (player.HandsController is ObservedFirearmController controller)
         {
             var ammo = controller.FindAmmoByIds(AmmoIds);
-            AmmoPackReloadingClass ammoPack = new(ammo);
+            AmmoPack ammoPack = new(ammo);
             ItemAddress gridItemAddress = null;
 
             if (Descriptor != null)
@@ -44,7 +45,7 @@ public sealed class ReloadBarrelsPacket : IPoolSubPacket
                 {
                     gridItemAddress = player.InventoryController.ToItemAddress(Descriptor);
                 }
-                catch (GException4 exception2)
+                catch (HTTPNetworkException exception2)
                 {
                     FikaGlobals.LogError(exception2);
                 }
@@ -79,7 +80,7 @@ public sealed class ReloadBarrelsPacket : IPoolSubPacket
         var exists = reader.GetBool();
         if (exists)
         {
-            Descriptor = reader.GetPolymorph<GClass1950>();
+            Descriptor = reader.GetPolymorph<ItemAddressDescriptor>();
         }
     }
 

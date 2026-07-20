@@ -16,32 +16,32 @@ internal sealed class ObservedQuickKnifeController : Player.QuickKnifeKickContro
 {
     public static ObservedQuickKnifeController Create(ObservedPlayer observerdPlayer, KnifeComponent item)
     {
-        return smethod_9<ObservedQuickKnifeController>(observerdPlayer, item);
+        return CreateController<ObservedQuickKnifeController>(observerdPlayer, item);
     }
 
     public override Dictionary<Type, OperationFactoryDelegate> GetOperationFactoryDelegates()
     {
         return new Dictionary<Type, OperationFactoryDelegate> {
             {
-                typeof(Class1290),
+                typeof(Player.QuickKnifeKickController.QuickKnifeKickOperation),
                 new OperationFactoryDelegate(CreateObservedQuickKnifeOperation)
             }
         };
     }
 
-    public Player.BaseAnimationOperationClass CreateObservedQuickKnifeOperation()
+    public Player.ObjectInHandsOperation CreateObservedQuickKnifeOperation()
     {
         return new ObservedQuickKnifeOperation(this);
     }
 
-    public override ShotInfoClass vmethod_0(Player.GStruct182 hit, BallisticCollider ballisticCollider)
+    public override PlayerHitInfo ProcessHit(Player.KnifeRaycastHit hit, BallisticCollider ballisticCollider)
     {
 #if DEBUG
         FikaGlobals.LogInfo($"Hit from observed knife controller: {hit.point:F2}, ballisticCollider: {(ballisticCollider != null ? ballisticCollider.HitType : "none")}");
 #endif
         if (ballisticCollider != null)
         {
-            Singleton<Effects>.Instance.EffectsCommutator.PlayKnifeHitEffect(new DamageInfoStruct
+            Singleton<Effects>.Instance.EffectsCommutator.PlayKnifeHitEffect(new DamageInfo
             {
                 HitPoint = hit.point,
                 HitNormal = hit.normal,
@@ -50,24 +50,24 @@ internal sealed class ObservedQuickKnifeController : Player.QuickKnifeKickContro
             });
         }
 
-        return new ShotInfoClass()
+        return new PlayerHitInfo()
         {
             PoV = EPointOfView.ThirdPerson,
             Material = MaterialType.Body
         };
     }
 
-    public sealed class ObservedQuickKnifeOperation(ObservedQuickKnifeController controller) : Class1290(controller)
+    public sealed class ObservedQuickKnifeOperation(ObservedQuickKnifeController controller) : Player.QuickKnifeKickController.QuickKnifeKickOperation(controller)
     {
         public override void HideWeapon(Action onHidden, bool fastHide)
         {
             onHidden();
-            if (Bool_0)
+            if (_kickFinished)
             {
                 onHidden();
                 return;
             }
-            Action_1 = onHidden;
+            _onControllerDestroyed = onHidden;
         }
     }
 }

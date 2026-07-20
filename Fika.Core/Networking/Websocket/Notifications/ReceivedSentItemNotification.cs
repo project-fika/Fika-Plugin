@@ -1,4 +1,5 @@
 ﻿using System;
+using EFT;
 using EFT.Communications;
 using Fika.Core.Main.Utils;
 using Newtonsoft.Json;
@@ -6,7 +7,7 @@ using static Fika.Core.UI.FikaUIGlobals;
 
 namespace Fika.Core.Networking.Websocket.Notifications;
 
-public sealed class ReceivedSentItemNotification : NotificationAbstractClass
+public sealed class ReceivedSentItemNotification : Notification
 {
     public override ENotificationIconType Icon
     {

@@ -7,10 +7,13 @@ using Dissonance.Integrations.MirrorIgnorance;
 using Diz.Utils;
 using EFT;
 using EFT.Airdrop;
+using EFT.Communications;
 using EFT.Interactive;
 using EFT.InventoryLogic;
+using EFT.Settings;
 using EFT.SynchronizableObjects;
 using EFT.UI;
+using EFT.Vehicle;
 using Fika.Core.Main.Components;
 using Fika.Core.Main.GameMode;
 using Fika.Core.Main.HostClasses;
@@ -53,7 +56,7 @@ namespace Fika.Core.Networking;
 /// <summary>
 /// Server used to synchronize all <see cref="FikaClient"/>s
 /// </summary>
-public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchListener, GInterface279, IFikaNetworkManager
+public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchListener, IAirdropDataSender, IFikaNetworkManager
 {
     public int ReadyClients;
     public DateTime TimeSinceLastPeerDisconnected;
@@ -75,7 +78,7 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
         {
             if (_gameStartTime == null)
             {
-                _gameStartTime = EFTDateTimeClass.UtcNow;
+                _gameStartTime = DateTimeExtensions.UtcNow;
             }
             return _gameStartTime;
         }
@@ -269,7 +272,7 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
         {
             if (FikaPlugin.Instance.WanIP == null)
             {
-                NotificationManagerClass.DisplayMessageNotification("No WAN IP could be found, external players will not be able to join",
+                NotificationManager.DisplayMessageNotification("No WAN IP could be found, external players will not be able to join",
                     iconType: EFT.Communications.ENotificationIconType.Alert, textColor: Color.red);
             }
 
@@ -303,7 +306,7 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
                 if (!IPAddress.TryParse(FikaPlugin.Instance.Settings.ForceBindIP.Value, out var bindAddress))
                 {
                     var error = $"{FikaPlugin.Instance.Settings.ForceBindIP.Value} could not be parsed into a valid IP, raid will not start";
-                    NotificationManagerClass.DisplayWarningNotification(
+                    NotificationManager.DisplayWarningNotification(
                         error,
                         EFT.Communications.ENotificationDurationType.Long);
 
@@ -332,7 +335,7 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
 
         _logger.LogInfo("Started Fika Server");
 
-        NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.SERVER_STARTED.Localized(), _port),
+        NotificationManager.DisplayMessageNotification(string.Format(LocaleUtils.SERVER_STARTED.Localized(), _port),
             EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
 
         List<string> ipAddresses = [_externalIp];
@@ -348,7 +351,7 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
         if (ipAddresses.Count < 1)
         {
             ipAddresses = [_externalIp, ""];
-            NotificationManagerClass.DisplayMessageNotification(LocaleUtils.NO_VALID_IP.Localized(),
+            NotificationManager.DisplayMessageNotification(LocaleUtils.NO_VALID_IP.Localized(),
                 iconType: EFT.Communications.ENotificationIconType.Alert);
         }
 
@@ -365,13 +368,13 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
     public async Task InitializeVOIP()
     {
         var voipHandler = FikaGlobals.VOIPHandler;
-        var controller = Singleton<SharedGameSettingsClass>.Instance.Sound.Controller;
+        var controller = Singleton<SettingsManager>.Instance.Sound.Controller;
         if (voipHandler.MicrophoneChecked && !FikaBackendUtils.IsHeadless)
         {
             controller.ResetVoipDisabledReason();
             DissonanceComms.ClientPlayerId = FikaGlobals.GetProfile(RaidSide == ESideType.Savage).ProfileId;
-            await LoadSceneClass.LoadScene(AssetsManagerSingletonClass.Manager,
-                SceneResourceKeyAbstractClass.DissonanceSetupScene, UnityEngine.SceneManagement.LoadSceneMode.Additive);
+            await AssetsManagerExtension.LoadScene(EFT.Assets.Manager,
+                Scenes.DissonanceSetupScene, UnityEngine.SceneManagement.LoadSceneMode.Additive);
 
             MirrorIgnoranceCommsNetwork mirrorCommsNetwork;
             do
@@ -390,8 +393,8 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
         }
         else if (FikaBackendUtils.IsHeadless)
         {
-            await LoadSceneClass.LoadScene(AssetsManagerSingletonClass.Manager,
-                SceneResourceKeyAbstractClass.DissonanceSetupScene, UnityEngine.SceneManagement.LoadSceneMode.Additive);
+            await AssetsManagerExtension.LoadScene(EFT.Assets.Manager,
+                Scenes.DissonanceSetupScene, UnityEngine.SceneManagement.LoadSceneMode.Additive);
 
             MirrorIgnoranceCommsNetwork mirrorCommsNetwork;
             do
@@ -729,7 +732,7 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
         peer.Send(_dataWriter.AsReadOnlySpan(), deliveryMethod);
     }
 
-    public void SendBTRPacket(ref BTRDataPacketStruct data)
+    public void SendBTRPacket(ref ShapshotBTRMessage data)
     {
         _dataWriter.Reset();
         _dataWriter.PutEnum(EPacketType.BTR);
@@ -748,22 +751,22 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
             if (gameWorld.BtrController != null)
             {
                 stashesPacket.HasBTR = true;
-                var length = gameWorld.BtrController.TransferItemsController.List_0.Count;
-                stashesPacket.BTRStashes = new StashItemClass[length];
+                var length = gameWorld.BtrController.TransferItemsController._transferContainers.Count;
+                stashesPacket.BTRStashes = new Stash[length];
                 for (var i = 0; i < length; i++)
                 {
-                    stashesPacket.BTRStashes[i] = gameWorld.BtrController.TransferItemsController.List_0[i];
+                    stashesPacket.BTRStashes[i] = gameWorld.BtrController.TransferItemsController._transferContainers[i];
                 }
             }
 
             if (gameWorld.TransitController != null)
             {
                 stashesPacket.HasTransit = true;
-                var length = gameWorld.TransitController.TransferItemsController.List_0.Count;
-                stashesPacket.TransitStashes = new StashItemClass[length];
+                var length = gameWorld.TransitController.TransferItemsController._transferContainers.Count;
+                stashesPacket.TransitStashes = new Stash[length];
                 for (var i = 0; i < length; i++)
                 {
-                    stashesPacket.TransitStashes[i] = gameWorld.TransitController.TransferItemsController.List_0[i];
+                    stashesPacket.TransitStashes[i] = gameWorld.TransitController.TransferItemsController._transferContainers[i];
                 }
             }
 
@@ -773,8 +776,8 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
 
     public void OnPeerConnected(NetPeer peer)
     {
-        NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.PEER_CONNECTED.Localized(), peer.Port),
-            iconType: EFT.Communications.ENotificationIconType.Friend);
+        NotificationManager.DisplayMessageNotification(string.Format(LocaleUtils.PEER_CONNECTED.Localized(), peer.Port),
+            iconType: ENotificationIconType.Friend);
         _logger.LogInfo($"Connection established with {peer.Address}:{peer.Port}, id: {peer.Id}");
 
         HasHadPeer = true;
@@ -872,7 +875,7 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
         _logger.LogInfo($"Peer disconnected {peer.Port}, info: {disconnectInfo.Reason}");
         if (disconnectInfo.Reason != DisconnectReason.RemoteConnectionClose)
         {
-            NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.PEER_DISCONNECTED.Localized(), [peer.Port, disconnectInfo.Reason]),
+            NotificationManager.DisplayMessageNotification(string.Format(LocaleUtils.PEER_DISCONNECTED.Localized(), [peer.Port, disconnectInfo.Reason]),
                     iconType: EFT.Communications.ENotificationIconType.Alert);
         }
 

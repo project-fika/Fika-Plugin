@@ -1,5 +1,6 @@
 ﻿using Comfort.Common;
 using EFT;
+using EFT.InventoryLogic;
 using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Pooling;
@@ -35,7 +36,7 @@ public sealed class RocketShotPacket : IPoolSubPacket
     {
         if (player.HandsController is ObservedFirearmController controller)
         {
-            var rocketClass = (AmmoItemClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), AmmoTemplateId, null);
+            var rocketClass = (Ammo)Singleton<ItemFactory>.Instance.CreateItem(MongoID.Generate(), AmmoTemplateId, null);
             controller.HandleRocketShot(rocketClass, ShotPosition, ShotForward);
         }
     }

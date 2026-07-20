@@ -71,7 +71,7 @@ public class ClientPacketSender : MonoBehaviour, IPacketSender
     {
         enabled = true;
         SendState = true;
-        if (_player.AbstractQuestControllerClass is ClientQuestController clientQuestController)
+        if (_player.QuestController is ClientQuestController clientQuestController)
         {
             clientQuestController.LateInit();
         }
@@ -200,7 +200,7 @@ public class ClientPacketSender : MonoBehaviour, IPacketSender
 
             if (FikaPlugin.Instance.Settings.PlayPingAnimation.Value && _player.HealthController.IsAlive)
             {
-                _player.vmethod_7(EInteraction.ThereGesture);
+                _player.ShowGesture(EInteraction.ThereGesture);
             }
         }
     }

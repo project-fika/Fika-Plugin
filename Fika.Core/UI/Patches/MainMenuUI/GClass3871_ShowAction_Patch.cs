@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using EFT.UI;
+using System.Reflection;
 using Comfort.Common;
 using Fika.Core.Networking;
 using Fika.Core.UI.Custom;
@@ -12,12 +13,12 @@ public class GClass3871_ShowAction_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(GClass3871)
-            .GetMethod(nameof(GClass3871.ShowAction));
+        return typeof(InventoryScreen.InventoryScreenController)
+            .GetMethod(nameof(InventoryScreen.InventoryScreenController.ShowAction));
     }
 
     [PatchPostfix]
-    public static void Postfix(GClass3871 __instance)
+    public static void Postfix(InventoryScreen.InventoryScreenController __instance)
     {
         if (!__instance.InRaid && !Singleton<IFikaNetworkManager>.Instantiated)
         {

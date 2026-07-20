@@ -1,14 +1,16 @@
-﻿using Fika.Core.Main.Utils;
+﻿using EFT;
+using EFT.InventoryLogic;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Networking.Packets.Backend;
 
 public struct StashesPacket : INetSerializable
 {
     public bool HasBTR;
-    public StashItemClass[] BTRStashes;
+    public Stash[] BTRStashes;
 
     public bool HasTransit;
-    public StashItemClass[] TransitStashes;
+    public Stash[] TransitStashes;
 
     public void Deserialize(NetDataReader reader)
     {
@@ -16,11 +18,11 @@ public struct StashesPacket : INetSerializable
         if (HasBTR)
         {
             var amount = reader.GetInt();
-            BTRStashes = new StashItemClass[amount];
+            BTRStashes = new Stash[amount];
             for (var i = 0; i < amount; i++)
             {
                 var descriptor = reader.GetEFTItemDescriptor();
-                BTRStashes[i] = descriptor.Deserialize<StashItemClass>();
+                BTRStashes[i] = descriptor.Deserialize<Stash>();
             }
 
         }
@@ -29,11 +31,11 @@ public struct StashesPacket : INetSerializable
         if (HasTransit)
         {
             var amount = reader.GetInt();
-            TransitStashes = new StashItemClass[amount];
+            TransitStashes = new Stash[amount];
             for (var i = 0; i < amount; i++)
             {
                 var descriptor = reader.GetEFTItemDescriptor();
-                TransitStashes[i] = descriptor.Deserialize<StashItemClass>();
+                TransitStashes[i] = descriptor.Deserialize<Stash>();
             }
         }
     }
@@ -46,7 +48,7 @@ public struct StashesPacket : INetSerializable
             writer.Put(BTRStashes.Length);
             for (var i = 0; i < BTRStashes.Length; i++)
             {
-                writer.PutEFTItemDescriptor(EFTItemSerializerClass.SerializeItem(BTRStashes[i],
+                writer.PutEFTItemDescriptor(ItemBinarySerializer.SerializeItem(BTRStashes[i],
                     FikaGlobals.SearchControllerSerializer));
             }
         }
@@ -57,7 +59,7 @@ public struct StashesPacket : INetSerializable
             writer.Put(TransitStashes.Length);
             for (var i = 0; i < TransitStashes.Length; i++)
             {
-                writer.PutEFTItemDescriptor(EFTItemSerializerClass.SerializeItem(TransitStashes[i],
+                writer.PutEFTItemDescriptor(ItemBinarySerializer.SerializeItem(TransitStashes[i],
                     FikaGlobals.SearchControllerSerializer));
             }
         }

@@ -20,7 +20,7 @@ internal sealed class ClientHealthController_Kill_Patch : ModulePatch
         if (__instance.Player.IsYourPlayer && __instance.ReviveEnabled && __instance.CanBeDowned && !__instance.CheckIfDamageShouldInstantKill())
         {
             __instance.IsAlive = false;
-            __instance.method_35(damageType);
+            __instance.NetworkSyncIsAlive(damageType);
             return false;
         }
 

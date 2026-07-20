@@ -14,12 +14,12 @@ public sealed class ReconnectPacket : INetSerializable
 
     public string ProfileId;
     public Profile Profile;
-    public Profile.ProfileHealthClass ProfileHealthClass;
+    public Profile.HealthInfo ProfileHealthClass;
     public Vector3 PlayerPosition;
     public Vector2 PlayerRotation;
 
-    public List<SmokeGrenadeDataPacketStruct> ThrowableData;
-    public List<WorldInteractiveObject.WorldInteractiveDataPacketStruct> InteractivesData;
+    public List<SmokeGrenadeNetworkData> ThrowableData;
+    public List<WorldInteractiveObject.InteractiveObjectStatusInfo> InteractivesData;
     public Dictionary<int, byte> LampStates;
     public Dictionary<int, Vector3> WindowBreakerStates;
     public List<QuestSyncPacket> QuestSyncPackets;
@@ -48,7 +48,7 @@ public sealed class ReconnectPacket : INetSerializable
                     break;
                 case EReconnectDataType.OwnCharacter:
                     Profile = reader.GetProfile();
-                    ProfileHealthClass = SimpleZlib.Decompress(reader.GetByteArray()).ParseJsonTo<Profile.ProfileHealthClass>();
+                    ProfileHealthClass = SimpleZlib.Decompress(reader.GetByteArray()).ParseJsonTo<Profile.HealthInfo>();
                     PlayerPosition = reader.GetUnmanaged<Vector3>();
                     PlayerRotation = reader.GetUnmanaged<Vector2>();
                     break;

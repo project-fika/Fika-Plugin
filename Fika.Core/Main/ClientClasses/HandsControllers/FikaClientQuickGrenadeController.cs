@@ -1,5 +1,6 @@
 ﻿// © 2026 Lacyway All Rights Reserved
 
+using EFT.InventoryLogic;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Packets.FirearmController;
 using Fika.Core.Networking.Packets.FirearmController.SubPackets;
@@ -14,9 +15,9 @@ public class FikaClientQuickGrenadeController : EFT.Player.QuickGrenadeThrowHand
     protected FikaPlayer _fikaPlayer;
     private WeaponPacket _packet;
 
-    public static FikaClientQuickGrenadeController Create(FikaPlayer player, ThrowWeapItemClass item)
+    public static FikaClientQuickGrenadeController Create(FikaPlayer player, ThrowWeap item)
     {
-        var controller = smethod_9<FikaClientQuickGrenadeController>(player, item);
+        var controller = CreateController<FikaClientQuickGrenadeController>(player, item);
         controller._fikaPlayer = player;
         controller._packet = new()
         {
@@ -31,7 +32,7 @@ public class FikaClientQuickGrenadeController : EFT.Player.QuickGrenadeThrowHand
         base.Destroy();
     }
 
-    public override void vmethod_2(float timeSinceSafetyLevelRemoved, Vector3 position, Quaternion rotation, Vector3 force, bool lowThrow)
+    public override void ThrowGrenade(float timeSinceSafetyLevelRemoved, Vector3 position, Quaternion rotation, Vector3 force, bool lowThrow)
     {
         _packet.Type = EFirearmSubPacketType.Grenade;
         _packet.SubPacket = GrenadePacket.FromValue(
@@ -47,6 +48,6 @@ public class FikaClientQuickGrenadeController : EFT.Player.QuickGrenadeThrowHand
         );
         _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
 
-        base.vmethod_2(timeSinceSafetyLevelRemoved, position, rotation, force, lowThrow);
+        base.ThrowGrenade(timeSinceSafetyLevelRemoved, position, rotation, force, lowThrow);
     }
 }

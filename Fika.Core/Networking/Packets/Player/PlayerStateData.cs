@@ -103,7 +103,7 @@ public readonly struct PlayerStateData
     /// <summary>1 byte, offset 39</summary>
     private readonly byte _velocityDirZPacked;
 
-    public BasePhysicalClass.PhysicalStateStruct Physical
+    public PhysicalBase.StaminaStruct Physical
     {
         get
         {

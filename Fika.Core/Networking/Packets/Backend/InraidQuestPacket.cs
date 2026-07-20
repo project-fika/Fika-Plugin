@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using JsonType;
+using System.Collections.Generic;
 using EFT;
 using Newtonsoft.Json;
 
@@ -8,7 +9,7 @@ public struct InRaidQuestPacket : INetSerializable
 {
     public int NetId;
     public InraidQuestType Type;
-    public List<FlatItemsDataClass[]> Items;
+    public List<FlatItem[]> Items;
     public List<MongoID> ItemIdsToRemove;
 
     public void Deserialize(NetDataReader reader)
@@ -23,7 +24,7 @@ public struct InRaidQuestPacket : INetSerializable
                     Items = new(length);
                     for (var i = 0; i < length; i++)
                     {
-                        Items.Add(JsonConvert.DeserializeObject<FlatItemsDataClass[]>(reader.GetString()));
+                        Items.Add(JsonConvert.DeserializeObject<FlatItem[]>(reader.GetString()));
                     }
                 }
                 break;

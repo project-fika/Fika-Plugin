@@ -28,9 +28,9 @@ internal class FikaHalloweenEventManager : MonoBehaviour
 
         _server = Singleton<FikaServer>.Instance;
 
-        _summonStartedAction = GlobalEventHandlerClass.Instance.SubscribeOnEvent<HalloweenSummonStartedEvent>(OnHalloweenSummonStarted);
-        _syncStateEvent = GlobalEventHandlerClass.Instance.SubscribeOnEvent<HalloweenSyncStateEvent>(OnHalloweenSyncStateEvent);
-        _syncExitsEvent = GlobalEventHandlerClass.Instance.SubscribeOnEvent<HalloweenSyncExitsEvent>(OnHalloweenSyncExitsEvent);
+        _summonStartedAction = GlobalEventsController.Instance.SubscribeOnEvent<HalloweenSummonStartedEvent>(OnHalloweenSummonStarted);
+        _syncStateEvent = GlobalEventsController.Instance.SubscribeOnEvent<HalloweenSyncStateEvent>(OnHalloweenSyncStateEvent);
+        _syncExitsEvent = GlobalEventsController.Instance.SubscribeOnEvent<HalloweenSyncExitsEvent>(OnHalloweenSyncExitsEvent);
     }
 
     protected void OnDestroy()

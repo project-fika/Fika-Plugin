@@ -1,5 +1,6 @@
 ﻿using Comfort.Common;
 using EFT;
+using EFT.InventoryLogic;
 using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Pooling;
@@ -41,7 +42,7 @@ public sealed class FlareShotPacket : IPoolSubPacket
             {
                 controller.FirearmsAnimator.SetFire(true);
 
-                if (controller.Weapon is not RevolverItemClass)
+                if (controller.Weapon is not Revolver)
                 {
                     controller.FirearmsAnimator.Animator.Play(controller.FirearmsAnimator.FullFireStateName, 1, 0f);
                     controller.Weapon.Repairable.Durability = 0;
@@ -53,7 +54,7 @@ public sealed class FlareShotPacket : IPoolSubPacket
             }
             else
             {
-                var bulletClass = (AmmoItemClass)Singleton<ItemFactoryClass>.Instance.CreateItem(MongoID.Generate(), AmmoTemplateId, null);
+                var bulletClass = (Ammo)Singleton<ItemFactory>.Instance.CreateItem(MongoID.Generate(), AmmoTemplateId, null);
                 controller.InitiateFlare(bulletClass, ShotPosition, ShotForward);
                 bulletClass.IsUsed = true;
                 controller.WeaponManager.MoveAmmoFromChamberToShellPort(bulletClass.IsUsed, 0);

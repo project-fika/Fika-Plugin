@@ -1,0 +1,25 @@
+﻿using System.Reflection;
+using EFT;
+using Fika.Core.Main.Players;
+using Fika.Core.Main.Utils;
+using SPT.Reflection.Patching;
+
+namespace Fika.Core.Main.Patches;
+
+public class TransitInteractionControllerAbstractClass_TryGetAccessToLocation_Patch : ModulePatch
+{
+    protected override MethodBase GetTargetMethod()
+    {
+        return typeof(ClientTransitController)
+            .GetMethod(nameof(ClientTransitController.TryGetAccessToLocation));
+    }
+
+    [PatchPrefix]
+    public static void Prefix(Player player)
+    {
+        if (FikaBackendUtils.IsClient && player.IsYourPlayer && player is FikaPlayer fikaPlayer)
+        {
+            fikaPlayer.InventoryController.GetTraderServicesDataFromServer(FikaGlobals.TransitTraderId);
+        }
+    }
+}

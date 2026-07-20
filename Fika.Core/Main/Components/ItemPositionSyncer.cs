@@ -1,5 +1,7 @@
 ﻿using Comfort.Common;
+using EFT;
 using EFT.Interactive;
+using EFT.InventoryLogic;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 
@@ -11,7 +13,7 @@ public class ItemPositionSyncer : MonoBehaviour
     private FikaClient _client;
     private bool _isServer;
     private ObservedLootItem _lootItem;
-    private LootSyncStruct _data;
+    private EFT.LootSyncPacket _data;
 
     private bool PhysicsDone
     {
@@ -70,7 +72,7 @@ public class ItemPositionSyncer : MonoBehaviour
         _lootItem.ItemOwner.RemoveItemEvent += ItemOwner_RemoveItemEvent;
     }
 
-    private void ItemOwner_RemoveItemEvent(GEventArgs3 obj)
+    private void ItemOwner_RemoveItemEvent(RemoveItemEventArgs obj)
     {
         NotifyDone();
     }

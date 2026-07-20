@@ -30,7 +30,7 @@ internal class BTRViewSynchronizer : ThrottledMono
     {
         if (_server != null)
         {
-            _server.SendBTRPacket(ref BTRControllerClass.Instance.BTRDataPacketStruct);
+            _server.SendBTRPacket(ref BtrController.Instance._offlineSyncPacket);
         }
     }
 }
