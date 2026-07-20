@@ -6,15 +6,14 @@ using Systems.Effects;
 namespace Fika.Core.Main.Patches.Muzzle;
 
 /// <summary>
-/// This patch skips a LINQ allocation during <see cref="MuzzleManager.Play(EMuzzleParticlePivot, Transform)(bool, float)"/>
+/// This patch skips a LINQ allocation during <c>MuzzleManager.IMuzzleParticlePivot.Play(EMuzzleParticlePivot, Transform)</c>
 /// </summary>
 /// <remarks>Allocation found by <b>ifp</b></remarks>
 public sealed class MuzzleManager_Play_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(MuzzleManager)
-            .GetMethod(nameof(MuzzleManager.Play));
+        return typeof(MuzzleManager).GetMethod("IMuzzleParticlePivot.Play", BindingFlags.Instance | BindingFlags.Public);
     }
 
     [PatchPrefix]
