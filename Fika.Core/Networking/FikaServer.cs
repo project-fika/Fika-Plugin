@@ -10,7 +10,6 @@ using EFT.Airdrop;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
-using EFT.UI;
 using Fika.Core.Main.Components;
 using Fika.Core.Main.GameMode;
 using Fika.Core.Main.HostClasses;
@@ -41,7 +40,6 @@ using Fika.Core.Networking.Packets.Communication;
 using Fika.Core.Networking.Pooling;
 using Fika.Core.Networking.Open.Nat;
 using Fika.Core.Networking.Open.Nat.Enums;
-using Fika.Core.Networking.Open.Nat.Exceptions;
 using Fika.Core.Networking.Models;
 using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Player.Common;
@@ -222,7 +220,7 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
 #endif            
         await NetManagerUtils.CreateCoopHandler();
 
-        var portMapped=false;
+        var portMapped = false;
 
         if (FikaPlugin.Instance.Settings.UseUPnP.Value)
         {
@@ -237,7 +235,7 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
                 await device.CreatePortMapAsync(new Mapping(Protocol.Udp, _port, _port, 300, "Fika UDP"));
 
                 _logger.LogInfo("Port Mapping Succeeded");
-                portMapped=true;
+                portMapped = true;
             }
             catch (Exception ex)
             {
