@@ -235,7 +235,7 @@ public sealed class ObservedPlayer : FikaPlayer
 
         ObservedStatisticsManager statisticsManager = new();
         ObservedQuestController observedQuestController = null;
-        ClientDialogController dialogueController = null;
+        ObservedDialogueController dialogueController = null;
         if (!aiControl)
         {
             observedQuestController = new(profile, inventoryController, inventoryController.PlayerSearchController, null);
