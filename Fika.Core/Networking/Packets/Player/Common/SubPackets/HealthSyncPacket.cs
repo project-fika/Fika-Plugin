@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Main.Players;
