@@ -70,7 +70,7 @@ public struct InRaidQuestPacket : INetSerializable
         }
     }
 
-    public enum InraidQuestType
+    public enum InraidQuestType : byte
     {
         Finish,
         Handover
