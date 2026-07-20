@@ -8,7 +8,7 @@ using SPT.Reflection.Patching;
 namespace Fika.Core.Main.Patches.Revival;
 
 [IgnoreAutoPatch]
-internal sealed class GetActionsClass_GetAvailableActions_Patch : ModulePatch
+internal sealed class InteractionContextHelper_GetAvailableActions_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

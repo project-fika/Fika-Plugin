@@ -9,12 +9,12 @@ using static Fika.Core.UI.FikaUIGlobals;
 
 namespace Fika.Core.UI.Patches.MainMenuUI;
 
-public class GClass3871_ShowAction_Patch : ModulePatch
+public class InventoryScreenController_ShowAction_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(InventoryScreen.InventoryScreenController)
-            .GetMethod(nameof(InventoryScreen.InventoryScreenController.ShowAction));
+        return typeof(InventoryScreenController)
+            .GetMethod(nameof(InventoryScreenController.ShowAction));
     }
 
     [PatchPostfix]

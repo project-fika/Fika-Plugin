@@ -6,7 +6,7 @@ using SPT.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.Airdrops;
 
-public class SyncObjectProcessorClass_GetSyncObjectStrategyByType_Patch : ModulePatch
+public class SynchronizableObjectLogicProcessor_GetSyncObjectStrategyByType_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

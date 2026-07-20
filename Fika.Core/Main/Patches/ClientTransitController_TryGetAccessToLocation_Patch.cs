@@ -6,7 +6,7 @@ using SPT.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches;
 
-public class TransitInteractionControllerAbstractClass_TryGetAccessToLocation_Patch : ModulePatch
+public class ClientTransitController_TryGetAccessToLocation_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

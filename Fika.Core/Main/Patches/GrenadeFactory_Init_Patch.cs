@@ -9,7 +9,7 @@ namespace Fika.Core.Main.Patches;
 /// <summary>
 /// Used to help us keep track of thrown grenades during a session for kill progression
 /// </summary>
-public class GrenadeClass_Init_Patch : ModulePatch
+public class GrenadeFactory_Init_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

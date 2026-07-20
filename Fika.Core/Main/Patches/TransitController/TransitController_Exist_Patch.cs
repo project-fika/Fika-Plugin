@@ -6,13 +6,13 @@ using SPT.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.TransitController;
 
-public class TransitControllerAbstractClass_Exist_Patch : ModulePatch
+public class TransitController_Exist_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
         return typeof(EFT.TransitController)
             .GetMethod(nameof(EFT.TransitController.Exist))
-            .MakeGenericMethod(typeof(EFT.ClientTransitController));
+            .MakeGenericMethod(typeof(ClientTransitController));
     }
 
     [PatchPrefix]

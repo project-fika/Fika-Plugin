@@ -8,7 +8,7 @@ using SPT.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.Lighthouse;
 
-public class BufferZoneControllerClass_SetPlayerInZoneStatus_Patch : ModulePatch
+public class BufferZoneController_SetPlayerInZoneStatus_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

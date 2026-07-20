@@ -4,7 +4,7 @@ using SPT.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.Camera;
 
-public class WeaponManagerClass_ValidateScopeSmoothZoomUpdate_Patch : ModulePatch
+public class Firearms_ValidateScopeSmoothZoomUpdate_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

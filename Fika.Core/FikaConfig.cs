@@ -909,7 +909,7 @@ public sealed class FikaConfig(ConfigFile config)
         if (clientConfig.ReviveConfig.Enabled)
         {
             new ClientHealthController_Kill_Patch().Enable();
-            new GetActionsClass_GetAvailableActions_Patch().Enable();
+            new InteractionContextHelper_GetAvailableActions_Patch().Enable();
         }
 
         clientConfig.LogValues();

@@ -6,7 +6,7 @@ using SPT.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.Airdrops;
 
-public class OfflineAirplaneServerLogicClass_UpdateOfflineClientLogic_Patch : ModulePatch
+public class ServerPlane_UpdateOfflineClientLogic_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {

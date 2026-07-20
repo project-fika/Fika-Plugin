@@ -5,7 +5,7 @@ using SPT.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches;
 
-internal class LocaleClass_ReloadBackendLocale_Patch : ModulePatch
+internal class DataPrepareOperation_ReloadBackendLocale_Patch : ModulePatch
 {
     private static bool _hasBeenSet = false;
 

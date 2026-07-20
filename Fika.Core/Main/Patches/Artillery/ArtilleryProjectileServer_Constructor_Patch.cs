@@ -7,7 +7,7 @@ using SPT.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.Artillery;
 
-public class ArtilleryServerProjectileClass_Constructor_Patch : ModulePatch
+public class ArtilleryProjectileServer_Constructor_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
