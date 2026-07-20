@@ -19,7 +19,7 @@ public struct InRaidQuestPacket : INetSerializable
         {
             case InraidQuestType.Finish:
                 {
-                    var length = reader.GetInt();
+                    var length = reader.GetUShort();
                     Items = new(length);
                     for (var i = 0; i < length; i++)
                     {
@@ -31,7 +31,7 @@ public struct InRaidQuestPacket : INetSerializable
                 {
                     if (reader.GetBool())
                     {
-                        var length = reader.GetInt();
+                        var length = reader.GetUShort();
                         ItemIdsToRemove = new(length);
                         for (var i = 0; i < length; i++)
                         {
@@ -50,7 +50,7 @@ public struct InRaidQuestPacket : INetSerializable
         switch (Type)
         {
             case InraidQuestType.Finish:
-                writer.Put(Items.Count);
+                writer.Put((ushort)Items.Count);
                 for (var i = 0; i < Items.Count; i++)
                 {
                     writer.Put(JsonConvert.SerializeObject(Items[i]));
@@ -60,7 +60,7 @@ public struct InRaidQuestPacket : INetSerializable
                 if (ItemIdsToRemove != null)
                 {
                     writer.Put(true);
-                    writer.Put(ItemIdsToRemove.Count);
+                    writer.Put((ushort)ItemIdsToRemove.Count);
                     for (var i = 0; i < ItemIdsToRemove.Count; i++)
                     {
                         writer.PutMongoID(ItemIdsToRemove[i]);
