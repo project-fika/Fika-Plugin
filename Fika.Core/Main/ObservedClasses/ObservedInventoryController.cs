@@ -284,7 +284,7 @@ public sealed class ObservedInventoryController : Player.PlayerInventoryControll
             return;
         }
 
-        if (operation is FoldOperationClass && handler.player_0.HandsController.CanExecute(operation))
+        if (item is not Weapon && (item.Parent != to || operation is FoldOperationClass) && handler.player_0.HandsController.CanExecute(operation))
         {
             Traverse.Create(handler.player_0).Field<Callback>("_setInHandsCallback").Value = handler.callback;
             RaiseInOutProcessEvents(new(handler.player_0.HandsController.Item, CommandStatus.Begin, this));
