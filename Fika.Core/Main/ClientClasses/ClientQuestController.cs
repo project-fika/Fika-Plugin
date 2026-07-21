@@ -31,6 +31,11 @@ public class ClientQuestController(Profile profile, InventoryController inventor
         _player.InventoryController.AddItemEvent += InventoryController_AddItemEvent;
     }
 
+    public void ToggleSend(bool enabled)
+    {
+        _sendQuestSync = enabled;
+    }
+
     private void InventoryController_AddItemEvent(GEventArgs2 eventArgs)
     {
         if (eventArgs.Status != CommandStatus.Succeed || !_isClient || !_sendQuestSync)
@@ -100,7 +105,9 @@ public class ClientQuestController(Profile profile, InventoryController inventor
             var counter = conditional.ConditionCountersManager.GetCounter(condition.id);
             if (counter == null)
             {
+#if DEBUG
                 FikaGlobals.LogWarning($"There was no counter for condition [{condition.id}]");
+#endif
                 return;
             }
 

@@ -758,7 +758,7 @@ public sealed class FikaConfig(ConfigFile config)
             }),
             "UDP Port", ref failed, headers);
 
-        UseUPnP = SetupSetting(networkDefaultHeader, "Use UPnP", false,
+        UseUPnP = SetupSetting(networkDefaultHeader, "Use Port Mapping", false,
             new ConfigDescription(LocaleUtils.BEPINEX_USE_UPNP_D.Localized(), tags: new ConfigurationManagerAttributes
             {
                 Category = networkHeader,

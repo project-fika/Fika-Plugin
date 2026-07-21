@@ -107,6 +107,33 @@ public class FikaCommands
         }
     }
 
+    [ConsoleCommand("simulateLag", description: "Simulates lag by adding artifical delay and packet loss")]
+    public static void SimulateLag([ConsoleArgument(true, "if lag should be simulated")] bool simulate)
+    {
+        if (!CheckForGame())
+        {
+            return;
+        }
+
+        if (!Singleton<IFikaNetworkManager>.Instantiated)
+        {
+            return;
+        }
+
+        if (FikaBackendUtils.IsClient)
+        {
+            var client = Singleton<FikaClient>.Instance;
+            client.NetClient.SimulateLatency = simulate;
+            client.NetClient.SimulatePacketLoss = simulate;
+        }
+        else
+        {
+            var server = Singleton<FikaServer>.Instance;
+            server.NetServer.SimulateLatency = simulate;
+            server.NetServer.SimulatePacketLoss = simulate;
+        }
+    }
+
     [ConsoleCommand("setDowned", description: "Sets local player to downed/not downed")]
     public static void SetDowned([ConsoleArgument(true, "if downed or not")] bool downed)
     {

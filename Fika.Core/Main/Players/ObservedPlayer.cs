@@ -2048,9 +2048,9 @@ public sealed class ObservedPlayer : FikaPlayer
             HandsController = null;
         }
 
-        base.SpawnController(controllerFactory(), handler.DisposeHandler);
+        SpawnController(controllerFactory(), handler.DisposeHandler);
         OnSetInHands(new(item, CommandStatus.Succeed, InventoryController));
-        _shouldCullController = _handsController is EmptyHandsController || _handsController is KnifeController || _handsController is UsableItemController;
+        _shouldCullController = _handsController is EmptyHandsController or KnifeController or UsableItemController;
     }
 
     public void SpawnHandsController(EHandsControllerType controllerType, MongoID itemId, bool isStationary)

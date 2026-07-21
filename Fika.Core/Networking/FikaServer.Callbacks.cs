@@ -39,6 +39,7 @@ public sealed partial class FikaServer
         if (!CoopHandler.Players.TryGetValue(packet.NetId, out var player))
         {
             _logger.LogError($"Could not find player with id [{packet.NetId}] when trying to sync quest packet");
+            return;
         }
 
         if (player.AbstractQuestControllerClass is ObservedQuestController observedQuestController)

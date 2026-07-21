@@ -156,7 +156,7 @@ public sealed class ClientHealthController(Profile.ProfileHealthClass healthInfo
             return false;
         }
 
-        if ((_fikaPlayer.LatestDamageInfo.DamageType & (EDamageType.Exhaustion | EDamageType.Dehydration)) != 0) // starving / dehydration will not trigger downed
+        if ((_fikaPlayer.LatestDamageInfo.DamageType & (EDamageType.Exhaustion | EDamageType.Dehydration | EDamageType.Stimulator)) != 0) // starving / dehydration / stims will not trigger downed
         {
             return false;
         }

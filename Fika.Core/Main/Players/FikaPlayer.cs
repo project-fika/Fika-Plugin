@@ -214,6 +214,10 @@ public class FikaPlayer : LocalPlayer
             statisticsManager, questController, achievementsController, prestigeController, dialogController, filter,
             voipState, false, false);
 
+#if DEBUG
+        profile.Skills.SurgerySpeed.Value = 5f;
+#endif
+
         foreach (var magazineClass in player.Inventory.GetPlayerItems(EPlayerItems.NonQuestItems).OfType<MagazineItemClass>())
         {
             player.InventoryController.StrictCheckMagazine(magazineClass, true, player.Profile.MagDrillsMastering, false, false);
@@ -598,7 +602,8 @@ public class FikaPlayer : LocalPlayer
             ActiveHealthController.DisableMetabolism();
             MovementContext.IsInPronePose = true;
             HandsController.FastForwardCurrentState();
-            HideWeapon();
+            TrySaveLastItemInHands();
+            Proceed(false, null);
             ((SimpleCharacterController)CharacterController).IsMoveIgnored = true;
             MovementContext.IsAxesIgnored = true;
             var clientHealthController = _healthController as ClientHealthController;
@@ -630,7 +635,7 @@ public class FikaPlayer : LocalPlayer
             ActiveHealthController.SetDamageCoeff(1f);
             ActiveHealthController.UnpauseAllEffects();
             ActiveHealthController.IsAlive = true;
-            RevealWeapon();
+            TrySetLastEquippedWeapon(true);
             ((SimpleCharacterController)CharacterController).IsMoveIgnored = false;
             MovementContext.IsAxesIgnored = false;
             var clientHealthController = _healthController as ClientHealthController;
@@ -1299,6 +1304,10 @@ public class FikaPlayer : LocalPlayer
             {
                 return;
             }
+            if (FikaBackendUtils.IsClient)
+            {
+                _inventoryController.ExecuteStationaryOperation(stationaryWeapon, CheckIfStationarySucceeded);
+            }
         }
 
         base.OperateStationaryWeapon(stationaryWeapon, command);
@@ -1306,6 +1315,21 @@ public class FikaPlayer : LocalPlayer
         CommonPacket.Type = ECommonSubPacketType.Stationary;
         CommonPacket.SubPacket = StationaryPacket.FromValue((EStationaryCommand)command, stationaryWeapon.Id);
         PacketSender.NetworkManager.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
+    }
+
+    private void CheckIfStationarySucceeded(IResult result)
+    {
+        if (result.Succeed)
+        {
+            return;
+        }
+        MovementContext.PlayerAnimatorSetStationary(false);
+        MovementContext.PlayerAnimatorSetApproached(true);
+        CurrentManagedState.DropStationary();
+        if (MovementContext.StationaryWeapon != null)
+        {
+            MovementContext.StationaryWeapon.Unlock(ProfileId);
+        }
     }
 
     // Start
@@ -1797,32 +1821,13 @@ public class FikaPlayer : LocalPlayer
         }
     }
 
-    /*public void SendArmorDamagePacket()
-    {
-        int amount = _preAllocatedArmorComponents.Count;
-        if (amount > 0)
-        {
-            string[] ids = new string[amount];
-            float[] durabilities = new float[amount];
-
-            for (int i = 0; i < amount; i++)
-            {
-                ids[i] = _preAllocatedArmorComponents[i].Item.Id;
-                durabilities[i] = _preAllocatedArmorComponents[i].Repairable.Durability;
-            }
-
-            ArmorDamagePacket packet = new()
-            {
-                NetId = NetId,
-                ItemIds = ids,
-                Durabilities = durabilities,
-            };
-            PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
-        }
-    }*/
-
     public virtual void HandleDamagePacket(DamagePacket packet)
     {
+        if (_healthController == null || !_healthController.IsAlive)
+        {
+            return;
+        }
+
         DamageInfoStruct damageInfo = new()
         {
             Damage = packet.Damage,

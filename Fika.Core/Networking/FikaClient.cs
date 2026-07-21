@@ -364,7 +364,7 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
 
     public void SendData<T>(ref T packet, DeliveryMethod deliveryMethod, bool broadcast = false) where T : INetSerializable
     {
-        var peer = _netClient.FirstPeer;
+        var peer = ServerConnection;
         if (peer != null)
         {
             _dataWriter.Reset();

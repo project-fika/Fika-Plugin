@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Main.Players;
@@ -26,7 +25,7 @@ public sealed class HealthSyncPacket : IPoolSubPacket
     public CorpseSyncPackets CorpseSyncPacket;
     public List<string> TriggerZones = new(4);
 
-    public static HealthSyncPacket FromValue(NetworkHealthSyncPacketStruct value, [CallerMemberName] string caller = "")
+    public static HealthSyncPacket FromValue(NetworkHealthSyncPacketStruct value)
     {
         var packet = CommonSubPacketPoolManager.Instance.GetPacket<HealthSyncPacket>(ECommonSubPacketType.HealthSync);
         packet.Packet = value;

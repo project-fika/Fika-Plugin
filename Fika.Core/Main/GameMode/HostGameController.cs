@@ -782,6 +782,11 @@ public class HostGameController : BaseGameController, IBotGame
             NotificationManagerClass.DisplayMessageNotification(LocaleUtils.PLAYER_MIA.Localized(), iconType: EFT.Communications.ENotificationIconType.Alert, textColor: Color.red);
         }
 
+        if (player.AbstractQuestControllerClass is ClientQuestController clientQuestController)
+        {
+            clientQuestController.ToggleSend(false);
+        }
+
         if (player.AbstractQuestControllerClass is ClientSharedQuestController sharedQuestController)
         {
             sharedQuestController.ToggleQuestSharing(false);
@@ -1029,17 +1034,23 @@ public class HostGameController : BaseGameController, IBotGame
     {
         if (!fromCancel)
         {
-            GameObject.Destroy(_botStateManager);
+            if (_botStateManager != null)
+            {
+                _botStateManager.UnassignBotsController();
+                GameObject.Destroy(_botStateManager);
+            }
             var gameWorld = Singleton<GameWorld>.Instance;
             if (gameWorld.ServerShellingController != null)
             {
                 UpdateByUnity -= gameWorld.ServerShellingController.OnUpdate;
             }
-            _botStateManager.UnassignBotsController();
-            _botsController.StopGettingInfo();
-            if (!FikaBackendUtils.IsHeadless)
+            if (_botsController != null)
             {
-                _botsController.DestroyInfo(_localPlayer);
+                _botsController.StopGettingInfo();
+                if (!FikaBackendUtils.IsHeadless)
+                {
+                    _botsController.DestroyInfo(_localPlayer);
+                }
             }
         }
 

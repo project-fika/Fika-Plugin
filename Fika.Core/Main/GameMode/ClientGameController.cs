@@ -396,6 +396,11 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
             NotificationManagerClass.DisplayMessageNotification(LocaleUtils.PLAYER_MIA.Localized(), iconType: EFT.Communications.ENotificationIconType.Alert, textColor: Color.red);
         }
 
+        if (player.AbstractQuestControllerClass is ClientQuestController clientQuestController)
+        {
+            clientQuestController.ToggleSend(false);
+        }
+
         if (player.AbstractQuestControllerClass is ClientSharedQuestController sharedQuestController)
         {
             sharedQuestController.ToggleQuestSharing(false);

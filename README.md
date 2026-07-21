@@ -14,13 +14,17 @@ Client-side changes to make multiplayer work.
 
 Fully functional with minimal bugs.
 
-- 99.99% of all base game features are replicating and working properly
+- All base game features are replicating and working properly
 - Unique interpolation system inspired by the id Tech 3 networking model
 - Extremely efficient bandwidth usage
 - Headless client to off-load AI (see [Fika-Headless](https://github.com/project-fika/Fika-Headless) repo)
 - Base game bug fixes that have been unfixed for years
 - Base game performance fixes
 - DNS support
+- Works with all mods that are developed without hacky workarounds
+
+## Supported OS
+Fika is meant to be ran on Windows 10/11. Any other OS might work, but is not officially supported nor do we develop for them. Please respect this when creating an issue/bug report.
 
 ## Contributing
 
@@ -31,7 +35,7 @@ It is recommended to check in with our developers on Discord before spending tim
 ## Requirements
 
 - [Visual Studio Code](https://code.visualstudio.com/)
-- [.NET SDK 8.0.x](https://dotnet.microsoft.com/en-us/download/dotnet/8.0)
+- [.NET SDK 10.0.x](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
 
 ## Setup
 
