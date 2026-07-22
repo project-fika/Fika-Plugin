@@ -798,7 +798,7 @@ public sealed class FikaConfig(ConfigFile config)
                 Order = 4,
                 IsAdvanced = true
             }),
-            "Use NAT Punching", ref failed, headers);
+            "Use Relay", ref failed, headers);
             
         ForceRelay = SetupSetting(networkDefaultHeader, "Force Relay", false,
             new ConfigDescription(LocaleUtils.BEPINEX_FORCE_RELAY_D.Localized(), tags: new ConfigurationManagerAttributes
@@ -808,7 +808,7 @@ public sealed class FikaConfig(ConfigFile config)
                 Order = 4,
                 IsAdvanced = true
             }),
-            "Use NAT Punching", ref failed, headers);
+            "Force Relay", ref failed, headers);
 
         ConnectionTimeout = SetupSetting(networkDefaultHeader, "Connection Timeout", 30,
             new ConfigDescription(LocaleUtils.BEPINEX_CONNECTION_TIMEOUT_D.Localized(),
