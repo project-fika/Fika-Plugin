@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
+using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.InventoryLogic.Operations;
 using EFT.UI;
@@ -70,6 +71,12 @@ public sealed class ClientInventoryController : BaseInventoryController
         {
             MonoBehaviourSingleton<PreloaderUI>.Instance.MalfunctionGlow.ShowGlow(BattleUIMalfunctionGlow.EGlowType.Repaired, true, method_41());
         }
+    }
+
+    public override void ExecuteStationaryOperation(StationaryWeapon stationaryWeapon, Callback callback = null)
+    {
+        FikaPlayer.OperationStationaryCallbackId = NextOperationId;
+        base.ExecuteStationaryOperation(stationaryWeapon, callback);
     }
 
     public override void vmethod_1(BaseInventoryOperationClass operation, Callback callback)

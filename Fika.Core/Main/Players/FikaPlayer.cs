@@ -98,6 +98,19 @@ public class FikaPlayer : LocalPlayer
         }
     }
 
+    public override bool OnHisWayToOperateStationaryWeapon
+    {
+        get
+        {
+            if (FikaBackendUtils.IsServer)
+            {
+                return base.OnHisWayToOperateStationaryWeapon;
+            }
+
+            return OperationCallbacks.ContainsKey(OperationStationaryCallbackId);
+        }
+    }
+
     protected MongoID? _lastWeaponId;
     protected Action[] _armorUnsubcribes = new Action[Inventory.ArmorSlots.Length];
 
@@ -113,6 +126,7 @@ public class FikaPlayer : LocalPlayer
     private float _sign;
     private float _turnSoundTimer;
 
+    public ushort OperationStationaryCallbackId;
     private uint _proceedCallbackId;
     private readonly Dictionary<uint, Callback> _proceedCallbacks = [];
     private BaseInventoryController _baseInventoryController;
@@ -1313,7 +1327,7 @@ public class FikaPlayer : LocalPlayer
         base.OperateStationaryWeapon(stationaryWeapon, command);
 
         CommonPacket.Type = ECommonSubPacketType.Stationary;
-        CommonPacket.SubPacket = StationaryPacket.FromValue((EStationaryCommand)command, stationaryWeapon.Id);
+        CommonPacket.SubPacket = StationaryPacket.FromValue((EStationaryCommand)command, stationaryWeapon != null ? stationaryWeapon.Id : string.Empty);
         PacketSender.NetworkManager.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
     }
 
