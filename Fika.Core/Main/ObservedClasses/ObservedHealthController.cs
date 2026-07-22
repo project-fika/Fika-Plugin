@@ -64,29 +64,29 @@ public sealed class ObservedHealthController(byte[] serializedState, ObservedPla
                 BodyParts = EnumHelper<EBodyPart>.GetDictWith<Profile.HealthInfo.BodyPartInfo>(),
                 Energy = new Profile.HealthInfo.ValueInfo
                 {
-                    Current = healthValue_0.Current,
-                    Minimum = healthValue_0.Minimum,
-                    Maximum = healthValue_0.Maximum
+                    Current = _energy.Current,
+                    Minimum = _energy.Minimum,
+                    Maximum = _energy.Maximum
                 },
                 Hydration = new Profile.HealthInfo.ValueInfo
                 {
-                    Current = healthValue_1.Current,
-                    Minimum = healthValue_1.Minimum,
-                    Maximum = healthValue_1.Maximum
+                    Current = _hydration.Current,
+                    Minimum = _hydration.Minimum,
+                    Maximum = _hydration.Maximum
                 },
                 Temperature = new Profile.HealthInfo.ValueInfo
                 {
-                    Current = healthValue_2.Current,
-                    Minimum = healthValue_2.Minimum,
-                    Maximum = healthValue_2.Maximum
+                    Current = _temperature.Current,
+                    Minimum = _temperature.Minimum,
+                    Maximum = _temperature.Maximum
                 }
             };
             profileHealthClass = profileHealthClass2;
             profileHealthClass2.Poison = new Profile.HealthInfo.ValueInfo
             {
-                Current = healthValue_3.Current,
-                Minimum = healthValue_3.Minimum,
-                Maximum = healthValue_3.Maximum
+                Current = _poison.Current,
+                Minimum = _poison.Minimum,
+                Maximum = _poison.Maximum
             };
         }
         health = profileHealthClass;

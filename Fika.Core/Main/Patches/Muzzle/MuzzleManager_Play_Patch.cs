@@ -13,7 +13,7 @@ public sealed class MuzzleManager_Play_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(MuzzleManager).GetMethod("IMuzzleParticlePivot.Play", BindingFlags.Instance | BindingFlags.Public);
+        return typeof(MuzzleManager).GetMethod("IMuzzleParticlePivot.Play", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
     }
 
     [PatchPrefix]

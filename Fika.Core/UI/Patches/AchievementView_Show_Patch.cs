@@ -12,7 +12,7 @@ public class AchievementView_Show_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(AchievementView).GetMethod("EFT.Achievements.IAchievementView.Show", BindingFlags.Instance | BindingFlags.Public);
+        return typeof(AchievementView).GetMethod("EFT.Achievements.IAchievementView.Show", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
     }
 
     [PatchPostfix]
