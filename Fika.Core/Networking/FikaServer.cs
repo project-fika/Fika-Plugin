@@ -348,6 +348,10 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
         {
             _raidAdminUIScript = RaidAdminUIScript.Create(this, _netServer);
         }
+
+        if (FikaPlugin.Instance.RelayServerEnable){
+            // TODO connect to relay server
+        }
     }
 
     public async Task InitializeVOIP()

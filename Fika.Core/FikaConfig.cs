@@ -105,6 +105,8 @@ public sealed class FikaConfig(ConfigFile config)
     public ConfigEntry<int> ConnectionTimeout { get; set; }
     public ConfigEntry<ESendRate> SendRate { get; set; }
     public ConfigEntry<bool> UseFikaNATPunchServer { get; set; }
+    public ConfigEntry<bool> UseRelay { get; set; }
+    public ConfigEntry<bool> ForceRelay { get; set; }
     public ConfigEntry<bool> AllowVOIP { get; set; }
 
     // Gameplay
@@ -787,6 +789,26 @@ public sealed class FikaConfig(ConfigFile config)
                 IsAdvanced = true
             }),
             "Use Fika NAT Punch Server", ref failed, headers);
+            
+        UseRelay = SetupSetting(networkDefaultHeader, "Use Relay", false,
+            new ConfigDescription(LocaleUtils.BEPINEX_USE_RELAY_D.Localized(), tags: new ConfigurationManagerAttributes
+            {
+                Category = networkHeader,
+                DispName = LocaleUtils.BEPINEX_USE_RELAY_T.Localized(),
+                Order = 4,
+                IsAdvanced = true
+            }),
+            "Use NAT Punching", ref failed, headers);
+            
+        ForceRelay = SetupSetting(networkDefaultHeader, "Force Relay", false,
+            new ConfigDescription(LocaleUtils.BEPINEX_FORCE_RELAY_D.Localized(), tags: new ConfigurationManagerAttributes
+            {
+                Category = networkHeader,
+                DispName = LocaleUtils.BEPINEX_FORCE_RELAY_T.Localized(),
+                Order = 4,
+                IsAdvanced = true
+            }),
+            "Use NAT Punching", ref failed, headers);
 
         ConnectionTimeout = SetupSetting(networkDefaultHeader, "Connection Timeout", 30,
             new ConfigDescription(LocaleUtils.BEPINEX_CONNECTION_TIMEOUT_D.Localized(),

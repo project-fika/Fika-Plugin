@@ -193,7 +193,18 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
         }
         else
         {
-            ServerConnection = _netClient.Connect(FikaBackendUtils.RemoteEndPoint, connectString);
+            if(FikaPlugin.Instance.Settings.ForceRelay.Value){
+                // TODO Connect to relay
+            }
+            try {            
+                ServerConnection = _netClient.Connect(FikaBackendUtils.RemoteEndPoint, connectString);
+            } catch (Exception exception) {
+                if(FikaPlugin.Instance.Settings.UseRelay.Value){
+                    // TODO Connect to relay
+                } else {
+                    throw exception;
+                }
+            }
         }
     }
 
