@@ -923,6 +923,7 @@ public class HostGameController : BaseGameController, IBotGame
     {
         if (FikaPlugin.Instance.Settings.NoLoot.Value)
         {
+            NotificationManager.DisplayWarningNotification("NoLoot enabled, no loot will spawn and any stationary weapon WILL NOT WORK!");
             location.Loot = [];
         }
 

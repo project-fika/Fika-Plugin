@@ -134,15 +134,13 @@ public sealed partial class FikaServer
             return;
         }
 
-        var search = player.FindItemById(packet.ItemId, false, false);
-        if (search.Failed)
+        if (!TryFindItemForProceedPacket(packet.ItemId, out var item))
         {
             response.Error = $"Could not find item with id {packet.ItemId}";
             SendDataToPeer(ref response, DeliveryMethod.ReliableOrdered, peer);
             return;
         }
 
-        var item = search.Value;
         if (item.CurrentAddress != null)
         {
             var result = item.CheckAction(null);
@@ -155,6 +153,34 @@ public sealed partial class FikaServer
         }
 
         SendDataToPeer(ref response, DeliveryMethod.ReliableOrdered, peer);
+    }
+
+    /// <summary>
+    /// Attempts to find the item with the given id
+    /// </summary>
+    /// <param name="itemId">The id to search for</param>
+    /// <param name="item">The item if found</param>
+    /// <returns><see langword="true"/> if found; otherwise <see langword="false"/></returns>
+    private bool TryFindItemForProceedPacket(MongoID itemId, out Item item)
+    {
+        var gameWorld = Singleton<GameWorld>.Instance;
+
+        var search = gameWorld.FindItemWithWorldData(itemId);
+        if (search.Succeeded)
+        {
+            item = search.Value.item;
+            return true;
+        }
+
+        var stationary = gameWorld.FindStationaryWeaponByItemId(itemId);
+        if (stationary != null)
+        {
+            item = stationary.Item;
+            return true;
+        }
+
+        item = null;
+        return false;
     }
 
     private void OnClearSnapshotterPacketReceived(ClearSnapshotterPacket packet, NetPeer _)

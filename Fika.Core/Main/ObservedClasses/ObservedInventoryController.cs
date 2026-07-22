@@ -3,21 +3,24 @@
 using Diz.LanguageExtensions;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
 using EFT.InventoryLogic.Operations;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
-using HarmonyLib;
-using JetBrains.Annotations;
 
 namespace Fika.Core.Main.ObservedClasses;
 
 public sealed class ObservedInventoryController : Player.PlayerInventoryController, IOperationHandler
 {
+    private readonly static FieldInfo _setInHandsCallbackField = typeof(Player)
+        .GetField("_setInHandsCallback", BindingFlags.NonPublic | BindingFlags.Instance);
+
     private readonly IPlayerSearchController _searchController;
     private readonly FikaPlayer _fikaPlayer;
+
     public override bool HasDiscardLimits
     {
         get
@@ -200,13 +203,13 @@ public sealed class ObservedInventoryController : Player.PlayerInventoryControll
         return new ItemRestrictionsError(item, location);
     }
 
-    public override bool CheckOverLimit(IEnumerable<Item> items, [CanBeNull] ItemAddress to, bool useItemCountInEquipment, out ItemManipulator.CountLimitError error)
+    public override bool CheckOverLimit(IEnumerable<Item> items, ItemAddress to, bool useItemCountInEquipment, out ItemManipulator.CountLimitError error)
     {
         error = null;
         return true;
     }
 
-    public override bool IsLimitedAtAddress(Item item, [CanBeNull] ItemAddress address, out int limit)
+    public override bool IsLimitedAtAddress(Item item, ItemAddress address, out int limit)
     {
         return IsLimitedAtAddress(item.TemplateId, address, out limit);
     }
@@ -284,9 +287,9 @@ public sealed class ObservedInventoryController : Player.PlayerInventoryControll
 
         if ((item.Parent != to || operation is FoldOperation) && handler.player_0.HandsController.CanExecute(operation))
         {
-            Traverse.Create(handler.player_0).Field<Callback>("_setInHandsCallback").Value = handler.callback;
-            RaiseInOutProcessEvents(new(handler.player_0.HandsController.Item, CommandStatus.Begin, this));
-            handler.player_0.HandsController.Execute(operation, new Callback(handler.method_1));
+            _setInHandsCallbackField.SetValue(handler.player_0, handler.callback);
+            RaiseInOutProcessEvents(new InOutHandsProcessEventArgs(handler.player_0.HandsController.Item, CommandStatus.Begin, this));
+            handler.player_0.HandsController.Execute(operation, handler.method_1);
             return;
         }
 
