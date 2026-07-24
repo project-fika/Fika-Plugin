@@ -555,4 +555,14 @@ public static class FikaGlobals
             throw new NullReferenceException($"Failed to find private field [{fieldName}] in {typeof(T).Name}.");
         }
     }
+
+    /// <summary>
+    /// Checks whether the shot type is a misfire
+    /// </summary>
+    /// <returns><see langword="true"/> if the shot is a misfire; otherwise <see langword="false"/></returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool IsMisfire(this EShotType shotType)
+    {
+        return shotType >= EShotType.Misfire;
+    }
 }
