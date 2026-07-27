@@ -129,7 +129,7 @@ public class FikaPlayer : LocalPlayer
     public ushort OperationStationaryCallbackId;
     private uint _proceedCallbackId;
     private readonly Dictionary<uint, Callback> _proceedCallbacks = [];
-    private BaseInventoryController _baseInventoryController;
+    protected BaseInventoryController _baseInventoryController;
 
     private static Func<Player, SurfaceSet> _getCurrentSet;
     private static Func<Player, float> _getLastStepTime;
