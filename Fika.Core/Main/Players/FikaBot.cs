@@ -66,7 +66,7 @@ public sealed class FikaBot : FikaPlayer
         };
 
         BotInventoryController inventoryController = new(player, profile, true, currentId, nextOperationId);
-
+        player._baseInventoryController = inventoryController;
 
         var sender = await BotPacketSender.Create(player);
         player.BotPacketSender = sender;

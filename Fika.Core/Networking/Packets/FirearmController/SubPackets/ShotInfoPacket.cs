@@ -8,10 +8,7 @@ namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
 public sealed class ShotInfoPacket : IPoolSubPacket
 {
-    private ShotInfoPacket()
-    {
-
-    }
+    private ShotInfoPacket() { }
 
     public static ShotInfoPacket CreateInstance()
     {
@@ -42,9 +39,9 @@ public sealed class ShotInfoPacket : IPoolSubPacket
     public static ShotInfoPacket FromMisfire(MongoID ammoTemplate, float overheat, EShotType shotType)
     {
         var packet = FirearmSubPacketPoolManager.Instance.GetPacket<ShotInfoPacket>(EFirearmSubPacketType.ShotInfo);
+        packet.ShotType = shotType;
         packet.AmmoTemplate = ammoTemplate;
         packet.Overheat = overheat;
-        packet.ShotType = shotType;
         return packet;
     }
 
@@ -53,6 +50,7 @@ public sealed class ShotInfoPacket : IPoolSubPacket
         bool slideOnOverheatReached, EShotType shotType)
     {
         var packet = FirearmSubPacketPoolManager.Instance.GetPacket<ShotInfoPacket>(EFirearmSubPacketType.ShotInfo);
+        packet.ShotType = shotType;
         packet.ShotPosition = shotPosition;
         packet.ShotDirection = shotDirection;
         packet.AmmoTemplate = ammoTemplate;
@@ -63,7 +61,6 @@ public sealed class ShotInfoPacket : IPoolSubPacket
         packet.ChamberIndex = chamberIndex;
         packet.UnderbarrelShot = underbarrelShot;
         packet.SlideOnOverheatReached = slideOnOverheatReached;
-        packet.ShotType = shotType;
         return packet;
     }
 
@@ -79,6 +76,10 @@ public sealed class ShotInfoPacket : IPoolSubPacket
         {
             controller.HandleShotInfoPacket(this, player.InventoryController);
         }
+        else
+        {
+            FikaGlobals.LogError($"ShotInfoPacket::Execute: HandsController was not ObservedFirearmController, was: {player.HandsController.GetType().Name}");
+        }
     }
 
     public void Serialize(NetDataWriter writer)
@@ -88,6 +89,13 @@ public sealed class ShotInfoPacket : IPoolSubPacket
         {
             writer.PutPackedInt(ChamberIndex, 0, 16);
             writer.Put(UnderbarrelShot);
+            return;
+        }
+
+        if (ShotType.IsMisfire())
+        {
+            writer.PutMongoID(AmmoTemplate);
+            writer.PutPackedFloat(Overheat, 0f, 200f, EFloatCompression.High);
             return;
         }
 
@@ -110,6 +118,13 @@ public sealed class ShotInfoPacket : IPoolSubPacket
         {
             ChamberIndex = reader.GetPackedInt(0, 16);
             UnderbarrelShot = reader.GetBool();
+            return;
+        }
+
+        if (ShotType.IsMisfire())
+        {
+            AmmoTemplate = reader.GetMongoID();
+            Overheat = reader.GetPackedFloat(0f, 200f, EFloatCompression.High);
             return;
         }
 

@@ -5,6 +5,7 @@ using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
 using EFT.InventoryLogic.Operations;
+using Fika.Core.Main.BaseClasses;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Packets.Generic;
@@ -16,7 +17,7 @@ using static EFT.Player;
 
 namespace Fika.Core.Main.BotClasses;
 
-public sealed class BotInventoryController : PlayerInventoryController
+public sealed class BotInventoryController : BaseInventoryController
 {
     public override bool HasDiscardLimits
     {
@@ -28,7 +29,7 @@ public sealed class BotInventoryController : PlayerInventoryController
     private readonly FikaBot _fikaBot;
     private readonly BotInventoryOperationHandlerPool _botInventoryOperationHandlerPool;
 
-    public BotInventoryController(Player player, Profile profile, bool examined, MongoID currentId, ushort nextOperationId) : base(player, profile, examined)
+    public BotInventoryController(Player player, Profile profile, bool examined, MongoID currentId, ushort nextOperationId) : base(player, profile, examined, false)
     {
         _fikaBot = (FikaBot)player;
         _currentId = currentId;
