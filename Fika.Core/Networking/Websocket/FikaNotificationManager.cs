@@ -89,7 +89,7 @@ internal class FikaNotificationManager
 
     private void WebSocket_OnMessage(object sender, MessageEventArgs e)
     {
-        if (e == null)
+        if (e == null || e.IsPing)
         {
             return;
         }

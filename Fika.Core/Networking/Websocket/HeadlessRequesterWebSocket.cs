@@ -49,6 +49,11 @@ public class HeadlessRequesterWebSocket
         _webSocket.OnError += WebSocket_OnError;
         _webSocket.OnMessage += (sender, args) =>
         {
+            if (args.IsPing)
+            {
+                return;
+            }
+
             // Run the OnMessage event on main thread
             AsyncWorker.RunInMainTread(() => WebSocket_OnMessage(sender, args));
         };
