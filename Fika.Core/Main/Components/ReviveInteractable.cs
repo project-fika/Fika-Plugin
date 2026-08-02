@@ -1,10 +1,10 @@
-﻿using EFT.UI;
-using System;
+﻿using System;
 using Comfort.Common;
 using EFT;
 using EFT.AssetsManager;
 using EFT.Interactive;
 using EFT.InventoryLogic;
+using EFT.UI;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Packets.Player.Common;
@@ -17,6 +17,7 @@ internal sealed class ReviveInteractable : InteractableObject
 {
     private static readonly int _playerLayer = LayerMask.NameToLayer("Player");
     private static readonly int _ragdollLayer = LayerMask.NameToLayer("Deadbody");
+    private static readonly int _bodyPartHitLayer = LayerMask.NameToLayer("HitCollider");
 
     /// <summary>
     /// If the player is currently being revived
@@ -132,6 +133,16 @@ internal sealed class ReviveInteractable : InteractableObject
 
         TransformTools.SetLayersRecursively(_observedPlayer.gameObject, _playerLayer);
 
+        for (var i = 0; i < _observedPlayer.PlayerBones.ArmorPlateColliders.Length; i++)
+        {
+            _observedPlayer.PlayerBones.ArmorPlateColliders[i].gameObject.layer = _bodyPartHitLayer;
+        }
+
+        for (var i = 0; i < _observedPlayer.PlayerBones.BodyPartColliders.Length; i++)
+        {
+            _observedPlayer.PlayerBones.BodyPartColliders[i].gameObject.layer = _bodyPartHitLayer;
+        }
+
         foreach (var joint in _observedPlayer.gameObject.GetComponentsInChildren<CharacterJoint>())
         {
             joint.enableProjection = false;
@@ -146,6 +157,7 @@ internal sealed class ReviveInteractable : InteractableObject
 
         _observedPlayer.ProceduralWeaponAnimation.OnPreCollision += _observedPlayer.IkStoreRaw;
         _observedPlayer.enabled = true;
+        _observedPlayer.RecalculateEquipmentParams();
     }
 
     private static bool CheckCorpseIsStill(bool sleeping, float timePass)
