@@ -17,11 +17,10 @@ public sealed class DeathFade_Patch : ModulePatch
         var deathFadeType = typeof(DeathFade);
 
         deathFadeType.GetField("_time", BindingFlags.NonPublic | BindingFlags.Instance)
-            ?.SetValue(__instance, (float)deathFadeType.GetField("_disableTime", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(__instance));
+            ?.SetValue(__instance, __instance._disableTime);
         deathFadeType.GetField("_isDead", BindingFlags.NonPublic | BindingFlags.Instance)
             ?.SetValue(__instance, false);
-        var disableCurveValue = (AnimationCurve)deathFadeType.GetField("_disableCurve", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(__instance);
-        deathFadeType.GetField("_currentCurve", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(__instance, disableCurveValue);
+        deathFadeType.GetField("_currentCurve", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(__instance, __instance._disableCurve);
         return false;
     }
 }
