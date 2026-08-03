@@ -12,7 +12,7 @@ public class FikaClientPortableRangeFinderController : PortableRangeFinderContro
 
     public static FikaClientPortableRangeFinderController Create(FikaPlayer player, Item item)
     {
-        var controller = smethod_6<FikaClientPortableRangeFinderController>(player, item);
+        var controller = CreateController<FikaClientPortableRangeFinderController>(player, item);
         controller._fikaPlayer = player;
         return controller;
     }

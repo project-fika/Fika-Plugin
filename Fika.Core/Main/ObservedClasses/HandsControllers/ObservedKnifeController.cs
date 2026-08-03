@@ -16,7 +16,7 @@ internal class ObservedKnifeController : Player.KnifeController
 
     public static ObservedKnifeController Create(ObservedPlayer observerdPlayer, KnifeComponent item)
     {
-        var controller = smethod_9<ObservedKnifeController>(observerdPlayer, item);
+        var controller = CreateController<ObservedKnifeController>(observerdPlayer, item);
         controller._observedPlayer = observerdPlayer;
         return controller;
     }
@@ -28,14 +28,14 @@ internal class ObservedKnifeController : Player.KnifeController
         _observedPlayer.SetPropVisibility(isActive);*/
     }
 
-    public override ShotInfoClass vmethod_0(Player.GStruct182 hit, BallisticCollider ballisticCollider)
+    public override PlayerHitInfo ProcessHit(Player.KnifeRaycastHit hit, BallisticCollider ballisticCollider)
     {
 #if DEBUG
         FikaGlobals.LogInfo($"Hit from observed knife controller: {hit.point:F2}, ballisticCollider: {(ballisticCollider != null ? ballisticCollider.HitType : "none")}");
 #endif
         if (ballisticCollider != null)
         {
-            Singleton<Effects>.Instance.EffectsCommutator.PlayKnifeHitEffect(new DamageInfoStruct
+            Singleton<Effects>.Instance.EffectsCommutator.PlayKnifeHitEffect(new DamageInfo
             {
                 HitPoint = hit.point,
                 HitNormal = hit.normal,
@@ -44,7 +44,7 @@ internal class ObservedKnifeController : Player.KnifeController
             });
         }
 
-        return new ShotInfoClass()
+        return new PlayerHitInfo()
         {
             PoV = EPointOfView.ThirdPerson,
             Material = MaterialType.Body

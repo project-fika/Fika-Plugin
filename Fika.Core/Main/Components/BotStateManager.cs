@@ -68,7 +68,7 @@ public sealed class BotStateManager : MonoBehaviour
     private void Update()
     {
         _controller.Update?.Invoke();
-        _botsController?.method_0();
+        _botsController?.UpdateByUnity();
 
         _updateCount += Time.unscaledDeltaTime;
         if (_updateCount >= _updatesPerTick)

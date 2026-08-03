@@ -1,0 +1,35 @@
+﻿using System.Reflection;
+using Comfort.Common;
+using EFT.BufferZone;
+using Fika.Core.Main.Utils;
+using Fika.Core.Networking;
+using Fika.Core.Networking.Packets.World;
+using SPT.Reflection.Patching;
+
+namespace Fika.Core.Main.Patches.Lighthouse;
+
+public class BufferZoneController_SetPlayerInZoneStatus_Patch : ModulePatch
+{
+    protected override MethodBase GetTargetMethod()
+    {
+        return typeof(BufferZoneController)
+            .GetMethod(nameof(BufferZoneController.SetPlayerInZoneStatus));
+    }
+
+    [PatchPostfix]
+    public static void Postfix(string profileID, bool inZone)
+    {
+        if (FikaBackendUtils.IsClient)
+        {
+            return;
+        }
+
+        BufferZonePacket packet = new(EBufferZoneData.PlayerInZoneStatusChange)
+        {
+            ProfileId = profileID,
+            Available = inZone
+        };
+
+        Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+    }
+}

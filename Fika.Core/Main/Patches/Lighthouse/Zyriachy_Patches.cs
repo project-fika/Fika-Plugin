@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using EFT.Ballistics;
+using System.Reflection;
 using Comfort.Common;
 using EFT;
 using EFT.BufferZone;
@@ -11,21 +12,21 @@ public static class Zyriachy_Patches
     /// <summary>
     /// Search for 'Zryachiy don't have controllable zone FIX it' string in assembly to find class
     /// </summary>
-    public class ZyriachyBossLogicClass_Activate_Patch : ModulePatch
+    public class BossZryachiy_Activate_Patch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
         {
-            return typeof(ZyriachyBossLogicClass)
-                .GetMethod(nameof(ZyriachyBossLogicClass.Activate));
+            return typeof(BossZryachiy)
+                .GetMethod(nameof(BossZryachiy.Activate));
         }
 
         [PatchPostfix]
-        public static void Postfix(ref BotOwner ___BotOwner_0)
+        public static void Postfix(ref BotOwner ____owner)
         {
-            ___BotOwner_0.GetPlayer.OnPlayerDead += OnZryachiyDead;
+            ____owner.GetPlayer.OnPlayerDead += OnZryachiyDead;
         }
 
-        private static void OnZryachiyDead(Player player, IPlayer lastAggressor, DamageInfoStruct damageInfo, EBodyPart part)
+        private static void OnZryachiyDead(Player player, IPlayer lastAggressor, DamageInfo damageInfo, EBodyPart part)
         {
             player.OnPlayerDead -= OnZryachiyDead;
             Singleton<GameWorld>.Instance.BufferZoneController.SetInnerZoneAvailabilityStatus(false,

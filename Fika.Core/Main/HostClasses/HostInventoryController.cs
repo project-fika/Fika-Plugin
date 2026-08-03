@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using EFT.Settings;
+using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
@@ -36,7 +37,7 @@ public sealed class HostInventoryController : BaseInventoryController
     {
         _player = player;
         FikaPlayer = (FikaPlayer)player;
-        PlayerSearchController = new PlayerSearchControllerClass(profile, this);
+        PlayerSearchController = new ActiveSearchController(profile, this);
 
         _hostInventoryOperationHandlerPool = new HostInventoryOperationHandlerPool(8, HostInventoryOperationHandler.CreateInstance);
     }
@@ -65,18 +66,18 @@ public sealed class HostInventoryController : BaseInventoryController
 
     public override void CallMalfunctionRepaired(Weapon weapon)
     {
-        if (Singleton<SharedGameSettingsClass>.Instance.Game.Settings.MalfunctionVisability)
+        if (Singleton<SettingsManager>.Instance.Game.Settings.MalfunctionVisability)
         {
-            MonoBehaviourSingleton<PreloaderUI>.Instance.MalfunctionGlow.ShowGlow(BattleUIMalfunctionGlow.EGlowType.Repaired, true, method_41());
+            MonoBehaviourSingleton<PreloaderUI>.Instance.MalfunctionGlow.ShowGlow(BattleUIMalfunctionGlow.EGlowType.Repaired, true, GetGlowAlphaMultiplier());
         }
     }
 
-    public override void vmethod_1(BaseInventoryOperationClass operation, Callback callback)
+    public override void Execute(EFT.InventoryLogic.Operations.AbstractOperation operation, Callback callback)
     {
         HandleOperation(operation, callback).HandleExceptions();
     }
 
-    private async Task HandleOperation(BaseInventoryOperationClass operation, Callback callback)
+    private async Task HandleOperation(EFT.InventoryLogic.Operations.AbstractOperation operation, Callback callback)
     {
         if (_player.HealthController.IsAlive)
         {
@@ -103,15 +104,15 @@ public sealed class HostInventoryController : BaseInventoryController
         _hostInventoryOperationHandlerPool.ReturnHandler(handler);
     }
 
-    private void RunHostOperation(BaseInventoryOperationClass operation, Callback callback)
+    private void RunHostOperation(EFT.InventoryLogic.Operations.AbstractOperation operation, Callback callback)
     {
         // Do not replicate picking up quest items, throws an error on the other clients            
-        if (operation is MoveOperationClass moveOperation)
+        if (operation is MoveOperation moveOperation)
         {
             var lootedItem = moveOperation.Item;
             if (lootedItem.QuestItem)
             {
-                if (FikaPlayer.AbstractQuestControllerClass is ClientSharedQuestController sharedQuestController && sharedQuestController.ContainsAcceptedType("PlaceBeacon"))
+                if (FikaPlayer.QuestController is ClientSharedQuestController sharedQuestController && sharedQuestController.ContainsAcceptedType("PlaceBeacon"))
                 {
                     if (!sharedQuestController.CheckForTemplateId(lootedItem.TemplateId))
                     {
@@ -126,25 +127,25 @@ public sealed class HostInventoryController : BaseInventoryController
                         FikaPlayer.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
                     }
                 }
-                base.vmethod_1(operation, callback);
+                base.Execute(operation, callback);
                 return;
             }
         }
 
         // Do not replicate stashing quest items
-        if (operation is RemoveOperationClass discardOperation)
+        if (operation is RemoveOperation discardOperation)
         {
             if (discardOperation.Item.QuestItem)
             {
-                base.vmethod_1(operation, callback);
+                base.Execute(operation, callback);
                 return;
             }
         }
 
         // Do not replicate search operations
-        if (operation is SearchContentOperationResultClass)
+        if (operation is SinglePlayerSearchContentOperation)
         {
-            base.vmethod_1(operation, callback);
+            base.Execute(operation, callback);
             return;
         }
 
@@ -152,9 +153,9 @@ public sealed class HostInventoryController : BaseInventoryController
         ConsoleScreen.Log($"InvOperation: {operation.GetType().Name}, Id: {operation.Id}");
 #endif
         // Check for GClass increments, TraderServices
-        if (operation is GClass3493)
+        if (operation is PurchaseTraderServiceOperation)
         {
-            base.vmethod_1(operation, callback);
+            base.Execute(operation, callback);
             return;
         }
 
@@ -162,9 +163,9 @@ public sealed class HostInventoryController : BaseInventoryController
         handler.Set(this, operation, callback);
         try
         {
-            if (vmethod_0(handler.Operation))
+            if (CanExecute(handler.Operation))
             {
-                handler.Operation.method_1(handler.HandleResultDelegate);
+                handler.Operation.Execute(handler.HandleResultDelegate);
                 FikaPlayer.PacketSender.NetworkManager.SendGenericPacket(EGenericSubPacketType.InventoryOperation,
                     InventoryPacket.FromValue(FikaPlayer.NetId, operation), true);
                 return;
@@ -178,13 +179,13 @@ public sealed class HostInventoryController : BaseInventoryController
         }
     }
 
-    public override bool HasCultistAmulet(out CultistAmuletItemClass amulet)
+    public override bool HasCultistAmulet(out CultistAmulet amulet)
     {
         amulet = null;
         using var enumerator = Inventory.GetItemsInSlots([EquipmentSlot.Pockets]).GetEnumerator();
         while (enumerator.MoveNext())
         {
-            if (enumerator.Current is CultistAmuletItemClass cultistAmuletClass)
+            if (enumerator.Current is CultistAmulet cultistAmuletClass)
             {
                 amulet = cultistAmuletClass;
                 return true;
@@ -193,9 +194,9 @@ public sealed class HostInventoryController : BaseInventoryController
         return false;
     }
 
-    public override SearchContentOperation vmethod_2(SearchableItemItemClass item)
+    public override SearchContentOperation CreateSearchOperation(SearchableItem item)
     {
-        return new SearchContentOperationResultClass(method_12(), this, PlayerSearchController, Profile, item);
+        return new SinglePlayerSearchContentOperation(GetAndIncrementNextOperationId(), this, PlayerSearchController, Profile, item);
     }
 
     public void ClearPool()

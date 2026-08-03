@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace Fika.Core.Networking.Websocket.Notifications;
 
-internal class OpenAdminMenuNotification : NotificationAbstractClass
+internal class OpenAdminMenuNotification : Notification
 {
     public override ENotificationIconType Icon
     {

@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Reflection;
+using EFT;
 using EFT.UI;
 using EFT.UI.Matchmaker;
 using Fika.Core.Main.Utils;
@@ -22,13 +23,13 @@ public sealed class MatchmakerOfflineRaidScreen_Show_Patch : ModulePatch
         var captionText = __instance.gameObject.transform.GetChild(2).GetChild(0).GetComponent<LocalizedText>();
         if (captionText != null)
         {
-            captionText.method_2(LocaleUtils.UI_COOP_GAME_MODE.Localized());
+            captionText.SetLabelText(LocaleUtils.UI_COOP_GAME_MODE.Localized());
         }
 
         var descriptionText = __instance.gameObject.transform.GetChild(1).GetChild(1).GetComponent<LocalizedText>();
         if (descriptionText != null)
         {
-            descriptionText.method_2(LocaleUtils.UI_RAID_SETTINGS_DESCRIPTION.Localized());
+            descriptionText.SetLabelText(LocaleUtils.UI_RAID_SETTINGS_DESCRIPTION.Localized());
         }
     }
 }

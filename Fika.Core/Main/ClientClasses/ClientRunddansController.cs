@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using JsonType;
+using System.Threading;
 using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
@@ -8,11 +9,11 @@ using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.ClientClasses;
 
-public class ClientRunddansController : GClass2286
+public class ClientRunddansController : NetworkRunddansController
 {
-    public ClientRunddansController(BackendConfigSettingsClass.GClass1748 settings, LocationSettingsClass.Location location) : base(settings, location)
+    public ClientRunddansController(GlobalConfiguration.RunddansGlobalSettings settings, LocationSettings.Location location) : base(settings, location)
     {
-        HandleWeather(settings.ApplyFrozenEveryMS, CancellationTokenSource_0.Token)
+        HandleWeather(settings.ApplyFrozenEveryMS, _cts.Token)
             .HandleExceptions();
     }
 
@@ -30,14 +31,14 @@ public class ClientRunddansController : GClass2286
             {
                 break;
             }
-            if (gameTimer.PastTime.TotalSeconds >= (double)Gclass1748_0.initialFrozenDelaySec)
+            if (gameTimer.PastTime.TotalSeconds >= (double)settings.initialFrozenDelaySec)
             {
                 var myPlayer = GamePlayerOwner.MyPlayer;
                 if (myPlayer != null && !myPlayer.IsAI
-                    && !myPlayer.AIData.IsInside && !method_0(myPlayer)
+                    && !myPlayer.AIData.IsInside && !CheckBonfires(myPlayer)
                     && !(WeatherController.Instance == null) && WeatherController.Instance.WeatherCurve.Rain
-                    >= Gclass1748_0.rainForFrozen &&
-                    (EFTDateTimeClass.UtcNow - myPlayer.AIData.DrinkTimestamp).TotalSeconds >= (double)Gclass1748_0.drunkImmunitySec)
+                    >= settings.rainForFrozen &&
+                    (DateTimeExtensions.UtcNow - myPlayer.AIData.DrinkTimestamp).TotalSeconds >= (double)settings.drunkImmunitySec)
                 {
                     var activeHealthController = myPlayer.ActiveHealthController;
                     if (activeHealthController != null)
@@ -51,12 +52,13 @@ public class ClientRunddansController : GClass2286
 
     public void DestroyItem(FikaPlayer player)
     {
-        if (!method_5(player, out var item))
+        if (!TryGetConsumableItem(player, out var item))
         {
             FikaGlobals.LogError($"Could not find repair item on {player.Profile.Info.MainProfileNickname}");
             return;
         }
-        if (!method_10(item))
+
+        if (!TryRemoveConsumableItem(item))
         {
             FikaGlobals.LogError($"Remove consumable error on {player.Profile.Info.MainProfileNickname}");
         }

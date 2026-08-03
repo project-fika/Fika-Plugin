@@ -48,7 +48,7 @@ public class SpawnSyncObjectSubPackets
                 return;
             }
 
-            if (Singleton<ItemFactoryClass>.Instance.CreateItem(GrenadeId, GrenadeTemplate, null) is not ThrowWeapItemClass grenadeClass)
+            if (Singleton<ItemFactory>.Instance.CreateItem(GrenadeId, GrenadeTemplate, null) is not ThrowWeap grenadeClass)
             {
                 FikaGlobals.LogError("OnSpawnSyncObjectPacketReceived: Item with id " + GrenadeId + " is not a grenade!");
                 return;
@@ -161,13 +161,13 @@ public class SpawnSyncObjectSubPackets
             syncObject.ObjectId = ObjectId;
             syncObject.transform.position = Position;
             syncObject.transform.rotation = Rotation;
-            if (syncObject.Logic is AirdropLogicClass airdropLogicClass)
+            if (syncObject.Logic is ClientAirDrop airdropLogicClass)
             {
-                airdropLogicClass.Vector3_0 = Position;
+                airdropLogicClass._destinationPosition = Position;
             }
             else
             {
-                FikaGlobals.LogWarning("AirdropSynchronizableObject logic was not of type AirdropLogicClass!");
+                FikaGlobals.LogWarning("AirdropSynchronizableObject logic was not of type ClientAirDrop!");
             }
             syncObject.AirdropType = AirdropType;
             var container = syncObject.GetComponentInChildren<LootableContainer>().gameObject.GetComponentInChildren<LootableContainer>();

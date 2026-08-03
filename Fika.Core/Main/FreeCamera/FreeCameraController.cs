@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using EFT.Settings;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Comfort.Common;
@@ -100,7 +101,7 @@ public class FreeCameraController : MonoBehaviour
     protected void Start()
     {
         // Find Main Camera
-        CameraMain = CameraClass.Instance.Camera;
+        CameraMain = CameraManager.Instance.Camera;
         if (CameraMain == null)
         {
             return;
@@ -120,7 +121,7 @@ public class FreeCameraController : MonoBehaviour
             return;
         }
 
-        _deathFade = CameraClass.Instance.Camera.GetComponent<DeathFade>();
+        _deathFade = CameraManager.Instance.Camera.GetComponent<DeathFade>();
         _deathFade.enabled = true;
 
         _allCullingObjects = FindObjectsOfType<DisablerCullingObjectBase>();
@@ -234,7 +235,7 @@ public class FreeCameraController : MonoBehaviour
                     Player.HeavyBreath = false;
                 }
 
-                if (CameraClass.Exist)
+                if (CameraManager.Exist)
                 {
                     ClearEffects();
                 }
@@ -250,7 +251,7 @@ public class FreeCameraController : MonoBehaviour
             yield return new WaitForSeconds(5);
         }
 
-        var cameraClassInstance = CameraClass.Instance;
+        var cameraClassInstance = CameraManager.Instance;
         if (cameraClassInstance == null)
         {
             yield break;
@@ -263,7 +264,7 @@ public class FreeCameraController : MonoBehaviour
 
         if (cameraClassInstance.Camera != null)
         {
-            cameraClassInstance.Camera.fieldOfView = Singleton<SharedGameSettingsClass>.Instance.Game.Settings.FieldOfView;
+            cameraClassInstance.Camera.fieldOfView = Singleton<SettingsManager>.Instance.Game.Settings.FieldOfView;
         }
 
         // Disable the DeathFade effect & Toggle the Camera
@@ -296,7 +297,7 @@ public class FreeCameraController : MonoBehaviour
                 Player.HeavyBreath = false;
             }
 
-            if (CameraClass.Exist)
+            if (CameraManager.Exist)
             {
                 ClearEffects();
             }
@@ -306,19 +307,19 @@ public class FreeCameraController : MonoBehaviour
 
     private void ClearEffects()
     {
-        var cameraClass = CameraClass.Instance;
+        var cameraClass = CameraManager.Instance;
 
-        cameraClass.EffectsController.method_4(null, false);
+        cameraClass.EffectsController.OnGlassesChanged(null, false);
 
         var effectsController = Traverse.Create(cameraClass.EffectsController);
 
-        var bloodOnScreen = effectsController.Field<BloodOnScreen>("bloodOnScreen_0").Value;
+        var bloodOnScreen = effectsController.Field<BloodOnScreen>("_bloodOnScreen").Value;
         if (bloodOnScreen != null)
         {
             Destroy(bloodOnScreen);
         }
 
-        var effectsManagerList = effectsController.Field<List<EffectsController.Class633>>("list_0").Value;
+        var effectsManagerList = effectsController.Field<List<EffectsController.EffectAccumulator>>("_effectAccumulators").Value;
         if (effectsManagerList != null)
         {
             for (var i = 0; i < effectsManagerList.Count; i++)
@@ -355,11 +356,11 @@ public class FreeCameraController : MonoBehaviour
         Destroy(cameraClass.VisorSwitcher);
         if (cameraClass.NightVision.On)
         {
-            cameraClass.NightVision.method_1(false);
+            cameraClass.NightVision.Switch(false);
         }
         if (cameraClass.ThermalVision.On)
         {
-            cameraClass.ThermalVision.method_1(false);
+            cameraClass.ThermalVision.Switch(false);
         }
     }
 
@@ -499,7 +500,7 @@ public class FreeCameraController : MonoBehaviour
         _freeCamScript.SetActive(false, _extracted);
 
         localPlayer.PointOfView = EPointOfView.FirstPerson;
-        CameraClass.Instance.SetOcclusionCullingEnabled(true);
+        CameraManager.Instance.SetOcclusionCullingEnabled(true);
 
         if (_hasEnabledCulling)
         {

@@ -1,4 +1,8 @@
-﻿using System;
+﻿using CommonAssets.Scripts.Game;
+using EFT.Ballistics;
+using EFT.BufferZone;
+using JsonType;
+using System;
 using System.Collections.Generic;
 using Comfort.Common;
 using EFT;
@@ -22,14 +26,14 @@ public class FikaClientGameWorld : ClientLocalGameWorld
     public FikaClientWorld FikaClientWorld { get; private set; }
     public Dictionary<int, Turnable> TurnableDict => Turnables;
 
-    public static FikaClientGameWorld Create(GameObject gameObject, PoolManagerClass objectsFactory, EUpdateQueue updateQueue, string currentProfileId)
+    public static FikaClientGameWorld Create(GameObject gameObject, ObjectsFactory objectsFactory, EUpdateQueue updateQueue, string currentProfileId)
     {
         var gameWorld = gameObject.AddComponent<FikaClientGameWorld>();
         gameWorld.ObjectsFactory = objectsFactory;
-        Traverse.Create(gameWorld).Field<EUpdateQueue>("eupdateQueue_0").Value = updateQueue;
+        Traverse.Create(gameWorld).Field<EUpdateQueue>("_updateQueue").Value = updateQueue;
         gameWorld.SpeakerManager = gameObject.AddComponent<SpeakerManager>();
-        gameWorld.ExfiltrationController = new ExfiltrationControllerClass();
-        gameWorld.BufferZoneController = new BufferZoneControllerClass();
+        gameWorld.ExfiltrationController = new ExfiltrationController();
+        gameWorld.BufferZoneController = new BufferZoneController();
         gameWorld.CurrentProfileId = currentProfileId;
         gameWorld.UnityTickListener = GameWorldUnityTickListener.Create(gameObject, gameWorld);
         gameWorld.AudioSourceCulling = gameObject.GetOrAddComponent<AudioSourceCulling>();
@@ -38,15 +42,15 @@ public class FikaClientGameWorld : ClientLocalGameWorld
         return gameWorld;
     }
 
-    public override void ShotDelegate(EftBulletClass shotResult)
+    public override void ShotDelegate(Shot shotResult)
     {
         if (!shotResult.IsFlyingOutOfTime)
         {
-            DamageInfoStruct damageInfoStruct = new(EDamageType.Bullet, shotResult);
-            ShotIdStruct shotIdStruct = new(shotResult.Ammo.Id, shotResult.FragmentIndex);
+            DamageInfo damageInfoStruct = new(EDamageType.Bullet, shotResult);
+            ShotId shotIdStruct = new(shotResult.Ammo.Id, shotResult.FragmentIndex);
             var shotInfoClass = (shotResult.HittedBallisticCollider != null) ? shotResult.HittedBallisticCollider.ApplyHit(damageInfoStruct, shotIdStruct) : null;
             shotResult.AddClientHitPosition(shotInfoClass);
-            var itemComponent = shotResult.Ammo.GetItemComponent<ExplosiveItemComponentClass>();
+            var itemComponent = shotResult.Ammo.GetItemComponent<ExplosiveAmmoComponent>();
             if (itemComponent != null && shotResult.TimeSinceShot >= itemComponent.Template.FuzeArmTimeSec)
             {
                 if (Singleton<Effects>.Instantiated)
@@ -73,7 +77,7 @@ public class FikaClientGameWorld : ClientLocalGameWorld
         }
     }
 
-    public override GrenadeFactoryClass CreateGrenadeFactory()
+    public override GrenadeFactory CreateGrenadeFactory()
     {
         return new FikaClientGrenadeFactory();
     }
@@ -99,7 +103,7 @@ public class FikaClientGameWorld : ClientLocalGameWorld
         // Do nothing
     }
 
-    public override void vmethod_1(float dt)
+    public override void UpdateSynchronizableObjectLogic(float dt)
     {
         // Do nothing
     }
@@ -109,9 +113,9 @@ public class FikaClientGameWorld : ClientLocalGameWorld
         // Do nothing
     }
 
-    public override SyncObjectProcessorClass SyncObjectProcessorFactory()
+    public override SynchronizableObjectLogicProcessor SyncObjectProcessorFactory()
     {
-        ClientSynchronizableObjectLogicProcessor = new SynchronizableObjectLogicProcessorClass
+        ClientSynchronizableObjectLogicProcessor = new ClientSynchronizableObjectLogicProcessor
         {
             TripwireManager = new(Singleton<GameWorld>.Instance)
         };
@@ -127,7 +131,7 @@ public class FikaClientGameWorld : ClientLocalGameWorld
         for (var i = 0; i < syncObjects.Count; i++)
         {
             var syncObject = syncObjects[i];
-            syncObject.OnUpdateRequired -= SynchronizableObjectLogicProcessor.method_1;
+            syncObject.OnUpdateRequired -= SynchronizableObjectLogicProcessor.UpdateRequiredHandler;
             syncObject.Logic.ReturnToPool();
             syncObject.ReturnToPool();
         }
@@ -148,11 +152,11 @@ public class FikaClientGameWorld : ClientLocalGameWorld
         // Do nothing
     }
 
-    public Item CreateReconnectQuestItem(LootItemPositionClass lootItem, bool initial, Player questPlayer = null, MovingPlatform platform = null)
+    public Item CreateReconnectQuestItem(JsonLootItem lootItem, bool initial, Player questPlayer = null, MovingPlatform platform = null)
     {
         var item = (questPlayer == null) ? lootItem.Item : lootItem.Item.CloneItem(null);
-        new TraderControllerClass(item, item.Id, item.ShortName, true, EOwnerType.Profile);
-        var gameObject = Singleton<PoolManagerClass>.Instance.CreateLootPrefab(item, ECameraType.Default, null);
+        new ItemController(item, item.Id, item.ShortName, true, EOwnerType.Profile);
+        var gameObject = Singleton<ObjectsFactory>.Instance.CreateLootPrefab(item, ECameraType.Default, null);
         gameObject.SetActive(true);
         if (platform != null)
         {

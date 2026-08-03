@@ -12,7 +12,7 @@ public sealed class ObservedCorpseCulling : IDisposable
     private readonly ObservedPlayer _observedPlayer;
     private readonly Corpse _observedCorpse;
     private readonly List<Renderer> _renderers = new(256);
-    private GClass999 _gClass999;
+    private ObservedCullingObject _gClass999;
     private bool _ragdollDone;
     private bool _localVisible = true;
 
@@ -33,7 +33,7 @@ public sealed class ObservedCorpseCulling : IDisposable
         {
             _gClass999.CustomUpdate();
         }
-        if (!_ragdollDone && _observedCorpse.Ragdoll.Bool_2)
+        if (!_ragdollDone && _observedCorpse.Ragdoll._isPhysicsDone)
         {
             _ragdollDone = true;
         }

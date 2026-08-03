@@ -1,5 +1,6 @@
 ﻿// © 2026 Lacyway All Rights Reserved
 
+using Diz.LanguageExtensions;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -12,12 +13,11 @@ using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.ObservedClasses;
 
-public sealed class ObservedInventoryController : Player.PlayerInventoryController, Interface18
+public sealed class ObservedInventoryController : Player.PlayerInventoryController, IOperationHandler
 {
     private readonly static FieldInfo _setInHandsCallbackField = typeof(Player)
         .GetField("_setInHandsCallback", BindingFlags.NonPublic | BindingFlags.Instance);
 
-    private readonly IPlayerSearchController _searchController;
     private readonly FikaPlayer _fikaPlayer;
 
     public override bool HasDiscardLimits
@@ -28,28 +28,22 @@ public sealed class ObservedInventoryController : Player.PlayerInventoryControll
         }
     }
 
-    public override IPlayerSearchController PlayerSearchController
-    {
-        get
-        {
-            return _searchController;
-        }
-    }
+    public override IPlayerSearchController PlayerSearchController { get; }
 
     public ObservedInventoryController(Player player, Profile profile, bool examined, MongoID firstId, ushort firstOperationId, bool aiControl) : base(player, profile, examined)
     {
-        MongoID_0 = firstId;
-        Ushort_0 = firstOperationId;
-        _searchController = new AISearchControllerClass();
+        _currentId = firstId;
+        _nextOperationId = firstOperationId;
+        PlayerSearchController = new ObservedPlayerSearchController();
         _fikaPlayer = (FikaPlayer)player;
     }
 
-    public override void AddDiscardLimits(Item rootItem, IEnumerable<DestroyedItemsStruct> destroyedItems)
+    public override void AddDiscardLimits(Item rootItem, IEnumerable<ItemsCount> destroyedItems)
     {
         // Do nothing
     }
 
-    public override IEnumerable<DestroyedItemsStruct> GetItemsOverDiscardLimit(Item item)
+    public override IEnumerable<ItemsCount> GetItemsOverDiscardLimit(Item item)
     {
         return [];
     }
@@ -60,13 +54,13 @@ public sealed class ObservedInventoryController : Player.PlayerInventoryControll
         return false;
     }
 
-    public override GStruct156<bool> TryThrowItem(Item item, Callback callback = null, bool silent = false)
+    public override Option<bool> TryThrowItem(Item item, Callback callback = null, bool silent = false)
     {
         ThrowItem(item, false, callback);
         return true;
     }
 
-    public override GStruct155 CheckItemAction(Item item, ItemAddress location)
+    public override Option CheckItemAction(Item item, ItemAddress location)
     {
         if (item.CurrentAddress == null)
         {
@@ -74,18 +68,18 @@ public sealed class ObservedInventoryController : Player.PlayerInventoryControll
         }
         if (!item.CheckForLockable(out var lockableComponent))
         {
-            return new InteractionsHandlerClass.GClass1593(lockableComponent);
+            return new ItemManipulator.ContainerLockedError(lockableComponent);
         }
         if (location != null && !location.Container.ParentItem.CheckForLockable(out lockableComponent))
         {
-            return new InteractionsHandlerClass.GClass1593(lockableComponent);
+            return new ItemManipulator.ContainerLockedError(lockableComponent);
         }
         var flag = false;
         if (item is CompoundItem compoundItem)
         {
             foreach (var item2 in compoundItem.GetAllItems())
             {
-                foreach (var geventArgs in List_0)
+                foreach (var geventArgs in ActiveEvents)
                 {
                     // this block is redundant during this check and isn't really meant to be used as it triggers a deny if player drags currently equipped item out of a slot
                     /*if (item2 == geventArgs.Item)
@@ -100,10 +94,10 @@ public sealed class ObservedInventoryController : Player.PlayerInventoryControll
 #endif
                         flag = true;
                     }
-                    if (location != null && geventArgs.Location != null && smethod_0(item2, location, geventArgs.Item, geventArgs.Location))
+                    if (location != null && geventArgs.Location != null && CheckLocation(item2, location, geventArgs.Item, geventArgs.Location))
                     {
 #if DEBUG
-                        FikaGlobals.LogError($"{item2.LocalizedShortName()} failed to process on smethod_0");
+                        FikaGlobals.LogError($"{item2.LocalizedShortName()} failed to process on CheckLocation");
 #endif
                         flag = true;
                     }
@@ -112,36 +106,36 @@ public sealed class ObservedInventoryController : Player.PlayerInventoryControll
 #if DEBUG
                         FikaGlobals.LogError($"Flag hit, gevent was {geventArgs.GetType().Name}");
 #endif
-                        return new GClass1561(item, ParentItem.GetRootItem());
+                        return new PlayerIsBusyError(item, ParentItem.GetRootItem());
                     }
                 }
             }
         }
-        foreach (var geventArgs2 in List_0)
+        foreach (var geventArgs2 in ActiveEvents)
         {
-            var lambda = new Class2447();
-            if (geventArgs2 is GEventArgs7 geventArgs3 && (geventArgs3.TargetItem == item || geventArgs3.Item == item))
+            var lambda = new CG_CheckItemAction();
+            if (geventArgs2 is LoadMagazineEventArgs geventArgs3 && (geventArgs3.TargetItem == item || geventArgs3.Item == item))
             {
 #if DEBUG
                 FikaGlobals.LogError($"{item.LocalizedShortName()} was in a GEventArgs7");
 #endif
                 flag = true;
             }
-            if (geventArgs2 is GEventArgs8 geventArgs4 && (geventArgs4.FromItem == item || geventArgs4.Item == item || geventArgs4.TargetItem == item))
+            if (geventArgs2 is UnloadMagazineEventArgs geventArgs4 && (geventArgs4.FromItem == item || geventArgs4.Item == item || geventArgs4.TargetItem == item))
             {
 #if DEBUG
                 FikaGlobals.LogError($"{item.LocalizedShortName()} was in a GEventArgs8");
 #endif
                 flag = true;
             }
-            if (geventArgs2 is GEventArgs2 geventArgs5 && item == geventArgs5.To.Container.ParentItem)
+            if (geventArgs2 is AddItemEventArgs geventArgs5 && item == geventArgs5.To.Container.ParentItem)
             {
 #if DEBUG
                 FikaGlobals.LogError($"{item.LocalizedShortName()} was in a GEventArgs2");
 #endif
                 flag = true;
             }
-            if (geventArgs2 is GEventArgs3 geventArgs6)
+            if (geventArgs2 is RemoveItemEventArgs geventArgs6)
             {
                 if (item.Parent.Container.ParentItem == geventArgs6.Item)
                 {
@@ -158,7 +152,7 @@ public sealed class ObservedInventoryController : Player.PlayerInventoryControll
                     flag = true;
                 }
             }
-            lambda.inOutHandsProcess = geventArgs2 as GEventArgs17;
+            lambda.inOutHandsProcess = geventArgs2 as InOutHandsProcessEventArgs;
             if (lambda.inOutHandsProcess != null)
             {
                 if (item.GetAllParentItemsAndSelf(false).Any(lambda.method_1))
@@ -183,29 +177,26 @@ public sealed class ObservedInventoryController : Player.PlayerInventoryControll
 #endif
                 flag = true;
             }
-            if (location != null && geventArgs2.Location != null && smethod_0(item, location, geventArgs2.Item, geventArgs2.Location))
+            if (location != null && geventArgs2.Location != null && CheckLocation(item, location, geventArgs2.Item, geventArgs2.Location))
             {
 #if DEBUG
-                FikaGlobals.LogError($"{item.LocalizedShortName()} failed to process smethod_0 v2");
+                FikaGlobals.LogError($"{item.LocalizedShortName()} failed to process CheckLocation v2");
 #endif
                 flag = true;
             }
             if (flag)
             {
-#if DEBUG
-                FikaGlobals.LogError($"Flag hit, gevent was {geventArgs2.GetType().Name}");
-#endif
-                return new GClass1561(item, ParentItem.GetRootItem());
+                return new PlayerIsBusyError(item, ParentItem.GetRootItem());
             }
         }
-        if (!method_16(item, location))
+        if (!CheckRestrictions(item, location))
         {
             return default;
         }
-        return new GClass1568(item, location);
+        return new ItemRestrictionsError(item, location);
     }
 
-    public override bool CheckOverLimit(IEnumerable<Item> items, ItemAddress to, bool useItemCountInEquipment, out InteractionsHandlerClass.GClass1609 error)
+    public override bool CheckOverLimit(IEnumerable<Item> items, ItemAddress to, bool useItemCountInEquipment, out ItemManipulator.CountLimitError error)
     {
         error = null;
         return true;
@@ -222,7 +213,7 @@ public sealed class ObservedInventoryController : Player.PlayerInventoryControll
         return false;
     }
 
-    public override void StrictCheckMagazine(MagazineItemClass magazine, bool status, int skill = 0, bool notify = false, bool useOperation = true)
+    public override void StrictCheckMagazine(Magazine magazine, bool status, int skill = 0, bool notify = false, bool useOperation = true)
     {
         // Do nothing
     }
@@ -247,17 +238,17 @@ public sealed class ObservedInventoryController : Player.PlayerInventoryControll
         return false;
     }
 
-    public override bool vmethod_0(BaseInventoryOperationClass operation)
+    public override bool CanExecute(EFT.InventoryLogic.Operations.AbstractOperation operation)
     {
         return true;
     }
 
-    public override SearchContentOperation vmethod_2(SearchableItemItemClass item)
+    public override SearchContentOperation CreateSearchOperation(SearchableItem item)
     {
         return null;
     }
 
-    public override void InProcess(TraderControllerClass executor, Item item, ItemAddress to, bool succeed, GInterface438 operation, Callback callback)
+    public override void InProcess(ItemController executor, Item item, ItemAddress to, bool succeed, IInventoryOperation operation, Callback callback)
     {
         if (!succeed)
         {
@@ -273,9 +264,9 @@ public sealed class ObservedInventoryController : Player.PlayerInventoryControll
         _fikaPlayer.StatisticsManager.OnGrabLoot(item);
     }
 
-    private void HandleInProcess(Item item, ItemAddress to, GInterface438 operation, Callback callback)
+    private void HandleInProcess(Item item, ItemAddress to, IInventoryOperation operation, Callback callback)
     {
-        Player.Class1350 handler = new()
+        Player.CG_TrySetInHands handler = new()
         {
             player_0 = _fikaPlayer,
             callback = callback
@@ -287,15 +278,15 @@ public sealed class ObservedInventoryController : Player.PlayerInventoryControll
             return;
         }
 
-        if ((item.Parent != to || operation is FoldOperationClass) && handler.player_0.HandsController.CanExecute(operation))
+        if ((item.Parent != to || operation is FoldOperation) && handler.player_0.HandsController.CanExecute(operation))
         {
             _setInHandsCallbackField.SetValue(handler.player_0, handler.callback);
-            RaiseInOutProcessEvents(new GEventArgs17(handler.player_0.HandsController.Item, CommandStatus.Begin, this));
+            RaiseInOutProcessEvents(new InOutHandsProcessEventArgs(handler.player_0.HandsController.Item, CommandStatus.Begin, this));
             handler.player_0.HandsController.Execute(operation, handler.method_1);
             return;
         }
 
-        if (operation is FoldOperationClass && !handler.player_0.HandsController.CanExecute(operation))
+        if (operation is FoldOperation && !handler.player_0.HandsController.CanExecute(operation))
         {
             handler.callback.Fail("Can't perform operation");
             return;
@@ -311,12 +302,12 @@ public sealed class ObservedInventoryController : Player.PlayerInventoryControll
 
     public void SetNewID(MongoID newId)
     {
-        MongoID_0 = newId;
+        _currentId = newId;
     }
 
-    OperationDataStruct Interface18.CreateOperationFromDescriptor(BaseDescriptorClass descriptor)
+    OperationCreationResult IOperationHandler.CreateOperationFromDescriptor(InventoryOperationDescriptor descriptor)
     {
-        method_13(descriptor);
+        UpdateOperationId(descriptor);
         return descriptor.ToInventoryOperation(_fikaPlayer);
     }
 }

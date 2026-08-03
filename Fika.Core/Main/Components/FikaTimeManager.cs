@@ -8,7 +8,7 @@ namespace Fika.Core.Main.Components;
 public class FikaTimeManager : MonoBehaviour
 {
     public CoopGame CoopGame;
-    public GameTimerClass GameTimer;
+    public GameTimer GameTimer;
 
     public static FikaTimeManager Create(CoopGame game)
     {

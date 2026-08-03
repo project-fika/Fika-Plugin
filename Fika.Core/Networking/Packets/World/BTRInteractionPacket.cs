@@ -8,7 +8,7 @@ public struct BTRInteractionPacket(int netId) : INetSerializable
     public int NetId = netId;
     public bool IsResponse;
     public EBtrInteractionStatus Status;
-    public PlayerInteractPacket Data;
+    public InteractWithBtrPacket Data;
 
     public void Deserialize(NetDataReader reader)
     {

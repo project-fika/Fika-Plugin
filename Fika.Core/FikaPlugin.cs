@@ -45,7 +45,7 @@ namespace Fika.Core;
 [BepInDependency("com.SPT.debugging", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after spt-debugging, that way we can disable its patches
 public class FikaPlugin : BaseUnityPlugin
 {
-    public const string FikaVersion = "2.3.9";
+    public const string FikaVersion = "2.4.0";
     public const string FikaNATPunchMasterServer = "natpunch.project-fika.com";
     public const ushort FikaNATPunchMasterPort = 6790;
 
@@ -71,7 +71,7 @@ public class FikaPlugin : BaseUnityPlugin
     internal FikaNotificationManager NotificationManager { get; set; }
 
 #if RELEASE || GOLDMASTER
-    private static readonly Version _requiredServerVersion = new("2.3.5");
+    private static readonly System.Version _requiredServerVersion = new("2.4.0");
 #endif
     private PatchManager _patchManager;
     private TarkovApplication _tarkovApp;
@@ -134,7 +134,7 @@ public class FikaPlugin : BaseUnityPlugin
 
         BundleLoaderPlugin = new();
 
-        BotSettingsRepoClass.Init();
+        WildSpawnTypeExtension.Init();
 
         BotDifficulties = FikaRequestHandler.GetBotDifficulties();
         ConsoleScreen.Processor.RegisterCommandGroup<FikaCommands>();
@@ -184,7 +184,7 @@ public class FikaPlugin : BaseUnityPlugin
     {
         var version = FikaRequestHandler.CheckServerVersion().Version;
         var failed = true;
-        if (Version.TryParse(version, out var serverVersion))
+        if (System.Version.TryParse(version, out var serverVersion))
         {
             if (serverVersion >= _requiredServerVersion)
             {

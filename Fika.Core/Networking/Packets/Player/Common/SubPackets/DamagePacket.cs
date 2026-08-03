@@ -36,7 +36,7 @@ public sealed class DamagePacket : IPoolSubPacket
     public MongoID? WeaponId;
     public MongoID? SourceId;
 
-    public static DamagePacket FromValue(int netId, DamageInfoStruct damageInfo, EBodyPart bodyPartType,
+    public static DamagePacket FromValue(int netId, DamageInfo damageInfo, EBodyPart bodyPartType,
         EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider = default, MaterialType materialType = default, float absorbed = default)
     {
         var packet = CommonSubPacketPoolManager.Instance.GetPacket<DamagePacket>(ECommonSubPacketType.Damage);

@@ -1,6 +1,7 @@
 ﻿// © 2026 Lacyway All Rights Reserved
 
 using EFT;
+using EFT.InventoryLogic;
 using Fika.Core.Main.Players;
 
 namespace Fika.Core.Main.ObservedClasses.HandsControllers;
@@ -10,9 +11,9 @@ namespace Fika.Core.Main.ObservedClasses.HandsControllers;
 /// </summary>
 internal sealed class ObservedQuickGrenadeController : Player.QuickGrenadeThrowHandsController
 {
-    public static ObservedQuickGrenadeController Create(FikaPlayer player, ThrowWeapItemClass item)
+    public static ObservedQuickGrenadeController Create(FikaPlayer player, ThrowWeap item)
     {
-        return smethod_9<ObservedQuickGrenadeController>(player, item);
+        return CreateController<ObservedQuickGrenadeController>(player, item);
     }
 
     public override bool CanChangeCompassState(bool newState)
@@ -43,7 +44,7 @@ internal sealed class ObservedQuickGrenadeController : Player.QuickGrenadeThrowH
     /// <param name="rotation"></param>
     /// <param name="force"></param>
     /// <param name="lowThrow"></param>
-    public override void vmethod_2(float timeSinceSafetyLevelRemoved, Vector3 position, Quaternion rotation, Vector3 force, bool lowThrow)
+    public override void ThrowGrenade(float timeSinceSafetyLevelRemoved, Vector3 position, Quaternion rotation, Vector3 force, bool lowThrow)
     {
         // Do nothing
     }
@@ -58,6 +59,6 @@ internal sealed class ObservedQuickGrenadeController : Player.QuickGrenadeThrowH
     /// <param name="lowThrow">If it's a low throw or not</param>
     public void SpawnGrenade(float timeSinceSafetyLevelRemoved, Vector3 position, Quaternion rotation, Vector3 force, bool lowThrow)
     {
-        base.vmethod_2(timeSinceSafetyLevelRemoved, position, rotation, force, lowThrow);
+        base.ThrowGrenade(timeSinceSafetyLevelRemoved, position, rotation, force, lowThrow);
     }
 }

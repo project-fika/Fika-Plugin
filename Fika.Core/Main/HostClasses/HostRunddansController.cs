@@ -3,15 +3,16 @@ using EFT;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Communication;
+using JsonType;
 
 namespace Fika.Core.Main.HostClasses;
 
-public class HostRunddansController(BackendConfigSettingsClass.GClass1748 settings, LocationSettingsClass.Location location)
-    : LocalGameRunddansControllerClass(settings, location)
+public class HostRunddansController(GlobalConfiguration.RunddansGlobalSettings settings, LocationSettings.Location location)
+    : LocalRunddansController(settings, location)
 {
-    public override void InteractWithEventObject(Player player, InteractPacketStruct packet)
+    public override void InteractWithEventObject(Player player, InteractWithEventObjectPacket packet)
     {
-        if (!IsValid(player, out LocalGameTransitControllerClass transitController, out var transitDataClass)
+        if (!IsValid(player, out LocalTransitController transitController, out var transitDataClass)
                 || !transitDataClass.events)
         {
             return;
@@ -36,18 +37,18 @@ public class HostRunddansController(BackendConfigSettingsClass.GClass1748 settin
         }
         else
         {
-            if (!method_5(player, out var item))
+            if (!TryGetConsumableItem(player, out var item))
             {
                 NoRequiredItemNotification(player);
                 return;
             }
-            if (!method_10(item))
+            if (!TryRemoveConsumableItem(item))
             {
                 FikaGlobals.LogError($"Remove consumable error on {player.Profile.Info.MainProfileNickname}");
                 return;
             }
         }
-        method_4(packet.objectId, EventObject.EState.Running);
+        SetState(packet.objectId, EventObject.EState.Running);
         transitController.EnablePoints(false);
         transitController.UpdateTimers();
 
@@ -58,7 +59,7 @@ public class HostRunddansController(BackendConfigSettingsClass.GClass1748 settin
         Singleton<IFikaNetworkManager>.Instance.SendData(ref startPacket, DeliveryMethod.ReliableOrdered);
     }
 
-    public void ObservedInteractWithEventObject(Player player, InteractPacketStruct packet, NetPeer peer)
+    public void ObservedInteractWithEventObject(Player player, InteractWithEventObjectPacket packet, NetPeer peer)
     {
         if (FikaBackendUtils.IsHeadless)
         {
@@ -92,19 +93,19 @@ public class HostRunddansController(BackendConfigSettingsClass.GClass1748 settin
         }
         else
         {
-            if (!method_5(player, out var item))
+            if (!TryGetConsumableItem(player, out var item))
             {
                 FikaGlobals.LogWarning($"{player.Profile.GetCorrectedNickname()} is missing the required item");
                 NoRequiredItemNotification(player);
                 return;
             }
-            if (!method_10(item))
+            if (!TryRemoveConsumableItem(item))
             {
                 FikaGlobals.LogError($"Remove consumable error on {player.Profile.Info.MainProfileNickname}");
                 return;
             }
         }
-        method_4(packet.objectId, EventObject.EState.Running);
+        SetState(packet.objectId, EventObject.EState.Running);
         transitController.EnablePoints(false);
         transitController.UpdateTimers();
 
@@ -122,12 +123,12 @@ public class HostRunddansController(BackendConfigSettingsClass.GClass1748 settin
         Singleton<IFikaNetworkManager>.Instance.SendData(ref removePacket, DeliveryMethod.ReliableOrdered);
     }
 
-    private void ObservedHeadlessInteractWithEventObject(Player player, InteractPacketStruct packet, NetPeer peer)
+    private void ObservedHeadlessInteractWithEventObject(Player player, InteractWithEventObjectPacket packet, NetPeer peer)
     {
 #if DEBUG
         FikaGlobals.LogInfo($"Player {player.Profile.Info.MainProfileNickname} interacted with object on headless");
 #endif
-        if (Singleton<GameWorld>.Instance.TransitController is not TransitControllerAbstractClass transitController)
+        if (Singleton<GameWorld>.Instance.TransitController is not EFT.TransitController transitController)
         {
             FikaGlobals.LogError($"TransitController was of wrong type: {Singleton<GameWorld>.Instance.TransitController.GetType().Name}");
             return;
@@ -150,19 +151,19 @@ public class HostRunddansController(BackendConfigSettingsClass.GClass1748 settin
         }
         else
         {
-            if (!method_5(player, out var item))
+            if (!TryGetConsumableItem(player, out var item))
             {
                 FikaGlobals.LogWarning($"{player.Profile.GetCorrectedNickname()} is missing the required item");
                 NoRequiredItemNotification(player);
                 return;
             }
-            if (!method_10(item))
+            if (!TryRemoveConsumableItem(item))
             {
                 FikaGlobals.LogError($"Remove consumable error on {player.Profile.Info.MainProfileNickname}");
                 return;
             }
         }
-        method_4(packet.objectId, EventObject.EState.Running);
+        SetState(packet.objectId, EventObject.EState.Running);
         transitController.EnablePoints(false);
 
         var startPacket = new EventControllerEventPacket
@@ -206,7 +207,7 @@ public class HostRunddansController(BackendConfigSettingsClass.GClass1748 settin
     {
         if (player.IsYourPlayer)
         {
-            method_13();
+            NoRequiredItemNotification();
             return;
         }
 
@@ -226,7 +227,7 @@ public class HostRunddansController(BackendConfigSettingsClass.GClass1748 settin
     {
         if (player.IsYourPlayer)
         {
-            method_14();
+            NonInteractiveNotification();
             return;
         }
 

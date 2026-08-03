@@ -7,6 +7,8 @@ using EFT;
 using EFT.InventoryLogic;
 using EFT.InventoryLogic.Operations;
 using EFT.UI;
+using Diz.LanguageExtensions;
+using Diz.Utils;
 
 namespace Fika.Core.Main.BaseClasses;
 
@@ -30,12 +32,12 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
         StrictSync = strictSync;
     }
 
-    public override SearchContentOperation vmethod_2(SearchableItemItemClass item)
+    public override SearchContentOperation CreateSearchOperation(SearchableItem item)
     {
         throw new NotImplementedException();
     }
 
-    public override Task<IResult> LoadMagazine(AmmoItemClass sourceAmmo, MagazineItemClass magazine, int loadCount, bool ignoreRestrictions)
+    public override Task<IResult> LoadMagazine(Ammo sourceAmmo, Magazine magazine, int loadCount, bool ignoreRestrictions)
     {
         if (_instantLoad)
         {
@@ -59,7 +61,7 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
         return base.LoadMagazine(sourceAmmo, magazine, loadCount, ignoreRestrictions);
     }
 
-    private async Task<IResult> QuickLoadMagazine(AmmoItemClass sourceAmmo, MagazineItemClass magazine, int loadCount, bool ignoreRestrictions)
+    private async Task<IResult> QuickLoadMagazine(Ammo sourceAmmo, Magazine magazine, int loadCount, bool ignoreRestrictions)
     {
         if (loadCount <= 0)
         {
@@ -69,7 +71,7 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
         StopProcesses();
 
         var speedPercentage = 100f - Profile.Skills.MagDrillsLoadSpeed + magazine.LoadUnloadModifier;
-        var finalLoadSpeed = Singleton<BackendConfigSettingsClass>.Instance.BaseLoadTime * speedPercentage / 100f;
+        var finalLoadSpeed = Singleton<GlobalConfiguration>.Instance.BaseLoadTime * speedPercentage / 100f;
         var loadPerTick = GetLoadPerTick(magazine);
 
         var operationResult = ignoreRestrictions
@@ -81,23 +83,23 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
             return operationResult.ToResult();
         }
 
-        var readinessResult = await method_30();
+        var readinessResult = await WaitForProcess();
         if (readinessResult.Failed)
         {
             return readinessResult;
         }
 
-        Interface19_0 = new CustomAmmoLoader(this, magazine, sourceAmmo, loadCount,
+        _loadProcess = new CustomAmmoLoader(this, magazine, sourceAmmo, loadCount,
             Profile.Skills.MagDrillsLoadProgression, finalLoadSpeed, loadPerTick);
 
-        var executionResult = await Interface19_0.Start();
+        var executionResult = await _loadProcess.Start();
 
-        Interface19_0 = null;
+        _loadProcess = null;
 
         return executionResult;
     }
 
-    public override Task<IResult> UnloadMagazine(MagazineItemClass magazine, bool equipmentBlocked)
+    public override Task<IResult> UnloadMagazine(Magazine magazine, bool equipmentBlocked)
     {
         if (_instantLoad)
         {
@@ -112,23 +114,23 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
         return base.UnloadMagazine(magazine, equipmentBlocked);
     }
 
-    private async Task<IResult> QuickUnloadMagazine(MagazineItemClass magazine)
+    private async Task<IResult> QuickUnloadMagazine(Magazine magazine)
     {
         StopProcesses();
         var unloadSpeed = 100f - Profile.Skills.MagDrillsUnloadSpeed + magazine.LoadUnloadModifier;
-        var unloadOneAmmoSpeed = Singleton<BackendConfigSettingsClass>.Instance.BaseUnloadTime * unloadSpeed / 100f;
+        var unloadOneAmmoSpeed = Singleton<GlobalConfiguration>.Instance.BaseUnloadTime * unloadSpeed / 100f;
         var unloadPerTick = GetLoadPerTick(magazine);
 
-        var awaitClear = await method_30();
+        var awaitClear = await WaitForProcess();
         if (awaitClear.Failed)
         {
             return awaitClear;
         }
 
-        Interface19_0 = new CustomAmmoUnloader(this, magazine, unloadPerTick, unloadOneAmmoSpeed, Profile.Skills.MagDrillsLoadProgression);
-        var result = await Interface19_0.Start();
+        _loadProcess = new CustomAmmoUnloader(this, magazine, unloadPerTick, unloadOneAmmoSpeed, Profile.Skills.MagDrillsLoadProgression);
+        var result = await _loadProcess.Start();
 
-        Interface19_0 = null;
+        _loadProcess = null;
 
         return result;
     }
@@ -136,9 +138,9 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
     /// <summary>
     /// Returns how many bullets should be loaded per tick into the <paramref name="magazine"/>
     /// </summary>
-    /// <param name="magazine">The magazine to check the <see cref="MagazineItemClass.MaxCount"/> on</param>
+    /// <param name="magazine">The magazine to check the <see cref="Magazine.MaxCount"/> on</param>
     /// <returns>The amount of bullets to load per tick</returns>
-    private static int GetLoadPerTick(MagazineItemClass magazine)
+    private static int GetLoadPerTick(Magazine magazine)
     {
         var maxCount = magazine.MaxCount;
         if (maxCount <= 5)
@@ -161,11 +163,11 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
 
     public override IPlayerSearchController PlayerSearchController { get; }
 
-    private sealed class CustomAmmoLoader : Interface19
+    private sealed class CustomAmmoLoader : IMagazineLoadingProcess
     {
         private readonly InventoryController _inventoryController;
-        private readonly MagazineItemClass _magazine;
-        private readonly AmmoItemClass _sourceAmmo;
+        private readonly Magazine _magazine;
+        private readonly Ammo _sourceAmmo;
         private readonly int _totalLoadCount;
         private readonly bool _isElite;
         private readonly float _baseLoadSpeed;
@@ -179,7 +181,7 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
 
         public bool IsCancelled => _cts?.IsCancellationRequested != false;
 
-        public CustomAmmoLoader(InventoryController inventoryController, MagazineItemClass magazine, AmmoItemClass sourceAmmo,
+        public CustomAmmoLoader(InventoryController inventoryController, Magazine magazine, Ammo sourceAmmo,
             int count, bool elite, float loadOneAmmoSpeed, int loadPerTick)
         {
             _inventoryController = inventoryController;
@@ -244,7 +246,7 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
         public void RaiseEvents(CommandStatus status)
         {
             var loadCount = Mathf.CeilToInt((float)_totalLoadCount / _loadPerTick);
-            var geventArgs = new GEventArgs7(_sourceAmmo, _magazine,
+            var geventArgs = new LoadMagazineEventArgs(_sourceAmmo, _magazine,
                 loadCount, _baseLoadSpeed, status, _inventoryController);
             _magazineOwner.RaiseLoadMagazineEvent(geventArgs);
 
@@ -274,7 +276,7 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
 
                 if (_isElite)
                 {
-                    var progressModifier = Singleton<BackendConfigSettingsClass>.Instance.LoadTimeSpeedProgress;
+                    var progressModifier = Singleton<GlobalConfiguration>.Instance.LoadTimeSpeedProgress;
                     _currentLoadSpeed = Mathf.Clamp(_currentLoadSpeed - (_baseLoadSpeed * progressModifier / 100f), _baseLoadSpeed * 40f / 100f, 10f);
                 }
 
@@ -288,7 +290,7 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
                 var operation = _inventoryController.ConvertOperationResultToOperation(gstruct.Value);
                 var executionSource = new TaskCompletionSource<IResult>();
 
-                _inventoryController.vmethod_1(operation, executionSource.SetResult);
+                _inventoryController.Execute(operation, executionSource.SetResult);
 
                 var operationResult = await executionSource.Task;
 
@@ -330,10 +332,10 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
         }
     }
 
-    private sealed class CustomAmmoUnloader : Interface19
+    private sealed class CustomAmmoUnloader : IMagazineLoadingProcess
     {
         private readonly BaseInventoryController _inventoryController;
-        private readonly MagazineItemClass _magazine;
+        private readonly Magazine _magazine;
         private readonly int _unloadPerTick;
         private readonly float _baseUnloadSpeed;
         private readonly bool _isElite;
@@ -345,7 +347,7 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
         private Item _currentAmmoItem;
         private Item _targetItem;
 
-        public CustomAmmoUnloader(BaseInventoryController baseInventoryController, MagazineItemClass magazine, int unloadPerTick, float unloadOneAmmoSpeed, bool isElite)
+        public CustomAmmoUnloader(BaseInventoryController baseInventoryController, Magazine magazine, int unloadPerTick, float unloadOneAmmoSpeed, bool isElite)
         {
             _inventoryController = baseInventoryController;
             _magazine = magazine;
@@ -364,7 +366,7 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
 
             if (_remainingAmmoCount == 0)
             {
-                return new GClass1562(_magazine).ToResult();
+                return new AmmoContainerIsEmptyError(_magazine).ToResult();
             }
 
             _cts = new CancellationTokenSource();
@@ -424,14 +426,14 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
 
             while (!_cts.IsCancellationRequested)
             {
-                if (_magazine.Cartridges.Items.LastOrDefault() is not AmmoItemClass ammoItem)
+                if (_magazine.Cartridges.Items.LastOrDefault() is not Ammo ammoItem)
                 {
                     break;
                 }
 
-                var findPlaceResult = InteractionsHandlerClass.QuickFindAppropriatePlace(ammoItem, _inventoryController,
+                var findPlaceResult = ItemManipulator.QuickFindAppropriatePlace(ammoItem, _inventoryController,
                     _inventoryController.Inventory.Equipment.ToEnumerable(),
-                    InteractionsHandlerClass.EMoveItemOrder.UnloadAmmo, true);
+                    ItemManipulator.EMoveItemOrder.UnloadAmmo, true);
 
                 if (findPlaceResult.Failed)
                 {
@@ -442,11 +444,11 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
                 Item targetItem = null;
                 var interactionValue = findPlaceResult.Value;
 
-                if (interactionValue is GInterface428 moveOperation)
+                if (interactionValue is IToEmptyAddressResult moveOperation)
                 {
                     targetAddress = moveOperation.To;
                 }
-                else if (interactionValue is GInterface429 mergeOperation)
+                else if (interactionValue is ITransferOrMergeResult mergeOperation)
                 {
                     targetItem = mergeOperation.TargetItem;
                 }
@@ -478,25 +480,25 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
 
                 if (_isElite)
                 {
-                    var speedModifier = _baseUnloadSpeed * Singleton<BackendConfigSettingsClass>.Instance.LoadTimeSpeedProgress / 100f;
+                    var speedModifier = _baseUnloadSpeed * Singleton<GlobalConfiguration>.Instance.LoadTimeSpeedProgress / 100f;
                     _currentUnloadSpeed = Mathf.Clamp(_currentUnloadSpeed - speedModifier, _baseUnloadSpeed * 40f / 100f, 10f);
                 }
 
                 var applyResult = (_targetItem != null)
-                    ? AmmoItemClass.ApplyToAmmo(_currentAmmoItem, _targetItem, _unloadPerTick, _inventoryController, true)
-                    : AmmoItemClass.ApplyToAddress(_currentAmmoItem, targetAddress, _unloadPerTick, _inventoryController, true);
+                    ? Ammo.ApplyToAmmo(_currentAmmoItem, _targetItem, _unloadPerTick, _inventoryController, true)
+                    : Ammo.ApplyToAddress(_currentAmmoItem, targetAddress, _unloadPerTick, _inventoryController, true);
 
                 if (applyResult.Failed)
                 {
                     return applyResult.ToResult();
                 }
 
-                GInterface432 operationResult = new GClass3420(applyResult.Value);
-                var operation = _inventoryController.ConvertOperationResultToOperation(operationResult) as GClass3514;
+                IUnloadMagOperationResult operationResult = new UnloadMagOperationResult(applyResult.Value);
+                var operation = _inventoryController.ConvertOperationResultToOperation(operationResult) as UnloadMagOperation;
 
                 var executionTcs = new TaskCompletionSource<IResult>();
 
-                _inventoryController.vmethod_1(operation, new Callback(res => executionTcs.SetResult(res)));
+                _inventoryController.Execute(operation, new Callback(res => executionTcs.SetResult(res)));
 
                 var executionResult = await executionTcs.Task;
                 if (executionResult.Failed)
@@ -520,7 +522,7 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
             var owner = _magazine.Parent.GetOwner();
             var unloadCount = Mathf.CeilToInt((float)_totalAmmoCount / _unloadPerTick);
 
-            var eventArgs = new GEventArgs8(_currentAmmoItem, _targetItem, _magazine, _totalAmmoCount - _remainingAmmoCount, unloadCount,
+            var eventArgs = new UnloadMagazineEventArgs(_currentAmmoItem, _targetItem, _magazine, _totalAmmoCount - _remainingAmmoCount, unloadCount,
                                             _baseUnloadSpeed, status, _inventoryController);
 
             owner.RaiseUnloadMagazineEvent(eventArgs);

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Diz.LanguageExtensions;
+using System.Collections.Generic;
 using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
@@ -9,10 +10,10 @@ using Fika.Core.Networking.Packets.Communication;
 
 namespace Fika.Core.Main.ObservedClasses;
 
-public class ObservedQuestController(Profile profile, InventoryController inventoryController, IPlayerSearchController searchController, IQuestActions session)
-    : GClass4007(profile, inventoryController, searchController, session)
+public class ObservedQuestController(Profile profile, InventoryController inventoryController, IPlayerSearchController searchController, IQuestSession session)
+    : QuestControllerClientLocalGame(profile, inventoryController, searchController, session)
 {
-    private Dictionary<int, List<QuestInformation>> _quests;
+    private Dictionary<int, List<QuestInformation>> _questsDict;
     private List<ZoneDropInformation> _zoneDrops;
     private List<string> _visitedPlaces;
     private List<MongoID> _lootedQuestItems;
@@ -21,7 +22,7 @@ public class ObservedQuestController(Profile profile, InventoryController invent
     {
         if (FikaBackendUtils.IsServer)
         {
-            _quests = [];
+            _questsDict = [];
             _zoneDrops = [];
             _visitedPlaces = [];
             _lootedQuestItems = [];
@@ -61,10 +62,10 @@ public class ObservedQuestController(Profile profile, InventoryController invent
         FikaGlobals.LogInfo($"Received from client for quest [{packet.QuestId}] for conditional [{packet.ConditionId}] with a value of [{packet.Value}]");
 #endif
 
-        if (!_quests.TryGetValue(packet.QuestId, out var questInformation))
+        if (!_questsDict.TryGetValue(packet.QuestId, out var questInformation))
         {
             questInformation = [];
-            _quests.Add(packet.QuestId, questInformation);
+            _questsDict.Add(packet.QuestId, questInformation);
         }
 
         for (var i = 0; i < questInformation.Count; i++)
@@ -92,14 +93,14 @@ public class ObservedQuestController(Profile profile, InventoryController invent
 
     public bool TryGetReconnectQuestSyncPackets(out List<QuestSyncPacket> packets)
     {
-        if (_quests.Count == 0 && _zoneDrops.Count == 0 && _visitedPlaces.Count == 0 && _lootedQuestItems.Count == 0)
+        if (_questsDict.Count == 0 && _zoneDrops.Count == 0 && _visitedPlaces.Count == 0 && _lootedQuestItems.Count == 0)
         {
             packets = null;
             return false;
         }
 
-        packets = new List<QuestSyncPacket>(_quests.Count + _zoneDrops.Count + _visitedPlaces.Count + _lootedQuestItems.Count);
-        foreach ((var questId, var questInformation) in _quests)
+        packets = new List<QuestSyncPacket>(_questsDict.Count + _zoneDrops.Count + _visitedPlaces.Count + _lootedQuestItems.Count);
+        foreach ((var questId, var questInformation) in _questsDict)
         {
             foreach (var quest in questInformation)
             {
@@ -145,18 +146,18 @@ public class ObservedQuestController(Profile profile, InventoryController invent
         return true;
     }
 
-    public override void ManageConditional(QuestClass conditional)
+    public override void ManageConditional(Quest conditional)
     {
         // do nothing
     }
 
     public override void Dispose()
     {
-        CompositeDisposableClass.Dispose();
+        _disposable.Dispose();
         ConditionalBook.Dispose();
         foreach (var quest in ConditionalBook)
         {
-            method_3(quest);
+            RemovedConditionalHandlers(quest);
         }
     }
 
@@ -167,23 +168,23 @@ public class ObservedQuestController(Profile profile, InventoryController invent
             case InRaidQuestPacket.InraidQuestType.Finish:
                 {
                     FikaGlobals.LogInfo($"Processing {packet.Items.Count} items from quest reward for {Profile.Info.MainProfileNickname}");
-                    List<QuestRewardDataClass> readList = [];
+                    List<QuestReward> readList = [];
                     foreach (var item in packet.Items)
                     {
                         readList.Add(new()
                         {
                             items = item,
-                            MongoID_0 = MongoID.Generate(true),
+                            _stashId = MongoID.Generate(true),
                             type = ERewardType.Item
                         });
                     }
 
                     var generatedItems = 0;
-                    List<GClass3411> results = [];
-                    GStruct153 appendResult = default;
+                    List<MoveResult> results = [];
+                    OperationResult appendResult = default;
                     foreach (var item in readList)
                     {
-                        appendResult = item.TryAppendClaimResults(InventoryController_0, results, out var clonedCount);
+                        appendResult = item.TryAppendClaimResults(InventoryController, results, out var clonedCount);
                         generatedItems += clonedCount;
                         if (appendResult.Failed)
                         {
@@ -195,7 +196,7 @@ public class ObservedQuestController(Profile profile, InventoryController invent
                         results.RollBack();
                         for (var i = 0; i < generatedItems; i++)
                         {
-                            InventoryController_0.RollBack();
+                            InventoryController.RollBack();
                         }
                         return;
                     }
@@ -219,11 +220,11 @@ public class ObservedQuestController(Profile profile, InventoryController invent
                         itemsToRemove.Add(result.Value);
                     }
 
-                    List<GStruct154<GClass3408>> list = [];
-                    GStruct154<GClass3408> discardResult = default;
+                    List<OperationResult<DiscardResult>> list = [];
+                    OperationResult<DiscardResult> discardResult = default;
                     for (var i = 0; i < itemsToRemove.Count; i++)
                     {
-                        discardResult = InteractionsHandlerClass.Discard(itemsToRemove[i], InventoryController_0, false);
+                        discardResult = ItemManipulator.Discard(itemsToRemove[i], InventoryController, false);
                         if (discardResult.Failed)
                         {
                             break;

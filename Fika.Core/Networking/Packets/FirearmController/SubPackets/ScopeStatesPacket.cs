@@ -1,4 +1,5 @@
-﻿using Fika.Core.Main.ObservedClasses.HandsControllers;
+﻿using EFT;
+using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Pooling;
 
@@ -10,7 +11,7 @@ public sealed class ScopeStatesPacket : IPoolSubPacket
     {
 
     }
-    public static ScopeStatesPacket FromValue(int amount, FirearmScopeStateStruct[] states)
+    public static ScopeStatesPacket FromValue(int amount, ScopeState[] states)
     {
         var packet = FirearmSubPacketPoolManager.Instance.GetPacket<ScopeStatesPacket>(EFirearmSubPacketType.ToggleScopeStates);
         packet.Amount = amount;
@@ -24,7 +25,7 @@ public sealed class ScopeStatesPacket : IPoolSubPacket
     }
 
     public int Amount;
-    public FirearmScopeStateStruct[] States;
+    public ScopeState[] States;
 
     public void Execute(FikaPlayer player)
     {
@@ -54,7 +55,7 @@ public sealed class ScopeStatesPacket : IPoolSubPacket
         Amount = reader.GetInt();
         if (Amount > 0)
         {
-            States = new FirearmScopeStateStruct[Amount];
+            States = new ScopeState[Amount];
             for (var i = 0; i < Amount; i++)
             {
                 States[i] = new()

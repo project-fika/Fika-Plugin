@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EFT.Communications;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using EFT;
@@ -8,11 +9,12 @@ using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Packets.Communication;
 using static Fika.Core.UI.FikaUIGlobals;
+using Diz.Utils;
 
 namespace Fika.Core.Main.ClientClasses;
 
 public sealed class ClientSharedQuestController(Profile profile, InventoryController inventoryController,
-    IPlayerSearchController searchController, IQuestActions session, FikaPlayer player) : ClientQuestController(profile, inventoryController, searchController, session, player)
+    IPlayerSearchController searchController, IQuestSession session, FikaPlayer player) : ClientQuestController(profile, inventoryController, searchController, session, player)
 {
     private readonly List<string> _lastFromNetwork = [];
     private readonly HashSet<string> _acceptedTypes = [];
@@ -93,7 +95,7 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
         _player.PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
     }
 
-    public override void OnConditionValueChanged(QuestClass conditional, EQuestStatus status, Condition condition, bool notify = true)
+    public override void OnConditionValueChanged(Quest conditional, EQuestStatus status, Condition condition, bool notify = true)
     {
         base.OnConditionValueChanged(conditional, status, condition, notify);
         if (!_canSendAndReceive)
@@ -147,7 +149,7 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
             return;
         }
 
-        if (conditional is QuestClass quest)
+        if (conditional is Quest quest)
         {
             var counter = quest.ConditionCountersManager.GetCounter(condition.id);
             if (counter != null)
@@ -207,7 +209,7 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
                     counter.Value++;
                     if (FikaPlugin.Instance.Settings.QuestSharingNotifications.Value)
                     {
-                        NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.RECEIVED_SHARED_QUEST_PROGRESS.Localized(),
+                        NotificationManager.DisplayMessageNotification(string.Format(LocaleUtils.RECEIVED_SHARED_QUEST_PROGRESS.Localized(),
                             [ColorizeText(EColor.GREEN, packet.Nickname), ColorizeText(EColor.BROWN, quest.Template.Name)]),
                             iconType: EFT.Communications.ENotificationIconType.Quest);
                     }
@@ -229,9 +231,9 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
             if (item != null)
             {
                 var playerInventory = _player.InventoryController;
-                var pickupResult = InteractionsHandlerClass.QuickFindAppropriatePlace(item, playerInventory,
+                var pickupResult = ItemManipulator.QuickFindAppropriatePlace(item, playerInventory,
                     playerInventory.Inventory.Equipment.ToEnumerable(),
-                    InteractionsHandlerClass.EMoveItemOrder.PickUp, true);
+                    ItemManipulator.EMoveItemOrder.PickUp, true);
 
                 if (pickupResult.Succeeded && playerInventory.CanExecute(pickupResult.Value))
                 {
@@ -239,7 +241,7 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
                     playerInventory.RunNetworkTransaction(pickupResult.Value);
                     if (FikaPlugin.Instance.Settings.QuestSharingNotifications.Value)
                     {
-                        NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.RECEIVED_SHARED_ITEM_PICKUP.Localized(),
+                        NotificationManager.DisplayMessageNotification(string.Format(LocaleUtils.RECEIVED_SHARED_ITEM_PICKUP.Localized(),
                             [ColorizeText(EColor.GREEN, packet.Nickname), ColorizeText(EColor.BLUE, item.Name.Localized())]),
                                             iconType: EFT.Communications.ENotificationIconType.Quest);
                     }
@@ -279,7 +281,7 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
 
         if (FikaPlugin.Instance.Settings.QuestSharingNotifications.Value)
         {
-            NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.RECEIVED_SHARED_ITEM_PLANT.Localized(),
+            NotificationManager.DisplayMessageNotification(string.Format(LocaleUtils.RECEIVED_SHARED_ITEM_PLANT.Localized(),
                 [ColorizeText(EColor.GREEN, packet.Nickname), ColorizeText(EColor.BROWN, questName)]),
                                 iconType: EFT.Communications.ENotificationIconType.Quest);
         }
@@ -288,7 +290,7 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
         {
             if (questItem.TemplateId == itemId && questItem.QuestItem)
             {
-                var removeResult = InteractionsHandlerClass.Remove(questItem, _player.InventoryController, true);
+                var removeResult = ItemManipulator.Remove(questItem, _player.InventoryController, true);
                 _player.InventoryController.TryRunNetworkTransaction(removeResult, result =>
                 {
                     if (!result.Succeed)
@@ -302,7 +304,7 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
         _isItemBeingDropped = false;
     }
 
-    private bool IsQuestActive(QuestClass quest)
+    private bool IsQuestActive(Quest quest)
     {
         return quest.QuestStatus is EQuestStatus.Started;
     }
@@ -372,7 +374,7 @@ public sealed class ClientSharedQuestController(Profile profile, InventoryContro
     /// </summary>
     /// <param name="counter">The counter to validate</param>
     /// <returns>Returns true if the quest type is valid, returns false if not</returns>
-    private bool ValidateQuestType(TaskConditionCounterClass counter)
+    private bool ValidateQuestType(TaskConditionCounter counter)
     {
 #if DEBUG
         FikaGlobals.LogInfo($"Validating counter of type {counter.Type}");

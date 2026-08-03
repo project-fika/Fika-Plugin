@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EFT.Ballistics;
+using System;
 using System.Collections.Generic;
 using EFT;
 using EFT.HealthSystem;
@@ -44,12 +45,12 @@ public sealed class ObservedStatisticsManager : IStatisticsManager
 
     }
 
-    public void OnEnemyDamage(DamageInfoStruct damage, EBodyPart bodyPart, string playerProfileId, EPlayerSide playerSide, WildSpawnType role, string groupId, float fullHealth, bool isHeavyDamage, float distance, int hour, List<string> targetEquipment, HealthEffects enemyEffects, List<string> zoneIds)
+    public void OnEnemyDamage(DamageInfo damage, EBodyPart bodyPart, string playerProfileId, EPlayerSide playerSide, WildSpawnType role, string groupId, float fullHealth, bool isHeavyDamage, float distance, int hour, List<string> targetEquipment, HealthEffects enemyEffects, List<string> zoneIds)
     {
         // Do nothing
     }
 
-    public void OnEnemyKill(DamageInfoStruct damage, EDamageType lethalDamageType, EBodyPart bodyPart, EPlayerSide playerSide, WildSpawnType role, string playerAccountId, string playerProfileId, string playerName, string groupId, int level, int killExp, float distance, int hour, List<string> targetEquipment, HealthEffects enemyEffects, List<string> zoneIds, bool isFriendly, bool isAI)
+    public void OnEnemyKill(DamageInfo damage, EDamageType lethalDamageType, EBodyPart bodyPart, EPlayerSide playerSide, WildSpawnType role, string playerAccountId, string playerProfileId, string playerName, string groupId, int level, int killExp, float distance, int hour, List<string> targetEquipment, HealthEffects enemyEffects, List<string> zoneIds, bool isFriendly, bool isAI)
     {
         // Do nothing
     }
@@ -69,7 +70,7 @@ public sealed class ObservedStatisticsManager : IStatisticsManager
         // Do nothing
     }
 
-    public void OnShot(Weapon weapon, AmmoItemClass ammo)
+    public void OnShot(Weapon weapon, Ammo ammo)
     {
         // Do nothing
     }

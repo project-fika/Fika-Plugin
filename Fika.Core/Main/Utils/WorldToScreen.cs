@@ -1,4 +1,5 @@
 ﻿using EFT.Animations;
+using EFT.CameraControl;
 using Fika.Core.Main.Players;
 
 namespace Fika.Core.Main.Utils;
@@ -16,7 +17,7 @@ public static class WorldToScreen
     {
         canvasPosition = Vector2.zero;
 
-        var camClass = CameraClass.Instance;
+        var camClass = CameraManager.Instance;
         if (mainPlayer == null || camClass?.Camera == null)
         {
             return false;

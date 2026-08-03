@@ -1,3 +1,4 @@
+using EFT.Ballistics;
 using System.Collections.Generic;
 using Comfort.Common;
 using EFT.UI;
@@ -220,7 +221,7 @@ public class DebugUI : MonoBehaviour
         _alivePlayers.Add(player);
     }
 
-    private void PlayerDied(EFT.Player player, EFT.IPlayer lastAggressor, DamageInfoStruct damageInfo, EBodyPart part)
+    private void PlayerDied(EFT.Player player, EFT.IPlayer lastAggressor, DamageInfo damageInfo, EBodyPart part)
     {
         player.OnPlayerDead -= PlayerDied;
         _alivePlayers.Remove((FikaPlayer)player);
@@ -232,7 +233,7 @@ public class DebugUI : MonoBehaviour
         _aliveBots.Add(bot);
     }
 
-    private void BotDied(EFT.Player player, EFT.IPlayer lastAggressor, DamageInfoStruct damageInfo, EBodyPart part)
+    private void BotDied(EFT.Player player, EFT.IPlayer lastAggressor, DamageInfo damageInfo, EBodyPart part)
     {
         player.OnPlayerDead -= BotDied;
         _aliveBots.Remove((FikaPlayer)player);

@@ -8,7 +8,7 @@ namespace Fika.Core.Main.Custom;
 
 public sealed class BotDifficulties : Dictionary<string, BotDifficulties.RoleData>
 {
-    public CoreBotSettingsClass CoreSettings
+    public BotGlobalsCoreSettings CoreSettings
     {
         get
         {
@@ -18,12 +18,12 @@ public sealed class BotDifficulties : Dictionary<string, BotDifficulties.RoleDat
     }
 
     [JsonIgnore]
-    private readonly CoreBotSettingsClass _coreSettings;
+    private readonly BotGlobalsCoreSettings _coreSettings;
 
     public BotDifficulties()
     {
         var coreString = RequestHandler.GetJson("/singleplayer/settings/bot/difficulty/core/core");
-        _coreSettings = JsonConvert.DeserializeObject<CoreBotSettingsClass>(coreString);
+        _coreSettings = JsonConvert.DeserializeObject<BotGlobalsCoreSettings>(coreString);
 
         // Adjust wave coefs so that wave settings do something
         _coreSettings.WAVE_COEF_LOW = 0.5f;

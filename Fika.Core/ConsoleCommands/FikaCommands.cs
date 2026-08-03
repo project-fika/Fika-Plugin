@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EFT.HealthSystem;
+using System;
 using Comfort.Common;
 using EFT;
 using EFT.Console.Core;
@@ -179,9 +180,9 @@ public class FikaCommands
         }
 
         var localPlayer = (FikaPlayer)Singleton<GameWorld>.Instance.MainPlayer;
-        if (localPlayer.ActiveHealthController.Dictionary_0.TryGetValue(bodyPart, out var partState))
+        if (localPlayer.ActiveHealthController.BodyState.TryGetValue(bodyPart, out var partState))
         {
-            localPlayer.ActiveHealthController.ChangeHealth(bodyPart, -partState.Health.Current, GClass3051.UndefinedDamage);
+            localPlayer.ActiveHealthController.ChangeHealth(bodyPart, -partState.Health.Current, DamageHelper.UndefinedDamage);
             localPlayer.ActiveHealthController.DestroyBodyPart(bodyPart, EDamageType.Undefined);
         }
     }
@@ -286,13 +287,13 @@ public class FikaCommands
 
         if (coopGame != null)
         {
-            if (coopGame.GameTimer.Status == GameTimerClass.EGameTimerStatus.Stopped)
+            if (coopGame.GameTimer.Status == GameTimer.EGameTimerStatus.Stopped)
             {
                 LogError("GameTimer is already stopped at: " + coopGame.GameTimer.PastTime.ToString());
                 return;
             }
             coopGame.GameTimer.TryStop();
-            if (coopGame.GameTimer.Status == GameTimerClass.EGameTimerStatus.Stopped)
+            if (coopGame.GameTimer.Status == GameTimer.EGameTimerStatus.Stopped)
             {
                 LogInfo("GameTimer stopped at: " + coopGame.GameTimer.PastTime.ToString());
             }
@@ -311,7 +312,7 @@ public class FikaCommands
 
         if (coopGame != null)
         {
-            var gameWorld = coopGame.GameWorld_0;
+            var gameWorld = coopGame.GameWorld;
             if (gameWorld != null)
             {
                 if (gameWorld.BtrController != null)
@@ -351,7 +352,7 @@ public class FikaCommands
             return;
         }
 
-        var itemFactory = Singleton<ItemFactoryClass>.Instance;
+        var itemFactory = Singleton<ItemFactory>.Instance;
         if (itemFactory == null)
         {
             LogError("ItemFactory was null!");
@@ -425,7 +426,7 @@ public class FikaCommands
             return;
         }
 
-        BotWaveDataClass newBotData = new()
+        SpawnWave newBotData = new()
         {
             BotsCount = amount,
             Side = EPlayerSide.Savage,
@@ -479,25 +480,25 @@ public class FikaCommands
             return;
         }
 
-        if (!serverAirdropManager.Boolean_0)
+        if (!serverAirdropManager.CanSummonAirdrop)
         {
             LogError("Airdrops are disabled!");
             return;
         }
 
-        var dropPoints = serverAirdropManager.List_2;
+        var dropPoints = serverAirdropManager._projectileSuccessPositions;
         if (dropPoints != null && dropPoints.Count > 0)
         {
-            var templateId = serverAirdropManager.String_0;
-            serverAirdropManager.method_5(serverAirdropManager.Single_0);
-            gameWorld.InitAirdrop(templateId, true, serverAirdropManager.method_6());
-            serverAirdropManager.String_0 = null;
+            var templateId = serverAirdropManager._overrideLootTemplateId;
+            serverAirdropManager.UpdateAirdropTimers(serverAirdropManager.PlaneAirdropCooldown);
+            gameWorld.InitAirdrop(templateId, true, serverAirdropManager.GetEquidistantPoint());
+            serverAirdropManager._overrideLootTemplateId = null;
             dropPoints.Clear();
             LogInfo("Started airdrop");
             return;
         }
 
-        serverAirdropManager.method_5(serverAirdropManager.Single_0);
+        serverAirdropManager.UpdateAirdropTimers(serverAirdropManager.PlaneAirdropCooldown);
         gameWorld.InitAirdrop();
         LogInfo("Started airdrop");
     }

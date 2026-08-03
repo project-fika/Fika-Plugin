@@ -17,7 +17,7 @@ on:
       eft_version:
         description: 'EFT Version'
         required: false
-        default: "EFT 0.16.9.40087"
+        default: "EFT 0.16.9.40743"
 
 jobs:
   build-and-release:

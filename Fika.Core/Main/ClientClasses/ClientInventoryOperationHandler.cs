@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EFT.InventoryLogic.Operations;
+using System;
 using Comfort.Common;
 using EFT;
 using Fika.Core.Main.Utils;
@@ -9,7 +10,7 @@ namespace Fika.Core.Main.ClientClasses;
 public sealed class ClientInventoryOperationHandler : IDisposable
 {
     public ClientInventoryController InventoryController;
-    public BaseInventoryOperationClass Operation;
+    public EFT.InventoryLogic.Operations.AbstractOperation Operation;
     public Callback Callback;
 
     public IResult OperationResult;
@@ -19,7 +20,7 @@ public sealed class ClientInventoryOperationHandler : IDisposable
     public Callback HandleResultDelegate;
     public Action<ServerOperationStatus> ServerStatusDelegate;
 
-    public void Set(ClientInventoryController inventoryController, BaseInventoryOperationClass operation, Callback callback)
+    public void Set(ClientInventoryController inventoryController, EFT.InventoryLogic.Operations.AbstractOperation operation, Callback callback)
     {
         InventoryController = inventoryController;
         Operation = operation;
@@ -44,7 +45,7 @@ public sealed class ClientInventoryOperationHandler : IDisposable
         switch (serverStatus.Status)
         {
             case EOperationStatus.Started:
-                Operation.method_0(ExecuteResultDelegate);
+                Operation.ExecuteWithoutDispose(ExecuteResultDelegate);
                 return;
             case EOperationStatus.Succeeded:
                 HandleResultDelegate(SuccessfulResult.New);
@@ -83,7 +84,7 @@ public sealed class ClientInventoryOperationHandler : IDisposable
         var localStatus = Operation.Status;
         if (localStatus.InProgress())
         {
-            if (Operation is GInterface441 ginterface)
+            if (Operation is IServerDependentOperation ginterface)
             {
                 ginterface.Terminate();
             }

@@ -12,7 +12,7 @@ public class FikaClientUsableItemController : UsableItemController
 
     public static FikaClientUsableItemController Create(FikaPlayer player, Item item)
     {
-        var controller = smethod_6<FikaClientUsableItemController>(player, item);
+        var controller = CreateController<FikaClientUsableItemController>(player, item);
         controller._fikaPlayer = player;
         return controller;
     }

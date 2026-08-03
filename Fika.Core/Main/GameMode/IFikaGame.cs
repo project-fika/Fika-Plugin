@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using EFT.Weather;
+using System.Collections.Generic;
 using EFT;
 
 namespace Fika.Core.Main.GameMode;
@@ -18,7 +19,7 @@ public interface IFikaGame
 
     public ESeason Season { get; set; }
 
-    public SeasonsSettingsClass SeasonsSettings { get; set; }
+    public SeasonsSettings SeasonsSettings { get; set; }
 
     public BaseGameController GameController { get; set; }
 }

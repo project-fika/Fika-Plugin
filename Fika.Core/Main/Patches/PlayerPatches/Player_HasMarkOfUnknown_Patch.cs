@@ -13,10 +13,10 @@ class Player_HasMarkOfUnknown_Patch : ModulePatch
     }
 
     [PatchPrefix]
-    public static bool Prefix(Player __instance, ref MarkOfUnknownItemClass markOfUnknown, ref bool __result)
+    public static bool Prefix(Player __instance, ref MarkOfUnknown markOfUnknown, ref bool __result)
     {
         __result = false;
-        CompoundItem compoundItem = __instance.InventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.Pockets).ContainedItem as PocketsItemClass;
+        CompoundItem compoundItem = __instance.InventoryController.Inventory.Equipment.GetSlot(EquipmentSlot.Pockets).ContainedItem as Pockets;
         if (compoundItem != null)
         {
             markOfUnknown = null;
@@ -25,7 +25,7 @@ class Player_HasMarkOfUnknown_Patch : ModulePatch
                 var slots = compoundItem.Slots;
                 for (var i = 0; i < slots.Length; i++)
                 {
-                    if (slots[i].ContainedItem is MarkOfUnknownItemClass markOfUnknownItemClass)
+                    if (slots[i].ContainedItem is MarkOfUnknown markOfUnknownItemClass)
                     {
                         markOfUnknown = markOfUnknownItemClass;
                         __result = true;

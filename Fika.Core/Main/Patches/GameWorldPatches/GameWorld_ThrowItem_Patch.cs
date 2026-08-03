@@ -8,10 +8,10 @@ using SPT.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.GameWorldPatches;
 
-public class GameWorld_ThrowItem_Patch : ModulePatch
+public sealed class GameWorld_ThrowItem_Patch : ModulePatch
 {
     private static readonly FieldInfo _networkPhysics = typeof(ObservedLootItem)
-        .GetField("bool_3", BindingFlags.Instance | BindingFlags.NonPublic);
+        .GetField("_isNetworkGame", BindingFlags.Instance | BindingFlags.NonPublic);
 
     protected override MethodBase GetTargetMethod()
     {

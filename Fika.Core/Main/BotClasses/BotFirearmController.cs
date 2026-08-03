@@ -16,7 +16,7 @@ public sealed class BotFirearmController : FikaClientFirearmController
 
     public static BotFirearmController Create(FikaBot player, Weapon weapon)
     {
-        var controller = smethod_6<BotFirearmController>(player, weapon);
+        var controller = CreateController<BotFirearmController>(player, weapon);
         controller._fikaPlayer = player;
         controller._packet = new()
         {

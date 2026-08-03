@@ -1,4 +1,5 @@
 ﻿using EFT;
+using EFT.NetworkPackets;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Pooling;
 
@@ -16,7 +17,7 @@ public sealed class ProceedPacket : IPoolSubPacket
         return new();
     }
 
-    public static ProceedPacket FromValue(GStruct382<EBodyPart> bodyParts, MongoID itemId, float amount, int animationVariant, EProceedType proceedType, bool scheduled)
+    public static ProceedPacket FromValue(OneAndList<EBodyPart> bodyParts, MongoID itemId, float amount, int animationVariant, EProceedType proceedType, bool scheduled)
     {
         var packet = CommonSubPacketPoolManager.Instance.GetPacket<ProceedPacket>(ECommonSubPacketType.Proceed);
         packet.BodyParts = bodyParts;
@@ -28,7 +29,7 @@ public sealed class ProceedPacket : IPoolSubPacket
         return packet;
     }
 
-    public GStruct382<EBodyPart> BodyParts;
+    public OneAndList<EBodyPart> BodyParts;
     public MongoID ItemId;
     public float Amount;
     public int AnimationVariant;

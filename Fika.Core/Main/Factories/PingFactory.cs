@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using EFT.CameraControl;
+using System.Collections.Generic;
 using Comfort.Common;
 using EFT;
 using EFT.Communications;
@@ -37,13 +38,13 @@ public static class PingFactory
             Singleton<GUISounds>.Instance.PlayUISound(GetPingSound());
             if (string.IsNullOrEmpty(localeId))
             {
-                NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.RECEIVE_PING.Localized(), FikaUIGlobals.ColorizeText(FikaUIGlobals.EColor.GREEN, nickname)),
+                NotificationManager.DisplayMessageNotification(string.Format(LocaleUtils.RECEIVE_PING.Localized(), FikaUIGlobals.ColorizeText(FikaUIGlobals.EColor.GREEN, nickname)),
                             ENotificationDurationType.Default, ENotificationIconType.Friend);
             }
             else
             {
                 var localizedName = localeId.Localized();
-                NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.RECEIVE_PING_OBJECT.Localized(),
+                NotificationManager.DisplayMessageNotification(string.Format(LocaleUtils.RECEIVE_PING_OBJECT.Localized(),
                     [FikaUIGlobals.ColorizeText(FikaUIGlobals.EColor.GREEN, nickname), FikaUIGlobals.ColorizeText(FikaUIGlobals.EColor.BLUE, localizedName)]),
                     ENotificationDurationType.Default, ENotificationIconType.Friend);
             }
@@ -138,7 +139,7 @@ public static class PingFactory
             }
 
             const float edgePadding = 20f;
-            var cam = CameraClass.Instance.Camera;
+            var cam = CameraManager.Instance.Camera;
             var targetPos = _hitPoint;
 
             // vector from camera to target
@@ -198,7 +199,7 @@ public static class PingFactory
 
             if (_displayRange)
             {
-                _rangeText.SetText("[{0:0.0}m]", CameraClass.Instance.Distance(_hitPoint));
+                _rangeText.SetText("[{0:0.0}m]", CameraManager.Instance.Distance(_hitPoint));
             }
         }
 
@@ -208,7 +209,7 @@ public static class PingFactory
             transform.position = point;
             _pingColor = pingColor;
 
-            var distance = Mathf.Clamp(Vector3.Distance(CameraClass.Instance.Camera.transform.position, transform.position) / 100, 0.4f, 0.6f);
+            var distance = Mathf.Clamp(Vector3.Distance(CameraManager.Instance.Camera.transform.position, transform.position) / 100, 0.4f, 0.6f);
             var pingSize = FikaPlugin.Instance.Settings.PingSize.Value;
             Vector3 scaledSize = new(pingSize, pingSize, pingSize);
             if (FikaPlugin.Instance.Settings.PingScaleWithDistance.Value)

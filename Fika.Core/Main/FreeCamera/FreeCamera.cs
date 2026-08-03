@@ -1,4 +1,6 @@
-﻿using System;
+﻿using EFT.CameraControl;
+using EFT.Communications;
+using System;
 using System.Collections.Generic;
 using BSG.CameraEffects;
 using Comfort.Common;
@@ -105,11 +107,11 @@ public partial class FreeCamera : MonoBehaviour
         _showOverlay = FikaPlugin.Instance.Settings.KeybindOverlay.Value;
         FikaPlugin.Instance.Settings.KeybindOverlay.SettingChanged += KeybindOverlay_SettingChanged;
 
-        _nightVision = CameraClass.Instance.NightVision;
-        _thermalVision = CameraClass.Instance.ThermalVision;
+        _nightVision = CameraManager.Instance.NightVision;
+        _thermalVision = CameraManager.Instance.ThermalVision;
 
         _freeCameraController = Singleton<GameWorld>.Instance.gameObject.GetComponent<FreeCameraController>();
-        _originalFov = CameraClass.Instance.Fov;
+        _originalFov = CameraManager.Instance.Fov;
 
         var asset = InternalBundleLoader.Instance.GetFikaAsset(InternalBundleLoader.EFikaAsset.FreecamUI);
         var freecamObject = Instantiate(asset);
@@ -302,7 +304,7 @@ public partial class FreeCamera : MonoBehaviour
         {
             _disableInput = !_disableInput;
             _freecamUI.InputText.SetText($"HOME: {(_disableInput ? "Enable Input" : "Disable Input")}");
-            NotificationManagerClass.DisplayMessageNotification(_disableInput ? LocaleUtils.FREECAM_DISABLED.Localized() : LocaleUtils.FREECAM_ENABLED.Localized());
+            NotificationManager.DisplayMessageNotification(_disableInput ? LocaleUtils.FREECAM_DISABLED.Localized() : LocaleUtils.FREECAM_ENABLED.Localized());
         }
 
         if (_disableInput)
@@ -499,11 +501,11 @@ public partial class FreeCamera : MonoBehaviour
         var scrollValue = Input.GetAxisRaw(mouseScrollAxis);
         if (scrollValue != 0)
         {
-            var currentFov = CameraClass.Instance.Fov;
+            var currentFov = CameraManager.Instance.Fov;
             if (currentFov >= _minFov && currentFov <= _originalFov)
             {
                 var newFov = Mathf.Clamp(currentFov -= (scrollValue * 100), _minFov, _originalFov);
-                CameraClass.Instance.SetFov(newFov, 1f);
+                CameraManager.Instance.SetFov(newFov, 1f);
             }
         }
 
@@ -669,12 +671,12 @@ public partial class FreeCamera : MonoBehaviour
             _freecamUI.gameObject.SetActive(false);
             if (_nightVision != null && _nightVision.On)
             {
-                _nightVision.method_1(false);
+                _nightVision.Switch(false);
             }
 
             if (_thermalVision != null && _thermalVision.On)
             {
-                _thermalVision.method_1(false);
+                _thermalVision.Switch(false);
             }
 
             var player = Singleton<GameWorld>.Instance.MainPlayer;
@@ -731,12 +733,12 @@ public partial class FreeCamera : MonoBehaviour
                 {
                     if (_nightVision != null && _nightVision.On)
                     {
-                        _nightVision.method_1(false);
+                        _nightVision.Switch(false);
                     }
 
                     if (_thermalVision != null && _thermalVision.On)
                     {
-                        _thermalVision.method_1(false);
+                        _thermalVision.Switch(false);
                     }
 
                     ForceAddPlayers();
@@ -789,9 +791,9 @@ public partial class FreeCamera : MonoBehaviour
 
     private void CheckAndResetFov()
     {
-        if (CameraClass.Instance.Fov != _originalFov)
+        if (CameraManager.Instance.Fov != _originalFov)
         {
-            CameraClass.Instance.SetFov(_originalFov, 0.1f);
+            CameraManager.Instance.SetFov(_originalFov, 0.1f);
         }
     }
 

@@ -2,6 +2,8 @@
 using EFT.UI.Matchmaker;
 using Fika.Core.Main.Utils;
 using SPT.Reflection.Patching;
+using EFT;
+using EFT.Communications;
 
 namespace Fika.Core.UI.Patches;
 
@@ -18,7 +20,7 @@ public class RaidSettingsWindow_Show_Patch : ModulePatch
     {
         if (!FikaPlugin.Instance.Settings.CanEditRaidSettings)
         {
-            NotificationManagerClass.DisplayMessageNotification(LocaleUtils.UI_NOTIFICATION_RAIDSETTINGS_DISABLED.Localized(), iconType: EFT.Communications.ENotificationIconType.Alert);
+            NotificationManager.DisplayMessageNotification(LocaleUtils.UI_NOTIFICATION_RAIDSETTINGS_DISABLED.Localized(), iconType: ENotificationIconType.Alert);
             return false;
         }
 

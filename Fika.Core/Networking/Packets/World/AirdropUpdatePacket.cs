@@ -5,7 +5,7 @@ namespace Fika.Core.Networking.Packets.World;
 
 public struct AirdropUpdatePacket : INetSerializable
 {
-    public AirplaneDataPacketStruct Data;
+    public SynchronizableObjectPacket Data;
 
     public void Deserialize(NetDataReader reader)
     {

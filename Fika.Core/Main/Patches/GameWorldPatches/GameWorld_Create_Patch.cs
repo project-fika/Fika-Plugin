@@ -1,4 +1,6 @@
-﻿using System.Reflection;
+﻿using CommonAssets.Scripts.Game;
+using EFT.BufferZone;
+using System.Reflection;
 using EFT;
 using Fika.Core.Main.ClientClasses;
 using Fika.Core.Main.HostClasses;
@@ -18,7 +20,7 @@ public class GameWorld_Create_Patch : ModulePatch
     }
 
     [PatchPrefix]
-    public static bool Prefix(ref GameWorld __result, GameObject gameObject, PoolManagerClass objectsFactory, EUpdateQueue updateQueue, MongoID? currentProfileId)
+    public static bool Prefix(ref GameWorld __result, GameObject gameObject, ObjectsFactory objectsFactory, EUpdateQueue updateQueue, MongoID? currentProfileId)
     {
 
         if (!FikaBackendUtils.RequestFikaWorld)
@@ -39,15 +41,15 @@ public class GameWorld_Create_Patch : ModulePatch
         return false;
     }
 
-    private static GameWorld CreateHideoutWorld(GameObject gameObject, PoolManagerClass objectsFactory, EUpdateQueue updateQueue, MongoID? currentProfileId)
+    private static GameWorld CreateHideoutWorld(GameObject gameObject, ObjectsFactory objectsFactory, EUpdateQueue updateQueue, MongoID? currentProfileId)
     {
         var gameWorld = gameObject.AddComponent<HideoutGameWorld>();
         var gameWorldTraverse = Traverse.Create(gameWorld);
-        gameWorldTraverse.Field<PoolManagerClass>("ObjectsFactory").Value = objectsFactory;
-        gameWorldTraverse.Field<EUpdateQueue>("eupdateQueue_0").Value = updateQueue;
+        gameWorldTraverse.Field<ObjectsFactory>("ObjectsFactory").Value = objectsFactory;
+        gameWorldTraverse.Field<EUpdateQueue>("_updateQueue").Value = updateQueue;
         gameWorld.SpeakerManager = gameObject.AddComponent<SpeakerManager>();
-        gameWorld.ExfiltrationController = new ExfiltrationControllerClass();
-        gameWorld.BufferZoneController = new BufferZoneControllerClass();
+        gameWorld.ExfiltrationController = new ExfiltrationController();
+        gameWorld.BufferZoneController = new BufferZoneController();
         gameWorld.CurrentProfileId = currentProfileId;
         gameWorld.UnityTickListener = GameWorldUnityTickListener.Create(gameObject, gameWorld);
         gameWorld.AudioSourceCulling = gameObject.GetOrAddComponent<AudioSourceCulling>();

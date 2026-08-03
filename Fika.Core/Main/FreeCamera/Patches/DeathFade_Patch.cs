@@ -3,7 +3,7 @@ using SPT.Reflection.Patching;
 
 namespace Fika.Core.Main.FreeCamera.Patches;
 
-public class DeathFade_Patch : ModulePatch
+public sealed class DeathFade_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
@@ -16,10 +16,11 @@ public class DeathFade_Patch : ModulePatch
     {
         var deathFadeType = typeof(DeathFade);
 
-        deathFadeType.GetField("_float_0", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(__instance, (float)deathFadeType.GetField("_disableTime", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(__instance));
-        deathFadeType.GetField("bool_0", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(__instance, false);
-        var disableCurveValue = (AnimationCurve)deathFadeType.GetField("_disableCurve", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(__instance);
-        deathFadeType.GetField("animationCurve_0", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(__instance, disableCurveValue);
+        deathFadeType.GetField("_time", BindingFlags.NonPublic | BindingFlags.Instance)
+            ?.SetValue(__instance, __instance._disableTime);
+        deathFadeType.GetField("_isDead", BindingFlags.NonPublic | BindingFlags.Instance)
+            ?.SetValue(__instance, false);
+        deathFadeType.GetField("_currentCurve", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(__instance, __instance._disableCurve);
         return false;
     }
 }

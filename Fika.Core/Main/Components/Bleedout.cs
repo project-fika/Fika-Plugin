@@ -1,4 +1,5 @@
 ﻿using BepInEx.Configuration;
+using EFT;
 using EFT.UI;
 using Fika.Core.Main.ClientClasses;
 using Fika.Core.Main.Players;

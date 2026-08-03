@@ -1,8 +1,5 @@
 ﻿// © 2026 Lacyway All Rights Reserved
 
-using System;
-using System.Collections.Generic;
-using System.Reflection;
 using Diz.Utils;
 using EFT;
 using EFT.InputSystem;
@@ -10,7 +7,11 @@ using EFT.UI;
 using Fika.Core.Main.Utils;
 using HarmonyLib;
 using JsonType;
+using System;
+using System.Collections.Generic;
+using System.Reflection;
 using TMPro;
+using static EFT.UI.PreloaderUI;
 
 namespace Fika.Core.UI;
 
@@ -77,12 +78,12 @@ public static class FikaUIGlobals
     /// <param name="acceptCallback">Callback to invoke when the message is accepted.</param>
     /// <param name="endTimeCallback">Callback to invoke when the waiting time ends.</param>
     /// <returns>The context object for the displayed message.</returns>
-    public static GClass3835 ShowFikaMessage(this PreloaderUI preloaderUI, string header, string message,
+    public static ErrorWindowContext ShowFikaMessage(this PreloaderUI preloaderUI, string header, string message,
         ErrorScreen.EButtonType buttonType, float waitingTime, Action acceptCallback, Action endTimeCallback)
     {
         var preloaderUiTraverse = Traverse.Create(preloaderUI);
 
-        PreloaderUI.Class2988 messageHandler = new()
+        CG_ShowCriticalErrorScreen messageHandler = new()
         {
             preloaderUI_0 = preloaderUI
         };
@@ -90,7 +91,7 @@ public static class FikaUIGlobals
         if (!AsyncWorker.CheckIsMainThread())
         {
             FikaGlobals.LogError("You are trying to show error screen from non-main thread!");
-            return new GClass3835();
+            return new ErrorWindowContext();
         }
 
         var errorScreenTemplate = preloaderUiTraverse.Field("_criticalErrorScreenTemplate").GetValue<ErrorScreen>();
@@ -113,41 +114,41 @@ public static class FikaUIGlobals
     /// <param name="buttonType">The type of button to display.</param>
     /// <param name="removeHtml">Whether to remove HTML tags from the message.</param>
     /// <returns>The context object for the displayed message.</returns>
-    public static GClass3835 ShowFikaMessage(this ErrorScreen errorScreen, string title, string message,
+    public static ErrorWindowContext ShowFikaMessage(this ErrorScreen errorScreen, string title, string message,
         Action closeManuallyCallback = null, float waitingTime = 0f, Action timeOutCallback = null,
         ErrorScreen.EButtonType buttonType = ErrorScreen.EButtonType.OkButton, bool removeHtml = true)
     {
         var errorScreenTraverse = Traverse.Create(errorScreen);
 
-        ErrorScreen.Class2741 errorScreenHandler = new()
+        ErrorScreen.CG_Show errorScreenHandler = new()
         {
             errorScreen_0 = errorScreen
         };
         if (!MonoBehaviourSingleton<PreloaderUI>.Instance.CanShowErrorScreen)
         {
-            return new GClass3835();
+            return new ErrorWindowContext();
         }
         if (removeHtml)
         {
-            message = ErrorScreen.smethod_0(message);
+            message = ErrorScreen.RemoveHtml(message);
         }
         ItemUiContext.Instance.CloseAllWindows();
 
-        var action_1 = timeOutCallback ?? closeManuallyCallback;
-        errorScreenTraverse.Field("action_1").SetValue(action_1);
+        var onClose = timeOutCallback ?? closeManuallyCallback;
+        errorScreenTraverse.Field("_onClose").SetValue(onClose);
         MethodBase baseShow = typeof(ErrorScreen).BaseType.GetMethod("Show");
 
-        errorScreenHandler.context = (GClass3835)baseShow.Invoke(errorScreen, []);
-        errorScreenHandler.context.OnAccept += errorScreen.method_3;
+        errorScreenHandler.context = (ErrorWindowContext)baseShow.Invoke(errorScreen, []);
+        errorScreenHandler.context.OnAccept += errorScreen.TimeOut;
         if (timeOutCallback != null)
         {
             errorScreenHandler.context.OnAccept += timeOutCallback;
         }
-        errorScreenHandler.context.OnDecline += errorScreen.method_4;
+        errorScreenHandler.context.OnDecline += errorScreen.CloseSilent;
         errorScreenHandler.context.OnDecline += Application.Quit;
-        errorScreenHandler.context.OnCloseSilent += errorScreen.method_4;
+        errorScreenHandler.context.OnCloseSilent += errorScreen.CloseSilent;
 
-        var ui = Traverse.Create(errorScreen).Field<CompositeDisposableClass>("UI").Value;
+        var ui = Traverse.Create(errorScreen).Field<CompositeDisposable>("UI").Value;
 
         ui.AddDisposable(errorScreenHandler.method_0);
         var text = buttonType switch
@@ -165,20 +166,20 @@ public static class FikaUIGlobals
 
         errorScreen.Caption.SetText(string.IsNullOrEmpty(title) ? "ERROR" : title);
 
-        var string_1 = message.SubstringIfNecessary(500);
-        errorScreenTraverse.Field("string_1").SetValue(string_1);
+        var description = message.SubstringIfNecessary(500);
+        errorScreenTraverse.Field("_description").SetValue(description);
 
         var errorDescription = Traverse.Create(errorScreen).Field<TextMeshProUGUI>("_errorDescription").Value;
-        errorDescription.SetText(string_1);
+        errorDescription.SetText(description);
 
-        var coroutine_0 = errorScreenTraverse.Field("coroutine_0").GetValue<Coroutine>();
+        var coroutine_0 = errorScreenTraverse.Field("_waitForReactionCoroutine").GetValue<Coroutine>();
         if (coroutine_0 != null)
         {
             errorScreen.StopCoroutine(coroutine_0);
         }
         if (waitingTime > 0f)
         {
-            errorScreenTraverse.Field("coroutine_0").SetValue(errorScreen.StartCoroutine(errorScreen.method_2(EFTDateTimeClass.Now.AddSeconds((double)waitingTime))));
+            errorScreenTraverse.Field("_waitForReactionCoroutine").SetValue(errorScreen.StartCoroutine(errorScreen.Co_WaitForReaction(DateTimeExtensions.Now.AddSeconds((double)waitingTime))));
         }
         return errorScreenHandler.context;
     }

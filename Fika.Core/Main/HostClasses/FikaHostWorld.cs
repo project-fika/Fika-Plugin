@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using EFT.Ballistics;
+using System.Collections.Generic;
 using Comfort.Common;
 using EFT;
 using EFT.Interactive;
@@ -14,12 +15,12 @@ namespace Fika.Core.Main.HostClasses;
 /// </summary>
 public class FikaHostWorld : World
 {
-    public List<LootSyncStruct> LootSyncPackets;
+    public List<EFT.LootSyncPacket> LootSyncPackets;
     public WorldPacket WorldPacket;
 
     private FikaServer _server;
     private GameWorld _gameWorld;
-    private List<GrenadeDataPacketStruct> _grenadeData;
+    private List<GrenadeSyncPacket> _grenadeData;
     private bool _hasCriticalData;
 
     public static FikaHostWorld Create(FikaHostGameWorld gameWorld)
@@ -28,7 +29,7 @@ public class FikaHostWorld : World
         hostWorld._server = Singleton<FikaServer>.Instance;
         hostWorld._server.FikaHostWorld = hostWorld;
         hostWorld._gameWorld = gameWorld;
-        hostWorld.LootSyncPackets = new List<LootSyncStruct>(8);
+        hostWorld.LootSyncPackets = new List<EFT.LootSyncPacket>(8);
         hostWorld.WorldPacket = new()
         {
             ArtilleryPackets = new(8),
@@ -47,7 +48,7 @@ public class FikaHostWorld : World
         base.OnDestroy();
     }
 
-    private void WindowBreaker_OnWindowHitAction(WindowBreaker windowBreaker, DamageInfoStruct damageInfo, WindowBreakingConfig.Crack crack, float angle)
+    private void WindowBreaker_OnWindowHitAction(WindowBreaker windowBreaker, DamageInfo damageInfo, WindowBreakingConfig.Crack crack, float angle)
     {
         _server.SendGenericPacket(EGenericSubPacketType.SyncableItem,
             SyncableItemPacket.FromValue(windowBreaker.NetId, damageInfo.HitPoint), true);
@@ -58,7 +59,7 @@ public class FikaHostWorld : World
         UpdateLootItems(_gameWorld.LootItems);
     }
 
-    public void AddLootSyncStruct(LootSyncStruct syncStruct)
+    public void AddLootSyncStruct(EFT.LootSyncPacket syncStruct)
     {
         if (WorldPacket.LootSyncStructs.Count >= 8)
         {
@@ -113,7 +114,7 @@ public class FikaHostWorld : World
         _gameWorld.ArtilleryProjectilesStates.Clear();
     }
 
-    public void UpdateLootItems(GClass818<int, LootItem> lootItems)
+    public void UpdateLootItems(DictionaryListHydra<int, LootItem> lootItems)
     {
         for (var i = LootSyncPackets.Count - 1; i >= 0; i--)
         {
@@ -144,7 +145,7 @@ public class FikaHostWorld : World
     /// <param name="zone"></param>
     /// <param name="arg3"></param>
     /// <param name="arg4"></param>
-    private void OnBorderZoneShot(IPlayerOwner player, BorderZone zone, float arg3, bool arg4)
+    private void OnBorderZoneShot(IObserverToPlayerBridge player, BorderZone zone, float arg3, bool arg4)
     {
         _server.SendGenericPacket(EGenericSubPacketType.BorderZone,
             BorderZoneEvent.FromValue(player.iPlayer.ProfileId, zone.Id), true);

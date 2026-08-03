@@ -1,4 +1,8 @@
-﻿using System;
+﻿using CommonAssets.Scripts.Game;
+using EFT.Communications;
+using EFT.UI.Screens;
+using JsonType;
+using System;
 using System.Collections;
 using System.Threading.Tasks;
 using Comfort.Common;
@@ -22,11 +26,11 @@ using Fika.Core.Networking.Packets.Backend;
 using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
 using Fika.Core.Networking.Packets.World;
-using static LocationSettingsClass;
+using static JsonType.LocationSettings;
 
 namespace Fika.Core.Main.GameMode;
 
-public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, GameWorld gameWorld, ISession session)
+public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, GameWorld gameWorld, IEftSession session)
     : BaseGameController(game, updateQueue, gameWorld, session)
 {
     public bool ExfiltrationReceived { get; set; }
@@ -60,7 +64,7 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
             if (FikaPlugin.Instance.Settings.DevMode.Value)
             {
                 Logger.LogWarning("DevMode is enabled, skipping wait...");
-                NotificationManagerClass.DisplayMessageNotification("DevMode enabled, starting automatically...", iconType: EFT.Communications.ENotificationIconType.Note);
+                NotificationManager.DisplayMessageNotification("DevMode enabled, starting automatically...", iconType: EFT.Communications.ENotificationIconType.Note);
                 var fikaClient = Singleton<FikaClient>.Instance ?? throw new NullReferenceException("CreateStartButton::FikaClient was null!");
                 InformationPacket devModePacket = new()
                 {
@@ -136,7 +140,7 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
             _abstractGame.SetMatchmakerStatus(LocaleUtils.UI_INIT_WEATHER.Localized());
             Logger.LogInfo("Generating and initializing weather...");
             await GetWeather();
-            WeatherController.Instance.method_0(WeatherClasses);
+            WeatherController.Instance.SetWeatherNodes(WeatherClasses);
         }
     }
 
@@ -176,7 +180,7 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
         if (!spawnTogether)
         {
             Logger.LogInfo("Using random spawn points!");
-            NotificationManagerClass.DisplayMessageNotification(LocaleUtils.RANDOM_SPAWNPOINTS.Localized(),
+            NotificationManager.DisplayMessageNotification(LocaleUtils.RANDOM_SPAWNPOINTS.Localized(),
                 iconType: EFT.Communications.ENotificationIconType.Alert);
 
             CreateSpawnSystem(profile);
@@ -217,11 +221,11 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
 
     public override void CreateSpawnSystem(Profile profile)
     {
-        _spawnPoints = SpawnPointManagerClass.CreateFromScene(new DateTime?(EFTDateTimeClass.LocalDateTimeFromUnixTime(Location.UnixDateTime)),
+        _spawnPoints = SpawnPointsCollection.CreateFromScene(new DateTime?(DateTimeExtensions.LocalDateTimeFromUnixTime(Location.UnixDateTime)),
                                 Location.SpawnPointParams);
         var spawnSafeDistance = (Location.SpawnSafeDistanceMeters > 0) ? Location.SpawnSafeDistanceMeters : 100;
-        SpawnSettingsStruct settings = new(Location.MinDistToFreePoint, Location.MaxDistToFreePoint, Location.MaxBotPerZone, spawnSafeDistance, Location.NoGroupSpawn, Location.OneTimeSpawn);
-        SpawnSystem = SpawnSystemCreatorClass.CreateSpawnSystem(settings, FikaGlobals.GetApplicationTime, Singleton<GameWorld>.Instance, null, _spawnPoints);
+        SpawnSystemSettings settings = new(Location.MinDistToFreePoint, Location.MaxDistToFreePoint, Location.MaxBotPerZone, spawnSafeDistance, Location.NoGroupSpawn, Location.OneTimeSpawn);
+        SpawnSystem = SpawnSystemFactory.CreateSpawnSystem(settings, FikaGlobals.GetApplicationTime, Singleton<GameWorld>.Instance, null, _spawnPoints);
         _spawnPoint = SpawnSystem.SelectSpawnPoint(ESpawnCategory.Player, profile.Info.Side, null, null, null, null, profile.Id);
         InfiltrationPoint = string.IsNullOrEmpty(_spawnPoint.Infiltration) ? "MissingInfiltration" : _spawnPoint.Infiltration;
         ClientSpawnPosition = _spawnPoint.Position;
@@ -244,7 +248,7 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
         } while (!client.HostLoaded);
     }
 
-    public override async Task InitializeLoot(LocationSettingsClass.Location location)
+    public override async Task InitializeLoot(LocationSettings.Location location)
     {
         _abstractGame.SetMatchmakerStatus(LocaleUtils.UI_RETRIEVE_LOOT.Localized());
         if (!FikaBackendUtils.IsReconnect)
@@ -259,7 +263,7 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
     }
 
     private async Task RetrieveLootFromServer(bool register,
-        LocationSettingsClass.Location location)
+        LocationSettings.Location location)
     {
         var client = Singleton<FikaClient>.Instance;
         WorldLootPacket packet = new()
@@ -326,40 +330,40 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
         coopGame.GameTimer.Start(GameTime, SessionTime);
         coopGame.Spawn();
 
-        var skills = coopGame.Profile_0.Skills.Skills;
+        var skills = coopGame.Profile.Skills.Skills;
         var skillsLength = skills.Length;
         for (var i = 0; i < skillsLength; i++)
         {
             skills[i].SetPointsEarnedInSession(0f, false);
         }
 
-        coopGame.Profile_0.Info.EntryPoint = InfiltrationPoint;
+        coopGame.Profile.Info.EntryPoint = InfiltrationPoint;
         Logger.LogInfo("[CLIENT] SpawnPosition: " + ClientSpawnPosition + ", InfiltrationPoint: " + InfiltrationPoint);
 
-        var exfilController = ExfiltrationControllerClass.Instance;
+        var exfilController = ExfiltrationController.Instance;
         var isScav = player.Side is EPlayerSide.Savage;
         ExfiltrationPoint[] exfilPoints;
         SecretExfiltrationPoint[] secretExfilPoints;
-        ExfiltrationControllerClass.Instance.InitSecretExfils(player);
+        ExfiltrationController.Instance.InitSecretExfils(player);
 
         if (isScav)
         {
             exfilController.ScavExfiltrationClaim(player.Position, player.ProfileId, player.Profile.FenceInfo.AvailableExitsCount);
             var mask = exfilController.GetScavExfiltrationMask(player.ProfileId);
             exfilPoints = exfilController.ScavExfiltrationClaim(mask, player.ProfileId);
-            secretExfilPoints = ExfiltrationControllerClass.Instance.GetScavSecretExits();
+            secretExfilPoints = ExfiltrationController.Instance.GetScavSecretExits();
         }
         else
         {
-            exfilPoints = exfilController.EligiblePoints(coopGame.Profile_0);
-            secretExfilPoints = ExfiltrationControllerClass.Instance.SecretEligiblePoints();
+            exfilPoints = exfilController.EligiblePoints(coopGame.Profile);
+            secretExfilPoints = ExfiltrationController.Instance.SecretEligiblePoints();
         }
 
-        coopGame.GameUi.TimerPanel.SetTime(EFTDateTimeClass.UtcNow,
-            coopGame.Profile_0.Info.Side, coopGame.GameTimer.EscapeTimeSeconds(),
+        coopGame.GameUi.TimerPanel.SetTime(DateTimeExtensions.UtcNow,
+            coopGame.Profile.Info.Side, coopGame.GameTimer.EscapeTimeSeconds(),
             exfilPoints, secretExfilPoints);
 
-        if (TransitControllerAbstractClass.Exist(out ClientTransitController transitController))
+        if (TransitController.Exist(out ClientClasses.ClientTransitController transitController))
         {
             transitController.Init();
         }
@@ -393,21 +397,21 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
 
         if (coopGame.ExitStatus == ExitStatus.MissingInAction)
         {
-            NotificationManagerClass.DisplayMessageNotification(LocaleUtils.PLAYER_MIA.Localized(), iconType: EFT.Communications.ENotificationIconType.Alert, textColor: Color.red);
+            NotificationManager.DisplayMessageNotification(LocaleUtils.PLAYER_MIA.Localized(), iconType: EFT.Communications.ENotificationIconType.Alert, textColor: Color.red);
         }
 
-        if (player.AbstractQuestControllerClass is ClientQuestController clientQuestController)
+        if (player.QuestController is ClientQuestController clientQuestController)
         {
             clientQuestController.ToggleSend(false);
         }
 
-        if (player.AbstractQuestControllerClass is ClientSharedQuestController sharedQuestController)
+        if (player.QuestController is ClientSharedQuestController sharedQuestController)
         {
             sharedQuestController.ToggleQuestSharing(false);
         }
 
 #if !DEBUG
-        var matchEndConfig = Singleton<BackendConfigSettingsClass>.Instance.Experience.MatchEnd;
+        var matchEndConfig = Singleton<GlobalConfiguration>.Instance.Experience.MatchEnd;
         if (player.Profile.EftStats.SessionCounters.GetAllInt([CounterTag.Exp]) < matchEndConfig.SurvivedExpRequirement && coopGame.PastTime < matchEndConfig.SurvivedTimeRequirement)
         {
             coopGame.ExitStatus = ExitStatus.Runner;
@@ -474,7 +478,7 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
             _extractRoutine = coopGame.StartCoroutine(ExtractRoutine(player, coopGame));
 
             // Prevents players from looting after extracting
-            CurrentScreenSingletonClass.Instance.CloseAllScreensForced();
+            EftScreenManager.Instance.CloseAllScreensForced();
 
             // Destroys session timer
             if (TimeManager != null)
@@ -533,6 +537,6 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
 
         LoadingScreenUI.Instance.UpdateAndBroadcast(85f);
 
-        Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal = Math.Max(Singleton<BackendConfigSettingsClass>.Instance.TimeBeforeDeployLocal, 3);
+        Singleton<GlobalConfiguration>.Instance.TimeBeforeDeployLocal = Math.Max(Singleton<GlobalConfiguration>.Instance.TimeBeforeDeployLocal, 3);
     }
 }

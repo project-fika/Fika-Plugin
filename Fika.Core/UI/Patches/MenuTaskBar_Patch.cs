@@ -45,7 +45,7 @@ public class MenuTaskBar_Patch : ModulePatch
                 var text = downloadProfileGameObject.GetComponentInChildren<LocalizedText>();
                 if (text != null)
                 {
-                    text.method_2(LocaleUtils.UI_DOWNLOAD_PROFILE.Localized());
+                    text.SetLabelText(LocaleUtils.UI_DOWNLOAD_PROFILE.Localized());
                     text.LocalizationKey = "";
                 }
 
@@ -68,7 +68,7 @@ public class MenuTaskBar_Patch : ModulePatch
                         var elapsed = DateTime.Now - _lastDownload;
                         if (elapsed.TotalMinutes <= 1)
                         {
-                            NotificationManagerClass.DisplayMessageNotification(
+                            NotificationManager.DisplayMessageNotification(
                                 $"Please wait {(int)Math.Ceiling(60 - elapsed.TotalSeconds)} seconds before attempting to download your profile again!",
                                 iconType: ENotificationIconType.Alert, textColor: Color.red);
                             return;
@@ -94,7 +94,7 @@ public class MenuTaskBar_Patch : ModulePatch
 
                                     // create dir, put profile in dir and moddata, change to dictionary, key = modName
 
-                                    var profileId = Singleton<ClientApplication<ISession>>.Instance.Session.Profile.ProfileId;
+                                    var profileId = Singleton<ClientApplication<IEftSession>>.Instance.Session.Profile.ProfileId;
 
                                     var profileDir = Path.Combine(fikaDir, profileId);
                                     if (!Directory.Exists(profileDir))
@@ -116,7 +116,7 @@ public class MenuTaskBar_Patch : ModulePatch
                                     }
 
                                     File.WriteAllText(Path.Combine(profileDir, $"{profileId}.json"), profileResponse.Profile.ToString());
-                                    NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.SAVED_PROFILE.Localized(),
+                                    NotificationManager.DisplayMessageNotification(string.Format(LocaleUtils.SAVED_PROFILE.Localized(),
                                         [ColorizeText(EColor.BLUE, profileId), fikaDir]));
 
                                     /* ____toggleButtons.Remove(EMenuType.NewsHub);
@@ -126,12 +126,12 @@ public class MenuTaskBar_Patch : ModulePatch
                             }
                             else
                             {
-                                NotificationManagerClass.DisplayWarningNotification(error);
+                                NotificationManager.DisplayWarningNotification(error);
                             }
                         }
                         catch (Exception ex)
                         {
-                            NotificationManagerClass.DisplayWarningNotification(LocaleUtils.UNKNOWN_ERROR.Localized());
+                            NotificationManager.DisplayWarningNotification(LocaleUtils.UNKNOWN_ERROR.Localized());
                             FikaGlobals.LogError(ex.Message);
                         }
 

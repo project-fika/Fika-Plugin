@@ -72,7 +72,7 @@ public sealed class WorldInteractionPacket : IPoolSubPacket
 
                     keyHandler.UnlockResult.Value.RaiseEvents(player.InventoryController, CommandStatus.Begin);
                     keyHandler.UnlockResult.Value.RaiseEvents(player.InventoryController, CommandStatus.Succeed);
-                    player.vmethod_1(worldInteractiveObject, keyHandler.UnlockResult.Value);
+                    player.ExecuteInteraction(worldInteractiveObject, keyHandler.UnlockResult.Value);
                     return;
                 }
                 else
@@ -83,7 +83,7 @@ public sealed class WorldInteractionPacket : IPoolSubPacket
 
                 if (InteractionStage == EInteractionStage.Start)
                 {
-                    player.vmethod_0(worldInteractiveObject, interactionResult, action);
+                    player.StartInteraction(worldInteractiveObject, interactionResult, action);
                     return;
                 }
 
@@ -93,7 +93,7 @@ public sealed class WorldInteractionPacket : IPoolSubPacket
                     return;
                 }
 
-                player.vmethod_1(worldInteractiveObject, interactionResult);
+                player.ExecuteInteraction(worldInteractiveObject, interactionResult);
             }
 
         }

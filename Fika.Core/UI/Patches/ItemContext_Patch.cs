@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using EFT.Communications;
+using EFT.InventoryLogic.Operations;
+using EFT.Utilities;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Comfort.Common;
@@ -29,23 +32,23 @@ public sealed class ItemContext_Patch : ModulePatch
     protected override MethodBase GetTargetMethod()
     {
         return typeof(SimpleContextMenu)
-            .GetMethod(nameof(SimpleContextMenu.method_0))
+            .GetMethod(nameof(SimpleContextMenu.ShowMenu))
             .MakeGenericMethod(typeof(EItemInfoButton));
     }
 
     [PatchPrefix]
-    private static void Prefix(ItemInfoInteractionsAbstractClass<EItemInfoButton> contextInteractions, Item item)
+    private static void Prefix(ContextInteractions<EItemInfoButton> contextInteractions, Item item)
     {
-        if (contextInteractions is not ContextInteractionsAbstractClass gclass)
+        if (contextInteractions is not BaseItemContextInteractions itemContextInteractions)
         {
             return;
         }
 
         // check for GClass increments
-        var itemContext = gclass.ItemContextAbstractClass;
+        var itemContext = itemContextInteractions.ItemContext;
         if (itemContext.ViewType == EItemViewType.Inventory)
         {
-            if (GClass2340.InRaid)
+            if (InGameStatus.InRaid)
             {
                 return;
             }
@@ -77,7 +80,7 @@ public sealed class ItemContext_Patch : ModulePatch
             }
 
             // Check for GClass increments
-            var dynamicInteractions = gclass.Dictionary_0 ?? [];
+            var dynamicInteractions = itemContextInteractions._dynamicInteractions ?? [];
             dynamicInteractions["SEND"] = new("SEND", "SEND", () =>
             {
                 foreach (var itemId in FikaPlugin.Instance.Settings.BlacklistedItems)
@@ -89,16 +92,16 @@ public sealed class ItemContext_Patch : ModulePatch
                             var itemText = ColorizeText(EColor.BLUE, item.ShortName.Localized());
                             if (attachedItem == item)
                             {
-                                NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.ITEM_BLACKLISTED.Localized(), itemText),
-                                    iconType: EFT.Communications.ENotificationIconType.Alert);
+                                NotificationManager.DisplayMessageNotification(string.Format(LocaleUtils.ITEM_BLACKLISTED.Localized(), itemText),
+                                    iconType: ENotificationIconType.Alert);
                             }
                             else
                             {
                                 var itemName = attachedItem.ShortName.Localized();
                                 var attachedItemText = ColorizeText(EColor.BLUE, itemName);
-                                NotificationManagerClass.DisplayMessageNotification(string.Format(LocaleUtils.ITEM_CONTAINS_BLACKLISTED.Localized(),
+                                NotificationManager.DisplayMessageNotification(string.Format(LocaleUtils.ITEM_CONTAINS_BLACKLISTED.Localized(),
                                     [itemText, attachedItemText]),
-                                    iconType: EFT.Communications.ENotificationIconType.Alert);
+                                    iconType: ENotificationIconType.Alert);
                             }
                             return;
                         }
@@ -135,7 +138,7 @@ public sealed class ItemContext_Patch : ModulePatch
                 var uiGameObj = Object.Instantiate(matchMakerUiPrefab);
                 uiGameObj.transform.SetParent(GameObject.Find("Preloader UI/Preloader UI/UIContext/").transform);
                 var screenController = Traverse.Create(CommonUI.Instance.InventoryScreen)
-                    .Field<InventoryScreen.GClass3871>("ScreenController").Value;
+                    .Field<InventoryScreen.InventoryScreenController>("ScreenController").Value;
                 screenController.OnClose += () => Object.Destroy(uiGameObj);
                 var sendItemUI = uiGameObj.GetComponent<SendItemUI>();
                 sendItemUI.PlayersDropdown.ClearOptions();
@@ -176,10 +179,10 @@ public sealed class ItemContext_Patch : ModulePatch
                     {
                         var player = sendItemUI.PlayersDropdown.options[sendItemUI.PlayersDropdown.value].text;
                         _lastIndex = sendItemUI.PlayersDropdown.value;
-                        if (Singleton<ClientApplication<ISession>>.Instantiated)
+                        if (Singleton<ClientApplication<IEftSession>>.Instantiated)
                         {
                             Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.TradeOperationComplete);
-                            Singleton<ClientApplication<ISession>>.Instance
+                            Singleton<ClientApplication<IEftSession>>.Instance
                                 .GetClientBackEndSession()
                                 .SendOperationRightNow(new SendItemsPayload
                                 {
@@ -195,16 +198,16 @@ public sealed class ItemContext_Patch : ModulePatch
                         }
                         else
                         {
-                            PreloaderUI.Instance.ShowErrorScreen("Fika.Core.ItemContextPatch", "!Singleton<ISession>.Instantiated");
+                            PreloaderUI.Instance.ShowErrorScreen("Fika.Core.ItemContextPatch", "!Singleton<IEftSession>.Instantiated");
                         }
                     }
                     GameObject.Destroy(uiGameObj);
                 });
-            }, CacheResourcesPopAbstractClass.Pop<Sprite>("Characteristics/Icons/UnloadAmmo"));
+            }, ResourcesCache.Pop<Sprite>("Characteristics/Icons/UnloadAmmo"));
         }
     }
 
-    public sealed class SendItemsPayload : GClass3472
+    public sealed class SendItemsPayload : CommandWithOwner
     {
         [JsonProperty("Action")]
         public string Action = "SendToPlayer";

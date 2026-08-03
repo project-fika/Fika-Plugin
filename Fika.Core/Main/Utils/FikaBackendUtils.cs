@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Diz.Binding;
+using EFT.Communications;
+using JsonType;
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
@@ -85,7 +88,7 @@ public static class FikaBackendUtils
     public static ushort LocalPort { get; internal set; }
     public static string HostLocationId { get; internal set; }
     public static RaidSettings CachedRaidSettings { get; set; }
-    public static GClass1628<GroupPlayerViewModelClass> GroupPlayers { get; set; } = [];
+    public static BindableList<RaidPlayer> GroupPlayers { get; set; } = [];
     public static FikaCustomRaidSettings CustomRaidSettings { get; set; } = new();
 
     internal static bool RequestFikaWorld;
@@ -157,7 +160,7 @@ public static class FikaBackendUtils
     /// The <see cref="Guid"/> of the current raid session
     /// </summary>
     public static Guid ServerGuid { get; internal set; }
-    public static RaidTransitionInfoClass TransitData
+    public static TransitSettings TransitData
     {
         get
         {
@@ -175,7 +178,7 @@ public static class FikaBackendUtils
         }
     }
 
-    private static RaidTransitionInfoClass _transitData;
+    private static TransitSettings _transitData;
 
     public static void ResetTransitData()
     {
@@ -215,7 +218,7 @@ public static class FikaBackendUtils
 
     public static async Task CreateMatch(string profileId, string hostUsername, RaidSettings raidSettings)
     {
-        NotificationManagerClass.DisplayWarningNotification(LocaleUtils.STARTING_RAID.Localized());
+        NotificationManager.DisplayWarningNotification(LocaleUtils.STARTING_RAID.Localized());
         var timestamp = DateTimeOffset.Now.ToUnixTimeSeconds();
         var raidCode = GenerateRaidCode(6);
         var serverGuid = Guid.NewGuid();
@@ -262,7 +265,7 @@ public static class FikaBackendUtils
         foreach ((var profile, var isLeader) in profiles)
         {
             var info = profile.Info;
-            GroupPlayerDataClass infoSet = new()
+            GroupPlayer infoSet = new()
             {
                 AccountId = profile.AccountId,
                 Id = profile.Id,
@@ -278,7 +281,7 @@ public static class FikaBackendUtils
                     HasCoopExtension = info.HasCoopExtension
                 }
             };
-            GroupPlayerViewModelClass visualProfile = new(infoSet)
+            RaidPlayer visualProfile = new(infoSet)
             {
                 PlayerVisualRepresentation = profile.GetVisualEquipmentState(false)
             };
@@ -288,7 +291,7 @@ public static class FikaBackendUtils
 
         if (TarkovApplication.Exist(out var app))
         {
-            var controller = app.MatchmakerPlayerControllerClass;
+            var controller = app.Matchmaker;
             if (controller != null)
             {
                 var menuUi = Singleton<MenuUI>.Instance;
@@ -302,7 +305,7 @@ public static class FikaBackendUtils
                 FikaGlobals.LogWarning("AddPartyMembers: MenuUI was null!");
                 return;
             }
-            FikaGlobals.LogWarning("AddPartyMembers: MatchmakerPlayerControllerClass was null!");
+            FikaGlobals.LogWarning("AddPartyMembers: MatchmakerPlayersController was null!");
         }
         FikaGlobals.LogWarning("AddPartyMembers: TarkovApplication was null!");
     }

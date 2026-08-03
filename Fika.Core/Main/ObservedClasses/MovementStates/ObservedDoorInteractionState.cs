@@ -4,7 +4,7 @@ using EFT.Interactive;
 
 namespace Fika.Core.Main.ObservedClasses.MovementStates;
 
-public class ObservedDoorInteractionState(MovementContext movementContext) : DoorInteractionStateClass(movementContext)
+public class ObservedDoorInteractionState(MovementContext movementContext) : DoorInteractState(movementContext)
 {
     public override void Enter(bool isFromSameState)
     {

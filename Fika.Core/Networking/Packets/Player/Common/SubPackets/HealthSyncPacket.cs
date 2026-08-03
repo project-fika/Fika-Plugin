@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
+using EFT.HealthSystem;
+using System.Collections.Generic;
 using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Pooling;
-using static NetworkHealthSyncPacketStruct;
-using static NetworkHealthSyncPacketStruct.NetworkHealthExtraDataTypeStruct;
+using static EFT.HealthSystem.SyncHealthPacket;
+using static EFT.HealthSystem.SyncHealthPacket.SyncAddEffect;
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
@@ -18,14 +19,14 @@ public sealed class HealthSyncPacket : IPoolSubPacket
         return new();
     }
 
-    public NetworkHealthSyncPacketStruct Packet;
+    public SyncHealthPacket Packet;
     public MongoID? KillerId;
     public MongoID? WeaponId;
     public EBodyPart BodyPart;
     public CorpseSyncPackets CorpseSyncPacket;
     public List<string> TriggerZones = new(4);
 
-    public static HealthSyncPacket FromValue(NetworkHealthSyncPacketStruct value)
+    public static HealthSyncPacket FromValue(SyncHealthPacket value)
     {
         var packet = CommonSubPacketPoolManager.Instance.GetPacket<HealthSyncPacket>(ECommonSubPacketType.HealthSync);
         packet.Packet = value;
@@ -61,7 +62,7 @@ public sealed class HealthSyncPacket : IPoolSubPacket
 
     public void Deserialize(NetDataReader reader)
     {
-        NetworkHealthSyncPacketStruct packet = new()
+        SyncHealthPacket packet = new()
         {
             SyncType = reader.GetEnum<ESyncType>()
         };
@@ -453,7 +454,7 @@ public sealed class HealthSyncPacket : IPoolSubPacket
 
 public struct CorpseSyncPackets
 {
-    public InventoryDescriptorClass InventoryDescriptor;
+    public ItemDescriptor InventoryDescriptor;
     public Item ItemInHands;
 
     public EBodyPartColliderType BodyPartColliderType;

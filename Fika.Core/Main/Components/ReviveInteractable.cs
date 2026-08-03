@@ -4,6 +4,7 @@ using EFT;
 using EFT.AssetsManager;
 using EFT.Interactive;
 using EFT.InventoryLogic;
+using EFT.UI;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Packets.Player.Common;
@@ -16,6 +17,7 @@ internal sealed class ReviveInteractable : InteractableObject
 {
     private static readonly int _playerLayer = LayerMask.NameToLayer("Player");
     private static readonly int _ragdollLayer = LayerMask.NameToLayer("Deadbody");
+    private static readonly int _bodyPartHitLayer = LayerMask.NameToLayer("HitCollider");
 
     /// <summary>
     /// If the player is currently being revived
@@ -32,7 +34,7 @@ internal sealed class ReviveInteractable : InteractableObject
     private Callback _finishLootingDelegate;
     private GamePlayerOwner _owner;
     private FikaPlayer _localPlayer;
-    private RagdollClass _ragdoll;
+    private CorpseRagdoll _ragdoll;
 
     public static ReviveInteractable Create(ObservedPlayer observedPlayer)
     {
@@ -65,7 +67,7 @@ internal sealed class ReviveInteractable : InteractableObject
 #endif
 
         _observedPlayer.MovementContext.ReleaseDoorIfInteractingWithOne();
-        _observedPlayer.MovementContext.OnStateChanged -= _observedPlayer.method_17;
+        _observedPlayer.MovementContext.OnStateChanged -= _observedPlayer.MovementContextOnStateChanged;
         _observedPlayer.MovementContext.PhysicalConditionChanged -= _observedPlayer.ProceduralWeaponAnimation.PhysicalConditionUpdated;
         _observedPlayer.EnabledAnimators = 0;
         _observedPlayer.BodyAnimatorCommon.enabled = false;
@@ -77,10 +79,10 @@ internal sealed class ReviveInteractable : InteractableObject
 
         _observedPlayer.ProceduralWeaponAnimation.OnPreCollision -= _observedPlayer.IkStoreRaw;
 
-        TransformHelperClass.SetLayersRecursively(_observedPlayer.gameObject, _ragdollLayer);
+        TransformTools.SetLayersRecursively(_observedPlayer.gameObject, _ragdollLayer);
 
         var poolObject = _observedPlayer.gameObject.GetComponent<PlayerPoolObject>();
-        _ragdoll = new RagdollClass
+        _ragdoll = new CorpseRagdoll
         (
             poolObject.RigidbodySpawners,
             poolObject.JointSpawners,
@@ -121,7 +123,7 @@ internal sealed class ReviveInteractable : InteractableObject
 #if DEBUG
         FikaGlobals.LogInfo($"Removing ragdoll from {_observedPlayer.Profile.GetCorrectedNickname()}");
 #endif
-        _observedPlayer.MovementContext.OnStateChanged += _observedPlayer.method_17;
+        _observedPlayer.MovementContext.OnStateChanged += _observedPlayer.MovementContextOnStateChanged;
         _observedPlayer.MovementContext.PhysicalConditionChanged += _observedPlayer.ProceduralWeaponAnimation.PhysicalConditionUpdated;
         _observedPlayer.EnabledAnimators = EAnimatorMask.Thirdperson | EAnimatorMask.Arms | EAnimatorMask.Procedural | EAnimatorMask.FBBIK | EAnimatorMask.IK;
         _observedPlayer.BodyAnimatorCommon.enabled = true;
@@ -129,7 +131,17 @@ internal sealed class ReviveInteractable : InteractableObject
         _observedPlayer._characterController.isEnabled = true;
         _observedPlayer.POM.On();
 
-        TransformHelperClass.SetLayersRecursively(_observedPlayer.gameObject, _playerLayer);
+        TransformTools.SetLayersRecursively(_observedPlayer.gameObject, _playerLayer);
+
+        for (var i = 0; i < _observedPlayer.PlayerBones.ArmorPlateColliders.Length; i++)
+        {
+            _observedPlayer.PlayerBones.ArmorPlateColliders[i].gameObject.layer = _bodyPartHitLayer;
+        }
+
+        for (var i = 0; i < _observedPlayer.PlayerBones.BodyPartColliders.Length; i++)
+        {
+            _observedPlayer.PlayerBones.BodyPartColliders[i].gameObject.layer = _bodyPartHitLayer;
+        }
 
         foreach (var joint in _observedPlayer.gameObject.GetComponentsInChildren<CharacterJoint>())
         {
@@ -140,11 +152,12 @@ internal sealed class ReviveInteractable : InteractableObject
 
         foreach (var rb in _observedPlayer.gameObject.GetComponentsInChildren<Rigidbody>())
         {
-            EFTPhysicsClass.GClass745.UnsupportRigidbody(rb);
+            PhysicsExtensions.UpdateController.UnsupportRigidbody(rb);
         }
 
         _observedPlayer.ProceduralWeaponAnimation.OnPreCollision += _observedPlayer.IkStoreRaw;
         _observedPlayer.enabled = true;
+        _observedPlayer.RecalculateEquipmentParams();
     }
 
     private static bool CheckCorpseIsStill(bool sleeping, float timePass)
@@ -152,7 +165,7 @@ internal sealed class ReviveInteractable : InteractableObject
         return sleeping || timePass >= 15f;
     }
 
-    public ActionsReturnClass GetActions(GamePlayerOwner owner)
+    public AvailableInteractionState GetActions(GamePlayerOwner owner)
     {
         if (BeingRevived)
         {
@@ -162,15 +175,15 @@ internal sealed class ReviveInteractable : InteractableObject
         _owner = owner;
         _localPlayer = owner.Player as FikaPlayer;
 
-        var actions = new ActionsReturnClass();
-        actions.Actions.Add(new ActionsTypesClass
+        var actions = new AvailableInteractionState();
+        actions.Actions.Add(new InteractionAction
         {
             Action = _startReviveDelegate,
             Name = string.Format(LocaleUtils.UI_REVIVE_PLAYER.Localized(), _observedPlayer.Profile.GetCorrectedNickname())
         });
         if (AllowLooting)
         {
-            actions.Actions.Add(new ActionsTypesClass
+            actions.Actions.Add(new InteractionAction
             {
                 Action = _startSearchingDelegate,
                 Name = "Search"
@@ -199,7 +212,7 @@ internal sealed class ReviveInteractable : InteractableObject
 
     public void StartRevive()
     {
-        if (_localPlayer.CurrentState is IdleStateClass)
+        if (_localPlayer.CurrentState is IdlePlayerState)
         {
             var reviveTime = ReviveTime;
             _owner.ShowObjectivesPanel(LocaleUtils.UI_REVIVING_PLAYER.Localized(), reviveTime);

@@ -30,13 +30,13 @@ public sealed class ReloadMagPacket : IPoolSubPacket
 
     public MongoID MagId;
     public ItemAddress GridItemAddress;
-    public GClass1950 Descriptor;
+    public ItemAddressDescriptor Descriptor;
 
     public void Execute(FikaPlayer player)
     {
         if (player.HandsController is ObservedFirearmController controller)
         {
-            MagazineItemClass magazine = null;
+            Magazine magazine = null;
             try
             {
                 var result = player.FindItemById(MagId);
@@ -45,7 +45,7 @@ public sealed class ReloadMagPacket : IPoolSubPacket
                     FikaGlobals.LogError(result.Error.ToString());
                     return;
                 }
-                if (result.Value is MagazineItemClass magazineClass)
+                if (result.Value is Magazine magazineClass)
                 {
                     magazine = magazineClass;
                 }
@@ -67,7 +67,7 @@ public sealed class ReloadMagPacket : IPoolSubPacket
                 {
                     gridItemAddress = player.InventoryController.ToItemAddress(Descriptor);
                 }
-                catch (GException4 exception2)
+                catch (HTTPNetworkException exception2)
                 {
                     FikaGlobals.LogError(exception2);
                 }
@@ -101,7 +101,7 @@ public sealed class ReloadMagPacket : IPoolSubPacket
         var exists = reader.GetBool();
         if (exists)
         {
-            Descriptor = reader.GetPolymorph<GClass1950>();
+            Descriptor = reader.GetPolymorph<ItemAddressDescriptor>();
         }
     }
 

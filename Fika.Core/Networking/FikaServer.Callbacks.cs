@@ -1,5 +1,7 @@
 ﻿using Comfort.Common;
 using EFT;
+using EFT.Ballistics;
+using EFT.Communications;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using Fika.Core.Main.ClientClasses;
@@ -42,13 +44,13 @@ public sealed partial class FikaServer
             return;
         }
 
-        if (player.AbstractQuestControllerClass is ObservedQuestController observedQuestController)
+        if (player.QuestController is ObservedQuestController observedQuestController)
         {
             observedQuestController.UpdateQuestStatusForClient(packet);
             return;
         }
 
-        _logger.LogError($"QuestController on player [{player.Profile.GetCorrectedNickname()}] was not of type observed, was [{player.AbstractQuestControllerClass.GetType().Name}]");
+        _logger.LogError($"QuestController on player [{player.Profile.GetCorrectedNickname()}] was not of type observed, was [{player.QuestController.GetType().Name}]");
     }
 
     private void OnKnifeHitPacketReceived(KnifeHitPacket packet, NetPeer _)
@@ -76,7 +78,7 @@ public sealed partial class FikaServer
                         return;
                     }
 
-                    var damageInfo = new DamageInfoStruct
+                    var damageInfo = new DamageInfo
                     {
                         HitPoint = packet.HitPoint
                     };
@@ -106,7 +108,7 @@ public sealed partial class FikaServer
                         return;
                     }
 
-                    turnable.method_0(new DamageInfoStruct
+                    turnable.OnHit(new DamageInfo
                     {
                         HitPoint = packet.HitPoint
                     });
@@ -128,6 +130,12 @@ public sealed partial class FikaServer
         if (!CoopHandler.Players.TryGetValue(packet.NetId, out var player))
         {
             response.Error = $"Could not find player with id {packet.NetId}";
+            SendDataToPeer(ref response, DeliveryMethod.ReliableOrdered, peer);
+            return;
+        }
+
+        if (packet.ProceedType is EProceedType.EmptyHands) // always accept empty hands
+        {
             SendDataToPeer(ref response, DeliveryMethod.ReliableOrdered, peer);
             return;
         }
@@ -269,7 +277,7 @@ public sealed partial class FikaServer
     {
         if (_coopHandler.Players.TryGetValue(packet.NetId, out var player))
         {
-            if (player.AbstractQuestControllerClass is ObservedQuestController controller)
+            if (player.QuestController is ObservedQuestController controller)
             {
                 controller.HandleInraidQuestPacket(packet);
             }
@@ -443,7 +451,7 @@ public sealed partial class FikaServer
             var gameWorld = Singleton<GameWorld>.Instance;
             if (gameWorld.BtrController != null && gameWorld.BtrController.BtrVehicle != null)
             {
-                var status = gameWorld.BtrController.BtrVehicle.method_39(playerToApply, packet.Data);
+                var status = gameWorld.BtrController.BtrVehicle.InteractInternal(playerToApply, packet.Data);
                 BTRInteractionPacket response = new(packet.NetId)
                 {
                     IsResponse = true,
@@ -476,7 +484,7 @@ public sealed partial class FikaServer
         {
             if (packet.InitialRequest)
             {
-                NotificationManagerClass.DisplayMessageNotification(LocaleUtils.RECONNECT_REQUESTED.Localized(),
+                NotificationManager.DisplayMessageNotification(LocaleUtils.RECONNECT_REQUESTED.Localized(),
                     iconType: EFT.Communications.ENotificationIconType.Alert);
                 foreach (var player in _coopHandler.HumanPlayers)
                 {
@@ -504,10 +512,10 @@ public sealed partial class FikaServer
             }
 
             var gameWorld = Singleton<GameWorld>.Instance;
-            var worldTraverse = Traverse.Create(gameWorld.World_0);
+            var worldTraverse = Traverse.Create(gameWorld.World);
 
             var grenades = gameWorld.Grenades.GetValuesEnumerator();
-            List<SmokeGrenadeDataPacketStruct> smokeData = [];
+            List<SmokeGrenadeNetworkData> smokeData = [];
             foreach (var item in grenades)
             {
                 if (item is SmokeGrenade smokeGrenade)
@@ -527,8 +535,8 @@ public sealed partial class FikaServer
                 SendDataToPeer(ref throwablePacket, DeliveryMethod.ReliableOrdered, peer);
             }
 
-            List<WorldInteractiveObject.WorldInteractiveDataPacketStruct> interactivesData = [];
-            foreach (var interactiveObject in worldTraverse.Field<WorldInteractiveObject[]>("worldInteractiveObject_0").Value)
+            List<WorldInteractiveObject.InteractiveObjectStatusInfo> interactivesData = [];
+            foreach (var interactiveObject in worldTraverse.Field<WorldInteractiveObject[]>("_interactableObjectsForNetSync").Value)
             {
                 if ((interactiveObject.DoorState != interactiveObject.InitialDoorState
                     && interactiveObject.DoorState != EDoorState.Interacting)
@@ -614,7 +622,7 @@ public sealed partial class FikaServer
 
                 if (player.HandsController != null)
                 {
-                    characterPacket.PlayerInfoPacket.ControllerType = HandsControllerToEnumClass.FromController(player.HandsController);
+                    characterPacket.PlayerInfoPacket.ControllerType = HandsControllerTypeConvert.FromController(player.HandsController);
                     characterPacket.PlayerInfoPacket.ItemId = player.HandsController.Item.Id;
                     characterPacket.PlayerInfoPacket.IsStationary = player.MovementContext.IsStationaryWeaponInHands;
                 }
@@ -626,22 +634,22 @@ public sealed partial class FikaServer
             if (gameWorld.BtrController != null)
             {
                 stashesPacket.HasBTR = true;
-                var length = gameWorld.BtrController.TransferItemsController.List_0.Count;
-                stashesPacket.BTRStashes = new StashItemClass[length];
+                var length = gameWorld.BtrController.TransferItemsController._transferContainers.Count;
+                stashesPacket.BTRStashes = new Stash[length];
                 for (var i = 0; i < length; i++)
                 {
-                    stashesPacket.BTRStashes[i] = gameWorld.BtrController.TransferItemsController.List_0[i];
+                    stashesPacket.BTRStashes[i] = gameWorld.BtrController.TransferItemsController._transferContainers[i];
                 }
             }
 
             if (gameWorld.TransitController != null)
             {
                 stashesPacket.HasTransit = true;
-                var length = gameWorld.TransitController.TransferItemsController.List_0.Count;
-                stashesPacket.TransitStashes = new StashItemClass[length];
+                var length = gameWorld.TransitController.TransferItemsController._transferContainers.Count;
+                stashesPacket.TransitStashes = new Stash[length];
                 for (var i = 0; i < length; i++)
                 {
-                    stashesPacket.TransitStashes[i] = gameWorld.TransitController.TransferItemsController.List_0[i];
+                    stashesPacket.TransitStashes[i] = gameWorld.TransitController.TransferItemsController._transferContainers[i];
                 }
             }
 
@@ -649,7 +657,7 @@ public sealed partial class FikaServer
 
             foreach (var player in _coopHandler.HumanPlayers)
             {
-                if (player.ProfileId == packet.ProfileId && player is ObservedPlayer observedPlayer && observedPlayer.AbstractQuestControllerClass is ObservedQuestController questController)
+                if (player.ProfileId == packet.ProfileId && player is ObservedPlayer observedPlayer && observedPlayer.QuestController is ObservedQuestController questController)
                 {
                     if (questController.TryGetReconnectQuestSyncPackets(out var packets))
                     {
@@ -699,7 +707,7 @@ public sealed partial class FikaServer
         {
             if (Singleton<GameWorld>.Instantiated)
             {
-                var world = Singleton<GameWorld>.Instance.World_0;
+                var world = Singleton<GameWorld>.Instance.World;
                 if (world.Interactables != null)
                 {
                     InteractableInitPacket response = new(false)
@@ -722,7 +730,7 @@ public sealed partial class FikaServer
 
         if (_hostPlayer.HealthController.IsAlive)
         {
-            if (_hostPlayer.AbstractQuestControllerClass is ClientSharedQuestController sharedQuestController)
+            if (_hostPlayer.QuestController is ClientSharedQuestController sharedQuestController)
             {
                 sharedQuestController.ReceiveQuestDropItemPacket(packet);
             }
@@ -738,7 +746,7 @@ public sealed partial class FikaServer
 
         if (_hostPlayer.HealthController.IsAlive)
         {
-            if (_hostPlayer.AbstractQuestControllerClass is ClientSharedQuestController sharedQuestController)
+            if (_hostPlayer.QuestController is ClientSharedQuestController sharedQuestController)
             {
                 sharedQuestController.ReceiveQuestItemPacket(packet);
             }
@@ -754,7 +762,7 @@ public sealed partial class FikaServer
 
         if (_hostPlayer.HealthController.IsAlive)
         {
-            if (_hostPlayer.AbstractQuestControllerClass is ClientSharedQuestController sharedQuestController)
+            if (_hostPlayer.QuestController is ClientSharedQuestController sharedQuestController)
             {
                 sharedQuestController.ReceiveQuestPacket(packet);
             }
@@ -833,7 +841,7 @@ public sealed partial class FikaServer
         {
             try
             {
-                if (playerToApply.InventoryController is Interface18 inventoryController)
+                if (playerToApply.InventoryController is IOperationHandler inventoryController)
                 {
                     var result = inventoryController.CreateOperationFromDescriptor(packet.Descriptor);
 #if DEBUG
@@ -861,11 +869,11 @@ public sealed partial class FikaServer
 
                     SendGenericPacket(EGenericSubPacketType.InventoryOperation, packet,
                         true, peer);
-                    handler.OperationResult.Value.method_1(handler.HandleResultDelegate);
+                    handler.OperationResult.Value.Execute(handler.HandleResultDelegate);
                 }
                 else
                 {
-                    throw new InvalidTypeException($"Inventory controller was not of type {nameof(Interface18)}!");
+                    throw new InvalidTypeException($"Inventory controller was not of type {nameof(IOperationHandler)}!");
                 }
             }
             catch (Exception exception)

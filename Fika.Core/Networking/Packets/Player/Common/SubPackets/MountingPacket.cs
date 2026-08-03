@@ -17,7 +17,7 @@ public sealed class MountingPacket : IPoolSubPacket
         return new();
     }
 
-    public static MountingPacket FromValue(MountingPacketStruct.EMountingCommand command, bool isMounted,
+    public static MountingPacket FromValue(EFT.MountingPacket.EMountingCommand command, bool isMounted,
         Vector3 mountDirection, Vector3 mountingPoint, float currentMountingPointVerticalOffset, short mountingDirection)
     {
         var packet = CommonSubPacketPoolManager.Instance.GetPacket<MountingPacket>(ECommonSubPacketType.Mounting);
@@ -30,7 +30,7 @@ public sealed class MountingPacket : IPoolSubPacket
         return packet;
     }
 
-    public MountingPacketStruct.EMountingCommand Command;
+    public EFT.MountingPacket.EMountingCommand Command;
     public bool IsMounted;
     public Vector3 MountDirection;
     public Vector3 MountingPoint;
@@ -49,7 +49,7 @@ public sealed class MountingPacket : IPoolSubPacket
     {
         switch (Command)
         {
-            case MountingPacketStruct.EMountingCommand.Enter:
+            case EFT.MountingPacket.EMountingCommand.Enter:
                 {
                     player.MovementContext.PlayerMountingPointData.SetData(new MountPointData(MountingPoint, MountDirection,
                         (EMountSideDirection)MountingDirection), TargetPos, TargetPoseLevel, TargetHandsRotation,
@@ -58,17 +58,17 @@ public sealed class MountingPacket : IPoolSubPacket
                     player.MovementContext.EnterMountedState();
                 }
                 break;
-            case MountingPacketStruct.EMountingCommand.Exit:
+            case EFT.MountingPacket.EMountingCommand.Exit:
                 {
                     player.MovementContext.ExitMountedState();
                 }
                 break;
-            case MountingPacketStruct.EMountingCommand.Update:
+            case EFT.MountingPacket.EMountingCommand.Update:
                 {
                     player.MovementContext.PlayerMountingPointData.CurrentMountingPointVerticalOffset = CurrentMountingPointVerticalOffset;
                 }
                 break;
-            case MountingPacketStruct.EMountingCommand.StartLeaving:
+            case EFT.MountingPacket.EMountingCommand.StartLeaving:
                 {
                     if (player.MovementContext is ObservedMovementContext observedMovementContext)
                     {
@@ -84,15 +84,15 @@ public sealed class MountingPacket : IPoolSubPacket
     public void Serialize(NetDataWriter writer)
     {
         writer.Put((byte)Command);
-        if (Command == MountingPacketStruct.EMountingCommand.Update)
+        if (Command == EFT.MountingPacket.EMountingCommand.Update)
         {
             writer.Put(CurrentMountingPointVerticalOffset);
         }
-        if (Command is <= MountingPacketStruct.EMountingCommand.Exit)
+        if (Command is <= EFT.MountingPacket.EMountingCommand.Exit)
         {
             writer.Put(IsMounted);
         }
-        if (Command == MountingPacketStruct.EMountingCommand.Enter)
+        if (Command == EFT.MountingPacket.EMountingCommand.Enter)
         {
             writer.PutUnmanaged(MountDirection);
             writer.PutUnmanaged(MountingPoint);
@@ -110,17 +110,17 @@ public sealed class MountingPacket : IPoolSubPacket
 
     public void Deserialize(NetDataReader reader)
     {
-        Command = (MountingPacketStruct.EMountingCommand)reader.GetByte();
-        if (Command == MountingPacketStruct.EMountingCommand.Update)
+        Command = (EFT.MountingPacket.EMountingCommand)reader.GetByte();
+        if (Command == EFT.MountingPacket.EMountingCommand.Update)
         {
             CurrentMountingPointVerticalOffset = reader.GetFloat();
         }
-        if (Command is <= MountingPacketStruct.EMountingCommand.Exit)
+        if (Command is <= EFT.MountingPacket.EMountingCommand.Exit)
         {
             IsMounted = reader.GetBool();
         }
         ;
-        if (Command == MountingPacketStruct.EMountingCommand.Enter)
+        if (Command == EFT.MountingPacket.EMountingCommand.Enter)
         {
             MountDirection = reader.GetUnmanaged<Vector3>();
             MountingPoint = reader.GetUnmanaged<Vector3>();

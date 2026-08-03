@@ -49,6 +49,11 @@ public class HeadlessRequesterWebSocket
         _webSocket.OnError += WebSocket_OnError;
         _webSocket.OnMessage += (sender, args) =>
         {
+            if (args.IsPing)
+            {
+                return;
+            }
+
             // Run the OnMessage event on main thread
             AsyncWorker.RunInMainTread(() => WebSocket_OnMessage(sender, args));
         };
@@ -112,7 +117,7 @@ public class HeadlessRequesterWebSocket
             return;
         }
 
-        var tarkovApplication = (TarkovApplication)Singleton<ClientApplication<ISession>>.Instance;
+        var tarkovApplication = (TarkovApplication)Singleton<ClientApplication<IEftSession>>.Instance;
 
         var success = await MatchMakerUIScript.JoinMatch(tarkovApplication.Session.Profile.Id, data.MatchId,
             null, false);
@@ -120,7 +125,7 @@ public class HeadlessRequesterWebSocket
         if (success)
         {
             FikaBackendUtils.MatchMakerAcceptScreenInstance
-                .method_22()
+                .GameStart()
                 .HandleExceptions();
         }
 

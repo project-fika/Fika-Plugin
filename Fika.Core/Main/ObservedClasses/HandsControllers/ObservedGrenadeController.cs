@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
+using EFT.InventoryLogic.Operations;
 using Fika.Core.Main.Players;
 
 namespace Fika.Core.Main.ObservedClasses.HandsControllers;
@@ -13,9 +14,9 @@ internal sealed class ObservedGrenadeController : Player.GrenadeHandsController
 {
     private ObservedPlayer _observedPlayer;
 
-    public static ObservedGrenadeController Create(ObservedPlayer observedPlayer, ThrowWeapItemClass item)
+    public static ObservedGrenadeController Create(ObservedPlayer observedPlayer, ThrowWeap item)
     {
-        var controller = smethod_9<ObservedGrenadeController>(observedPlayer, item);
+        var controller = CreateController<ObservedGrenadeController>(observedPlayer, item);
         controller._observedPlayer = observedPlayer;
         return controller;
     }
@@ -23,11 +24,11 @@ internal sealed class ObservedGrenadeController : Player.GrenadeHandsController
     public override Dictionary<Type, OperationFactoryDelegate> GetOperationFactoryDelegates()
     {
         var operationFactoryDelegates = base.GetOperationFactoryDelegates();
-        operationFactoryDelegates[typeof(TripwireStateManagerClass)] = new OperationFactoryDelegate(Grenade1);
+        operationFactoryDelegates[typeof(Player.GrenadeHandsController.PlantTripwireOperation)] = new OperationFactoryDelegate(Grenade1);
         return operationFactoryDelegates;
     }
 
-    private Player.BaseAnimationOperationClass Grenade1()
+    private Player.ObjectInHandsOperation Grenade1()
     {
         return new ObservedTripwireState(this, _observedPlayer);
     }
@@ -67,7 +68,7 @@ internal sealed class ObservedGrenadeController : Player.GrenadeHandsController
     /// <param name="rotation"></param>
     /// <param name="force"></param>
     /// <param name="lowThrow"></param>
-    public override void vmethod_2(float timeSinceSafetyLevelRemoved, Vector3 position, Quaternion rotation, Vector3 force, bool lowThrow)
+    public override void ThrowGrenade(float timeSinceSafetyLevelRemoved, Vector3 position, Quaternion rotation, Vector3 force, bool lowThrow)
     {
         // Do nothing, we use our own method
     }
@@ -82,25 +83,25 @@ internal sealed class ObservedGrenadeController : Player.GrenadeHandsController
     /// <param name="lowThrow">If it's a low throw or not</param>
     public void SpawnGrenade(float timeSinceSafetyLevelRemoved, Vector3 position, Quaternion rotation, Vector3 force, bool lowThrow)
     {
-        base.vmethod_2(timeSinceSafetyLevelRemoved, position, rotation, force, lowThrow);
+        base.ThrowGrenade(timeSinceSafetyLevelRemoved, position, rotation, force, lowThrow);
     }
 }
 
-public sealed class ObservedTripwireState(Player.GrenadeHandsController controller, FikaPlayer player) : Player.GrenadeHandsController.TripwireStateManagerClass(controller)
+public sealed class ObservedTripwireState(Player.GrenadeHandsController controller, FikaPlayer player) : Player.GrenadeHandsController.PlantTripwireOperation(controller)
 {
     private readonly FikaPlayer _fikaPlayer = player;
 
     public new void Start()
     {
-        Gparam_0.FirearmsAnimator.SetFireMode(Weapon.EFireMode.greanadePlanting, false);
-        EPlantOperationState_0 = EPlantOperationState.StateIn;
+        Controller.FirearmsAnimator.SetFireMode(Weapon.EFireMode.greanadePlanting, false);
+        _plantOperationState = EPlantOperationState.StateIn;
         State = Player.EOperationState.Executing;
         SetLeftStanceAnimOnStartOperation();
     }
 
     public override void OnIdleStartAction()
     {
-        EPlantOperationState_0 = EPlantOperationState.Idling;
+        _plantOperationState = EPlantOperationState.Idling;
     }
 
     public override void OnEnd()
@@ -119,14 +120,14 @@ public sealed class ObservedTripwireState(Player.GrenadeHandsController controll
     }
 
 
-    public override void Execute(GInterface438 operation, Callback callback)
+    public override void Execute(IInventoryOperation operation, Callback callback)
     {
         callback.Succeed();
     }
 
     public override void PlantTripwire()
     {
-        EPlantOperationState_0 = EPlantOperationState.Planting;
-        Gparam_0.FirearmsAnimator.SetGrenadeFire(FirearmsAnimator.EGrenadeFire.Throw);
+        _plantOperationState = EPlantOperationState.Planting;
+        Controller.FirearmsAnimator.SetGrenadeFire(FirearmsAnimator.EGrenadeFire.Throw);
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EFT.Communications;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -231,7 +232,7 @@ public class CoopHandler : MonoBehaviour
 
     public void ReInitInteractables()
     {
-        Singleton<GameWorld>.Instance.World_0.method_0(null);
+        Singleton<GameWorld>.Instance.World.RegisterNetworkInteractionObjects(null);
     }
 
     /// <summary>
@@ -279,7 +280,7 @@ public class CoopHandler : MonoBehaviour
 
         if (peers > 0)
         {
-            NotificationManagerClass.DisplayWarningNotification(LocaleUtils.HOST_CANNOT_EXTRACT.Localized());
+            NotificationManager.DisplayWarningNotification(LocaleUtils.HOST_CANNOT_EXTRACT.Localized());
             _requestQuitGame = false;
             return;
         }
@@ -287,7 +288,7 @@ public class CoopHandler : MonoBehaviour
         var recentDisconnect = server.TimeSinceLastPeerDisconnected > DateTime.Now.AddSeconds(-5);
         if (server.HasHadPeer && recentDisconnect)
         {
-            NotificationManagerClass.DisplayWarningNotification(LocaleUtils.HOST_WAIT_5_SECONDS.Localized());
+            NotificationManager.DisplayWarningNotification(LocaleUtils.HOST_WAIT_5_SECONDS.Localized());
             _requestQuitGame = false;
             return;
         }
@@ -322,8 +323,8 @@ public class CoopHandler : MonoBehaviour
         await JobScheduler.Yield();
         try
         {
-            await Singleton<PoolManagerClass>.Instance.LoadBundlesAndCreatePools(PoolManagerClass.PoolsCategory.Raid,
-                PoolManagerClass.AssemblyType.Local, allPrefabPaths, FikaPlugin.Instance.Settings.LoadPriority.Value.ToLoadPriorty());
+            await Singleton<ObjectsFactory>.Instance.LoadBundlesAndCreatePools(ObjectsFactory.PoolsCategory.Raid,
+                ObjectsFactory.AssemblyType.Local, allPrefabPaths, FikaPlugin.Instance.Settings.LoadPriority.Value.ToLoadPriorty());
         }
         catch (OperationCanceledException)
         {
@@ -468,7 +469,7 @@ public class CoopHandler : MonoBehaviour
         var otherPlayer = await ObservedPlayer.CreateObservedPlayer(gameWorld, netId, position, Quaternion.identity, "Player",
             isAi ? "Bot_" : $"Player_{profile.Nickname}_", EPointOfView.ThirdPerson, profile, healthBytes, isAi,
             EUpdateQueue.Update, Player.EUpdateMode.Manual, Player.EUpdateMode.Auto,
-            BackendConfigAbstractClass.Config.CharacterController.ObservedPlayerMode,
+            AppEnvironment.Config.CharacterController.ObservedPlayerMode,
             FikaGlobals.GetOtherPlayerSensitivity, FikaGlobals.GetOtherPlayerSensitivity, ObservedViewFilter.Default,
             firstId, firstOperationId, isZombie);
 
@@ -508,7 +509,7 @@ public class CoopHandler : MonoBehaviour
 
             if (playerCollider != null && otherCollider != null)
             {
-                EFTPhysicsClass.IgnoreCollision(playerCollider, otherCollider);
+                PhysicsExtensions.IgnoreCollision(playerCollider, otherCollider);
             }
         }
 

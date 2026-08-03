@@ -11,6 +11,8 @@ using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.FirearmController;
 using Fika.Core.Networking.Packets.FirearmController.SubPackets;
 using Fika.Core.Networking.Pooling;
+using ReloadMagPacket = Fika.Core.Networking.Packets.FirearmController.SubPackets.ReloadMagPacket;
+using RollCylinderPacket = Fika.Core.Networking.Packets.FirearmController.SubPackets.RollCylinderPacket;
 
 namespace Fika.Core.Main.ClientClasses.HandsControllers;
 
@@ -23,7 +25,7 @@ public class FikaClientFirearmController : Player.FirearmController
 
     public static FikaClientFirearmController Create(FikaPlayer player, Weapon weapon)
     {
-        var controller = smethod_6<FikaClientFirearmController>(player, weapon);
+        var controller = CreateController<FikaClientFirearmController>(player, weapon);
         controller._fikaPlayer = player;
         controller._isClient = FikaBackendUtils.IsClient;
         controller._isGrenadeLauncher = weapon.IsGrenadeLauncher;
@@ -78,9 +80,9 @@ public class FikaClientFirearmController : Player.FirearmController
     public override Dictionary<Type, OperationFactoryDelegate> GetOperationFactoryDelegates()
     {
         var operationFactoryDelegates = base.GetOperationFactoryDelegates();
-        operationFactoryDelegates[typeof(AmmoPackReloadOperationClass)] = new OperationFactoryDelegate(Weapon1);
-        operationFactoryDelegates[typeof(CylinderReloadOperationClass)] = new OperationFactoryDelegate(Weapon2);
-        operationFactoryDelegates[typeof(GenericFireOperationClass)] = new OperationFactoryDelegate(Weapon3);
+        operationFactoryDelegates[typeof(Player.FirearmController.ReloadInternalMagBase)] = new OperationFactoryDelegate(Weapon1);
+        operationFactoryDelegates[typeof(Player.FirearmController.ReloadCylinderMagOperation)] = new OperationFactoryDelegate(Weapon2);
+        operationFactoryDelegates[typeof(Player.FirearmController.FireOperation)] = new OperationFactoryDelegate(Weapon3);
         return operationFactoryDelegates;
     }
 
@@ -113,7 +115,7 @@ public class FikaClientFirearmController : Player.FirearmController
         return base.CanPressTrigger();
     }
 
-    public Player.BaseAnimationOperationClass Weapon1()
+    public Player.ObjectInHandsOperation Weapon1()
     {
         if (Item.ReloadMode is Weapon.EReloadMode.InternalMagazine && Item.Chambers.Length == 0)
         {
@@ -126,36 +128,36 @@ public class FikaClientFirearmController : Player.FirearmController
         return new AmmoPackReloadInternalOneChamberOperation(this);
     }
 
-    public Player.BaseAnimationOperationClass Weapon2()
+    public Player.ObjectInHandsOperation Weapon2()
     {
         return new CylinderReloadOperation(this);
     }
 
-    public Player.BaseAnimationOperationClass Weapon3()
+    public Player.ObjectInHandsOperation Weapon3()
     {
-        if (Item is RocketLauncherItemClass)
+        if (Item is RocketLauncher)
         {
-            return new GClass2036(this);
+            return new Player.FirearmController.RocketLauncherFire(this);
         }
         if (Item.IsFlareGun)
         {
-            return new FlareGunFireOperationClass(this);
+            return new Player.FirearmController.FlareGunFire(this);
         }
         if (Item.IsOneOff)
         {
-            return new IsOneOffFireOperationClass(this);
+            return new Player.FirearmController.OneOffGunFire(this);
         }
         if (Item.ReloadMode == Weapon.EReloadMode.OnlyBarrel)
         {
             return new FireOnlyBarrelFireOperation(this);
         }
-        if (Item is RevolverItemClass)
+        if (Item is Revolver)
         {
-            return new RevolverFireOperationClass(this);
+            return new Player.FirearmController.FireCylinderMagOperation(this);
         }
         if (!Item.BoltAction)
         {
-            return new GenericFireOperationClass(this);
+            return new Player.FirearmController.FireOperation(this);
         }
         return new DefaultFireOperation(this);
     }
@@ -268,7 +270,7 @@ public class FikaClientFirearmController : Player.FirearmController
         return flag;
     }
 
-    public override void InitiateShot(IWeapon weapon, AmmoItemClass ammo, Vector3 shotPosition, Vector3 shotDirection, Vector3 fireportPosition, int chamberIndex, float overheat)
+    public override void InitiateShot(IWeapon weapon, Ammo ammo, Vector3 shotPosition, Vector3 shotDirection, Vector3 fireportPosition, int chamberIndex, float overheat)
     {
         EShotType shotType = default;
 
@@ -305,7 +307,7 @@ public class FikaClientFirearmController : Player.FirearmController
         base.InitiateShot(weapon, ammo, shotPosition, shotDirection, fireportPosition, chamberIndex, overheat);
     }
 
-    public override void QuickReloadMag(MagazineItemClass magazine, Callback callback)
+    public override void QuickReloadMag(Magazine magazine, Callback callback)
     {
         if (CanStartReload())
         {
@@ -319,7 +321,7 @@ public class FikaClientFirearmController : Player.FirearmController
         callback?.Fail("Can't start QuickReloadMag");
     }
 
-    public override void ReloadBarrels(AmmoPackReloadingClass ammoPack, ItemAddress placeToPutContainedAmmoMagazine, Callback callback)
+    public override void ReloadBarrels(AmmoPack ammoPack, ItemAddress placeToPutContainedAmmoMagazine, Callback callback)
     {
         if (CanStartReload() && ammoPack.AmmoCount > 0)
         {
@@ -331,7 +333,7 @@ public class FikaClientFirearmController : Player.FirearmController
         callback?.Fail("Can't start ReloadBarrels");
     }
 
-    public override void ReloadCylinderMagazine(AmmoPackReloadingClass ammoPack, Callback callback, bool quickReload = false)
+    public override void ReloadCylinderMagazine(AmmoPack ammoPack, Callback callback, bool quickReload = false)
     {
         if (Blindfire)
         {
@@ -344,7 +346,7 @@ public class FikaClientFirearmController : Player.FirearmController
         if (CanStartReload())
         {
             ReloadCylinderMagazineHandler handler = new(_fikaPlayer, this, quickReload, ammoPack.GetReloadingAmmoIds(),
-            [], (CylinderMagazineItemClass)Item.GetCurrentMagazine());
+            [], (CylinderMagazine)Item.GetCurrentMagazine());
             Weapon.GetShellsIndexes(handler.ShellsIndexes);
             CurrentOperation.ReloadCylinderMagazine(ammoPack, callback, handler.Process, handler.QuickReload);
             return;
@@ -353,7 +355,7 @@ public class FikaClientFirearmController : Player.FirearmController
         callback?.Fail("Can't start ReloadCylinderMagazine");
     }
 
-    public override void ReloadGrenadeLauncher(AmmoPackReloadingClass ammoPack, Callback callback)
+    public override void ReloadGrenadeLauncher(AmmoPack ammoPack, Callback callback)
     {
         if (CanStartReload())
         {
@@ -369,7 +371,7 @@ public class FikaClientFirearmController : Player.FirearmController
         callback?.Fail("Can't start ReloadGrenadeLauncher");
     }
 
-    public override void ReloadMag(MagazineItemClass magazine, ItemAddress itemAddress, Callback callback)
+    public override void ReloadMag(Magazine magazine, ItemAddress itemAddress, Callback callback)
     {
         if (!CanStartReload() || Blindfire)
         {
@@ -387,7 +389,7 @@ public class FikaClientFirearmController : Player.FirearmController
         callback?.Fail("Can't start ReloadMag");
     }
 
-    public override void ReloadWithAmmo(AmmoPackReloadingClass ammoPack, Callback callback)
+    public override void ReloadWithAmmo(AmmoPack ammoPack, Callback callback)
     {
         if (Item.GetCurrentMagazine() == null)
         {
@@ -403,7 +405,7 @@ public class FikaClientFirearmController : Player.FirearmController
         callback?.Fail("Can't start ReloadWithAmmo");
     }
 
-    public override bool SetLightsState(FirearmLightStateStruct[] lightsStates, bool force = false, bool animated = true)
+    public override bool SetLightsState(LightsState[] lightsStates, bool force = false, bool animated = true)
     {
         if (force || CurrentOperation.CanChangeLightState(lightsStates))
         {
@@ -415,24 +417,24 @@ public class FikaClientFirearmController : Player.FirearmController
         return base.SetLightsState(lightsStates, force, animated);
     }
 
-    public override void SetScopeMode(FirearmScopeStateStruct[] scopeStates)
+    public override void SetScopeMode(ScopeState[] scopeStates)
     {
         SendScopeStates(scopeStates);
         base.SetScopeMode(scopeStates);
     }
-    public override void OpticCalibrationSwitchUp(FirearmScopeStateStruct[] scopeStates)
+    public override void OpticCalibrationSwitchUp(ScopeState[] scopeStates)
     {
         SendScopeStates(scopeStates);
         base.OpticCalibrationSwitchUp(scopeStates);
     }
 
-    public override void OpticCalibrationSwitchDown(FirearmScopeStateStruct[] scopeStates)
+    public override void OpticCalibrationSwitchDown(ScopeState[] scopeStates)
     {
         SendScopeStates(scopeStates);
         base.OpticCalibrationSwitchDown(scopeStates);
     }
 
-    private void SendScopeStates(FirearmScopeStateStruct[] scopeStates)
+    private void SendScopeStates(ScopeState[] scopeStates)
     {
         if (!CurrentOperation.CanChangeScopeStates(scopeStates))
         {
@@ -444,7 +446,7 @@ public class FikaClientFirearmController : Player.FirearmController
         _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
     }
 
-    public override void ShotMisfired(AmmoItemClass ammo, Weapon.EMalfunctionState malfunctionState, float overheat)
+    public override void ShotMisfired(Ammo ammo, Weapon.EMalfunctionState malfunctionState, float overheat)
     {
         EShotType shotType = new();
 
@@ -515,7 +517,7 @@ public class FikaClientFirearmController : Player.FirearmController
         _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
     }
 
-    public override void CreateFlareShot(AmmoItemClass flareItem, Vector3 shotPosition, Vector3 forward)
+    public override void CreateFlareShot(Ammo flareItem, Vector3 shotPosition, Vector3 forward)
     {
         _packet.Type = EFirearmSubPacketType.FlareShot;
         _packet.SubPacket = FlareShotPacket.FromValue(shotPosition, forward, flareItem.TemplateId, false);
@@ -523,7 +525,7 @@ public class FikaClientFirearmController : Player.FirearmController
         base.CreateFlareShot(flareItem, shotPosition, forward);
     }
 
-    public override void CreateRocketShot(AmmoItemClass rocketItem, Vector3 shotPosition, Vector3 forward, Transform smokeport = null)
+    public override void CreateRocketShot(Ammo rocketItem, Vector3 shotPosition, Vector3 forward, Transform smokeport = null)
     {
         _packet.Type = EFirearmSubPacketType.RocketShot;
         _packet.SubPacket = RocketShotPacket.FromValue(shotPosition, forward, rocketItem.TemplateId);
@@ -568,82 +570,82 @@ public class FikaClientFirearmController : Player.FirearmController
         _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
     }
 
-    private class CylinderReloadOperation(Player.FirearmController controller) : CylinderReloadOperationClass(controller)
+    private class CylinderReloadOperation(Player.FirearmController controller) : Player.FirearmController.ReloadCylinderMagOperation(controller)
     {
         public override void SetTriggerPressed(bool pressed)
         {
-            var bool_ = Bool_1;
+            var bool_ = ReloadAborted;
             base.SetTriggerPressed(pressed);
-            if (Bool_1 && !bool_)
+            if (ReloadAborted && !bool_)
             {
-                coopClientFirearmController.SendAbortReloadPacket(Int_0);
+                coopClientFirearmController.SendAbortReloadPacket(AmmoToLoadIntoMag);
             }
         }
 
         public override void SwitchToIdle()
         {
-            coopClientFirearmController.SendEndReloadPacket(Int_0);
-            method_13();
+            coopClientFirearmController.SendEndReloadPacket(AmmoToLoadIntoMag);
+            EndReload();
             base.SwitchToIdle();
         }
 
         private readonly FikaClientFirearmController coopClientFirearmController = (FikaClientFirearmController)controller;
     }
 
-    private class AmmoPackReloadInternalOneChamberOperation(Player.FirearmController controller) : AmmoPackReloadInternalOneChamberOperationClass(controller)
+    private class AmmoPackReloadInternalOneChamberOperation(Player.FirearmController controller) : Player.FirearmController.ReloadInternalMagOperation(controller)
     {
         public override void SetTriggerPressed(bool pressed)
         {
-            var bool_ = Bool_1;
+            var bool_ = ReloadAborted;
             base.SetTriggerPressed(pressed);
-            if (Bool_1 && !bool_)
+            if (ReloadAborted && !bool_)
             {
-                _coopClientFirearmController.SendAbortReloadPacket(Int_0);
+                _coopClientFirearmController.SendAbortReloadPacket(AmmoToLoadIntoMag);
             }
         }
 
         public override void SwitchToIdle()
         {
-            _coopClientFirearmController.SendEndReloadPacket(Int_0);
+            _coopClientFirearmController.SendEndReloadPacket(AmmoToLoadIntoMag);
             base.SwitchToIdle();
         }
 
         private readonly FikaClientFirearmController _coopClientFirearmController = (FikaClientFirearmController)controller;
     }
 
-    private class AmmoPackReloadInternalBoltOpenOperation(Player.FirearmController controller) : AmmoPackReloadInternalBoltOpenOperationClass(controller)
+    private class AmmoPackReloadInternalBoltOpenOperation(Player.FirearmController controller) : Player.FirearmController.ReloadInternalMagWithOpenBoltOperation(controller)
     {
         public override void SetTriggerPressed(bool pressed)
         {
-            var bool_ = Bool_1;
+            var bool_ = ReloadAborted;
             base.SetTriggerPressed(pressed);
-            if (Bool_1 && !bool_)
+            if (ReloadAborted && !bool_)
             {
-                _coopClientFirearmController.SendAbortReloadPacket(Int_0);
+                _coopClientFirearmController.SendAbortReloadPacket(AmmoToLoadIntoMag);
             }
         }
 
         public override void SwitchToIdle()
         {
-            _coopClientFirearmController.SendEndReloadPacket(Int_0);
+            _coopClientFirearmController.SendEndReloadPacket(AmmoToLoadIntoMag);
             base.SwitchToIdle();
         }
 
         private readonly FikaClientFirearmController _coopClientFirearmController = (FikaClientFirearmController)controller;
     }
 
-    private class DefaultFireOperation(Player.FirearmController controller) : DefaultWeaponOperationClass(controller)
+    private class DefaultFireOperation(Player.FirearmController controller) : Player.FirearmController.BoltActionFireOperation(controller)
     {
         public override void Start()
         {
             base.Start();
-            SendBoltActionReloadPacket(!FirearmController_0.IsTriggerPressed);
+            SendBoltActionReloadPacket(!Controller.IsTriggerPressed);
         }
 
         public override void SetTriggerPressed(bool pressed)
         {
             base.SetTriggerPressed(pressed);
-            SendBoltActionReloadPacket(!FirearmController_0.IsTriggerPressed);
+            SendBoltActionReloadPacket(!Controller.IsTriggerPressed);
         }
 
         public override void SetInventoryOpened(bool opened)
@@ -652,25 +654,25 @@ public class FikaClientFirearmController : Player.FirearmController
             SendBoltActionReloadPacket(true);
         }
 
-        public override void ReloadMag(MagazineItemClass magazine, ItemAddress gridItemAddress, Callback finishCallback, Callback startCallback)
+        public override void ReloadMag(Magazine magazine, ItemAddress gridItemAddress, Callback finishCallback, Callback startCallback)
         {
             base.ReloadMag(magazine, gridItemAddress, finishCallback, startCallback);
             SendBoltActionReloadPacket(true);
         }
 
-        public override void QuickReloadMag(MagazineItemClass magazine, Callback finishCallback, Callback startCallback)
+        public override void QuickReloadMag(Magazine magazine, Callback finishCallback, Callback startCallback)
         {
             base.QuickReloadMag(magazine, finishCallback, startCallback);
             SendBoltActionReloadPacket(true);
         }
 
-        public override void ReloadWithAmmo(AmmoPackReloadingClass ammoPack, Callback finishCallback, Callback startCallback)
+        public override void ReloadWithAmmo(AmmoPack ammoPack, Callback finishCallback, Callback startCallback)
         {
             base.ReloadWithAmmo(ammoPack, finishCallback, startCallback);
             SendBoltActionReloadPacket(true);
         }
 
-        public override void ReloadCylinderMagazine(AmmoPackReloadingClass ammoPack, Callback finishCallback, Callback startCallback, bool quickReload = false)
+        public override void ReloadCylinderMagazine(AmmoPack ammoPack, Callback finishCallback, Callback startCallback, bool quickReload = false)
         {
             base.ReloadCylinderMagazine(ammoPack, finishCallback, startCallback, quickReload);
             SendBoltActionReloadPacket(true);
@@ -695,12 +697,12 @@ public class FikaClientFirearmController : Player.FirearmController
         private bool _hasSent;
     }
 
-    private sealed class ReloadMagHandler(FikaPlayer fikaPlayer, FikaClientFirearmController coopClientFirearmController, ItemAddress gridItemAddress, MagazineItemClass magazine)
+    private sealed class ReloadMagHandler(FikaPlayer fikaPlayer, FikaClientFirearmController coopClientFirearmController, ItemAddress gridItemAddress, Magazine magazine)
     {
         private readonly FikaPlayer _fikaPlayer = fikaPlayer;
         private readonly FikaClientFirearmController _coopClientFirearmController = coopClientFirearmController;
         private readonly ItemAddress _gridItemAddress = gridItemAddress;
-        private readonly MagazineItemClass _magazine = magazine;
+        private readonly Magazine _magazine = magazine;
 
         public void Process(IResult _)
         {
@@ -713,14 +715,14 @@ public class FikaClientFirearmController : Player.FirearmController
         }
     }
 
-    private sealed class ReloadCylinderMagazineHandler(FikaPlayer fikaPlayer, FikaClientFirearmController coopClientFirearmController, bool quickReload, string[] ammoIds, List<int> shellsIndexes, CylinderMagazineItemClass cylinderMagazine)
+    private sealed class ReloadCylinderMagazineHandler(FikaPlayer fikaPlayer, FikaClientFirearmController coopClientFirearmController, bool quickReload, string[] ammoIds, List<int> shellsIndexes, CylinderMagazine cylinderMagazine)
     {
         private readonly FikaPlayer _fikaPlayer = fikaPlayer;
         private readonly FikaClientFirearmController _coopClientFirearmController = coopClientFirearmController;
         public readonly bool QuickReload = quickReload;
         private readonly string[] _ammoIds = ammoIds;
         public readonly List<int> ShellsIndexes = shellsIndexes;
-        private readonly CylinderMagazineItemClass _cylinderMagazine = cylinderMagazine;
+        private readonly CylinderMagazine _cylinderMagazine = cylinderMagazine;
 
         public void Process(IResult _)
         {
@@ -735,12 +737,12 @@ public class FikaClientFirearmController : Player.FirearmController
         }
     }
 
-    private sealed class ReloadBarrelsHandler(FikaPlayer fikaPlayer, FikaClientFirearmController coopClientFirearmController, ItemAddress placeToPutContainedAmmoMagazine, AmmoPackReloadingClass ammoPack)
+    private sealed class ReloadBarrelsHandler(FikaPlayer fikaPlayer, FikaClientFirearmController coopClientFirearmController, ItemAddress placeToPutContainedAmmoMagazine, AmmoPack ammoPack)
     {
         private readonly FikaPlayer _fikaPlayer = fikaPlayer;
         private readonly FikaClientFirearmController _coopClientFirearmController = coopClientFirearmController;
         private readonly ItemAddress _placeToPutContainedAmmoMagazine = placeToPutContainedAmmoMagazine;
-        private readonly AmmoPackReloadingClass _ammoPack = ammoPack;
+        private readonly AmmoPack _ammoPack = ammoPack;
 
         public void Process(IResult _)
         {

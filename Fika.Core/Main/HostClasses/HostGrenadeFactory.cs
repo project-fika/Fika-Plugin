@@ -2,7 +2,7 @@
 
 namespace Fika.Core.Main.HostClasses;
 
-public class HostGrenadeFactory : GrenadeFactoryClass
+public class HostGrenadeFactory : GrenadeFactory
 {
     public override Grenade AddGrenade(GameObject gameObject)
     {

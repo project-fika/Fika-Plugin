@@ -1,4 +1,5 @@
-﻿using Fika.Core.Main.ObservedClasses.HandsControllers;
+﻿using EFT.InventoryLogic;
+using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Pooling;
 
@@ -32,7 +33,7 @@ public sealed class ReloadLauncherPacket : IPoolSubPacket
         if (player.HandsController is ObservedFirearmController controller)
         {
             var ammo = controller.FindAmmoByIds(AmmoIds);
-            AmmoPackReloadingClass ammoPack = new(ammo);
+            AmmoPack ammoPack = new(ammo);
             controller.FastForwardCurrentState();
             controller.ReloadGrenadeLauncher(ammoPack, null);
         }

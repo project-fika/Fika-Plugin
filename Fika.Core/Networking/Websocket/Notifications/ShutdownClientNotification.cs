@@ -1,6 +1,7 @@
-﻿namespace Fika.Core.Networking.Websocket.Notifications;
+﻿using EFT.Communications;
+namespace Fika.Core.Networking.Websocket.Notifications;
 
-public class ShutdownClientNotification : NotificationAbstractClass
+public class ShutdownClientNotification : Notification
 {
     public override string Description
     {

@@ -1,4 +1,8 @@
-﻿using System;
+﻿using Diz.Jobs;
+using EFT.Settings;
+using EFT.Settings.Sound;
+using JsonType;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -59,7 +63,7 @@ public static class FikaGlobals
     {
         get
         {
-            return GClass2240.Instance;
+            return FullySearchedSearchController.Instance;
         }
     }
 
@@ -81,15 +85,15 @@ public static class FikaGlobals
 
     private static InputTree _inputTree;
 
-    public static VoipSettingsClass VOIPHandler
+    public static VoipSettings VOIPHandler
     {
         get
         {
             if (_voipHandler == null)
             {
-                _voipHandler = VoipSettingsClass.Default;
+                _voipHandler = VoipSettings.Default;
                 _voipHandler.VoipQualitySettings.Apply();
-                _voipHandler.MicrophoneChecked = SoundSettingsControllerClass.CheckMicrophone();
+                _voipHandler.MicrophoneChecked = SoundSettingsGroup.CheckMicrophone();
                 _voipHandler.VoipEnabled = true;
                 var pttSettings = _voipHandler.PushToTalkSettings;
                 pttSettings.SpeakingSecondsLimit = 20f;
@@ -112,7 +116,7 @@ public static class FikaGlobals
         }
     }
 
-    private static VoipSettingsClass _voipHandler;
+    private static VoipSettings _voipHandler;
 
     internal static float GetOtherPlayerSensitivity()
     {
@@ -121,12 +125,12 @@ public static class FikaGlobals
 
     internal static float GetLocalPlayerSensitivity()
     {
-        return Singleton<SharedGameSettingsClass>.Instance.Control.Settings.MouseSensitivity;
+        return Singleton<SettingsManager>.Instance.Control.Settings.MouseSensitivity;
     }
 
     internal static float GetLocalPlayerAimingSensitivity()
     {
-        return Singleton<SharedGameSettingsClass>.Instance.Control.Settings.MouseAimingSensitivity;
+        return Singleton<SettingsManager>.Instance.Control.Settings.MouseAimingSensitivity;
     }
 
     public static float GetApplicationTime()
@@ -149,7 +153,7 @@ public static class FikaGlobals
         return breaker.AvailableToSync;
     }
 
-    internal static Item GetLootItemPositionItem(LootItemPositionClass positionClass)
+    internal static Item GetLootItemPositionItem(JsonLootItem positionClass)
     {
         return positionClass.Item;
     }
@@ -180,8 +184,8 @@ public static class FikaGlobals
         {
             collection.AddRange(subItem.Template.AllResources);
         }
-        var loadTask = Singleton<PoolManagerClass>.Instance.LoadBundlesAndCreatePools(PoolManagerClass.PoolsCategory.Raid, PoolManagerClass.AssemblyType.Online,
-            [.. collection], JobPriorityClass.Immediate, null, default);
+        var loadTask = Singleton<ObjectsFactory>.Instance.LoadBundlesAndCreatePools(ObjectsFactory.PoolsCategory.Raid, ObjectsFactory.AssemblyType.Online,
+            [.. collection], JobYieldPriority.Immediate, null, default);
 
         WaitForEndOfFrame waitForEndOfFrame = new();
         while (!loadTask.IsCompleted)
@@ -201,11 +205,11 @@ public static class FikaGlobals
     }
 
     /// <summary>
-    /// Forces the <see cref="InfoClass.MainProfileNickname"/> to be set on a profile
+    /// Forces the <see cref="ProfileInfo.MainProfileNickname"/> to be set on a profile
     /// </summary>
     /// <param name="infoClass"></param>
     /// <param name="nickname"></param>
-    public static void SetProfileNickname(this InfoClass infoClass, string nickname)
+    public static void SetProfileNickname(this ProfileInfo infoClass, string nickname)
     {
         Traverse.Create(infoClass).Field<string>("MainProfileNickname").Value = nickname;
     }
@@ -221,10 +225,10 @@ public static class FikaGlobals
     }
 
     /// <summary>
-    /// Gets the current <see cref="ISession"/>
+    /// Gets the current <see cref="IEftSession"/>
     /// </summary>
-    /// <returns><see cref="ISession"/> of the application</returns>
-    public static ISession GetSession()
+    /// <returns><see cref="IEftSession"/> of the application</returns>
+    public static IEftSession GetSession()
     {
         if (TarkovApplication.Exist(out var tarkovApplication))
         {
@@ -265,7 +269,7 @@ public static class FikaGlobals
     public static Profile GetLiteProfile(bool scav)
     {
         var profile = GetProfile(scav);
-        CompleteProfileDescriptorClass liteDescriptor = new(profile, SearchControllerSerializer)
+        ProfileDescriptor liteDescriptor = new(profile, SearchControllerSerializer)
         {
             Encyclopedia = [],
             InsuredItems = [],
@@ -278,8 +282,8 @@ public static class FikaGlobals
     /// Gets the states from a <see cref="TacticalComboVisualController"/>
     /// </summary>
     /// <param name="controller"></param>
-    /// <returns><see cref="FirearmLightStateStruct"/></returns>
-    public static FirearmLightStateStruct GetFirearmLightStates(TacticalComboVisualController controller)
+    /// <returns><see cref="LightsState"/></returns>
+    public static LightsState GetFirearmLightStates(TacticalComboVisualController controller)
     {
         return controller.LightMod.GetLightState(false, false);
     }
@@ -298,10 +302,10 @@ public static class FikaGlobals
     /// Gets a light states from a <see cref="LightComponent"/>
     /// </summary>
     /// <param name="component">The <see cref="LightComponent"/> to check</param>
-    /// <returns>A new <see cref="FirearmLightStateStruct"/> with data</returns>
-    public static FirearmLightStateStruct GetFirearmLightStatesFromComponent(LightComponent component)
+    /// <returns>A new <see cref="LightsState"/> with data</returns>
+    public static LightsState GetFirearmLightStatesFromComponent(LightComponent component)
     {
-        return new FirearmLightStateStruct
+        return new LightsState
         {
             Id = component.Item.Id,
             IsActive = component.IsActive,
@@ -448,15 +452,15 @@ public static class FikaGlobals
     /// Converts the <see cref="ELoadPriority"/> to a delegate
     /// </summary>
     /// <param name="priority">The priority</param>
-    /// <returns>A new <see cref="GDelegate62"/> for <see cref="Components.CoopHandler.SpawnPlayer(Components.CoopHandler.SpawnObject)"/></returns>
-    public static GDelegate62 ToLoadPriorty(this ELoadPriority priority)
+    /// <returns>A new <see cref="YieldDelegate"/> for <see cref="Components.CoopHandler.SpawnPlayer(Components.CoopHandler.SpawnObject)"/></returns>
+    public static YieldDelegate ToLoadPriorty(this ELoadPriority priority)
     {
         return priority switch
         {
-            ELoadPriority.Low => JobPriorityClass.Low,
-            ELoadPriority.Medium => JobPriorityClass.General,
-            ELoadPriority.High => JobPriorityClass.Immediate,
-            _ => JobPriorityClass.Low,
+            ELoadPriority.Low => JobYieldPriority.Low,
+            ELoadPriority.Medium => JobYieldPriority.General,
+            ELoadPriority.High => JobYieldPriority.Immediate,
+            _ => JobYieldPriority.Low,
         };
     }
 

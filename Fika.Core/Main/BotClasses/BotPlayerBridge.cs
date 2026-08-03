@@ -5,7 +5,7 @@ using Fika.Core.Main.Players;
 
 namespace Fika.Core.Main.BotClasses;
 
-public sealed class BotPlayerBridge(FikaBot bot) : BodyPartCollider.IPlayerBridge
+public sealed class BotPlayerBridge(FikaBot bot) : BodyPartCollider.IObserverToPlayerBridge
 {
     private readonly FikaBot _bot = bot;
 
@@ -33,12 +33,12 @@ public sealed class BotPlayerBridge(FikaBot bot) : BodyPartCollider.IPlayerBridg
         }
     }
 
-    public void ApplyDamageInfo(DamageInfoStruct damageInfo, EBodyPart bodyPartType, EBodyPartColliderType bodyPartCollider, float absorbed)
+    public void ApplyDamageInfo(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType bodyPartCollider, float absorbed)
     {
         _bot.ApplyDamageInfo(damageInfo, bodyPartType, bodyPartCollider, absorbed);
     }
 
-    public ShotInfoClass ApplyShot(DamageInfoStruct damageInfo, EBodyPart bodyPart, EBodyPartColliderType bodyPartCollider, EArmorPlateCollider armorPlateCollider, ShotIdStruct shotId)
+    public PlayerHitInfo ApplyShot(DamageInfo damageInfo, EBodyPart bodyPart, EBodyPartColliderType bodyPartCollider, EArmorPlateCollider armorPlateCollider, ShotId shotId)
     {
         if (damageInfo.DamageType is EDamageType.Explosion or EDamageType.Landmine or EDamageType.Sniper)
         {
@@ -69,12 +69,12 @@ public sealed class BotPlayerBridge(FikaBot bot) : BodyPartCollider.IPlayerBridg
         return _bot.IsShotDeflectedByHeavyArmor(colliderType, armorPlateCollider, shotSeed);
     }
 
-    public bool SetShotStatus(BodyPartCollider bodypart, EftBulletClass shot, Vector3 hitpoint, Vector3 shotNormal, Vector3 shotDirection)
+    public bool SetShotStatus(BodyPartCollider bodypart, Shot shot, Vector3 hitpoint, Vector3 shotNormal, Vector3 shotDirection)
     {
         return _bot.SetShotStatus(bodypart, shot, hitpoint, shotNormal, shotDirection);
     }
 
-    public bool TryGetArmorResistData(BodyPartCollider bodyPart, float penetrationPower, out ArmorResistanceStruct armorResistanceData)
+    public bool TryGetArmorResistData(BodyPartCollider bodyPart, float penetrationPower, out ArmorResistanceData armorResistanceData)
     {
         return _bot.TryGetArmorResistData(bodyPart, penetrationPower, out armorResistanceData);
     }

@@ -37,7 +37,7 @@ public class NatDiscoverer
     // Finalizer is never used however its destructor, that releases the open ports, is invoked by the
     // process as part of the shuting down step. So, don't remove it!
     private static readonly Finalizer Finalizer = new();
-    internal static readonly Timer RenewTimer = new(RenewMappings, null, 5000, 2000);
+    internal static readonly System.Threading.Timer RenewTimer = new(RenewMappings, null, 5000, 2000);
 
     /// <summary>
     /// Discovers and returns an UPnp or Pmp NAT device; otherwise a <see cref="NatDeviceNotFoundException">NatDeviceNotFoundException</see>

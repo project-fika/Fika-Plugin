@@ -8,7 +8,7 @@ internal class ScavProfileLoad_Override : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(TarkovApplication).GetMethod(nameof(TarkovApplication.method_52));
+        return typeof(TarkovApplication).GetMethod(nameof(TarkovApplication.OnGameEnd));
     }
 
     [PatchPrefix]

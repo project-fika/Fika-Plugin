@@ -1,10 +1,11 @@
-﻿namespace Fika.Core.Main.ClientClasses;
+﻿using EFT;
+namespace Fika.Core.Main.ClientClasses;
 
 public class FikaClientSmokeGrenade : ObservedSmokeGrenade
 {
     private const float _smoothSpeed = 10f;
 
-    public override void ApplyNetPacket(GrenadeDataPacketStruct packet)
+    public override void ApplyNetPacket(GrenadeSyncPacket packet)
     {
         var t = 1f - Mathf.Exp(-_smoothSpeed * Time.deltaTime);
 
@@ -22,13 +23,13 @@ public class FikaClientSmokeGrenade : ObservedSmokeGrenade
         }
         else
         {
-            method_1(packet);
+            SetVelocity(packet);
         }
 
         if (packet.Done)
         {
             transform.SetPositionAndRotation(packet.Position, packet.Rotation);
-            method_1(packet);
+            SetVelocity(packet);
             OnDoneFromNet();
         }
     }

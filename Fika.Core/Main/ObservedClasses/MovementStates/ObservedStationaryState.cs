@@ -3,7 +3,7 @@ using EFT;
 
 namespace Fika.Core.Main.ObservedClasses.MovementStates;
 
-public class ObservedStationaryState(MovementContext movementContext) : StationaryStateClass(movementContext)
+public class ObservedStationaryState(MovementContext movementContext) : StationaryPlayerState(movementContext)
 {
     public override bool OutOfOperationRange
     {
@@ -20,12 +20,12 @@ public class ObservedStationaryState(MovementContext movementContext) : Stationa
         StationaryWeapon.ObserverMagazineAmmoCount = StationaryWeapon.GetMagazineCount();
         if (OutOfOperationRange)
         {
-            MovementContext.DropStationary(StationaryPacketStruct.EStationaryCommand.Denied);
+            MovementContext.DropStationary(StationaryWeaponPacket.EStationaryCommand.Denied);
             return;
         }
-        Bool_2 = false;
-        Vector2_0 = new Vector2(StationaryWeapon.Yaw, StationaryWeapon.Pitch);
-        Float_5 = 0.5f;
+        _denied = false;
+        _exitRotation = new Vector2(StationaryWeapon.Yaw, StationaryWeapon.Pitch);
+        _outTime = 0.5f;
         if (isFromSameState)
         {
             return;
@@ -39,21 +39,21 @@ public class ObservedStationaryState(MovementContext movementContext) : Stationa
 
     public void SetStationaryCallback(Player.AbstractHandsController arg1, Player.AbstractHandsController newContoller)
     {
-        Class1402 @class = new()
+        CG_Spawned @class = new()
         {
-            StationaryStateClass = this
+            StationaryPlayerState = this
         };
         MovementContext.SetStationaryStrategy();
         MovementContext.StateLocksInventory = false;
-        Transform_0 = newContoller.HandsHierarchy.GetTransform(ECharacterWeaponBones.weapon);
+        _weaponTransform = newContoller.HandsHierarchy.GetTransform(ECharacterWeaponBones.weapon);
         StationaryWeapon.SetPivots(newContoller.HandsHierarchy);
         @class.firearm = newContoller as Player.FirearmController;
         StationaryWeapon.Hide(MovementContext.IsAI);
         MovementContext.RotationAction = StationaryWeapon.Animation == EFT.Interactive.StationaryWeapon.EStationaryAnimationType.AGS_17
             ? MovementContext.AGSRotationFunction : MovementContext.UtesRotationFunction;
         Stage = EStationaryStage.Main;
-        MovementContext.OnHandsControllerChanged += method_3;
-        MovementContext.HandsChangingEvent += method_2;
-        Action_0 = new Action(@class.method_1);
+        MovementContext.OnHandsControllerChanged += OnHandsControllerChanged;
+        MovementContext.HandsChangingEvent += MovementContextOnHandsChangedEvent;
+        _handsChangingEventUnsubscribe = new Action(@class.method_1);
     }
 }

@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using CommonAssets.Scripts.Game;
+using EFT;
+using EFT.Weather;
+using System.Collections.Generic;
 using System.Linq;
 using Comfort.Common;
 using EFT.Interactive;
@@ -91,7 +94,7 @@ public static class RequestSubPackets
     {
         public ESeason Season;
         public Vector3 SpringSnowFactor;
-        public WeatherClass[] WeatherClasses;
+        public WeatherNode[] WeatherClasses;
 
         public WeatherRequest()
         {
@@ -103,7 +106,7 @@ public static class RequestSubPackets
             Season = reader.GetEnum<ESeason>();
             SpringSnowFactor = reader.GetUnmanaged<Vector3>();
             var amount = reader.GetInt();
-            WeatherClasses = new WeatherClass[amount];
+            WeatherClasses = new WeatherNode[amount];
             for (var i = 0; i < amount; i++)
             {
                 WeatherClasses[i] = reader.GetWeatherClass();
@@ -179,13 +182,13 @@ public static class RequestSubPackets
 
         public void HandleRequest(NetPeer peer, FikaServer server)
         {
-            if (ExfiltrationControllerClass.Instance == null)
+            if (ExfiltrationController.Instance == null)
             {
-                FikaGlobals.LogError("ExfiltrationRequest::HandleRequest: ExfiltrationControllerClass was null!");
+                FikaGlobals.LogError("ExfiltrationRequest::HandleRequest: ExfiltrationController was null!");
                 return;
             }
 
-            var exfilController = ExfiltrationControllerClass.Instance;
+            var exfilController = ExfiltrationController.Instance;
             var allExfils = exfilController.ExfiltrationPoints;
 
             NetDataWriter writer = new();
@@ -220,13 +223,13 @@ public static class RequestSubPackets
                 return;
             }
 
-            if (ExfiltrationControllerClass.Instance == null)
+            if (ExfiltrationController.Instance == null)
             {
-                FikaGlobals.LogError("ExfiltrationRequest::HandleRequest: ExfiltrationControllerClass was null!");
+                FikaGlobals.LogError("ExfiltrationRequest::HandleRequest: ExfiltrationController was null!");
                 return;
             }
 
-            var exfilController = ExfiltrationControllerClass.Instance;
+            var exfilController = ExfiltrationController.Instance;
             var allExfils = exfilController.ExfiltrationPoints;
 
             NetDataReader reader = new(Data);
@@ -272,7 +275,7 @@ public static class RequestSubPackets
     {
         public int NetId;
         public string TraderId;
-        public List<TraderServicesClass> Services;
+        public List<TraderServiceAvailabilityData> Services;
 
         public TraderServicesRequest()
         {
@@ -329,7 +332,7 @@ public static class RequestSubPackets
 
             if (Singleton<IFikaNetworkManager>.Instance.CoopHandler.Players.TryGetValue(NetId, out var playerToApply))
             {
-                playerToApply.method_166(Services);
+                playerToApply.UpdateTraderServiceData(Services);
             }
         }
 
@@ -416,7 +419,7 @@ public static class RequestSubPackets
 
                         if (fikaPlayer.HandsController != null)
                         {
-                            packet.PlayerInfoPacket.ControllerType = HandsControllerToEnumClass.FromController(fikaPlayer.HandsController);
+                            packet.PlayerInfoPacket.ControllerType = HandsControllerTypeConvert.FromController(fikaPlayer.HandsController);
                             packet.PlayerInfoPacket.ItemId = fikaPlayer.HandsController.Item.Id;
                             packet.PlayerInfoPacket.IsStationary = fikaPlayer.MovementContext.IsStationaryWeaponInHands;
                         }

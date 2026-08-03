@@ -27,7 +27,7 @@ public class Player_SpawnInHands_Patch : ModulePatch
             return true;
         }
 
-        ____spawnedKey = Singleton<PoolManagerClass>.Instance.CreateItem(item, Player.GetVisibleToCamera(__instance), __instance, true);
+        ____spawnedKey = Singleton<ObjectsFactory>.Instance.CreateItem(item, Player.GetVisibleToCamera(__instance), __instance, true);
         var transform = ____spawnedKey.transform.FindTransform("pivot");
         var transform2 = ____limbs[0].solver.bone3.transform.FindTransform(parentBone);
         ____spawnedKey.transform.SetParent(transform2, false);

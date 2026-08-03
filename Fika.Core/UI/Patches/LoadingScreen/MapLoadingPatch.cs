@@ -10,8 +10,8 @@ public class MapLoadingPatch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return AccessTools.Method(typeof(Class1505),
-            nameof(Class1505.method_1));
+        return AccessTools.Method(typeof(CG_Class1505),
+            nameof(CG_Class1505.method_1));
     }
 
     [PatchPrefix]

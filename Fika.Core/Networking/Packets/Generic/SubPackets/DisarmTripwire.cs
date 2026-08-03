@@ -9,7 +9,7 @@ namespace Fika.Core.Networking.Packets.Generic.SubPackets;
 
 public sealed class DisarmTripwire : IPoolSubPacket
 {
-    public AirplaneDataPacketStruct Data;
+    public SynchronizableObjectPacket Data;
 
     private DisarmTripwire() { }
 
@@ -18,7 +18,7 @@ public sealed class DisarmTripwire : IPoolSubPacket
         return new DisarmTripwire();
     }
 
-    public static DisarmTripwire FromValue(AirplaneDataPacketStruct data)
+    public static DisarmTripwire FromValue(SynchronizableObjectPacket data)
     {
         var packet = GenericSubPacketPoolManager.Instance.GetPacket<DisarmTripwire>(EGenericSubPacketType.DisarmTripwire);
         packet.Data = data;

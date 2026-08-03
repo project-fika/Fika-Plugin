@@ -1,4 +1,9 @@
-﻿using System;
+﻿using EFT.BinarySerialization;
+using EFT.InventoryLogic.Operations;
+using EFT.Notes;
+using EFT.Prestige;
+using JsonType;
+using System;
 using System.Collections.Generic;
 using EFT;
 using EFT.InventoryLogic;
@@ -12,7 +17,7 @@ namespace Fika.Core.Networking;
 /// </summary>
 public static class EFTSerializationExtensions
 {
-    private static readonly List<Type> _indexToType = GClass3695.List_0;
+    private static readonly List<Type> _indexToType = BinarySerializationMirrorExtensions._types;
     private static readonly Dictionary<Type, byte> _typeToByte;
     private static readonly Dictionary<Type, Action<NetDataWriter, object>> _serializers;
     private static readonly Dictionary<byte, Func<NetDataReader, object>> _deserializers;
@@ -29,260 +34,260 @@ public static class EFTSerializationExtensions
             _typeToByte[_indexToType[i]] = (byte)i;
         }
 
-        RegisterSerializer<GClass788>((w, t) => w.PutAggressorStats(t));
+        RegisterSerializer<AggressorStats>((w, t) => w.PutAggressorStats(t));
         RegisterSerializer<ClassQuaternion>((w, t) => w.PutClassQuaternion(t));
         RegisterSerializer<ClassTransformSync>((w, t) => w.PutClassTransformSync(t));
         RegisterSerializer<ClassVector3>((w, t) => w.PutClassVector3(t));
-        RegisterSerializer<AddNoteDescriptorClass>((w, t) => w.PutEFTAddNoteOperationDescriptor(t));
-        RegisterSerializer<ApplyKeyDescriptorClass>((w, t) => w.PutEFTApplyKeyOperationDescriptor(t));
-        RegisterSerializer<GClass1959>((w, t) => w.PutEFTBindItemOperationDescriptor(t));
-        RegisterSerializer<GClass2215>((w, t) => w.PutEFTBodyPartDamageHistoryDescriptor(t));
-        RegisterSerializer<ProfileBonusesClass>((w, t) => w.PutEFTBonusDescriptor(t));
-        RegisterSerializer<CheckMagazineDescriptorClass>((w, t) => w.PutEFTCheckMagazineOperationDescriptor(t));
-        RegisterSerializer<GClass1949>((w, t) => w.PutEFTContainerDescriptor(t));
-        RegisterSerializer<GClass2219>((w, t) => w.PutEFTCounterCollectionDescriptor(t));
-        RegisterSerializer<GClass2218>((w, t) => w.PutEFTCounterCollectionItemDescriptor(t));
-        RegisterSerializer<CreateMapMarkerDescriptorClass>((w, t) => w.PutEFTCreateMapMarkerOperationDescriptor(t));
-        RegisterSerializer<GClass1944>((w, t) => w.PutEFTCultistAmuletComponentDescriptor(t));
-        RegisterSerializer<GClass2216>((w, t) => w.PutEFTDamageHistoryDescriptor(t));
-        RegisterSerializer<GClass2217>((w, t) => w.PutEFTDamageStatsDescriptor(t));
-        RegisterSerializer<GClass2199>((w, t) => w.PutEFTDeathCause(t));
-        RegisterSerializer<GClass1962>((w, t) => w.PutEFTDeleteMapMarkerOperationDescriptor(t));
-        RegisterSerializer<GClass1963>((w, t) => w.PutEFTDeleteNoteOperationDescriptor(t));
-        RegisterSerializer<GClass1955>((w, t) => w.PutEFTDestroyedItem(t));
-        RegisterSerializer<GClass1938>((w, t) => w.PutEFTDogTagComponentDescriptor(t));
-        RegisterSerializer<GClass2185>((w, t) => w.PutEFTDroppedItem(t));
-        RegisterSerializer<GClass1964>((w, t) => w.PutEFTEditMapMarkerOperationDescriptor(t));
-        RegisterSerializer<EditNoteDescriptorClass>((w, t) => w.PutEFTEditNoteOperationDescriptor(t));
-        RegisterSerializer<GClass1966>((w, t) => w.PutEFTExamineMalfTypeOperationDescriptor(t));
-        RegisterSerializer<GClass1967>((w, t) => w.PutEFTExamineMalfunctionOperationDescriptor(t));
-        RegisterSerializer<GClass1968>((w, t) => w.PutEFTExamineOperationDescriptor(t));
-        RegisterSerializer<GClass1935>((w, t) => w.PutEFTFaceShieldComponentDescriptor(t));
-        RegisterSerializer<GClass1969>((w, t) => w.PutEFTFaceshieldMarkOperationDescriptor(t));
-        RegisterSerializer<GClass1937>((w, t) => w.PutEFTFireModeComponentDescriptor(t));
-        RegisterSerializer<GClass1936>((w, t) => w.PutEFTFoldableComponentDescriptor(t));
-        RegisterSerializer<GClass1970>((w, t) => w.PutEFTFoldOperationDescriptor(t));
-        RegisterSerializer<GClass1925>((w, t) => w.PutEFTFoodDrinkComponentDescriptor(t));
-        RegisterSerializer<GClass2186>((w, t) => w.PutEFTFoundInRaidItem(t));
-        RegisterSerializer<GClass1919>((w, t) => w.PutEFTGridDescriptor(t));
-        RegisterSerializer<GClass1954>((w, t) => w.PutEFTGridItemAddressDescriptor(t));
-        RegisterSerializer<EFTInventoryClass>((w, t) => w.PutEFTInventoryDescriptor(t));
-        RegisterSerializer<GClass2211>((w, t) => w.PutEFTInventoryEquipmentDescriptor(t));
+        RegisterSerializer<AddNoteOperationDescriptor>((w, t) => w.PutEFTAddNoteOperationDescriptor(t));
+        RegisterSerializer<ApplyKeyOperationDescriptor>((w, t) => w.PutEFTApplyKeyOperationDescriptor(t));
+        RegisterSerializer<BindItemOperationDescriptor>((w, t) => w.PutEFTBindItemOperationDescriptor(t));
+        RegisterSerializer<BodyPartDamageHistoryDescriptor>((w, t) => w.PutEFTBodyPartDamageHistoryDescriptor(t));
+        RegisterSerializer<BonusDescriptor>((w, t) => w.PutEFTBonusDescriptor(t));
+        RegisterSerializer<CheckMagazineOperationDescriptor>((w, t) => w.PutEFTCheckMagazineOperationDescriptor(t));
+        RegisterSerializer<ContainerDescriptor>((w, t) => w.PutEFTContainerDescriptor(t));
+        RegisterSerializer<CounterCollectionDescriptor>((w, t) => w.PutEFTCounterCollectionDescriptor(t));
+        RegisterSerializer<CounterCollectionItemDescriptor>((w, t) => w.PutEFTCounterCollectionItemDescriptor(t));
+        RegisterSerializer<CreateMapMarkerOperationDescriptor>((w, t) => w.PutEFTCreateMapMarkerOperationDescriptor(t));
+        RegisterSerializer<CultistAmuletComponentDescriptor>((w, t) => w.PutEFTCultistAmuletComponentDescriptor(t));
+        RegisterSerializer<DamageHistoryDescriptor>((w, t) => w.PutEFTDamageHistoryDescriptor(t));
+        RegisterSerializer<DamageStatsDescriptor>((w, t) => w.PutEFTDamageStatsDescriptor(t));
+        RegisterSerializer<DeathCause>((w, t) => w.PutEFTDeathCause(t));
+        RegisterSerializer<DeleteMapMarkerOperationDescriptor>((w, t) => w.PutEFTDeleteMapMarkerOperationDescriptor(t));
+        RegisterSerializer<DeleteNoteOperationDescriptor>((w, t) => w.PutEFTDeleteNoteOperationDescriptor(t));
+        RegisterSerializer<DestroyedItem>((w, t) => w.PutEFTDestroyedItem(t));
+        RegisterSerializer<DogTagComponentDescriptor>((w, t) => w.PutEFTDogTagComponentDescriptor(t));
+        RegisterSerializer<DroppedItem>((w, t) => w.PutEFTDroppedItem(t));
+        RegisterSerializer<EditMapMarkerOperationDescriptor>((w, t) => w.PutEFTEditMapMarkerOperationDescriptor(t));
+        RegisterSerializer<EditNoteOperationDescriptor>((w, t) => w.PutEFTEditNoteOperationDescriptor(t));
+        RegisterSerializer<ExamineMalfTypeOperationDescriptor>((w, t) => w.PutEFTExamineMalfTypeOperationDescriptor(t));
+        RegisterSerializer<ExamineMalfunctionOperationDescriptor>((w, t) => w.PutEFTExamineMalfunctionOperationDescriptor(t));
+        RegisterSerializer<ExamineOperationDescriptor>((w, t) => w.PutEFTExamineOperationDescriptor(t));
+        RegisterSerializer<FaceShieldComponentDescriptor>((w, t) => w.PutEFTFaceShieldComponentDescriptor(t));
+        RegisterSerializer<FaceshieldMarkOperationDescriptor>((w, t) => w.PutEFTFaceshieldMarkOperationDescriptor(t));
+        RegisterSerializer<FireModeComponentDescriptor>((w, t) => w.PutEFTFireModeComponentDescriptor(t));
+        RegisterSerializer<FoldableComponentDescriptor>((w, t) => w.PutEFTFoldableComponentDescriptor(t));
+        RegisterSerializer<FoldOperationDescriptor>((w, t) => w.PutEFTFoldOperationDescriptor(t));
+        RegisterSerializer<FoodDrinkComponentDescriptor>((w, t) => w.PutEFTFoodDrinkComponentDescriptor(t));
+        RegisterSerializer<FoundInRaidItem>((w, t) => w.PutEFTFoundInRaidItem(t));
+        RegisterSerializer<GridDescriptor>((w, t) => w.PutEFTGridDescriptor(t));
+        RegisterSerializer<GridItemAddressDescriptor>((w, t) => w.PutEFTGridItemAddressDescriptor(t));
+        RegisterSerializer<InventoryDescriptor>((w, t) => w.PutEFTInventoryDescriptor(t));
+        RegisterSerializer<InventoryEquipmentDescriptor>((w, t) => w.PutEFTInventoryEquipmentDescriptor(t));
         RegisterSerializer<MapMarker>((w, t) => w.PutEFTInventoryLogicMapMarker(t));
-        RegisterSerializer<GClass1994>((w, t) => w.PutEFTInventoryLogicOperationsAddToWishlistOperationDescriptor(t));
-        RegisterSerializer<GClass1997>((w, t) => w.PutEFTInventoryLogicOperationsChangeItemsOperationDescriptor(t));
-        RegisterSerializer<GClass1998>((w, t) => w.PutEFTInventoryLogicOperationsChangeWishlistItemCategoryOperationDescriptor(t));
-        RegisterSerializer<GClass1999>((w, t) => w.PutEFTInventoryLogicOperationsPurchaseTraderServiceOperationDescriptor(t));
-        RegisterSerializer<GClass2000>((w, t) => w.PutEFTInventoryLogicOperationsRemoveFromWishlistOperationDescriptor(t));
-        RegisterSerializer<GClass2002>((w, t) => w.PutEFTInventoryLogicOperationsSearchContentOperationDescriptor(t));
-        RegisterSerializer<GClass2001>((w, t) => w.PutEFTInventoryLogicOperationsSearchSuboperationDescriptor(t));
-        RegisterSerializer<GClass1995>((w, t) => w.PutEFTInventoryLogicOperationsSplitToNowhereDescriptor(t));
-        RegisterSerializer<GClass1996>((w, t) => w.PutEFTInventoryLogicOperationsTransferFromNowhereDescriptor(t));
-        RegisterSerializer<InventoryDescriptorClass>((w, t) => w.PutEFTItemDescriptor(t));
-        RegisterSerializer<GClass1924>((w, t) => w.PutEFTItemInfoDescriptor(t));
-        RegisterSerializer<GClass1918>((w, t) => w.PutEFTItemInGridDescriptor(t));
-        RegisterSerializer<GClass1946>((w, t) => w.PutEFTJsonCorpseDescriptor(t));
-        RegisterSerializer<GClass1945>((w, t) => w.PutEFTJsonLootItemDescriptor(t));
-        RegisterSerializer<GClass1940>((w, t) => w.PutEFTKeyComponentDescriptor(t));
-        RegisterSerializer<GClass1928>((w, t) => w.PutEFTLightComponentDescriptor(t));
-        RegisterSerializer<GClass1972>((w, t) => w.PutEFTLoadMagOperationDescriptor(t));
-        RegisterSerializer<GClass1929>((w, t) => w.PutEFTLockableComponentDescriptor(t));
-        RegisterSerializer<GClass1947>((w, t) => w.PutEFTLootDataDescriptor(t));
-        RegisterSerializer<GClass1917>((w, t) => w.PutEFTMalfunctionDescriptor(t));
-        RegisterSerializer<GClass1930>((w, t) => w.PutEFTMapComponentDescriptor(t));
-        RegisterSerializer<GClass1931>((w, t) => w.PutEFTMedKitComponentDescriptor(t));
-        RegisterSerializer<MergeDescriptorClass>((w, t) => w.PutEFTMergeOperationDescriptor(t));
-        RegisterSerializer<MoveDescriptorClass>((w, t) => w.PutEFTMoveOperationDescriptor(t));
-        RegisterSerializer<GClass1921>((w, t) => w.PutEFTNestedItemDescriptor(t));
-        RegisterSerializer<GClass3107>((w, t) => w.PutEFTNotesNote(t));
-        RegisterSerializer<NotesManagerClass.GClass3109>((w, t) => w.PutEFTNotesNotesManagerNotesDescriptor(t));
-        RegisterSerializer<GClass1982>((w, t) => w.PutEFTOperateStationaryWeaponOperationDescriptor(t));
-        RegisterSerializer<GClass1951>((w, t) => w.PutEFTOwnerItselfDescriptor(t));
-        RegisterSerializer<GClass1976>((w, t) => w.PutEFTPlantTripwireOperationDescriptor(t));
-        RegisterSerializer<GClass2214>((w, t) => w.PutEFTPlayerVisualRepresentationDescriptor(t));
-        RegisterSerializer<GClass1926>((w, t) => w.PutEFTPoisonComponentDescriptor(t));
-        RegisterSerializer<GClass2660>((w, t) => w.PutEFTPrestigePrestigeStatusData(t));
-        RegisterSerializer<Profile.ProfileHealthClass>((w, t) => w.PutEFTProfileHealthInfo(t));
-        RegisterSerializer<Profile.ProfileHealthClass.ProfileBodyPartHealthClass>((w, t) => w.PutEFTProfileHealthInfoBodyPartInfo(t));
-        RegisterSerializer<Profile.ProfileHealthClass.GClass2206>((w, t) => w.PutEFTProfileHealthInfoEffectInfo(t));
-        RegisterSerializer<Profile.ProfileHealthClass.ValueInfo>((w, t) => w.PutEFTProfileHealthInfoValueInfo(t));
-        RegisterSerializer<Profile.GClass2209>((w, t) => w.PutEFTProfileMoneyTransferLimitData(t));
-        RegisterSerializer<Profile.GClass2208>((w, t) => w.PutEFTProfileUnlockedInfo(t));
-        RegisterSerializer<GClass2222>((w, t) => w.PutEFTProfileBanDescriptor(t));
-        RegisterSerializer<CompleteProfileDescriptorClass>((w, t) => w.PutEFTProfileDescriptor(t));
-        RegisterSerializer<ProfileInfoClass>((w, t) => w.PutEFTProfileInfoDescriptor(t));
-        RegisterSerializer<ProfileInfoSettingsClass>((w, t) => w.PutEFTProfileSettings(t));
-        RegisterSerializer<ProfileEftStatsClass>((w, t) => w.PutEFTProfileStatsDescriptor(t));
-        RegisterSerializer<ProfileStatsClass>((w, t) => w.PutEFTProfileStatsSeparatorDescriptor(t));
-        RegisterSerializer<GClass1991>((w, t) => w.PutEFTQuestAcceptDescriptor(t));
-        RegisterSerializer<GClass1992>((w, t) => w.PutEFTQuestFinishDescriptor(t));
-        RegisterSerializer<GClass1993>((w, t) => w.PutEFTQuestHandoverDescriptor(t));
+        RegisterSerializer<AddToWishlistOperationDescriptor>((w, t) => w.PutEFTInventoryLogicOperationsAddToWishlistOperationDescriptor(t));
+        RegisterSerializer<ChangeItemsOperationDescriptor>((w, t) => w.PutEFTInventoryLogicOperationsChangeItemsOperationDescriptor(t));
+        RegisterSerializer<ChangeWishlistItemCategoryOperationDescriptor>((w, t) => w.PutEFTInventoryLogicOperationsChangeWishlistItemCategoryOperationDescriptor(t));
+        RegisterSerializer<PurchaseTraderServiceOperationDescriptor>((w, t) => w.PutEFTInventoryLogicOperationsPurchaseTraderServiceOperationDescriptor(t));
+        RegisterSerializer<RemoveFromWishlistOperationDescriptor>((w, t) => w.PutEFTInventoryLogicOperationsRemoveFromWishlistOperationDescriptor(t));
+        RegisterSerializer<SearchContentOperationDescriptor>((w, t) => w.PutEFTInventoryLogicOperationsSearchContentOperationDescriptor(t));
+        RegisterSerializer<SearchSuboperationDescriptor>((w, t) => w.PutEFTInventoryLogicOperationsSearchSuboperationDescriptor(t));
+        RegisterSerializer<SplitToNowhereDescriptor>((w, t) => w.PutEFTInventoryLogicOperationsSplitToNowhereDescriptor(t));
+        RegisterSerializer<TransferFromNowhereDescriptor>((w, t) => w.PutEFTInventoryLogicOperationsTransferFromNowhereDescriptor(t));
+        RegisterSerializer<ItemDescriptor>((w, t) => w.PutEFTItemDescriptor(t));
+        RegisterSerializer<ItemInfoDescriptor>((w, t) => w.PutEFTItemInfoDescriptor(t));
+        RegisterSerializer<ItemInGridDescriptor>((w, t) => w.PutEFTItemInGridDescriptor(t));
+        RegisterSerializer<JsonCorpseDescriptor>((w, t) => w.PutEFTJsonCorpseDescriptor(t));
+        RegisterSerializer<JsonLootItemDescriptor>((w, t) => w.PutEFTJsonLootItemDescriptor(t));
+        RegisterSerializer<KeyComponentDescriptor>((w, t) => w.PutEFTKeyComponentDescriptor(t));
+        RegisterSerializer<LightComponentDescriptor>((w, t) => w.PutEFTLightComponentDescriptor(t));
+        RegisterSerializer<LoadMagOperationDescriptor>((w, t) => w.PutEFTLoadMagOperationDescriptor(t));
+        RegisterSerializer<LockableComponentDescriptor>((w, t) => w.PutEFTLockableComponentDescriptor(t));
+        RegisterSerializer<LootDataDescriptor>((w, t) => w.PutEFTLootDataDescriptor(t));
+        RegisterSerializer<MalfunctionDescriptor>((w, t) => w.PutEFTMalfunctionDescriptor(t));
+        RegisterSerializer<MapComponentDescriptor>((w, t) => w.PutEFTMapComponentDescriptor(t));
+        RegisterSerializer<MedKitComponentDescriptor>((w, t) => w.PutEFTMedKitComponentDescriptor(t));
+        RegisterSerializer<MergeOperationDescriptor>((w, t) => w.PutEFTMergeOperationDescriptor(t));
+        RegisterSerializer<MoveOperationDescriptor>((w, t) => w.PutEFTMoveOperationDescriptor(t));
+        RegisterSerializer<NestedItemDescriptor>((w, t) => w.PutEFTNestedItemDescriptor(t));
+        RegisterSerializer<Note>((w, t) => w.PutEFTNotesNote(t));
+        RegisterSerializer<NotesManager.NotesDescriptor>((w, t) => w.PutEFTNotesNotesManagerNotesDescriptor(t));
+        RegisterSerializer<OperateStationaryWeaponOperationDescriptor>((w, t) => w.PutEFTOperateStationaryWeaponOperationDescriptor(t));
+        RegisterSerializer<OwnerItselfDescriptor>((w, t) => w.PutEFTOwnerItselfDescriptor(t));
+        RegisterSerializer<PlantTripwireOperationDescriptor>((w, t) => w.PutEFTPlantTripwireOperationDescriptor(t));
+        RegisterSerializer<PlayerVisualRepresentationDescriptor>((w, t) => w.PutEFTPlayerVisualRepresentationDescriptor(t));
+        RegisterSerializer<PoisonComponentDescriptor>((w, t) => w.PutEFTPoisonComponentDescriptor(t));
+        RegisterSerializer<PrestigeStatusData>((w, t) => w.PutEFTPrestigePrestigeStatusData(t));
+        RegisterSerializer<Profile.HealthInfo>((w, t) => w.PutEFTProfileHealthInfo(t));
+        RegisterSerializer<Profile.HealthInfo.BodyPartInfo>((w, t) => w.PutEFTProfileHealthInfoBodyPartInfo(t));
+        RegisterSerializer<Profile.HealthInfo.EffectInfo>((w, t) => w.PutEFTProfileHealthInfoEffectInfo(t));
+        RegisterSerializer<Profile.HealthInfo.ValueInfo>((w, t) => w.PutEFTProfileHealthInfoValueInfo(t));
+        RegisterSerializer<Profile.MoneyTransferLimitData>((w, t) => w.PutEFTProfileMoneyTransferLimitData(t));
+        RegisterSerializer<Profile.UnlockedInfo>((w, t) => w.PutEFTProfileUnlockedInfo(t));
+        RegisterSerializer<ProfileBanDescriptor>((w, t) => w.PutEFTProfileBanDescriptor(t));
+        RegisterSerializer<ProfileDescriptor>((w, t) => w.PutEFTProfileDescriptor(t));
+        RegisterSerializer<ProfileInfoDescriptor>((w, t) => w.PutEFTProfileInfoDescriptor(t));
+        RegisterSerializer<ProfileSettings>((w, t) => w.PutEFTProfileSettings(t));
+        RegisterSerializer<ProfileStatsDescriptor>((w, t) => w.PutEFTProfileStatsDescriptor(t));
+        RegisterSerializer<ProfileStatsSeparatorDescriptor>((w, t) => w.PutEFTProfileStatsSeparatorDescriptor(t));
+        RegisterSerializer<QuestAcceptDescriptor>((w, t) => w.PutEFTQuestAcceptDescriptor(t));
+        RegisterSerializer<QuestFinishDescriptor>((w, t) => w.PutEFTQuestFinishDescriptor(t));
+        RegisterSerializer<QuestHandoverDescriptor>((w, t) => w.PutEFTQuestHandoverDescriptor(t));
         RegisterSerializer<QuestDataClass>((w, t) => w.PutEFTQuestsQuestStatusData(t));
-        RegisterSerializer<GClass1943>((w, t) => w.PutEFTRecodableComponentDescriptor(t));
-        RegisterSerializer<GClass1977>((w, t) => w.PutEFTRemoveOperationDescriptor(t));
-        RegisterSerializer<GClass1932>((w, t) => w.PutEFTRepairableComponentDescriptor(t));
-        RegisterSerializer<GClass1942>((w, t) => w.PutEFTRepairEnhancementComponentDescriptor(t));
-        RegisterSerializer<GClass1941>((w, t) => w.PutEFTRepairKitComponentDescriptor(t));
-        RegisterSerializer<GClass1927>((w, t) => w.PutEFTResourceItemComponentDescriptor(t));
+        RegisterSerializer<RecodableComponentDescriptor>((w, t) => w.PutEFTRecodableComponentDescriptor(t));
+        RegisterSerializer<RemoveOperationDescriptor>((w, t) => w.PutEFTRemoveOperationDescriptor(t));
+        RegisterSerializer<RepairableComponentDescriptor>((w, t) => w.PutEFTRepairableComponentDescriptor(t));
+        RegisterSerializer<RepairEnhancementComponentDescriptor>((w, t) => w.PutEFTRepairEnhancementComponentDescriptor(t));
+        RegisterSerializer<RepairKitComponentDescriptor>((w, t) => w.PutEFTRepairKitComponentDescriptor(t));
+        RegisterSerializer<ResourceItemComponentDescriptor>((w, t) => w.PutEFTResourceItemComponentDescriptor(t));
         RegisterSerializer<SceneResourceKey>((w, t) => w.PutEFTSceneResourceKey(t));
         RegisterSerializer<ResourceKey>((w, t) => w.PutEFTResourceKey(t));
-        RegisterSerializer<GClass1978>((w, t) => w.PutEFTSetDialogProgressOperationDescriptor(t));
-        RegisterSerializer<GClass1979>((w, t) => w.PutEFTSetupItemOperationDescriptor(t));
-        RegisterSerializer<GClass1980>((w, t) => w.PutEFTSetVariableOperationDescriptor(t));
-        RegisterSerializer<GClass1916>((w, t) => w.PutEFTShellTemplateDescriptor(t));
-        RegisterSerializer<GClass1933>((w, t) => w.PutEFTSightComponentDescriptor(t));
-        RegisterSerializer<SkillsDescriptorClass>((w, t) => w.PutEFTSkillsDescriptor(t));
-        RegisterSerializer<SkillsDescriptorClass.GClass2226>((w, t) => w.PutEFTSkillsDescriptorMasteringInfoDescriptor(t));
-        RegisterSerializer<SkillsDescriptorClass.GClass2225>((w, t) => w.PutEFTSkillsDescriptorSkillInfoDescriptor(t));
-        RegisterSerializer<GClass1915>((w, t) => w.PutEFTSlotDescriptor(t));
-        RegisterSerializer<GClass1952>((w, t) => w.PutEFTSlotItemAddressDescriptor(t));
-        RegisterSerializer<SplitDescriptorClass>((w, t) => w.PutEFTSplitOperationDescriptor(t));
-        RegisterSerializer<GClass1920>((w, t) => w.PutEFTStackSlotDescriptor(t));
-        RegisterSerializer<GClass1953>((w, t) => w.PutEFTStackSlotItemAddressDescriptor(t));
-        RegisterSerializer<GClass1983>((w, t) => w.PutEFTSwapOperationDescriptor(t));
-        RegisterSerializer<GClass1939>((w, t) => w.PutEFTTagComponentDescriptor(t));
-        RegisterSerializer<TagDescriptorClass>((w, t) => w.PutEFTTagOperationDescriptor(t));
-        RegisterSerializer<GClass2227>((w, t) => w.PutEFTTaskConditionCounterDescriptor(t));
-        RegisterSerializer<ThrowDescriptorClass>((w, t) => w.PutEFTThrowOperationDescriptor(t));
-        RegisterSerializer<GClass1934>((w, t) => w.PutEFTTogglableComponentDescriptor(t));
-        RegisterSerializer<GClass1986>((w, t) => w.PutEFTToggleOperationDescriptor(t));
-        RegisterSerializer<TraderInfoClass>((w, t) => w.PutEFTTraderInfoDescriptor(t));
-        RegisterSerializer<TraderServicesClass>((w, t) => w.PutEFTTraderServiceAvailabilityData(t));
-        RegisterSerializer<GClass1987>((w, t) => w.PutEFTTransferOperationDescriptor(t));
-        RegisterSerializer<GClass1988>((w, t) => w.PutEFTUnbindItemOperationDescriptor(t));
-        RegisterSerializer<GClass1973>((w, t) => w.PutEFTUnloadMagOperationDescriptor(t));
-        RegisterSerializer<GClass2201>((w, t) => w.PutEFTVictimStats(t));
-        RegisterSerializer<GClass1989>((w, t) => w.PutEFTWeaponRechamberOperationDescriptor(t));
-        RegisterSerializer<InsuredItemClass>((w, t) => w.PutJsonTypeInsuredProfileItems(t));
-        RegisterSerializer<GClass1410>((w, t) => w.PutJsonTypePlayerInfo(t));
+        RegisterSerializer<SetDialogProgressOperationDescriptor>((w, t) => w.PutEFTSetDialogProgressOperationDescriptor(t));
+        RegisterSerializer<SetupItemOperationDescriptor>((w, t) => w.PutEFTSetupItemOperationDescriptor(t));
+        RegisterSerializer<SetVariableOperationDescriptor>((w, t) => w.PutEFTSetVariableOperationDescriptor(t));
+        RegisterSerializer<ShellTemplateDescriptor>((w, t) => w.PutEFTShellTemplateDescriptor(t));
+        RegisterSerializer<SightComponentDescriptor>((w, t) => w.PutEFTSightComponentDescriptor(t));
+        RegisterSerializer<SkillsDescriptor>((w, t) => w.PutEFTSkillsDescriptor(t));
+        RegisterSerializer<SkillsDescriptor.MasteringInfoDescriptor>((w, t) => w.PutEFTSkillsDescriptorMasteringInfoDescriptor(t));
+        RegisterSerializer<SkillsDescriptor.SkillInfoDescriptor>((w, t) => w.PutEFTSkillsDescriptorSkillInfoDescriptor(t));
+        RegisterSerializer<SlotDescriptor>((w, t) => w.PutEFTSlotDescriptor(t));
+        RegisterSerializer<SlotItemAddressDescriptor>((w, t) => w.PutEFTSlotItemAddressDescriptor(t));
+        RegisterSerializer<SplitOperationDescriptor>((w, t) => w.PutEFTSplitOperationDescriptor(t));
+        RegisterSerializer<StackSlotDescriptor>((w, t) => w.PutEFTStackSlotDescriptor(t));
+        RegisterSerializer<StackSlotItemAddressDescriptor>((w, t) => w.PutEFTStackSlotItemAddressDescriptor(t));
+        RegisterSerializer<SwapOperationDescriptor>((w, t) => w.PutEFTSwapOperationDescriptor(t));
+        RegisterSerializer<TagComponentDescriptor>((w, t) => w.PutEFTTagComponentDescriptor(t));
+        RegisterSerializer<TagOperationDescriptor>((w, t) => w.PutEFTTagOperationDescriptor(t));
+        RegisterSerializer<TaskConditionCounterDescriptor>((w, t) => w.PutEFTTaskConditionCounterDescriptor(t));
+        RegisterSerializer<ThrowOperationDescriptor>((w, t) => w.PutEFTThrowOperationDescriptor(t));
+        RegisterSerializer<TogglableComponentDescriptor>((w, t) => w.PutEFTTogglableComponentDescriptor(t));
+        RegisterSerializer<ToggleOperationDescriptor>((w, t) => w.PutEFTToggleOperationDescriptor(t));
+        RegisterSerializer<TraderInfoDescriptor>((w, t) => w.PutEFTTraderInfoDescriptor(t));
+        RegisterSerializer<TraderServiceAvailabilityData>((w, t) => w.PutEFTTraderServiceAvailabilityData(t));
+        RegisterSerializer<TransferOperationDescriptor>((w, t) => w.PutEFTTransferOperationDescriptor(t));
+        RegisterSerializer<UnbindItemOperationDescriptor>((w, t) => w.PutEFTUnbindItemOperationDescriptor(t));
+        RegisterSerializer<UnloadMagOperationDescriptor>((w, t) => w.PutEFTUnloadMagOperationDescriptor(t));
+        RegisterSerializer<VictimStats>((w, t) => w.PutEFTVictimStats(t));
+        RegisterSerializer<WeaponRechamberOperationDescriptor>((w, t) => w.PutEFTWeaponRechamberOperationDescriptor(t));
+        RegisterSerializer<InsuredProfileItems>((w, t) => w.PutJsonTypeInsuredProfileItems(t));
+        RegisterSerializer<PlayerInfo>((w, t) => w.PutJsonTypePlayerInfo(t));
         RegisterSerializer<WeightedLootPointSpawnPosition>((w, t) => w.PutWeightedLootPointSpawnPosition(t));
 
-        RegisterDeserializer<GClass788>(r => r.GetAggressorStats());
+        RegisterDeserializer<AggressorStats>(r => r.GetAggressorStats());
         RegisterDeserializer<ClassQuaternion>(r => r.GetClassQuaternion());
         RegisterDeserializer<ClassTransformSync>(r => r.GetClassTransformSync());
         RegisterDeserializer<ClassVector3>(r => r.GetClassVector3());
-        RegisterDeserializer<AddNoteDescriptorClass>(r => r.GetEFTAddNoteOperationDescriptor());
-        RegisterDeserializer<ApplyKeyDescriptorClass>(r => r.GetEFTApplyKeyOperationDescriptor());
-        RegisterDeserializer<GClass1959>(r => r.GetEFTBindItemOperationDescriptor());
-        RegisterDeserializer<GClass2215>(r => r.GetEFTBodyPartDamageHistoryDescriptor());
-        RegisterDeserializer<ProfileBonusesClass>(r => r.GetEFTBonusDescriptor());
-        RegisterDeserializer<CheckMagazineDescriptorClass>(r => r.GetEFTCheckMagazineOperationDescriptor());
-        RegisterDeserializer<GClass1949>(r => r.GetEFTContainerDescriptor());
-        RegisterDeserializer<GClass2219>(r => r.GetEFTCounterCollectionDescriptor());
-        RegisterDeserializer<GClass2218>(r => r.GetEFTCounterCollectionItemDescriptor());
-        RegisterDeserializer<CreateMapMarkerDescriptorClass>(r => r.GetEFTCreateMapMarkerOperationDescriptor());
-        RegisterDeserializer<GClass1944>(r => r.GetEFTCultistAmuletComponentDescriptor());
-        RegisterDeserializer<GClass2216>(r => r.GetEFTDamageHistoryDescriptor());
-        RegisterDeserializer<GClass2217>(r => r.GetEFTDamageStatsDescriptor());
-        RegisterDeserializer<GClass2199>(r => r.GetEFTDeathCause());
-        RegisterDeserializer<GClass1962>(r => r.GetEFTDeleteMapMarkerOperationDescriptor());
-        RegisterDeserializer<GClass1963>(r => r.GetEFTDeleteNoteOperationDescriptor());
-        RegisterDeserializer<GClass1955>(r => r.GetEFTDestroyedItem());
-        RegisterDeserializer<GClass1938>(r => r.GetEFTDogTagComponentDescriptor());
-        RegisterDeserializer<GClass2185>(r => r.GetEFTDroppedItem());
-        RegisterDeserializer<GClass1964>(r => r.GetEFTEditMapMarkerOperationDescriptor());
-        RegisterDeserializer<EditNoteDescriptorClass>(r => r.GetEFTEditNoteOperationDescriptor());
-        RegisterDeserializer<GClass1966>(r => r.GetEFTExamineMalfTypeOperationDescriptor());
-        RegisterDeserializer<GClass1967>(r => r.GetEFTExamineMalfunctionOperationDescriptor());
-        RegisterDeserializer<GClass1968>(r => r.GetEFTExamineOperationDescriptor());
-        RegisterDeserializer<GClass1935>(r => r.GetEFTFaceShieldComponentDescriptor());
-        RegisterDeserializer<GClass1969>(r => r.GetEFTFaceshieldMarkOperationDescriptor());
-        RegisterDeserializer<GClass1937>(r => r.GetEFTFireModeComponentDescriptor());
-        RegisterDeserializer<GClass1936>(r => r.GetEFTFoldableComponentDescriptor());
-        RegisterDeserializer<GClass1970>(r => r.GetEFTFoldOperationDescriptor());
-        RegisterDeserializer<GClass1925>(r => r.GetEFTFoodDrinkComponentDescriptor());
-        RegisterDeserializer<GClass2186>(r => r.GetEFTFoundInRaidItem());
-        RegisterDeserializer<GClass1919>(r => r.GetEFTGridDescriptor());
-        RegisterDeserializer<GClass1954>(r => r.GetEFTGridItemAddressDescriptor());
-        RegisterDeserializer<EFTInventoryClass>(r => r.GetEFTInventoryDescriptor());
-        RegisterDeserializer<GClass2211>(r => r.GetEFTInventoryEquipmentDescriptor());
+        RegisterDeserializer<AddNoteOperationDescriptor>(r => r.GetEFTAddNoteOperationDescriptor());
+        RegisterDeserializer<ApplyKeyOperationDescriptor>(r => r.GetEFTApplyKeyOperationDescriptor());
+        RegisterDeserializer<BindItemOperationDescriptor>(r => r.GetEFTBindItemOperationDescriptor());
+        RegisterDeserializer<BodyPartDamageHistoryDescriptor>(r => r.GetEFTBodyPartDamageHistoryDescriptor());
+        RegisterDeserializer<BonusDescriptor>(r => r.GetEFTBonusDescriptor());
+        RegisterDeserializer<CheckMagazineOperationDescriptor>(r => r.GetEFTCheckMagazineOperationDescriptor());
+        RegisterDeserializer<ContainerDescriptor>(r => r.GetEFTContainerDescriptor());
+        RegisterDeserializer<CounterCollectionDescriptor>(r => r.GetEFTCounterCollectionDescriptor());
+        RegisterDeserializer<CounterCollectionItemDescriptor>(r => r.GetEFTCounterCollectionItemDescriptor());
+        RegisterDeserializer<CreateMapMarkerOperationDescriptor>(r => r.GetEFTCreateMapMarkerOperationDescriptor());
+        RegisterDeserializer<CultistAmuletComponentDescriptor>(r => r.GetEFTCultistAmuletComponentDescriptor());
+        RegisterDeserializer<DamageHistoryDescriptor>(r => r.GetEFTDamageHistoryDescriptor());
+        RegisterDeserializer<DamageStatsDescriptor>(r => r.GetEFTDamageStatsDescriptor());
+        RegisterDeserializer<DeathCause>(r => r.GetEFTDeathCause());
+        RegisterDeserializer<DeleteMapMarkerOperationDescriptor>(r => r.GetEFTDeleteMapMarkerOperationDescriptor());
+        RegisterDeserializer<DeleteNoteOperationDescriptor>(r => r.GetEFTDeleteNoteOperationDescriptor());
+        RegisterDeserializer<DestroyedItem>(r => r.GetEFTDestroyedItem());
+        RegisterDeserializer<DogTagComponentDescriptor>(r => r.GetEFTDogTagComponentDescriptor());
+        RegisterDeserializer<DroppedItem>(r => r.GetEFTDroppedItem());
+        RegisterDeserializer<EditMapMarkerOperationDescriptor>(r => r.GetEFTEditMapMarkerOperationDescriptor());
+        RegisterDeserializer<EditNoteOperationDescriptor>(r => r.GetEFTEditNoteOperationDescriptor());
+        RegisterDeserializer<ExamineMalfTypeOperationDescriptor>(r => r.GetEFTExamineMalfTypeOperationDescriptor());
+        RegisterDeserializer<ExamineMalfunctionOperationDescriptor>(r => r.GetEFTExamineMalfunctionOperationDescriptor());
+        RegisterDeserializer<ExamineOperationDescriptor>(r => r.GetEFTExamineOperationDescriptor());
+        RegisterDeserializer<FaceShieldComponentDescriptor>(r => r.GetEFTFaceShieldComponentDescriptor());
+        RegisterDeserializer<FaceshieldMarkOperationDescriptor>(r => r.GetEFTFaceshieldMarkOperationDescriptor());
+        RegisterDeserializer<FireModeComponentDescriptor>(r => r.GetEFTFireModeComponentDescriptor());
+        RegisterDeserializer<FoldableComponentDescriptor>(r => r.GetEFTFoldableComponentDescriptor());
+        RegisterDeserializer<FoldOperationDescriptor>(r => r.GetEFTFoldOperationDescriptor());
+        RegisterDeserializer<FoodDrinkComponentDescriptor>(r => r.GetEFTFoodDrinkComponentDescriptor());
+        RegisterDeserializer<FoundInRaidItem>(r => r.GetEFTFoundInRaidItem());
+        RegisterDeserializer<GridDescriptor>(r => r.GetEFTGridDescriptor());
+        RegisterDeserializer<GridItemAddressDescriptor>(r => r.GetEFTGridItemAddressDescriptor());
+        RegisterDeserializer<InventoryDescriptor>(r => r.GetEFTInventoryDescriptor());
+        RegisterDeserializer<InventoryEquipmentDescriptor>(r => r.GetEFTInventoryEquipmentDescriptor());
         RegisterDeserializer<MapMarker>(r => r.GetEFTInventoryLogicMapMarker());
-        RegisterDeserializer<GClass1994>(r => r.GetEFTInventoryLogicOperationsAddToWishlistOperationDescriptor());
-        RegisterDeserializer<GClass1997>(r => r.GetEFTInventoryLogicOperationsChangeItemsOperationDescriptor());
-        RegisterDeserializer<GClass1998>(r => r.GetEFTInventoryLogicOperationsChangeWishlistItemCategoryOperationDescriptor());
-        RegisterDeserializer<GClass1999>(r => r.GetEFTInventoryLogicOperationsPurchaseTraderServiceOperationDescriptor());
-        RegisterDeserializer<GClass2000>(r => r.GetEFTInventoryLogicOperationsRemoveFromWishlistOperationDescriptor());
-        RegisterDeserializer<GClass2002>(r => r.GetEFTInventoryLogicOperationsSearchContentOperationDescriptor());
-        RegisterDeserializer<GClass2001>(r => r.GetEFTInventoryLogicOperationsSearchSuboperationDescriptor());
-        RegisterDeserializer<GClass1995>(r => r.GetEFTInventoryLogicOperationsSplitToNowhereDescriptor());
-        RegisterDeserializer<GClass1996>(r => r.GetEFTInventoryLogicOperationsTransferFromNowhereDescriptor());
-        RegisterDeserializer<InventoryDescriptorClass>(r => r.GetEFTItemDescriptor());
-        RegisterDeserializer<GClass1924>(r => r.GetEFTItemInfoDescriptor());
-        RegisterDeserializer<GClass1918>(r => r.GetEFTItemInGridDescriptor());
-        RegisterDeserializer<GClass1946>(r => r.GetEFTJsonCorpseDescriptor());
-        RegisterDeserializer<GClass1945>(r => r.GetEFTJsonLootItemDescriptor());
-        RegisterDeserializer<GClass1940>(r => r.GetEFTKeyComponentDescriptor());
-        RegisterDeserializer<GClass1928>(r => r.GetEFTLightComponentDescriptor());
-        RegisterDeserializer<GClass1972>(r => r.GetEFTLoadMagOperationDescriptor());
-        RegisterDeserializer<GClass1929>(r => r.GetEFTLockableComponentDescriptor());
-        RegisterDeserializer<GClass1947>(r => r.GetEFTLootDataDescriptor());
-        RegisterDeserializer<GClass1917>(r => r.GetEFTMalfunctionDescriptor());
-        RegisterDeserializer<GClass1930>(r => r.GetEFTMapComponentDescriptor());
-        RegisterDeserializer<GClass1931>(r => r.GetEFTMedKitComponentDescriptor());
-        RegisterDeserializer<MergeDescriptorClass>(r => r.GetEFTMergeOperationDescriptor());
-        RegisterDeserializer<MoveDescriptorClass>(r => r.GetEFTMoveOperationDescriptor());
-        RegisterDeserializer<GClass1921>(r => r.GetEFTNestedItemDescriptor());
-        RegisterDeserializer<GClass3107>(r => r.GetEFTNotesNote());
-        RegisterDeserializer<NotesManagerClass.GClass3109>(r => r.GetEFTNotesNotesManagerNotesDescriptor());
-        RegisterDeserializer<GClass1982>(r => r.GetEFTOperateStationaryWeaponOperationDescriptor());
-        RegisterDeserializer<GClass1951>(r => r.GetEFTOwnerItselfDescriptor());
-        RegisterDeserializer<GClass1976>(r => r.GetEFTPlantTripwireOperationDescriptor());
-        RegisterDeserializer<GClass2214>(r => r.GetEFTPlayerVisualRepresentationDescriptor());
-        RegisterDeserializer<GClass1926>(r => r.GetEFTPoisonComponentDescriptor());
-        RegisterDeserializer<GClass2660>(r => r.GetEFTPrestigePrestigeStatusData());
-        RegisterDeserializer<Profile.ProfileHealthClass>(r => r.GetEFTProfileHealthInfo());
-        RegisterDeserializer<Profile.ProfileHealthClass.ProfileBodyPartHealthClass>(r => r.GetEFTProfileHealthInfoBodyPartInfo());
-        RegisterDeserializer<Profile.ProfileHealthClass.GClass2206>(r => r.GetEFTProfileHealthInfoEffectInfo());
-        RegisterDeserializer<Profile.ProfileHealthClass.ValueInfo>(r => r.GetEFTProfileHealthInfoValueInfo());
-        RegisterDeserializer<Profile.GClass2209>(r => r.GetEFTProfileMoneyTransferLimitData());
-        RegisterDeserializer<Profile.GClass2208>(r => r.GetEFTProfileUnlockedInfo());
-        RegisterDeserializer<GClass2222>(r => r.GetEFTProfileBanDescriptor());
-        RegisterDeserializer<CompleteProfileDescriptorClass>(r => r.GetEFTProfileDescriptor());
-        RegisterDeserializer<ProfileInfoClass>(r => r.GetEFTProfileInfoDescriptor());
-        RegisterDeserializer<ProfileInfoSettingsClass>(r => r.GetEFTProfileSettings());
-        RegisterDeserializer<ProfileEftStatsClass>(r => r.GetEFTProfileStatsDescriptor());
-        RegisterDeserializer<ProfileStatsClass>(r => r.GetEFTProfileStatsSeparatorDescriptor());
-        RegisterDeserializer<GClass1991>(r => r.GetEFTQuestAcceptDescriptor());
-        RegisterDeserializer<GClass1992>(r => r.GetEFTQuestFinishDescriptor());
-        RegisterDeserializer<GClass1993>(r => r.GetEFTQuestHandoverDescriptor());
+        RegisterDeserializer<AddToWishlistOperationDescriptor>(r => r.GetEFTInventoryLogicOperationsAddToWishlistOperationDescriptor());
+        RegisterDeserializer<ChangeItemsOperationDescriptor>(r => r.GetEFTInventoryLogicOperationsChangeItemsOperationDescriptor());
+        RegisterDeserializer<ChangeWishlistItemCategoryOperationDescriptor>(r => r.GetEFTInventoryLogicOperationsChangeWishlistItemCategoryOperationDescriptor());
+        RegisterDeserializer<PurchaseTraderServiceOperationDescriptor>(r => r.GetEFTInventoryLogicOperationsPurchaseTraderServiceOperationDescriptor());
+        RegisterDeserializer<RemoveFromWishlistOperationDescriptor>(r => r.GetEFTInventoryLogicOperationsRemoveFromWishlistOperationDescriptor());
+        RegisterDeserializer<SearchContentOperationDescriptor>(r => r.GetEFTInventoryLogicOperationsSearchContentOperationDescriptor());
+        RegisterDeserializer<SearchSuboperationDescriptor>(r => r.GetEFTInventoryLogicOperationsSearchSuboperationDescriptor());
+        RegisterDeserializer<SplitToNowhereDescriptor>(r => r.GetEFTInventoryLogicOperationsSplitToNowhereDescriptor());
+        RegisterDeserializer<TransferFromNowhereDescriptor>(r => r.GetEFTInventoryLogicOperationsTransferFromNowhereDescriptor());
+        RegisterDeserializer<ItemDescriptor>(r => r.GetEFTItemDescriptor());
+        RegisterDeserializer<ItemInfoDescriptor>(r => r.GetEFTItemInfoDescriptor());
+        RegisterDeserializer<ItemInGridDescriptor>(r => r.GetEFTItemInGridDescriptor());
+        RegisterDeserializer<JsonCorpseDescriptor>(r => r.GetEFTJsonCorpseDescriptor());
+        RegisterDeserializer<JsonLootItemDescriptor>(r => r.GetEFTJsonLootItemDescriptor());
+        RegisterDeserializer<KeyComponentDescriptor>(r => r.GetEFTKeyComponentDescriptor());
+        RegisterDeserializer<LightComponentDescriptor>(r => r.GetEFTLightComponentDescriptor());
+        RegisterDeserializer<LoadMagOperationDescriptor>(r => r.GetEFTLoadMagOperationDescriptor());
+        RegisterDeserializer<LockableComponentDescriptor>(r => r.GetEFTLockableComponentDescriptor());
+        RegisterDeserializer<LootDataDescriptor>(r => r.GetEFTLootDataDescriptor());
+        RegisterDeserializer<MalfunctionDescriptor>(r => r.GetEFTMalfunctionDescriptor());
+        RegisterDeserializer<MapComponentDescriptor>(r => r.GetEFTMapComponentDescriptor());
+        RegisterDeserializer<MedKitComponentDescriptor>(r => r.GetEFTMedKitComponentDescriptor());
+        RegisterDeserializer<MergeOperationDescriptor>(r => r.GetEFTMergeOperationDescriptor());
+        RegisterDeserializer<MoveOperationDescriptor>(r => r.GetEFTMoveOperationDescriptor());
+        RegisterDeserializer<NestedItemDescriptor>(r => r.GetEFTNestedItemDescriptor());
+        RegisterDeserializer<Note>(r => r.GetEFTNotesNote());
+        RegisterDeserializer<NotesManager.NotesDescriptor>(r => r.GetEFTNotesNotesManagerNotesDescriptor());
+        RegisterDeserializer<OperateStationaryWeaponOperationDescriptor>(r => r.GetEFTOperateStationaryWeaponOperationDescriptor());
+        RegisterDeserializer<OwnerItselfDescriptor>(r => r.GetEFTOwnerItselfDescriptor());
+        RegisterDeserializer<PlantTripwireOperationDescriptor>(r => r.GetEFTPlantTripwireOperationDescriptor());
+        RegisterDeserializer<PlayerVisualRepresentationDescriptor>(r => r.GetEFTPlayerVisualRepresentationDescriptor());
+        RegisterDeserializer<PoisonComponentDescriptor>(r => r.GetEFTPoisonComponentDescriptor());
+        RegisterDeserializer<PrestigeStatusData>(r => r.GetEFTPrestigePrestigeStatusData());
+        RegisterDeserializer<Profile.HealthInfo>(r => r.GetEFTProfileHealthInfo());
+        RegisterDeserializer<Profile.HealthInfo.BodyPartInfo>(r => r.GetEFTProfileHealthInfoBodyPartInfo());
+        RegisterDeserializer<Profile.HealthInfo.EffectInfo>(r => r.GetEFTProfileHealthInfoEffectInfo());
+        RegisterDeserializer<Profile.HealthInfo.ValueInfo>(r => r.GetEFTProfileHealthInfoValueInfo());
+        RegisterDeserializer<Profile.MoneyTransferLimitData>(r => r.GetEFTProfileMoneyTransferLimitData());
+        RegisterDeserializer<Profile.UnlockedInfo>(r => r.GetEFTProfileUnlockedInfo());
+        RegisterDeserializer<ProfileBanDescriptor>(r => r.GetEFTProfileBanDescriptor());
+        RegisterDeserializer<ProfileDescriptor>(r => r.GetEFTProfileDescriptor());
+        RegisterDeserializer<ProfileInfoDescriptor>(r => r.GetEFTProfileInfoDescriptor());
+        RegisterDeserializer<ProfileSettings>(r => r.GetEFTProfileSettings());
+        RegisterDeserializer<ProfileStatsDescriptor>(r => r.GetEFTProfileStatsDescriptor());
+        RegisterDeserializer<ProfileStatsSeparatorDescriptor>(r => r.GetEFTProfileStatsSeparatorDescriptor());
+        RegisterDeserializer<QuestAcceptDescriptor>(r => r.GetEFTQuestAcceptDescriptor());
+        RegisterDeserializer<QuestFinishDescriptor>(r => r.GetEFTQuestFinishDescriptor());
+        RegisterDeserializer<QuestHandoverDescriptor>(r => r.GetEFTQuestHandoverDescriptor());
         RegisterDeserializer<QuestDataClass>(r => r.GetEFTQuestsQuestStatusData());
-        RegisterDeserializer<GClass1943>(r => r.GetEFTRecodableComponentDescriptor());
-        RegisterDeserializer<GClass1977>(r => r.GetEFTRemoveOperationDescriptor());
-        RegisterDeserializer<GClass1932>(r => r.GetEFTRepairableComponentDescriptor());
-        RegisterDeserializer<GClass1942>(r => r.GetEFTRepairEnhancementComponentDescriptor());
-        RegisterDeserializer<GClass1941>(r => r.GetEFTRepairKitComponentDescriptor());
-        RegisterDeserializer<GClass1927>(r => r.GetEFTResourceItemComponentDescriptor());
+        RegisterDeserializer<RecodableComponentDescriptor>(r => r.GetEFTRecodableComponentDescriptor());
+        RegisterDeserializer<RemoveOperationDescriptor>(r => r.GetEFTRemoveOperationDescriptor());
+        RegisterDeserializer<RepairableComponentDescriptor>(r => r.GetEFTRepairableComponentDescriptor());
+        RegisterDeserializer<RepairEnhancementComponentDescriptor>(r => r.GetEFTRepairEnhancementComponentDescriptor());
+        RegisterDeserializer<RepairKitComponentDescriptor>(r => r.GetEFTRepairKitComponentDescriptor());
+        RegisterDeserializer<ResourceItemComponentDescriptor>(r => r.GetEFTResourceItemComponentDescriptor());
         RegisterDeserializer<SceneResourceKey>(r => r.GetEFTSceneResourceKey());
         RegisterDeserializer<ResourceKey>(r => r.GetEFTResourceKey());
-        RegisterDeserializer<GClass1978>(r => r.GetEFTSetDialogProgressOperationDescriptor());
-        RegisterDeserializer<GClass1979>(r => r.GetEFTSetupItemOperationDescriptor());
-        RegisterDeserializer<GClass1980>(r => r.GetEFTSetVariableOperationDescriptor());
-        RegisterDeserializer<GClass1916>(r => r.GetEFTShellTemplateDescriptor());
-        RegisterDeserializer<GClass1933>(r => r.GetEFTSightComponentDescriptor());
-        RegisterDeserializer<SkillsDescriptorClass>(r => r.GetEFTSkillsDescriptor());
-        RegisterDeserializer<SkillsDescriptorClass.GClass2226>(r => r.GetEFTSkillsDescriptorMasteringInfoDescriptor());
-        RegisterDeserializer<SkillsDescriptorClass.GClass2225>(r => r.GetEFTSkillsDescriptorSkillInfoDescriptor());
-        RegisterDeserializer<GClass1915>(r => r.GetEFTSlotDescriptor());
-        RegisterDeserializer<GClass1952>(r => r.GetEFTSlotItemAddressDescriptor());
-        RegisterDeserializer<SplitDescriptorClass>(r => r.GetEFTSplitOperationDescriptor());
-        RegisterDeserializer<GClass1920>(r => r.GetEFTStackSlotDescriptor());
-        RegisterDeserializer<GClass1953>(r => r.GetEFTStackSlotItemAddressDescriptor());
-        RegisterDeserializer<GClass1983>(r => r.GetEFTSwapOperationDescriptor());
-        RegisterDeserializer<GClass1939>(r => r.GetEFTTagComponentDescriptor());
-        RegisterDeserializer<TagDescriptorClass>(r => r.GetEFTTagOperationDescriptor());
-        RegisterDeserializer<GClass2227>(r => r.GetEFTTaskConditionCounterDescriptor());
-        RegisterDeserializer<ThrowDescriptorClass>(r => r.GetEFTThrowOperationDescriptor());
-        RegisterDeserializer<GClass1934>(r => r.GetEFTTogglableComponentDescriptor());
-        RegisterDeserializer<GClass1986>(r => r.GetEFTToggleOperationDescriptor());
-        RegisterDeserializer<TraderInfoClass>(r => r.GetEFTTraderInfoDescriptor());
-        RegisterDeserializer<TraderServicesClass>(r => r.GetEFTTraderServiceAvailabilityData());
-        RegisterDeserializer<GClass1987>(r => r.GetEFTTransferOperationDescriptor());
-        RegisterDeserializer<GClass1988>(r => r.GetEFTUnbindItemOperationDescriptor());
-        RegisterDeserializer<GClass1973>(r => r.GetEFTUnloadMagOperationDescriptor());
-        RegisterDeserializer<GClass2201>(r => r.GetEFTVictimStats());
-        RegisterDeserializer<GClass1989>(r => r.GetEFTWeaponRechamberOperationDescriptor());
-        RegisterDeserializer<InsuredItemClass>(r => r.GetJsonTypeInsuredProfileItems());
-        RegisterDeserializer<GClass1410>(r => r.GetJsonTypePlayerInfo());
+        RegisterDeserializer<SetDialogProgressOperationDescriptor>(r => r.GetEFTSetDialogProgressOperationDescriptor());
+        RegisterDeserializer<SetupItemOperationDescriptor>(r => r.GetEFTSetupItemOperationDescriptor());
+        RegisterDeserializer<SetVariableOperationDescriptor>(r => r.GetEFTSetVariableOperationDescriptor());
+        RegisterDeserializer<ShellTemplateDescriptor>(r => r.GetEFTShellTemplateDescriptor());
+        RegisterDeserializer<SightComponentDescriptor>(r => r.GetEFTSightComponentDescriptor());
+        RegisterDeserializer<SkillsDescriptor>(r => r.GetEFTSkillsDescriptor());
+        RegisterDeserializer<SkillsDescriptor.MasteringInfoDescriptor>(r => r.GetEFTSkillsDescriptorMasteringInfoDescriptor());
+        RegisterDeserializer<SkillsDescriptor.SkillInfoDescriptor>(r => r.GetEFTSkillsDescriptorSkillInfoDescriptor());
+        RegisterDeserializer<SlotDescriptor>(r => r.GetEFTSlotDescriptor());
+        RegisterDeserializer<SlotItemAddressDescriptor>(r => r.GetEFTSlotItemAddressDescriptor());
+        RegisterDeserializer<SplitOperationDescriptor>(r => r.GetEFTSplitOperationDescriptor());
+        RegisterDeserializer<StackSlotDescriptor>(r => r.GetEFTStackSlotDescriptor());
+        RegisterDeserializer<StackSlotItemAddressDescriptor>(r => r.GetEFTStackSlotItemAddressDescriptor());
+        RegisterDeserializer<SwapOperationDescriptor>(r => r.GetEFTSwapOperationDescriptor());
+        RegisterDeserializer<TagComponentDescriptor>(r => r.GetEFTTagComponentDescriptor());
+        RegisterDeserializer<TagOperationDescriptor>(r => r.GetEFTTagOperationDescriptor());
+        RegisterDeserializer<TaskConditionCounterDescriptor>(r => r.GetEFTTaskConditionCounterDescriptor());
+        RegisterDeserializer<ThrowOperationDescriptor>(r => r.GetEFTThrowOperationDescriptor());
+        RegisterDeserializer<TogglableComponentDescriptor>(r => r.GetEFTTogglableComponentDescriptor());
+        RegisterDeserializer<ToggleOperationDescriptor>(r => r.GetEFTToggleOperationDescriptor());
+        RegisterDeserializer<TraderInfoDescriptor>(r => r.GetEFTTraderInfoDescriptor());
+        RegisterDeserializer<TraderServiceAvailabilityData>(r => r.GetEFTTraderServiceAvailabilityData());
+        RegisterDeserializer<TransferOperationDescriptor>(r => r.GetEFTTransferOperationDescriptor());
+        RegisterDeserializer<UnbindItemOperationDescriptor>(r => r.GetEFTUnbindItemOperationDescriptor());
+        RegisterDeserializer<UnloadMagOperationDescriptor>(r => r.GetEFTUnloadMagOperationDescriptor());
+        RegisterDeserializer<VictimStats>(r => r.GetEFTVictimStats());
+        RegisterDeserializer<WeaponRechamberOperationDescriptor>(r => r.GetEFTWeaponRechamberOperationDescriptor());
+        RegisterDeserializer<InsuredProfileItems>(r => r.GetJsonTypeInsuredProfileItems());
+        RegisterDeserializer<PlayerInfo>(r => r.GetJsonTypePlayerInfo());
         RegisterDeserializer<WeightedLootPointSpawnPosition>(r => r.GetWeightedLootPointSpawnPosition());
     }
 
@@ -347,10 +352,10 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Serializes the aggressor statistics from a GClass788 object into the writer stream.
+    /// Serializes the aggressor statistics from a AggressorStats object into the writer stream.
     /// </summary>
-    /// <param name="target">The GClass788 instance containing the statistics to write.</param>
-    public static void PutAggressorStats(this NetDataWriter writer, GClass788 target)
+    /// <param name="target">The AggressorStats instance containing the statistics to write.</param>
+    public static void PutAggressorStats(this NetDataWriter writer, AggressorStats target)
     {
         writer.Put(target.AccountId);
         writer.Put(target.ProfileId);
@@ -365,12 +370,12 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass788 object from the reader stream.
+    /// Deserializes and reconstructs a AggressorStats object from the reader stream.
     /// </summary>
-    /// <returns>A new instance of GClass788 populated with the stream data.</returns>
-    public static GClass788 GetAggressorStats(this NetDataReader reader)
+    /// <returns>A new instance of AggressorStats populated with the stream data.</returns>
+    public static AggressorStats GetAggressorStats(this NetDataReader reader)
     {
-        return new GClass788
+        return new AggressorStats
         {
             AccountId = reader.GetString(),
             ProfileId = reader.GetString(),
@@ -388,8 +393,8 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the add note operation descriptor into the writer stream.
     /// </summary>
-    /// <param name="target">The AddNoteDescriptorClass instance containing the descriptor data to write.</param>
-    public static void PutEFTAddNoteOperationDescriptor(this NetDataWriter writer, AddNoteDescriptorClass target)
+    /// <param name="target">The AddNoteOperationDescriptor instance containing the descriptor data to write.</param>
+    public static void PutEFTAddNoteOperationDescriptor(this NetDataWriter writer, AddNoteOperationDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -397,12 +402,12 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs an AddNoteDescriptorClass object from the reader stream.
+    /// Deserializes and reconstructs an AddNoteOperationDescriptor object from the reader stream.
     /// </summary>
-    /// <returns>A new instance of AddNoteDescriptorClass populated with the stream data.</returns>
-    public static AddNoteDescriptorClass GetEFTAddNoteOperationDescriptor(this NetDataReader reader)
+    /// <returns>A new instance of AddNoteOperationDescriptor populated with the stream data.</returns>
+    public static AddNoteOperationDescriptor GetEFTAddNoteOperationDescriptor(this NetDataReader reader)
     {
-        return new AddNoteDescriptorClass
+        return new AddNoteOperationDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID(),
@@ -411,23 +416,23 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Serializes a GClass3107 note object into the writer stream.
+    /// Serializes a Note note object into the writer stream.
     /// </summary>
-    /// <param name="target">The GClass3107 instance containing the note data to write.</param>
-    public static void PutEFTNotesNote(this NetDataWriter writer, GClass3107 target)
+    /// <param name="target">The Note instance containing the note data to write.</param>
+    public static void PutEFTNotesNote(this NetDataWriter writer, Note target)
     {
         writer.Put(target.Time);
         writer.Put(target.Text);
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass3107 note object from the reader stream.
+    /// Deserializes and reconstructs a Note note object from the reader stream.
     /// </summary>
     /// <param name="reader">The reader instance.</param>
-    /// <returns>A new instance of GClass3107 populated with the stream data.</returns>
-    public static GClass3107 GetEFTNotesNote(this NetDataReader reader)
+    /// <returns>A new instance of Note populated with the stream data.</returns>
+    public static Note GetEFTNotesNote(this NetDataReader reader)
     {
-        return new GClass3107
+        return new Note
         {
             Time = reader.GetFloat(),
             Text = reader.GetString()
@@ -437,8 +442,8 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the key application operation descriptor into the writer stream.
     /// </summary>
-    /// <param name="target">The ApplyKeyDescriptorClass instance containing the descriptor data to write.</param>
-    public static void PutEFTApplyKeyOperationDescriptor(this NetDataWriter writer, ApplyKeyDescriptorClass target)
+    /// <param name="target">The ApplyKeyOperationDescriptor instance containing the descriptor data to write.</param>
+    public static void PutEFTApplyKeyOperationDescriptor(this NetDataWriter writer, ApplyKeyOperationDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -447,12 +452,12 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs an ApplyKeyDescriptorClass object from the reader stream.
+    /// Deserializes and reconstructs an ApplyKeyOperationDescriptor object from the reader stream.
     /// </summary>
-    /// <returns>A new instance of ApplyKeyDescriptorClass populated with the stream data.</returns>
-    public static ApplyKeyDescriptorClass GetEFTApplyKeyOperationDescriptor(this NetDataReader reader)
+    /// <returns>A new instance of ApplyKeyOperationDescriptor populated with the stream data.</returns>
+    public static ApplyKeyOperationDescriptor GetEFTApplyKeyOperationDescriptor(this NetDataReader reader)
     {
-        return new ApplyKeyDescriptorClass
+        return new ApplyKeyOperationDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID(),
@@ -464,8 +469,8 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the item binding operation descriptor into the writer stream.
     /// </summary>
-    /// <param name="target">The GClass1959 instance containing the descriptor data to write.</param>
-    public static void PutEFTBindItemOperationDescriptor(this NetDataWriter writer, GClass1959 target)
+    /// <param name="target">The BindItemOperationDescriptor instance containing the descriptor data to write.</param>
+    public static void PutEFTBindItemOperationDescriptor(this NetDataWriter writer, BindItemOperationDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -474,12 +479,12 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1959 object from the reader stream.
+    /// Deserializes and reconstructs a BindItemOperationDescriptor object from the reader stream.
     /// </summary>
-    /// <returns>A new instance of GClass1959 populated with the stream data.</returns>
-    public static GClass1959 GetEFTBindItemOperationDescriptor(this NetDataReader reader)
+    /// <returns>A new instance of BindItemOperationDescriptor populated with the stream data.</returns>
+    public static BindItemOperationDescriptor GetEFTBindItemOperationDescriptor(this NetDataReader reader)
     {
-        return new GClass1959
+        return new BindItemOperationDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID(),
@@ -491,8 +496,8 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the body part damage history descriptor into the writer stream.
     /// </summary>
-    /// <param name="target">The GClass2215 instance containing the damage history data to write.</param>
-    public static void PutEFTBodyPartDamageHistoryDescriptor(this NetDataWriter writer, GClass2215 target)
+    /// <param name="target">The BodyPartDamageHistoryDescriptor instance containing the damage history data to write.</param>
+    public static void PutEFTBodyPartDamageHistoryDescriptor(this NetDataWriter writer, BodyPartDamageHistoryDescriptor target)
     {
         writer.Put(target.DamageList.Count);
         for (var i = 0; i < target.DamageList.Count; i++)
@@ -502,14 +507,14 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass2215 object from the reader stream.
+    /// Deserializes and reconstructs a BodyPartDamageHistoryDescriptor object from the reader stream.
     /// </summary>
-    /// <returns>A new instance of GClass2215 populated with the stream data.</returns>
-    public static GClass2215 GetEFTBodyPartDamageHistoryDescriptor(this NetDataReader reader)
+    /// <returns>A new instance of BodyPartDamageHistoryDescriptor populated with the stream data.</returns>
+    public static BodyPartDamageHistoryDescriptor GetEFTBodyPartDamageHistoryDescriptor(this NetDataReader reader)
     {
-        var gclass = new GClass2215();
+        var gclass = new BodyPartDamageHistoryDescriptor();
         var num = reader.GetInt();
-        gclass.DamageList = new List<GClass2217>(num);
+        gclass.DamageList = new List<DamageStatsDescriptor>(num);
         for (var i = 0; i < num; i++)
         {
             gclass.DamageList.Add(reader.GetEFTDamageStatsDescriptor());
@@ -520,8 +525,8 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the damage statistics descriptor into the writer stream.
     /// </summary>
-    /// <param name="target">The GClass2217 instance containing the damage stats data to write.</param>
-    public static void PutEFTDamageStatsDescriptor(this NetDataWriter writer, GClass2217 target)
+    /// <param name="target">The DamageStatsDescriptor instance containing the damage stats data to write.</param>
+    public static void PutEFTDamageStatsDescriptor(this NetDataWriter writer, DamageStatsDescriptor target)
     {
         writer.Put(target.Amount);
         writer.PutEnum(target.Type);
@@ -540,12 +545,12 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass2217 object from the reader stream.
+    /// Deserializes and reconstructs a DamageStatsDescriptor object from the reader stream.
     /// </summary>
-    /// <returns>A new instance of GClass2217 populated with the stream data.</returns>
-    public static GClass2217 GetEFTDamageStatsDescriptor(this NetDataReader reader)
+    /// <returns>A new instance of DamageStatsDescriptor populated with the stream data.</returns>
+    public static DamageStatsDescriptor GetEFTDamageStatsDescriptor(this NetDataReader reader)
     {
-        var gclass = new GClass2217
+        var gclass = new DamageStatsDescriptor
         {
             Amount = reader.GetFloat(),
             Type = reader.GetEnum<EDamageType>(),
@@ -563,8 +568,8 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the profile bonus descriptor into the writer stream.
     /// </summary>
-    /// <param name="target">The ProfileBonusesClass instance containing the bonus data to write.</param>
-    public static void PutEFTBonusDescriptor(this NetDataWriter writer, ProfileBonusesClass target)
+    /// <param name="target">The BonusDescriptor instance containing the bonus data to write.</param>
+    public static void PutEFTBonusDescriptor(this NetDataWriter writer, BonusDescriptor target)
     {
         writer.PutEnum(target.BonusType);
         writer.PutMongoID(target.Id);
@@ -614,12 +619,12 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a ProfileBonusesClass object from the reader stream.
+    /// Deserializes and reconstructs a BonusDescriptor object from the reader stream.
     /// </summary>
-    /// <returns>A new instance of ProfileBonusesClass populated with the stream data.</returns>
-    public static ProfileBonusesClass GetEFTBonusDescriptor(this NetDataReader reader)
+    /// <returns>A new instance of BonusDescriptor populated with the stream data.</returns>
+    public static BonusDescriptor GetEFTBonusDescriptor(this NetDataReader reader)
     {
-        var profileBonusesClass = new ProfileBonusesClass
+        var profileBonusesClass = new BonusDescriptor
         {
             BonusType = reader.GetEnum<EBonusType>(),
             Id = reader.GetMongoID(),
@@ -656,8 +661,8 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the magazine check operation descriptor into the writer stream.
     /// </summary>
-    /// <param name="target">The CheckMagazineDescriptorClass instance containing the descriptor data to write.</param>
-    public static void PutEFTCheckMagazineOperationDescriptor(this NetDataWriter writer, CheckMagazineDescriptorClass target)
+    /// <param name="target">The CheckMagazineOperationDescriptor instance containing the descriptor data to write.</param>
+    public static void PutEFTCheckMagazineOperationDescriptor(this NetDataWriter writer, CheckMagazineOperationDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -667,12 +672,12 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a CheckMagazineDescriptorClass object from the reader stream.
+    /// Deserializes and reconstructs a CheckMagazineOperationDescriptor object from the reader stream.
     /// </summary>
-    /// <returns>A new instance of CheckMagazineDescriptorClass populated with the stream data.</returns>
-    public static CheckMagazineDescriptorClass GetEFTCheckMagazineOperationDescriptor(this NetDataReader reader)
+    /// <returns>A new instance of CheckMagazineOperationDescriptor populated with the stream data.</returns>
+    public static CheckMagazineOperationDescriptor GetEFTCheckMagazineOperationDescriptor(this NetDataReader reader)
     {
-        return new CheckMagazineDescriptorClass
+        return new CheckMagazineOperationDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID(),
@@ -685,8 +690,8 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the container descriptor into the writer stream.
     /// </summary>
-    /// <param name="target">The GClass1949 instance containing the container data to write.</param>
-    public static void PutEFTContainerDescriptor(this NetDataWriter writer, GClass1949 target)
+    /// <param name="target">The ContainerDescriptor instance containing the container data to write.</param>
+    public static void PutEFTContainerDescriptor(this NetDataWriter writer, ContainerDescriptor target)
     {
         if (target.ParentId != null)
         {
@@ -701,12 +706,12 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1949 object from the reader stream.
+    /// Deserializes and reconstructs a ContainerDescriptor object from the reader stream.
     /// </summary>
-    /// <returns>A new instance of GClass1949 populated with the stream data.</returns>
-    public static GClass1949 GetEFTContainerDescriptor(this NetDataReader reader)
+    /// <returns>A new instance of ContainerDescriptor populated with the stream data.</returns>
+    public static ContainerDescriptor GetEFTContainerDescriptor(this NetDataReader reader)
     {
-        var gclass = new GClass1949();
+        var gclass = new ContainerDescriptor();
         if (reader.GetBool())
         {
             gclass.ParentId = new MongoID?(reader.GetMongoID());
@@ -718,8 +723,8 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the counter collection descriptor into the writer stream.
     /// </summary>
-    /// <param name="target">The GClass2219 instance containing the collection items to write.</param>
-    public static void PutEFTCounterCollectionDescriptor(this NetDataWriter writer, GClass2219 target)
+    /// <param name="target">The CounterCollectionDescriptor instance containing the collection items to write.</param>
+    public static void PutEFTCounterCollectionDescriptor(this NetDataWriter writer, CounterCollectionDescriptor target)
     {
         writer.Put(target.Items.Count);
         for (var i = 0; i < target.Items.Count; i++)
@@ -729,14 +734,14 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass2219 object from the reader stream.
+    /// Deserializes and reconstructs a CounterCollectionDescriptor object from the reader stream.
     /// </summary>
-    /// <returns>A new instance of GClass2219 populated with the stream data.</returns>
-    public static GClass2219 GetEFTCounterCollectionDescriptor(this NetDataReader reader)
+    /// <returns>A new instance of CounterCollectionDescriptor populated with the stream data.</returns>
+    public static CounterCollectionDescriptor GetEFTCounterCollectionDescriptor(this NetDataReader reader)
     {
-        var gclass = new GClass2219();
+        var gclass = new CounterCollectionDescriptor();
         var num = reader.GetInt();
-        gclass.Items = new List<GClass2218>(num);
+        gclass.Items = new List<CounterCollectionItemDescriptor>(num);
         for (var i = 0; i < num; i++)
         {
             gclass.Items.Add(reader.GetEFTCounterCollectionItemDescriptor());
@@ -747,8 +752,8 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes a counter collection item descriptor into the writer stream.
     /// </summary>
-    /// <param name="target">The GClass2218 instance containing the item data to write.</param>
-    public static void PutEFTCounterCollectionItemDescriptor(this NetDataWriter writer, GClass2218 target)
+    /// <param name="target">The CounterCollectionItemDescriptor instance containing the item data to write.</param>
+    public static void PutEFTCounterCollectionItemDescriptor(this NetDataWriter writer, CounterCollectionItemDescriptor target)
     {
         writer.Put(target.Key.Count);
         for (var i = 0; i < target.Key.Count; i++)
@@ -759,12 +764,12 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass2218 object from the reader stream.
+    /// Deserializes and reconstructs a CounterCollectionItemDescriptor object from the reader stream.
     /// </summary>
-    /// <returns>A new instance of GClass2218 populated with the stream data.</returns>
-    public static GClass2218 GetEFTCounterCollectionItemDescriptor(this NetDataReader reader)
+    /// <returns>A new instance of CounterCollectionItemDescriptor populated with the stream data.</returns>
+    public static CounterCollectionItemDescriptor GetEFTCounterCollectionItemDescriptor(this NetDataReader reader)
     {
-        var gclass = new GClass2218();
+        var gclass = new CounterCollectionItemDescriptor();
         var num = reader.GetInt();
         gclass.Key = new List<string>(num);
         for (var i = 0; i < num; i++)
@@ -778,8 +783,8 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the map marker creation operation descriptor into the writer stream.
     /// </summary>
-    /// <param name="target">The CreateMapMarkerDescriptorClass instance containing the descriptor data to write.</param>
-    public static void PutEFTCreateMapMarkerOperationDescriptor(this NetDataWriter writer, CreateMapMarkerDescriptorClass target)
+    /// <param name="target">The CreateMapMarkerOperationDescriptor instance containing the descriptor data to write.</param>
+    public static void PutEFTCreateMapMarkerOperationDescriptor(this NetDataWriter writer, CreateMapMarkerOperationDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -788,12 +793,12 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a CreateMapMarkerDescriptorClass object from the reader stream.
+    /// Deserializes and reconstructs a CreateMapMarkerOperationDescriptor object from the reader stream.
     /// </summary>
-    /// <returns>A new instance of CreateMapMarkerDescriptorClass populated with the stream data.</returns>
-    public static CreateMapMarkerDescriptorClass GetEFTCreateMapMarkerOperationDescriptor(this NetDataReader reader)
+    /// <returns>A new instance of CreateMapMarkerOperationDescriptor populated with the stream data.</returns>
+    public static CreateMapMarkerOperationDescriptor GetEFTCreateMapMarkerOperationDescriptor(this NetDataReader reader)
     {
-        return new CreateMapMarkerDescriptorClass
+        return new CreateMapMarkerOperationDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID(),
@@ -832,19 +837,19 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the cultist amulet component descriptor into the writer stream.
     /// </summary>
-    /// <param name="target">The GClass1944 instance containing the component data to write.</param>
-    public static void PutEFTCultistAmuletComponentDescriptor(this NetDataWriter writer, GClass1944 target)
+    /// <param name="target">The CultistAmuletComponentDescriptor instance containing the component data to write.</param>
+    public static void PutEFTCultistAmuletComponentDescriptor(this NetDataWriter writer, CultistAmuletComponentDescriptor target)
     {
         writer.Put(target.NumberOfUsages);
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1944 object from the reader stream.
+    /// Deserializes and reconstructs a CultistAmuletComponentDescriptor object from the reader stream.
     /// </summary>
-    /// <returns>A new instance of GClass1944 populated with the stream data.</returns>
-    public static GClass1944 GetEFTCultistAmuletComponentDescriptor(this NetDataReader reader)
+    /// <returns>A new instance of CultistAmuletComponentDescriptor populated with the stream data.</returns>
+    public static CultistAmuletComponentDescriptor GetEFTCultistAmuletComponentDescriptor(this NetDataReader reader)
     {
-        return new GClass1944
+        return new CultistAmuletComponentDescriptor
         {
             NumberOfUsages = reader.GetInt()
         };
@@ -853,8 +858,8 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the total damage history descriptor into the writer stream.
     /// </summary>
-    /// <param name="target">The GClass2216 instance containing the entire damage history data to write.</param>
-    public static void PutEFTDamageHistoryDescriptor(this NetDataWriter writer, GClass2216 target)
+    /// <param name="target">The DamageHistoryDescriptor instance containing the entire damage history data to write.</param>
+    public static void PutEFTDamageHistoryDescriptor(this NetDataWriter writer, DamageHistoryDescriptor target)
     {
         writer.PutEnum(target.LethalDamagePart);
         if (target.LethalDamage != null)
@@ -875,12 +880,12 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass2216 object from the reader stream.
+    /// Deserializes and reconstructs a DamageHistoryDescriptor object from the reader stream.
     /// </summary>
-    /// <returns>A new instance of GClass2216 populated with the stream data.</returns>
-    public static GClass2216 GetEFTDamageHistoryDescriptor(this NetDataReader reader)
+    /// <returns>A new instance of DamageHistoryDescriptor populated with the stream data.</returns>
+    public static DamageHistoryDescriptor GetEFTDamageHistoryDescriptor(this NetDataReader reader)
     {
-        var gclass = new GClass2216
+        var gclass = new DamageHistoryDescriptor
         {
             LethalDamagePart = reader.GetEnum<EBodyPart>()
         };
@@ -889,7 +894,7 @@ public static class EFTSerializationExtensions
             gclass.LethalDamage = reader.GetEFTDamageStatsDescriptor();
         }
         var num = reader.GetInt();
-        gclass.BodyParts = new Dictionary<EBodyPart, GClass2215>();
+        gclass.BodyParts = new Dictionary<EBodyPart, BodyPartDamageHistoryDescriptor>();
         for (var i = 0; i < num; i++)
         {
             gclass.BodyParts[reader.GetEnum<EBodyPart>()] = reader.GetEFTBodyPartDamageHistoryDescriptor();
@@ -900,7 +905,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes combat health depletion logs and causal weapon attributes into the writer stream.
     /// </summary>
-    public static void PutEFTDeathCause(this NetDataWriter writer, GClass2199 target)
+    public static void PutEFTDeathCause(this NetDataWriter writer, DeathCause target)
     {
         writer.PutEnum(target.DamageType);
         writer.PutEnum(target.Side);
@@ -909,11 +914,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass2199 object from the reader stream.
+    /// Deserializes and reconstructs a DeathCause object from the reader stream.
     /// </summary>
-    public static GClass2199 GetEFTDeathCause(this NetDataReader reader)
+    public static DeathCause GetEFTDeathCause(this NetDataReader reader)
     {
-        return new GClass2199
+        return new DeathCause
         {
             DamageType = reader.GetEnum<EDamageType>(),
             Side = reader.GetEnum<EPlayerSide>(),
@@ -925,8 +930,8 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the map marker deletion operation descriptor into the writer stream.
     /// </summary>
-    /// <param name="target">The GClass1962 instance containing the descriptor data to write.</param>
-    public static void PutEFTDeleteMapMarkerOperationDescriptor(this NetDataWriter writer, GClass1962 target)
+    /// <param name="target">The DeleteMapMarkerOperationDescriptor instance containing the descriptor data to write.</param>
+    public static void PutEFTDeleteMapMarkerOperationDescriptor(this NetDataWriter writer, DeleteMapMarkerOperationDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -936,12 +941,12 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1962 object from the reader stream.
+    /// Deserializes and reconstructs a DeleteMapMarkerOperationDescriptor object from the reader stream.
     /// </summary>
-    /// <returns>A new instance of GClass1962 populated with the stream data.</returns>
-    public static GClass1962 GetEFTDeleteMapMarkerOperationDescriptor(this NetDataReader reader)
+    /// <returns>A new instance of DeleteMapMarkerOperationDescriptor populated with the stream data.</returns>
+    public static DeleteMapMarkerOperationDescriptor GetEFTDeleteMapMarkerOperationDescriptor(this NetDataReader reader)
     {
-        return new GClass1962
+        return new DeleteMapMarkerOperationDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID(),
@@ -954,8 +959,8 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the note deletion operation descriptor into the writer stream.
     /// </summary>
-    /// <param name="target">The GClass1963 instance containing the descriptor data to write.</param>
-    public static void PutEFTDeleteNoteOperationDescriptor(this NetDataWriter writer, GClass1963 target)
+    /// <param name="target">The DeleteNoteOperationDescriptor instance containing the descriptor data to write.</param>
+    public static void PutEFTDeleteNoteOperationDescriptor(this NetDataWriter writer, DeleteNoteOperationDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -963,12 +968,12 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1963 object from the reader stream.
+    /// Deserializes and reconstructs a DeleteNoteOperationDescriptor object from the reader stream.
     /// </summary>
-    /// <returns>A new instance of GClass1963 populated with the stream data.</returns>
-    public static GClass1963 GetEFTDeleteNoteOperationDescriptor(this NetDataReader reader)
+    /// <returns>A new instance of DeleteNoteOperationDescriptor populated with the stream data.</returns>
+    public static DeleteNoteOperationDescriptor GetEFTDeleteNoteOperationDescriptor(this NetDataReader reader)
     {
-        return new GClass1963
+        return new DeleteNoteOperationDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID(),
@@ -979,8 +984,8 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the destroyed item details into the writer stream.
     /// </summary>
-    /// <param name="target">The GClass1955 instance containing the item destruction data to write.</param>
-    public static void PutEFTDestroyedItem(this NetDataWriter writer, GClass1955 target)
+    /// <param name="target">The DestroyedItem instance containing the item destruction data to write.</param>
+    public static void PutEFTDestroyedItem(this NetDataWriter writer, DestroyedItem target)
     {
         writer.PutMongoID(target.ItemId);
         writer.Put(target.NumberToDestroy);
@@ -988,12 +993,12 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1955 object from the reader stream.
+    /// Deserializes and reconstructs a DestroyedItem object from the reader stream.
     /// </summary>
-    /// <returns>A new instance of GClass1955 populated with the stream data.</returns>
-    public static GClass1955 GetEFTDestroyedItem(this NetDataReader reader)
+    /// <returns>A new instance of DestroyedItem populated with the stream data.</returns>
+    public static DestroyedItem GetEFTDestroyedItem(this NetDataReader reader)
     {
-        return new GClass1955
+        return new DestroyedItem
         {
             ItemId = reader.GetMongoID(),
             NumberToDestroy = reader.GetInt(),
@@ -1004,8 +1009,8 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the dog tag component descriptor into the writer stream.
     /// </summary>
-    /// <param name="target">The GClass1938 instance containing the dog tag component data to write.</param>
-    public static void PutEFTDogTagComponentDescriptor(this NetDataWriter writer, GClass1938 target)
+    /// <param name="target">The DogTagComponentDescriptor instance containing the dog tag component data to write.</param>
+    public static void PutEFTDogTagComponentDescriptor(this NetDataWriter writer, DogTagComponentDescriptor target)
     {
         writer.Put(target.AccountId);
         writer.Put(target.ProfileId);
@@ -1022,12 +1027,12 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1938 object from the reader stream.
+    /// Deserializes and reconstructs a DogTagComponentDescriptor object from the reader stream.
     /// </summary>
-    /// <returns>A new instance of GClass1938 populated with the stream data.</returns>
-    public static GClass1938 GetEFTDogTagComponentDescriptor(this NetDataReader reader)
+    /// <returns>A new instance of DogTagComponentDescriptor populated with the stream data.</returns>
+    public static DogTagComponentDescriptor GetEFTDogTagComponentDescriptor(this NetDataReader reader)
     {
-        return new GClass1938
+        return new DogTagComponentDescriptor
         {
             AccountId = reader.GetString(),
             ProfileId = reader.GetString(),
@@ -1047,8 +1052,8 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the dropped item information into the writer stream.
     /// </summary>
-    /// <param name="target">The GClass2185 instance containing the dropped item data to write.</param>
-    public static void PutEFTDroppedItem(this NetDataWriter writer, GClass2185 target)
+    /// <param name="target">The DroppedItem instance containing the dropped item data to write.</param>
+    public static void PutEFTDroppedItem(this NetDataWriter writer, DroppedItem target)
     {
         writer.PutMongoID(target.QuestId);
         writer.PutMongoID(target.ItemId);
@@ -1056,12 +1061,12 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass2185 object from the reader stream.
+    /// Deserializes and reconstructs a DroppedItem object from the reader stream.
     /// </summary>
-    /// <returns>A new instance of GClass2185 populated with the stream data.</returns>
-    public static GClass2185 GetEFTDroppedItem(this NetDataReader reader)
+    /// <returns>A new instance of DroppedItem populated with the stream data.</returns>
+    public static DroppedItem GetEFTDroppedItem(this NetDataReader reader)
     {
-        return new GClass2185
+        return new DroppedItem
         {
             QuestId = reader.GetMongoID(),
             ItemId = reader.GetMongoID(),
@@ -1072,8 +1077,8 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the map marker edit operation descriptor into the writer stream.
     /// </summary>
-    /// <param name="target">The GClass1964 instance containing the descriptor data to write.</param>
-    public static void PutEFTEditMapMarkerOperationDescriptor(this NetDataWriter writer, GClass1964 target)
+    /// <param name="target">The EditMapMarkerOperationDescriptor instance containing the descriptor data to write.</param>
+    public static void PutEFTEditMapMarkerOperationDescriptor(this NetDataWriter writer, EditMapMarkerOperationDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -1084,12 +1089,12 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1964 object from the reader stream.
+    /// Deserializes and reconstructs a EditMapMarkerOperationDescriptor object from the reader stream.
     /// </summary>
-    /// <returns>A new instance of GClass1964 populated with the stream data.</returns>
-    public static GClass1964 GetEFTEditMapMarkerOperationDescriptor(this NetDataReader reader)
+    /// <returns>A new instance of EditMapMarkerOperationDescriptor populated with the stream data.</returns>
+    public static EditMapMarkerOperationDescriptor GetEFTEditMapMarkerOperationDescriptor(this NetDataReader reader)
     {
-        return new GClass1964
+        return new EditMapMarkerOperationDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID(),
@@ -1103,8 +1108,8 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the note editing operation descriptor into the writer stream.
     /// </summary>
-    /// <param name="target">The EditNoteDescriptorClass instance containing the descriptor data to write.</param>
-    public static void PutEFTEditNoteOperationDescriptor(this NetDataWriter writer, EditNoteDescriptorClass target)
+    /// <param name="target">The EditNoteOperationDescriptor instance containing the descriptor data to write.</param>
+    public static void PutEFTEditNoteOperationDescriptor(this NetDataWriter writer, EditNoteOperationDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -1113,12 +1118,12 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs an EditNoteDescriptorClass object from the reader stream.
+    /// Deserializes and reconstructs an EditNoteOperationDescriptor object from the reader stream.
     /// </summary>
-    /// <returns>A new instance of EditNoteDescriptorClass populated with the stream data.</returns>
-    public static EditNoteDescriptorClass GetEFTEditNoteOperationDescriptor(this NetDataReader reader)
+    /// <returns>A new instance of EditNoteOperationDescriptor populated with the stream data.</returns>
+    public static EditNoteOperationDescriptor GetEFTEditNoteOperationDescriptor(this NetDataReader reader)
     {
-        return new EditNoteDescriptorClass
+        return new EditNoteOperationDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID(),
@@ -1130,8 +1135,8 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the malfunction type examination operation descriptor into the writer stream.
     /// </summary>
-    /// <param name="target">The GClass1966 instance containing the descriptor data to write.</param>
-    public static void PutEFTExamineMalfTypeOperationDescriptor(this NetDataWriter writer, GClass1966 target)
+    /// <param name="target">The ExamineMalfTypeOperationDescriptor instance containing the descriptor data to write.</param>
+    public static void PutEFTExamineMalfTypeOperationDescriptor(this NetDataWriter writer, ExamineMalfTypeOperationDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -1139,12 +1144,12 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1966 object from the reader stream.
+    /// Deserializes and reconstructs a ExamineMalfTypeOperationDescriptor object from the reader stream.
     /// </summary>
-    /// <returns>A new instance of GClass1966 populated with the stream data.</returns>
-    public static GClass1966 GetEFTExamineMalfTypeOperationDescriptor(this NetDataReader reader)
+    /// <returns>A new instance of ExamineMalfTypeOperationDescriptor populated with the stream data.</returns>
+    public static ExamineMalfTypeOperationDescriptor GetEFTExamineMalfTypeOperationDescriptor(this NetDataReader reader)
     {
-        return new GClass1966
+        return new ExamineMalfTypeOperationDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID(),
@@ -1155,8 +1160,8 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the malfunction examination operation descriptor into the writer stream.
     /// </summary>
-    /// <param name="target">The GClass1967 instance containing the descriptor data to write.</param>
-    public static void PutEFTExamineMalfunctionOperationDescriptor(this NetDataWriter writer, GClass1967 target)
+    /// <param name="target">The ExamineMalfunctionOperationDescriptor instance containing the descriptor data to write.</param>
+    public static void PutEFTExamineMalfunctionOperationDescriptor(this NetDataWriter writer, ExamineMalfunctionOperationDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -1164,12 +1169,12 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1967 object from the reader stream.
+    /// Deserializes and reconstructs a ExamineMalfunctionOperationDescriptor object from the reader stream.
     /// </summary>
-    /// <returns>A new instance of GClass1967 populated with the stream data.</returns>
-    public static GClass1967 GetEFTExamineMalfunctionOperationDescriptor(this NetDataReader reader)
+    /// <returns>A new instance of ExamineMalfunctionOperationDescriptor populated with the stream data.</returns>
+    public static ExamineMalfunctionOperationDescriptor GetEFTExamineMalfunctionOperationDescriptor(this NetDataReader reader)
     {
-        return new GClass1967
+        return new ExamineMalfunctionOperationDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID(),
@@ -1180,8 +1185,8 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the item examination operation descriptor into the writer stream.
     /// </summary>
-    /// <param name="target">The GClass1968 instance containing the descriptor data to write.</param>
-    public static void PutEFTExamineOperationDescriptor(this NetDataWriter writer, GClass1968 target)
+    /// <param name="target">The ExamineOperationDescriptor instance containing the descriptor data to write.</param>
+    public static void PutEFTExamineOperationDescriptor(this NetDataWriter writer, ExamineOperationDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -1189,12 +1194,12 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1968 object from the reader stream.
+    /// Deserializes and reconstructs a ExamineOperationDescriptor object from the reader stream.
     /// </summary>
-    /// <returns>A new instance of GClass1968 populated with the stream data.</returns>
-    public static GClass1968 GetEFTExamineOperationDescriptor(this NetDataReader reader)
+    /// <returns>A new instance of ExamineOperationDescriptor populated with the stream data.</returns>
+    public static ExamineOperationDescriptor GetEFTExamineOperationDescriptor(this NetDataReader reader)
     {
-        return new GClass1968
+        return new ExamineOperationDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID(),
@@ -1205,20 +1210,20 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the face shield component descriptor into the writer stream.
     /// </summary>
-    /// <param name="target">The GClass1935 instance containing the face shield status data to write.</param>
-    public static void PutEFTFaceShieldComponentDescriptor(this NetDataWriter writer, GClass1935 target)
+    /// <param name="target">The FaceShieldComponentDescriptor instance containing the face shield status data to write.</param>
+    public static void PutEFTFaceShieldComponentDescriptor(this NetDataWriter writer, FaceShieldComponentDescriptor target)
     {
         writer.Put(target.Hits);
         writer.Put(target.HitSeed);
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1935 object from the reader stream.
+    /// Deserializes and reconstructs a FaceShieldComponentDescriptor object from the reader stream.
     /// </summary>
-    /// <returns>A new instance of GClass1935 populated with the stream data.</returns>
-    public static GClass1935 GetEFTFaceShieldComponentDescriptor(this NetDataReader reader)
+    /// <returns>A new instance of FaceShieldComponentDescriptor populated with the stream data.</returns>
+    public static FaceShieldComponentDescriptor GetEFTFaceShieldComponentDescriptor(this NetDataReader reader)
     {
-        return new GClass1935
+        return new FaceShieldComponentDescriptor
         {
             Hits = reader.GetByte(),
             HitSeed = reader.GetByte()
@@ -1228,8 +1233,8 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the face shield marking operation descriptor into the writer stream.
     /// </summary>
-    /// <param name="target">The GClass1969 instance containing the descriptor data to write.</param>
-    public static void PutEFTFaceshieldMarkOperationDescriptor(this NetDataWriter writer, GClass1969 target)
+    /// <param name="target">The FaceshieldMarkOperationDescriptor instance containing the descriptor data to write.</param>
+    public static void PutEFTFaceshieldMarkOperationDescriptor(this NetDataWriter writer, FaceshieldMarkOperationDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -1237,12 +1242,12 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1969 object from the reader stream.
+    /// Deserializes and reconstructs a FaceshieldMarkOperationDescriptor object from the reader stream.
     /// </summary>
-    /// <returns>A new instance of GClass1969 populated with the stream data.</returns>
-    public static GClass1969 GetEFTFaceshieldMarkOperationDescriptor(this NetDataReader reader)
+    /// <returns>A new instance of FaceshieldMarkOperationDescriptor populated with the stream data.</returns>
+    public static FaceshieldMarkOperationDescriptor GetEFTFaceshieldMarkOperationDescriptor(this NetDataReader reader)
     {
-        return new GClass1969
+        return new FaceshieldMarkOperationDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID(),
@@ -1253,19 +1258,19 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the fire mode component descriptor into the writer stream.
     /// </summary>
-    /// <param name="target">The GClass1937 instance containing the fire mode status data to write.</param>
-    public static void PutEFTFireModeComponentDescriptor(this NetDataWriter writer, GClass1937 target)
+    /// <param name="target">The FireModeComponentDescriptor instance containing the fire mode status data to write.</param>
+    public static void PutEFTFireModeComponentDescriptor(this NetDataWriter writer, FireModeComponentDescriptor target)
     {
         writer.PutEnum(target.FireMode);
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1937 object from the reader stream.
+    /// Deserializes and reconstructs a FireModeComponentDescriptor object from the reader stream.
     /// </summary>
-    /// <returns>A new instance of GClass1937 populated with the stream data.</returns>
-    public static GClass1937 GetEFTFireModeComponentDescriptor(this NetDataReader reader)
+    /// <returns>A new instance of FireModeComponentDescriptor populated with the stream data.</returns>
+    public static FireModeComponentDescriptor GetEFTFireModeComponentDescriptor(this NetDataReader reader)
     {
-        return new GClass1937
+        return new FireModeComponentDescriptor
         {
             FireMode = reader.GetEnum<Weapon.EFireMode>()
         };
@@ -1274,19 +1279,19 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the foldable component descriptor into the writer stream.
     /// </summary>
-    /// <param name="target">The GClass1936 instance containing the folded status data to write.</param>
-    public static void PutEFTFoldableComponentDescriptor(this NetDataWriter writer, GClass1936 target)
+    /// <param name="target">The FoldableComponentDescriptor instance containing the folded status data to write.</param>
+    public static void PutEFTFoldableComponentDescriptor(this NetDataWriter writer, FoldableComponentDescriptor target)
     {
         writer.Put(target.Folded);
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1936 object from the reader stream.
+    /// Deserializes and reconstructs a FoldableComponentDescriptor object from the reader stream.
     /// </summary>
-    /// <returns>A new instance of GClass1936 populated with the stream data.</returns>
-    public static GClass1936 GetEFTFoldableComponentDescriptor(this NetDataReader reader)
+    /// <returns>A new instance of FoldableComponentDescriptor populated with the stream data.</returns>
+    public static FoldableComponentDescriptor GetEFTFoldableComponentDescriptor(this NetDataReader reader)
     {
-        return new GClass1936
+        return new FoldableComponentDescriptor
         {
             Folded = reader.GetBool()
         };
@@ -1295,8 +1300,8 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the item folding operation descriptor into the writer stream.
     /// </summary>
-    /// <param name="target">The GClass1970 instance containing the descriptor data to write.</param>
-    public static void PutEFTFoldOperationDescriptor(this NetDataWriter writer, GClass1970 target)
+    /// <param name="target">The FoldOperationDescriptor instance containing the descriptor data to write.</param>
+    public static void PutEFTFoldOperationDescriptor(this NetDataWriter writer, FoldOperationDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -1305,12 +1310,12 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1970 object from the reader stream.
+    /// Deserializes and reconstructs a FoldOperationDescriptor object from the reader stream.
     /// </summary>
-    /// <returns>A new instance of GClass1970 populated with the stream data.</returns>
-    public static GClass1970 GetEFTFoldOperationDescriptor(this NetDataReader reader)
+    /// <returns>A new instance of FoldOperationDescriptor populated with the stream data.</returns>
+    public static FoldOperationDescriptor GetEFTFoldOperationDescriptor(this NetDataReader reader)
     {
-        return new GClass1970
+        return new FoldOperationDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID(),
@@ -1322,19 +1327,19 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the food and drink component descriptor into the writer stream.
     /// </summary>
-    /// <param name="target">The GClass1925 instance containing the food/drink status data to write.</param>
-    public static void PutEFTFoodDrinkComponentDescriptor(this NetDataWriter writer, GClass1925 target)
+    /// <param name="target">The FoodDrinkComponentDescriptor instance containing the food/drink status data to write.</param>
+    public static void PutEFTFoodDrinkComponentDescriptor(this NetDataWriter writer, FoodDrinkComponentDescriptor target)
     {
         writer.Put(target.HpPercent);
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1925 object from the reader stream.
+    /// Deserializes and reconstructs a FoodDrinkComponentDescriptor object from the reader stream.
     /// </summary>
-    /// <returns>A new instance of GClass1925 populated with the stream data.</returns>
-    public static GClass1925 GetEFTFoodDrinkComponentDescriptor(this NetDataReader reader)
+    /// <returns>A new instance of FoodDrinkComponentDescriptor populated with the stream data.</returns>
+    public static FoodDrinkComponentDescriptor GetEFTFoodDrinkComponentDescriptor(this NetDataReader reader)
     {
-        return new GClass1925
+        return new FoodDrinkComponentDescriptor
         {
             HpPercent = reader.GetFloat()
         };
@@ -1343,20 +1348,20 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the found in raid item details into the writer stream.
     /// </summary>
-    /// <param name="target">The GClass2186 instance containing the item raid data to write.</param>
-    public static void PutEFTFoundInRaidItem(this NetDataWriter writer, GClass2186 target)
+    /// <param name="target">The FoundInRaidItem instance containing the item raid data to write.</param>
+    public static void PutEFTFoundInRaidItem(this NetDataWriter writer, FoundInRaidItem target)
     {
         writer.PutMongoID(target.QuestId);
         writer.PutMongoID(target.ItemId);
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass2186 object from the reader stream.
+    /// Deserializes and reconstructs a FoundInRaidItem object from the reader stream.
     /// </summary>
-    /// <returns>A new instance of GClass2186 populated with the stream data.</returns>
-    public static GClass2186 GetEFTFoundInRaidItem(this NetDataReader reader)
+    /// <returns>A new instance of FoundInRaidItem populated with the stream data.</returns>
+    public static FoundInRaidItem GetEFTFoundInRaidItem(this NetDataReader reader)
     {
-        return new GClass2186
+        return new FoundInRaidItem
         {
             QuestId = reader.GetMongoID(),
             ItemId = reader.GetMongoID()
@@ -1366,7 +1371,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes a grid descriptor object into the writer stream.
     /// </summary>
-    public static void PutEFTGridDescriptor(this NetDataWriter writer, GClass1919 target)
+    public static void PutEFTGridDescriptor(this NetDataWriter writer, GridDescriptor target)
     {
         writer.Put(target.GridNumber);
         writer.Put(target.ContainedItems.Count);
@@ -1377,16 +1382,16 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1919 object from the reader stream.
+    /// Deserializes and reconstructs a GridDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1919 GetEFTGridDescriptor(this NetDataReader reader)
+    public static GridDescriptor GetEFTGridDescriptor(this NetDataReader reader)
     {
-        var gclass = new GClass1919
+        var gclass = new GridDescriptor
         {
             GridNumber = reader.GetByte()
         };
         var num = reader.GetInt();
-        gclass.ContainedItems = new List<GClass1918>(num);
+        gclass.ContainedItems = new List<ItemInGridDescriptor>(num);
         for (var i = 0; i < num; i++)
         {
             gclass.ContainedItems.Add(reader.GetEFTItemInGridDescriptor());
@@ -1397,7 +1402,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes a grid item address descriptor object into the writer stream.
     /// </summary>
-    public static void PutEFTGridItemAddressDescriptor(this NetDataWriter writer, GClass1954 target)
+    public static void PutEFTGridItemAddressDescriptor(this NetDataWriter writer, GridItemAddressDescriptor target)
     {
         writer.Put(target.X);
         writer.Put(target.Y);
@@ -1406,11 +1411,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1954 object from the reader stream.
+    /// Deserializes and reconstructs a GridItemAddressDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1954 GetEFTGridItemAddressDescriptor(this NetDataReader reader)
+    public static GridItemAddressDescriptor GetEFTGridItemAddressDescriptor(this NetDataReader reader)
     {
-        return new GClass1954
+        return new GridItemAddressDescriptor
         {
             X = reader.GetByte(),
             Y = reader.GetByte(),
@@ -1422,7 +1427,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the inventory descriptor state into the writer stream.
     /// </summary>
-    public static void PutEFTInventoryDescriptor(this NetDataWriter writer, EFTInventoryClass target)
+    public static void PutEFTInventoryDescriptor(this NetDataWriter writer, InventoryDescriptor target)
     {
         writer.PutEFTItemDescriptor(target.Equipment);
         if (target.Stash != null)
@@ -1505,11 +1510,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs an EFTInventoryClass object from the reader stream.
+    /// Deserializes and reconstructs an InventoryDescriptor object from the reader stream.
     /// </summary>
-    public static EFTInventoryClass GetEFTInventoryDescriptor(this NetDataReader reader)
+    public static InventoryDescriptor GetEFTInventoryDescriptor(this NetDataReader reader)
     {
-        var eftinventoryClass = new EFTInventoryClass
+        var eftinventoryClass = new InventoryDescriptor
         {
             Equipment = reader.GetEFTItemDescriptor()
         };
@@ -1536,7 +1541,7 @@ public static class EFTSerializationExtensions
         if (reader.GetBool())
         {
             var num = reader.GetInt();
-            eftinventoryClass.HideoutAreaStashes = new Dictionary<EAreaType, InventoryDescriptorClass>();
+            eftinventoryClass.HideoutAreaStashes = new Dictionary<EAreaType, ItemDescriptor>();
             for (var i = 0; i < num; i++)
             {
                 eftinventoryClass.HideoutAreaStashes[reader.GetEnum<EAreaType>()] = reader.GetEFTItemDescriptor();
@@ -1567,17 +1572,17 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the inventory equipment descriptor into the writer stream.
     /// </summary>
-    public static void PutEFTInventoryEquipmentDescriptor(this NetDataWriter writer, GClass2211 target)
+    public static void PutEFTInventoryEquipmentDescriptor(this NetDataWriter writer, InventoryEquipmentDescriptor target)
     {
         writer.PutEFTItemDescriptor(target.Items);
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass2211 object from the reader stream.
+    /// Deserializes and reconstructs a InventoryEquipmentDescriptor object from the reader stream.
     /// </summary>
-    public static GClass2211 GetEFTInventoryEquipmentDescriptor(this NetDataReader reader)
+    public static InventoryEquipmentDescriptor GetEFTInventoryEquipmentDescriptor(this NetDataReader reader)
     {
-        return new GClass2211
+        return new InventoryEquipmentDescriptor
         {
             Items = reader.GetEFTItemDescriptor()
         };
@@ -1586,7 +1591,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the wishlist addition operation descriptor into the writer stream.
     /// </summary>
-    public static void PutEFTInventoryLogicOperationsAddToWishlistOperationDescriptor(this NetDataWriter writer, GClass1994 target)
+    public static void PutEFTInventoryLogicOperationsAddToWishlistOperationDescriptor(this NetDataWriter writer, AddToWishlistOperationDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -1595,11 +1600,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1994 object from the reader stream.
+    /// Deserializes and reconstructs a AddToWishlistOperationDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1994 GetEFTInventoryLogicOperationsAddToWishlistOperationDescriptor(this NetDataReader reader)
+    public static AddToWishlistOperationDescriptor GetEFTInventoryLogicOperationsAddToWishlistOperationDescriptor(this NetDataReader reader)
     {
-        return new GClass1994
+        return new AddToWishlistOperationDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID(),
@@ -1611,7 +1616,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the item modification and change operation descriptor into the writer stream.
     /// </summary>
-    public static void PutEFTInventoryLogicOperationsChangeItemsOperationDescriptor(this NetDataWriter writer, GClass1997 target)
+    public static void PutEFTInventoryLogicOperationsChangeItemsOperationDescriptor(this NetDataWriter writer, ChangeItemsOperationDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -1678,11 +1683,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1997 object from the reader stream.
+    /// Deserializes and reconstructs a ChangeItemsOperationDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1997 GetEFTInventoryLogicOperationsChangeItemsOperationDescriptor(this NetDataReader reader)
+    public static ChangeItemsOperationDescriptor GetEFTInventoryLogicOperationsChangeItemsOperationDescriptor(this NetDataReader reader)
     {
-        var gclass = new GClass1997
+        var gclass = new ChangeItemsOperationDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID()
@@ -1690,7 +1695,7 @@ public static class EFTSerializationExtensions
         if (reader.GetBool())
         {
             var num = reader.GetInt();
-            gclass.ChangedItems = new List<GClass1924>(num);
+            gclass.ChangedItems = new List<ItemInfoDescriptor>(num);
             for (var i = 0; i < num; i++)
             {
                 gclass.ChangedItems.Add(reader.GetEFTItemInfoDescriptor());
@@ -1708,16 +1713,16 @@ public static class EFTSerializationExtensions
         if (reader.GetBool())
         {
             var num3 = reader.GetInt();
-            gclass.MovedItems = new Dictionary<MongoID, GClass1950>();
+            gclass.MovedItems = new Dictionary<MongoID, ItemAddressDescriptor>();
             for (var k = 0; k < num3; k++)
             {
-                gclass.MovedItems[reader.GetMongoID()] = reader.GetPolymorph<GClass1950>();
+                gclass.MovedItems[reader.GetMongoID()] = reader.GetPolymorph<ItemAddressDescriptor>();
             }
         }
         if (reader.GetBool())
         {
             var num4 = reader.GetInt();
-            gclass.NewItems = new List<GClass1921>(num4);
+            gclass.NewItems = new List<NestedItemDescriptor>(num4);
             for (var l = 0; l < num4; l++)
             {
                 gclass.NewItems.Add(reader.GetEFTNestedItemDescriptor());
@@ -1725,7 +1730,7 @@ public static class EFTSerializationExtensions
         }
         if (reader.GetBool())
         {
-            gclass.InternalOperationDescriptor = reader.GetPolymorph<BaseDescriptorClass>();
+            gclass.InternalOperationDescriptor = reader.GetPolymorph<InventoryOperationDescriptor>();
         }
         return gclass;
     }
@@ -1733,7 +1738,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the wishlist item category change operation descriptor into the writer stream.
     /// </summary>
-    public static void PutEFTInventoryLogicOperationsChangeWishlistItemCategoryOperationDescriptor(this NetDataWriter writer, GClass1998 target)
+    public static void PutEFTInventoryLogicOperationsChangeWishlistItemCategoryOperationDescriptor(this NetDataWriter writer, ChangeWishlistItemCategoryOperationDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -1742,11 +1747,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1998 object from the reader stream.
+    /// Deserializes and reconstructs a ChangeWishlistItemCategoryOperationDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1998 GetEFTInventoryLogicOperationsChangeWishlistItemCategoryOperationDescriptor(this NetDataReader reader)
+    public static ChangeWishlistItemCategoryOperationDescriptor GetEFTInventoryLogicOperationsChangeWishlistItemCategoryOperationDescriptor(this NetDataReader reader)
     {
-        return new GClass1998
+        return new ChangeWishlistItemCategoryOperationDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID(),
@@ -1758,7 +1763,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the trader service purchase operation descriptor into the writer stream.
     /// </summary>
-    public static void PutEFTInventoryLogicOperationsPurchaseTraderServiceOperationDescriptor(this NetDataWriter writer, GClass1999 target)
+    public static void PutEFTInventoryLogicOperationsPurchaseTraderServiceOperationDescriptor(this NetDataWriter writer, PurchaseTraderServiceOperationDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -1773,11 +1778,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1999 object from the reader stream.
+    /// Deserializes and reconstructs a PurchaseTraderServiceOperationDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1999 GetEFTInventoryLogicOperationsPurchaseTraderServiceOperationDescriptor(this NetDataReader reader)
+    public static PurchaseTraderServiceOperationDescriptor GetEFTInventoryLogicOperationsPurchaseTraderServiceOperationDescriptor(this NetDataReader reader)
     {
-        var gclass = new GClass1999
+        var gclass = new PurchaseTraderServiceOperationDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID(),
@@ -1793,7 +1798,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the wishlist removal operation descriptor into the writer stream.
     /// </summary>
-    public static void PutEFTInventoryLogicOperationsRemoveFromWishlistOperationDescriptor(this NetDataWriter writer, GClass2000 target)
+    public static void PutEFTInventoryLogicOperationsRemoveFromWishlistOperationDescriptor(this NetDataWriter writer, RemoveFromWishlistOperationDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -1802,11 +1807,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass2000 object from the reader stream.
+    /// Deserializes and reconstructs a RemoveFromWishlistOperationDescriptor object from the reader stream.
     /// </summary>
-    public static GClass2000 GetEFTInventoryLogicOperationsRemoveFromWishlistOperationDescriptor(this NetDataReader reader)
+    public static RemoveFromWishlistOperationDescriptor GetEFTInventoryLogicOperationsRemoveFromWishlistOperationDescriptor(this NetDataReader reader)
     {
-        return new GClass2000
+        return new RemoveFromWishlistOperationDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID(),
@@ -1818,7 +1823,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the container content search operation descriptor into the writer stream.
     /// </summary>
-    public static void PutEFTInventoryLogicOperationsSearchContentOperationDescriptor(this NetDataWriter writer, GClass2002 target)
+    public static void PutEFTInventoryLogicOperationsSearchContentOperationDescriptor(this NetDataWriter writer, SearchContentOperationDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -1826,11 +1831,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass2002 object from the reader stream.
+    /// Deserializes and reconstructs a SearchContentOperationDescriptor object from the reader stream.
     /// </summary>
-    public static GClass2002 GetEFTInventoryLogicOperationsSearchContentOperationDescriptor(this NetDataReader reader)
+    public static SearchContentOperationDescriptor GetEFTInventoryLogicOperationsSearchContentOperationDescriptor(this NetDataReader reader)
     {
-        return new GClass2002
+        return new SearchContentOperationDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID(),
@@ -1841,7 +1846,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the container content search suboperation descriptor into the writer stream.
     /// </summary>
-    public static void PutEFTInventoryLogicOperationsSearchSuboperationDescriptor(this NetDataWriter writer, GClass2001 target)
+    public static void PutEFTInventoryLogicOperationsSearchSuboperationDescriptor(this NetDataWriter writer, SearchSuboperationDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -1863,11 +1868,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass2001 object from the reader stream.
+    /// Deserializes and reconstructs a SearchSuboperationDescriptor object from the reader stream.
     /// </summary>
-    public static GClass2001 GetEFTInventoryLogicOperationsSearchSuboperationDescriptor(this NetDataReader reader)
+    public static SearchSuboperationDescriptor GetEFTInventoryLogicOperationsSearchSuboperationDescriptor(this NetDataReader reader)
     {
-        var gclass = new GClass2001
+        var gclass = new SearchSuboperationDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID(),
@@ -1876,7 +1881,7 @@ public static class EFTSerializationExtensions
         if (reader.GetBool())
         {
             var num = reader.GetInt();
-            gclass.Content = new List<GClass1921>(num);
+            gclass.Content = new List<NestedItemDescriptor>(num);
             for (var i = 0; i < num; i++)
             {
                 gclass.Content.Add(reader.GetEFTNestedItemDescriptor());
@@ -1889,7 +1894,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the item split to nowhere operation descriptor into the writer stream.
     /// </summary>
-    public static void PutEFTInventoryLogicOperationsSplitToNowhereDescriptor(this NetDataWriter writer, GClass1995 target)
+    public static void PutEFTInventoryLogicOperationsSplitToNowhereDescriptor(this NetDataWriter writer, SplitToNowhereDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -1898,11 +1903,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1995 object from the reader stream.
+    /// Deserializes and reconstructs a SplitToNowhereDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1995 GetEFTInventoryLogicOperationsSplitToNowhereDescriptor(this NetDataReader reader)
+    public static SplitToNowhereDescriptor GetEFTInventoryLogicOperationsSplitToNowhereDescriptor(this NetDataReader reader)
     {
-        return new GClass1995
+        return new SplitToNowhereDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID(),
@@ -1914,7 +1919,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the item transfer from nowhere operation descriptor into the writer stream.
     /// </summary>
-    public static void PutEFTInventoryLogicOperationsTransferFromNowhereDescriptor(this NetDataWriter writer, GClass1996 target)
+    public static void PutEFTInventoryLogicOperationsTransferFromNowhereDescriptor(this NetDataWriter writer, TransferFromNowhereDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -1924,11 +1929,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1996 object from the reader stream.
+    /// Deserializes and reconstructs a TransferFromNowhereDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1996 GetEFTInventoryLogicOperationsTransferFromNowhereDescriptor(this NetDataReader reader)
+    public static TransferFromNowhereDescriptor GetEFTInventoryLogicOperationsTransferFromNowhereDescriptor(this NetDataReader reader)
     {
-        return new GClass1996
+        return new TransferFromNowhereDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID(),
@@ -1941,7 +1946,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes an inventory item descriptor into the writer stream.
     /// </summary>
-    public static void PutEFTItemDescriptor(this NetDataWriter writer, InventoryDescriptorClass target)
+    public static void PutEFTItemDescriptor(this NetDataWriter writer, ItemDescriptor target)
     {
         writer.PutMongoID(target.Id);
         writer.PutMongoID(target.TemplateId);
@@ -2033,11 +2038,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs an InventoryDescriptorClass object from the reader stream.
+    /// Deserializes and reconstructs an ItemDescriptor object from the reader stream.
     /// </summary>
-    public static InventoryDescriptorClass GetEFTItemDescriptor(this NetDataReader reader)
+    public static ItemDescriptor GetEFTItemDescriptor(this NetDataReader reader)
     {
-        var inventoryDescriptorClass = new InventoryDescriptorClass
+        var inventoryDescriptorClass = new ItemDescriptor
         {
             Id = reader.GetMongoID(),
             TemplateId = reader.GetMongoID(),
@@ -2057,16 +2062,16 @@ public static class EFTSerializationExtensions
         if (reader.GetBool())
         {
             var num = reader.GetInt();
-            inventoryDescriptorClass.Components = new List<GClass1923>(num);
+            inventoryDescriptorClass.Components = new List<ItemComponentDescriptor>(num);
             for (var i = 0; i < num; i++)
             {
-                inventoryDescriptorClass.Components.Add(reader.GetPolymorph<GClass1923>());
+                inventoryDescriptorClass.Components.Add(reader.GetPolymorph<ItemComponentDescriptor>());
             }
         }
         if (reader.GetBool())
         {
             var num2 = reader.GetInt();
-            inventoryDescriptorClass.Slots = new List<GClass1915>(num2);
+            inventoryDescriptorClass.Slots = new List<SlotDescriptor>(num2);
             for (var j = 0; j < num2; j++)
             {
                 inventoryDescriptorClass.Slots.Add(reader.GetEFTSlotDescriptor());
@@ -2075,7 +2080,7 @@ public static class EFTSerializationExtensions
         if (reader.GetBool())
         {
             var num3 = reader.GetInt();
-            inventoryDescriptorClass.ShellsInWeapon = new List<GClass1916>(num3);
+            inventoryDescriptorClass.ShellsInWeapon = new List<ShellTemplateDescriptor>(num3);
             for (var k = 0; k < num3; k++)
             {
                 inventoryDescriptorClass.ShellsInWeapon.Add(reader.GetEFTShellTemplateDescriptor());
@@ -2084,7 +2089,7 @@ public static class EFTSerializationExtensions
         if (reader.GetBool())
         {
             var num4 = reader.GetInt();
-            inventoryDescriptorClass.Grids = new List<GClass1919>(num4);
+            inventoryDescriptorClass.Grids = new List<GridDescriptor>(num4);
             for (var l = 0; l < num4; l++)
             {
                 inventoryDescriptorClass.Grids.Add(reader.GetEFTGridDescriptor());
@@ -2093,7 +2098,7 @@ public static class EFTSerializationExtensions
         if (reader.GetBool())
         {
             var num5 = reader.GetInt();
-            inventoryDescriptorClass.StackSlots = new List<GClass1920>(num5);
+            inventoryDescriptorClass.StackSlots = new List<StackSlotDescriptor>(num5);
             for (var m = 0; m < num5; m++)
             {
                 inventoryDescriptorClass.StackSlots.Add(reader.GetEFTStackSlotDescriptor());
@@ -2105,7 +2110,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes basic item informational parameters into the writer stream.
     /// </summary>
-    public static void PutEFTItemInfoDescriptor(this NetDataWriter writer, GClass1924 target)
+    public static void PutEFTItemInfoDescriptor(this NetDataWriter writer, ItemInfoDescriptor target)
     {
         writer.PutMongoID(target.Id);
         writer.Put(target.Hash);
@@ -2115,11 +2120,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1924 object from the reader stream.
+    /// Deserializes and reconstructs a ItemInfoDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1924 GetEFTItemInfoDescriptor(this NetDataReader reader)
+    public static ItemInfoDescriptor GetEFTItemInfoDescriptor(this NetDataReader reader)
     {
-        return new GClass1924
+        return new ItemInfoDescriptor
         {
             Id = reader.GetMongoID(),
             Hash = reader.GetInt(),
@@ -2132,7 +2137,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes a descriptor mapping an item inside a parent grid layout into the writer stream.
     /// </summary>
-    public static void PutEFTItemInGridDescriptor(this NetDataWriter writer, GClass1918 target)
+    public static void PutEFTItemInGridDescriptor(this NetDataWriter writer, ItemInGridDescriptor target)
     {
         writer.PutEFTItemDescriptor(target.Item);
         writer.Put(target.X);
@@ -2141,11 +2146,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1918 object from the reader stream.
+    /// Deserializes and reconstructs a ItemInGridDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1918 GetEFTItemInGridDescriptor(this NetDataReader reader)
+    public static ItemInGridDescriptor GetEFTItemInGridDescriptor(this NetDataReader reader)
     {
-        return new GClass1918
+        return new ItemInGridDescriptor
         {
             Item = reader.GetEFTItemDescriptor(),
             X = reader.GetByte(),
@@ -2157,7 +2162,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes a detailed corpse item state and visual transform metadata mapping into the writer stream.
     /// </summary>
-    public static void PutEFTJsonCorpseDescriptor(this NetDataWriter writer, GClass1946 target)
+    public static void PutEFTJsonCorpseDescriptor(this NetDataWriter writer, JsonCorpseDescriptor target)
     {
         writer.Put(target.Customization.Count);
         foreach (var keyValuePair in target.Customization)
@@ -2198,11 +2203,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1946 object from the reader stream.
+    /// Deserializes and reconstructs a JsonCorpseDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1946 GetEFTJsonCorpseDescriptor(this NetDataReader reader)
+    public static JsonCorpseDescriptor GetEFTJsonCorpseDescriptor(this NetDataReader reader)
     {
-        var gclass = new GClass1946();
+        var gclass = new JsonCorpseDescriptor();
         var num = reader.GetInt();
         gclass.Customization = new Dictionary<int, MongoID>();
         for (var i = 0; i < num; i++)
@@ -2242,7 +2247,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes a loose world loot item instance descriptor into the writer stream.
     /// </summary>
-    public static void PutEFTJsonLootItemDescriptor(this NetDataWriter writer, GClass1945 target)
+    public static void PutEFTJsonLootItemDescriptor(this NetDataWriter writer, JsonLootItemDescriptor target)
     {
         writer.Put(target.Id);
         writer.PutClassVector3(target.Position);
@@ -2269,11 +2274,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1945 object from the reader stream.
+    /// Deserializes and reconstructs a JsonLootItemDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1945 GetEFTJsonLootItemDescriptor(this NetDataReader reader)
+    public static JsonLootItemDescriptor GetEFTJsonLootItemDescriptor(this NetDataReader reader)
     {
-        var gclass = new GClass1945
+        var gclass = new JsonLootItemDescriptor
         {
             Id = reader.GetString(),
             Position = reader.GetClassVector3(),
@@ -2300,17 +2305,17 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the key component descriptor into the writer stream.
     /// </summary>
-    public static void PutEFTKeyComponentDescriptor(this NetDataWriter writer, GClass1940 target)
+    public static void PutEFTKeyComponentDescriptor(this NetDataWriter writer, KeyComponentDescriptor target)
     {
         writer.Put(target.NumberOfUsages);
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1940 object from the reader stream.
+    /// Deserializes and reconstructs a KeyComponentDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1940 GetEFTKeyComponentDescriptor(this NetDataReader reader)
+    public static KeyComponentDescriptor GetEFTKeyComponentDescriptor(this NetDataReader reader)
     {
-        return new GClass1940
+        return new KeyComponentDescriptor
         {
             NumberOfUsages = reader.GetInt()
         };
@@ -2319,18 +2324,18 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the light/tactical device component descriptor into the writer stream.
     /// </summary>
-    public static void PutEFTLightComponentDescriptor(this NetDataWriter writer, GClass1928 target)
+    public static void PutEFTLightComponentDescriptor(this NetDataWriter writer, LightComponentDescriptor target)
     {
         writer.Put(target.IsActive);
         writer.Put(target.SelectedMode);
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1928 object from the reader stream.
+    /// Deserializes and reconstructs a LightComponentDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1928 GetEFTLightComponentDescriptor(this NetDataReader reader)
+    public static LightComponentDescriptor GetEFTLightComponentDescriptor(this NetDataReader reader)
     {
-        return new GClass1928
+        return new LightComponentDescriptor
         {
             IsActive = reader.GetBool(),
             SelectedMode = reader.GetInt()
@@ -2340,7 +2345,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the magazine loading operation descriptor into the writer stream.
     /// </summary>
-    public static void PutEFTLoadMagOperationDescriptor(this NetDataWriter writer, GClass1972 target)
+    public static void PutEFTLoadMagOperationDescriptor(this NetDataWriter writer, LoadMagOperationDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -2348,32 +2353,32 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1972 object from the reader stream.
+    /// Deserializes and reconstructs a LoadMagOperationDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1972 GetEFTLoadMagOperationDescriptor(this NetDataReader reader)
+    public static LoadMagOperationDescriptor GetEFTLoadMagOperationDescriptor(this NetDataReader reader)
     {
-        return new GClass1972
+        return new LoadMagOperationDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID(),
-            InternalOperationDescriptor = reader.GetPolymorph<BaseDescriptorClass>()
+            InternalOperationDescriptor = reader.GetPolymorph<InventoryOperationDescriptor>()
         };
     }
 
     /// <summary>
     /// Serializes the lockable component descriptor into the writer stream.
     /// </summary>
-    public static void PutEFTLockableComponentDescriptor(this NetDataWriter writer, GClass1929 target)
+    public static void PutEFTLockableComponentDescriptor(this NetDataWriter writer, LockableComponentDescriptor target)
     {
         writer.Put(target.Locked);
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1929 object from the reader stream.
+    /// Deserializes and reconstructs a LockableComponentDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1929 GetEFTLockableComponentDescriptor(this NetDataReader reader)
+    public static LockableComponentDescriptor GetEFTLockableComponentDescriptor(this NetDataReader reader)
     {
-        return new GClass1929
+        return new LockableComponentDescriptor
         {
             Locked = reader.GetBool()
         };
@@ -2382,7 +2387,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes global loot data descriptors into the writer stream.
     /// </summary>
-    public static void PutEFTLootDataDescriptor(this NetDataWriter writer, GClass1947 target)
+    public static void PutEFTLootDataDescriptor(this NetDataWriter writer, LootDataDescriptor target)
     {
         writer.Put(target.Items.Count);
         for (var i = 0; i < target.Items.Count; i++)
@@ -2392,16 +2397,16 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1947 object from the reader stream.
+    /// Deserializes and reconstructs a LootDataDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1947 GetEFTLootDataDescriptor(this NetDataReader reader)
+    public static LootDataDescriptor GetEFTLootDataDescriptor(this NetDataReader reader)
     {
-        var gclass = new GClass1947();
+        var gclass = new LootDataDescriptor();
         var num = reader.GetInt();
-        gclass.Items = new List<GClass1945>(num);
+        gclass.Items = new List<JsonLootItemDescriptor>(num);
         for (var i = 0; i < num; i++)
         {
-            gclass.Items.Add(reader.GetPolymorph<GClass1945>());
+            gclass.Items.Add(reader.GetPolymorph<JsonLootItemDescriptor>());
         }
         return gclass;
     }
@@ -2409,7 +2414,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes detailed weapon malfunction descriptor structures into the writer stream.
     /// </summary>
-    public static void PutEFTMalfunctionDescriptor(this NetDataWriter writer, GClass1917 target)
+    public static void PutEFTMalfunctionDescriptor(this NetDataWriter writer, MalfunctionDescriptor target)
     {
         writer.Put(target.Malfunction);
         writer.Put(target.LastShotOverheat);
@@ -2459,11 +2464,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1917 object from the reader stream.
+    /// Deserializes and reconstructs a MalfunctionDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1917 GetEFTMalfunctionDescriptor(this NetDataReader reader)
+    public static MalfunctionDescriptor GetEFTMalfunctionDescriptor(this NetDataReader reader)
     {
-        var gclass = new GClass1917
+        var gclass = new MalfunctionDescriptor
         {
             Malfunction = reader.GetByte(),
             LastShotOverheat = reader.GetFloat(),
@@ -2506,7 +2511,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the map item component markers into the writer stream.
     /// </summary>
-    public static void PutEFTMapComponentDescriptor(this NetDataWriter writer, GClass1930 target)
+    public static void PutEFTMapComponentDescriptor(this NetDataWriter writer, MapComponentDescriptor target)
     {
         writer.Put(target.Markers.Count);
         for (var i = 0; i < target.Markers.Count; i++)
@@ -2516,11 +2521,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1930 object from the reader stream.
+    /// Deserializes and reconstructs a MapComponentDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1930 GetEFTMapComponentDescriptor(this NetDataReader reader)
+    public static MapComponentDescriptor GetEFTMapComponentDescriptor(this NetDataReader reader)
     {
-        var gclass = new GClass1930();
+        var gclass = new MapComponentDescriptor();
         var num = reader.GetInt();
         gclass.Markers = new List<MapMarker>(num);
         for (var i = 0; i < num; i++)
@@ -2533,17 +2538,17 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the medical kit component resource state into the writer stream.
     /// </summary>
-    public static void PutEFTMedKitComponentDescriptor(this NetDataWriter writer, GClass1931 target)
+    public static void PutEFTMedKitComponentDescriptor(this NetDataWriter writer, MedKitComponentDescriptor target)
     {
         writer.Put(target.HpResource);
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1931 object from the reader stream.
+    /// Deserializes and reconstructs a MedKitComponentDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1931 GetEFTMedKitComponentDescriptor(this NetDataReader reader)
+    public static MedKitComponentDescriptor GetEFTMedKitComponentDescriptor(this NetDataReader reader)
     {
-        return new GClass1931
+        return new MedKitComponentDescriptor
         {
             HpResource = reader.GetFloat()
         };
@@ -2552,7 +2557,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the item stack merge operation descriptor into the writer stream.
     /// </summary>
-    public static void PutEFTMergeOperationDescriptor(this NetDataWriter writer, MergeDescriptorClass target)
+    public static void PutEFTMergeOperationDescriptor(this NetDataWriter writer, MergeOperationDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -2561,11 +2566,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a MergeDescriptorClass object from the reader stream.
+    /// Deserializes and reconstructs a MergeOperationDescriptor object from the reader stream.
     /// </summary>
-    public static MergeDescriptorClass GetEFTMergeOperationDescriptor(this NetDataReader reader)
+    public static MergeOperationDescriptor GetEFTMergeOperationDescriptor(this NetDataReader reader)
     {
-        return new MergeDescriptorClass
+        return new MergeOperationDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID(),
@@ -2577,7 +2582,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the item structural inventory move operation descriptor into the writer stream.
     /// </summary>
-    public static void PutEFTMoveOperationDescriptor(this NetDataWriter writer, MoveDescriptorClass target)
+    public static void PutEFTMoveOperationDescriptor(this NetDataWriter writer, MoveOperationDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -2598,22 +2603,22 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a MoveDescriptorClass object from the reader stream.
+    /// Deserializes and reconstructs a MoveOperationDescriptor object from the reader stream.
     /// </summary>
-    public static MoveDescriptorClass GetEFTMoveOperationDescriptor(this NetDataReader reader)
+    public static MoveOperationDescriptor GetEFTMoveOperationDescriptor(this NetDataReader reader)
     {
-        var moveDescriptorClass = new MoveDescriptorClass
+        var moveDescriptorClass = new MoveOperationDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID(),
             ItemId = reader.GetString(),
-            From = reader.GetPolymorph<GClass1950>(),
-            To = reader.GetPolymorph<GClass1950>()
+            From = reader.GetPolymorph<ItemAddressDescriptor>(),
+            To = reader.GetPolymorph<ItemAddressDescriptor>()
         };
         if (reader.GetBool())
         {
             var num = reader.GetInt();
-            moveDescriptorClass.DestroyedItems = new List<GClass1955>(num);
+            moveDescriptorClass.DestroyedItems = new List<DestroyedItem>(num);
             for (var i = 0; i < num; i++)
             {
                 moveDescriptorClass.DestroyedItems.Add(reader.GetEFTDestroyedItem());
@@ -2625,20 +2630,20 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes a nested item hierarchy reference mapping its parent address context into the writer stream.
     /// </summary>
-    public static void PutEFTNestedItemDescriptor(this NetDataWriter writer, GClass1921 target)
+    public static void PutEFTNestedItemDescriptor(this NetDataWriter writer, NestedItemDescriptor target)
     {
         writer.PutPolymorph(target.Address);
         writer.PutEFTItemDescriptor(target.Item);
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1921 object from the reader stream.
+    /// Deserializes and reconstructs a NestedItemDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1921 GetEFTNestedItemDescriptor(this NetDataReader reader)
+    public static NestedItemDescriptor GetEFTNestedItemDescriptor(this NetDataReader reader)
     {
-        return new GClass1921
+        return new NestedItemDescriptor
         {
-            Address = reader.GetPolymorph<GClass1950>(),
+            Address = reader.GetPolymorph<ItemAddressDescriptor>(),
             Item = reader.GetEFTItemDescriptor()
         };
     }
@@ -2646,7 +2651,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the player profile context notes manager data arrays into the writer stream.
     /// </summary>
-    public static void PutEFTNotesNotesManagerNotesDescriptor(this NetDataWriter writer, NotesManagerClass.GClass3109 target)
+    public static void PutEFTNotesNotesManagerNotesDescriptor(this NetDataWriter writer, NotesManager.NotesDescriptor target)
     {
         writer.Put(target.Notes.Length);
         for (var i = 0; i < target.Notes.Length; i++)
@@ -2656,13 +2661,13 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a NotesManagerClass.GClass3109 object from the reader stream.
+    /// Deserializes and reconstructs a NotesManager.NotesDescriptor object from the reader stream.
     /// </summary>
-    public static NotesManagerClass.GClass3109 GetEFTNotesNotesManagerNotesDescriptor(this NetDataReader reader)
+    public static NotesManager.NotesDescriptor GetEFTNotesNotesManagerNotesDescriptor(this NetDataReader reader)
     {
-        var gclass = new NotesManagerClass.GClass3109();
+        var gclass = new NotesManager.NotesDescriptor();
         var num = reader.GetInt();
-        gclass.Notes = new GClass3107[num];
+        gclass.Notes = new Note[num];
         for (var i = 0; i < num; i++)
         {
             gclass.Notes[i] = reader.GetEFTNotesNote();
@@ -2673,7 +2678,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the stationary weapon interaction/operation context descriptor into the writer stream.
     /// </summary>
-    public static void PutEFTOperateStationaryWeaponOperationDescriptor(this NetDataWriter writer, GClass1982 target)
+    public static void PutEFTOperateStationaryWeaponOperationDescriptor(this NetDataWriter writer, OperateStationaryWeaponOperationDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -2681,11 +2686,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1982 object from the reader stream.
+    /// Deserializes and reconstructs a OperateStationaryWeaponOperationDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1982 GetEFTOperateStationaryWeaponOperationDescriptor(this NetDataReader reader)
+    public static OperateStationaryWeaponOperationDescriptor GetEFTOperateStationaryWeaponOperationDescriptor(this NetDataReader reader)
     {
-        return new GClass1982
+        return new OperateStationaryWeaponOperationDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID(),
@@ -2696,17 +2701,17 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes an inventory base root container self-owner tracking descriptor reference into the writer stream.
     /// </summary>
-    public static void PutEFTOwnerItselfDescriptor(this NetDataWriter writer, GClass1951 target)
+    public static void PutEFTOwnerItselfDescriptor(this NetDataWriter writer, OwnerItselfDescriptor target)
     {
         writer.PutEFTContainerDescriptor(target.Container);
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1951 object from the reader stream.
+    /// Deserializes and reconstructs a OwnerItselfDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1951 GetEFTOwnerItselfDescriptor(this NetDataReader reader)
+    public static OwnerItselfDescriptor GetEFTOwnerItselfDescriptor(this NetDataReader reader)
     {
-        return new GClass1951
+        return new OwnerItselfDescriptor
         {
             Container = reader.GetEFTContainerDescriptor()
         };
@@ -2715,7 +2720,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes a localized interactive structural tripwire deployment operation into the writer stream.
     /// </summary>
-    public static void PutEFTPlantTripwireOperationDescriptor(this NetDataWriter writer, GClass1976 target)
+    public static void PutEFTPlantTripwireOperationDescriptor(this NetDataWriter writer, PlantTripwireOperationDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -2734,11 +2739,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1976 object from the reader stream.
+    /// Deserializes and reconstructs a PlantTripwireOperationDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1976 GetEFTPlantTripwireOperationDescriptor(this NetDataReader reader)
+    public static PlantTripwireOperationDescriptor GetEFTPlantTripwireOperationDescriptor(this NetDataReader reader)
     {
-        var gclass = new GClass1976
+        var gclass = new PlantTripwireOperationDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID(),
@@ -2756,7 +2761,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes entire localized dynamic player profile visual equipment layout representations into the writer stream.
     /// </summary>
-    public static void PutEFTPlayerVisualRepresentationDescriptor(this NetDataWriter writer, GClass2214 target)
+    public static void PutEFTPlayerVisualRepresentationDescriptor(this NetDataWriter writer, PlayerVisualRepresentationDescriptor target)
     {
         writer.PutJsonTypePlayerInfo(target.Info);
         if (target.Customization != null)
@@ -2783,11 +2788,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass2214 object from the reader stream.
+    /// Deserializes and reconstructs a PlayerVisualRepresentationDescriptor object from the reader stream.
     /// </summary>
-    public static GClass2214 GetEFTPlayerVisualRepresentationDescriptor(this NetDataReader reader)
+    public static PlayerVisualRepresentationDescriptor GetEFTPlayerVisualRepresentationDescriptor(this NetDataReader reader)
     {
-        var gclass = new GClass2214
+        var gclass = new PlayerVisualRepresentationDescriptor
         {
             Info = reader.GetJsonTypePlayerInfo()
         };
@@ -2810,17 +2815,17 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the poison component descriptor state into the writer stream.
     /// </summary>
-    public static void PutEFTPoisonComponentDescriptor(this NetDataWriter writer, GClass1926 target)
+    public static void PutEFTPoisonComponentDescriptor(this NetDataWriter writer, PoisonComponentDescriptor target)
     {
         writer.Put(target.Resource);
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1926 object from the reader stream.
+    /// Deserializes and reconstructs a PoisonComponentDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1926 GetEFTPoisonComponentDescriptor(this NetDataReader reader)
+    public static PoisonComponentDescriptor GetEFTPoisonComponentDescriptor(this NetDataReader reader)
     {
-        return new GClass1926
+        return new PoisonComponentDescriptor
         {
             Resource = reader.GetFloat()
         };
@@ -2829,18 +2834,18 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes prestige status validation data points into the writer stream.
     /// </summary>
-    public static void PutEFTPrestigePrestigeStatusData(this NetDataWriter writer, GClass2660 target)
+    public static void PutEFTPrestigePrestigeStatusData(this NetDataWriter writer, PrestigeStatusData target)
     {
         writer.PutMongoID(target.TemplateId);
         writer.Put(target.Timestamp);
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass2660 object from the reader stream.
+    /// Deserializes and reconstructs a PrestigeStatusData object from the reader stream.
     /// </summary>
-    public static GClass2660 GetEFTPrestigePrestigeStatusData(this NetDataReader reader)
+    public static PrestigeStatusData GetEFTPrestigePrestigeStatusData(this NetDataReader reader)
     {
-        return new GClass2660
+        return new PrestigeStatusData
         {
             TemplateId = reader.GetMongoID(),
             Timestamp = reader.GetInt()
@@ -2850,7 +2855,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes comprehensive multi-zone structural profile health data matrices into the writer stream.
     /// </summary>
-    public static void PutEFTProfileHealthInfo(this NetDataWriter writer, Profile.ProfileHealthClass target)
+    public static void PutEFTProfileHealthInfo(this NetDataWriter writer, Profile.HealthInfo target)
     {
         writer.Put(target.BodyParts.Count);
         foreach (var keyValuePair in target.BodyParts)
@@ -2872,13 +2877,13 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a Profile.ProfileHealthClass object from the reader stream.
+    /// Deserializes and reconstructs a Profile.HealthInfo object from the reader stream.
     /// </summary>
-    public static Profile.ProfileHealthClass GetEFTProfileHealthInfo(this NetDataReader reader)
+    public static Profile.HealthInfo GetEFTProfileHealthInfo(this NetDataReader reader)
     {
-        var profileHealthClass = new Profile.ProfileHealthClass();
+        var profileHealthClass = new Profile.HealthInfo();
         var num = reader.GetInt();
-        profileHealthClass.BodyParts = new Dictionary<EBodyPart, Profile.ProfileHealthClass.ProfileBodyPartHealthClass>();
+        profileHealthClass.BodyParts = new Dictionary<EBodyPart, Profile.HealthInfo.BodyPartInfo>();
         for (var i = 0; i < num; i++)
         {
             profileHealthClass.BodyParts[reader.GetEnum<EBodyPart>()] = reader.GetEFTProfileHealthInfoBodyPartInfo();
@@ -2897,7 +2902,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes structural health values and active status side effects for a targeted body zone into the writer stream.
     /// </summary>
-    public static void PutEFTProfileHealthInfoBodyPartInfo(this NetDataWriter writer, Profile.ProfileHealthClass.ProfileBodyPartHealthClass target)
+    public static void PutEFTProfileHealthInfoBodyPartInfo(this NetDataWriter writer, Profile.HealthInfo.BodyPartInfo target)
     {
         writer.PutEFTProfileHealthInfoValueInfo(target.Health);
         writer.Put(target.Effects.Count);
@@ -2909,16 +2914,16 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a Profile.ProfileHealthClass.ProfileBodyPartHealthClass object from the reader stream.
+    /// Deserializes and reconstructs a Profile.HealthInfo.BodyPartInfo object from the reader stream.
     /// </summary>
-    public static Profile.ProfileHealthClass.ProfileBodyPartHealthClass GetEFTProfileHealthInfoBodyPartInfo(this NetDataReader reader)
+    public static Profile.HealthInfo.BodyPartInfo GetEFTProfileHealthInfoBodyPartInfo(this NetDataReader reader)
     {
-        var profileBodyPartHealthClass = new Profile.ProfileHealthClass.ProfileBodyPartHealthClass
+        var profileBodyPartHealthClass = new Profile.HealthInfo.BodyPartInfo
         {
             Health = reader.GetEFTProfileHealthInfoValueInfo()
         };
         var num = reader.GetInt();
-        profileBodyPartHealthClass.Effects = new Dictionary<string, Profile.ProfileHealthClass.GClass2206>();
+        profileBodyPartHealthClass.Effects = new Dictionary<string, Profile.HealthInfo.EffectInfo>();
         for (var i = 0; i < num; i++)
         {
             profileBodyPartHealthClass.Effects[reader.GetString()] = reader.GetEFTProfileHealthInfoEffectInfo();
@@ -2929,17 +2934,17 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes a targeted health anomaly or buff context duration element into the writer stream.
     /// </summary>
-    public static void PutEFTProfileHealthInfoEffectInfo(this NetDataWriter writer, Profile.ProfileHealthClass.GClass2206 target)
+    public static void PutEFTProfileHealthInfoEffectInfo(this NetDataWriter writer, Profile.HealthInfo.EffectInfo target)
     {
         writer.Put(target.Time);
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a Profile.ProfileHealthClass.GClass2206 object from the reader stream.
+    /// Deserializes and reconstructs a Profile.HealthInfo.EffectInfo object from the reader stream.
     /// </summary>
-    public static Profile.ProfileHealthClass.GClass2206 GetEFTProfileHealthInfoEffectInfo(this NetDataReader reader)
+    public static Profile.HealthInfo.EffectInfo GetEFTProfileHealthInfoEffectInfo(this NetDataReader reader)
     {
-        return new Profile.ProfileHealthClass.GClass2206
+        return new Profile.HealthInfo.EffectInfo
         {
             Time = reader.GetFloat()
         };
@@ -2948,7 +2953,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes precise structural attribute parameters including maximum thresholds and external damage scale coefficients into the writer stream.
     /// </summary>
-    public static void PutEFTProfileHealthInfoValueInfo(this NetDataWriter writer, Profile.ProfileHealthClass.ValueInfo target)
+    public static void PutEFTProfileHealthInfoValueInfo(this NetDataWriter writer, Profile.HealthInfo.ValueInfo target)
     {
         writer.Put(target.Current);
         writer.Put(target.Minimum);
@@ -2958,11 +2963,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a Profile.ProfileHealthClass.ValueInfo object from the reader stream.
+    /// Deserializes and reconstructs a Profile.HealthInfo.ValueInfo object from the reader stream.
     /// </summary>
-    public static Profile.ProfileHealthClass.ValueInfo GetEFTProfileHealthInfoValueInfo(this NetDataReader reader)
+    public static Profile.HealthInfo.ValueInfo GetEFTProfileHealthInfoValueInfo(this NetDataReader reader)
     {
-        return new Profile.ProfileHealthClass.ValueInfo
+        return new Profile.HealthInfo.ValueInfo
         {
             Current = reader.GetFloat(),
             Minimum = reader.GetFloat(),
@@ -2975,7 +2980,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes safe-trade profile economy money transfer limits and remaining intervals into the writer stream.
     /// </summary>
-    public static void PutEFTProfileMoneyTransferLimitData(this NetDataWriter writer, Profile.GClass2209 target)
+    public static void PutEFTProfileMoneyTransferLimitData(this NetDataWriter writer, Profile.MoneyTransferLimitData target)
     {
         writer.Put(target.nextResetTime);
         writer.Put(target.remainingLimit);
@@ -2984,11 +2989,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a Profile.GClass2209 object from the reader stream.
+    /// Deserializes and reconstructs a Profile.MoneyTransferLimitData object from the reader stream.
     /// </summary>
-    public static Profile.GClass2209 GetEFTProfileMoneyTransferLimitData(this NetDataReader reader)
+    public static Profile.MoneyTransferLimitData GetEFTProfileMoneyTransferLimitData(this NetDataReader reader)
     {
-        return new Profile.GClass2209
+        return new Profile.MoneyTransferLimitData
         {
             nextResetTime = reader.GetInt(),
             remainingLimit = reader.GetInt(),
@@ -3000,7 +3005,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes profile recipe unlock structures into the writer stream.
     /// </summary>
-    public static void PutEFTProfileUnlockedInfo(this NetDataWriter writer, Profile.GClass2208 target)
+    public static void PutEFTProfileUnlockedInfo(this NetDataWriter writer, Profile.UnlockedInfo target)
     {
         writer.Put(target.unlockedSchemeList.Count);
         for (var i = 0; i < target.unlockedSchemeList.Count; i++)
@@ -3010,11 +3015,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a Profile.GClass2208 object from the reader stream.
+    /// Deserializes and reconstructs a Profile.UnlockedInfo object from the reader stream.
     /// </summary>
-    public static Profile.GClass2208 GetEFTProfileUnlockedInfo(this NetDataReader reader)
+    public static Profile.UnlockedInfo GetEFTProfileUnlockedInfo(this NetDataReader reader)
     {
-        var gclass = new Profile.GClass2208();
+        var gclass = new Profile.UnlockedInfo();
         var num = reader.GetInt();
         gclass.unlockedSchemeList = new List<MongoID>(num);
         for (var i = 0; i < num; i++)
@@ -3027,18 +3032,18 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes a profile account moderation ban entry state into the writer stream.
     /// </summary>
-    public static void PutEFTProfileBanDescriptor(this NetDataWriter writer, GClass2222 target)
+    public static void PutEFTProfileBanDescriptor(this NetDataWriter writer, ProfileBanDescriptor target)
     {
         writer.PutEnum(target.Type);
         writer.Put(target.ExpirationTime);
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass2222 object from the reader stream.
+    /// Deserializes and reconstructs a ProfileBanDescriptor object from the reader stream.
     /// </summary>
-    public static GClass2222 GetEFTProfileBanDescriptor(this NetDataReader reader)
+    public static ProfileBanDescriptor GetEFTProfileBanDescriptor(this NetDataReader reader)
     {
-        return new GClass2222
+        return new ProfileBanDescriptor
         {
             Type = reader.GetEnum<EBanType>(),
             ExpirationTime = reader.GetLong()
@@ -3048,7 +3053,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes an entire complete server profile context descriptor containing all sub-systems into the writer stream.
     /// </summary>
-    public static void PutEFTProfileDescriptor(this NetDataWriter writer, CompleteProfileDescriptorClass target)
+    public static void PutEFTProfileDescriptor(this NetDataWriter writer, ProfileDescriptor target)
     {
         writer.PutMongoID(target.Id);
         writer.Put(target.AccountId);
@@ -3163,11 +3168,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a CompleteProfileDescriptorClass object from the reader stream.
+    /// Deserializes and reconstructs a ProfileDescriptor object from the reader stream.
     /// </summary>
-    public static CompleteProfileDescriptorClass GetEFTProfileDescriptor(this NetDataReader reader)
+    public static ProfileDescriptor GetEFTProfileDescriptor(this NetDataReader reader)
     {
-        var completeProfileDescriptorClass = new CompleteProfileDescriptorClass
+        var completeProfileDescriptorClass = new ProfileDescriptor
         {
             Id = reader.GetMongoID(),
             AccountId = reader.GetString()
@@ -3177,7 +3182,7 @@ public static class EFTSerializationExtensions
             completeProfileDescriptorClass.PetId = new MongoID?(reader.GetMongoID());
         }
         completeProfileDescriptorClass.KarmaValue = reader.GetFloat();
-        completeProfileDescriptorClass.Info = reader.GetPolymorph<ProfileInfoClass>();
+        completeProfileDescriptorClass.Info = reader.GetPolymorph<ProfileInfoDescriptor>();
         var num = reader.GetInt();
         completeProfileDescriptorClass.Customization = new Dictionary<EBodyModelPart, MongoID>();
         for (var i = 0; i < num; i++)
@@ -3199,7 +3204,7 @@ public static class EFTSerializationExtensions
         }
         completeProfileDescriptorClass.Inventory = reader.GetEFTInventoryDescriptor();
         var num3 = reader.GetInt();
-        completeProfileDescriptorClass.InsuredItems = new InsuredItemClass[num3];
+        completeProfileDescriptorClass.InsuredItems = new InsuredProfileItems[num3];
         for (var k = 0; k < num3; k++)
         {
             completeProfileDescriptorClass.InsuredItems[k] = reader.GetJsonTypeInsuredProfileItems();
@@ -3207,7 +3212,7 @@ public static class EFTSerializationExtensions
         completeProfileDescriptorClass.Skills = reader.GetEFTSkillsDescriptor();
         completeProfileDescriptorClass.Notes = reader.GetEFTNotesNotesManagerNotesDescriptor();
         var num4 = reader.GetInt();
-        completeProfileDescriptorClass.TaskConditionCounters = new Dictionary<MongoID, GClass2227>();
+        completeProfileDescriptorClass.TaskConditionCounters = new Dictionary<MongoID, TaskConditionCounterDescriptor>();
         for (var l = 0; l < num4; l++)
         {
             completeProfileDescriptorClass.TaskConditionCounters[reader.GetMongoID()] = reader.GetEFTTaskConditionCounterDescriptor();
@@ -3239,7 +3244,7 @@ public static class EFTSerializationExtensions
         completeProfileDescriptorClass.UnlockedRecipeInfo = reader.GetEFTProfileUnlockedInfo();
         completeProfileDescriptorClass.TransferLimitData = reader.GetEFTProfileMoneyTransferLimitData();
         var num11 = reader.GetInt();
-        completeProfileDescriptorClass.Bonuses = new ProfileBonusesClass[num11];
+        completeProfileDescriptorClass.Bonuses = new BonusDescriptor[num11];
         for (var num12 = 0; num12 < num11; num12++)
         {
             completeProfileDescriptorClass.Bonuses[num12] = reader.GetEFTBonusDescriptor();
@@ -3264,7 +3269,7 @@ public static class EFTSerializationExtensions
             completeProfileDescriptorClass.CheckedChambers.Add(reader.GetMongoID());
         }
         var num19 = reader.GetInt();
-        completeProfileDescriptorClass.TradersInfo = new Dictionary<MongoID, TraderInfoClass>();
+        completeProfileDescriptorClass.TradersInfo = new Dictionary<MongoID, TraderInfoDescriptor>();
         for (var num20 = 0; num20 < num19; num20++)
         {
             completeProfileDescriptorClass.TradersInfo[reader.GetMongoID()] = reader.GetEFTTraderInfoDescriptor();
@@ -3275,7 +3280,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes fundamental metadata and setting parameters for a profile character entry into the writer stream.
     /// </summary>
-    public static void PutEFTProfileInfoDescriptor(this NetDataWriter writer, ProfileInfoClass target)
+    public static void PutEFTProfileInfoDescriptor(this NetDataWriter writer, ProfileInfoDescriptor target)
     {
         writer.Put(target.Nickname);
         writer.Put(target.MainProfileNickname);
@@ -3307,11 +3312,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a ProfileInfoClass object from the reader stream.
+    /// Deserializes and reconstructs a ProfileInfoDescriptor object from the reader stream.
     /// </summary>
-    public static ProfileInfoClass GetEFTProfileInfoDescriptor(this NetDataReader reader)
+    public static ProfileInfoDescriptor GetEFTProfileInfoDescriptor(this NetDataReader reader)
     {
-        var profileInfoClass = new ProfileInfoClass
+        var profileInfoClass = new ProfileInfoDescriptor
         {
             Nickname = reader.GetString(),
             MainProfileNickname = reader.GetString(),
@@ -3331,7 +3336,7 @@ public static class EFTSerializationExtensions
             GroupInviteRestriction = reader.GetBool()
         };
         var num = reader.GetInt();
-        profileInfoClass.Bans = new List<GClass2222>(num);
+        profileInfoClass.Bans = new List<ProfileBanDescriptor>(num);
         for (var i = 0; i < num; i++)
         {
             profileInfoClass.Bans.Add(reader.GetEFTProfileBanDescriptor());
@@ -3348,7 +3353,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes contextual internal AI bot matching structure configuration fields into the writer stream.
     /// </summary>
-    public static void PutEFTProfileSettings(this NetDataWriter writer, ProfileInfoSettingsClass target)
+    public static void PutEFTProfileSettings(this NetDataWriter writer, ProfileSettings target)
     {
         writer.PutEnum(target.Role);
         writer.PutEnum(target.BotDifficulty);
@@ -3359,11 +3364,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a ProfileInfoSettingsClass object from the reader stream.
+    /// Deserializes and reconstructs a ProfileSettings object from the reader stream.
     /// </summary>
-    public static ProfileInfoSettingsClass GetEFTProfileSettings(this NetDataReader reader)
+    public static ProfileSettings GetEFTProfileSettings(this NetDataReader reader)
     {
-        return new ProfileInfoSettingsClass
+        return new ProfileSettings
         {
             Role = reader.GetEnum<WildSpawnType>(),
             BotDifficulty = reader.GetEnum<BotDifficulty>(),
@@ -3377,7 +3382,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes session persistent stats metrics, combat actions history records, and raid logs into the writer stream.
     /// </summary>
-    public static void PutEFTProfileStatsDescriptor(this NetDataWriter writer, ProfileEftStatsClass target)
+    public static void PutEFTProfileStatsDescriptor(this NetDataWriter writer, ProfileStatsDescriptor target)
     {
         writer.PutEFTCounterCollectionDescriptor(target.SessionCounters);
         writer.PutEFTCounterCollectionDescriptor(target.OverallCounters);
@@ -3446,11 +3451,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a ProfileEftStatsClass object from the reader stream.
+    /// Deserializes and reconstructs a ProfileStatsDescriptor object from the reader stream.
     /// </summary>
-    public static ProfileEftStatsClass GetEFTProfileStatsDescriptor(this NetDataReader reader)
+    public static ProfileStatsDescriptor GetEFTProfileStatsDescriptor(this NetDataReader reader)
     {
-        var profileEftStatsClass = new ProfileEftStatsClass
+        var profileEftStatsClass = new ProfileStatsDescriptor
         {
             SessionCounters = reader.GetEFTCounterCollectionDescriptor(),
             OverallCounters = reader.GetEFTCounterCollectionDescriptor(),
@@ -3464,19 +3469,19 @@ public static class EFTSerializationExtensions
             profileEftStatsClass.Aggressor = reader.GetAggressorStats();
         }
         var num = reader.GetInt();
-        profileEftStatsClass.DroppedItems = new List<GClass2185>(num);
+        profileEftStatsClass.DroppedItems = new List<DroppedItem>(num);
         for (var i = 0; i < num; i++)
         {
             profileEftStatsClass.DroppedItems.Add(reader.GetEFTDroppedItem());
         }
         var num2 = reader.GetInt();
-        profileEftStatsClass.FoundInRaidItems = new List<GClass2186>(num2);
+        profileEftStatsClass.FoundInRaidItems = new List<FoundInRaidItem>(num2);
         for (var j = 0; j < num2; j++)
         {
             profileEftStatsClass.FoundInRaidItems.Add(reader.GetEFTFoundInRaidItem());
         }
         var num3 = reader.GetInt();
-        profileEftStatsClass.Victims = new List<GClass2201>(num3);
+        profileEftStatsClass.Victims = new List<VictimStats>(num3);
         for (var k = 0; k < num3; k++)
         {
             profileEftStatsClass.Victims.Add(reader.GetEFTVictimStats());
@@ -3507,7 +3512,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes divided statistics profiles for separate game environments into the writer stream.
     /// </summary>
-    public static void PutEFTProfileStatsSeparatorDescriptor(this NetDataWriter writer, ProfileStatsClass target)
+    public static void PutEFTProfileStatsSeparatorDescriptor(this NetDataWriter writer, ProfileStatsSeparatorDescriptor target)
     {
         if (target.Eft != null)
         {
@@ -3528,11 +3533,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a ProfileStatsClass object from the reader stream.
+    /// Deserializes and reconstructs a ProfileStatsSeparatorDescriptor object from the reader stream.
     /// </summary>
-    public static ProfileStatsClass GetEFTProfileStatsSeparatorDescriptor(this NetDataReader reader)
+    public static ProfileStatsSeparatorDescriptor GetEFTProfileStatsSeparatorDescriptor(this NetDataReader reader)
     {
-        var profileStatsClass = new ProfileStatsClass();
+        var profileStatsClass = new ProfileStatsSeparatorDescriptor();
         if (reader.GetBool())
         {
             profileStatsClass.Eft = reader.GetEFTProfileStatsDescriptor();
@@ -3547,7 +3552,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes a quest acceptance operation descriptor into the writer stream.
     /// </summary>
-    public static void PutEFTQuestAcceptDescriptor(this NetDataWriter writer, GClass1991 target)
+    public static void PutEFTQuestAcceptDescriptor(this NetDataWriter writer, QuestAcceptDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -3555,11 +3560,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1991 object from the reader stream.
+    /// Deserializes and reconstructs a QuestAcceptDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1991 GetEFTQuestAcceptDescriptor(this NetDataReader reader)
+    public static QuestAcceptDescriptor GetEFTQuestAcceptDescriptor(this NetDataReader reader)
     {
-        return new GClass1991
+        return new QuestAcceptDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID(),
@@ -3570,7 +3575,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes a quest finalization/finish operation descriptor into the writer stream.
     /// </summary>
-    public static void PutEFTQuestFinishDescriptor(this NetDataWriter writer, GClass1992 target)
+    public static void PutEFTQuestFinishDescriptor(this NetDataWriter writer, QuestFinishDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -3578,11 +3583,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1992 object from the reader stream.
+    /// Deserializes and reconstructs a QuestFinishDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1992 GetEFTQuestFinishDescriptor(this NetDataReader reader)
+    public static QuestFinishDescriptor GetEFTQuestFinishDescriptor(this NetDataReader reader)
     {
-        return new GClass1992
+        return new QuestFinishDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID(),
@@ -3593,7 +3598,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes a quest condition items handover operation descriptor into the writer stream.
     /// </summary>
-    public static void PutEFTQuestHandoverDescriptor(this NetDataWriter writer, GClass1993 target)
+    public static void PutEFTQuestHandoverDescriptor(this NetDataWriter writer, QuestHandoverDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -3607,11 +3612,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1993 object from the reader stream.
+    /// Deserializes and reconstructs a QuestHandoverDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1993 GetEFTQuestHandoverDescriptor(this NetDataReader reader)
+    public static QuestHandoverDescriptor GetEFTQuestHandoverDescriptor(this NetDataReader reader)
     {
-        var gclass = new GClass1993
+        var gclass = new QuestHandoverDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID()
@@ -3679,17 +3684,17 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the recodable/encoded item status state component into the writer stream.
     /// </summary>
-    public static void PutEFTRecodableComponentDescriptor(this NetDataWriter writer, GClass1943 target)
+    public static void PutEFTRecodableComponentDescriptor(this NetDataWriter writer, RecodableComponentDescriptor target)
     {
         writer.Put(target.IsEncoded);
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1943 object from the reader stream.
+    /// Deserializes and reconstructs a RecodableComponentDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1943 GetEFTRecodableComponentDescriptor(this NetDataReader reader)
+    public static RecodableComponentDescriptor GetEFTRecodableComponentDescriptor(this NetDataReader reader)
     {
-        return new GClass1943
+        return new RecodableComponentDescriptor
         {
             IsEncoded = reader.GetBool()
         };
@@ -3698,7 +3703,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes an inventory item removal operation descriptor into the writer stream.
     /// </summary>
-    public static void PutEFTRemoveOperationDescriptor(this NetDataWriter writer, GClass1977 target)
+    public static void PutEFTRemoveOperationDescriptor(this NetDataWriter writer, RemoveOperationDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -3706,11 +3711,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1977 object from the reader stream.
+    /// Deserializes and reconstructs a RemoveOperationDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1977 GetEFTRemoveOperationDescriptor(this NetDataReader reader)
+    public static RemoveOperationDescriptor GetEFTRemoveOperationDescriptor(this NetDataReader reader)
     {
-        return new GClass1977
+        return new RemoveOperationDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID(),
@@ -3721,18 +3726,18 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the repairable item status parameters into the writer stream.
     /// </summary>
-    public static void PutEFTRepairableComponentDescriptor(this NetDataWriter writer, GClass1932 target)
+    public static void PutEFTRepairableComponentDescriptor(this NetDataWriter writer, RepairableComponentDescriptor target)
     {
         writer.Put(target.Durability);
         writer.Put(target.MaxDurability);
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1932 object from the reader stream.
+    /// Deserializes and reconstructs a RepairableComponentDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1932 GetEFTRepairableComponentDescriptor(this NetDataReader reader)
+    public static RepairableComponentDescriptor GetEFTRepairableComponentDescriptor(this NetDataReader reader)
     {
-        return new GClass1932
+        return new RepairableComponentDescriptor
         {
             Durability = reader.GetFloat(),
             MaxDurability = reader.GetFloat()
@@ -3742,7 +3747,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the repair enhancement state attributes and modifiers into the writer stream.
     /// </summary>
-    public static void PutEFTRepairEnhancementComponentDescriptor(this NetDataWriter writer, GClass1942 target)
+    public static void PutEFTRepairEnhancementComponentDescriptor(this NetDataWriter writer, RepairEnhancementComponentDescriptor target)
     {
         if (target.BuffType != null)
         {
@@ -3767,11 +3772,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1942 object from the reader stream.
+    /// Deserializes and reconstructs a RepairEnhancementComponentDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1942 GetEFTRepairEnhancementComponentDescriptor(this NetDataReader reader)
+    public static RepairEnhancementComponentDescriptor GetEFTRepairEnhancementComponentDescriptor(this NetDataReader reader)
     {
-        var gclass = new GClass1942();
+        var gclass = new RepairEnhancementComponentDescriptor();
         if (reader.GetBool())
         {
             gclass.BuffType = new ERepairBuffType?(reader.GetEnum<ERepairBuffType>());
@@ -3788,17 +3793,17 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the repair kit resource points component data into the writer stream.
     /// </summary>
-    public static void PutEFTRepairKitComponentDescriptor(this NetDataWriter writer, GClass1941 target)
+    public static void PutEFTRepairKitComponentDescriptor(this NetDataWriter writer, RepairKitComponentDescriptor target)
     {
         writer.Put(target.Resource);
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1941 object from the reader stream.
+    /// Deserializes and reconstructs a RepairKitComponentDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1941 GetEFTRepairKitComponentDescriptor(this NetDataReader reader)
+    public static RepairKitComponentDescriptor GetEFTRepairKitComponentDescriptor(this NetDataReader reader)
     {
-        return new GClass1941
+        return new RepairKitComponentDescriptor
         {
             Resource = reader.GetFloat()
         };
@@ -3807,17 +3812,17 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes general item resource usage levels into the writer stream.
     /// </summary>
-    public static void PutEFTResourceItemComponentDescriptor(this NetDataWriter writer, GClass1927 target)
+    public static void PutEFTResourceItemComponentDescriptor(this NetDataWriter writer, ResourceItemComponentDescriptor target)
     {
         writer.Put(target.Resource);
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1927 object from the reader stream.
+    /// Deserializes and reconstructs a ResourceItemComponentDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1927 GetEFTResourceItemComponentDescriptor(this NetDataReader reader)
+    public static ResourceItemComponentDescriptor GetEFTResourceItemComponentDescriptor(this NetDataReader reader)
     {
-        return new GClass1927
+        return new ResourceItemComponentDescriptor
         {
             Resource = reader.GetFloat()
         };
@@ -3906,7 +3911,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes a localized story dialog narrative advancement event into the writer stream.
     /// </summary>
-    public static void PutEFTSetDialogProgressOperationDescriptor(this NetDataWriter writer, GClass1978 target)
+    public static void PutEFTSetDialogProgressOperationDescriptor(this NetDataWriter writer, SetDialogProgressOperationDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -3916,11 +3921,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1978 object from the reader stream.
+    /// Deserializes and reconstructs a SetDialogProgressOperationDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1978 GetEFTSetDialogProgressOperationDescriptor(this NetDataReader reader)
+    public static SetDialogProgressOperationDescriptor GetEFTSetDialogProgressOperationDescriptor(this NetDataReader reader)
     {
-        return new GClass1978
+        return new SetDialogProgressOperationDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID(),
@@ -3933,7 +3938,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes an item placement/setup operation descriptor into the writer stream.
     /// </summary>
-    public static void PutEFTSetupItemOperationDescriptor(this NetDataWriter writer, GClass1979 target)
+    public static void PutEFTSetupItemOperationDescriptor(this NetDataWriter writer, SetupItemOperationDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -3945,11 +3950,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1979 object from the reader stream.
+    /// Deserializes and reconstructs a SetupItemOperationDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1979 GetEFTSetupItemOperationDescriptor(this NetDataReader reader)
+    public static SetupItemOperationDescriptor GetEFTSetupItemOperationDescriptor(this NetDataReader reader)
     {
-        return new GClass1979
+        return new SetupItemOperationDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID(),
@@ -3964,7 +3969,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes a dynamic variable assignment operation descriptor into the writer stream.
     /// </summary>
-    public static void PutEFTSetVariableOperationDescriptor(this NetDataWriter writer, GClass1980 target)
+    public static void PutEFTSetVariableOperationDescriptor(this NetDataWriter writer, SetVariableOperationDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -3973,11 +3978,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1980 object from the reader stream.
+    /// Deserializes and reconstructs a SetVariableOperationDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1980 GetEFTSetVariableOperationDescriptor(this NetDataReader reader)
+    public static SetVariableOperationDescriptor GetEFTSetVariableOperationDescriptor(this NetDataReader reader)
     {
-        return new GClass1980
+        return new SetVariableOperationDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID(),
@@ -3989,17 +3994,17 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes a weapon cartridge shell template reference mapping into the writer stream.
     /// </summary>
-    public static void PutEFTShellTemplateDescriptor(this NetDataWriter writer, GClass1916 target)
+    public static void PutEFTShellTemplateDescriptor(this NetDataWriter writer, ShellTemplateDescriptor target)
     {
         writer.PutMongoID(target.AmmoTemplateId);
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1916 object from the reader stream.
+    /// Deserializes and reconstructs a ShellTemplateDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1916 GetEFTShellTemplateDescriptor(this NetDataReader reader)
+    public static ShellTemplateDescriptor GetEFTShellTemplateDescriptor(this NetDataReader reader)
     {
-        return new GClass1916
+        return new ShellTemplateDescriptor
         {
             AmmoTemplateId = reader.GetMongoID()
         };
@@ -4008,7 +4013,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes complex structural firearm sight calibration and scope multi-mode arrays into the writer stream.
     /// </summary>
-    public static void PutEFTSightComponentDescriptor(this NetDataWriter writer, GClass1933 target)
+    public static void PutEFTSightComponentDescriptor(this NetDataWriter writer, SightComponentDescriptor target)
     {
         writer.Put(target.SelectedSightScope);
         writer.Put(target.ScopesSelectedModes.Length);
@@ -4025,11 +4030,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1933 object from the reader stream.
+    /// Deserializes and reconstructs a SightComponentDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1933 GetEFTSightComponentDescriptor(this NetDataReader reader)
+    public static SightComponentDescriptor GetEFTSightComponentDescriptor(this NetDataReader reader)
     {
-        var gclass = new GClass1933
+        var gclass = new SightComponentDescriptor
         {
             SelectedSightScope = reader.GetInt()
         };
@@ -4052,7 +4057,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes separate progression blocks covering both common attributes and mastering stats into the writer stream.
     /// </summary>
-    public static void PutEFTSkillsDescriptor(this NetDataWriter writer, SkillsDescriptorClass target)
+    public static void PutEFTSkillsDescriptor(this NetDataWriter writer, SkillsDescriptor target)
     {
         writer.Put(target.Common.Length);
         for (var i = 0; i < target.Common.Length; i++)
@@ -4067,19 +4072,19 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a SkillsDescriptorClass object from the reader stream.
+    /// Deserializes and reconstructs a SkillsDescriptor object from the reader stream.
     /// </summary>
-    public static SkillsDescriptorClass GetEFTSkillsDescriptor(this NetDataReader reader)
+    public static SkillsDescriptor GetEFTSkillsDescriptor(this NetDataReader reader)
     {
-        var skillsDescriptorClass = new SkillsDescriptorClass();
+        var skillsDescriptorClass = new SkillsDescriptor();
         var num = reader.GetInt();
-        skillsDescriptorClass.Common = new SkillsDescriptorClass.GClass2225[num];
+        skillsDescriptorClass.Common = new SkillsDescriptor.SkillInfoDescriptor[num];
         for (var i = 0; i < num; i++)
         {
             skillsDescriptorClass.Common[i] = reader.GetEFTSkillsDescriptorSkillInfoDescriptor();
         }
         var num2 = reader.GetInt();
-        skillsDescriptorClass.Mastering = new SkillsDescriptorClass.GClass2226[num2];
+        skillsDescriptorClass.Mastering = new SkillsDescriptor.MasteringInfoDescriptor[num2];
         for (var j = 0; j < num2; j++)
         {
             skillsDescriptorClass.Mastering[j] = reader.GetEFTSkillsDescriptorMasteringInfoDescriptor();
@@ -4090,18 +4095,18 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes a specified weapon mastery identifier alongside its progression metric into the writer stream.
     /// </summary>
-    public static void PutEFTSkillsDescriptorMasteringInfoDescriptor(this NetDataWriter writer, SkillsDescriptorClass.GClass2226 target)
+    public static void PutEFTSkillsDescriptorMasteringInfoDescriptor(this NetDataWriter writer, SkillsDescriptor.MasteringInfoDescriptor target)
     {
         writer.Put(target.Id);
         writer.Put(target.Progress);
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a SkillsDescriptorClass.GClass2226 object from the reader stream.
+    /// Deserializes and reconstructs a SkillsDescriptor.MasteringInfoDescriptor object from the reader stream.
     /// </summary>
-    public static SkillsDescriptorClass.GClass2226 GetEFTSkillsDescriptorMasteringInfoDescriptor(this NetDataReader reader)
+    public static SkillsDescriptor.MasteringInfoDescriptor GetEFTSkillsDescriptorMasteringInfoDescriptor(this NetDataReader reader)
     {
-        return new SkillsDescriptorClass.GClass2226
+        return new SkillsDescriptor.MasteringInfoDescriptor
         {
             Id = reader.GetString(),
             Progress = reader.GetFloat()
@@ -4111,7 +4116,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes an isolated character skill item encompassing session gain records and temporal markers into the writer stream.
     /// </summary>
-    public static void PutEFTSkillsDescriptorSkillInfoDescriptor(this NetDataWriter writer, SkillsDescriptorClass.GClass2225 target)
+    public static void PutEFTSkillsDescriptorSkillInfoDescriptor(this NetDataWriter writer, SkillsDescriptor.SkillInfoDescriptor target)
     {
         writer.PutEnum(target.Id);
         writer.Put(target.Progress);
@@ -4120,11 +4125,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a SkillsDescriptorClass.GClass2225 object from the reader stream.
+    /// Deserializes and reconstructs a SkillsDescriptor.SkillInfoDescriptor object from the reader stream.
     /// </summary>
-    public static SkillsDescriptorClass.GClass2225 GetEFTSkillsDescriptorSkillInfoDescriptor(this NetDataReader reader)
+    public static SkillsDescriptor.SkillInfoDescriptor GetEFTSkillsDescriptorSkillInfoDescriptor(this NetDataReader reader)
     {
-        return new SkillsDescriptorClass.GClass2225
+        return new SkillsDescriptor.SkillInfoDescriptor
         {
             Id = reader.GetEnum<ESkillId>(),
             Progress = reader.GetFloat(),
@@ -4136,18 +4141,18 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes a single inventory slot descriptor into the writer stream.
     /// </summary>
-    public static void PutEFTSlotDescriptor(this NetDataWriter writer, GClass1915 target)
+    public static void PutEFTSlotDescriptor(this NetDataWriter writer, SlotDescriptor target)
     {
         writer.Put(target.SlotNumber);
         writer.PutEFTItemDescriptor(target.ContainedItem);
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1915 object from the reader stream.
+    /// Deserializes and reconstructs a SlotDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1915 GetEFTSlotDescriptor(this NetDataReader reader)
+    public static SlotDescriptor GetEFTSlotDescriptor(this NetDataReader reader)
     {
-        return new GClass1915
+        return new SlotDescriptor
         {
             SlotNumber = reader.GetByte(),
             ContainedItem = reader.GetEFTItemDescriptor()
@@ -4157,17 +4162,17 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes a slot item address container reference mapping into the writer stream.
     /// </summary>
-    public static void PutEFTSlotItemAddressDescriptor(this NetDataWriter writer, GClass1952 target)
+    public static void PutEFTSlotItemAddressDescriptor(this NetDataWriter writer, SlotItemAddressDescriptor target)
     {
         writer.PutEFTContainerDescriptor(target.Container);
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1952 object from the reader stream.
+    /// Deserializes and reconstructs a SlotItemAddressDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1952 GetEFTSlotItemAddressDescriptor(this NetDataReader reader)
+    public static SlotItemAddressDescriptor GetEFTSlotItemAddressDescriptor(this NetDataReader reader)
     {
-        return new GClass1952
+        return new SlotItemAddressDescriptor
         {
             Container = reader.GetEFTContainerDescriptor()
         };
@@ -4176,7 +4181,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes an item stack partition split operation descriptor into the writer stream.
     /// </summary>
-    public static void PutEFTSplitOperationDescriptor(this NetDataWriter writer, SplitDescriptorClass target)
+    public static void PutEFTSplitOperationDescriptor(this NetDataWriter writer, SplitOperationDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -4188,18 +4193,18 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a SplitDescriptorClass object from the reader stream.
+    /// Deserializes and reconstructs a SplitOperationDescriptor object from the reader stream.
     /// </summary>
-    public static SplitDescriptorClass GetEFTSplitOperationDescriptor(this NetDataReader reader)
+    public static SplitOperationDescriptor GetEFTSplitOperationDescriptor(this NetDataReader reader)
     {
-        return new SplitDescriptorClass
+        return new SplitOperationDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID(),
             ItemId = reader.GetString(),
             CloneId = reader.GetString(),
-            From = reader.GetPolymorph<GClass1950>(),
-            To = reader.GetPolymorph<GClass1950>(),
+            From = reader.GetPolymorph<ItemAddressDescriptor>(),
+            To = reader.GetPolymorph<ItemAddressDescriptor>(),
             Count = reader.GetInt()
         };
     }
@@ -4207,7 +4212,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes an inventory multi-item stack slot layout block into the writer stream.
     /// </summary>
-    public static void PutEFTStackSlotDescriptor(this NetDataWriter writer, GClass1920 target)
+    public static void PutEFTStackSlotDescriptor(this NetDataWriter writer, StackSlotDescriptor target)
     {
         writer.Put(target.SlotNumber);
         writer.Put(target.ContainedItems.Count);
@@ -4218,16 +4223,16 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1920 object from the reader stream.
+    /// Deserializes and reconstructs a StackSlotDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1920 GetEFTStackSlotDescriptor(this NetDataReader reader)
+    public static StackSlotDescriptor GetEFTStackSlotDescriptor(this NetDataReader reader)
     {
-        var gclass = new GClass1920
+        var gclass = new StackSlotDescriptor
         {
             SlotNumber = reader.GetByte()
         };
         var num = reader.GetInt();
-        gclass.ContainedItems = new List<InventoryDescriptorClass>(num);
+        gclass.ContainedItems = new List<ItemDescriptor>(num);
         for (var i = 0; i < num; i++)
         {
             gclass.ContainedItems.Add(reader.GetEFTItemDescriptor());
@@ -4238,17 +4243,17 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes a stack slot structural layout item address mapping descriptor into the writer stream.
     /// </summary>
-    public static void PutEFTStackSlotItemAddressDescriptor(this NetDataWriter writer, GClass1953 target)
+    public static void PutEFTStackSlotItemAddressDescriptor(this NetDataWriter writer, StackSlotItemAddressDescriptor target)
     {
         writer.PutEFTContainerDescriptor(target.Container);
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1953 object from the reader stream.
+    /// Deserializes and reconstructs a StackSlotItemAddressDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1953 GetEFTStackSlotItemAddressDescriptor(this NetDataReader reader)
+    public static StackSlotItemAddressDescriptor GetEFTStackSlotItemAddressDescriptor(this NetDataReader reader)
     {
-        return new GClass1953
+        return new StackSlotItemAddressDescriptor
         {
             Container = reader.GetEFTContainerDescriptor()
         };
@@ -4257,7 +4262,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes a complex item layout positional swap exchange operation descriptor into the writer stream.
     /// </summary>
-    public static void PutEFTSwapOperationDescriptor(this NetDataWriter writer, GClass1983 target)
+    public static void PutEFTSwapOperationDescriptor(this NetDataWriter writer, SwapOperationDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -4279,23 +4284,23 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1983 object from the reader stream.
+    /// Deserializes and reconstructs a SwapOperationDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1983 GetEFTSwapOperationDescriptor(this NetDataReader reader)
+    public static SwapOperationDescriptor GetEFTSwapOperationDescriptor(this NetDataReader reader)
     {
-        var gclass = new GClass1983
+        var gclass = new SwapOperationDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID(),
             ItemId = reader.GetString(),
-            To = reader.GetPolymorph<GClass1950>(),
+            To = reader.GetPolymorph<ItemAddressDescriptor>(),
             Item1Id = reader.GetString(),
-            To1 = reader.GetPolymorph<GClass1950>()
+            To1 = reader.GetPolymorph<ItemAddressDescriptor>()
         };
         if (reader.GetBool())
         {
             var num = reader.GetInt();
-            gclass.DestroyedItems = new List<GClass1955>(num);
+            gclass.DestroyedItems = new List<DestroyedItem>(num);
             for (var i = 0; i < num; i++)
             {
                 gclass.DestroyedItems.Add(reader.GetEFTDestroyedItem());
@@ -4307,18 +4312,18 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes an interactive item status tag component entry into the writer stream.
     /// </summary>
-    public static void PutEFTTagComponentDescriptor(this NetDataWriter writer, GClass1939 target)
+    public static void PutEFTTagComponentDescriptor(this NetDataWriter writer, TagComponentDescriptor target)
     {
         writer.Put(target.Name);
         writer.Put(target.Color);
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1939 object from the reader stream.
+    /// Deserializes and reconstructs a TagComponentDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1939 GetEFTTagComponentDescriptor(this NetDataReader reader)
+    public static TagComponentDescriptor GetEFTTagComponentDescriptor(this NetDataReader reader)
     {
-        return new GClass1939
+        return new TagComponentDescriptor
         {
             Name = reader.GetString(),
             Color = reader.GetInt()
@@ -4328,7 +4333,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes an individual item label tag alteration operation descriptor into the writer stream.
     /// </summary>
-    public static void PutEFTTagOperationDescriptor(this NetDataWriter writer, TagDescriptorClass target)
+    public static void PutEFTTagOperationDescriptor(this NetDataWriter writer, TagOperationDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -4338,11 +4343,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a TagDescriptorClass object from the reader stream.
+    /// Deserializes and reconstructs a TagOperationDescriptor object from the reader stream.
     /// </summary>
-    public static TagDescriptorClass GetEFTTagOperationDescriptor(this NetDataReader reader)
+    public static TagOperationDescriptor GetEFTTagOperationDescriptor(this NetDataReader reader)
     {
-        return new TagDescriptorClass
+        return new TagOperationDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID(),
@@ -4355,7 +4360,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes a targeted profile progression task condition monitoring tracker element into the writer stream.
     /// </summary>
-    public static void PutEFTTaskConditionCounterDescriptor(this NetDataWriter writer, GClass2227 target)
+    public static void PutEFTTaskConditionCounterDescriptor(this NetDataWriter writer, TaskConditionCounterDescriptor target)
     {
         writer.PutMongoID(target.Id);
         writer.Put(target.Value);
@@ -4364,11 +4369,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass2227 object from the reader stream.
+    /// Deserializes and reconstructs a TaskConditionCounterDescriptor object from the reader stream.
     /// </summary>
-    public static GClass2227 GetEFTTaskConditionCounterDescriptor(this NetDataReader reader)
+    public static TaskConditionCounterDescriptor GetEFTTaskConditionCounterDescriptor(this NetDataReader reader)
     {
-        return new GClass2227
+        return new TaskConditionCounterDescriptor
         {
             Id = reader.GetMongoID(),
             Value = reader.GetInt(),
@@ -4380,7 +4385,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes an environmental item discard/throw physical physics operation descriptor into the writer stream.
     /// </summary>
-    public static void PutEFTThrowOperationDescriptor(this NetDataWriter writer, ThrowDescriptorClass target)
+    public static void PutEFTThrowOperationDescriptor(this NetDataWriter writer, ThrowOperationDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -4400,11 +4405,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a ThrowDescriptorClass object from the reader stream.
+    /// Deserializes and reconstructs a ThrowOperationDescriptor object from the reader stream.
     /// </summary>
-    public static ThrowDescriptorClass GetEFTThrowOperationDescriptor(this NetDataReader reader)
+    public static ThrowOperationDescriptor GetEFTThrowOperationDescriptor(this NetDataReader reader)
     {
-        var throwDescriptorClass = new ThrowDescriptorClass
+        var throwDescriptorClass = new ThrowOperationDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID(),
@@ -4414,7 +4419,7 @@ public static class EFTSerializationExtensions
         if (reader.GetBool())
         {
             var num = reader.GetInt();
-            throwDescriptorClass.DestroyedItems = new List<GClass1955>(num);
+            throwDescriptorClass.DestroyedItems = new List<DestroyedItem>(num);
             for (var i = 0; i < num; i++)
             {
                 throwDescriptorClass.DestroyedItems.Add(reader.GetEFTDestroyedItem());
@@ -4426,17 +4431,17 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the togglable component descriptor state into the writer stream.
     /// </summary>
-    public static void PutEFTTogglableComponentDescriptor(this NetDataWriter writer, GClass1934 target)
+    public static void PutEFTTogglableComponentDescriptor(this NetDataWriter writer, TogglableComponentDescriptor target)
     {
         writer.Put(target.IsOn);
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1934 object from the reader stream.
+    /// Deserializes and reconstructs a TogglableComponentDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1934 GetEFTTogglableComponentDescriptor(this NetDataReader reader)
+    public static TogglableComponentDescriptor GetEFTTogglableComponentDescriptor(this NetDataReader reader)
     {
-        return new GClass1934
+        return new TogglableComponentDescriptor
         {
             IsOn = reader.GetBool()
         };
@@ -4445,7 +4450,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes an inventory item toggle action operation descriptor into the writer stream.
     /// </summary>
-    public static void PutEFTToggleOperationDescriptor(this NetDataWriter writer, GClass1986 target)
+    public static void PutEFTToggleOperationDescriptor(this NetDataWriter writer, ToggleOperationDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -4454,11 +4459,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1986 object from the reader stream.
+    /// Deserializes and reconstructs a ToggleOperationDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1986 GetEFTToggleOperationDescriptor(this NetDataReader reader)
+    public static ToggleOperationDescriptor GetEFTToggleOperationDescriptor(this NetDataReader reader)
     {
-        return new GClass1986
+        return new ToggleOperationDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID(),
@@ -4470,7 +4475,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes the loyalty level, standing, and threshold metadata for a trader instance into the writer stream.
     /// </summary>
-    public static void PutEFTTraderInfoDescriptor(this NetDataWriter writer, TraderInfoClass target)
+    public static void PutEFTTraderInfoDescriptor(this NetDataWriter writer, TraderInfoDescriptor target)
     {
         writer.Put(target.Unlocked);
         writer.Put(target.LoyaltyLevel);
@@ -4481,11 +4486,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a TraderInfoClass object from the reader stream.
+    /// Deserializes and reconstructs a TraderInfoDescriptor object from the reader stream.
     /// </summary>
-    public static TraderInfoClass GetEFTTraderInfoDescriptor(this NetDataReader reader)
+    public static TraderInfoDescriptor GetEFTTraderInfoDescriptor(this NetDataReader reader)
     {
-        return new TraderInfoClass
+        return new TraderInfoDescriptor
         {
             Unlocked = reader.GetBool(),
             LoyaltyLevel = reader.GetInt(),
@@ -4499,7 +4504,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes commercial trader services cost listings and eligibility validation states into the writer stream.
     /// </summary>
-    public static void PutEFTTraderServiceAvailabilityData(this NetDataWriter writer, TraderServicesClass target)
+    public static void PutEFTTraderServiceAvailabilityData(this NetDataWriter writer, TraderServiceAvailabilityData target)
     {
         writer.PutMongoID(target.TraderId);
         writer.PutEnum(target.ServiceType);
@@ -4525,11 +4530,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a TraderServicesClass object from the reader stream.
+    /// Deserializes and reconstructs a TraderServiceAvailabilityData object from the reader stream.
     /// </summary>
-    public static TraderServicesClass GetEFTTraderServiceAvailabilityData(this NetDataReader reader)
+    public static TraderServiceAvailabilityData GetEFTTraderServiceAvailabilityData(this NetDataReader reader)
     {
-        var traderServicesClass = new TraderServicesClass
+        var traderServicesClass = new TraderServiceAvailabilityData
         {
             TraderId = reader.GetMongoID(),
             ServiceType = reader.GetEnum<ETraderServiceType>(),
@@ -4560,7 +4565,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes an inventory item numeric element transfer operation descriptor into the writer stream.
     /// </summary>
-    public static void PutEFTTransferOperationDescriptor(this NetDataWriter writer, GClass1987 target)
+    public static void PutEFTTransferOperationDescriptor(this NetDataWriter writer, TransferOperationDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -4570,11 +4575,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1987 object from the reader stream.
+    /// Deserializes and reconstructs a TransferOperationDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1987 GetEFTTransferOperationDescriptor(this NetDataReader reader)
+    public static TransferOperationDescriptor GetEFTTransferOperationDescriptor(this NetDataReader reader)
     {
-        return new GClass1987
+        return new TransferOperationDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID(),
@@ -4587,7 +4592,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes a fast-access hotkey structural item unbind operation descriptor into the writer stream.
     /// </summary>
-    public static void PutEFTUnbindItemOperationDescriptor(this NetDataWriter writer, GClass1988 target)
+    public static void PutEFTUnbindItemOperationDescriptor(this NetDataWriter writer, UnbindItemOperationDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -4596,11 +4601,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1988 object from the reader stream.
+    /// Deserializes and reconstructs a UnbindItemOperationDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1988 GetEFTUnbindItemOperationDescriptor(this NetDataReader reader)
+    public static UnbindItemOperationDescriptor GetEFTUnbindItemOperationDescriptor(this NetDataReader reader)
     {
-        return new GClass1988
+        return new UnbindItemOperationDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID(),
@@ -4612,7 +4617,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes a weapon magazine emptying or unload operation descriptor into the writer stream.
     /// </summary>
-    public static void PutEFTUnloadMagOperationDescriptor(this NetDataWriter writer, GClass1973 target)
+    public static void PutEFTUnloadMagOperationDescriptor(this NetDataWriter writer, UnloadMagOperationDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -4620,22 +4625,22 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1973 object from the reader stream.
+    /// Deserializes and reconstructs a UnloadMagOperationDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1973 GetEFTUnloadMagOperationDescriptor(this NetDataReader reader)
+    public static UnloadMagOperationDescriptor GetEFTUnloadMagOperationDescriptor(this NetDataReader reader)
     {
-        return new GClass1973
+        return new UnloadMagOperationDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID(),
-            InternalOperationDescriptor = reader.GetPolymorph<BaseDescriptorClass>()
+            InternalOperationDescriptor = reader.GetPolymorph<InventoryOperationDescriptor>()
         };
     }
 
     /// <summary>
     /// Serializes kill tracking victim profile context attributes and range metrics logs into the writer stream.
     /// </summary>
-    public static void PutEFTVictimStats(this NetDataWriter writer, GClass2201 target)
+    public static void PutEFTVictimStats(this NetDataWriter writer, VictimStats target)
     {
         writer.Put(target.AccountId);
         writer.Put(target.ProfileId);
@@ -4652,11 +4657,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass2201 object from the reader stream.
+    /// Deserializes and reconstructs a VictimStats object from the reader stream.
     /// </summary>
-    public static GClass2201 GetEFTVictimStats(this NetDataReader reader)
+    public static VictimStats GetEFTVictimStats(this NetDataReader reader)
     {
-        return new GClass2201
+        return new VictimStats
         {
             AccountId = reader.GetString(),
             ProfileId = reader.GetString(),
@@ -4676,7 +4681,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes a internal firearm bolt/rechamber interaction action operation descriptor into the writer stream.
     /// </summary>
-    public static void PutEFTWeaponRechamberOperationDescriptor(this NetDataWriter writer, GClass1989 target)
+    public static void PutEFTWeaponRechamberOperationDescriptor(this NetDataWriter writer, WeaponRechamberOperationDescriptor target)
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
@@ -4684,11 +4689,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1989 object from the reader stream.
+    /// Deserializes and reconstructs a WeaponRechamberOperationDescriptor object from the reader stream.
     /// </summary>
-    public static GClass1989 GetEFTWeaponRechamberOperationDescriptor(this NetDataReader reader)
+    public static WeaponRechamberOperationDescriptor GetEFTWeaponRechamberOperationDescriptor(this NetDataReader reader)
     {
-        return new GClass1989
+        return new WeaponRechamberOperationDescriptor
         {
             OperationId = reader.GetUShort(),
             OwnerId = reader.GetMongoID(),
@@ -4699,18 +4704,18 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes item identity string associations for insurance tracking records into the writer stream.
     /// </summary>
-    public static void PutJsonTypeInsuredProfileItems(this NetDataWriter writer, InsuredItemClass target)
+    public static void PutJsonTypeInsuredProfileItems(this NetDataWriter writer, InsuredProfileItems target)
     {
         writer.Put(target.TraderId);
         writer.Put(target.ItemId);
     }
 
     /// <summary>
-    /// Deserializes and reconstructs an InsuredItemClass object from the reader stream.
+    /// Deserializes and reconstructs an InsuredProfileItems object from the reader stream.
     /// </summary>
-    public static InsuredItemClass GetJsonTypeInsuredProfileItems(this NetDataReader reader)
+    public static InsuredProfileItems GetJsonTypeInsuredProfileItems(this NetDataReader reader)
     {
-        return new InsuredItemClass
+        return new InsuredProfileItems
         {
             TraderId = reader.GetString(),
             ItemId = reader.GetString()
@@ -4720,7 +4725,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes visual identity parameters and comprehensive health state values for player profile models into the writer stream.
     /// </summary>
-    public static void PutJsonTypePlayerInfo(this NetDataWriter writer, GClass1410 target)
+    public static void PutJsonTypePlayerInfo(this NetDataWriter writer, PlayerInfo target)
     {
         writer.Put(target.Nickname);
         writer.PutEnum(target.Side);
@@ -4736,11 +4741,11 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a GClass1410 object from the reader stream.
+    /// Deserializes and reconstructs a PlayerInfo object from the reader stream.
     /// </summary>
-    public static GClass1410 GetJsonTypePlayerInfo(this NetDataReader reader)
+    public static PlayerInfo GetJsonTypePlayerInfo(this NetDataReader reader)
     {
-        return new GClass1410
+        return new PlayerInfo
         {
             Nickname = reader.GetString(),
             Side = reader.GetEnum<EPlayerSide>(),

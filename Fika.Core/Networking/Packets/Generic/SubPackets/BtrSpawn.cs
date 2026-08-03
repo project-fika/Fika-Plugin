@@ -30,7 +30,7 @@ public sealed class BtrSpawn : IPoolSubPacket
     public void Execute(FikaPlayer player = null)
     {
         FikaGlobals.LogInfo("Received BTR spawn event from server");
-        GlobalEventHandlerClass.CreateEvent<BtrSpawnOnThePathEvent>()
+        GlobalEventsController.CreateEvent<BtrSpawnOnThePathEvent>()
             .Invoke(Position, Rotation, PlayerProfileId);
     }
 

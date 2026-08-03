@@ -1,4 +1,5 @@
-﻿using System;
+﻿using JsonType;
+using System;
 using System.Linq;
 using System.Reflection;
 using EFT;
@@ -16,7 +17,7 @@ public sealed class TarkovApplication_LocalGamePreparer_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(TarkovApplication).GetMethod(nameof(TarkovApplication.method_41));
+        return typeof(TarkovApplication).GetMethod(nameof(TarkovApplication.LocalGameMatching));
     }
 
     [PatchPrefix]
@@ -35,7 +36,7 @@ public sealed class TarkovApplication_LocalGamePreparer_Patch : ModulePatch
                 ____raidSettings.SelectedLocation = __instance.Session.LocationSettings.locations.Values
                     .FirstOrDefault(IsSandboxHigh);
 
-                NotificationManagerClass.DisplayMessageNotification("Notification/HighLevelQueue".Localized(null),
+                NotificationManager.DisplayMessageNotification("Notification/HighLevelQueue".Localized(null),
                     ENotificationDurationType.Default, ENotificationIconType.Default, null);
             }
 
@@ -67,12 +68,12 @@ public sealed class TarkovApplication_LocalGamePreparer_Patch : ModulePatch
         }
     }
 
-    private static bool IsSandboxHigh(LocationSettingsClass.Location location)
+    private static bool IsSandboxHigh(LocationSettings.Location location)
     {
         return string.Equals(location.Id, "sandbox_high", StringComparison.OrdinalIgnoreCase);
     }
 
-    private static bool IsSandbox(LocationSettingsClass.Location location)
+    private static bool IsSandbox(LocationSettings.Location location)
     {
         return string.Equals(location.Id, "sandbox", StringComparison.OrdinalIgnoreCase);
     }

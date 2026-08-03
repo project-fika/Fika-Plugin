@@ -13,11 +13,11 @@ public class SessionResultExitStatus_Show_Patch : ModulePatch
     protected override MethodBase GetTargetMethod()
     {
         return typeof(SessionResultExitStatus).GetMethod(nameof(SessionResultExitStatus.Show), [typeof(Profile),
-            typeof(LastPlayerStateClass),
+            typeof(PlayerVisualRepresentation),
             typeof(ESideType),
             typeof(ExitStatus),
             typeof(TimeSpan),
-            typeof(ISession),
+            typeof(IEftSession),
             typeof(bool)]);
     }
 

@@ -110,7 +110,7 @@ public class FikaModHandler
         if (!UIFixesLoaded)
         {
             _logger.LogInfo("UI Fixes is not loaded, enabling PartyInfoPanel fix");
-            manager.EnablePatch(new PartyInfoPanel_method_3_Patch());
+            manager.EnablePatch(new PartyInfoPanel_CG_method_3_Patch());
         }
 
         return Task.CompletedTask;

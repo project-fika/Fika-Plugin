@@ -9,7 +9,7 @@ namespace Fika.Core.Main.Components;
 internal class CorpsePositionSyncer : MonoBehaviour
 {
     private Corpse _corpse;
-    private RagdollPacketStruct _data;
+    private CorpseSyncPacket _data;
     private FikaHostWorld _world;
     private int _counter;
 
@@ -17,7 +17,7 @@ internal class CorpsePositionSyncer : MonoBehaviour
     {
         var corpsePositionSyncer = gameObject.AddComponent<CorpsePositionSyncer>();
         corpsePositionSyncer._corpse = corpse;
-        corpsePositionSyncer._world = (FikaHostWorld)Singleton<GameWorld>.Instance.World_0;
+        corpsePositionSyncer._world = (FikaHostWorld)Singleton<GameWorld>.Instance.World;
         corpsePositionSyncer._counter = 0;
         corpsePositionSyncer._data = new()
         {
@@ -44,7 +44,7 @@ internal class CorpsePositionSyncer : MonoBehaviour
 
     public void FixedUpdate()
     {
-        if (_corpse.Ragdoll.Bool_2)
+        if (_corpse.Ragdoll._isPhysicsDone)
         {
             _data.Position = _corpse.TrackableTransform.position;
             _data.TransformSyncs = _corpse.TransformSyncs;

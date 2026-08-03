@@ -1,4 +1,6 @@
-﻿using System;
+﻿using BitPacking;
+using EFT.Vehicle;
+using System;
 using System.Net;
 using System.Net.Sockets;
 using Fika.Core.Networking.LZ4;
@@ -7,13 +9,13 @@ namespace Fika.Core.Networking;
 
 public static class NetworkUtils
 {
-    public static IDataReader EventDataReader { get; private set; } = new GClass1364(new byte[16_384]);
-    public static GInterface131 EventDataWriter { get; private set; } = new GClass1368(new byte[10_000]);
+    public static IBitReaderStream EventDataReader { get; private set; } = new BitReaderStream(new byte[16_384]);
+    public static IBitWriterStream EventDataWriter { get; private set; } = new BitWriterStream(new byte[10_000]);
 
     internal static void ResetReaderAndWriter()
     {
-        EventDataReader = new GClass1364(new byte[16_384]);
-        EventDataWriter = new GClass1368(new byte[10_000]);
+        EventDataReader = new BitReaderStream(new byte[16_384]);
+        EventDataWriter = new BitWriterStream(new byte[10_000]);
     }
 
     /// <summary>
@@ -172,7 +174,7 @@ public static class NetworkUtils
         /// </summary>
         PlayerState,
         /// <summary>
-        /// A raw <see cref="BTRDataPacketStruct"/>
+        /// A raw <see cref="ShapshotBTRMessage"/>
         /// </summary>
         BTR,
         /// <summary>

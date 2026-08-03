@@ -1,13 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using EFT;
+using System.Collections.Generic;
 
 namespace Fika.Core.Networking.Packets.World;
 
 public sealed class WorldPacket : IReusable
 {
-    public List<ArtilleryPacketStruct> ArtilleryPackets { get; set; }
-    public List<GrenadeDataPacketStruct> GrenadePackets { get; set; }
-    public List<AirplaneDataPacketStruct> SyncObjectPackets { get; set; }
-    public List<LootSyncStruct> LootSyncStructs { get; set; }
+    public List<ArtilleryProjectileSyncPacket> ArtilleryPackets { get; set; }
+    public List<GrenadeSyncPacket> GrenadePackets { get; set; }
+    public List<SynchronizableObjectPacket> SyncObjectPackets { get; set; }
+    public List<EFT.LootSyncPacket> LootSyncStructs { get; set; }
 
     public bool HasData
     {

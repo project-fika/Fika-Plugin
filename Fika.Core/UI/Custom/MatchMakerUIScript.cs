@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EFT.Communications;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Net;
@@ -236,7 +237,7 @@ public class MatchMakerUIScript : MonoBehaviour
         {
             ToggleLoading(true);
 
-            var tarkovApplication = (TarkovApplication)Singleton<ClientApplication<ISession>>.Instance;
+            var tarkovApplication = (TarkovApplication)Singleton<ClientApplication<IEftSession>>.Instance;
             var session = tarkovApplication.Session;
 
             Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
@@ -333,7 +334,7 @@ public class MatchMakerUIScript : MonoBehaviour
                 }
                 else
                 {
-                    NotificationManagerClass.DisplaySingletonWarningNotification(LocaleUtils.STARTING_RAID_ON_DEDICATED.Localized());
+                    NotificationManager.DisplaySingletonWarningNotification(LocaleUtils.STARTING_RAID_ON_DEDICATED.Localized());
                 }
             }
         });
@@ -411,7 +412,7 @@ public class MatchMakerUIScript : MonoBehaviour
         }
 
         FikaBackendUtils.IsReconnect = reconnect;
-        NotificationManagerClass.DisplayMessageNotification(LocaleUtils.CONNECTING_TO_SESSION.Localized(),
+        NotificationManager.DisplayMessageNotification(LocaleUtils.CONNECTING_TO_SESSION.Localized(),
             iconType: EFT.Communications.ENotificationIconType.EntryPoint);
         using var pingingClient = await NetManagerUtils.CreatePingingClient();
 
