@@ -134,6 +134,12 @@ public sealed partial class FikaServer
             return;
         }
 
+        if (packet.ProceedType is EProceedType.EmptyHands) // always accept empty hands
+        {
+            SendDataToPeer(ref response, DeliveryMethod.ReliableOrdered, peer);
+            return;
+        }
+
         if (!TryFindItemForProceedPacket(packet.ItemId, out var item))
         {
             response.Error = $"Could not find item with id {packet.ItemId}";
