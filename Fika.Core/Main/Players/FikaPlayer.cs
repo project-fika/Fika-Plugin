@@ -1154,11 +1154,6 @@ public class FikaPlayer : LocalPlayer
         float distance, List<string> targetEquipment,
         HealthEffects enemyEffects, List<string> zoneIds, FikaPlayer killer)
     {
-        if (!HealthController.IsAlive)
-        {
-            return;
-        }
-
 #if DEBUG
         FikaGlobals.LogWarning($"HandleTeammateKill: Weapon {(damage.Weapon != null ? damage.Weapon.Name.Localized() : "None")}");
 #endif
