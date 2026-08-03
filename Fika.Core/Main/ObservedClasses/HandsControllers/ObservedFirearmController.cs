@@ -39,9 +39,8 @@ public sealed class ObservedFirearmController : FirearmController
     private float _lastFireTime;
     private float _overlapCounter;
     private bool _hasFired;
-    private WeaponPrefab _weaponPrefab;
     private Firearms _weaponManager;
-    private Player.FirearmController.UnderbarrelContainer _underBarrelManager;
+    private UnderbarrelContainer _underBarrelManager;
     private bool _boltActionReload;
     private bool _isThrowingPatron;
     private bool _stationaryWeapon;
@@ -117,7 +116,6 @@ public sealed class ObservedFirearmController : FirearmController
     private void Start()
     {
         _objectInHandsAnimator.SetAiming(false);
-        _weaponPrefab = ControllerGameObject.GetComponent<WeaponPrefab>();
         _weaponManager = _weaponPrefab.ObjectInHands as Firearms;
         if (UnderbarrelWeapon != null)
         {

@@ -18,7 +18,6 @@ public sealed class ObservedInventoryController : Player.PlayerInventoryControll
     private readonly static FieldInfo _setInHandsCallbackField = typeof(Player)
         .GetField("_setInHandsCallback", BindingFlags.NonPublic | BindingFlags.Instance);
 
-    private readonly IPlayerSearchController _searchController;
     private readonly FikaPlayer _fikaPlayer;
 
     public override bool HasDiscardLimits
@@ -29,19 +28,13 @@ public sealed class ObservedInventoryController : Player.PlayerInventoryControll
         }
     }
 
-    public override IPlayerSearchController PlayerSearchController
-    {
-        get
-        {
-            return _searchController;
-        }
-    }
+    public override IPlayerSearchController PlayerSearchController { get; }
 
     public ObservedInventoryController(Player player, Profile profile, bool examined, MongoID firstId, ushort firstOperationId, bool aiControl) : base(player, profile, examined)
     {
         _currentId = firstId;
         _nextOperationId = firstOperationId;
-        _searchController = new ObservedPlayerSearchController();
+        PlayerSearchController = new ObservedPlayerSearchController();
         _fikaPlayer = (FikaPlayer)player;
     }
 

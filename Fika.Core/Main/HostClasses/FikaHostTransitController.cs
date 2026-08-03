@@ -20,7 +20,6 @@ public class FikaHostTransitController : LocalTransitController
     public FikaHostTransitController(GlobalConfiguration.TransitGlobalSettings settings, LocationSettings.Location.TransitParameters[] parameters, Profile profile, LocalRaidSettings localRaidSettings)
         : base(settings, parameters, profile, localRaidSettings)
     {
-        _localRaidSettings = localRaidSettings;
         IsEvent = localRaidSettings.transitionType.HasFlagNoBox(ELocationTransition.Event);
         string[] array = [.. localRaidSettings.transition.visitedLocations.EmptyIfNull(), localRaidSettings.location];
         summonedTransits[profile.Id] = new(localRaidSettings.transition.transitionRaidId, localRaidSettings.transition.transitionCount,
@@ -39,7 +38,6 @@ public class FikaHostTransitController : LocalTransitController
         OnPlayerExit += OnHostPlayerExit;
     }
 
-    private readonly LocalRaidSettings _localRaidSettings;
     private readonly FikaServer _server;
     private readonly Dictionary<Player, int> _playersInTransitZone;
     private readonly List<int> _transittedPlayers;

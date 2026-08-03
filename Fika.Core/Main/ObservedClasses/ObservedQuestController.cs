@@ -13,7 +13,7 @@ namespace Fika.Core.Main.ObservedClasses;
 public class ObservedQuestController(Profile profile, InventoryController inventoryController, IPlayerSearchController searchController, IQuestSession session)
     : QuestControllerClientLocalGame(profile, inventoryController, searchController, session)
 {
-    private Dictionary<int, List<QuestInformation>> _quests;
+    private Dictionary<int, List<QuestInformation>> _questsDict;
     private List<ZoneDropInformation> _zoneDrops;
     private List<string> _visitedPlaces;
     private List<MongoID> _lootedQuestItems;
@@ -22,7 +22,7 @@ public class ObservedQuestController(Profile profile, InventoryController invent
     {
         if (FikaBackendUtils.IsServer)
         {
-            _quests = [];
+            _questsDict = [];
             _zoneDrops = [];
             _visitedPlaces = [];
             _lootedQuestItems = [];
@@ -62,10 +62,10 @@ public class ObservedQuestController(Profile profile, InventoryController invent
         FikaGlobals.LogInfo($"Received from client for quest [{packet.QuestId}] for conditional [{packet.ConditionId}] with a value of [{packet.Value}]");
 #endif
 
-        if (!_quests.TryGetValue(packet.QuestId, out var questInformation))
+        if (!_questsDict.TryGetValue(packet.QuestId, out var questInformation))
         {
             questInformation = [];
-            _quests.Add(packet.QuestId, questInformation);
+            _questsDict.Add(packet.QuestId, questInformation);
         }
 
         for (var i = 0; i < questInformation.Count; i++)
@@ -93,14 +93,14 @@ public class ObservedQuestController(Profile profile, InventoryController invent
 
     public bool TryGetReconnectQuestSyncPackets(out List<QuestSyncPacket> packets)
     {
-        if (_quests.Count == 0 && _zoneDrops.Count == 0 && _visitedPlaces.Count == 0 && _lootedQuestItems.Count == 0)
+        if (_questsDict.Count == 0 && _zoneDrops.Count == 0 && _visitedPlaces.Count == 0 && _lootedQuestItems.Count == 0)
         {
             packets = null;
             return false;
         }
 
-        packets = new List<QuestSyncPacket>(_quests.Count + _zoneDrops.Count + _visitedPlaces.Count + _lootedQuestItems.Count);
-        foreach ((var questId, var questInformation) in _quests)
+        packets = new List<QuestSyncPacket>(_questsDict.Count + _zoneDrops.Count + _visitedPlaces.Count + _lootedQuestItems.Count);
+        foreach ((var questId, var questInformation) in _questsDict)
         {
             foreach (var quest in questInformation)
             {
