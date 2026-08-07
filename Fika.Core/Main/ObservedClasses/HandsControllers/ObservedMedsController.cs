@@ -1,13 +1,13 @@
 ﻿// © 2026 Lacyway All Rights Reserved
 
-using EFT.HealthSystem;
-using EFT.NetworkPackets;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
 using EFT;
+using EFT.HealthSystem;
 using EFT.InventoryLogic;
+using EFT.NetworkPackets;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 
@@ -18,8 +18,8 @@ internal sealed class ObservedMedsController : Player.MedsController
     private FikaPlayer _fikaPlayer;
     private int _animation;
 
-    private readonly static FieldInfo _onOutUseAction = typeof(Player.MedsController)
-        .GetField("action_0", BindingFlags.NonPublic | BindingFlags.Instance);
+    private readonly static FieldInfo _onOutUseActionField = typeof(Player.MedsController)
+        .GetField("_onOutUseEvent", BindingFlags.NonPublic | BindingFlags.Instance);
 
     private ObservedMedsOperation ObservedOperation
     {
@@ -32,8 +32,8 @@ internal sealed class ObservedMedsController : Player.MedsController
     public static ObservedMedsController Create(FikaPlayer player, Item item, OneAndList<EBodyPart> bodyParts, float amount, int animationVariant)
     {
         var controller = CreateController<ObservedMedsController>(player, item, bodyParts, amount, animationVariant);
-        var action = (Action)_onOutUseAction.GetValue(controller);
-        _onOutUseAction.SetValue(controller, FikaGlobals.ClearDelegates(action));
+        var action = (Action)_onOutUseActionField.GetValue(controller);
+        _onOutUseActionField.SetValue(controller, FikaGlobals.ClearDelegates(action));
         controller._fikaPlayer = player;
         controller._animation = animationVariant;
         return controller;
@@ -41,9 +41,10 @@ internal sealed class ObservedMedsController : Player.MedsController
 
     public override Dictionary<Type, OperationFactoryDelegate> GetOperationFactoryDelegates()
     {
-        return new Dictionary<Type, OperationFactoryDelegate> {
+        return new Dictionary<Type, OperationFactoryDelegate>
+        {
             {
-                typeof(Player.MedsController.MedsInHandsOperation),
+                typeof(MedsInHandsOperation),
                 new OperationFactoryDelegate(GetObservedMedsOperation)
             },
             {

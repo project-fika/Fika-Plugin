@@ -1,18 +1,16 @@
-﻿using BitPacking;
-using CommonAssets.Scripts.Game;
-using EFT.Communications;
-using EFT.UI.Screens;
-using JsonType;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using BitPacking;
 using Comfort.Common;
+using CommonAssets.Scripts.Game;
 using CommonAssets.Scripts.Game.LabyrinthEvent;
 using EFT;
 using EFT.AssetsManager;
 using EFT.Bots;
+using EFT.Communications;
 using EFT.Counters;
 using EFT.Game.Spawning;
 using EFT.GlobalEvents;
@@ -20,6 +18,7 @@ using EFT.Interactive;
 using EFT.Interactive.SecretExfiltrations;
 using EFT.InventoryLogic;
 using EFT.UI;
+using EFT.UI.Screens;
 using EFT.Weather;
 using Fika.Core.Main.ClientClasses;
 using Fika.Core.Main.Components;
@@ -37,6 +36,7 @@ using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
 using Fika.Core.Networking.Packets.World;
 using Fika.Core.UI.Models;
+using JsonType;
 using static JsonType.LocationSettings;
 
 namespace Fika.Core.Main.GameMode;
@@ -779,12 +779,12 @@ public class HostGameController : BaseGameController, IBotGame
 
         player.ClientMovementContext.SetGravity(false);
         var position = player.Position;
-        position.y += 500;
+        position.y += 500f;
         player.Teleport(position);
 
         if (coopGame.ExitStatus == ExitStatus.MissingInAction)
         {
-            NotificationManager.DisplayMessageNotification(LocaleUtils.PLAYER_MIA.Localized(), iconType: EFT.Communications.ENotificationIconType.Alert, textColor: Color.red);
+            NotificationManager.DisplayMessageNotification(LocaleUtils.PLAYER_MIA.Localized(), iconType: ENotificationIconType.Alert, textColor: Color.red);
         }
 
         if (player.QuestController is ClientQuestController clientQuestController)
@@ -797,30 +797,29 @@ public class HostGameController : BaseGameController, IBotGame
             sharedQuestController.ToggleQuestSharing(false);
         }
 
+#if !DEBUG
         var matchEndConfig = Singleton<GlobalConfiguration>.Instance.Experience.MatchEnd;
         if (player.Profile.EftStats.SessionCounters.GetAllInt([CounterTag.Exp]) < matchEndConfig.SurvivedExpRequirement && coopGame.PastTime < matchEndConfig.SurvivedTimeRequirement)
         {
             coopGame.ExitStatus = ExitStatus.Runner;
         }
+#endif
 
         if (exfiltrationPoint != null)
         {
             exfiltrationPoint.Disable();
 
-            if (exfiltrationPoint.HasRequirements && exfiltrationPoint.TransferItemRequirement != null)
+            if (exfiltrationPoint.HasRequirements && exfiltrationPoint.TransferItemRequirement?.Met(player, exfiltrationPoint) == true && player.IsYourPlayer)
             {
-                if (exfiltrationPoint.TransferItemRequirement.Met(player, exfiltrationPoint) && player.IsYourPlayer)
-                {
-                    // Seems to already be handled by SPT so we only add it visibly
-                    player.Profile.EftStats.SessionCounters.AddDouble(0.2, [CounterTag.FenceStanding, EFenceStandingSource.ExitStanding]);
-                }
+                // Seems to already be handled by SPT so we only add it visibly
+                player.Profile.EftStats.SessionCounters.AddDouble(0.2, [CounterTag.FenceStanding, EFenceStandingSource.ExitStanding]);
             }
         }
 
         if (player.Side == EPlayerSide.Savage)
         {
             // Seems to already be handled by SPT so we only add it visibly
-            player.Profile.EftStats.SessionCounters.AddDouble(0.01, [CounterTag.FenceStanding, EFenceStandingSource.ExitStanding]);
+            player.Profile.EftStats.SessionCounters.AddDouble(0.01d, [CounterTag.FenceStanding, EFenceStandingSource.ExitStanding]);
         }
 
         var transitController = Singleton<GameWorld>.Instance.TransitController;
@@ -859,8 +858,8 @@ public class HostGameController : BaseGameController, IBotGame
 
             preloaderUI.StartBlackScreenShow(2f, 2f, () => preloaderUI.FadeBlackScreen(2f, -2f));
 
-            player.ActiveHealthController.SetDamageCoeff(0);
-            player.ActiveHealthController.DamageMultiplier = 0;
+            player.ActiveHealthController.SetDamageCoeff(0f);
+            player.ActiveHealthController.DamageMultiplier = 0f;
             player.ActiveHealthController.DisableMetabolism();
             player.ActiveHealthController.PauseAllEffects();
 

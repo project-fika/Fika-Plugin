@@ -1,18 +1,17 @@
-﻿using CommonAssets.Scripts.Game;
-using EFT.Communications;
-using EFT.UI.Screens;
-using JsonType;
-using System;
+﻿using System;
 using System.Collections;
 using System.Threading.Tasks;
 using Comfort.Common;
+using CommonAssets.Scripts.Game;
 using EFT;
 using EFT.Bots;
+using EFT.Communications;
 using EFT.Counters;
 using EFT.Game.Spawning;
 using EFT.Interactive;
 using EFT.Interactive.SecretExfiltrations;
 using EFT.UI;
+using EFT.UI.Screens;
 using EFT.Weather;
 using Fika.Core.Main.ClientClasses;
 using Fika.Core.Main.FreeCamera;
@@ -26,6 +25,7 @@ using Fika.Core.Networking.Packets.Backend;
 using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
 using Fika.Core.Networking.Packets.World;
+using JsonType;
 using static JsonType.LocationSettings;
 
 namespace Fika.Core.Main.GameMode;
@@ -392,7 +392,7 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
 
         player.ClientMovementContext.SetGravity(false);
         var position = player.Position;
-        position.y += 500;
+        position.y += 500f;
         player.Teleport(position);
 
         if (coopGame.ExitStatus == ExitStatus.MissingInAction)
@@ -415,25 +415,24 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
         if (player.Profile.EftStats.SessionCounters.GetAllInt([CounterTag.Exp]) < matchEndConfig.SurvivedExpRequirement && coopGame.PastTime < matchEndConfig.SurvivedTimeRequirement)
         {
             coopGame.ExitStatus = ExitStatus.Runner;
-        } 
+        }
 #endif
 
         if (exfiltrationPoint != null)
         {
             exfiltrationPoint.Disable();
 
-            if (exfiltrationPoint.HasRequirements && exfiltrationPoint.TransferItemRequirement != null
-                && exfiltrationPoint.TransferItemRequirement.Met(player, exfiltrationPoint) && player.IsYourPlayer)
+            if (exfiltrationPoint.HasRequirements && exfiltrationPoint.TransferItemRequirement?.Met(player, exfiltrationPoint) == true && player.IsYourPlayer)
             {
                 // Seems to already be handled by SPT so we only add it visibly
-                player.Profile.EftStats.SessionCounters.AddDouble(0.2, [CounterTag.FenceStanding, EFenceStandingSource.ExitStanding]);
+                player.Profile.EftStats.SessionCounters.AddDouble(0.2d, [CounterTag.FenceStanding, EFenceStandingSource.ExitStanding]);
             }
         }
 
         if (player.Side == EPlayerSide.Savage)
         {
             // Seems to already be handled by SPT so we only add it visibly
-            player.Profile.EftStats.SessionCounters.AddDouble(0.01, [CounterTag.FenceStanding, EFenceStandingSource.ExitStanding]);
+            player.Profile.EftStats.SessionCounters.AddDouble(0.01d, [CounterTag.FenceStanding, EFenceStandingSource.ExitStanding]);
         }
 
         var transitController = Singleton<GameWorld>.Instance.TransitController;
