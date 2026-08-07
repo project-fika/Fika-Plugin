@@ -759,16 +759,13 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         var myPlayer = (FikaPlayer)Singleton<GameWorld>.Instance.MainPlayer;
         myPlayer.PacketSender.DestroyThis();
 
-        if (myPlayer.Side != EPlayerSide.Savage)
+        if (myPlayer.Side != EPlayerSide.Savage && myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem != null)
         {
-            if (myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem != null)
+            var result = ItemManipulator.Remove(myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag)
+                .ContainedItem, myPlayer.InventoryController, false);
+            if (result.Error != null)
             {
-                var result = ItemManipulator.Remove(myPlayer.Equipment.GetSlot(EquipmentSlot.Dogtag)
-                    .ContainedItem, myPlayer.InventoryController, false);
-                if (result.Error != null)
-                {
-                    _logger.LogError("Stop: Error removing dog tag!");
-                }
+                _logger.LogError("Error removing dog tag!");
             }
         }
 
@@ -786,6 +783,8 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         {
             (GameController as HostGameController).StopBotsSystem(false);
         }
+
+        var errors = 0;
 
         if (GameController.CoopHandler != null)
         {
@@ -805,13 +804,19 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
                 catch (Exception ex)
                 {
                     _logger.LogError($"There was an error disposing of player [{player.Profile.GetCorrectedNickname()}]: {ex}");
-                    throw;
+                    errors++;
                 }
             }
         }
         else
         {
-            _logger.LogError("Stop: Could not find CoopHandler!");
+            _logger.LogError("Could not find CoopHandler!");
+        }
+
+        if (errors > 0)
+        {
+            NotificationManager.DisplayWarningNotification($"Failed to dispose of {errors} players/bots. Please check your log files and restart the client after this raid.");
+            _logger.LogError($"Failed to dispose of {errors} players/bots.");
         }
 
         if (!FikaBackendUtils.IsTransit)
