@@ -35,6 +35,7 @@ public partial class FreeCamera
             var listPlayer = newObj.GetComponent<ListPlayer>();
             _playersTracker.Add(player.NetId, listPlayer);
             listPlayer.Init(player);
+            RecalculatePlayerList();
             return;
         }
 
@@ -55,6 +56,8 @@ public partial class FreeCamera
             Destroy(listPlayer.gameObject);
         }
 
+        RecalculatePlayerList();
+
         if (!_allowSpectateBots && IsPlayerHuman(player))
         {
             for (var i = 0; i < _coopHandler.HumanPlayers.Count; i++)
@@ -74,6 +77,8 @@ public partial class FreeCamera
         {
             Destroy(listPlayer.gameObject);
         }
+
+        RecalculatePlayerList();
 
         if (!_allowSpectateBots && IsPlayerHuman(player))
         {

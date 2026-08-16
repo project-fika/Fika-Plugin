@@ -1,10 +1,10 @@
-﻿using EFT.CameraControl;
-using EFT.Communications;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using BSG.CameraEffects;
 using Comfort.Common;
 using EFT;
+using EFT.CameraControl;
+using EFT.Communications;
 using EFT.UI;
 using Fika.Core.Bundles;
 using Fika.Core.Main.Components;
@@ -32,6 +32,7 @@ public partial class FreeCamera : MonoBehaviour
     private bool _allowSpectateBots;
     //private bool _refreshedAfterLastPlayerLeft;
     private FikaPlayer _currentPlayer;
+    private int _lastSpectatedIndex = -1;
     private Vector3 _lastKnownPlayerPosition;
     private bool _isFollowing;
     private bool _leftMode;
@@ -210,85 +211,72 @@ public partial class FreeCamera : MonoBehaviour
     /// </param>
     public void CycleSpectatePlayers(bool reverse = false)
     {
-        ClearAndAddPlayers();
-#if DEBUG
-        FikaGlobals.LogInfo($"Freecam: There are {_players.Count} players");
-#endif
-
-        if (_players.Count == 0)
+        var count = _players.Count;
+        if (count == 0)
         {
-            // clear out all spectate positions
+            _currentPlayer = null;
             DetachCamera();
-
             return;
         }
 
-        // start spectating a player if we haven't before
-        if (_currentPlayer == null && _players.Count > 0)
-        {
-            if (_lastSpectatingPlayer != null && _players.Contains(_lastSpectatingPlayer))
-            {
-                SetCurrentPlayer(_lastSpectatingPlayer);
-            }
-            else
-            {
-                SetCurrentPlayer(_players[0]);
-            }
+        var step = reverse ? -1 : 1;
+        var currentIndex = _players.IndexOf(_currentPlayer);
 
-#if DEBUG
-            FikaGlobals.LogInfo($"Freecam: currentPlayer was null, setting to first player {_players[0].Profile.GetCorrectedNickname()}");
-#endif
-            SwitchSpectateMode();
-            return;
-        }
-
-        // Cycle through spectate-able players
-        var nextIndex = reverse ? _players.IndexOf(_currentPlayer) - 1 : _players.IndexOf(_currentPlayer) + 1;
-        if (!reverse)
+        if (currentIndex != -1)
         {
-            if (nextIndex <= _players.Count - 1)
-            {
-#if DEBUG
-                FikaGlobals.LogInfo("Freecam: Setting to next player");
-#endif
-                SetCurrentPlayer(_players[nextIndex]);
-            }
-            else
-            {
-                // hit end of list, loop from start
-#if DEBUG
-                FikaGlobals.LogInfo("Freecam: Looping back to start player");
-#endif
-                SetCurrentPlayer(_players[0]);
-            }
+            _lastSpectatedIndex = currentIndex;
+            var nextIndex = (currentIndex + step + count) % count;
+            SetCurrentPlayer(_players[nextIndex]);
         }
         else
         {
-            if (nextIndex >= 0)
+            var fallbackIndex = _lastSpectatingPlayer != null ? _players.IndexOf(_lastSpectatingPlayer) : -1;
+
+            if (fallbackIndex != -1)
             {
-#if DEBUG
-                FikaGlobals.LogInfo("Freecam: Setting to previous player");
-#endif
+                _lastSpectatedIndex = fallbackIndex;
+                var nextIndex = (fallbackIndex + step + count) % count;
                 SetCurrentPlayer(_players[nextIndex]);
             }
             else
             {
-                // hit beginning of list, loop from end
-#if DEBUG
-                FikaGlobals.LogInfo("Freecam: Looping back to end player");
-#endif
-                SetCurrentPlayer(_players[^1]);
+                var baseIndex = Mathf.Clamp(_lastSpectatedIndex, 0, count - 1);
+
+                int nextIndex;
+                if (reverse)
+                {
+                    nextIndex = (baseIndex + step + count) % count;
+                }
+                else
+                {
+                    nextIndex = baseIndex % count;
+                }
+
+                SetCurrentPlayer(_players[nextIndex]);
             }
         }
+
+        _lastSpectatedIndex = _players.IndexOf(_currentPlayer);
         SwitchSpectateMode();
     }
 
-    private void ClearAndAddPlayers()
+    /// <summary>
+    /// Clears and recalculates all alive players for free cam tracking (human and AI)
+    /// </summary>
+    private void RecalculatePlayerList()
     {
         _players.Clear();
-        foreach (var listPlayer in _playersTracker.Values)
+
+        var listTransform = _freecamUI.ListOfPlayers.transform;
+        for (var i = 0; i < listTransform.childCount; i++)
         {
-            _players.Add(listPlayer.Player);
+            var listPlayer = listTransform.GetChild(i)
+                .GetComponent<ListPlayer>();
+            if (listPlayer != null && listPlayer.Player != null
+                && listPlayer.Player.HealthController != null && listPlayer.Player.HealthController.IsAlive)
+            {
+                _players.Add(listPlayer.Player);
+            }
         }
     }
 
@@ -373,7 +361,7 @@ public partial class FreeCamera : MonoBehaviour
 
         if (Input.GetKeyDown(_detachKey))
         {
-            ClearAndAddPlayers();
+            RecalculatePlayerList();
 
             if (_isFollowing && FikaPlugin.Instance.Settings.AllowSpectateFreeCam)
             {
