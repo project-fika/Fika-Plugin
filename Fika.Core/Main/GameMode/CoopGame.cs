@@ -693,8 +693,8 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
     /// <returns></returns>
     public void Extract(FikaPlayer player, ExfiltrationPoint exfiltrationPoint, TransitPoint transitPoint = null)
     {
-        MainPlayerExtracted?.Invoke(player);
         GameController.Extract(player, exfiltrationPoint, transitPoint);
+        MainPlayerExtracted?.Invoke(player);
     }
 
     /// <summary>
