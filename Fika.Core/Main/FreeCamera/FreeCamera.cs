@@ -8,6 +8,7 @@ using EFT.Communications;
 using EFT.UI;
 using Fika.Core.Bundles;
 using Fika.Core.Main.Components;
+using Fika.Core.Main.GameMode;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 
@@ -128,6 +129,14 @@ public partial class FreeCamera : MonoBehaviour
         ForceAddPlayers();
     }
 
+    /// <summary>
+    /// Forces a recalculation on extract
+    /// </summary>
+    public void RecalculateOnExtract()
+    {
+        ForceAddPlayers();
+    }
+
     private void ForceAddPlayers()
     {
         foreach (var player in _coopHandler.Players.Values)
@@ -156,12 +165,14 @@ public partial class FreeCamera : MonoBehaviour
         }
 
         _currentPlayer = player;
+        _lastSpectatedIndex = _players.IndexOf(_currentPlayer);
+
         if (_currentPlayer != null && _playersTracker.TryGetValue(_currentPlayer.NetId, out listPlayer))
         {
             listPlayer.ToggleBackground(true);
         }
 #if DEBUG
-        FikaGlobals.LogInfo($"Freecam: Setting player to {_currentPlayer}");
+        FikaGlobals.LogInfo($"Freecam: Setting player to {_currentPlayer.Profile.GetCorrectedNickname()}");
 #endif
     }
 
@@ -278,6 +289,17 @@ public partial class FreeCamera : MonoBehaviour
                 _players.Add(listPlayer.Player);
             }
         }
+    }
+
+    /// <summary>
+    /// Clears and recalculates all alive players for free cam tracking (human and AI) and returns a list
+    /// </summary>
+    /// <returns>A list of all valid players</returns>
+    /// <remarks>Non-alloc</remarks>
+    public List<FikaPlayer> RecalculateAndGetPlayers()
+    {
+        RecalculatePlayerList();
+        return _players;
     }
 
     protected void Update()

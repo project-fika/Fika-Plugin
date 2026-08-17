@@ -40,7 +40,7 @@ public partial class FreeCamera
         }
 
 #if DEBUG
-        FikaGlobals.LogWarning($"ListPlayer for {player.Profile.GetCorrectedNickname()} already existed");
+        FikaGlobals.LogWarning($"ListPlayer for {player.Profile.GetCorrectedNickname()} already exists");
 #endif
     }
 
