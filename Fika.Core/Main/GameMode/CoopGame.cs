@@ -1,30 +1,30 @@
-﻿using Audio.RadioSystem;
-using Dissonance.Integrations.MirrorIgnorance;
-using Diz.Jobs;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Audio.RadioSystem;
 using BepInEx.Logging;
 using Comfort.Common;
 using CommonAssets.Scripts.Game;
+using Dissonance.Integrations.MirrorIgnorance;
 using Dissonance.Networking.Client;
+using Diz.Jobs;
 using EFT;
+using EFT.Airdrop;
 using EFT.AssetsManager;
 using EFT.Bots;
 using EFT.CameraControl;
-using EFT.EnvironmentEffect;
-using EFT.Interactive;
-using EFT.InventoryLogic;
-using EFT.UI;
-using EFT.UI.Screens;
-using EFT.Airdrop;
 using EFT.Communications;
+using EFT.EnvironmentEffect;
 using EFT.Game.Spawning;
 using EFT.HealthSystem;
 using EFT.InputSystem;
+using EFT.Interactive;
+using EFT.InventoryLogic;
+using EFT.UI;
 using EFT.UI.Insurance;
+using EFT.UI.Screens;
 using EFT.Utilities;
 using EFT.Weather;
 using Fika.Core.Main.ClientClasses;
@@ -52,6 +52,12 @@ namespace Fika.Core.Main.GameMode;
 /// </summary>
 public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, IClientHearingTable
 {
+    /// <summary>
+    /// Invoked when the main player extracts
+    /// </summary>
+    /// <remarks>Does not run on headless clients as there is no player</remarks>
+    public static Action<FikaPlayer> MainPlayerExtracted { get; set; }
+
     public BaseGameController GameController { get; set; }
     public ExitStatus ExitStatus { get; set; } = ExitStatus.Survived;
     public string ExitLocation { get; set; }
@@ -687,6 +693,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
     /// <returns></returns>
     public void Extract(FikaPlayer player, ExfiltrationPoint exfiltrationPoint, TransitPoint transitPoint = null)
     {
+        MainPlayerExtracted?.Invoke(player);
         GameController.Extract(player, exfiltrationPoint, transitPoint);
     }
 
