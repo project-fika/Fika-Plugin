@@ -43,9 +43,9 @@ namespace Fika.Core;
 [BepInDependency("com.SPT.singleplayer", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after spt-singleplayer, that way we can disable its patches
 [BepInDependency("com.SPT.core", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after spt-core, that way we can disable its patches
 [BepInDependency("com.SPT.debugging", BepInDependency.DependencyFlags.HardDependency)] // This is used so that we guarantee to load after spt-debugging, that way we can disable its patches
-public class FikaPlugin : BaseUnityPlugin
+public sealed class FikaPlugin : BaseUnityPlugin
 {
-    public const string FikaVersion = "2.4.1";
+    public const string FikaVersion = "2.4.2";
     public const string FikaNATPunchMasterServer = "natpunch.project-fika.com";
     public const ushort FikaNATPunchMasterPort = 6790;
 
@@ -114,7 +114,7 @@ public class FikaPlugin : BaseUnityPlugin
     public int NatPunchServerNatIntroduceAmount;
     #endregion
 
-    protected void Awake()
+    private void Awake()
     {
         Instance = this;
         _patchManager = new(this, true);
@@ -154,7 +154,7 @@ public class FikaPlugin : BaseUnityPlugin
     /// <summary>
     /// Run these at start to hopefully ensure that all mods are loaded
     /// </summary>
-    protected void Start()
+    private void Start()
     {
         _ = Task.Run(RunChecks);
         _ = Task.Run(GetTarkovApp);

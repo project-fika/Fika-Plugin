@@ -1,12 +1,13 @@
-﻿using EFT.Settings;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Comfort.Common;
 using EFT;
 using EFT.CameraControl;
+using EFT.Settings;
 using EFT.UI;
 using Fika.Core.Main.Components;
+using Fika.Core.Main.GameMode;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.UI;
@@ -133,6 +134,58 @@ public class FreeCameraController : MonoBehaviour
         {
             _coopHandler = cHandler;
         }
+
+        CoopGame.MainPlayerExtracted += MainPlayerExtracted;
+    }
+
+    private void MainPlayerExtracted(FikaPlayer player)
+    {
+        if (_extracted)
+        {
+            return;
+        }
+
+#if DEBUG
+        FikaGlobals.LogInfo("Freecam: player has extracted");
+#endif
+        var fikaGame = _coopHandler.LocalGameInstance;
+        if (fikaGame.ExtractedPlayers.Contains(Player.NetId))
+        {
+            Player.ActiveHealthController.DiedEvent -= MainPlayer_DiedEvent;
+            _extracted = true;
+            _freeCamScript.Extracted = true;
+            ShowExtractMessage();
+        }
+
+        if (!_freeCamScript.IsActive)
+        {
+            _freeCamScript.RecalculateOnExtract();
+            ToggleUI();
+            if (FikaPlugin.Instance.Settings.AllowSpectateFreeCam || _isSpectator)
+            {
+                _freeCamScript.transform.position = _lastKnownPosition;
+                ToggleCamera();
+            }
+            else
+            {
+                ToggleSpectateCamera();
+            }
+        }
+
+        if (!_effectsCleared)
+        {
+            if (Player != null)
+            {
+                Player.Muffled = false;
+                Player.HeavyBreath = false;
+            }
+
+            if (CameraManager.Exist)
+            {
+                ClearEffects();
+            }
+            _effectsCleared = true;
+        }
     }
 
     private void MainPlayer_DiedEvent(EDamageType obj)
@@ -201,46 +254,7 @@ public class FreeCameraController : MonoBehaviour
 
         if (quitState == CoopHandler.EQuitState.Extracted && !_extracted)
         {
-#if DEBUG
-            FikaGlobals.LogInfo("Freecam: player has extracted");
-#endif
-            var fikaGame = _coopHandler.LocalGameInstance;
-            if (fikaGame.ExtractedPlayers.Contains(Player.NetId))
-            {
-                Player.ActiveHealthController.DiedEvent -= MainPlayer_DiedEvent;
-                _extracted = true;
-                _freeCamScript.Extracted = true;
-                ShowExtractMessage();
-            }
 
-            if (!_freeCamScript.IsActive)
-            {
-                ToggleUI();
-                if (FikaPlugin.Instance.Settings.AllowSpectateFreeCam || _isSpectator)
-                {
-                    _freeCamScript.transform.position = _lastKnownPosition;
-                    ToggleCamera();
-                }
-                else
-                {
-                    ToggleSpectateCamera();
-                }
-            }
-
-            if (!_effectsCleared)
-            {
-                if (Player != null)
-                {
-                    Player.Muffled = false;
-                    Player.HeavyBreath = false;
-                }
-
-                if (CameraManager.Exist)
-                {
-                    ClearEffects();
-                }
-                _effectsCleared = true;
-            }
         }
     }
 
@@ -408,44 +422,34 @@ public class FreeCameraController : MonoBehaviour
 
         if (!_freeCamScript.IsActive)
         {
-            if (CoopHandler.TryGetCoopHandler(out var coopHandler))
+            var aliveTargets = _freeCamScript.RecalculateAndGetPlayers();
+
+            if (aliveTargets.Count == 0)
             {
-                List<FikaPlayer> alivePlayers = [];
-
-                var humanPlayers = coopHandler.HumanPlayers;
-                for (var i = 0; i < humanPlayers.Count; i++)
-                {
-                    var player = humanPlayers[i];
-                    if (!player.IsYourPlayer && player.HealthController.IsAlive)
-                    {
-                        alivePlayers.Add(player);
-                    }
-                }
-                if (alivePlayers.Count == 0)
-                {
-                    // No alive players to attach to at this time, so let's fallback to freecam on last known position
-                    _freeCamScript.transform.position = _lastKnownPosition;
-                    ToggleCamera();
-                    return;
-                }
-                var fikaPlayer = alivePlayers[0];
-                _freeCamScript.SetCurrentPlayer(fikaPlayer);
 #if DEBUG
-                FikaGlobals.LogInfo("FreecamController: Spectating new player: " + fikaPlayer.Profile.Info.MainProfileNickname);
+                FikaGlobals.LogInfo("FreecamController: No players found");
 #endif
-
-                Player.PointOfView = EPointOfView.ThirdPerson;
-                if (Player.PlayerBody != null)
-                {
-                    Player.PlayerBody.PointOfView.Value = EPointOfView.FreeCamera;
-                    Player.GetComponent<PlayerCameraController>().UpdatePointOfView();
-                }
-                _gamePlayerOwner.enabled = false;
-                _freeCamScript.SetActive(true, _extracted);
-
-                _freeCamScript.Attach3rdPerson();
+                _freeCamScript.transform.position = _lastKnownPosition;
+                ToggleCamera();
                 return;
             }
+
+            var fikaPlayer = aliveTargets[0];
+            _freeCamScript.SetCurrentPlayer(fikaPlayer);
+#if DEBUG
+            FikaGlobals.LogInfo("FreecamController: Spectating new target: " + fikaPlayer.Profile.Info.MainProfileNickname);
+#endif
+
+            Player.PointOfView = EPointOfView.ThirdPerson;
+            if (Player.PlayerBody != null)
+            {
+                Player.PlayerBody.PointOfView.Value = EPointOfView.FreeCamera;
+                Player.GetComponent<PlayerCameraController>().UpdatePointOfView();
+            }
+            _gamePlayerOwner.enabled = false;
+            _freeCamScript.SetActive(true, _extracted);
+
+            _freeCamScript.Attach3rdPerson();
         }
     }
 
@@ -613,6 +617,7 @@ public class FreeCameraController : MonoBehaviour
 
     public void OnDestroy()
     {
+        CoopGame.MainPlayerExtracted -= MainPlayerExtracted;
         if (!Singleton<FreeCameraController>.TryRelease(this))
         {
             FikaGlobals.LogWarning("Unable to release FreeCameraController singleton");

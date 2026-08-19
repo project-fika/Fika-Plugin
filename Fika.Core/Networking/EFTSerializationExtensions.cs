@@ -1,14 +1,14 @@
-﻿using EFT.BinarySerialization;
+﻿using System;
+using System.Collections.Generic;
+using EFT;
+using EFT.BinarySerialization;
+using EFT.InventoryLogic;
 using EFT.InventoryLogic.Operations;
 using EFT.Notes;
 using EFT.Prestige;
-using JsonType;
-using System;
-using System.Collections.Generic;
-using EFT;
-using EFT.InventoryLogic;
 using EFT.Quests;
 using Fika.Core.Main.Utils;
+using JsonType;
 
 namespace Fika.Core.Networking;
 
@@ -289,6 +289,43 @@ public static class EFTSerializationExtensions
         RegisterDeserializer<InsuredProfileItems>(r => r.GetJsonTypeInsuredProfileItems());
         RegisterDeserializer<PlayerInfo>(r => r.GetJsonTypePlayerInfo());
         RegisterDeserializer<WeightedLootPointSpawnPosition>(r => r.GetWeightedLootPointSpawnPosition());
+    }
+
+    /// <summary>
+    /// Used to register new polymorphic types without reflection. <br/>
+    /// Handles existing types bound in <see cref="_indexToType"/> or appends dynamically assigned IDs for custom types.
+    /// </summary>
+    /// <remarks>
+    /// See <see href="https://github.com/Lacyway/MergeConsumables/blob/master/fika/MergeConsumablesSerialization.cs">MergeConsumables reference implementation</see> for an example.
+    /// </remarks>
+    public static void RegisterPolymorphicType<T>(
+        Action<NetDataWriter, T> serializer,
+        Func<NetDataReader, T> deserializer) where T : class
+    {
+        var type = typeof(T);
+
+        // Check if type already exists in base list
+        var index = _indexToType.IndexOf(type);
+        byte id;
+
+        if (index != -1)
+        {
+            id = (byte)index;
+        }
+        else
+        {
+            _indexToType.Add(type);
+            id = (byte)(_indexToType.Count - 1);
+
+            if (_indexToType.Count > 256)
+            {
+                throw new OverflowException($"Polymorphic type limit exceeded (256 maximum). Cannot register {type.FullName}.");
+            }
+        }
+
+        _typeToByte[type] = id;
+        _serializers[type] = (writer, target) => serializer(writer, (T)target);
+        _deserializers[id] = deserializer;
     }
 
     private static void RegisterSerializer<T>(Action<NetDataWriter, T> exactSerializer) where T : class

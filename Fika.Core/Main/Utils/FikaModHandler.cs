@@ -161,7 +161,7 @@ public class FikaModHandler
                     SAINLoaded = true;
                     break;
                 }
-            case "Tyfon.UIFixes":
+            case "com.tyfon.uifixes":
                 {
                     UIFixesLoaded = true;
                     break;

@@ -35,11 +35,12 @@ public partial class FreeCamera
             var listPlayer = newObj.GetComponent<ListPlayer>();
             _playersTracker.Add(player.NetId, listPlayer);
             listPlayer.Init(player);
+            RecalculatePlayerList();
             return;
         }
 
 #if DEBUG
-        FikaGlobals.LogWarning($"ListPlayer for {player.Profile.GetCorrectedNickname()} already existed");
+        FikaGlobals.LogWarning($"ListPlayer for {player.Profile.GetCorrectedNickname()} already exists");
 #endif
     }
 
@@ -54,6 +55,8 @@ public partial class FreeCamera
         {
             Destroy(listPlayer.gameObject);
         }
+
+        RecalculatePlayerList();
 
         if (!_allowSpectateBots && IsPlayerHuman(player))
         {
@@ -74,6 +77,8 @@ public partial class FreeCamera
         {
             Destroy(listPlayer.gameObject);
         }
+
+        RecalculatePlayerList();
 
         if (!_allowSpectateBots && IsPlayerHuman(player))
         {

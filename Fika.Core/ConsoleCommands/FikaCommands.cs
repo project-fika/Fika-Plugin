@@ -1,8 +1,9 @@
-﻿using EFT.HealthSystem;
-using System;
+﻿using System;
+using System.Linq;
 using Comfort.Common;
 using EFT;
 using EFT.Console.Core;
+using EFT.HealthSystem;
 using EFT.UI;
 using Fika.Core.Main.Components;
 using Fika.Core.Main.GameMode;
@@ -257,9 +258,9 @@ public class FikaCommands
 
             if (CoopHandler.TryGetCoopHandler(out var coopHandler))
             {
-                foreach (var bot in fikaGame.GameController.Bots.Values)
+                foreach (var bot in fikaGame.GameController.Bots.Values.ToArray())
                 {
-                    if (bot.AIData.BotOwner == null)
+                    if (bot == null || bot.AIData.BotOwner == null)
                     {
                         continue;
                     }
