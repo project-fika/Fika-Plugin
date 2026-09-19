@@ -677,7 +677,7 @@ public class FikaCommands
     private static void LogWarning(string message)
     {
         ConsoleScreen.LogWarning(message);
-        FikaGlobals.LogInfo(message);
+        FikaGlobals.LogWarning(message);
     }
 
     private static void LogError(string message)
