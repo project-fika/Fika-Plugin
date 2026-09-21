@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Reflection;
 using System.Runtime.Serialization;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Fika.Core.Networking.LiteNetLib.Utils;
 

@@ -2,6 +2,7 @@
 using System.Net;
 using System.Net.Sockets;
 using LiteNetLib;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Fika.Core.Networking.LiteNetLib;
 
