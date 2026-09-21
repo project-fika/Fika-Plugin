@@ -5,6 +5,7 @@ using System.Runtime.Intrinsics.X86;
 #endif
 #if NET5_0_OR_GREATER || NET5_0
 using System.Runtime.Intrinsics.Arm;
+using ArmCrc32 = System.Runtime.Intrinsics.Arm.Crc32;
 #endif
 
 namespace Fika.Core.Networking.LiteNetLib.Utils;
@@ -23,7 +24,7 @@ public static class CRC32C
             return;
 #endif
 #if NET5_0_OR_GREATER || NET5_0
-        if (Crc32.IsSupported)
+        if (ArmCrc32.IsSupported)
             return;
 #endif
         Table = NetUtils.AllocatePinnedUninitializedArray<uint>(16 * 256);
@@ -88,17 +89,17 @@ public static class CRC32C
         }
 #endif
 #if NET5_0_OR_GREATER || NET5_0
-        if (Crc32.IsSupported)
+        if (ArmCrc32.IsSupported)
         {
             var data = new ReadOnlySpan<byte>(input, offset, length);
             int processed = 0;
-            if (Crc32.Arm64.IsSupported && data.Length > sizeof(ulong))
+            if (ArmCrc32.Arm64.IsSupported && data.Length > sizeof(ulong))
             {
                 processed = data.Length / sizeof(ulong) * sizeof(ulong);
                 var ulongs = MemoryMarshal.Cast<byte, ulong>(data.Slice(0, processed));
                 for (int i = 0; i < ulongs.Length; i++)
                 {
-                    crcLocal = Crc32.Arm64.ComputeCrc32C(crcLocal, ulongs[i]);
+                    crcLocal = ArmCrc32.Arm64.ComputeCrc32C(crcLocal, ulongs[i]);
                 }
             }
             else if (data.Length > sizeof(uint))
@@ -107,13 +108,13 @@ public static class CRC32C
                 var uints = MemoryMarshal.Cast<byte, uint>(data.Slice(0, processed));
                 for (int i = 0; i < uints.Length; i++)
                 {
-                    crcLocal = Crc32.ComputeCrc32C(crcLocal, uints[i]);
+                    crcLocal = ArmCrc32.ComputeCrc32C(crcLocal, uints[i]);
                 }
             }
 
             for (int i = processed; i < data.Length; i++)
             {
-                crcLocal = Crc32.ComputeCrc32C(crcLocal, data[i]);
+                crcLocal = ArmCrc32.ComputeCrc32C(crcLocal, data[i]);
             }
 
             return crcLocal ^ uint.MaxValue;
