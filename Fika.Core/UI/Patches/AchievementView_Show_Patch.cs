@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 using EFT.Achievements;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 using TMPro;
 
 namespace Fika.Core.UI.Patches;
@@ -16,8 +16,8 @@ public class AchievementView_Show_Patch : ModulePatch
     }
 
     [PatchPostfix]
-    public static void Postfix(TMP_Text ____globalProgressText)
+    public static void Postfix(EFT.Achievements.AchievementView __instance)
     {
-        ____globalProgressText.alpha = 1f;
+        __instance._globalProgressText.alpha = 1f;
     }
 }

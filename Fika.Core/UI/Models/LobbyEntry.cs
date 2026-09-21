@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using EFT;
 using JsonType;
+using System.Text.Json.Serialization;
 
 namespace Fika.Core.UI.Models;
 
@@ -10,34 +11,34 @@ public struct LobbyEntry(string serverId, string hostUsername, int playerCount,
     LobbyEntry.ELobbyStatus status, string location, ESideType side, EDateTime time,
     Dictionary<string, bool> players, bool isHeadless, string headlessRequesterNickname)
 {
-    [DataMember]
+    [JsonInclude]
     public string ServerId = serverId;
 
-    [DataMember]
+    [JsonInclude]
     public string HostUsername = hostUsername;
 
-    [DataMember]
+    [JsonInclude]
     public int PlayerCount = playerCount;
 
-    [DataMember]
+    [JsonInclude]
     public ELobbyStatus Status = status;
 
-    [DataMember]
+    [JsonInclude]
     public string Location = location;
 
-    [DataMember]
+    [JsonInclude]
     public ESideType Side = side;
 
-    [DataMember]
+    [JsonInclude]
     public EDateTime Time = time;
 
-    [DataMember]
+    [JsonInclude]
     public Dictionary<string, bool> Players = players;
 
-    [DataMember]
+    [JsonInclude]
     public bool IsHeadless = isHeadless;
 
-    [DataMember]
+    [JsonInclude]
     public string HeadlessRequesterNickname = headlessRequesterNickname;
 
     public enum ELobbyStatus

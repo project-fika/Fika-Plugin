@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using EFT;
 using Fika.Core.Main.Utils;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.DebugPatches;
 
@@ -15,7 +15,7 @@ public class TestHalloweenPatch : ModulePatch
     }
 
     [PatchPrefix]
-    public static void Prefix(HalloweenEventVisual __instance, bool ____isInitialized, HalloweenVisualContainer ____container, Vector3[] positions)
+    public static void Prefix(HalloweenEventVisual __instance, Il2CppInterop.Runtime.InteropTypes.Arrays.Il2CppStructArray<Vector3> positions)
     {
         if (__instance == null)
         {
@@ -23,7 +23,7 @@ public class TestHalloweenPatch : ModulePatch
             return;
         }
 
-        if (____container == null)
+        if (__instance._container == null)
         {
             FikaGlobals.LogError("CONTAINER WAS NULL");
             return;
@@ -35,6 +35,6 @@ public class TestHalloweenPatch : ModulePatch
             return;
         }
 
-        FikaGlobals.LogWarning($"Halloween Test Patch: transform: {__instance.transform + " " + __instance.transform.name}, bool: {____isInitialized}, container: {____container}, positions: {positions}; {positions.Length}; {positions[0].ToStringHighResolution()}");
+        FikaGlobals.LogWarning($"Halloween Test Patch: transform: {__instance.transform + " " + __instance.transform.name}, bool: {__instance._isInitialized}, container: {__instance._container}, positions: {positions}; {positions.Length}; {positions[0].ToStringHighResolution()}");
     }
 }

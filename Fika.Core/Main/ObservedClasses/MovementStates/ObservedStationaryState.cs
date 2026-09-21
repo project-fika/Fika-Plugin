@@ -1,10 +1,22 @@
 ﻿using System;
 using EFT;
+using Il2CppInterop.Runtime.Injection;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.ObservedClasses.MovementStates;
 
-public class ObservedStationaryState(MovementContext movementContext) : StationaryPlayerState(movementContext)
+public class ObservedStationaryState : StationaryPlayerState
 {
+    public ObservedStationaryState(IntPtr pointer) : base(pointer)
+    {
+    }
+
+    public ObservedStationaryState(MovementContext movementContext) : base(Il2CppInjection.Allocate<ObservedStationaryState>())
+    {
+        ClassInjector.DerivedConstructorBody(this);
+        ClassInjector.InvokeBaseConstructor<StationaryPlayerState>(this, movementContext);
+    }
+
     public override bool OutOfOperationRange
     {
         get
@@ -39,21 +51,30 @@ public class ObservedStationaryState(MovementContext movementContext) : Stationa
 
     public void SetStationaryCallback(Player.AbstractHandsController arg1, Player.AbstractHandsController newContoller)
     {
-        CG_Spawned @class = new()
-        {
-            StationaryPlayerState = this
-        };
         MovementContext.SetStationaryStrategy();
         MovementContext.StateLocksInventory = false;
         _weaponTransform = newContoller.HandsHierarchy.GetTransform(ECharacterWeaponBones.weapon);
         StationaryWeapon.SetPivots(newContoller.HandsHierarchy);
-        @class.firearm = newContoller as Player.FirearmController;
         StationaryWeapon.Hide(MovementContext.IsAI);
         MovementContext.RotationAction = StationaryWeapon.Animation == EFT.Interactive.StationaryWeapon.EStationaryAnimationType.AGS_17
             ? MovementContext.AGSRotationFunction : MovementContext.UtesRotationFunction;
         Stage = EStationaryStage.Main;
-        MovementContext.OnHandsControllerChanged += OnHandsControllerChanged;
+        MovementContext.OnHandsControllerChanged += HandleHandsControllerChanged;
         MovementContext.HandsChangingEvent += MovementContextOnHandsChangedEvent;
-        _handsChangingEventUnsubscribe = new Action(@class.method_1);
+        _handsChangingEventUnsubscribe = new Action(() =>
+        {
+            MovementContext.HandsChangingEvent -= MovementContextOnHandsChangedEvent;
+            _handsChangingEventUnsubscribe = null;
+        });
+    }
+
+    private void HandleHandsControllerChanged(Player.AbstractHandsController oldController, Player.AbstractHandsController newController)
+    {
+        if (newController == null || newController.Item != StationaryWeapon.Item)
+        {
+            MovementContext.OnHandsControllerChanged -= HandleHandsControllerChanged;
+        }
+        
+        OnHandsControllerChanged(oldController, newController);
     }
 }

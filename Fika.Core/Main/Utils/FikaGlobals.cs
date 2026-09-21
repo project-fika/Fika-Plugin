@@ -22,6 +22,11 @@ using Fika.Core.Main.Players;
 using HarmonyLib;
 using static Fika.Core.FikaPlugin;
 using static Fika.Core.Networking.IFikaNetworkManager;
+using EFT.Communications;
+using UnityEngine;
+using Il2CppInterop.Runtime;
+using Fika.Core.Networking;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.Utils;
 
@@ -58,11 +63,28 @@ public static class FikaGlobals
     /// <summary>
     /// Use when no callback is needed to reduce allocations
     /// </summary>
-    public static Callback EmptyCallbackDelegate => EmptyCallback;
+    public static Callback EmptyCallbackDelegate
+    {
+        get
+        {
+            return _emptyCallback ??= new Action<IResult>(EmptyCallback);
+        }
+    }
+    private static Callback _emptyCallback;
     /// <summary>
     /// Use when no callback is needed to reduce allocations
     /// </summary>
     public static Action EmptyActionDelegate => EmptyAction;
+
+    /// <summary>
+    /// Set once Unity starts shutting down, when objects are destroyed in no particular order
+    /// </summary>
+    public static bool IsQuitting { get; private set; }
+
+    internal static void OnApplicationQuitting()
+    {
+        IsQuitting = true;
+    }
 
     /// <summary>
     /// The maximum raycast distance in meters for placing pings.
@@ -151,7 +173,7 @@ public static class FikaGlobals
     {
         get
         {
-            return Singleton<IFikaGame>.Instantiated;
+            return FikaGlobals.FikaGame != null;
         }
     }
 
@@ -264,7 +286,7 @@ public static class FikaGlobals
     /// <param name="player">The player in front of whom the item will be spawned.</param>
     internal static void SpawnItemInWorld(Item item, FikaPlayer player)
     {
-        StaticManager.BeginCoroutine(SpawnItemRoutine(item, player));
+        StaticManager.BeginCoroutine(SpawnItemRoutine(item, player).ToIl2Cpp());
     }
 
     /// <summary>
@@ -281,7 +303,7 @@ public static class FikaGlobals
             collection.AddRange(subItem.Template.AllResources);
         }
         var loadTask = Singleton<ObjectsFactory>.Instance.LoadBundlesAndCreatePools(ObjectsFactory.PoolsCategory.Raid, ObjectsFactory.AssemblyType.Online,
-            [.. collection], JobYieldPriority.Immediate, null, default);
+            collection.ToIl2CppList(), JobYieldPriority.Immediate, null, new Il2CppSystem.Threading.CancellationToken());
 
         WaitForEndOfFrame waitForEndOfFrame = new();
         while (!loadTask.IsCompleted)
@@ -317,7 +339,7 @@ public static class FikaGlobals
     /// <returns><see langword="true"/> if the profile belongs to a player; otherwise, <see langword="false"/> if it belongs to an AI.</returns>
     public static bool IsPlayerProfile(this Profile profile)
     {
-        return !string.IsNullOrEmpty(profile.PetId) || profile.Info.RegistrationDate > 0 || !string.IsNullOrEmpty(profile.Info.MainProfileNickname);
+        return profile.PetId.HasValue || profile.Info.RegistrationDate > 0 || !string.IsNullOrEmpty(profile.Info.MainProfileNickname);
     }
 
     /// <summary>
@@ -367,9 +389,9 @@ public static class FikaGlobals
         var profile = GetProfile(scav);
         ProfileDescriptor liteDescriptor = new(profile, SearchControllerSerializer)
         {
-            Encyclopedia = [],
-            InsuredItems = [],
-            TaskConditionCounters = []
+            Encyclopedia = new(),
+            InsuredItems = new Il2CppInterop.Runtime.InteropTypes.Arrays.Il2CppReferenceArray<InsuredProfileItems>(0),
+            TaskConditionCounters = new()
         };
         return new(liteDescriptor);
     }
@@ -694,6 +716,38 @@ public static class FikaGlobals
         {
             throw new NullReferenceException($"Failed to find private field [{fieldName}] in {typeof(T).Name}.");
         }
+    }
+
+    /// <summary>
+    /// The active network manager, server or client
+    /// </summary>
+    public static IFikaNetworkManager NetworkManager { get; set; }
+
+    /// <summary>
+    /// The active coop game
+    /// </summary>
+    public static IFikaGame FikaGame { get; set; }
+
+    /// <summary>
+    /// Builds an il2cpp delegate over a game method, which a managed wrapper cannot do
+    /// </summary>
+    /// <param name="target">The object declaring the method</param>
+    /// <param name="methodName">The name of the method</param>
+    public static Il2CppSystem.Action Il2CppActionFor(Il2CppSystem.Object target, string methodName)
+    {
+        return Il2CppSystem.Delegate.CreateDelegate(Il2CppType.Of<Il2CppSystem.Action>(), target, methodName).Cast<Il2CppSystem.Action>();
+    }
+
+    /// <summary>
+    /// Displays a message notification
+    /// </summary>
+    /// <param name="message">The message to display</param>
+    /// <param name="durationType">How long the notification stays</param>
+    /// <param name="iconType">The icon to display</param>
+    public static void DisplayMessage(string message, ENotificationDurationType durationType = ENotificationDurationType.Default,
+        ENotificationIconType iconType = ENotificationIconType.Default, Il2CppSystem.Nullable<Color> textColor = null)
+    {
+        NotificationManager.DisplayMessageNotification(message, durationType, iconType, textColor ?? new Il2CppSystem.Nullable<Color>(), false);
     }
 
     /// <summary>

@@ -48,14 +48,14 @@ public static class NetManagerUtils
             var server = FikaGameObject.AddComponent<FikaServer>();
             Singleton<FikaServer>.Create(server);
             _logger.LogInfo("FikaServer has created!");
-            Singleton<IFikaNetworkManager>.Create(server);
+            FikaGlobals.NetworkManager = server;
             return;
         }
 
         var client = FikaGameObject.AddComponent<FikaClient>();
         Singleton<FikaClient>.Create(client);
         _logger.LogInfo("FikaClient has created!");
-        Singleton<IFikaNetworkManager>.Create(client);
+        FikaGlobals.NetworkManager = client;
     }
 
     public static void CreateLoadingScreenUI()
@@ -68,7 +68,7 @@ public static class NetManagerUtils
 
         var loadingPrefab = InternalBundleLoader.Instance.GetFikaAsset(InternalBundleLoader.EFikaAsset.LoadingScreenUI);
         var loadingUi = GameObject.Instantiate(loadingPrefab, FikaGameObject.transform);
-        LoadingScreenUI.Instance = loadingUi.GetComponent<LoadingScreenUI>();
+        LoadingScreenUI.Instance = LoadingScreenUI.Create(loadingUi);
     }
 
     /// <summary>
@@ -103,7 +103,6 @@ public static class NetManagerUtils
         }
 
         var pingingClient = new FikaPingingClient();
-        Singleton<FikaPingingClient>.Create(pingingClient);
         _logger.LogInfo("FikaPingingClient has started!");
         return Task.FromResult(pingingClient);
     }
@@ -117,7 +116,7 @@ public static class NetManagerUtils
             CreateLoadingScreenUI();
             LoadingScreenUI.Instance.ReInitAfterTransit();
 
-            Singleton<IFikaNetworkManager>.Instance.CoopHandler.CleanUpForTransit();
+            FikaGlobals.NetworkManager.CoopHandler.CleanUpForTransit();
             if (isServer)
             {
                 var server = Singleton<FikaServer>.Instance;
@@ -145,10 +144,7 @@ public static class NetManagerUtils
             if (isServer)
             {
                 var server = Singleton<FikaServer>.Instance;
-                if (!Singleton<IFikaNetworkManager>.TryRelease(server))
-                {
-                    _logger.LogError("Unable to release Server from Singleton!");
-                }
+                FikaGlobals.NetworkManager = null;
                 try
                 {
                     server.PrintStatistics();
@@ -165,10 +161,7 @@ public static class NetManagerUtils
             }
 
             var client = Singleton<FikaClient>.Instance;
-            if (!Singleton<IFikaNetworkManager>.TryRelease(client))
-            {
-                _logger.LogError("Unable to release Client from Singleton!");
-            }
+            FikaGlobals.NetworkManager = null;
             try
             {
                 client.PrintStatistics();
@@ -215,7 +208,7 @@ public static class NetManagerUtils
     public static Task SetupGameVariables(FikaPlayer fikaPlayer)
     {
         _logger.LogInfo("Setting up game variables...");
-        Singleton<IFikaNetworkManager>.Instance.SetupGameVariables(fikaPlayer);
+        FikaGlobals.NetworkManager.SetupGameVariables(fikaPlayer);
         return Task.CompletedTask;
     }
 
@@ -262,7 +255,7 @@ public static class NetManagerUtils
         }
 
         _logger.LogInfo("Creating CoopHandler...");
-        var networkManager = Singleton<IFikaNetworkManager>.Instance;
+        var networkManager = FikaGlobals.NetworkManager;
         if (networkManager != null)
         {
             if (FikaGameObject != null)
@@ -278,7 +271,7 @@ public static class NetManagerUtils
 
                 UnityEngine.Object.Destroy(coopHandler);
                 _logger.LogError("No ServerId found, deleting CoopHandler!");
-                throw new MissingReferenceException("No Server Id found");
+                throw new InvalidOperationException("No Server Id found");
             }
         }
 

@@ -4,12 +4,17 @@ using Comfort.Common;
 using EFT;
 using EFT.GameTriggers;
 using Fika.Core.Main.Utils;
+using Il2CppInterop.Runtime.Injection;
 
 namespace Fika.Core.Main.Components;
 
 internal class LocalFikaTriggersModule : LocalClientTriggersModule
 {
-    public override bool ApplyDamage(string profileId, DamageData[] damageData)
+    public LocalFikaTriggersModule(IntPtr pointer) : base(pointer)
+    {
+    }
+
+    public override bool ApplyDamage(int playerRaidId, Il2CppInterop.Runtime.InteropTypes.Arrays.Il2CppStructArray<DamageData> damageData)
     {
         var clientLocalGameWorld = Singleton<GameWorld>.Instance as ClientLocalGameWorld;
         if (clientLocalGameWorld == null)
@@ -21,7 +26,7 @@ internal class LocalFikaTriggersModule : LocalClientTriggersModule
         for (var i = 0; i < clientLocalGameWorld.AllAlivePlayersList.Count; i++)
         {
             var player = clientLocalGameWorld.AllAlivePlayersList[i];
-            if (string.Equals(player.ProfileId, profileId, StringComparison.OrdinalIgnoreCase))
+            if (player.RaidId == playerRaidId)
             {
                 if (player.IsYourPlayer || player.IsAI)
                 {

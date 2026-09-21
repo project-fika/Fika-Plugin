@@ -3,7 +3,7 @@ using Comfort.Common;
 using EFT;
 using EFT.RocketLauncher;
 using Fika.Core.Main.Utils;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.Rockets;
 
@@ -19,15 +19,20 @@ public class RocketProjectile_Launch_Patch : ModulePatch
     }
 
     [PatchPrefix]
-    public static bool Prefix(RocketProjectile __instance, ref bool ____isLaunched, ref Coroutine ____coneBlastCoroutine, BackblastModel ____backBlastModel)
+    public static bool Prefix(RocketProjectile __instance)
     {
+        if (FikaBackendUtils.IsTutorial)
+        {
+            return true;
+        }
+
         if (Singleton<GameWorld>.Instance is ClientLocalGameWorld && FikaBackendUtils.IsServer)
         {
-            ____coneBlastCoroutine = __instance.StartCoroutine(____backBlastModel.ConeBlast(____coneBlastCoroutine));
+            __instance._coneBlastCoroutine = __instance.StartCoroutine(__instance._backBlastModel.ConeBlast(__instance._coneBlastCoroutine));
         }
         __instance.CreateShot();
         __instance.SetVisibleModel(true);
-        ____isLaunched = true;
+        __instance._isLaunched = true;
 
         return false;
     }

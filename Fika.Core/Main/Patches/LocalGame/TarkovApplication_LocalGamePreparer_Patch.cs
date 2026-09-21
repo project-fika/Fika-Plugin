@@ -1,6 +1,7 @@
 ﻿using JsonType;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Reflection;
 using EFT;
 using EFT.Communications;
@@ -9,7 +10,7 @@ using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Models;
 using Fika.Core.UI.Models;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.LocalGame;
 
@@ -21,7 +22,26 @@ public sealed class TarkovApplication_LocalGamePreparer_Patch : ModulePatch
     }
 
     [PatchPrefix]
-    public static async void Prefix(TarkovApplication __instance, RaidSettings ____raidSettings)
+    public static async void Prefix(TarkovApplication __instance)
+    {
+        FikaBackendUtils.IsTutorial = FikaBackendUtils.IsTutorialLocation(__instance._raidSettings?.LocationId);
+        if (FikaBackendUtils.IsTutorial)
+        {
+            FikaBackendUtils.RequestTutorialWorld = true;
+            return;
+        }
+        
+        try
+        {
+            await PrepareRaid(__instance);
+        }
+        catch (Exception ex)
+        {
+            FikaGlobals.LogError($"LocalGameMatching: {ex}");
+        }
+    }
+
+    private static async Task PrepareRaid(TarkovApplication __instance)
     {
         Logger.LogDebug("TarkovApplication_LocalGamePreparer_Patch:Prefix");
 
@@ -30,20 +50,20 @@ public sealed class TarkovApplication_LocalGamePreparer_Patch : ModulePatch
         var isServer = FikaBackendUtils.IsServer;
         if (!isServer && !string.IsNullOrEmpty(FikaBackendUtils.HostLocationId))
         {
-            if (string.Equals(____raidSettings.LocationId, "sandbox", StringComparison.OrdinalIgnoreCase)
+            if (string.Equals(__instance._raidSettings.LocationId, "sandbox", StringComparison.OrdinalIgnoreCase)
                 && string.Equals(FikaBackendUtils.HostLocationId, "sandbox_high", StringComparison.OrdinalIgnoreCase))
             {
-                ____raidSettings.SelectedLocation = __instance.Session.LocationSettings.locations.Values
+                __instance._raidSettings.SelectedLocation = __instance.Session.LocationSettings.locations.Values
                     .FirstOrDefault(IsSandboxHigh);
 
-                NotificationManager.DisplayMessageNotification("Notification/HighLevelQueue".Localized(null),
+                FikaGlobals.DisplayMessage("Notification/HighLevelQueue".Localized(null),
                     ENotificationDurationType.Default, ENotificationIconType.Default, null);
             }
 
-            if (string.Equals(____raidSettings.LocationId, "sandbox_high", StringComparison.OrdinalIgnoreCase)
+            if (string.Equals(__instance._raidSettings.LocationId, "sandbox_high", StringComparison.OrdinalIgnoreCase)
                 && string.Equals(FikaBackendUtils.HostLocationId, "sandbox", StringComparison.OrdinalIgnoreCase))
             {
-                ____raidSettings.SelectedLocation = __instance.Session.LocationSettings.locations.Values
+                __instance._raidSettings.SelectedLocation = __instance.Session.LocationSettings.locations.Values
                     .FirstOrDefault(IsSandbox);
             }
         }

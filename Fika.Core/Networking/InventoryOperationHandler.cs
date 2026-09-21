@@ -26,7 +26,7 @@ public sealed class InventoryOperationHandler : IDisposable
 
     private InventoryOperationHandler()
     {
-        HandleResultDelegate = HandleResult;
+        HandleResultDelegate = new System.Action<Comfort.Common.IResult>(HandleResult);
     }
 
     public static InventoryOperationHandler CreateInstance()

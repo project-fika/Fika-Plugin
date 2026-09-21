@@ -1,4 +1,5 @@
-﻿using EFT;
+﻿using Fika.Core.Main.Utils;
+using EFT;
 using EFT.Ballistics;
 using Fika.Core.Main.Players;
 
@@ -26,8 +27,8 @@ public readonly struct DamagePacket : IPlayerPacket
         ArmorPlateCollider = armorPlateCollider;
         Material = materialType;
 
-        BlockedBy = damageInfo.BlockedBy;
-        DeflectedBy = damageInfo.DeflectedBy;
+        BlockedBy = damageInfo.BlockedBy.ToMongoId();
+        DeflectedBy = damageInfo.DeflectedBy.ToMongoId();
         if (damageInfo.Player != null)
         {
             ProfileId = damageInfo.Player.iPlayer.ProfileId;
@@ -127,30 +128,30 @@ public readonly struct DamagePacket : IPlayerPacket
         writer.PutEnum(ArmorPlateCollider);
         writer.PutEnum(Material);
 
-        writer.Put(BlockedBy.HasValue);
-        if (BlockedBy.HasValue)
+        writer.Put(BlockedBy is not null);
+        if (BlockedBy is not null)
         {
-            writer.PutMongoID(BlockedBy.Value);
+            writer.PutMongoID(BlockedBy);
         }
-        writer.Put(DeflectedBy.HasValue);
-        if (DeflectedBy.HasValue)
+        writer.Put(DeflectedBy is not null);
+        if (DeflectedBy is not null)
         {
-            writer.PutMongoID(DeflectedBy.Value);
+            writer.PutMongoID(DeflectedBy);
         }
-        writer.Put(ProfileId.HasValue);
-        if (ProfileId.HasValue)
+        writer.Put(ProfileId is not null);
+        if (ProfileId is not null)
         {
-            writer.PutMongoID(ProfileId.Value);
+            writer.PutMongoID(ProfileId);
         }
-        writer.Put(WeaponId.HasValue);
-        if (WeaponId.HasValue)
+        writer.Put(WeaponId is not null);
+        if (WeaponId is not null)
         {
-            writer.PutMongoID(WeaponId.Value);
+            writer.PutMongoID(WeaponId);
         }
-        writer.Put(SourceId.HasValue);
-        if (SourceId.HasValue)
+        writer.Put(SourceId is not null);
+        if (SourceId is not null)
         {
-            writer.PutMongoID(SourceId.Value);
+            writer.PutMongoID(SourceId);
         }
     }
 }

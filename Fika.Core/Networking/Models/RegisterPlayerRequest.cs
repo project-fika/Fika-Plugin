@@ -1,17 +1,18 @@
 using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Fika.Core.Networking.Models;
 
 [DataContract]
 public struct RegisterPlayerRequest
 {
-    [DataMember(Name = "crc")]
+    [JsonPropertyName("crc")]
     public int Crc;
 
-    [DataMember(Name = "locationId")]
+    [JsonPropertyName("locationId")]
     public string LocationId;
 
-    [DataMember(Name = "variantId")]
+    [JsonPropertyName("variantId")]
     public int VariantId;
 
     public RegisterPlayerRequest(int crc, string locationId, int variantId)

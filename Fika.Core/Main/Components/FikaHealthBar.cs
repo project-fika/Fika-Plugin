@@ -12,8 +12,11 @@ using EFT.UI;
 using Fika.Core.Bundles;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
+using Fika.Core.UI.Custom;
 using TMPro;
 using UnityEngine.UI;
+using Il2CppInterop.Runtime.Injection;
+using Il2CppInterop.Runtime;
 
 namespace Fika.Core.Main.Components;
 
@@ -23,12 +26,16 @@ namespace Fika.Core.Main.Components;
 /// </summary>
 public sealed class FikaHealthBar : MonoBehaviour
 {
+    public FikaHealthBar(IntPtr pointer) : base(pointer)
+    {
+    }
+
     /// <summary>
     /// Check for GClass increments, can be checked in <see cref="StaticIcons.EffectSprites"/> method <see cref="ISerializationCallbackReceiver.OnAfterDeserialize"/> <br/><br/>
     /// <see cref="ActiveHealthController.Wound"/>, <see cref="ActiveHealthController.Encumbered"/>, <see cref="ActiveHealthController.OverEncumbered"/>, <br/>
     /// <see cref="ActiveHealthController.MildMusclePain"/>, <see cref="ActiveHealthController.SevereMusclePain"/>
     /// </summary>
-    private static readonly Type[] _ignoredTypes = [typeof(IWound), typeof(IEncumbered), typeof(IOverEncumbered), typeof(IMildMusclePain), typeof(ISevereMusclePain)];
+    private static readonly Il2CppSystem.Type[] _ignoredTypes = [Il2CppType.Of<IWound>(), Il2CppType.Of<IEncumbered>(), Il2CppType.Of<IOverEncumbered>(), Il2CppType.Of<IMildMusclePain>(), Il2CppType.Of<ISevereMusclePain>()];
 
     private const float _tweenLength = 0.25f;
 
@@ -36,7 +43,7 @@ public sealed class FikaHealthBar : MonoBehaviour
     private Camera _camera;
     private FikaPlayer _mainPlayer;
     private PlayerPlateUI _playerPlate;
-    private Dictionary<Type, Sprite> _effectIcons;
+    private Il2CppSystem.Collections.Generic.Dictionary<Il2CppSystem.Type, Sprite> _effectIcons;
     private List<HealthBarEffect> _effects;
     private float _counter;
     private bool _updatePos = true;
@@ -71,7 +78,12 @@ public sealed class FikaHealthBar : MonoBehaviour
         healthBar._effects = [];
         healthBar._neckBone = player.PlayerBones.Neck;
 
-        healthBar.CreateHealthBar();
+        if (!healthBar.CreateHealthBar())
+        {
+            Destroy(healthBar);
+            return null;
+        }
+
         return healthBar;
     }
 
@@ -151,6 +163,16 @@ public sealed class FikaHealthBar : MonoBehaviour
     {
         if (!_updatePos)
         {
+            return;
+        }
+
+        if (FikaCutsceneManager.Instance?.IsActive == true)
+        {
+            if (_playerPlate.ScalarObjectScreen.activeSelf)
+            {
+                _playerPlate.ScalarObjectScreen.SetActive(false);
+            }
+
             return;
         }
 
@@ -239,11 +261,17 @@ public sealed class FikaHealthBar : MonoBehaviour
         }
     }
 
-    private void CreateHealthBar()
+    private bool CreateHealthBar()
     {
         var uiPrefab = InternalBundleLoader.Instance.GetFikaAsset(InternalBundleLoader.EFikaAsset.PlayerUI);
         var uiGameObj = Instantiate(uiPrefab);
-        _playerPlate = uiGameObj.GetComponent<PlayerPlateUI>();
+        _playerPlate = PrefabWiring.Attach<PlayerPlateUI>(uiGameObj);
+        if (_playerPlate == null)
+        {
+            Destroy(uiGameObj);
+            return false;
+        }
+
         _alphaGroup = _playerPlate.AlphaGroup;
         _plateRectTransform = _playerPlate.ScalarObjectScreen.GetComponent<RectTransform>();
         _playerPlate.SetNameText(_currentPlayer.Profile.Info.MainProfileNickname);
@@ -309,6 +337,8 @@ public sealed class FikaHealthBar : MonoBehaviour
             UpdateHealth();
         }
         ToggleNamePlate();
+
+        return true;
     }
 
     private void ToggleHealthControllerEvents(bool enabled)
@@ -373,7 +403,7 @@ public sealed class FikaHealthBar : MonoBehaviour
         for (var i = 0; i < _effects.Count; i++)
         {
             var currentEffect = _effects[i];
-            if (currentEffect.EffectType == effect.Type)
+            if (currentEffect.EffectType.Equals(effect.Type))
             {
                 currentEffect.DecreaseAmount();
                 if (currentEffect.Amount == 0)
@@ -457,7 +487,7 @@ public sealed class FikaHealthBar : MonoBehaviour
     {
         for (var i = 0; i < _ignoredTypes.Length; i++)
         {
-            if (_ignoredTypes[i] == effect.Type)
+            if (_ignoredTypes[i].Equals(effect.Type))
             {
                 return;
             }
@@ -466,7 +496,7 @@ public sealed class FikaHealthBar : MonoBehaviour
         var found = false;
         foreach (var currentEffect in _effects)
         {
-            if (currentEffect.EffectType == effect.Type)
+            if (currentEffect.EffectType.Equals(effect.Type))
             {
                 currentEffect.IncreaseAmount();
                 found = true;
@@ -662,7 +692,11 @@ public sealed class FikaHealthBar : MonoBehaviour
         _currentPlayer.HealthController.EffectAddedEvent -= HealthController_EffectAddedEvent;
         _currentPlayer.HealthController.EffectRemovedEvent -= HealthController_EffectRemovedEvent;
 
-        _playerPlate.gameObject.SetActive(false);
+        if (_playerPlate != null)
+        {
+            _playerPlate.gameObject.SetActive(false);
+        }
+
         _effects.Clear();
         Destroy(this);
     }
@@ -671,7 +705,7 @@ public sealed class FikaHealthBar : MonoBehaviour
     {
         public int Amount { get; private set; }
 
-        public Type EffectType;
+        public Il2CppSystem.Type EffectType;
         public Image EffectImage;
         public TextMeshProUGUI TMPText;
 

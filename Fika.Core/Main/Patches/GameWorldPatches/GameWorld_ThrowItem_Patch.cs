@@ -4,7 +4,7 @@ using EFT;
 using EFT.Interactive;
 using Fika.Core.Main.Components;
 using Fika.Core.Main.Utils;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.GameWorldPatches;
 

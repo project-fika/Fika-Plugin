@@ -13,7 +13,7 @@ public readonly struct SpawnAIPacket(int netId, Vector3 location) : IGenericPack
 
     public readonly void Execute()
     {
-        var coopHandler = Singleton<IFikaNetworkManager>.Instance.CoopHandler;
+        var coopHandler = FikaGlobals.NetworkManager.CoopHandler;
         if (coopHandler == null)
         {
             FikaGlobals.LogError("SpawnAI: CoopHandler was null!");

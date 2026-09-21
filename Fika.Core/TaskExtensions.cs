@@ -22,7 +22,7 @@ public static class TaskExtensions
         }
         catch (Exception e)
         {
-            Debug.LogException(e);
+            Main.Utils.FikaGlobals.LogError(e.ToString());
         }
     }
 }

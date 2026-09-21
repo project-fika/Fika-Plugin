@@ -2,13 +2,24 @@
 using EFT;
 using EFT.Communications;
 using Fika.Core.Main.Utils;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 using static Fika.Core.UI.FikaUIGlobals;
+using Il2CppInterop.Runtime.Injection;
 
 namespace Fika.Core.Networking.Websocket.Notifications;
 
 public sealed class ReceivedSentItemNotification : Notification
 {
+    public ReceivedSentItemNotification(IntPtr pointer) : base(pointer)
+    {
+    }
+
+    public ReceivedSentItemNotification() : base(Il2CppInjection.Allocate<ReceivedSentItemNotification>())
+    {
+        ClassInjector.DerivedConstructorBody(this);
+        ClassInjector.InvokeBaseConstructor<Notification>(this);
+    }
+
     public override ENotificationIconType Icon
     {
         get
@@ -41,18 +52,18 @@ public sealed class ReceivedSentItemNotification : Notification
         }
     }
 
-    [JsonProperty("nickname")]
+    [JsonPropertyName("nickname")]
     public string Nickname;
 
-    [JsonProperty("targetId")]
+    [JsonPropertyName("targetId")]
     public string TargetId;
 
-    [JsonProperty("itemName")]
+    [JsonPropertyName("itemName")]
     public string ItemName;
 
-    [JsonProperty("stackCount")]
+    [JsonPropertyName("stackCount")]
     public double StackCount;
 
-    [JsonProperty("multiple")]
+    [JsonPropertyName("multiple")]
     public bool Multiple;
 }

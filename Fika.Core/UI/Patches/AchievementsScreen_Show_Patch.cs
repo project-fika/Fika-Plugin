@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 using EFT.UI;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.UI.Patches;
 
@@ -15,9 +15,9 @@ public class AchievementsScreen_Show_Patch : ModulePatch
     }
 
     [PatchPostfix]
-    public static void Postfix(CanvasGroup ____allPlayersPercentCanvasGroup)
+    public static void Postfix(EFT.UI.AchievementsScreen __instance)
     {
-        ____allPlayersPercentCanvasGroup.alpha = 1f;
-        ____allPlayersPercentCanvasGroup.interactable = true;
+        __instance._allPlayersPercentCanvasGroup.alpha = 1f;
+        __instance._allPlayersPercentCanvasGroup.interactable = true;
     }
 }

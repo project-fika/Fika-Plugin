@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using EFT.UI;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 using UnityEngine.UI;
 
 namespace Fika.Core.Main.FreeCamera.Patches;
@@ -37,7 +37,7 @@ internal class StartBlackScreenShow_Patch : ModulePatch
     }
 
     [PatchPostfix]
-    public static void Postfix(Action callback)
+    public static void Postfix(Il2CppSystem.Action callback)
     {
         callback?.Invoke();
     }
@@ -58,9 +58,9 @@ internal class SetBlackImageAlpha_Patch : ModulePatch
     }
 
     [PatchPostfix]
-    public static void Postfix(float alpha, Image ____overlapBlackImage)
+    public static void Postfix(EFT.UI.PreloaderUI __instance, float alpha)
     {
-        ____overlapBlackImage.gameObject.SetActive(value: true);
-        ____overlapBlackImage.color = new Color(0f, 0f, 0f, 0f);
+        __instance._overlapBlackImage.gameObject.SetActive(value: true);
+        __instance._overlapBlackImage.color = new Color(0f, 0f, 0f, 0f);
     }
 }

@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using Comfort.Common;
+﻿using Comfort.Common;
 using EFT;
 
 namespace Fika.Core.Networking.Packets.Generic.SubPackets;
@@ -14,11 +13,15 @@ public readonly struct MineEventPacket(Vector3 minePosition) : IGenericPacket
     {
         if (Singleton<GameWorld>.Instance.MineManager != null)
         {
-            NetworkGame<EftGamePlayerOwner>.CG_ParseMineExplosionData mineSeeker = new()
+            MineDirectional mineDirectional = null;
+            foreach (var mine in Singleton<GameWorld>.Instance.MineManager.Mines)
             {
-                minePosition = MinePosition
-            };
-            var mineDirectional = Singleton<GameWorld>.Instance.MineManager.Mines.FirstOrDefault(mineSeeker.method_0);
+                if (Vector3.Distance(mine.transform.position, MinePosition) < Mathf.Epsilon)
+                {
+                    mineDirectional = mine;
+                    break;
+                }
+            }
             if (mineDirectional == null)
             {
                 return;

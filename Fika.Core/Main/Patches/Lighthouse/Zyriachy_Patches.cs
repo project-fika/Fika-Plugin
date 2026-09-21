@@ -3,7 +3,7 @@ using System.Reflection;
 using Comfort.Common;
 using EFT;
 using EFT.BufferZone;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.Lighthouse;
 
@@ -21,9 +21,9 @@ public static class Zyriachy_Patches
         }
 
         [PatchPostfix]
-        public static void Postfix(ref BotOwner ____owner)
+        public static void Postfix(BossZryachiy __instance)
         {
-            ____owner.GetPlayer.OnPlayerDead += OnZryachiyDead;
+            __instance._owner.GetPlayer.OnPlayerDead += OnZryachiyDead;
         }
 
         private static void OnZryachiyDead(Player player, IPlayer lastAggressor, DamageInfo damageInfo, EBodyPart part)

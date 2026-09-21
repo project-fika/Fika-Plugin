@@ -13,13 +13,29 @@ using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Backend;
 using Fika.Core.Networking.Packets.Communication;
 using Diz.Utils;
+using System;
+using Il2CppInterop.Runtime.Injection;
 
 namespace Fika.Core.Main.ClientClasses;
 
-public class ClientQuestController(Profile profile, InventoryController inventoryController, IPlayerSearchController searchController, IQuestSession session, FikaPlayer player)
-    : QuestControllerClientLocalGame(profile, inventoryController, searchController, session)
+public class ClientQuestController : QuestControllerClientLocalGame
 {
-    protected readonly FikaPlayer _player = player;
+    public ClientQuestController(IntPtr pointer) : base(pointer)
+    {
+    }
+
+    protected ClientQuestController(IntPtr pointer, Profile profile, InventoryController inventoryController, IPlayerSearchController searchController, IQuestSession session, FikaPlayer player) : base(pointer)
+    {
+        ClassInjector.DerivedConstructorBody(this);
+        _player = player;
+        ClassInjector.InvokeBaseConstructor<QuestControllerClientLocalGame>(this, profile, inventoryController, searchController, session);
+    }
+
+    public ClientQuestController(Profile profile, InventoryController inventoryController, IPlayerSearchController searchController, IQuestSession session, FikaPlayer player) : this(Il2CppInjection.Allocate<ClientQuestController>(), profile, inventoryController, searchController, session, player)
+    {
+    }
+
+    protected readonly FikaPlayer _player;
     protected bool _canSendAndReceive;
     private readonly bool _isClient = FikaBackendUtils.IsClient;
     private bool _sendQuestSync = true;
@@ -126,7 +142,12 @@ public class ClientQuestController(Profile profile, InventoryController inventor
         }
     }
 
-    public override async Task<OperationResult<ConditionalFinishResult<Quest>>> FinishQuest(Quest quest, bool runNetworkTransaction)
+    public override Il2CppSystem.Threading.Tasks.Task<OperationResult<ConditionalFinishResult<Quest>>> FinishQuest(Quest quest, bool runNetworkTransaction)
+    {
+        return FinishQuestAsync(quest, runNetworkTransaction).ToIl2Cpp();
+    }
+
+    private async Task<OperationResult<ConditionalFinishResult<Quest>>> FinishQuestAsync(Quest quest, bool runNetworkTransaction)
     {
         List<FlatItem[]> items = [];
         var hasRewards = false;
@@ -158,36 +179,20 @@ public class ClientQuestController(Profile profile, InventoryController inventor
         return finishResult;
     }
 
-    public override async Task<IResult> HandoverItem(Quest quest, ConditionItem condition, Item[] items, bool runNetworkTransaction)
+    public override OperationResult<QuestHandoverResult> HandoverItem(Quest quest, ConditionItem condition, Il2CppSystem.Collections.Generic.IReadOnlyCollection<ItemsCount> items, bool simulate)
     {
         List<MongoID> itemIds = [];
-        var hasNonQuestItem = false;
-        for (var i = 0; i < items.Length; i++)
+        foreach (var count in items)
         {
-            var item = items[i];
-            if (!item.QuestItem)
+            if (!count.Item.QuestItem)
             {
-                hasNonQuestItem = true;
-                break;
+                itemIds.Add(count.Item.Id);
             }
         }
 
-        if (hasNonQuestItem)
-        {
-            for (var i = 0; i < items.Length; i++)
-            {
-                var item = items[i];
-                if (item.QuestItem)
-                {
-                    continue;
-                }
-
-                itemIds.Add(item.Id);
-            }
-        }
-
-        var handoverResult = await base.HandoverItem(quest, condition, items, runNetworkTransaction);
-        if (handoverResult.Succeed && hasNonQuestItem)
+        var hasNonQuestItem = itemIds.Count > 0;
+        var handoverResult = base.HandoverItem(quest, condition, items, simulate);
+        if (handoverResult.Succeeded && hasNonQuestItem && !simulate)
         {
 
             InRaidQuestPacket packet = new()
@@ -223,7 +228,7 @@ public class ClientQuestController(Profile profile, InventoryController inventor
                     _player.SpecialPlaceVisited(packet.ZoneId, 0);
                     break;
                 case QuestSyncPacket.EQuestSyncType.PickUpQuestItem:
-                    LootReconnectQuestItem(packet.ItemId.Value);
+                    LootReconnectQuestItem(packet.ItemId);
                     break;
             }
         }
@@ -235,9 +240,7 @@ public class ClientQuestController(Profile profile, InventoryController inventor
     private void LootReconnectQuestItem(MongoID itemId)
     {
         var gameWorld = (FikaClientGameWorld)_player.GameWorld;
-        var lootItems = (List<JsonLootItem>)typeof(GameWorld)
-            .GetField("list_1", BindingFlags.NonPublic | BindingFlags.Instance)
-            .GetValue(gameWorld);
+        var lootItems = gameWorld._questLootItems;
 
 #if DEBUG
         FikaGlobals.LogInfo($"Looking for quest item [{itemId}]");
@@ -254,7 +257,7 @@ public class ClientQuestController(Profile profile, InventoryController inventor
                 var item = gameWorld.CreateReconnectQuestItem(lootItem, true, _player);
                 var playerInventory = _player.InventoryController;
                 var pickupResult = ItemManipulator.QuickFindAppropriatePlace(item, playerInventory,
-                    playerInventory.Inventory.Equipment.ToEnumerable(),
+                    playerInventory.Inventory.Equipment.AsIl2CppEnumerable<CompoundItem>(),
                     ItemManipulator.EMoveItemOrder.PickUp, true);
 
                 if (pickupResult.Succeeded && playerInventory.CanExecute(pickupResult.Value))

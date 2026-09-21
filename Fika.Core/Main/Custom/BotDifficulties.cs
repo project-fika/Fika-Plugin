@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using EFT;
 using Fika.Core.Main.Utils;
-using Newtonsoft.Json;
-using SPT.Common.Http;
+using SPTushonka.Common.Http;
+using Il2CppInterop.Runtime.InteropTypes.Arrays;
 
 namespace Fika.Core.Main.Custom;
 
@@ -17,13 +17,13 @@ public sealed class BotDifficulties : Dictionary<string, BotDifficulties.RoleDat
         }
     }
 
-    [JsonIgnore]
     private readonly BotGlobalsCoreSettings _coreSettings;
 
     public BotDifficulties()
     {
         var coreString = RequestHandler.GetJson("/singleplayer/settings/bot/difficulty/core/core");
-        _coreSettings = JsonConvert.DeserializeObject<BotGlobalsCoreSettings>(coreString);
+        _coreSettings = JsonExtensions.ParseJsonTo<BotGlobalsCoreSettings>(coreString,
+            new Il2CppReferenceArray<Newtonsoft.Json.JsonConverter>(0L));
 
         // Adjust wave coefs so that wave settings do something
         _coreSettings.WAVE_COEF_LOW = 0.5f;

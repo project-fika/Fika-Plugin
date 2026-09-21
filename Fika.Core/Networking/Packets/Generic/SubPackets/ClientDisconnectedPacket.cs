@@ -25,7 +25,7 @@ public readonly struct ClientDisconnectedPacket : IGenericPacket
     public readonly void Execute()
     {
         var message = string.Format(LocaleUtils.UI_PLAYER_DISCONNECTED.Localized(), ColorizeText(EColor.BLUE, Name));
-        NotificationManager.DisplayMessageNotification(message);
+        FikaGlobals.DisplayMessage(message);
     }
 
     public readonly void Serialize(NetDataWriter writer)

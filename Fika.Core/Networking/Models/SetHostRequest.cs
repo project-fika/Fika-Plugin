@@ -1,27 +1,28 @@
 using System.Runtime.Serialization;
 using Fika.Core.Main.Components;
+using System.Text.Json.Serialization;
 
 namespace Fika.Core.Networking.Models;
 
 [DataContract]
 public struct SetHostRequest
 {
-    [DataMember(Name = "serverId")]
+    [JsonPropertyName("serverId")]
     public string ServerId;
 
-    [DataMember(Name = "ips")]
+    [JsonPropertyName("ips")]
     public string[] Ips;
 
-    [DataMember(Name = "port")]
+    [JsonPropertyName("port")]
     public ushort Port;
 
-    [DataMember(Name = "natPunch")]
+    [JsonPropertyName("natPunch")]
     public bool NatPunch;
 
-    [DataMember(Name = "useFikaNatPunchServer")]
+    [JsonPropertyName("useFikaNatPunchServer")]
     public bool UseFikaNatPunchServer;
 
-    [DataMember(Name = "isHeadless")]
+    [JsonPropertyName("isHeadless")]
     public bool IsHeadless;
 
     public SetHostRequest(string[] ips, ushort port, bool natPunch, bool useFikaNatPunchServer, bool isHeadless)

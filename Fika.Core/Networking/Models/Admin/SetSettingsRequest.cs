@@ -1,23 +1,24 @@
 ﻿using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Fika.Core.Networking.Models.Admin;
 
 [DataContract]
 public struct SetSettingsRequest
 {
-    [DataMember(Name = "friendlyFire")]
+    [JsonPropertyName("friendlyFire")]
     public bool FriendlyFire;
 
-    [DataMember(Name = "freeCam")]
+    [JsonPropertyName("freeCam")]
     public bool FreeCam;
 
-    [DataMember(Name = "spectateFreeCam")]
+    [JsonPropertyName("spectateFreeCam")]
     public bool SpectateFreeCam;
 
-    [DataMember(Name = "sharedQuestProgression")]
+    [JsonPropertyName("sharedQuestProgression")]
     public bool SharedQuestProgression;
 
-    [DataMember(Name = "averageLevel")]
+    [JsonPropertyName("averageLevel")]
     public bool AverageLevel;
 
     public SetSettingsRequest(bool friendlyFire, bool freeCam, bool spectateFreeCam, bool sharedQuestProgression, bool averageLevel)

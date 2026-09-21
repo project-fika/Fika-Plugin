@@ -1,4 +1,7 @@
-﻿namespace Fika.Core.Main.Custom;
+﻿using System;
+using Il2CppInterop.Runtime.Injection;
+using Fika.Core.Main.Utils;
+namespace Fika.Core.Main.Custom;
 
 /// <summary>
 /// An abstract MonoBehaviour that throttles the frequency of <see cref="Tick"/> calls
@@ -6,6 +9,10 @@
 /// </summary>
 public abstract class ThrottledMono : MonoBehaviour
 {
+    protected ThrottledMono(IntPtr pointer) : base(pointer)
+    {
+    }
+
     /// <summary>
     /// Gets the number of ticks per second. <br/>
     /// E.g., a value of 10 means <see cref="Tick"/> is called 10 times per second.

@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using EFT.UI;
 using Fika.Core.UI.Custom;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.UI.Patches.MainMenuUI;
 

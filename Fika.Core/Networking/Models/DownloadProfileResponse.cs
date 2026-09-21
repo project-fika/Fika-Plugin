@@ -1,18 +1,19 @@
 ﻿using System.Collections.Generic;
 using System.Runtime.Serialization;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Fika.Core.Networking.Models;
 
 [DataContract]
 public record DownloadProfileResponse
 {
-    [DataMember(Name = "profile")]
-    public JObject Profile { get; set; }
+    [JsonPropertyName("profile")]
+    public JsonElement Profile { get; set; }
 
-    [DataMember(Name = "modData")]
+    [JsonPropertyName("modData")]
     public Dictionary<string, string> ModData { get; set; }
 
-    [DataMember(Name = "errmsg", EmitDefaultValue = true, IsRequired = false)]
+    [JsonPropertyName("errmsg")]
     public string ErrorMessage { get; set; }
 }

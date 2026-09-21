@@ -1,16 +1,27 @@
 ﻿using System;
 using EFT;
 using Fika.Core.Main.Utils;
+using Il2CppInterop.Runtime.Injection;
 
 namespace Fika.Core.Main.ClientClasses;
 
 public class ClientMovementContext : MovementContext
 {
+    public ClientMovementContext(IntPtr pointer) : base(pointer)
+    {
+    }
+
+    public ClientMovementContext() : base(Il2CppInjection.Allocate<ClientMovementContext>())
+    {
+        ClassInjector.DerivedConstructorBody(this);
+        ClassInjector.InvokeBaseConstructor<MovementContext>(this);
+    }
+
     private bool _doGravity;
 
-    public new static ClientMovementContext Create(Player player, Func<IAnimator> animatorGetter, Func<ICharacterController> characterControllerGetter, LayerMask groundMask)
+    public new static ClientMovementContext Create(Player player, Il2CppSystem.Func<ICharacterController> characterControllerGetter, LayerMask groundMask)
     {
-        var movementContext = Create<ClientMovementContext>(player, animatorGetter, characterControllerGetter, groundMask);
+        var movementContext = Create<ClientMovementContext>(player, characterControllerGetter, groundMask);
         return movementContext;
     }
 

@@ -6,13 +6,26 @@ using EFT.InventoryLogic;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Packets.Player.Common;
 using Fika.Core.Networking.Packets.Player.Common.SubPackets;
+using System;
+using Il2CppInterop.Runtime.Injection;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.BotClasses;
 
-public sealed class BotHealthController(Profile.HealthInfo healthInfo, Player player, InventoryController inventoryController, SkillManager skillManager, bool aiHealth)
-    : PlayerHealthController(healthInfo, player, inventoryController, skillManager, aiHealth)
+public sealed class BotHealthController : PlayerHealthController
 {
-    private readonly FikaBot _fikaBot = (FikaBot)player;
+    public BotHealthController(IntPtr pointer) : base(pointer)
+    {
+    }
+
+    public BotHealthController(Profile.HealthInfo healthInfo, Player player, InventoryController inventoryController, SkillManager skillManager, bool aiHealth) : base(Il2CppInjection.Allocate<BotHealthController>())
+    {
+        ClassInjector.DerivedConstructorBody(this);
+        _fikaBot = (FikaBot)player;
+        ClassInjector.InvokeBaseConstructor<PlayerHealthController>(this, healthInfo, player, inventoryController, skillManager, aiHealth);
+    }
+
+    private readonly FikaBot _fikaBot;
     public override bool _sendNetworkSyncPackets
     {
         get

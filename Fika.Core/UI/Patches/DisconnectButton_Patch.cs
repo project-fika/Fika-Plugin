@@ -5,7 +5,7 @@ using EFT.UI;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using EFT;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.UI.Patches;
 
@@ -13,7 +13,7 @@ public class DisconnectButton_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(MenuScreen).GetMethod(nameof(MenuScreen.CG_Awake1));
+        return Il2CppMethods.ByNativeName(typeof(MenuScreen), "<Awake>b__22_2");
     }
 
     [PatchPrefix]

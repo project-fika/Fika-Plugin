@@ -1,50 +1,58 @@
-﻿using Dissonance.Integrations.MirrorIgnorance;
-using System;
+﻿using System;
 using Comfort.Common;
+using Dissonance.Integrations.MirrorIgnorance;
 using Dissonance.Networking;
+using Fika.Core.Main.Utils;
+using Il2CppInterop.Runtime.Injection;
 
 namespace Fika.Core.Networking.VOIP;
 
-public class FikaVOIPClient(ICommsNetworkState network) : BaseClient<FikaVOIPServer, FikaVOIPClient, FikaVOIPPeer>(network)
+public class FikaVOIPClient : MirrorIgnoranceClient
 {
-    private readonly FikaCommsNetwork _commsNet = (FikaCommsNetwork)network;
+    private static readonly Action<BaseClient<MirrorIgnoranceServer, MirrorIgnoranceClient, MirrorConn>> _baseDisconnect =
+        typeof(BaseClient<MirrorIgnoranceServer, MirrorIgnoranceClient, MirrorConn>).GetMethod(nameof(Disconnect))
+            .CreateBaseCall<Action<BaseClient<MirrorIgnoranceServer, MirrorIgnoranceClient, MirrorConn>>>();
+
+    private readonly FikaCommsNetwork _commsNet;
+
+    public FikaVOIPClient(IntPtr pointer) : base(pointer)
+    {
+    }
+
+    public FikaVOIPClient(FikaCommsNetwork network) : base(Il2CppInjection.Allocate<FikaVOIPClient>())
+    {
+        ClassInjector.DerivedConstructorBody(this);
+        _commsNet = network;
+        ClassInjector.InvokeBaseConstructor<MirrorIgnoranceClient>(this, network);
+    }
 
     public override void Connect()
     {
         Connected();
     }
 
-    protected override void ReadMessages()
+    public override void Disconnect()
     {
-
+        _baseDisconnect(this);
     }
 
-    public override void SendVoiceData(ArraySegment<byte> encodedAudio)
-    {
-        VoiceClient.SetTalkDateTime();
-        if (!VoiceClient.Blocked)
-        {
-            base.SendVoiceData(encodedAudio);
-        }
-    }
-
-    protected override void SendReliable(ArraySegment<byte> packet)
+    public override void SendReliable(Il2CppSystem.ArraySegment<byte> packet)
     {
         if (_commsNet.PreprocessPacketToServer(packet))
         {
             return;
         }
 
-        Singleton<IFikaNetworkManager>.Instance.SendVOIPData(packet, DeliveryMethod.ReliableOrdered);
+        FikaGlobals.NetworkManager.SendVOIPData(packet.ToManaged(), DeliveryMethod.ReliableOrdered);
     }
 
-    protected override void SendUnreliable(ArraySegment<byte> packet)
+    public override void SendUnreliable(Il2CppSystem.ArraySegment<byte> packet)
     {
         if (_commsNet.PreprocessPacketToServer(packet))
         {
             return;
         }
 
-        Singleton<IFikaNetworkManager>.Instance.SendVOIPData(packet, DeliveryMethod.Sequenced);
+        FikaGlobals.NetworkManager.SendVOIPData(packet.ToManaged(), DeliveryMethod.Sequenced);
     }
 }

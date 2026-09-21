@@ -33,13 +33,13 @@ public readonly struct HealthSyncPacket : IPlayerPacket
         {
             SyncType = reader.GetEnum<ESyncType>()
         };
-        ref var data = ref packet.Data;
+        var data = packet.Data;
 
         switch (packet.SyncType)
         {
             case ESyncType.AddEffect:
                 {
-                    ref var addEffect = ref data.AddEffect;
+                    var addEffect = data.AddEffect;
                     addEffect.EffectId = reader.GetInt();
                     addEffect.Type = reader.GetByte();
                     addEffect.BodyPart = reader.GetEnum<EBodyPart>();
@@ -50,51 +50,64 @@ public readonly struct HealthSyncPacket : IPlayerPacket
                     addEffect.Strength = reader.GetPackedFloat(-100f, 100f, EFloatCompression.High);
                     addEffect.ExtraDataType = reader.GetEnum<EExtraDataType>();
 
+                    var extraData = addEffect.ExtraData;
                     switch (addEffect.ExtraDataType)
                     {
                         case EExtraDataType.MedEffect:
-                            addEffect.ExtraData.MedEffect.ItemId = reader.GetMongoID();
-                            addEffect.ExtraData.MedEffect.Amount = reader.GetFloat();
+                            var medEffect = extraData.MedEffect;
+                            medEffect.ItemId = reader.GetMongoID();
+                            medEffect.Amount = reader.GetFloat();
+                            extraData.MedEffect = medEffect;
                             break;
 
                         case EExtraDataType.Stimulator:
-                            addEffect.ExtraData.Stimulator.BuffsName = reader.GetString();
+                            var stimulator = extraData.Stimulator;
+                            stimulator.BuffsName = reader.GetString();
+                            extraData.Stimulator = stimulator;
                             break;
                     }
+                    addEffect.ExtraData = extraData;
+                    data.AddEffect = addEffect;
                     break;
                 }
 
             case ESyncType.RemoveEffect:
-                data.RemoveEffect.EffectId = reader.GetInt();
+                var removeEffect = data.RemoveEffect;
+                removeEffect.EffectId = reader.GetInt();
+                data.RemoveEffect = removeEffect;
                 break;
 
             case ESyncType.EffectNextState:
-                ref var ens = ref data.EffectNextState;
+                var ens = data.EffectNextState;
                 ens.EffectId = reader.GetInt();
                 ens.StateTime = reader.GetFloat();
+                data.EffectNextState = ens;
                 break;
 
             case ESyncType.EffectStateTime:
-                ref var est = ref data.EffectStateTime;
+                var est = data.EffectStateTime;
                 est.EffectId = reader.GetInt();
                 est.RemainingStateTime = reader.GetFloat();
+                data.EffectStateTime = est;
                 break;
 
             case ESyncType.EffectStrength:
-                ref var estr = ref data.EffectStrength;
+                var estr = data.EffectStrength;
                 estr.EffectId = reader.GetInt();
                 estr.Strength = reader.GetPackedFloat(0f, 27f, EFloatCompression.High);
+                data.EffectStrength = estr;
                 break;
 
             case ESyncType.EffectMedResource:
-                ref var emr = ref data.EffectMedResource;
+                var emr = data.EffectMedResource;
                 emr.EffectId = reader.GetInt();
                 emr.Resource = reader.GetPackedFloat(-1f, 3000f);
+                data.EffectMedResource = emr;
                 break;
 
             case ESyncType.EffectStimulatorBuff:
                 {
-                    ref var stim = ref data.EffectStimulatorBuff;
+                    var stim = data.EffectStimulatorBuff;
                     stim.EffectId = reader.GetInt();
                     stim.BuffIndex = reader.GetPackedInt(0, 63);
                     stim.BuffActivate = reader.GetBool();
@@ -105,12 +118,13 @@ public readonly struct HealthSyncPacket : IPlayerPacket
                         stim.BuffDuration = reader.GetFloat();
                         stim.BuffDelay = reader.GetFloat();
                     }
+                    data.EffectStimulatorBuff = stim;
                     break;
                 }
 
             case ESyncType.IsAlive:
                 {
-                    ref var alive = ref data.IsAlive;
+                    var alive = data.IsAlive;
                     alive.IsAlive = reader.GetBool();
 
                     if (!alive.IsAlive)
@@ -130,45 +144,56 @@ public readonly struct HealthSyncPacket : IPlayerPacket
                             } 
                         }
                     }
+                    data.IsAlive = alive;
                     break;
                 }
 
             case ESyncType.BodyHealth:
                 {
-                    ref var bh = ref data.BodyHealth;
+                    var bh = data.BodyHealth;
                     bh.BodyPart = reader.GetEnum<EBodyPart>();
                     bh.Value = reader.GetFloat();
+                    data.BodyHealth = bh;
                     break;
                 }
 
             case ESyncType.Energy:
-                data.Energy.Value = reader.GetPackedFloat(0f, 200f, EFloatCompression.High);
+                var energy = data.Energy;
+                energy.Value = reader.GetPackedFloat(0f, 200f, EFloatCompression.High);
+                data.Energy = energy;
                 break;
 
             case ESyncType.Hydration:
-                data.Hydration.Value = reader.GetPackedFloat(0f, 200f, EFloatCompression.High);
+                var hydration = data.Hydration;
+                hydration.Value = reader.GetPackedFloat(0f, 200f, EFloatCompression.High);
+                data.Hydration = hydration;
                 break;
 
             case ESyncType.Temperature:
-                data.Temperature.Value = reader.GetPackedFloat(0f, 100f, EFloatCompression.High);
+                var temperature = data.Temperature;
+                temperature.Value = reader.GetPackedFloat(0f, 100f, EFloatCompression.High);
+                data.Temperature = temperature;
                 break;
 
             case ESyncType.DamageCoeff:
-                data.DamageCoeff.DamageCoeff = reader.GetFloat();
+                var damageCoeff = data.DamageCoeff;
+                damageCoeff.DamageCoeff = reader.GetFloat();
+                data.DamageCoeff = damageCoeff;
                 break;
 
             case ESyncType.ApplyDamage:
                 {
-                    ref var dmg = ref data.ApplyDamage;
+                    var dmg = data.ApplyDamage;
                     dmg.BodyPart = reader.GetEnum<EBodyPart>();
                     dmg.Damage = reader.GetFloat();
                     dmg.DamageType = reader.GetEnum<EDamageType>();
+                    data.ApplyDamage = dmg;
                     break;
                 }
 
             case ESyncType.DestroyedBodyPart:
                 {
-                    ref var destroyed = ref data.DestroyedBodyPart;
+                    var destroyed = data.DestroyedBodyPart;
                     destroyed.BodyPart = reader.GetEnum<EBodyPart>();
                     destroyed.IsDestroyed = reader.GetBool();
 
@@ -180,43 +205,53 @@ public readonly struct HealthSyncPacket : IPlayerPacket
                     {
                         destroyed.HealthMaximum = reader.GetFloat();
                     }
+                    data.DestroyedBodyPart = destroyed;
                     break;
                 }
 
             case ESyncType.HealthRates:
                 {
-                    ref var rates = ref data.HealthRates;
+                    var rates = data.HealthRates;
                     rates.HealRate = reader.GetPackedFloat(0f, 3000f, EFloatCompression.High);
                     rates.DamageRate = reader.GetPackedFloat(-1000f, 0f, EFloatCompression.High);
                     rates.DamageMultiplier = reader.GetPackedFloat(0f, 2f, EFloatCompression.High);
                     rates.Energy = reader.GetPackedFloat(-2000f, 3000f, EFloatCompression.High);
                     rates.Hydration = reader.GetPackedFloat(-2000f, 3000f, EFloatCompression.High);
                     rates.Temperature = reader.GetPackedFloat(-100f, 100f, EFloatCompression.High);
+                    data.HealthRates = rates;
                     break;
                 }
 
             case ESyncType.HealerDone:
-                data.HealerDone.EffectId = reader.GetInt();
+                var healerDone = data.HealerDone;
+                healerDone.EffectId = reader.GetInt();
+                data.HealerDone = healerDone;
                 break;
 
             case ESyncType.BurnEyes:
                 {
-                    ref var burn = ref data.BurnEyes;
+                    var burn = data.BurnEyes;
                     burn.Position = reader.GetUnmanaged<Vector3>();
                     burn.DistanceStrength = reader.GetFloat();
                     burn.NormalTime = reader.GetFloat();
+                    data.BurnEyes = burn;
                     break;
                 }
 
             case ESyncType.Poison:
-                data.Poison.Value = reader.GetPackedFloat(0f, 100f, EFloatCompression.High);
+                var poison = data.Poison;
+                poison.Value = reader.GetPackedFloat(0f, 100f, EFloatCompression.High);
+                data.Poison = poison;
                 break;
 
             case ESyncType.StaminaCoeff:
-                data.StaminaCoeff.StaminaCoeff = reader.GetFloat();
+                var staminaCoeff = data.StaminaCoeff;
+                staminaCoeff.StaminaCoeff = reader.GetFloat();
+                data.StaminaCoeff = staminaCoeff;
                 break;
         }
 
+        packet.Data = data;
         Packet = packet;
     }
 
@@ -232,14 +267,14 @@ public readonly struct HealthSyncPacket : IPlayerPacket
         {
             if (Packet.SyncType == ESyncType.IsAlive && !Packet.Data.IsAlive.IsAlive)
             {
-                if (KillerId.HasValue)
+                if (KillerId is not null)
                 {
                     observedPlayer.SetAggressorData(KillerId, BodyPart, WeaponId);
                 }
                 observedPlayer.CorpseSyncPacket = CorpseSyncPacket;
                 if (CorpseSyncPacket.TriggerZones.Count > 0)
                 {
-                    observedPlayer.TriggerZones.AddRange(CorpseSyncPacket.TriggerZones);
+                    observedPlayer.TriggerZones.AddRange(CorpseSyncPacket.TriggerZones.ToIl2CppList());
                 }
                 if (!observedPlayer.NetworkHealthController.IsAlive) // prevent downed players from not fully dying
                 {
@@ -255,14 +290,14 @@ public readonly struct HealthSyncPacket : IPlayerPacket
 
     public readonly void Serialize(NetDataWriter writer)
     {
-        ref readonly var packet = ref Packet.Data;
+        var packet = Packet.Data;
         writer.PutEnum(Packet.SyncType);
 
         switch (Packet.SyncType)
         {
             case ESyncType.AddEffect:
                 {
-                    ref readonly var addEffect = ref packet.AddEffect;
+                    var addEffect = packet.AddEffect;
                     writer.Put(addEffect.EffectId);
                     writer.Put(addEffect.Type);
                     writer.PutEnum(addEffect.BodyPart);
@@ -292,7 +327,7 @@ public readonly struct HealthSyncPacket : IPlayerPacket
 
             case ESyncType.EffectNextState:
                 {
-                    ref readonly var ens = ref packet.EffectNextState;
+                    var ens = packet.EffectNextState;
                     writer.Put(ens.EffectId);
                     writer.Put(ens.StateTime);
                     break;
@@ -300,7 +335,7 @@ public readonly struct HealthSyncPacket : IPlayerPacket
 
             case ESyncType.EffectStateTime:
                 {
-                    ref readonly var est = ref packet.EffectStateTime;
+                    var est = packet.EffectStateTime;
                     writer.Put(est.EffectId);
                     writer.Put(est.RemainingStateTime);
                     break;
@@ -308,7 +343,7 @@ public readonly struct HealthSyncPacket : IPlayerPacket
 
             case ESyncType.EffectStrength:
                 {
-                    ref readonly var estr = ref packet.EffectStrength;
+                    var estr = packet.EffectStrength;
                     writer.Put(estr.EffectId);
                     writer.PutPackedFloat(estr.Strength, 0f, 27f, EFloatCompression.High);
                     break;
@@ -316,7 +351,7 @@ public readonly struct HealthSyncPacket : IPlayerPacket
 
             case ESyncType.EffectMedResource:
                 {
-                    ref readonly var emr = ref packet.EffectMedResource;
+                    var emr = packet.EffectMedResource;
                     writer.Put(emr.EffectId);
                     writer.PutPackedFloat(emr.Resource, -1f, 3000f);
                     break;
@@ -324,7 +359,7 @@ public readonly struct HealthSyncPacket : IPlayerPacket
 
             case ESyncType.EffectStimulatorBuff:
                 {
-                    ref readonly var stim = ref packet.EffectStimulatorBuff;
+                    var stim = packet.EffectStimulatorBuff;
                     writer.Put(stim.EffectId);
                     writer.PutPackedInt(stim.BuffIndex, 0, 63);
                     writer.Put(stim.BuffActivate);
@@ -339,7 +374,7 @@ public readonly struct HealthSyncPacket : IPlayerPacket
 
             case ESyncType.IsAlive:
                 {
-                    ref readonly var alive = ref packet.IsAlive;
+                    var alive = packet.IsAlive;
                     writer.Put(alive.IsAlive);
                     if (!alive.IsAlive)
                     {
@@ -359,7 +394,7 @@ public readonly struct HealthSyncPacket : IPlayerPacket
 
             case ESyncType.BodyHealth:
                 {
-                    ref readonly var bh = ref packet.BodyHealth;
+                    var bh = packet.BodyHealth;
                     writer.PutEnum(bh.BodyPart);
                     writer.Put(bh.Value);
                     break;
@@ -383,7 +418,7 @@ public readonly struct HealthSyncPacket : IPlayerPacket
 
             case ESyncType.ApplyDamage:
                 {
-                    ref readonly var dmg = ref packet.ApplyDamage;
+                    var dmg = packet.ApplyDamage;
                     writer.PutEnum(dmg.BodyPart);
                     writer.Put(dmg.Damage);
                     writer.PutEnum(dmg.DamageType);
@@ -392,7 +427,7 @@ public readonly struct HealthSyncPacket : IPlayerPacket
 
             case ESyncType.DestroyedBodyPart:
                 {
-                    ref readonly var destroyed = ref packet.DestroyedBodyPart;
+                    var destroyed = packet.DestroyedBodyPart;
                     writer.PutEnum(destroyed.BodyPart);
                     writer.Put(destroyed.IsDestroyed);
                     if (destroyed.IsDestroyed)
@@ -409,7 +444,7 @@ public readonly struct HealthSyncPacket : IPlayerPacket
 
             case ESyncType.HealthRates:
                 {
-                    ref readonly var rates = ref packet.HealthRates;
+                    var rates = packet.HealthRates;
                     writer.PutPackedFloat(rates.HealRate, 0f, 3000f, EFloatCompression.High);
                     writer.PutPackedFloat(rates.DamageRate, -1000f, 0f, EFloatCompression.High);
                     writer.PutPackedFloat(rates.DamageMultiplier, 0f, 2f, EFloatCompression.High);
@@ -425,7 +460,7 @@ public readonly struct HealthSyncPacket : IPlayerPacket
 
             case ESyncType.BurnEyes:
                 {
-                    ref readonly var burn = ref packet.BurnEyes;
+                    var burn = packet.BurnEyes;
                     writer.PutUnmanaged(burn.Position);
                     writer.Put(burn.DistanceStrength);
                     writer.Put(burn.NormalTime);

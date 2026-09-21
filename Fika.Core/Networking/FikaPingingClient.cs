@@ -392,10 +392,6 @@ public class FikaPingingClient : INetEventListener, INatPunchListener, IDisposab
         _cts?.Cancel();
 
         NetClient.Stop();
-        if (!Singleton<FikaPingingClient>.TryRelease(this))
-        {
-            _logger.LogError("Failed to release FikaPingingClient Singleton!");
-        }
         _logger.LogInfo("Stopped FikaPingingClient");
     }
 }

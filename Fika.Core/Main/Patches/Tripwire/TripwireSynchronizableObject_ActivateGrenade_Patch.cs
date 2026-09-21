@@ -2,7 +2,8 @@
 using Comfort.Common;
 using EFT;
 using EFT.SynchronizableObjects;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.Patches.Tripwire;
 
@@ -15,8 +16,13 @@ public class TripwireSynchronizableObject_ActivateGrenade_Patch : ModulePatch
     }
 
     [PatchPostfix]
-    public static void Prefix(Grenade ____grenadeInWorld)
+    public static void Prefix(EFT.SynchronizableObjects.TripwireSynchronizableObject __instance)
     {
-        Singleton<IGameLevel>.Instance.RegisterGrenade(____grenadeInWorld);
+        if (FikaBackendUtils.IsTutorial)
+        {
+            return;
+        }
+
+        Singleton<IGameLevel>.Instance.RegisterGrenade(__instance._grenadeInWorld);
     }
 }

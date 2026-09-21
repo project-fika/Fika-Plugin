@@ -6,7 +6,7 @@ using Fika.Core.Main.ClientClasses;
 using Fika.Core.Main.HostClasses;
 using Fika.Core.Main.Utils;
 using HarmonyLib;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.GameWorldPatches;
 
@@ -20,8 +20,13 @@ public class GameWorld_Create_Patch : ModulePatch
     }
 
     [PatchPrefix]
-    public static bool Prefix(ref GameWorld __result, GameObject gameObject, ObjectsFactory objectsFactory, EUpdateQueue updateQueue, MongoID? currentProfileId)
+    public static bool Prefix(ref GameWorld __result, GameObject gameObject, ObjectsFactory objectsFactory, EUpdateQueue updateQueue, Il2CppSystem.Nullable<MongoID> currentProfileId)
     {
+        if (FikaBackendUtils.RequestTutorialWorld)
+        {
+            FikaBackendUtils.RequestTutorialWorld = false;
+            return true;
+        }
 
         if (!FikaBackendUtils.RequestFikaWorld)
         {
@@ -41,7 +46,7 @@ public class GameWorld_Create_Patch : ModulePatch
         return false;
     }
 
-    private static GameWorld CreateHideoutWorld(GameObject gameObject, ObjectsFactory objectsFactory, EUpdateQueue updateQueue, MongoID? currentProfileId)
+    private static GameWorld CreateHideoutWorld(GameObject gameObject, ObjectsFactory objectsFactory, EUpdateQueue updateQueue, Il2CppSystem.Nullable<MongoID> currentProfileId)
     {
         var gameWorld = gameObject.AddComponent<HideoutGameWorld>();
         gameWorld.ObjectsFactory = objectsFactory;

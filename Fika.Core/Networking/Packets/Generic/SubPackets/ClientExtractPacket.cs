@@ -16,7 +16,7 @@ public readonly struct ClientExtractPacket(int netId) : IGenericPacket
 
     public readonly void Execute()
     {
-        var coopHandler = Singleton<IFikaNetworkManager>.Instance.CoopHandler;
+        var coopHandler = FikaGlobals.NetworkManager.CoopHandler;
         if (coopHandler == null)
         {
             FikaGlobals.LogWarning("ClientExtract: CoopHandler was null! This is probably harmless.");
@@ -30,7 +30,7 @@ public readonly struct ClientExtractPacket(int netId) : IGenericPacket
             if (!coopHandler.ExtractedPlayers.Contains(NetId))
             {
                 coopHandler.ExtractedPlayers.Add(NetId);
-                var fikaGame = Singleton<IFikaGame>.Instance;
+                var fikaGame = FikaGlobals.FikaGame;
                 if (fikaGame != null)
                 {
                     fikaGame.ExtractedPlayers.Add(NetId);
@@ -42,7 +42,7 @@ public readonly struct ClientExtractPacket(int netId) : IGenericPacket
                     if (FikaPlugin.Instance.Settings.ShowNotifications.Value)
                     {
                         var nickname = !string.IsNullOrEmpty(playerToApply.Profile.Info.MainProfileNickname) ? playerToApply.Profile.Info.MainProfileNickname : playerToApply.Profile.Nickname;
-                        NotificationManager.DisplayMessageNotification(string.Format(LocaleUtils.GROUP_MEMBER_EXTRACTED.Localized(),
+                        FikaGlobals.DisplayMessage(string.Format(LocaleUtils.GROUP_MEMBER_EXTRACTED.Localized(),
                             ColorizeText(EColor.GREEN, nickname)),
                         ENotificationDurationType.Default, ENotificationIconType.EntryPoint);
                     }

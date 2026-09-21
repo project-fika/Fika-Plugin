@@ -2,25 +2,26 @@
 using EFT;
 using JsonType;
 using static Fika.Core.UI.FikaUIGlobals;
+using System.Text.Json.Serialization;
 
 namespace Fika.Core.Networking.Models.Presence;
 
 [DataContract]
 public struct FikaPlayerPresence
 {
-    [DataMember(Name = "nickname")]
+    [JsonPropertyName("nickname")]
     public string Nickname;
 
-    [DataMember(Name = "level")]
+    [JsonPropertyName("level")]
     public int Level;
 
-    [DataMember(Name = "activity")]
+    [JsonPropertyName("activity")]
     public EFikaPlayerPresence Activity;
 
-    [DataMember(Name = "activityStartedTimestamp")]
+    [JsonPropertyName("activityStartedTimestamp")]
     public long ActivityStartedTimestamp;
 
-    [DataMember(Name = "raidInformation")]
+    [JsonPropertyName("raidInformation")]
     public RaidInformation? RaidInformation;
 
     public FikaPlayerPresence(string nickname, int level, EFikaPlayerPresence activity, long activityStartedTimestamp, RaidInformation? raidInformation)
@@ -36,19 +37,19 @@ public struct FikaPlayerPresence
 [DataContract]
 public struct RaidInformation
 {
-    [DataMember(Name = "location")]
+    [JsonPropertyName("location")]
     public string Location;
 
-    [DataMember(Name = "side")]
+    [JsonPropertyName("side")]
     public ESideType Side;
 
-    [DataMember(Name = "time")]
+    [JsonPropertyName("time")]
     public EDateTime Time;
 
-    [DataMember(Name = "started")]
+    [JsonPropertyName("started")]
     public bool Started;
 
-    [DataMember(Name = "matchId")]
+    [JsonPropertyName("matchId")]
     public string MatchId;
 
     public RaidInformation(string location, ESideType side, EDateTime time, bool started, string matchId)

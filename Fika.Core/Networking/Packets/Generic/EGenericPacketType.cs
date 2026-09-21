@@ -98,7 +98,12 @@ public enum EGenericPacketType : byte
     /// <summary>
     /// The host changed a client's radio transmitter encoding
     /// </summary>
-    TransmitterEncoded
+    TransmitterEncoded,
+
+    /// <summary>
+    /// Trader dialog entry
+    /// </summary>
+    DialogEntry
 
     /// <summary>
     /// Train synchronization event (commented out).

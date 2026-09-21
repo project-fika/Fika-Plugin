@@ -12,8 +12,25 @@ public readonly struct ScopeStatesPacket : IFirearmPacket
         States = states;
     }
 
+    public ScopeStatesPacket(string zoomId, int zoomScopeIndex, float zoomValue)
+    {
+        IsZoom = true;
+        ZoomId = zoomId;
+        ZoomScopeIndex = zoomScopeIndex;
+        ZoomValue = zoomValue;
+    }
+
     public ScopeStatesPacket(NetDataReader reader)
     {
+        IsZoom = reader.GetBool();
+        if (IsZoom)
+        {
+            ZoomId = reader.GetString();
+            ZoomScopeIndex = reader.GetInt();
+            ZoomValue = reader.GetFloat();
+            return;
+        }
+
         Amount = reader.GetInt();
         if (Amount > 0)
         {
@@ -33,17 +50,36 @@ public readonly struct ScopeStatesPacket : IFirearmPacket
 
     public readonly int Amount;
     public readonly ScopeState[] States;
+    public readonly bool IsZoom;
+    public readonly string ZoomId;
+    public readonly int ZoomScopeIndex;
+    public readonly float ZoomValue;
 
     public readonly void Execute(FikaPlayer player)
     {
         if (player.HandsController is ObservedFirearmController controller)
         {
+            if (IsZoom)
+            {
+                controller.SetScopeZoom(ZoomId, ZoomScopeIndex, ZoomValue);
+                return;
+            }
+
             controller.SetScopeMode(States);
         }
     }
 
     public readonly void Serialize(NetDataWriter writer)
     {
+        writer.Put(IsZoom);
+        if (IsZoom)
+        {
+            writer.Put(ZoomId);
+            writer.Put(ZoomScopeIndex);
+            writer.Put(ZoomValue);
+            return;
+        }
+
         writer.Put(Amount);
         if (Amount > 0)
         {

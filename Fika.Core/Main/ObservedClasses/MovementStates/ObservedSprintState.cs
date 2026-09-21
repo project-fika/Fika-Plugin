@@ -1,13 +1,22 @@
 ﻿// © 2026 Lacyway All Rights Reserved
 
 using EFT;
+using System;
+using Il2CppInterop.Runtime.Injection;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.ObservedClasses.MovementStates;
 
 public class ObservedSprintState : SprintPlayerState
 {
-    public ObservedSprintState(MovementContext movementContext) : base(movementContext)
+    public ObservedSprintState(IntPtr pointer) : base(pointer)
     {
+    }
+
+    public ObservedSprintState(MovementContext movementContext) : base(Il2CppInjection.Allocate<ObservedSprintState>())
+    {
+        ClassInjector.DerivedConstructorBody(this);
+        ClassInjector.InvokeBaseConstructor<SprintPlayerState>(this, movementContext);
         MovementContext = movementContext;
     }
 

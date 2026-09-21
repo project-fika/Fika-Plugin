@@ -18,7 +18,7 @@ public class SpawnSyncObjectSubPackets
         public bool IsStatic;
         public string GrenadeTemplate;
         public string GrenadeId;
-        public string ProfileId;
+        public int PlayerRaidId;
         public Vector3 ToPosition;
         public Vector3 Position;
         public Quaternion Rotation;
@@ -34,7 +34,7 @@ public class SpawnSyncObjectSubPackets
             IsStatic = reader.GetBool();
             GrenadeTemplate = reader.GetString();
             GrenadeId = reader.GetString();
-            ProfileId = reader.GetString();
+            PlayerRaidId = reader.GetInt();
             Position = reader.GetUnmanaged<Vector3>();
             ToPosition = reader.GetUnmanaged<Vector3>();
             Rotation = reader.GetUnmanaged<Quaternion>();
@@ -60,7 +60,7 @@ public class SpawnSyncObjectSubPackets
             syncObject.transform.SetPositionAndRotation(Position, Rotation);
             processor.InitSyncObject(syncObject, syncObject.transform.position, syncObject.transform.rotation.eulerAngles, syncObject.ObjectId);
 
-            syncObject.SetupGrenade(grenadeClass, ProfileId, Position, ToPosition);
+            syncObject.SetupGrenade(grenadeClass, PlayerRaidId, Position, ToPosition);
         }
 
         public void Serialize(NetDataWriter writer)
@@ -69,7 +69,7 @@ public class SpawnSyncObjectSubPackets
             writer.Put(IsStatic);
             writer.Put(GrenadeTemplate);
             writer.Put(GrenadeId);
-            writer.Put(ProfileId);
+            writer.Put(PlayerRaidId);
             writer.PutUnmanaged(Position);
             writer.PutUnmanaged(ToPosition);
             writer.PutUnmanaged(Rotation);

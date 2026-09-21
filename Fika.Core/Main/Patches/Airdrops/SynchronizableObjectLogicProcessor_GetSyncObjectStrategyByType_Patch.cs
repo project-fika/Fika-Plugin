@@ -2,7 +2,7 @@
 using System.Reflection;
 using EFT.SynchronizableObjects;
 using Fika.Core.Main.Utils;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.Airdrops;
 
@@ -16,6 +16,11 @@ public class SynchronizableObjectLogicProcessor_GetSyncObjectStrategyByType_Patc
     [PatchPrefix]
     public static bool Prefix(SynchronizableObjectType type, ref ISynchronizableLogic __result)
     {
+        if (FikaBackendUtils.IsTutorial)
+        {
+            return true;
+        }
+
         switch (type)
         {
             case SynchronizableObjectType.Tripwire:

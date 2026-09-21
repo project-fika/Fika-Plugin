@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using EFT;
 using EFT.InventoryLogic;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.AI;
 
@@ -17,8 +17,8 @@ public class BotReload_AddAmmoToMagazines_Patch : ModulePatch
     }
 
     [PatchPostfix]
-    public static void Postfix(BotOwner ____owner)
+    public static void Postfix(BotReload __instance)
     {
-        ____owner.ShootData.BlockFor(0.7f);
+        __instance._owner.ShootData.BlockFor(0.7f);
     }
 }

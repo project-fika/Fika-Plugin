@@ -11,6 +11,8 @@ using Fika.Core.UI;
 using TMPro;
 using UnityEngine.UI;
 using Object = System.Object;
+using System;
+using Il2CppInterop.Runtime.Injection;
 
 namespace Fika.Core.Main.Factories;
 
@@ -38,13 +40,13 @@ public static class PingFactory
             Singleton<GUISounds>.Instance.PlayUISound(GetPingSound());
             if (string.IsNullOrEmpty(localeId))
             {
-                NotificationManager.DisplayMessageNotification(string.Format(LocaleUtils.RECEIVE_PING.Localized(), FikaUIGlobals.ColorizeText(FikaUIGlobals.EColor.GREEN, nickname)),
+                FikaGlobals.DisplayMessage(string.Format(LocaleUtils.RECEIVE_PING.Localized(), FikaUIGlobals.ColorizeText(FikaUIGlobals.EColor.GREEN, nickname)),
                             ENotificationDurationType.Default, ENotificationIconType.Friend);
             }
             else
             {
                 var localizedName = localeId.Localized();
-                NotificationManager.DisplayMessageNotification(string.Format(LocaleUtils.RECEIVE_PING_OBJECT.Localized(),
+                FikaGlobals.DisplayMessage(string.Format(LocaleUtils.RECEIVE_PING_OBJECT.Localized(),
                     [FikaUIGlobals.ColorizeText(FikaUIGlobals.EColor.GREEN, nickname), FikaUIGlobals.ColorizeText(FikaUIGlobals.EColor.BLUE, localizedName)]),
                     ENotificationDurationType.Default, ENotificationIconType.Friend);
             }
@@ -90,8 +92,18 @@ public static class PingFactory
 
     public abstract class AbstractPing : MonoBehaviour
     {
-        //internal static readonly AssetBundle pingBundle;
-        internal static readonly Dictionary<InternalBundleLoader.EFikaSprite, Sprite> sprites;
+        protected AbstractPing(IntPtr pointer) : base(pointer)
+        {
+        }
+
+        private static Dictionary<InternalBundleLoader.EFikaSprite, Sprite> _sprites;
+        internal static Dictionary<InternalBundleLoader.EFikaSprite, Sprite> sprites
+        {
+            get
+            {
+                return _sprites ??= InternalBundleLoader.Instance.GetFikaSprites();
+            }
+        }
 
         protected Image _image;
         protected Vector3 _hitPoint;
@@ -100,11 +112,6 @@ public static class PingFactory
         private bool _displayRange;
         private Color _pingColor = Color.white;
         private FikaPlayer _mainPlayer;
-
-        static AbstractPing()
-        {
-            sprites = InternalBundleLoader.Instance.GetFikaSprites();
-        }
 
         protected void Awake()
         {
@@ -226,6 +233,10 @@ public static class PingFactory
 
     public class InteractablePing : AbstractPing
     {
+        public InteractablePing(IntPtr pointer) : base(pointer)
+        {
+        }
+
         public override void Initialize(ref Vector3 point, Object userObject, Color pingColor)
         {
             base.Initialize(ref point, userObject, pingColor);
@@ -235,6 +246,10 @@ public static class PingFactory
 
     public class PlayerPing : AbstractPing
     {
+        public PlayerPing(IntPtr pointer) : base(pointer)
+        {
+        }
+
         public override void Initialize(ref Vector3 point, Object userObject, Color pingColor)
         {
             base.Initialize(ref point, userObject, pingColor);
@@ -244,6 +259,10 @@ public static class PingFactory
 
     public class LootContainerPing : AbstractPing
     {
+        public LootContainerPing(IntPtr pointer) : base(pointer)
+        {
+        }
+
         public override void Initialize(ref Vector3 point, Object userObject, Color pingColor)
         {
             base.Initialize(ref point, userObject, pingColor);
@@ -253,6 +272,10 @@ public static class PingFactory
 
     public class DoorPing : AbstractPing
     {
+        public DoorPing(IntPtr pointer) : base(pointer)
+        {
+        }
+
         public override void Initialize(ref Vector3 point, Object userObject, Color pingColor)
         {
             base.Initialize(ref point, userObject, pingColor);
@@ -262,6 +285,10 @@ public static class PingFactory
 
     public class PointPing : AbstractPing
     {
+        public PointPing(IntPtr pointer) : base(pointer)
+        {
+        }
+
         public override void Initialize(ref Vector3 point, Object userObject, Color pingColor)
         {
             base.Initialize(ref point, userObject, pingColor);
@@ -271,6 +298,10 @@ public static class PingFactory
 
     public class DeadBodyPing : AbstractPing
     {
+        public DeadBodyPing(IntPtr pointer) : base(pointer)
+        {
+        }
+
         public override void Initialize(ref Vector3 point, Object userObject, Color pingColor)
         {
             base.Initialize(ref point, userObject, Color.white); // White since this icon is already red...
@@ -281,6 +312,10 @@ public static class PingFactory
 
     public class LootItemPing : AbstractPing
     {
+        public LootItemPing(IntPtr pointer) : base(pointer)
+        {
+        }
+
         public override void Initialize(ref Vector3 point, Object userObject, Color pingColor)
         {
             base.Initialize(ref point, userObject, pingColor);

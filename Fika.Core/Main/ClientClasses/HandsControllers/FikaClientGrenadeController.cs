@@ -8,11 +8,16 @@ using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Packets.FirearmController;
 using Fika.Core.Networking.Packets.FirearmController.SubPackets;
+using Il2CppInterop.Runtime.Injection;
 
 namespace Fika.Core.Main.ClientClasses.HandsControllers;
 
 public class FikaClientGrenadeController : Player.GrenadeHandsController
 {
+    public FikaClientGrenadeController(IntPtr pointer) : base(pointer)
+    {
+    }
+
     protected FikaPlayer _fikaPlayer;
     private bool _isClient;
 
@@ -143,7 +148,7 @@ public class FikaClientGrenadeController : Player.GrenadeHandsController
         base.ChangeFireMode(fireMode);
     }
 
-    public override void ActualDrop(Result<IGrenadeController> controller, float animationSpeed, Action callback, bool fastDrop)
+    public override void ActualDrop(Result<IGrenadeController> controller, float animationSpeed, Il2CppSystem.Action callback, bool fastDrop)
     {
         var packet = new CancelGrenadePacket();
         _fikaPlayer.PacketSender.NetworkManager.SendFirearmPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);

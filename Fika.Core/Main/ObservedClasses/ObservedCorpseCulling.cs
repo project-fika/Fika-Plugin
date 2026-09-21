@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Fika.Core.Main.Utils;
+using System;
 using System.Collections.Generic;
 using EFT.Interactive;
 using Fika.Core.Main.Players;
@@ -60,7 +61,7 @@ public sealed class ObservedCorpseCulling : IDisposable
         }
         _renderers.Clear();
         var isVisible = IsVisible;
-        _observedPlayer.PlayerBody.GetRenderersNonAlloc(_renderers);
+        _observedPlayer.PlayerBody.GetRenderersNonAlloc((_renderers).ToIl2CppList());
         for (var k = 0; k < _renderers.Count; k++)
         {
             if (_renderers[k] != null)

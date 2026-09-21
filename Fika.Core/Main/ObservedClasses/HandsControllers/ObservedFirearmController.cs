@@ -10,11 +10,26 @@ using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Packets.FirearmController.SubPackets;
 using static EFT.Player;
+using Il2CppInterop.Runtime.Injection;
 
 namespace Fika.Core.Main.ObservedClasses.HandsControllers;
 
 public sealed class ObservedFirearmController : FirearmController
 {
+    public ObservedFirearmController(IntPtr pointer) : base(pointer)
+    {
+    }
+
+    public override void Destroy()
+    {
+        if (FikaGlobals.IsQuitting)
+        {
+            return;
+        }
+
+        base.Destroy();
+    }
+
     public Firearms WeaponManager
     {
         get
@@ -34,7 +49,6 @@ public sealed class ObservedFirearmController : FirearmController
 
     private ObservedPlayer _observedPlayer;
     private bool _triggerPressed;
-    private bool _needsReset;
     private float _lastFireTime;
     private float _overlapCounter;
     private bool _hasFired;
@@ -73,16 +87,15 @@ public sealed class ObservedFirearmController : FirearmController
         }
     }
 
-    public override Dictionary<Type, OperationFactoryDelegate> GetOperationFactoryDelegates()
+    public override Il2CppSystem.Collections.Generic.Dictionary<Il2CppSystem.Type, OperationFactoryDelegate> GetOperationFactoryDelegates()
     {
-        // Check for GClass increments..
         var operationFactoryDelegates = base.GetOperationFactoryDelegates();
-        operationFactoryDelegates[typeof(Idling)] = new OperationFactoryDelegate(Idle1);
+        operationFactoryDelegates[typeof(Idling).ToIl2Cpp()] = new System.Func<Player.ObjectInHandsOperation>(Idle1);
         // Look for operations that implement OnShellEjectEvent and ThrowPatronAsLoot
-        operationFactoryDelegates[typeof(ReloadMultiBarrelOperation)] = new OperationFactoryDelegate(ThrowPatron1);
-        operationFactoryDelegates[typeof(ReloadSingleBarrelOperation)] = new OperationFactoryDelegate(ThrowPatron2);
-        operationFactoryDelegates[typeof(RepairMalfunction)] = new OperationFactoryDelegate(ThrowPatron3);
-        operationFactoryDelegates[typeof(RechamberOperation)] = new OperationFactoryDelegate(ThrowPatron4);
+        operationFactoryDelegates[typeof(ReloadMultiBarrelOperation).ToIl2Cpp()] = new System.Func<Player.ObjectInHandsOperation>(ThrowPatron1);
+        operationFactoryDelegates[typeof(ReloadSingleBarrelOperation).ToIl2Cpp()] = new System.Func<Player.ObjectInHandsOperation>(ThrowPatron2);
+        operationFactoryDelegates[typeof(RepairMalfunction).ToIl2Cpp()] = new System.Func<Player.ObjectInHandsOperation>(ThrowPatron3);
+        operationFactoryDelegates[typeof(RechamberOperation).ToIl2Cpp()] = new System.Func<Player.ObjectInHandsOperation>(ThrowPatron4);
         return operationFactoryDelegates;
     }
 
@@ -115,6 +128,12 @@ public sealed class ObservedFirearmController : FirearmController
     {
         _objectInHandsAnimator.SetAiming(false);
         _weaponManager = _weaponPrefab.ObjectInHands as Firearms;
+        // ScopeZoomHandler.Update drives the zoom from the local mouse wheel, an observed scope only follows packets.
+        _weaponManager.ValidateScopeSmoothZoomUpdate(false);
+        if (UnderbarrelWeapon != null)
+        {
+            _underBarrelManager = _underbarrelContainer;
+        }
         IsRevolver = Weapon is Revolver;
         _stationaryWeapon = Weapon.IsStationaryWeapon;
     }
@@ -126,7 +145,7 @@ public sealed class ObservedFirearmController : FirearmController
         return controller;
     }
 
-    public override bool CanStartReload()
+    public override bool CanStartReload(bool checkWeaponMalfunctions = true)
     {
         return true;
     }
@@ -162,28 +181,25 @@ public sealed class ObservedFirearmController : FirearmController
             {
                 FirearmsAnimator.SetFire(false);
                 _hasFired = false;
-                if (_needsReset)
-                {
-                    _needsReset = false;
-                    WeaponSoundPlayer.OnBreakLoop();
-                }
             }
         }
     }
 
     public override void ReloadMag(Magazine magazine, ItemAddress itemAddress, Callback callback)
     {
-        _player.MovementContext.PlayerAnimator.AnimatedInteractions.ForceStopInteractions();
+        _player.ResetGestureInHands();
         CurrentOperation.ReloadMag(magazine, itemAddress, callback, null);
     }
 
     public override void QuickReloadMag(Magazine magazine, Callback callback)
     {
+        _player.ResetGestureInHands();
         CurrentOperation.QuickReloadMag(magazine, callback, null);
     }
 
     public override void ReloadGrenadeLauncher(AmmoPack foundItem, Callback callback)
     {
+        _player.ResetGestureInHands();
         CurrentOperation.ReloadGrenadeLauncher(foundItem, callback);
     }
 
@@ -194,11 +210,13 @@ public sealed class ObservedFirearmController : FirearmController
             return;
         }
 
+        _player.ResetGestureInHands();
         CurrentOperation.ReloadCylinderMagazine(ammoPack, callback, null, quickReload);
     }
 
     public override void ReloadWithAmmo(AmmoPack ammoPack, Callback callback)
     {
+        _player.ResetGestureInHands();
         if (IsRevolver)
         {
             CurrentOperation.ReloadCylinderMagazine(ammoPack, callback, null, false);
@@ -212,6 +230,7 @@ public sealed class ObservedFirearmController : FirearmController
     {
         if (ammoPack.AmmoCount > 0)
         {
+            _player.ResetGestureInHands();
             CurrentOperation.ReloadBarrels(ammoPack, placeToPutContainedAmmoMagazine, callback, null);
         }
     }
@@ -267,7 +286,6 @@ public sealed class ObservedFirearmController : FirearmController
             _triggerPressed = false;
             SetTriggerPressed(false);
 
-            _needsReset = false;
             WeaponSoundPlayer.OnBreakLoop();
 
             var fdt = Time.fixedDeltaTime;
@@ -278,7 +296,7 @@ public sealed class ObservedFirearmController : FirearmController
                 CurrentOperation.FastForward();
             }
 
-            StartCoroutine(BreakFiringLoop());
+            StartCoroutine((BreakFiringLoop()).ToIl2Cpp());
         }
         catch (Exception ex)
         {
@@ -321,10 +339,10 @@ public sealed class ObservedFirearmController : FirearmController
 
     private IEnumerator BreakFiringLoop()
     {
-        WeaponSoundPlayer.Release();
+        WeaponSoundPlayer.OnBreakLoop();
         var attempts = 0;
         WaitForEndOfFrame waitForEndOfFrame = new();
-        while (WeaponSoundPlayer._isFiring && attempts < 10)
+        while (WeaponSoundPlayer.IsFiring && attempts < 10)
         {
             yield return waitForEndOfFrame;
             WeaponSoundPlayer.StopFiringLoop();
@@ -332,10 +350,48 @@ public sealed class ObservedFirearmController : FirearmController
         }
     }
 
-    public override void SetScopeMode(ScopeState[] scopeStates)
+    public override void SetScopeMode(Il2CppInterop.Runtime.InteropTypes.Arrays.Il2CppReferenceArray<ScopeState> scopeStates)
     {
         _player.ProceduralWeaponAnimation.ObservedCalibration();
         base.SetScopeMode(scopeStates);
+    }
+
+    /// <summary>
+    /// Applies a replicated smooth scope zoom
+    /// </summary>
+    /// <param name="sightId">Id of the sight item</param>
+    /// <param name="scopeIndex">Selected scope inside the sight</param>
+    /// <param name="zoomValue">The zoom value to apply</param>
+    public void SetScopeZoom(string sightId, int scopeIndex, float zoomValue)
+    {
+        var visualControllers = _weaponManager._sightModVisualControllers;
+        if (visualControllers == null)
+        {
+            return;
+        }
+
+        for (var i = 0; i < visualControllers.Length; i++)
+        {
+            var visualController = visualControllers[i];
+            var sight = visualController?.SightMod;
+            if (sight == null || sight.Item == null || sight.Item.Id != sightId)
+            {
+                continue;
+            }
+
+            if (scopeIndex >= 0 && scopeIndex < sight.ScopesCount)
+            {
+                sight.SelectedScopeIndex = scopeIndex;
+            }
+
+            sight.ScopeZoomValue = zoomValue;
+            var zoomHandler = visualController._scopeZoomHandler;
+            if (zoomHandler != null)
+            {
+                zoomHandler.SetSpectatorZoomValue(zoomValue);
+            }
+            return;
+        }
     }
 
     public override void AdjustShotVectors(ref Vector3 position, ref Vector3 direction)
@@ -374,7 +430,7 @@ public sealed class ObservedFirearmController : FirearmController
     /// <param name="rocketClass">The ammo to shoot</param>
     /// <param name="shotPosition">Start position</param>
     /// <param name="shotForward">The forward velocity</param>
-    public void HandleRocketShot(Ammo rocketClass, Vector3 shotPosition, Vector3 shotForward)
+    public void HandleRocketShot(Rocket rocketClass, Vector3 shotPosition, Vector3 shotForward)
     {
         FirearmsAnimator.SetFire(true);
 
@@ -536,9 +592,7 @@ public sealed class ObservedFirearmController : FirearmController
         InitiateShot(Item, ammo, packet.ShotPosition, packet.ShotDirection,
             CurrentFireport.position, packet.ChamberIndex, packet.Overheat);
 
-        var pitchMult = CalculateBaseAimingVolume();
-        WeaponSoundPlayer.FireBullet(ammo, packet.ShotPosition, packet.ShotDirection,
-            pitchMult, Malfunction, false, IsBirstOf2Start);
+        PlayFireBulletSound(WeaponSoundPlayer, ammo, packet.ShotPosition, packet.ShotDirection, false);
 
         SetMalfAndDurability(packet, revolver);
 
@@ -599,7 +653,7 @@ public sealed class ObservedFirearmController : FirearmController
         var weapon = Weapon;
         SetMalfAndDurability(packet, weapon);
 
-        if (_stationaryWeapon)
+        if (_stationaryWeapon && _player.MovementContext.StationaryWeapon != null)
         {
             _player.MovementContext.StationaryWeapon.ObservedShot();
         }
@@ -609,17 +663,11 @@ public sealed class ObservedFirearmController : FirearmController
             _triggerPressed = true;
         }
 
-        var pitchMult = CalculateBaseAimingVolume();
-        WeaponSoundPlayer.FireBullet(ammo, packet.ShotPosition, packet.ShotDirection,
-            pitchMult, Malfunction, false, IsBirstOf2Start);
+        PlayFireBulletSound(WeaponSoundPlayer, ammo, packet.ShotPosition, packet.ShotDirection, false);
 
         _triggerPressed = false;
         _hasFired = true;
         _lastFireTime = 0f;
-        if (weapon.SelectedFireMode == Weapon.EFireMode.fullauto)
-        {
-            _needsReset = true;
-        }
 
         var magazine = weapon.GetCurrentMagazine();
 
@@ -777,7 +825,7 @@ public sealed class ObservedFirearmController : FirearmController
                 _preallocatedAmmoList.Add(bulletClass);
             }
         }
-        return _preallocatedAmmoList;
+        return (_preallocatedAmmoList).ToManagedList();
     }
 
 
@@ -808,17 +856,38 @@ public sealed class ObservedFirearmController : FirearmController
         }
     }
 
-    private class ObservedIdleOperation(FirearmController controller) : Idling(controller)
+    private class ObservedIdleOperation : Player.FirearmController.Idling
     {
+        public ObservedIdleOperation(IntPtr pointer) : base(pointer)
+        {
+        }
+
+        public ObservedIdleOperation(FirearmController controller) : base(Il2CppInjection.Allocate<ObservedIdleOperation>())
+        {
+            ClassInjector.DerivedConstructorBody(this);
+            ClassInjector.InvokeBaseConstructor<Player.FirearmController.Idling>(this, controller);
+        }
+
         public override void ProcessRemoveOneOffWeapon()
         {
             // Do nothing
         }
     }
 
-    private class ObservedThrowPatronOperation1(FirearmController controller) : ReloadMultiBarrelOperation(controller)
+    private class ObservedThrowPatronOperation1 : Player.FirearmController.ReloadMultiBarrelOperation
     {
-        private readonly ObservedFirearmController _observedController = (ObservedFirearmController)controller;
+        public ObservedThrowPatronOperation1(IntPtr pointer) : base(pointer)
+        {
+        }
+
+        public ObservedThrowPatronOperation1(FirearmController controller) : base(Il2CppInjection.Allocate<ObservedThrowPatronOperation1>())
+        {
+            ClassInjector.DerivedConstructorBody(this);
+            _observedController = (ObservedFirearmController)controller;
+            ClassInjector.InvokeBaseConstructor<Player.FirearmController.ReloadMultiBarrelOperation>(this, controller);
+        }
+
+        private readonly ObservedFirearmController _observedController;
 
         public override void Start(ReloadMultiBarrelResult reloadMultiBarrelResult, Callback callback)
         {
@@ -827,9 +896,20 @@ public sealed class ObservedFirearmController : FirearmController
         }
     }
 
-    private class ObservedThrowPatronOperation2(FirearmController controller) : ReloadSingleBarrelOperation(controller)
+    private class ObservedThrowPatronOperation2 : Player.FirearmController.ReloadSingleBarrelOperation
     {
-        private readonly ObservedFirearmController _observedController = (ObservedFirearmController)controller;
+        public ObservedThrowPatronOperation2(IntPtr pointer) : base(pointer)
+        {
+        }
+
+        public ObservedThrowPatronOperation2(FirearmController controller) : base(Il2CppInjection.Allocate<ObservedThrowPatronOperation2>())
+        {
+            ClassInjector.DerivedConstructorBody(this);
+            _observedController = (ObservedFirearmController)controller;
+            ClassInjector.InvokeBaseConstructor<Player.FirearmController.ReloadSingleBarrelOperation>(this, controller);
+        }
+
+        private readonly ObservedFirearmController _observedController;
 
         public override void Start(ReloadSingleBarrelResult reloadSingleBarrelResult, Callback callback)
         {
@@ -838,9 +918,20 @@ public sealed class ObservedFirearmController : FirearmController
         }
     }
 
-    private class ObservedThrowPatronOperation3(FirearmController controller) : RepairMalfunction(controller)
+    private class ObservedThrowPatronOperation3 : Player.FirearmController.RepairMalfunction
     {
-        private readonly ObservedFirearmController _observedController = (ObservedFirearmController)controller;
+        public ObservedThrowPatronOperation3(IntPtr pointer) : base(pointer)
+        {
+        }
+
+        public ObservedThrowPatronOperation3(FirearmController controller) : base(Il2CppInjection.Allocate<ObservedThrowPatronOperation3>())
+        {
+            ClassInjector.DerivedConstructorBody(this);
+            _observedController = (ObservedFirearmController)controller;
+            ClassInjector.InvokeBaseConstructor<Player.FirearmController.RepairMalfunction>(this, controller);
+        }
+
+        private readonly ObservedFirearmController _observedController;
 
         public override void Start()
         {
@@ -849,9 +940,20 @@ public sealed class ObservedFirearmController : FirearmController
         }
     }
 
-    private class ObservedThrowPatronOperation4(FirearmController controller) : RechamberOperation(controller)
+    private class ObservedThrowPatronOperation4 : Player.FirearmController.RechamberOperation
     {
-        private readonly ObservedFirearmController _observedController = (ObservedFirearmController)controller;
+        public ObservedThrowPatronOperation4(IntPtr pointer) : base(pointer)
+        {
+        }
+
+        public ObservedThrowPatronOperation4(FirearmController controller) : base(Il2CppInjection.Allocate<ObservedThrowPatronOperation4>())
+        {
+            ClassInjector.DerivedConstructorBody(this);
+            _observedController = (ObservedFirearmController)controller;
+            ClassInjector.InvokeBaseConstructor<Player.FirearmController.RechamberOperation>(this, controller);
+        }
+
+        private readonly ObservedFirearmController _observedController;
 
         public override void Start(Ammo ammo, Callback callback)
         {

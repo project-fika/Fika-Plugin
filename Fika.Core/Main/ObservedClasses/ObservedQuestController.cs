@@ -7,12 +7,24 @@ using EFT.Quests;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Packets.Backend;
 using Fika.Core.Networking.Packets.Communication;
+using System;
+using Il2CppInterop.Runtime.Injection;
+using System.Threading.Tasks;
 
 namespace Fika.Core.Main.ObservedClasses;
 
-public class ObservedQuestController(Profile profile, InventoryController inventoryController, IPlayerSearchController searchController, IQuestSession session)
-    : QuestControllerClientLocalGame(profile, inventoryController, searchController, session)
+public class ObservedQuestController : QuestControllerClientLocalGame
 {
+    public ObservedQuestController(IntPtr pointer) : base(pointer)
+    {
+    }
+
+    public ObservedQuestController(Profile profile, InventoryController inventoryController, IPlayerSearchController searchController, IQuestSession session) : base(Il2CppInjection.Allocate<ObservedQuestController>())
+    {
+        ClassInjector.DerivedConstructorBody(this);
+        ClassInjector.InvokeBaseConstructor<QuestControllerClientLocalGame>(this, profile, inventoryController, searchController, session);
+    }
+
     private Dictionary<int, List<QuestInformation>> _questsDict;
     private List<ZoneDropInformation> _zoneDrops;
     private List<string> _visitedPlaces;
@@ -52,9 +64,9 @@ public class ObservedQuestController(Profile profile, InventoryController invent
         if (packet.Type is QuestSyncPacket.EQuestSyncType.PickUpQuestItem)
         {
 #if DEBUG
-            FikaGlobals.LogInfo($"Received loot quest item [{packet.ItemId.Value}]");
+            FikaGlobals.LogInfo($"Received loot quest item [{packet.ItemId}]");
 #endif
-            _lootedQuestItems.Add(packet.ItemId.Value);
+            _lootedQuestItems.Add(packet.ItemId);
             return;
         }
 
@@ -161,6 +173,40 @@ public class ObservedQuestController(Profile profile, InventoryController invent
         }
     }
 
+    // InventoryOperationExtensions only kept the non generic RollBack in 1.1, these match the 4.1 overloads
+    private static void RollBackAll(List<MoveResult> results)
+    {
+        for (var i = results.Count - 1; i >= 0; i--)
+        {
+            results[i].RollBack();
+        }
+    }
+
+    private static void RollBackAll(List<OperationResult<DiscardResult>> results)
+    {
+        for (var i = results.Count - 1; i >= 0; i--)
+        {
+            results[i].Value.RollBack();
+        }
+    }
+    
+    private static async Task LoadRewardBundles(List<MoveResult> rewards)
+    {
+        var resources = new HashSet<ResourceKey>();
+        foreach (var reward in rewards)
+        {
+            foreach (var item in reward.Item.GetAllItems())
+            {
+                foreach (var resource in item.Template.AllResources)
+                {
+                    resources.Add(resource);
+                }
+            }
+        }
+        await Singleton<ObjectsFactory>.Instance.LoadBundlesAndCreatePools(ObjectsFactory.PoolsCategory.Raid, ObjectsFactory.AssemblyType.Online,
+            resources.ToIl2CppList(), Diz.Jobs.JobYieldPriority.Immediate, null, new Il2CppSystem.Threading.CancellationToken());
+    }
+
     public void HandleInraidQuestPacket(InRaidQuestPacket packet)
     {
         switch (packet.Type)
@@ -184,7 +230,7 @@ public class ObservedQuestController(Profile profile, InventoryController invent
                     OperationResult appendResult = default;
                     foreach (var item in readList)
                     {
-                        appendResult = item.TryAppendClaimResults(InventoryController, results, out var clonedCount);
+                        appendResult = item.TryAppendClaimResults(InventoryController, (results).ToIl2CppList(), out var clonedCount);
                         generatedItems += clonedCount;
                         if (appendResult.Failed)
                         {
@@ -193,7 +239,7 @@ public class ObservedQuestController(Profile profile, InventoryController invent
                     }
                     if (appendResult.Failed)
                     {
-                        results.RollBack();
+                        RollBackAll(results);
                         for (var i = 0; i < generatedItems; i++)
                         {
                             InventoryController.RollBack();
@@ -201,7 +247,7 @@ public class ObservedQuestController(Profile profile, InventoryController invent
                         return;
                     }
 
-                    method_5(results);
+                    LoadRewardBundles(results).Forget();
                 }
                 break;
             case InRaidQuestPacket.InraidQuestType.Handover:
@@ -234,7 +280,7 @@ public class ObservedQuestController(Profile profile, InventoryController invent
 
                     if (discardResult.Failed)
                     {
-                        list.RollBack();
+                        RollBackAll(list);
                         FikaGlobals.LogError($"Could not discard items: {discardResult.Error.Localized()}");
                     }
                 }

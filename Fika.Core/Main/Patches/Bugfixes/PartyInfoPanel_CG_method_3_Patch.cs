@@ -2,7 +2,8 @@
 using EFT;
 using EFT.InventoryLogic;
 using EFT.UI.Matchmaker;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.Patches.Bugfixes;
 
@@ -15,7 +16,7 @@ public class PartyInfoPanel_CG_method_3_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(PartyInfoPanel).GetMethod(nameof(PartyInfoPanel.CG_method_3));
+        return Il2CppMethods.ByNativeName(typeof(PartyInfoPanel), "<Show>g__HandleOnPlayerEquipmentClick|12_2");
     }
 
     [PatchPrefix]

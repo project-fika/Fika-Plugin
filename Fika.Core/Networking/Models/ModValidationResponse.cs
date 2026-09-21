@@ -1,16 +1,17 @@
 ﻿using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Fika.Core.Networking.Models;
 
 [DataContract]
 public struct ModValidationResponse
 {
-    [DataMember(Name = "forbidden")]
+    [JsonPropertyName("forbidden")]
     public string[] Forbidden;
 
-    [DataMember(Name = "missingRequired")]
+    [JsonPropertyName("missingRequired")]
     public string[] MissingRequired;
 
-    [DataMember(Name = "hashMismatch")]
+    [JsonPropertyName("hashMismatch")]
     public string[] HashMismatch;
 }

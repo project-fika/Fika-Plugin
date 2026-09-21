@@ -27,7 +27,7 @@ public readonly struct ExfilCountdownPacket : IGenericPacket
 
     public readonly void Execute()
     {
-        var coopHandler = Singleton<IFikaNetworkManager>.Instance.CoopHandler;
+        var coopHandler = FikaGlobals.NetworkManager.CoopHandler;
         if (coopHandler == null)
         {
             FikaGlobals.LogError("ClientExtract: CoopHandler was null!");
@@ -36,7 +36,7 @@ public readonly struct ExfilCountdownPacket : IGenericPacket
 
         if (ExfiltrationController.Instance != null)
         {
-            var fikaGame = Singleton<IFikaGame>.Instance;
+            var fikaGame = FikaGlobals.FikaGame;
             if (fikaGame == null)
             {
                 FikaGlobals.LogError("ExfilCountdown: FikaGame was null");

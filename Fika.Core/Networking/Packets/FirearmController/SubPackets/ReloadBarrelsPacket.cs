@@ -65,7 +65,7 @@ public readonly struct ReloadBarrelsPacket : IFirearmPacket
                 return;
             }
 
-            AmmoPack ammoPack = new(ammo);
+            AmmoPack ammoPack = new(ammo.ToIl2CppList());
 
             ItemAddress gridItemAddress = null;
             if (Descriptor != null)

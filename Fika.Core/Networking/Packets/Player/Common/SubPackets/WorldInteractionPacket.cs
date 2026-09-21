@@ -89,7 +89,7 @@ public readonly struct WorldInteractionPacket : IPlayerPacket
 
                 if (InteractionStage != EInteractionStage.Execute)
                 {
-                    worldInteractiveObject.Interact(interactionResult);
+                    player.CancelDoorInteraction(worldInteractiveObject, interactionResult);
                     return;
                 }
 

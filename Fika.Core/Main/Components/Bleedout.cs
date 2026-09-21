@@ -6,11 +6,17 @@ using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.UI;
 using TMPro;
+using System;
+using Il2CppInterop.Runtime.Injection;
 
 namespace Fika.Core.Main.Components;
 
 internal sealed class Bleedout : MonoBehaviour
 {
+    public Bleedout(IntPtr pointer) : base(pointer)
+    {
+    }
+
     private GameUI GameUI => MonoBehaviourSingleton<GameUI>.Instance;
     private KeyboardShortcut GiveUpKey => FikaPlugin.Instance.Settings.GiveUpKey.Value;
 
@@ -109,7 +115,7 @@ internal sealed class Bleedout : MonoBehaviour
             return;
         }
 
-        _healthController.Player.Speaker.Play(EPhraseTrigger.OnAgony, _healthController.Player.HealthStatus, true);
+        _healthController.Player.Speaker.Play(EPhraseTrigger.OnAgony, _healthController.Player.HealthStatus, true, new Il2CppSystem.Nullable<int>());
     }
 
     private void BleedOut()

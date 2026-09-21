@@ -3,7 +3,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using CustomPlayerLoopSystem;
 using HarmonyLib;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.Subsystems;
 
@@ -17,9 +17,9 @@ internal class CustomPlayerLoopSystemsInjector_InjectDataProviderSyncUpdate_Tran
         return typeof(CustomPlayerLoopSystemsInjector).GetMethod(nameof(CustomPlayerLoopSystemsInjector.InjectDataProviderSyncUpdate));
     }
 
-    [PatchTranspiler]
-    public static IEnumerable<CodeInstruction> Transpile()
+    [PatchPrefix]
+    public static bool Prefix()
     {
-        yield return new(OpCodes.Ret);
+        return false;
     }
 }

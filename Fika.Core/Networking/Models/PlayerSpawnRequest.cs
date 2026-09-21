@@ -1,18 +1,19 @@
 using System.Runtime.Serialization;
 using Fika.Core.Main.Components;
+using System.Text.Json.Serialization;
 
 namespace Fika.Core.Networking.Models;
 
 [DataContract]
 public struct PlayerSpawnRequest
 {
-    [DataMember(Name = "serverId")]
+    [JsonPropertyName("serverId")]
     public string ServerId;
 
-    [DataMember(Name = "profileId")]
+    [JsonPropertyName("profileId")]
     public string ProfileId;
 
-    [DataMember(Name = "groupId")]
+    [JsonPropertyName("groupId")]
     public string GroupId;
 
     public PlayerSpawnRequest(string profileId, string groupId)

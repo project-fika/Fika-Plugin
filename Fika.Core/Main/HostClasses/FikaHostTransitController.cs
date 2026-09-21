@@ -12,33 +12,43 @@ using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Communication;
+using System;
+using Il2CppInterop.Runtime.Injection;
+using Il2CppInterop.Runtime.InteropTypes.Arrays;
 
 namespace Fika.Core.Main.HostClasses;
 
 public class FikaHostTransitController : LocalTransitController
 {
-    public FikaHostTransitController(GlobalConfiguration.TransitGlobalSettings settings, LocationSettings.Location.TransitParameters[] parameters, Profile profile, LocalRaidSettings localRaidSettings)
-        : base(settings, parameters, profile, localRaidSettings)
+    public FikaHostTransitController(IntPtr pointer) : base(pointer)
     {
-        IsEvent = localRaidSettings.transitionType.HasFlagNoBox(ELocationTransition.Event);
-        string[] array = [.. localRaidSettings.transition.visitedLocations.EmptyIfNull(), localRaidSettings.location];
-        summonedTransits[profile.Id] = new(localRaidSettings.transition.transitionRaidId, localRaidSettings.transition.transitionCount,
-            array, IsEvent);
-        TransferItemsController.InitItemControllerServer(FikaGlobals.TransitTraderId, FikaGlobals.TransitTraderName);
+    }
+
+    public FikaHostTransitController(TransitGlobalSettings settings, Il2CppReferenceArray<LocationSettings.Location.TransitParameters> parameters, Profile profile, LocalRaidSettings localRaidSettings) : base(Il2CppInjection.Allocate<FikaHostTransitController>())
+    {
+        ClassInjector.DerivedConstructorBody(this);
         _server = Singleton<FikaServer>.Instance;
         _playersInTransitZone = [];
         _transittedPlayers = [];
+        ClassInjector.InvokeBaseConstructor<LocalTransitController>(this, settings, parameters, profile, localRaidSettings);
+        IsEvent = localRaidSettings.transitionType.HasFlagNoBox(ELocationTransition.Event);
+        string[] array = [.. localRaidSettings.transition.visitedLocations ?? (IEnumerable<string>)[], localRaidSettings.location];
+        summonedTransits[profile.Id] = new(localRaidSettings.transition.transitionRaidId, localRaidSettings.transition.transitionCount,
+            array, IsEvent);
+        TransferItemsController.InitItemControllerServer(FikaGlobals.TransitTraderId, FikaGlobals.TransitTraderName);
     }
 
     public void PostConstruct()
     {
-        OnPlayerEnter = FikaGlobals.ClearDelegates(OnPlayerEnter);
-        OnPlayerEnter += OnHostPlayerEnter;
-        OnPlayerExit = FikaGlobals.ClearDelegates(OnPlayerExit);
-        OnPlayerExit += OnHostPlayerExit;
+        _onHostPlayerEnter = new Action<TransitPoint, Player>(OnHostPlayerEnter);
+        _onHostPlayerExit = new Action<TransitPoint, Player>(OnHostPlayerExit);
+        OnPlayerEnter = _onHostPlayerEnter;
+        OnPlayerExit = _onHostPlayerExit;
     }
 
     private readonly FikaServer _server;
+    private Il2CppSystem.Action<TransitPoint, Player> _onHostPlayerEnter;
+    private Il2CppSystem.Action<TransitPoint, Player> _onHostPlayerExit;
     private readonly Dictionary<Player, int> _playersInTransitZone;
     private readonly List<int> _transittedPlayers;
 
@@ -94,7 +104,7 @@ public class FikaHostTransitController : LocalTransitController
                 EventType = TransitEventPacket.ETransitEventType.Interaction,
                 TransitEvent = new TransitInteractionEvent()
                 {
-                    PlayerId = player.Id,
+                    PlayerRaidId = player.RaidId,
                     PointId = point.parameters.id,
                     Type = TransitInteractionEvent.EType.Show
                 }
@@ -131,7 +141,7 @@ public class FikaHostTransitController : LocalTransitController
             EventType = TransitEventPacket.ETransitEventType.Interaction,
             TransitEvent = new TransitInteractionEvent()
             {
-                PlayerId = player.Id,
+                PlayerRaidId = player.RaidId,
                 PointId = point.parameters.id,
                 Type = TransitInteractionEvent.EType.Hide
             }
@@ -140,8 +150,9 @@ public class FikaHostTransitController : LocalTransitController
         _server.SendData(ref packet, DeliveryMethod.ReliableOrdered);
     }
 
-    public override void Sizes(Dictionary<int, byte> sizes)
+    public override void Sizes(int pointId, Il2CppSystem.Collections.Generic.Dictionary<int, byte> sizes)
     {
+        _currentTransitPointId = pointId;
 #if DEBUG
         foreach (var item in sizes)
         {
@@ -154,7 +165,7 @@ public class FikaHostTransitController : LocalTransitController
             if (GamePlayerOwner.MyPlayer.Id == size.Key)
             {
                 MonoBehaviourSingleton<GameUI>.Instance.LocationTransitGroupSize.Display();
-                MonoBehaviourSingleton<GameUI>.Instance.LocationTransitGroupSize.Show((int)size.Value);
+                MonoBehaviourSingleton<GameUI>.Instance.LocationTransitGroupSize.Show(size.Value, GetCurrentPointMaxGroupSize());
             }
         }
 
@@ -163,6 +174,7 @@ public class FikaHostTransitController : LocalTransitController
             EventType = TransitEventPacket.ETransitEventType.GroupSize,
             TransitEvent = new TransitGroupSizeEvent()
             {
+                PointId = pointId,
                 Sizes = sizes
             }
         };
@@ -170,8 +182,9 @@ public class FikaHostTransitController : LocalTransitController
         _server.SendData(ref packet, DeliveryMethod.ReliableOrdered);
     }
 
-    public override void Timers(int pointId, Dictionary<int, ushort> timers)
+    public override void Timers(int pointId, Il2CppSystem.Collections.Generic.Dictionary<int, ushort> timers)
     {
+        _currentTransitPointId = pointId;
 #if DEBUG
         foreach (var item in timers)
         {
@@ -216,7 +229,7 @@ public class FikaHostTransitController : LocalTransitController
             EventType = TransitEventPacket.ETransitEventType.Interaction,
             TransitEvent = new TransitInteractionEvent()
             {
-                PlayerId = playerId,
+                PlayerRaidId = playerId,
                 PointId = pointId,
                 Type = TransitInteractionEvent.EType.InactivePoint
             }
@@ -233,6 +246,11 @@ public class FikaHostTransitController : LocalTransitController
             return;
         }
 
+        if (transitPlayers.ContainsKey(player.ProfileId))
+        {
+            return;
+        }
+
         if (!CheckForPlayers(player, packet.pointId))
         {
             return;
@@ -241,6 +259,7 @@ public class FikaHostTransitController : LocalTransitController
         if (player.IsYourPlayer)
         {
             Cancel(player);
+            HideTransitInteractionNotification();
             transitPlayers.Add(player.ProfileId, player.Id);
             profileKeys[player.ProfileId] = packet.keyId;
             pointsById[packet.pointId].GroupEnter(player);
@@ -255,12 +274,25 @@ public class FikaHostTransitController : LocalTransitController
         pointsById[packet.pointId].GroupEnter(player);
         ExfiltrationController.Instance.BannedPlayers.Add(player.Id);
         ExfiltrationController.Instance.CancelExtractionForPlayer(player);
+
+        TransitEventPacket confirmPacket = new()
+        {
+            EventType = TransitEventPacket.ETransitEventType.Interaction,
+            TransitEvent = new TransitInteractionEvent()
+            {
+                PlayerRaidId = player.RaidId,
+                PointId = packet.pointId,
+                Type = TransitInteractionEvent.EType.Confirm
+            }
+        };
+
+        _server.SendData(ref confirmPacket, DeliveryMethod.ReliableOrdered);
     }
 
     private bool CheckForPlayers(Player player, int pointId)
     {
         var humanPlayers = 0;
-        foreach (var fikaPlayer in Singleton<IFikaNetworkManager>.Instance.CoopHandler.HumanPlayers)
+        foreach (var fikaPlayer in FikaGlobals.NetworkManager.CoopHandler.HumanPlayers)
         {
             if (fikaPlayer.HealthController.IsAlive)
             {
@@ -301,7 +333,7 @@ public class FikaHostTransitController : LocalTransitController
                 EventType = TransitEventPacket.ETransitEventType.Messages,
                 TransitEvent = new TransitMessagesEvent()
                 {
-                    Messages = messages
+                    Messages = (messages).ToIl2CppDictionary()
                 }
             };
 
@@ -312,7 +344,7 @@ public class FikaHostTransitController : LocalTransitController
         return true;
     }
 
-    public override void Transit(TransitPoint point, int playersCount, string hash, Dictionary<string, ProfileKey> keys, Player player)
+    public override Il2CppSystem.Threading.Tasks.Task Transit(TransitPoint point, int playersCount, string hash, Il2CppSystem.Collections.Generic.Dictionary<string, ProfileKey> keys, Player player)
     {
         if (player.IsYourPlayer)
         {
@@ -321,7 +353,7 @@ public class FikaHostTransitController : LocalTransitController
             if (TarkovApplication.Exist(out var tarkovApplication))
             {
                 eraidMode = ERaidMode.Local;
-                tarkovApplication.transitionStatus = new(location, false, _localRaidSettings.playerSide, eraidMode, _localRaidSettings.timeVariant);
+                tarkovApplication.TransitionStatus = new TransitionStatus(location, false, _localRaidSettings.playerSide, eraidMode, _localRaidSettings.timeVariant);
             }
             var profileId = player.ProfileId;
             LocationTransit gclass = new()
@@ -338,20 +370,24 @@ public class FikaHostTransitController : LocalTransitController
             };
             alreadyTransits.Add(profileId, gclass);
 
-            var fikaGame = Singleton<IFikaGame>.Instance;
+            var fikaGame = FikaGlobals.FikaGame;
             if (fikaGame is not CoopGame coopGame)
             {
                 FikaGlobals.LogError("FikaGame was not a CoopGame!");
-                return;
+                return Il2CppSystem.Threading.Tasks.Task.CompletedTask;
             }
 
-            if (coopGame != null)
+            var fikaPlayer = player.TryCast<FikaPlayer>();
+            if (fikaPlayer == null)
             {
-                coopGame.Extract((FikaPlayer)player, null, point);
+                FikaGlobals.LogError("Transit: transit player was not a FikaPlayer");
+                return Il2CppSystem.Threading.Tasks.Task.CompletedTask;
             }
+
+            coopGame.Extract(fikaPlayer, null, point);
 
             _transittedPlayers.Add(player.Id);
-            return;
+            return Il2CppSystem.Threading.Tasks.Task.CompletedTask;
         }
 
         TransitEventPacket packet = new()
@@ -364,13 +400,14 @@ public class FikaHostTransitController : LocalTransitController
         _transittedPlayers.Add(player.Id);
 
         _server.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+        return Il2CppSystem.Threading.Tasks.Task.CompletedTask;
     }
 
     public override void Dispose()
     {
         base.Dispose();
-        OnPlayerEnter -= OnHostPlayerEnter;
-        OnPlayerExit -= OnHostPlayerExit;
+        OnPlayerEnter -= _onHostPlayerEnter;
+        OnPlayerExit -= _onHostPlayerExit;
     }
 
     public void Init()

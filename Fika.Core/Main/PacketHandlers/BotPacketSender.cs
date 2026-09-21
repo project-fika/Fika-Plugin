@@ -6,11 +6,18 @@ using EFT;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Player;
+using System;
+using Il2CppInterop.Runtime.Injection;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.PacketHandlers;
 
 public sealed class BotPacketSender : MonoBehaviour, IPacketSender
 {
+    public BotPacketSender(IntPtr pointer) : base(pointer)
+    {
+    }
+
     public bool SendState { get; set; }
     public IFikaNetworkManager NetworkManager { get; set; }
 

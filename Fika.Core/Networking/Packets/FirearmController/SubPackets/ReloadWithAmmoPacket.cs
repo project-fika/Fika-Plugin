@@ -2,6 +2,7 @@
 using EFT.InventoryLogic;
 using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
@@ -76,7 +77,7 @@ public readonly struct ReloadWithAmmoPacket : IFirearmPacket
                 if (Status == EReloadWithAmmoStatus.StartReload && AmmoCount > 0)
                 {
                     var bullets = controller.FindAmmoByIds(AmmoIds, AmmoCount);
-                    AmmoPack ammoPack = new(bullets);
+                    AmmoPack ammoPack = new(bullets.ToIl2CppList());
 
                     controller.FastForwardCurrentState();
                     controller.CurrentOperation.ReloadWithAmmo(ammoPack, null, null);

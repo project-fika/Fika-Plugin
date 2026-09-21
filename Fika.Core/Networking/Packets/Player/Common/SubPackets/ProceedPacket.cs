@@ -33,6 +33,7 @@ public readonly struct ProceedPacket : IPlayerPacket
         {
             Amount = reader.GetFloat();
             AnimationVariant = reader.GetInt();
+            BodyParts = new();
             if (ProceedType is EProceedType.MedsClass)
             {
                 var bodyPartsAmount = reader.GetInt();

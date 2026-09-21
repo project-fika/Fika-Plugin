@@ -4,11 +4,18 @@ using Fika.Core.Main.Players;
 using Fika.Core.Networking.Packets.Player.Common;
 using Fika.Core.Networking.Packets.Player.Common.SubPackets;
 using static EFT.Player;
+using System;
+using Il2CppInterop.Runtime.Injection;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.ClientClasses.HandsControllers;
 
 public class FikaClientUsableItemController : UsableItemController
 {
+    public FikaClientUsableItemController(IntPtr pointer) : base(pointer)
+    {
+    }
+
     protected FikaPlayer _fikaPlayer;
 
     public static FikaClientUsableItemController Create(FikaPlayer player, Item item)
@@ -42,7 +49,7 @@ public class FikaClientUsableItemController : UsableItemController
         base.SetAim(value);
         if (IsAiming != isAiming)
         {
-            var packet = new UsableItemPacket(false, false, false, true, isAiming);
+            var packet = new UsableItemPacket(false, false, false, true, IsAiming);
             _fikaPlayer.PacketSender.NetworkManager.SendPlayerPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
         }
     }

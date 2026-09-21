@@ -7,35 +7,35 @@ public readonly struct SpawnBTRPacket : IGenericPacket
 {
     public EGenericPacketType Type => EGenericPacketType.SpawnBTR;
 
-    public SpawnBTRPacket(Vector3 position, Quaternion rotation, string profileId)
+    public SpawnBTRPacket(Vector3 position, Quaternion rotation, int playerRaidId)
     {
         Position = position;
         Rotation = rotation;
-        PlayerProfileId = profileId;
+        PlayerRaidId = playerRaidId;
     }
 
     public SpawnBTRPacket(NetDataReader reader)
     {
         Position = reader.GetUnmanaged<Vector3>();
         Rotation = reader.GetUnmanaged<Quaternion>();
-        PlayerProfileId = reader.GetString();
+        PlayerRaidId = reader.GetInt();
     }
 
     public readonly Vector3 Position;
     public readonly Quaternion Rotation;
-    public readonly string PlayerProfileId;
+    public readonly int PlayerRaidId;
 
     public readonly void Execute()
     {
         FikaGlobals.LogInfo("Received BTR spawn event from server");
         GlobalEventsController.CreateEvent<BtrSpawnOnThePathEvent>()
-            .Invoke(Position, Rotation, PlayerProfileId);
+            .Invoke(Position, Rotation, PlayerRaidId);
     }
 
     public readonly void Serialize(NetDataWriter writer)
     {
         writer.PutUnmanaged(Position);
         writer.PutUnmanaged(Rotation);
-        writer.Put(PlayerProfileId);
+        writer.Put(PlayerRaidId);
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using EFT;
 using Fika.Core.Main.Utils;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.LocalGame;
 
@@ -12,6 +12,11 @@ internal class NonWaveSpawnScenario_Patch : ModulePatch
     [PatchPrefix]
     public static bool PatchPrefix(NonWavesSpawnScenario __instance)
     {
+        if (FikaBackendUtils.IsTutorial)
+        {
+            return true;
+        }
+
         var result = FikaBackendUtils.IsServer;
         typeof(NonWavesSpawnScenario).GetProperty(nameof(NonWavesSpawnScenario.Enabled)).SetValue(__instance, result);
         return result;

@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 using Fika.Core.Main.Utils;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.Mines;
 

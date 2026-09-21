@@ -1,70 +1,71 @@
 ﻿using System;
 using System.Runtime.Serialization;
 using Fika.Core.Main.Utils;
+using System.Text.Json.Serialization;
 
 namespace Fika.Core.Networking.Models;
 
 [DataContract]
 public struct ClientConfigModel
 {
-    [DataMember(Name = "useBtr")]
+    [JsonPropertyName("useBtr")]
     public bool UseBTR { get; set; }
 
-    [DataMember(Name = "friendlyFire")]
+    [JsonPropertyName("friendlyFire")]
     public bool FriendlyFire { get; set; }
 
-    [DataMember(Name = "dynamicVExfils")]
+    [JsonPropertyName("dynamicVExfils")]
     public bool DynamicVExfils { get; set; }
 
-    [DataMember(Name = "allowFreeCam")]
+    [JsonPropertyName("allowFreeCam")]
     public bool AllowFreeCam { get; set; }
 
-    [DataMember(Name = "AllowSpectateFreeCam")]
+    [JsonPropertyName("AllowSpectateFreeCam")]
     public bool AllowSpectateFreeCam { get; set; }
 
-    [DataMember(Name = "allowItemSending")]
+    [JsonPropertyName("allowItemSending")]
     public bool AllowItemSending { get; set; }
 
-    [DataMember(Name = "blacklistedItems")]
+    [JsonPropertyName("blacklistedItems")]
     public string[] BlacklistedItems { get; set; }
 
-    [DataMember(Name = "forceSaveOnDeath")]
+    [JsonPropertyName("forceSaveOnDeath")]
     public bool ForceSaveOnDeath { get; set; }
 
-    [DataMember(Name = "useInertia")]
+    [JsonPropertyName("useInertia")]
     public bool UseInertia { get; set; }
 
-    [DataMember(Name = "sharedQuestProgression")]
+    [JsonPropertyName("sharedQuestProgression")]
     public bool SharedQuestProgression { get; set; }
 
-    [DataMember(Name = "canEditRaidSettings")]
+    [JsonPropertyName("canEditRaidSettings")]
     public bool CanEditRaidSettings { get; set; }
 
-    [DataMember(Name = "enableTransits")]
+    [JsonPropertyName("enableTransits")]
     public bool EnableTransits { get; set; }
 
-    [DataMember(Name = "anyoneCanStartRaid")]
+    [JsonPropertyName("anyoneCanStartRaid")]
     public bool AnyoneCanStartRaid { get; set; }
 
-    [DataMember(Name = "allowNamePlates")]
+    [JsonPropertyName("allowNamePlates")]
     public bool AllowNamePlates { get; set; }
 
-    [DataMember(Name = "randomLabyrinthSpawns")]
+    [JsonPropertyName("randomLabyrinthSpawns")]
     public bool RandomLabyrinthSpawns { get; set; }
 
-    [DataMember(Name = "pmcFoundInRaid")]
+    [JsonPropertyName("pmcFoundInRaid")]
     public bool PMCFoundInRaid { get; set; }
 
-    [DataMember(Name = "allowSpectateBots")]
+    [JsonPropertyName("allowSpectateBots")]
     public bool AllowSpectateBots { get; set; }
 
-    [DataMember(Name = "instantLoad")]
+    [JsonPropertyName("instantLoad")]
     public bool InstantLoad { get; set; }
 
-    [DataMember(Name = "fastLoad")]
+    [JsonPropertyName("fastLoad")]
     public bool FastLoad { get; set; }
 
-    [DataMember(Name = "reviveConfig")]
+    [JsonPropertyName("reviveConfig")]
     public ClientReviveConfig ReviveConfig { get; set; }
 
     public readonly void LogValues()
@@ -102,25 +103,25 @@ public struct ClientConfigModel
 
 public struct ClientReviveConfig
 {
-    [DataMember(Name = "enabled")]
+    [JsonPropertyName("enabled")]
     public bool Enabled { get; set; }
 
-    [DataMember(Name = "headshotKills")]
+    [JsonPropertyName("headshotKills")]
     public bool HeadshotKills { get; set; }
 
-    [DataMember(Name = "grenadesKills")]
+    [JsonPropertyName("grenadesKills")]
     public bool GrenadesKills { get; set; }
 
-    [DataMember(Name = "allowLooting")]
+    [JsonPropertyName("allowLooting")]
     public bool AllowLooting { get; set; }
 
-    [DataMember(Name = "maxRevives")]
+    [JsonPropertyName("maxRevives")]
     public int MaxRevives { get; set; }
 
-    [DataMember(Name = "bleedoutTime")]
+    [JsonPropertyName("bleedoutTime")]
     public float BleedoutTime { get; set; }
 
-    [DataMember(Name = "reviveTime")]
+    [JsonPropertyName("reviveTime")]
     public float ReviveTime { get; set; }
 
     public readonly void LogValues()

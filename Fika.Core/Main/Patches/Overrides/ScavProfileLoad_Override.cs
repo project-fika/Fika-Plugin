@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 using EFT;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.Overrides;
 
@@ -12,9 +12,9 @@ internal class ScavProfileLoad_Override : ModulePatch
     }
 
     [PatchPrefix]
-    private static void PatchPrefix(ref string profileId, Profile savageProfile, RaidSettings ____raidSettings)
+    private static void PatchPrefix(EFT.TarkovApplication __instance, ref string profileId, Profile savageProfile)
     {
-        if (!____raidSettings.IsPmc)
+        if (!__instance._raidSettings.IsPmc)
         {
             profileId = savageProfile.Id;
         }

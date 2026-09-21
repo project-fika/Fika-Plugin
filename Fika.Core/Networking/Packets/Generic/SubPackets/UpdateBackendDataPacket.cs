@@ -1,4 +1,4 @@
-﻿using Comfort.Common;
+﻿using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Networking.Packets.Generic.SubPackets;
 
@@ -10,7 +10,7 @@ public readonly struct UpdateBackendDataPacket(int playerAmount) : IGenericPacke
 
     public readonly void Execute()
     {
-        Singleton<IFikaNetworkManager>.Instance.PlayerAmount = PlayerAmount;
+        FikaGlobals.NetworkManager.PlayerAmount = PlayerAmount;
     }
 
     public readonly void Serialize(NetDataWriter writer)

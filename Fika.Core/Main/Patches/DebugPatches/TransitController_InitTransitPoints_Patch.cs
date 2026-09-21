@@ -1,6 +1,6 @@
 ﻿using JsonType;
 using System.Reflection;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.DebugPatches;
 
@@ -17,7 +17,7 @@ public class TransitController_InitTransitPoints_Patch : ModulePatch
     }
 
     [PatchPrefix]
-    public static void Prefix(ref LocationSettings.Location.TransitParameters[] parameters)
+    public static void Prefix(ref Il2CppInterop.Runtime.InteropTypes.Arrays.Il2CppReferenceArray<LocationSettings.Location.TransitParameters> parameters)
     {
         foreach (var parameter in parameters)
         {

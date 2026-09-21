@@ -7,11 +7,18 @@ using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Player;
 using Fika.Core.Networking.Snapshotting;
 using static Fika.Core.Networking.NetworkUtils;
+using System;
+using Il2CppInterop.Runtime.Injection;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.Components;
 
 public sealed class BotStateManager : MonoBehaviour
 {
+    public BotStateManager(IntPtr pointer) : base(pointer)
+    {
+    }
+
     private List<FikaBot> _bots;
     private HostGameController _controller;
     private BotsController _botsController;

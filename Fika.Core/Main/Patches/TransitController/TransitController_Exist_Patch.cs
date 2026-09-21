@@ -2,7 +2,7 @@
 using Comfort.Common;
 using EFT;
 using Fika.Core.Main.Utils;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.TransitController;
 

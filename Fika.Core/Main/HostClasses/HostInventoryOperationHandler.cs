@@ -19,7 +19,7 @@ public sealed class HostInventoryOperationHandler : IDisposable
 
     private HostInventoryOperationHandler()
     {
-        HandleResultDelegate = HandleResult;
+        HandleResultDelegate = new System.Action<Comfort.Common.IResult>(HandleResult);
     }
 
     public void Set(HostInventoryController inventoryController, EFT.InventoryLogic.Operations.AbstractOperation operation, Callback callback)

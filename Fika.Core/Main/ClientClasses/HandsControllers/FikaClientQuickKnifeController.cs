@@ -9,11 +9,17 @@ using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.World;
+using System;
+using Il2CppInterop.Runtime.Injection;
 
 namespace Fika.Core.Main.ClientClasses.HandsControllers;
 
 public class FikaClientQuickKnifeController : Player.QuickKnifeKickController
 {
+    public FikaClientQuickKnifeController(IntPtr pointer) : base(pointer)
+    {
+    }
+
     protected FikaPlayer _fikaPlayer;
 
     public static FikaClientQuickKnifeController Create(FikaPlayer player, KnifeComponent item)

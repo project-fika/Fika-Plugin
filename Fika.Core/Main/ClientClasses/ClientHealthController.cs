@@ -9,11 +9,25 @@ using Fika.Core.Main.Components;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Packets.Player.Common;
 using Fika.Core.Networking.Packets.Player.Common.SubPackets;
+using System;
+using Il2CppInterop.Runtime.Injection;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.ClientClasses;
 
-public sealed class ClientHealthController(Profile.HealthInfo healthInfo, Player player, InventoryController inventoryController, SkillManager skillManager, bool aiHealth) : PlayerHealthController(healthInfo, player, inventoryController, skillManager, aiHealth)
+public sealed class ClientHealthController : PlayerHealthController
 {
+    public ClientHealthController(IntPtr pointer) : base(pointer)
+    {
+    }
+
+    public ClientHealthController(Profile.HealthInfo healthInfo, Player player, InventoryController inventoryController, SkillManager skillManager, bool aiHealth) : base(Il2CppInjection.Allocate<ClientHealthController>())
+    {
+        ClassInjector.DerivedConstructorBody(this);
+        _fikaPlayer = (FikaPlayer)player;
+        ClassInjector.InvokeBaseConstructor<PlayerHealthController>(this, healthInfo, player, inventoryController, skillManager, aiHealth);
+    }
+
     public bool ReviveEnabled { get; } = FikaPlugin.Instance.Settings.ReviveConfig.Enabled;
     public bool Downed { get; internal set; }
     public bool CanBeDowned
@@ -33,7 +47,7 @@ public sealed class ClientHealthController(Profile.HealthInfo healthInfo, Player
     private int _revives;
     private bool _bledOut;
 
-    private readonly FikaPlayer _fikaPlayer = (FikaPlayer)player;
+    private readonly FikaPlayer _fikaPlayer;
 
     public override bool _sendNetworkSyncPackets
     {

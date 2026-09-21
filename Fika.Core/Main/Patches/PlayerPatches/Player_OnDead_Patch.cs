@@ -3,7 +3,10 @@ using System.Reflection;
 using System.Reflection.Emit;
 using EFT;
 using HarmonyLib;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
+using System;
+using Fika.Core.Main.Players;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.Patches.PlayerPatches;
 
@@ -18,13 +21,24 @@ public class Player_OnDead_Patch : ModulePatch
             .GetMethod(nameof(LocalPlayer.OnDead));
     }
 
-    [PatchTranspiler]
-    public static IEnumerable<CodeInstruction> Transpile()
-    {
+    private static readonly Action<Player, EDamageType> _playerOnDead =
+        typeof(Player).GetMethod(nameof(Player.OnDead)).CreateBaseCall<Action<Player, EDamageType>>();
 
-        yield return new CodeInstruction(OpCodes.Ldarg_0);
-        yield return new CodeInstruction(OpCodes.Ldarg_1);
-        yield return new CodeInstruction(OpCodes.Call, typeof(Player).GetMethod(nameof(Player.OnDead)));
-        yield return new CodeInstruction(OpCodes.Ret);
+    [PatchPrefix]
+    public static bool Prefix(LocalPlayer __instance, EDamageType damageType)
+    {
+        if (__instance is not FikaPlayer)
+        {
+            return true;
+        }
+        
+        if (__instance.IsAI && __instance.botPlayerCulling != null)
+        {
+            __instance.botPlayerCulling.SetMode(OfflinePlayerCulling.EMode.Disabled);
+            __instance.botPlayerCulling._cullingObject?.Dispose();
+        }
+
+        _playerOnDead(__instance, damageType);
+        return false;
     }
 }

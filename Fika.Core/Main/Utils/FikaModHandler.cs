@@ -10,10 +10,11 @@ using Diz.Utils;
 using EFT.UI;
 using Fika.Core.Main.Patches.Bugfixes;
 using Fika.Core.Networking.Models;
-using Newtonsoft.Json;
-using SPT.Common.Http;
-using SPT.Custom.Utils;
-using SPT.Reflection.Patching;
+using BepInEx.Unity.IL2CPP;
+using Fika.Core.Networking.Http;
+using SPTushonka.Common.Http;
+using SPTushonka.Custom.Utils;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.Main.Utils;
 
@@ -28,17 +29,17 @@ public class FikaModHandler
     public bool SAINLoaded;
     public bool UIFixesLoaded;
 
-    public Version SPTCoreVersion { get; }
+    public SemanticVersioning.Version SPTCoreVersion { get; }
 
     public FikaModHandler()
     {
-        Chainloader.PluginInfos.TryGetValue("com.SPT.core", out var pluginInfo);
+        IL2CPPChainloader.Instance.Plugins.TryGetValue("com.sptushonka.core", out var pluginInfo);
         SPTCoreVersion = pluginInfo.Metadata.Version;
     }
 
     public async Task VerifyMods(PatchManager manager)
     {
-        PluginInfo[] pluginInfos = [.. Chainloader.PluginInfos.Values];
+        PluginInfo[] pluginInfos = [.. IL2CPPChainloader.Instance.Plugins.Values];
 
         // Set capacity to avoid unnecessarily resizing for people who have a lot of mods loaded
         Dictionary<string, uint> loadedMods = new(pluginInfos.Length);
@@ -58,18 +59,18 @@ public class FikaModHandler
             CheckSpecialMods(pluginInfo.Metadata.GUID);
         }
 
-        var modValidationRequestJson = JsonConvert.SerializeObject(loadedMods);
+        var modValidationRequestJson = FikaJson.Serialize(loadedMods);
         _logger.LogDebug(modValidationRequestJson);
 
         var validationJson = RequestHandler.PostJson("/fika/client/check/mods", modValidationRequestJson);
         _logger.LogDebug(validationJson);
 
-        var validationResult = JsonConvert.DeserializeObject<ModValidationResponse>(validationJson);
+        var validationResult = FikaJson.Deserialize<ModValidationResponse>(validationJson);
         if (validationResult.Forbidden == null || validationResult.MissingRequired == null || validationResult.HashMismatch == null)
         {
             FikaGlobals.LogError("FikaModHandler::VerifyMods: Response was invalid!");
             MessageBoxHelper.Show("Failed to verify mods with server.\nMake sure that the server mod is installed!", "FIKA ERROR", MessageBoxHelper.MessageBoxType.OK);
-            AsyncWorker.RunInMainTread(Application.Quit);
+            MainThread.Post(Application.Quit);
             return;
         }
 
@@ -123,7 +124,7 @@ public class FikaModHandler
             await Task.Delay(250);
         }
 
-        AsyncWorker.RunInMainTread(ShowModErrorMessage);
+        MainThread.Post(ShowModErrorMessage);
     }
 
     private void ShowModErrorMessage()
@@ -143,7 +144,7 @@ public class FikaModHandler
         _ = Task.Run(async () =>
         {
             await Task.Delay(TimeSpan.FromSeconds(15));
-            AsyncWorker.RunInMainTread(Application.Quit);
+            MainThread.Post(Application.Quit);
         });
     }
 

@@ -1,14 +1,27 @@
 ﻿// © 2026 Lacyway All Rights Reserved
 
 using EFT;
+using System;
+using Il2CppInterop.Runtime.Injection;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.ObservedClasses.MovementStates;
 
 public class ObservedRunState : MovePlayerState
 {
-    public ObservedRunState(MovementContext movementContext) : base(movementContext)
+    public ObservedRunState(IntPtr pointer) : base(pointer)
     {
+    }
+
+    protected ObservedRunState(IntPtr pointer, MovementContext movementContext) : base(pointer)
+    {
+        ClassInjector.DerivedConstructorBody(this);
+        ClassInjector.InvokeBaseConstructor<MovePlayerState>(this, movementContext);
         MovementContext = movementContext;
+    }
+
+    public ObservedRunState(MovementContext movementContext) : this(Il2CppInjection.Allocate<ObservedRunState>(), movementContext)
+    {
     }
 
     public override bool HasNoInputForLongTime()

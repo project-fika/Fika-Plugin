@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using Dissonance;
 using HarmonyLib;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.VOIP;
 
@@ -11,8 +11,8 @@ public class DissonanceComms_Start_Patch : ModulePatch
 
     protected override MethodBase GetTargetMethod()
     {
-        return AccessTools
-            .Method(typeof(DissonanceComms), "Start");
+        return typeof(DissonanceComms)
+            .GetMethod(nameof(DissonanceComms.Initialize));
     }
 
     [PatchPrefix]

@@ -6,7 +6,7 @@ using EFT.Interactive;
 using EFT.InventoryLogic;
 using Fika.Core.Main.Components;
 using Fika.Core.Main.Utils;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.Lighthouse;
 
@@ -22,9 +22,13 @@ public static class LighthouseTraderZone_Patches
         }
 
         [PatchPrefix]
-        public static bool Prefix(Player player, LighthouseTraderZone __instance, ref List<Player> ___allPlayersInZone,
-            ref List<Player> ___allowedPlayers, ref List<Player> ___unallowedPlayers, ref Action<string, bool> ____onPlayerAllowStatusChanged)
+        public static bool Prefix(Player player, LighthouseTraderZone __instance)
         {
+            if (FikaBackendUtils.IsTutorial)
+            {
+                return true;
+            }
+
             if (!CoopHandler.TryGetCoopHandler(out _))
             {
                 return false;
@@ -35,31 +39,31 @@ public static class LighthouseTraderZone_Patches
 
             if (player.IsAI && __instance.IsValidAiPlayer(player))
             {
-                ___allowedPlayers.Add(player);
-                ___allPlayersInZone.Add(player);
+                __instance.allowedPlayers.Add(player);
+                __instance.allPlayersInZone.Add(player);
                 SubscribeAggression(player, __instance);
                 return false;
             }
             if (!flag)
             {
-                ___unallowedPlayers.Add(player);
-                ___allPlayersInZone.Add(player);
+                __instance.unallowedPlayers.Add(player);
+                __instance.allPlayersInZone.Add(player);
                 return false;
             }
             if (!__instance.IsValidPlayer(radioTransmitterRecodableComponent.Handler))
             {
-                ___unallowedPlayers.Add(player);
-                ____onPlayerAllowStatusChanged?.Invoke(player.ProfileId, false);
+                __instance.unallowedPlayers.Add(player);
+                LighthouseTraderZone.OnPlayerAllowStatusChangedField?.Invoke(player.RaidId, false);
             }
             else
             {
-                ___allowedPlayers.Add(player);
+                __instance.allowedPlayers.Add(player);
                 radioTransmitterRecodableComponent.OnRadioTransmitterStatusChanged += __instance.OnPlayerChangeRadioTransmitterStatus;
                 SubscribeAggression(player, __instance);
-                ____onPlayerAllowStatusChanged?.Invoke(player.ProfileId, true);
+                LighthouseTraderZone.OnPlayerAllowStatusChangedField?.Invoke(player.RaidId, true);
             }
 
-            ___allPlayersInZone.Add(player);
+            __instance.allPlayersInZone.Add(player);
 
             // Skip original method
             return false;
@@ -83,9 +87,13 @@ public static class LighthouseTraderZone_Patches
         }
 
         [PatchPrefix]
-        public static bool Prefix(Player player, LighthouseTraderZone __instance, ref List<Player> ___allPlayersInZone,
-            ref List<Player> ___allowedPlayers, ref List<Player> ___unallowedPlayers, ref Action<string, bool> ____onPlayerAllowStatusChanged)
+        public static bool Prefix(Player player, LighthouseTraderZone __instance)
         {
+            if (FikaBackendUtils.IsTutorial)
+            {
+                return true;
+            }
+
             if (!CoopHandler.TryGetCoopHandler(out _))
             {
                 return false;
@@ -94,9 +102,9 @@ public static class LighthouseTraderZone_Patches
             player.OnPlayerDead -= __instance.OnPlayerDieInZone;
             player.RecodableItemsHandler.TryToGetRecodableComponent(out RadioTransmitterRecodableComponent radioTransmitterRecodableComponent);
 
-            if (___allowedPlayers.Contains(player))
+            if (__instance.allowedPlayers.Contains(player))
             {
-                ___allowedPlayers.Remove(player);
+                __instance.allowedPlayers.Remove(player);
 
                 if (radioTransmitterRecodableComponent != null)
                 {
@@ -111,10 +119,10 @@ public static class LighthouseTraderZone_Patches
             }
             else
             {
-                ___unallowedPlayers.Remove(player);
+                __instance.unallowedPlayers.Remove(player);
             }
 
-            ___allPlayersInZone.Remove(player);
+            __instance.allPlayersInZone.Remove(player);
 
             return false;
         }
@@ -130,6 +138,11 @@ public static class LighthouseTraderZone_Patches
         [PatchPrefix]
         public static bool Prefix(LighthouseTraderZone __instance)
         {
+            if (FikaBackendUtils.IsTutorial)
+            {
+                return true;
+            }
+
             if (FikaBackendUtils.IsClient)
             {
                 UnityEngine.Object.Destroy(__instance);

@@ -11,6 +11,8 @@ using Fika.Core.Main.Components;
 using Fika.Core.Main.GameMode;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
+using Fika.Core.UI.Custom;
+using Il2CppInterop.Runtime.Injection;
 
 namespace Fika.Core.Main.FreeCamera;
 
@@ -23,6 +25,10 @@ namespace Fika.Core.Main.FreeCamera;
 /// </summary>
 public partial class FreeCamera : MonoBehaviour
 {
+    public FreeCamera(IntPtr pointer) : base(pointer)
+    {
+    }
+
     public bool IsActive { get; set; }
     public bool Extracted { get; set; }
 
@@ -118,11 +124,14 @@ public partial class FreeCamera : MonoBehaviour
         var asset = InternalBundleLoader.Instance.GetFikaAsset(InternalBundleLoader.EFikaAsset.FreecamUI);
         var freecamObject = Instantiate(asset);
         freecamObject.transform.SetParent(transform);
-        _freecamUI = freecamObject.GetComponent<FreecamUI>();
+        _freecamUI = PrefabWiring.Attach<FreecamUI>(freecamObject);
         if (_freecamUI == null)
         {
+            Destroy(freecamObject);
             throw new NullReferenceException("Could not assign FreecamUI");
         }
+        
+        _listPlayerPrefab = InternalBundleLoader.Instance.GetFikaAsset(InternalBundleLoader.EFikaAsset.ListPlayer);
         freecamObject.SetActive(false);
         _hidePlayerList = false;
 
@@ -321,7 +330,7 @@ public partial class FreeCamera : MonoBehaviour
         {
             _disableInput = !_disableInput;
             _freecamUI.InputText.SetText($"HOME: {(_disableInput ? "Enable Input" : "Disable Input")}");
-            NotificationManager.DisplayMessageNotification(_disableInput ? LocaleUtils.FREECAM_DISABLED.Localized() : LocaleUtils.FREECAM_ENABLED.Localized());
+            FikaGlobals.DisplayMessage(_disableInput ? LocaleUtils.FREECAM_DISABLED.Localized() : LocaleUtils.FREECAM_ENABLED.Localized());
         }
 
         if (_disableInput)

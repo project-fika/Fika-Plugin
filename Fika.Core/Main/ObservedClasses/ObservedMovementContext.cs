@@ -5,11 +5,23 @@ using Diz.LanguageExtensions;
 using EFT;
 using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.ObservedClasses.MovementStates;
+using Il2CppInterop.Runtime.Injection;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.ObservedClasses;
 
 public class ObservedMovementContext : MovementContext
 {
+    public ObservedMovementContext(IntPtr pointer) : base(pointer)
+    {
+    }
+
+    public ObservedMovementContext() : base(Il2CppInjection.Allocate<ObservedMovementContext>())
+    {
+        ClassInjector.DerivedConstructorBody(this);
+        ClassInjector.InvokeBaseConstructor<MovementContext>(this);
+    }
+
     public override bool CanJump
     {
         get
@@ -111,7 +123,7 @@ public class ObservedMovementContext : MovementContext
         return true;
     }
 
-    public override bool HasGround(float depth, Vector3? axis = null, float extraCastLn = 0)
+    public override bool HasGround(float depth, Il2CppSystem.Nullable<Vector3> axis = null, float extraCastLn = 0)
     {
         return true;
     }
@@ -126,7 +138,7 @@ public class ObservedMovementContext : MovementContext
         // Do nothing
     }
 
-    public override bool OverlapOrHasNoGround(float depth, Vector3? axis = null, float width = 0, float heightDivider = 4, float extraCastLn = 0)
+    public override bool OverlapOrHasNoGround(float depth, Il2CppSystem.Nullable<Vector3> axis = null, float width = 0, float heightDivider = 4, float extraCastLn = 0)
     {
         return false;
     }
@@ -227,11 +239,13 @@ public class ObservedMovementContext : MovementContext
 
     public override void WeightRelatedValuesUpdated()
     {
+        UpdateStrengthCurveCache();
         PlayerAnimatorTransitionSpeed = TransitionSpeed;
         UpdateCovertEfficiency(ClampedSpeed, true);
         TiltInertia = EFTHardSettings.Instance.InertiaTiltCurve.Evaluate(_player.Physical.Inertia);
         WalkInertia = InertiaSettings.WalkInertia.Evaluate(_player.Physical.Inertia);
         SprintBrakeInertia = InertiaSettings.SprintBrakeInertia.Evaluate(_player.Physical.Inertia);
+        UpdateInertiaCurveCache();
     }
 
     public override BaseMovementState GetNewState(EPlayerState name, bool isAI = false)
@@ -253,9 +267,9 @@ public class ObservedMovementContext : MovementContext
         };
     }
 
-    public new static ObservedMovementContext Create(Player player, Func<IAnimator> animatorGetter, Func<ICharacterController> characterControllerGetter, LayerMask groundMask)
+    public new static ObservedMovementContext Create(Player player, Il2CppSystem.Func<ICharacterController> characterControllerGetter, LayerMask groundMask)
     {
-        return Create<ObservedMovementContext>(player, animatorGetter, characterControllerGetter, groundMask);
+        return Create<ObservedMovementContext>(player, characterControllerGetter, groundMask);
     }
 
     public override void SmoothPoseLevel(float deltaTime)
@@ -273,12 +287,12 @@ public class ObservedMovementContext : MovementContext
         SmoothedPoseLevel = _poseLevel;
     }
 
-    public override void SetStationaryWeapon(Action<Player.AbstractHandsController, Player.AbstractHandsController> callback)
+    public override void SetStationaryWeapon(Il2CppSystem.Action<Player.AbstractHandsController, Player.AbstractHandsController> callback)
     {
         StationaryHandler handler = new(this, callback);
         if (_player.HandsController.Item == StationaryWeapon.Item)
         {
-            handler.callback(null, _player.HandsController);
+            handler.callback.Invoke(null, _player.HandsController);
             return;
         }
         OnHandsControllerChanged += handler.HandleSwap;
@@ -296,7 +310,7 @@ public class ObservedMovementContext : MovementContext
     public override void Init()
     {
         base.Init();
-        RotationAction = _player.UsedSimplifiedSkeleton ? SimpleRotate : Rotate;
+        RotationAction = _player.UsedSimplifiedSkeleton ? new System.Action<Player>(SimpleRotate) : new System.Action<Player>(Rotate);
 
         // Fix base game bug where idle animations are not playing
         PlayerAnimator.SetIsThirdPerson(true);
@@ -335,10 +349,10 @@ public class ObservedMovementContext : MovementContext
         handsController.FirearmsAnimator.SetMounted(false);
     }
 
-    private class StationaryHandler(MovementContext context, Action<Player.AbstractHandsController, Player.AbstractHandsController> callback)
+    private class StationaryHandler(MovementContext context, Il2CppSystem.Action<Player.AbstractHandsController, Player.AbstractHandsController> callback)
     {
         private readonly MovementContext _context = context;
-        public readonly Action<Player.AbstractHandsController, Player.AbstractHandsController> callback = callback;
+        public readonly Il2CppSystem.Action<Player.AbstractHandsController, Player.AbstractHandsController> callback = callback;
 
         public void HandleSwap(Player.AbstractHandsController oldController, Player.AbstractHandsController newController)
         {
@@ -350,7 +364,7 @@ public class ObservedMovementContext : MovementContext
             if (newController != null && newController is ObservedFirearmController observedController && observedController.Item == _context.StationaryWeapon.Item)
             {
                 _context.OnHandsControllerChanged -= HandleSwap;
-                callback(null, newController);
+                callback.Invoke(null, newController);
             }
         }
     }

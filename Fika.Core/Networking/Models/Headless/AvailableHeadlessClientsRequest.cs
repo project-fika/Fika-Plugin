@@ -1,13 +1,14 @@
 ﻿using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Fika.Core.Networking.Models.Headless;
 
 [DataContract]
 public struct AvailableHeadlessClientsRequest
 {
-    [DataMember(Name = "headlessSessionID")]
+    [JsonPropertyName("headlessSessionID")]
     public string HeadlessSessionID { get; set; }
-    [DataMember(Name = "alias")]
+    [JsonPropertyName("alias")]
     public string Alias { get; set; }
 
     public AvailableHeadlessClientsRequest(string headlessSessionID, string alias)

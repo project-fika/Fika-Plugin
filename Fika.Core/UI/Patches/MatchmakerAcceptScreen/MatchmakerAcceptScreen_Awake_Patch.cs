@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using EFT.UI.Matchmaker;
 using Fika.Core.Main.Utils;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.UI.Patches.MatchmakerAcceptScreen;
 
@@ -14,11 +14,11 @@ public class MatchmakerAcceptScreen_Awake_Patch : ModulePatch
     }
 
     [PatchPrefix]
-    private static bool PatchPrefix(MatchMakerAcceptScreen __instance, PlayersRaidReadyPanel ____playersRaidReadyPanel, MatchMakerGroupPreview ____groupPreview)
+    private static bool PatchPrefix(MatchMakerAcceptScreen __instance)
     {
         FikaBackendUtils.MatchMakerAcceptScreenInstance = __instance;
-        FikaBackendUtils.PlayersRaidReadyPanel = ____playersRaidReadyPanel;
-        FikaBackendUtils.MatchMakerGroupPreview = ____groupPreview;
+        FikaBackendUtils.PlayersRaidReadyPanel = __instance._playersRaidReadyPanel;
+        FikaBackendUtils.MatchMakerGroupPreview = __instance._groupPreview;
         return true;
     }
 

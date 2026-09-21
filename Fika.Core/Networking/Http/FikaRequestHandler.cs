@@ -13,8 +13,7 @@ using Fika.Core.Networking.Models.Admin;
 using Fika.Core.Networking.Models.Headless;
 using Fika.Core.Networking.Models.Presence;
 using Fika.Core.UI.Models;
-using Newtonsoft.Json;
-using SPT.Common.Http;
+using SPTushonka.Common.Http;
 
 namespace Fika.Core.Networking.Http;
 
@@ -72,14 +71,15 @@ public static class FikaRequestHandler
 
     private static byte[] EncodeBody<T>(T o)
     {
-        var serialized = JsonConvert.SerializeObject(o);
+        var serialized = FikaJson.Serialize(o);
         return Encoding.UTF8.GetBytes(serialized);
     }
 
     private static T DecodeBody<T>(byte[] data)
     {
+        MainThread.AttachToIl2Cpp();
         var json = Encoding.UTF8.GetString(data);
-        return JsonConvert.DeserializeObject<T>(json);
+        return FikaJson.Deserialize<T>(json);
     }
 
     private static async Task<T> GetJsonAsync<T>(string path)

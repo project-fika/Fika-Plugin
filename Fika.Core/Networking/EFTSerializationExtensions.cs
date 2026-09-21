@@ -17,10 +17,31 @@ namespace Fika.Core.Networking;
 /// </summary>
 public static class EFTSerializationExtensions
 {
-    private static readonly List<Type> _indexToType = BinarySerializationMirrorExtensions._types;
+    private static readonly List<Type> _indexToType = BuildTypeIndex();
     private static readonly Dictionary<Type, byte> _typeToByte;
     private static readonly Dictionary<Type, Action<NetDataWriter, object>> _serializers;
     private static readonly Dictionary<byte, Func<NetDataReader, object>> _deserializers;
+
+    // BSG's type table holds il2cpp types, we have to build an index of managed types here to identify them
+    private static List<Type> BuildTypeIndex()
+    {
+        var il2cppTypes = BinarySerializationMirrorExtensions._types;
+        var result = new List<Type>(il2cppTypes.Count);
+        foreach (var il2cppType in il2cppTypes)
+        {
+            var type = il2cppType.ToManaged();
+
+            if (type == null)
+            {
+                FikaGlobals.LogError($"EFTSerializationExtensions: no wrapper type for {il2cppType.FullName}");
+                type = typeof(void);
+            }
+
+            result.Add(type);
+        }
+
+        return result;
+    }
 
     static EFTSerializationExtensions()
     {
@@ -122,7 +143,7 @@ public static class EFTSerializationExtensions
         RegisterSerializer<QuestAcceptDescriptor>((w, t) => w.PutEFTQuestAcceptDescriptor(t));
         RegisterSerializer<QuestFinishDescriptor>((w, t) => w.PutEFTQuestFinishDescriptor(t));
         RegisterSerializer<QuestHandoverDescriptor>((w, t) => w.PutEFTQuestHandoverDescriptor(t));
-        RegisterSerializer<QuestDataClass>((w, t) => w.PutEFTQuestsQuestStatusData(t));
+        RegisterSerializer<EFT.Quests.QuestStatusData>((w, t) => w.PutEFTQuestsQuestStatusData(t));
         RegisterSerializer<RecodableComponentDescriptor>((w, t) => w.PutEFTRecodableComponentDescriptor(t));
         RegisterSerializer<RemoveOperationDescriptor>((w, t) => w.PutEFTRemoveOperationDescriptor(t));
         RegisterSerializer<RepairableComponentDescriptor>((w, t) => w.PutEFTRepairableComponentDescriptor(t));
@@ -133,7 +154,6 @@ public static class EFTSerializationExtensions
         RegisterSerializer<ResourceKey>((w, t) => w.PutEFTResourceKey(t));
         RegisterSerializer<SetDialogProgressOperationDescriptor>((w, t) => w.PutEFTSetDialogProgressOperationDescriptor(t));
         RegisterSerializer<SetupItemOperationDescriptor>((w, t) => w.PutEFTSetupItemOperationDescriptor(t));
-        RegisterSerializer<SetVariableOperationDescriptor>((w, t) => w.PutEFTSetVariableOperationDescriptor(t));
         RegisterSerializer<ShellTemplateDescriptor>((w, t) => w.PutEFTShellTemplateDescriptor(t));
         RegisterSerializer<SightComponentDescriptor>((w, t) => w.PutEFTSightComponentDescriptor(t));
         RegisterSerializer<SkillsDescriptor>((w, t) => w.PutEFTSkillsDescriptor(t));
@@ -250,7 +270,7 @@ public static class EFTSerializationExtensions
         RegisterDeserializer<QuestAcceptDescriptor>(r => r.GetEFTQuestAcceptDescriptor());
         RegisterDeserializer<QuestFinishDescriptor>(r => r.GetEFTQuestFinishDescriptor());
         RegisterDeserializer<QuestHandoverDescriptor>(r => r.GetEFTQuestHandoverDescriptor());
-        RegisterDeserializer<QuestDataClass>(r => r.GetEFTQuestsQuestStatusData());
+        RegisterDeserializer<EFT.Quests.QuestStatusData>(r => r.GetEFTQuestsQuestStatusData());
         RegisterDeserializer<RecodableComponentDescriptor>(r => r.GetEFTRecodableComponentDescriptor());
         RegisterDeserializer<RemoveOperationDescriptor>(r => r.GetEFTRemoveOperationDescriptor());
         RegisterDeserializer<RepairableComponentDescriptor>(r => r.GetEFTRepairableComponentDescriptor());
@@ -261,7 +281,6 @@ public static class EFTSerializationExtensions
         RegisterDeserializer<ResourceKey>(r => r.GetEFTResourceKey());
         RegisterDeserializer<SetDialogProgressOperationDescriptor>(r => r.GetEFTSetDialogProgressOperationDescriptor());
         RegisterDeserializer<SetupItemOperationDescriptor>(r => r.GetEFTSetupItemOperationDescriptor());
-        RegisterDeserializer<SetVariableOperationDescriptor>(r => r.GetEFTSetVariableOperationDescriptor());
         RegisterDeserializer<ShellTemplateDescriptor>(r => r.GetEFTShellTemplateDescriptor());
         RegisterDeserializer<SightComponentDescriptor>(r => r.GetEFTSightComponentDescriptor());
         RegisterDeserializer<SkillsDescriptor>(r => r.GetEFTSkillsDescriptor());
@@ -551,7 +570,7 @@ public static class EFTSerializationExtensions
     {
         var gclass = new BodyPartDamageHistoryDescriptor();
         var num = reader.GetInt();
-        gclass.DamageList = new List<DamageStatsDescriptor>(num);
+        gclass.DamageList = new Il2CppSystem.Collections.Generic.List<DamageStatsDescriptor>(num);
         for (var i = 0; i < num; i++)
         {
             gclass.DamageList.Add(reader.GetEFTDamageStatsDescriptor());
@@ -568,7 +587,7 @@ public static class EFTSerializationExtensions
         writer.Put(target.Amount);
         writer.PutEnum(target.Type);
         writer.Put(target.SourceId);
-        if (target.OverDamageFrom != null)
+        if (target.OverDamageFrom.HasValue)
         {
             writer.Put(true);
             writer.PutEnum(target.OverDamageFrom.Value);
@@ -628,7 +647,7 @@ public static class EFTSerializationExtensions
         {
             writer.Put(false);
         }
-        if (target.SkillType != null)
+        if (target.SkillType.HasValue)
         {
             writer.Put(true);
             writer.PutEnum(target.SkillType.Value);
@@ -637,7 +656,7 @@ public static class EFTSerializationExtensions
         {
             writer.Put(false);
         }
-        if (target.SkillName != null)
+        if (target.SkillName.HasValue)
         {
             writer.Put(true);
             writer.PutEnum(target.SkillName.Value);
@@ -646,7 +665,7 @@ public static class EFTSerializationExtensions
         {
             writer.Put(false);
         }
-        if (target.TemplateId != null)
+        if (target.TemplateId.HasValue)
         {
             writer.Put(true);
             writer.PutMongoID(target.TemplateId.Value);
@@ -674,7 +693,7 @@ public static class EFTSerializationExtensions
         if (reader.GetBool())
         {
             var num = reader.GetInt();
-            profileBonusesClass.Filters = new List<MongoID>(num);
+            profileBonusesClass.Filters = new Il2CppSystem.Collections.Generic.List<MongoID>(num);
             for (var i = 0; i < num; i++)
             {
                 profileBonusesClass.Filters.Add(reader.GetMongoID());
@@ -690,7 +709,7 @@ public static class EFTSerializationExtensions
         }
         if (reader.GetBool())
         {
-            profileBonusesClass.TemplateId = new MongoID?(reader.GetMongoID());
+            profileBonusesClass.TemplateId = reader.GetMongoID().ToIl2CppNullable();
         }
         return profileBonusesClass;
     }
@@ -730,7 +749,7 @@ public static class EFTSerializationExtensions
     /// <param name="target">The ContainerDescriptor instance containing the container data to write.</param>
     public static void PutEFTContainerDescriptor(this NetDataWriter writer, ContainerDescriptor target)
     {
-        if (target.ParentId != null)
+        if (target.ParentId.HasValue)
         {
             writer.Put(true);
             writer.PutMongoID(target.ParentId.Value);
@@ -751,7 +770,7 @@ public static class EFTSerializationExtensions
         var gclass = new ContainerDescriptor();
         if (reader.GetBool())
         {
-            gclass.ParentId = new MongoID?(reader.GetMongoID());
+            gclass.ParentId = reader.GetMongoID().ToIl2CppNullable();
         }
         gclass.ContainerId = reader.GetString();
         return gclass;
@@ -778,7 +797,7 @@ public static class EFTSerializationExtensions
     {
         var gclass = new CounterCollectionDescriptor();
         var num = reader.GetInt();
-        gclass.Items = new List<CounterCollectionItemDescriptor>(num);
+        gclass.Items = new Il2CppSystem.Collections.Generic.List<CounterCollectionItemDescriptor>(num);
         for (var i = 0; i < num; i++)
         {
             gclass.Items.Add(reader.GetEFTCounterCollectionItemDescriptor());
@@ -808,7 +827,7 @@ public static class EFTSerializationExtensions
     {
         var gclass = new CounterCollectionItemDescriptor();
         var num = reader.GetInt();
-        gclass.Key = new List<string>(num);
+        gclass.Key = new Il2CppSystem.Collections.Generic.List<string>(num);
         for (var i = 0; i < num; i++)
         {
             gclass.Key.Add(reader.GetString());
@@ -931,7 +950,7 @@ public static class EFTSerializationExtensions
             gclass.LethalDamage = reader.GetEFTDamageStatsDescriptor();
         }
         var num = reader.GetInt();
-        gclass.BodyParts = new Dictionary<EBodyPart, BodyPartDamageHistoryDescriptor>();
+        gclass.BodyParts = new Il2CppSystem.Collections.Generic.Dictionary<EBodyPart, BodyPartDamageHistoryDescriptor>();
         for (var i = 0; i < num; i++)
         {
             gclass.BodyParts[reader.GetEnum<EBodyPart>()] = reader.GetEFTBodyPartDamageHistoryDescriptor();
@@ -1050,14 +1069,22 @@ public static class EFTSerializationExtensions
     public static void PutEFTDogTagComponentDescriptor(this NetDataWriter writer, DogTagComponentDescriptor target)
     {
         writer.Put(target.AccountId);
-        writer.Put(target.ProfileId);
+        writer.PutMongoID(target.ProfileId);
         writer.Put(target.Nickname);
         writer.PutEnum(target.Side);
         writer.Put(target.Level);
         writer.Put(target.Time);
-        writer.Put(target.Status);
-        writer.Put(target.KillerAccountId);
-        writer.Put(target.KillerProfileId);
+        writer.PutEnum(target.Status);
+        writer.Put(target.KillerAccountId.HasValue);
+        if (target.KillerAccountId.HasValue)
+        {
+            writer.Put(target.KillerAccountId.Value);
+        }
+        writer.Put(target.KillerProfileId.HasValue);
+        if (target.KillerProfileId.HasValue)
+        {
+            writer.PutMongoID(target.KillerProfileId.Value);
+        }
         writer.Put(target.KillerName);
         writer.Put(target.WeaponName);
         writer.Put(target.CarriedByGroupMember);
@@ -1069,21 +1096,22 @@ public static class EFTSerializationExtensions
     /// <returns>A new instance of DogTagComponentDescriptor populated with the stream data.</returns>
     public static DogTagComponentDescriptor GetEFTDogTagComponentDescriptor(this NetDataReader reader)
     {
-        return new DogTagComponentDescriptor
+        var descriptor = new DogTagComponentDescriptor
         {
-            AccountId = reader.GetString(),
-            ProfileId = reader.GetString(),
+            AccountId = reader.GetUInt(),
+            ProfileId = reader.GetMongoID(),
             Nickname = reader.GetString(),
             Side = reader.GetEnum<EPlayerSide>(),
-            Level = reader.GetInt(),
+            Level = reader.GetByte(),
             Time = reader.GetDouble(),
-            Status = reader.GetString(),
-            KillerAccountId = reader.GetString(),
-            KillerProfileId = reader.GetString(),
-            KillerName = reader.GetString(),
-            WeaponName = reader.GetString(),
-            CarriedByGroupMember = reader.GetBool()
+            Status = reader.GetEnum<EDogtagStatus>()
         };
+        descriptor.KillerAccountId = reader.GetBool() ? new Il2CppSystem.Nullable<uint>(reader.GetUInt()) : new Il2CppSystem.Nullable<uint>();
+        descriptor.KillerProfileId = reader.GetBool() ? reader.GetMongoID().ToIl2CppNullable() : new Il2CppSystem.Nullable<MongoID>();
+        descriptor.KillerName = reader.GetString();
+        descriptor.WeaponName = reader.GetString();
+        descriptor.CarriedByGroupMember = reader.GetBool();
+        return descriptor;
     }
 
     /// <summary>
@@ -1428,7 +1456,7 @@ public static class EFTSerializationExtensions
             GridNumber = reader.GetByte()
         };
         var num = reader.GetInt();
-        gclass.ContainedItems = new List<ItemInGridDescriptor>(num);
+        gclass.ContainedItems = new Il2CppSystem.Collections.Generic.List<ItemInGridDescriptor>(num);
         for (var i = 0; i < num; i++)
         {
             gclass.ContainedItems.Add(reader.GetEFTItemInGridDescriptor());
@@ -1578,27 +1606,27 @@ public static class EFTSerializationExtensions
         if (reader.GetBool())
         {
             var num = reader.GetInt();
-            eftinventoryClass.HideoutAreaStashes = new Dictionary<EAreaType, ItemDescriptor>();
+            eftinventoryClass.HideoutAreaStashes = new Il2CppSystem.Collections.Generic.Dictionary<EAreaType, ItemDescriptor>();
             for (var i = 0; i < num; i++)
             {
                 eftinventoryClass.HideoutAreaStashes[reader.GetEnum<EAreaType>()] = reader.GetEFTItemDescriptor();
             }
         }
         var num2 = reader.GetInt();
-        eftinventoryClass.FastAccess = new Dictionary<EBoundItem, MongoID>();
+        eftinventoryClass.FastAccess = new Il2CppSystem.Collections.Generic.Dictionary<EBoundItem, MongoID>();
         for (var j = 0; j < num2; j++)
         {
             eftinventoryClass.FastAccess[reader.GetEnum<EBoundItem>()] = reader.GetMongoID();
         }
         var num3 = reader.GetInt();
-        eftinventoryClass.FavoriteItemsStorage = new List<MongoID>(num3);
+        eftinventoryClass.FavoriteItemsStorage = new Il2CppSystem.Collections.Generic.List<MongoID>(num3);
         for (var k = 0; k < num3; k++)
         {
             eftinventoryClass.FavoriteItemsStorage.Add(reader.GetMongoID());
         }
         eftinventoryClass.CheckInventoryHash = reader.GetBool();
         var num4 = reader.GetInt();
-        eftinventoryClass.DiscardLimits = new Dictionary<MongoID, int>();
+        eftinventoryClass.DiscardLimits = new Il2CppSystem.Collections.Generic.Dictionary<MongoID, int>();
         for (var l = 0; l < num4; l++)
         {
             eftinventoryClass.DiscardLimits[reader.GetMongoID()] = reader.GetInt();
@@ -1732,7 +1760,7 @@ public static class EFTSerializationExtensions
         if (reader.GetBool())
         {
             var num = reader.GetInt();
-            gclass.ChangedItems = new List<ItemInfoDescriptor>(num);
+            gclass.ChangedItems = new Il2CppSystem.Collections.Generic.List<ItemInfoDescriptor>(num);
             for (var i = 0; i < num; i++)
             {
                 gclass.ChangedItems.Add(reader.GetEFTItemInfoDescriptor());
@@ -1741,7 +1769,7 @@ public static class EFTSerializationExtensions
         if (reader.GetBool())
         {
             var num2 = reader.GetInt();
-            gclass.RemovedItems = new List<MongoID>(num2);
+            gclass.RemovedItems = new Il2CppSystem.Collections.Generic.List<MongoID>(num2);
             for (var j = 0; j < num2; j++)
             {
                 gclass.RemovedItems.Add(reader.GetMongoID());
@@ -1750,7 +1778,7 @@ public static class EFTSerializationExtensions
         if (reader.GetBool())
         {
             var num3 = reader.GetInt();
-            gclass.MovedItems = new Dictionary<MongoID, ItemAddressDescriptor>();
+            gclass.MovedItems = new Il2CppSystem.Collections.Generic.Dictionary<MongoID, ItemAddressDescriptor>();
             for (var k = 0; k < num3; k++)
             {
                 gclass.MovedItems[reader.GetMongoID()] = reader.GetPolymorph<ItemAddressDescriptor>();
@@ -1759,7 +1787,7 @@ public static class EFTSerializationExtensions
         if (reader.GetBool())
         {
             var num4 = reader.GetInt();
-            gclass.NewItems = new List<NestedItemDescriptor>(num4);
+            gclass.NewItems = new Il2CppSystem.Collections.Generic.List<NestedItemDescriptor>(num4);
             for (var l = 0; l < num4; l++)
             {
                 gclass.NewItems.Add(reader.GetEFTNestedItemDescriptor());
@@ -1918,7 +1946,7 @@ public static class EFTSerializationExtensions
         if (reader.GetBool())
         {
             var num = reader.GetInt();
-            gclass.Content = new List<NestedItemDescriptor>(num);
+            gclass.Content = new Il2CppSystem.Collections.Generic.List<NestedItemDescriptor>(num);
             for (var i = 0; i < num; i++)
             {
                 gclass.Content.Add(reader.GetEFTNestedItemDescriptor());
@@ -2099,7 +2127,7 @@ public static class EFTSerializationExtensions
         if (reader.GetBool())
         {
             var num = reader.GetInt();
-            inventoryDescriptorClass.Components = new List<ItemComponentDescriptor>(num);
+            inventoryDescriptorClass.Components = new Il2CppSystem.Collections.Generic.List<ItemComponentDescriptor>(num);
             for (var i = 0; i < num; i++)
             {
                 inventoryDescriptorClass.Components.Add(reader.GetPolymorph<ItemComponentDescriptor>());
@@ -2108,7 +2136,7 @@ public static class EFTSerializationExtensions
         if (reader.GetBool())
         {
             var num2 = reader.GetInt();
-            inventoryDescriptorClass.Slots = new List<SlotDescriptor>(num2);
+            inventoryDescriptorClass.Slots = new Il2CppSystem.Collections.Generic.List<SlotDescriptor>(num2);
             for (var j = 0; j < num2; j++)
             {
                 inventoryDescriptorClass.Slots.Add(reader.GetEFTSlotDescriptor());
@@ -2117,7 +2145,7 @@ public static class EFTSerializationExtensions
         if (reader.GetBool())
         {
             var num3 = reader.GetInt();
-            inventoryDescriptorClass.ShellsInWeapon = new List<ShellTemplateDescriptor>(num3);
+            inventoryDescriptorClass.ShellsInWeapon = new Il2CppSystem.Collections.Generic.List<ShellTemplateDescriptor>(num3);
             for (var k = 0; k < num3; k++)
             {
                 inventoryDescriptorClass.ShellsInWeapon.Add(reader.GetEFTShellTemplateDescriptor());
@@ -2126,7 +2154,7 @@ public static class EFTSerializationExtensions
         if (reader.GetBool())
         {
             var num4 = reader.GetInt();
-            inventoryDescriptorClass.Grids = new List<GridDescriptor>(num4);
+            inventoryDescriptorClass.Grids = new Il2CppSystem.Collections.Generic.List<GridDescriptor>(num4);
             for (var l = 0; l < num4; l++)
             {
                 inventoryDescriptorClass.Grids.Add(reader.GetEFTGridDescriptor());
@@ -2135,7 +2163,7 @@ public static class EFTSerializationExtensions
         if (reader.GetBool())
         {
             var num5 = reader.GetInt();
-            inventoryDescriptorClass.StackSlots = new List<StackSlotDescriptor>(num5);
+            inventoryDescriptorClass.StackSlots = new Il2CppSystem.Collections.Generic.List<StackSlotDescriptor>(num5);
             for (var m = 0; m < num5; m++)
             {
                 inventoryDescriptorClass.StackSlots.Add(reader.GetEFTStackSlotDescriptor());
@@ -2246,7 +2274,7 @@ public static class EFTSerializationExtensions
     {
         var gclass = new JsonCorpseDescriptor();
         var num = reader.GetInt();
-        gclass.Customization = new Dictionary<int, MongoID>();
+        gclass.Customization = new Il2CppSystem.Collections.Generic.Dictionary<int, MongoID>();
         for (var i = 0; i < num; i++)
         {
             gclass.Customization[reader.GetInt()] = reader.GetMongoID();
@@ -2440,7 +2468,7 @@ public static class EFTSerializationExtensions
     {
         var gclass = new LootDataDescriptor();
         var num = reader.GetInt();
-        gclass.Items = new List<JsonLootItemDescriptor>(num);
+        gclass.Items = new Il2CppSystem.Collections.Generic.List<JsonLootItemDescriptor>(num);
         for (var i = 0; i < num; i++)
         {
             gclass.Items.Add(reader.GetPolymorph<JsonLootItemDescriptor>());
@@ -2460,20 +2488,20 @@ public static class EFTSerializationExtensions
         writer.Put(target.PlayersWhoKnowAboutMalfunction.Count);
         for (var i = 0; i < target.PlayersWhoKnowAboutMalfunction.Count; i++)
         {
-            writer.PutMongoID(target.PlayersWhoKnowAboutMalfunction[i]);
+            writer.Put(target.PlayersWhoKnowAboutMalfunction[i]);
         }
         writer.Put(target.PlayersWhoKnowMalfType.Count);
         for (var j = 0; j < target.PlayersWhoKnowMalfType.Count; j++)
         {
-            writer.PutMongoID(target.PlayersWhoKnowMalfType[j]);
+            writer.Put(target.PlayersWhoKnowMalfType[j]);
         }
         writer.Put(target.PlayersReducedMalfChances.Count);
         foreach (var keyValuePair in target.PlayersReducedMalfChances)
         {
-            writer.PutMongoID(keyValuePair.Key);
+            writer.Put(keyValuePair.Key);
             writer.Put(keyValuePair.Value);
         }
-        if (target.AmmoToFireTemplateId != null)
+        if (target.AmmoToFireTemplateId.HasValue)
         {
             writer.Put(true);
             writer.PutMongoID(target.AmmoToFireTemplateId.Value);
@@ -2482,7 +2510,7 @@ public static class EFTSerializationExtensions
         {
             writer.Put(false);
         }
-        if (target.AmmoWillBeLoadedToChamberTemplateId != null)
+        if (target.AmmoWillBeLoadedToChamberTemplateId.HasValue)
         {
             writer.Put(true);
             writer.PutMongoID(target.AmmoWillBeLoadedToChamberTemplateId.Value);
@@ -2491,7 +2519,7 @@ public static class EFTSerializationExtensions
         {
             writer.Put(false);
         }
-        if (target.AmmoMalfunctionedTemplateId != null)
+        if (target.AmmoMalfunctionedTemplateId.HasValue)
         {
             writer.Put(true);
             writer.PutMongoID(target.AmmoMalfunctionedTemplateId.Value);
@@ -2513,34 +2541,34 @@ public static class EFTSerializationExtensions
             SlideOnOverheatReached = reader.GetBool()
         };
         var num = reader.GetInt();
-        gclass.PlayersWhoKnowAboutMalfunction = new List<MongoID>(num);
+        gclass.PlayersWhoKnowAboutMalfunction = new Il2CppSystem.Collections.Generic.List<int>(num);
         for (var i = 0; i < num; i++)
         {
-            gclass.PlayersWhoKnowAboutMalfunction.Add(reader.GetMongoID());
+            gclass.PlayersWhoKnowAboutMalfunction.Add(reader.GetInt());
         }
         var num2 = reader.GetInt();
-        gclass.PlayersWhoKnowMalfType = new List<MongoID>(num2);
+        gclass.PlayersWhoKnowMalfType = new Il2CppSystem.Collections.Generic.List<int>(num2);
         for (var j = 0; j < num2; j++)
         {
-            gclass.PlayersWhoKnowMalfType.Add(reader.GetMongoID());
+            gclass.PlayersWhoKnowMalfType.Add(reader.GetInt());
         }
         var num3 = reader.GetInt();
-        gclass.PlayersReducedMalfChances = new Dictionary<MongoID, byte>();
+        gclass.PlayersReducedMalfChances = new Il2CppSystem.Collections.Generic.Dictionary<int, byte>();
         for (var k = 0; k < num3; k++)
         {
-            gclass.PlayersReducedMalfChances[reader.GetMongoID()] = reader.GetByte();
+            gclass.PlayersReducedMalfChances[reader.GetInt()] = reader.GetByte();
         }
         if (reader.GetBool())
         {
-            gclass.AmmoToFireTemplateId = new MongoID?(reader.GetMongoID());
+            gclass.AmmoToFireTemplateId = reader.GetMongoID().ToIl2CppNullable();
         }
         if (reader.GetBool())
         {
-            gclass.AmmoWillBeLoadedToChamberTemplateId = new MongoID?(reader.GetMongoID());
+            gclass.AmmoWillBeLoadedToChamberTemplateId = reader.GetMongoID().ToIl2CppNullable();
         }
         if (reader.GetBool())
         {
-            gclass.AmmoMalfunctionedTemplateId = new MongoID?(reader.GetMongoID());
+            gclass.AmmoMalfunctionedTemplateId = reader.GetMongoID().ToIl2CppNullable();
         }
         return gclass;
     }
@@ -2564,7 +2592,7 @@ public static class EFTSerializationExtensions
     {
         var gclass = new MapComponentDescriptor();
         var num = reader.GetInt();
-        gclass.Markers = new List<MapMarker>(num);
+        gclass.Markers = new Il2CppSystem.Collections.Generic.List<MapMarker>(num);
         for (var i = 0; i < num; i++)
         {
             gclass.Markers.Add(reader.GetEFTInventoryLogicMapMarker());
@@ -2655,7 +2683,7 @@ public static class EFTSerializationExtensions
         if (reader.GetBool())
         {
             var num = reader.GetInt();
-            moveDescriptorClass.DestroyedItems = new List<DestroyedItem>(num);
+            moveDescriptorClass.DestroyedItems = new Il2CppSystem.Collections.Generic.List<DestroyedItem>(num);
             for (var i = 0; i < num; i++)
             {
                 moveDescriptorClass.DestroyedItems.Add(reader.GetEFTDestroyedItem());
@@ -2762,7 +2790,7 @@ public static class EFTSerializationExtensions
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
         writer.PutMongoID(target.TripwireId);
-        if (target.PlantingKitId != null)
+        if (target.PlantingKitId.HasValue)
         {
             writer.Put(true);
             writer.PutMongoID(target.PlantingKitId.Value);
@@ -2788,7 +2816,7 @@ public static class EFTSerializationExtensions
         };
         if (reader.GetBool())
         {
-            gclass.PlantingKitId = new MongoID?(reader.GetMongoID());
+            gclass.PlantingKitId = reader.GetMongoID().ToIl2CppNullable();
         }
         gclass.FromPosition = reader.GetClassVector3();
         gclass.ToPosition = reader.GetClassVector3();
@@ -2836,7 +2864,7 @@ public static class EFTSerializationExtensions
         if (reader.GetBool())
         {
             var num = reader.GetInt();
-            gclass.Customization = new Dictionary<EBodyModelPart, MongoID>();
+            gclass.Customization = new Il2CppSystem.Collections.Generic.Dictionary<EBodyModelPart, MongoID>();
             for (var i = 0; i < num; i++)
             {
                 gclass.Customization[reader.GetEnum<EBodyModelPart>()] = reader.GetMongoID();
@@ -2904,7 +2932,7 @@ public static class EFTSerializationExtensions
         writer.PutEFTProfileHealthInfoValueInfo(target.Hydration);
         writer.PutEFTProfileHealthInfoValueInfo(target.Temperature);
         writer.PutEFTProfileHealthInfoValueInfo(target.Poison);
-        if (target.UpdateTime != null)
+        if (target.UpdateTime.HasValue)
         {
             writer.Put(true);
             writer.Put(target.UpdateTime.Value);
@@ -2920,7 +2948,7 @@ public static class EFTSerializationExtensions
     {
         var profileHealthClass = new Profile.HealthInfo();
         var num = reader.GetInt();
-        profileHealthClass.BodyParts = new Dictionary<EBodyPart, Profile.HealthInfo.BodyPartInfo>();
+        profileHealthClass.BodyParts = new Il2CppSystem.Collections.Generic.Dictionary<EBodyPart, Profile.HealthInfo.BodyPartInfo>();
         for (var i = 0; i < num; i++)
         {
             profileHealthClass.BodyParts[reader.GetEnum<EBodyPart>()] = reader.GetEFTProfileHealthInfoBodyPartInfo();
@@ -2960,7 +2988,7 @@ public static class EFTSerializationExtensions
             Health = reader.GetEFTProfileHealthInfoValueInfo()
         };
         var num = reader.GetInt();
-        profileBodyPartHealthClass.Effects = new Dictionary<string, Profile.HealthInfo.EffectInfo>();
+        profileBodyPartHealthClass.Effects = new Il2CppSystem.Collections.Generic.Dictionary<string, Profile.HealthInfo.EffectInfo>();
         for (var i = 0; i < num; i++)
         {
             profileBodyPartHealthClass.Effects[reader.GetString()] = reader.GetEFTProfileHealthInfoEffectInfo();
@@ -3058,7 +3086,7 @@ public static class EFTSerializationExtensions
     {
         var gclass = new Profile.UnlockedInfo();
         var num = reader.GetInt();
-        gclass.unlockedSchemeList = new List<MongoID>(num);
+        gclass.unlockedSchemeList = new Il2CppSystem.Collections.Generic.List<MongoID>(num);
         for (var i = 0; i < num; i++)
         {
             gclass.unlockedSchemeList.Add(reader.GetMongoID());
@@ -3094,7 +3122,7 @@ public static class EFTSerializationExtensions
     {
         writer.PutMongoID(target.Id);
         writer.Put(target.AccountId);
-        if (target.PetId != null)
+        if (target.PetId.HasValue)
         {
             writer.Put(true);
             writer.PutMongoID(target.PetId.Value);
@@ -3202,6 +3230,143 @@ public static class EFTSerializationExtensions
             writer.PutMongoID(keyValuePair9.Key);
             writer.PutEFTTraderInfoDescriptor(keyValuePair9.Value);
         }
+        writer.PutMongoIDSet(target.PerkIds);
+        writer.Put(target.PerkEffectParameters?.Allergy != null);
+        if (target.PerkEffectParameters?.Allergy != null)
+        {
+            writer.Put(target.PerkEffectParameters.Allergy.Count);
+            foreach (var allergy in target.PerkEffectParameters.Allergy)
+            {
+                writer.PutMongoID(allergy.Key);
+                writer.Put(allergy.Value.TargetItems.Count);
+                foreach (var item in allergy.Value.TargetItems)
+                {
+                    writer.PutMongoID(item);
+                }
+            }
+        }
+        writer.Put(target.SeasonalRewards?.Count ?? -1);
+        if (target.SeasonalRewards != null)
+        {
+            foreach (var reward in target.SeasonalRewards)
+            {
+                writer.PutMongoID(reward.Key);
+                writer.PutMongoIDSet(reward.Value.Data);
+            }
+        }
+        writer.Put(target.BattlePassDocumentLimitData?.Count ?? -1);
+        if (target.BattlePassDocumentLimitData != null)
+        {
+            foreach (var limit in target.BattlePassDocumentLimitData)
+            {
+                writer.PutMongoID(limit.Key);
+                writer.Put(limit.Value.NextResetTime);
+                writer.Put(limit.Value.RemainingLimit);
+                writer.Put(limit.Value.TotalLimit);
+                writer.Put(limit.Value.ResetInterval);
+            }
+        }
+        writer.PutMongoIDBoolDictionary(target.CompletableItems);
+        writer.PutMongoIDBoolDictionary(target.QuestNotes);
+        writer.PutMongoIDSet(target.ReadQuestData);
+        writer.Put(target.Ending != null);
+        if (target.Ending != null)
+        {
+            writer.Put(target.Ending.Current);
+            writer.Put(target.Ending.Achieved?.Length ?? -1);
+            if (target.Ending.Achieved != null)
+            {
+                foreach (var achieved in target.Ending.Achieved)
+                {
+                    writer.Put(achieved);
+                }
+            }
+        }
+        writer.Put(target.UnlockedLocations?.Count ?? -1);
+        if (target.UnlockedLocations != null)
+        {
+            foreach (var location in target.UnlockedLocations)
+            {
+                writer.Put(location);
+            }
+        }
+        writer.Put(target.UniversalDocuments);
+        writer.Put(target.BattlePassProgress?.Count ?? -1);
+        if (target.BattlePassProgress != null)
+        {
+            foreach (var progress in target.BattlePassProgress)
+            {
+                writer.PutMongoID(progress.BattlePassId);
+                writer.Put(progress.ObtainedRewards?.Count ?? -1);
+                if (progress.ObtainedRewards != null)
+                {
+                    foreach (var reward in progress.ObtainedRewards)
+                    {
+                        writer.PutMongoID(reward);
+                    }
+                }
+            }
+        }
+    }
+
+    // Null is written as -1 so the reader can restore it
+    private static void PutMongoIDSet(this NetDataWriter writer, Il2CppSystem.Collections.Generic.HashSet<MongoID> set)
+    {
+        writer.Put(set?.Count ?? -1);
+        if (set != null)
+        {
+            foreach (var id in set)
+            {
+                writer.PutMongoID(id);
+            }
+        }
+    }
+
+    private static Il2CppSystem.Collections.Generic.HashSet<MongoID> GetMongoIDSet(this NetDataReader reader)
+    {
+        var count = reader.GetInt();
+        if (count < 0)
+        {
+            return null;
+        }
+        var set = new Il2CppSystem.Collections.Generic.HashSet<MongoID>();
+        for (var i = 0; i < count; i++)
+        {
+            set.Add(reader.GetMongoID());
+        }
+        return set;
+    }
+
+    private static void PutMongoIDBoolDictionary(this NetDataWriter writer, Il2CppSystem.Collections.Generic.Dictionary<MongoID, bool> dictionary)
+    {
+        writer.Put(dictionary?.Count ?? -1);
+        if (dictionary != null)
+        {
+            foreach (var entry in dictionary)
+            {
+                writer.PutMongoID(entry.Key);
+                writer.Put(entry.Value);
+            }
+        }
+    }
+
+    private static Il2CppSystem.Collections.Generic.Dictionary<MongoID, bool> GetMongoIDBoolDictionary(this NetDataReader reader)
+    {
+        var count = reader.GetInt();
+        
+        if (count < 0)
+        {
+            return null;
+        }
+
+        var dictionary = new Il2CppSystem.Collections.Generic.Dictionary<MongoID, bool>();
+        
+        for (var i = 0; i < count; i++)
+        {
+            dictionary[reader.GetMongoID()] = reader.GetBool();
+        }
+
+        return dictionary;
     }
 
     /// <summary>
@@ -3216,12 +3381,12 @@ public static class EFTSerializationExtensions
         };
         if (reader.GetBool())
         {
-            completeProfileDescriptorClass.PetId = new MongoID?(reader.GetMongoID());
+            completeProfileDescriptorClass.PetId = reader.GetMongoID().ToIl2CppNullable();
         }
         completeProfileDescriptorClass.KarmaValue = reader.GetFloat();
         completeProfileDescriptorClass.Info = reader.GetPolymorph<ProfileInfoDescriptor>();
         var num = reader.GetInt();
-        completeProfileDescriptorClass.Customization = new Dictionary<EBodyModelPart, MongoID>();
+        completeProfileDescriptorClass.Customization = new Il2CppSystem.Collections.Generic.Dictionary<EBodyModelPart, MongoID>();
         for (var i = 0; i < num; i++)
         {
             completeProfileDescriptorClass.Customization[reader.GetEnum<EBodyModelPart>()] = reader.GetMongoID();
@@ -3229,7 +3394,7 @@ public static class EFTSerializationExtensions
         if (reader.GetBool())
         {
             var num2 = reader.GetInt();
-            completeProfileDescriptorClass.Encyclopedia = new Dictionary<MongoID, bool>();
+            completeProfileDescriptorClass.Encyclopedia = new Il2CppSystem.Collections.Generic.Dictionary<MongoID, bool>();
             for (var j = 0; j < num2; j++)
             {
                 completeProfileDescriptorClass.Encyclopedia[reader.GetMongoID()] = reader.GetBool();
@@ -3249,31 +3414,31 @@ public static class EFTSerializationExtensions
         completeProfileDescriptorClass.Skills = reader.GetEFTSkillsDescriptor();
         completeProfileDescriptorClass.Notes = reader.GetEFTNotesNotesManagerNotesDescriptor();
         var num4 = reader.GetInt();
-        completeProfileDescriptorClass.TaskConditionCounters = new Dictionary<MongoID, TaskConditionCounterDescriptor>();
+        completeProfileDescriptorClass.TaskConditionCounters = new Il2CppSystem.Collections.Generic.Dictionary<MongoID, TaskConditionCounterDescriptor>();
         for (var l = 0; l < num4; l++)
         {
             completeProfileDescriptorClass.TaskConditionCounters[reader.GetMongoID()] = reader.GetEFTTaskConditionCounterDescriptor();
         }
         var num5 = reader.GetInt();
-        completeProfileDescriptorClass.QuestsData = new List<QuestDataClass>(num5);
+        completeProfileDescriptorClass.QuestsData = new Il2CppSystem.Collections.Generic.List<EFT.Quests.QuestStatusData>(num5);
         for (var m = 0; m < num5; m++)
         {
             completeProfileDescriptorClass.QuestsData.Add(reader.GetEFTQuestsQuestStatusData());
         }
         var num6 = reader.GetInt();
-        completeProfileDescriptorClass.AchievementsData = new Dictionary<MongoID, int>();
+        completeProfileDescriptorClass.AchievementsData = new Il2CppSystem.Collections.Generic.Dictionary<MongoID, int>();
         for (var n = 0; n < num6; n++)
         {
             completeProfileDescriptorClass.AchievementsData[reader.GetMongoID()] = reader.GetInt();
         }
         var num7 = reader.GetInt();
-        completeProfileDescriptorClass.PrestigeData = new Dictionary<MongoID, int>();
+        completeProfileDescriptorClass.PrestigeData = new Il2CppSystem.Collections.Generic.Dictionary<MongoID, int>();
         for (var num8 = 0; num8 < num7; num8++)
         {
             completeProfileDescriptorClass.PrestigeData[reader.GetMongoID()] = reader.GetInt();
         }
         var num9 = reader.GetInt();
-        completeProfileDescriptorClass.VariableData = new Dictionary<MongoID, int>();
+        completeProfileDescriptorClass.VariableData = new Il2CppSystem.Collections.Generic.Dictionary<MongoID, int>();
         for (var num10 = 0; num10 < num9; num10++)
         {
             completeProfileDescriptorClass.VariableData[reader.GetMongoID()] = reader.GetInt();
@@ -3287,29 +3452,118 @@ public static class EFTSerializationExtensions
             completeProfileDescriptorClass.Bonuses[num12] = reader.GetEFTBonusDescriptor();
         }
         var num13 = reader.GetInt();
-        completeProfileDescriptorClass.WishList = new Dictionary<MongoID, byte>();
+        completeProfileDescriptorClass.WishList = new Il2CppSystem.Collections.Generic.Dictionary<MongoID, byte>();
         for (var num14 = 0; num14 < num13; num14++)
         {
             completeProfileDescriptorClass.WishList[reader.GetMongoID()] = reader.GetByte();
         }
         completeProfileDescriptorClass.Stats = reader.GetEFTProfileStatsSeparatorDescriptor();
         var num15 = reader.GetInt();
-        completeProfileDescriptorClass.CheckedMagazines = new Dictionary<MongoID, int>();
+        completeProfileDescriptorClass.CheckedMagazines = new Il2CppSystem.Collections.Generic.Dictionary<MongoID, int>();
         for (var num16 = 0; num16 < num15; num16++)
         {
             completeProfileDescriptorClass.CheckedMagazines[reader.GetMongoID()] = reader.GetInt();
         }
         var num17 = reader.GetInt();
-        completeProfileDescriptorClass.CheckedChambers = new List<MongoID>(num17);
+        completeProfileDescriptorClass.CheckedChambers = new Il2CppSystem.Collections.Generic.List<MongoID>(num17);
         for (var num18 = 0; num18 < num17; num18++)
         {
             completeProfileDescriptorClass.CheckedChambers.Add(reader.GetMongoID());
         }
         var num19 = reader.GetInt();
-        completeProfileDescriptorClass.TradersInfo = new Dictionary<MongoID, TraderInfoDescriptor>();
+        completeProfileDescriptorClass.TradersInfo = new Il2CppSystem.Collections.Generic.Dictionary<MongoID, TraderInfoDescriptor>();
         for (var num20 = 0; num20 < num19; num20++)
         {
             completeProfileDescriptorClass.TradersInfo[reader.GetMongoID()] = reader.GetEFTTraderInfoDescriptor();
+        }
+        completeProfileDescriptorClass.PerkIds = reader.GetMongoIDSet();
+        if (reader.GetBool())
+        {
+            var allergies = new Il2CppSystem.Collections.Generic.Dictionary<MongoID, AllergyPerkEffectParametersData>();
+            var allergyCount = reader.GetInt();
+            for (var i = 0; i < allergyCount; i++)
+            {
+                var key = reader.GetMongoID();
+                var itemCount = reader.GetInt();
+                var items = new Il2CppSystem.Collections.Generic.List<MongoID>(itemCount);
+                for (var j = 0; j < itemCount; j++)
+                {
+                    items.Add(reader.GetMongoID());
+                }
+                allergies[key] = new AllergyPerkEffectParametersData { TargetItems = items };
+            }
+            completeProfileDescriptorClass.PerkEffectParameters = new SeasonalPerkEffectParametersData { Allergy = allergies };
+        }
+        var rewardCount = reader.GetInt();
+        if (rewardCount >= 0)
+        {
+            completeProfileDescriptorClass.SeasonalRewards = new Il2CppSystem.Collections.Generic.Dictionary<MongoID, SeasonalRewardData>();
+            for (var i = 0; i < rewardCount; i++)
+            {
+                completeProfileDescriptorClass.SeasonalRewards[reader.GetMongoID()] = new SeasonalRewardData { Data = reader.GetMongoIDSet() };
+            }
+        }
+        var limitCount = reader.GetInt();
+        if (limitCount >= 0)
+        {
+            completeProfileDescriptorClass.BattlePassDocumentLimitData = new Il2CppSystem.Collections.Generic.Dictionary<MongoID, Profile.BattlePassDocumentLimitData>();
+            for (var i = 0; i < limitCount; i++)
+            {
+                completeProfileDescriptorClass.BattlePassDocumentLimitData[reader.GetMongoID()] = new Profile.BattlePassDocumentLimitData
+                {
+                    NextResetTime = reader.GetInt(),
+                    RemainingLimit = reader.GetInt(),
+                    TotalLimit = reader.GetInt(),
+                    ResetInterval = reader.GetInt()
+                };
+            }
+        }
+        completeProfileDescriptorClass.CompletableItems = reader.GetMongoIDBoolDictionary();
+        completeProfileDescriptorClass.QuestNotes = reader.GetMongoIDBoolDictionary();
+        completeProfileDescriptorClass.ReadQuestData = reader.GetMongoIDSet();
+        if (reader.GetBool())
+        {
+            var ending = new EndingInfo { Current = reader.GetString() };
+            var achievedCount = reader.GetInt();
+            if (achievedCount >= 0)
+            {
+                var achieved = new string[achievedCount];
+                for (var i = 0; i < achievedCount; i++)
+                {
+                    achieved[i] = reader.GetString();
+                }
+                ending.Achieved = achieved;
+            }
+            completeProfileDescriptorClass.Ending = ending;
+        }
+        var unlockedCount = reader.GetInt();
+        if (unlockedCount >= 0)
+        {
+            completeProfileDescriptorClass.UnlockedLocations = new Il2CppSystem.Collections.Generic.HashSet<string>();
+            for (var i = 0; i < unlockedCount; i++)
+            {
+                completeProfileDescriptorClass.UnlockedLocations.Add(reader.GetString());
+            }
+        }
+        completeProfileDescriptorClass.UniversalDocuments = reader.GetInt();
+        var progressCount = reader.GetInt();
+        if (progressCount >= 0)
+        {
+            completeProfileDescriptorClass.BattlePassProgress = new Il2CppSystem.Collections.Generic.List<BattlePassProgressData>(progressCount);
+            for (var i = 0; i < progressCount; i++)
+            {
+                var progress = new BattlePassProgressData { BattlePassId = reader.GetMongoID() };
+                var rewardsCount = reader.GetInt();
+                if (rewardsCount >= 0)
+                {
+                    progress.ObtainedRewards = new Il2CppSystem.Collections.Generic.List<MongoID>(rewardsCount);
+                    for (var j = 0; j < rewardsCount; j++)
+                    {
+                        progress.ObtainedRewards.Add(reader.GetMongoID());
+                    }
+                }
+                completeProfileDescriptorClass.BattlePassProgress.Add(progress);
+            }
         }
         return completeProfileDescriptorClass;
     }
@@ -3373,7 +3627,7 @@ public static class EFTSerializationExtensions
             GroupInviteRestriction = reader.GetBool()
         };
         var num = reader.GetInt();
-        profileInfoClass.Bans = new List<ProfileBanDescriptor>(num);
+        profileInfoClass.Bans = new Il2CppSystem.Collections.Generic.List<ProfileBanDescriptor>(num);
         for (var i = 0; i < num; i++)
         {
             profileInfoClass.Bans.Add(reader.GetEFTProfileBanDescriptor());
@@ -3425,6 +3679,12 @@ public static class EFTSerializationExtensions
         writer.PutEFTCounterCollectionDescriptor(target.OverallCounters);
         writer.Put(target.SessionExperienceMult);
         writer.Put(target.ExperienceBonusMult);
+        writer.Put(target.GameEditionExperienceBonus != null);
+        if (target.GameEditionExperienceBonus != null)
+        {
+            writer.Put(target.GameEditionExperienceBonus.GameEdition);
+            writer.Put(target.GameEditionExperienceBonus.ExperienceBonus);
+        }
         writer.Put(target.TotalSessionExperience);
         writer.Put(target.LastSessionDate);
         if (target.Aggressor != null)
@@ -3497,34 +3757,42 @@ public static class EFTSerializationExtensions
             SessionCounters = reader.GetEFTCounterCollectionDescriptor(),
             OverallCounters = reader.GetEFTCounterCollectionDescriptor(),
             SessionExperienceMult = reader.GetFloat(),
-            ExperienceBonusMult = reader.GetFloat(),
-            TotalSessionExperience = reader.GetInt(),
-            LastSessionDate = reader.GetInt()
+            ExperienceBonusMult = reader.GetFloat()
         };
+        if (reader.GetBool())
+        {
+            profileEftStatsClass.GameEditionExperienceBonus = new GameEditionExperienceBonus
+            {
+                GameEdition = reader.GetString(),
+                ExperienceBonus = reader.GetFloat()
+            };
+        }
+        profileEftStatsClass.TotalSessionExperience = reader.GetInt();
+        profileEftStatsClass.LastSessionDate = reader.GetInt();
         if (reader.GetBool())
         {
             profileEftStatsClass.Aggressor = reader.GetAggressorStats();
         }
         var num = reader.GetInt();
-        profileEftStatsClass.DroppedItems = new List<DroppedItem>(num);
+        profileEftStatsClass.DroppedItems = new Il2CppSystem.Collections.Generic.List<DroppedItem>(num);
         for (var i = 0; i < num; i++)
         {
             profileEftStatsClass.DroppedItems.Add(reader.GetEFTDroppedItem());
         }
         var num2 = reader.GetInt();
-        profileEftStatsClass.FoundInRaidItems = new List<FoundInRaidItem>(num2);
+        profileEftStatsClass.FoundInRaidItems = new Il2CppSystem.Collections.Generic.List<FoundInRaidItem>(num2);
         for (var j = 0; j < num2; j++)
         {
             profileEftStatsClass.FoundInRaidItems.Add(reader.GetEFTFoundInRaidItem());
         }
         var num3 = reader.GetInt();
-        profileEftStatsClass.Victims = new List<VictimStats>(num3);
+        profileEftStatsClass.Victims = new Il2CppSystem.Collections.Generic.List<VictimStats>(num3);
         for (var k = 0; k < num3; k++)
         {
             profileEftStatsClass.Victims.Add(reader.GetEFTVictimStats());
         }
         var num4 = reader.GetInt();
-        profileEftStatsClass.CarriedQuestItems = new List<MongoID>(num4);
+        profileEftStatsClass.CarriedQuestItems = new Il2CppSystem.Collections.Generic.List<MongoID>(num4);
         for (var l = 0; l < num4; l++)
         {
             profileEftStatsClass.CarriedQuestItems.Add(reader.GetMongoID());
@@ -3639,10 +3907,10 @@ public static class EFTSerializationExtensions
     {
         writer.Put(target.OperationId);
         writer.PutMongoID(target.OwnerId);
-        writer.Put(target.ItemIds.Length);
-        for (var i = 0; i < target.ItemIds.Length; i++)
+        writer.Put(target.Items.Length);
+        for (var i = 0; i < target.Items.Length; i++)
         {
-            writer.PutMongoID(target.ItemIds[i]);
+            writer.PutEFTDestroyedItem(target.Items[i]);
         }
         writer.PutMongoID(target.ConditionId);
         writer.PutMongoID(target.QuestId);
@@ -3659,11 +3927,12 @@ public static class EFTSerializationExtensions
             OwnerId = reader.GetMongoID()
         };
         var num = reader.GetInt();
-        gclass.ItemIds = new MongoID[num];
+        var items = new DestroyedItem[num];
         for (var i = 0; i < num; i++)
         {
-            gclass.ItemIds[i] = reader.GetMongoID();
+            items[i] = reader.GetEFTDestroyedItem();
         }
+        gclass.Items = items;
         gclass.ConditionId = reader.GetMongoID();
         gclass.QuestId = reader.GetMongoID();
         return gclass;
@@ -3672,7 +3941,7 @@ public static class EFTSerializationExtensions
     /// <summary>
     /// Serializes historical quest state timeline logs and objective progress mappings into the writer stream.
     /// </summary>
-    public static void PutEFTQuestsQuestStatusData(this NetDataWriter writer, QuestDataClass target)
+    public static void PutEFTQuestsQuestStatusData(this NetDataWriter writer, EFT.Quests.QuestStatusData target)
     {
         writer.Put(target.Id);
         writer.Put(target.StartTime);
@@ -3692,30 +3961,30 @@ public static class EFTSerializationExtensions
     }
 
     /// <summary>
-    /// Deserializes and reconstructs a QuestDataClass object from the reader stream.
+    /// Deserializes and reconstructs a EFT.Quests.QuestStatusData object from the reader stream.
     /// </summary>
-    public static QuestDataClass GetEFTQuestsQuestStatusData(this NetDataReader reader)
+    public static EFT.Quests.QuestStatusData GetEFTQuestsQuestStatusData(this NetDataReader reader)
     {
-        var questDataClass = new QuestDataClass
+        var questStatusData = new EFT.Quests.QuestStatusData
         {
             Id = reader.GetString(),
             StartTime = reader.GetInt(),
             Status = reader.GetEnum<EQuestStatus>()
         };
         var num = reader.GetInt();
-        questDataClass.StatusStartTimestamps = new Dictionary<EQuestStatus, double>();
+        questStatusData.StatusStartTimestamps = new Il2CppSystem.Collections.Generic.Dictionary<EQuestStatus, double>();
         for (var i = 0; i < num; i++)
         {
-            questDataClass.StatusStartTimestamps[reader.GetEnum<EQuestStatus>()] = reader.GetDouble();
+            questStatusData.StatusStartTimestamps[reader.GetEnum<EQuestStatus>()] = reader.GetDouble();
         }
         var num2 = reader.GetInt();
-        questDataClass.CompletedConditions = new HashSet<MongoID>();
+        questStatusData.CompletedConditions = new Il2CppSystem.Collections.Generic.HashSet<MongoID>();
         for (var j = 0; j < num2; j++)
         {
-            questDataClass.CompletedConditions.Add(reader.GetMongoID());
+            questStatusData.CompletedConditions.Add(reader.GetMongoID());
         }
-        questDataClass.AvailableAfter = reader.GetInt();
-        return questDataClass;
+        questStatusData.AvailableAfter = reader.GetInt();
+        return questStatusData;
     }
 
     /// <summary>
@@ -3786,7 +4055,7 @@ public static class EFTSerializationExtensions
     /// </summary>
     public static void PutEFTRepairEnhancementComponentDescriptor(this NetDataWriter writer, RepairEnhancementComponentDescriptor target)
     {
-        if (target.BuffType != null)
+        if (target.BuffType.HasValue)
         {
             writer.Put(true);
             writer.PutEnum(target.BuffType.Value);
@@ -3795,7 +4064,7 @@ public static class EFTSerializationExtensions
         {
             writer.Put(false);
         }
-        if (target.BuffRarity != null)
+        if (target.BuffRarity.HasValue)
         {
             writer.Put(true);
             writer.PutEnum(target.BuffRarity.Value);
@@ -3955,6 +4224,7 @@ public static class EFTSerializationExtensions
         writer.PutMongoID(target.TraderId);
         writer.PutMongoID(target.DialogId);
         writer.PutMongoID(target.LineId);
+        writer.PutPolymorph(target.SubOperation);
     }
 
     /// <summary>
@@ -3968,7 +4238,8 @@ public static class EFTSerializationExtensions
             OwnerId = reader.GetMongoID(),
             TraderId = reader.GetMongoID(),
             DialogId = reader.GetMongoID(),
-            LineId = reader.GetMongoID()
+            LineId = reader.GetMongoID(),
+            SubOperation = reader.GetPolymorph<InventoryOperationDescriptor>()
         };
     }
 
@@ -4000,31 +4271,6 @@ public static class EFTSerializationExtensions
             Position = reader.GetClassVector3(),
             Rotation = reader.GetClassQuaternion(),
             SetupTime = reader.GetFloat()
-        };
-    }
-
-    /// <summary>
-    /// Serializes a dynamic variable assignment operation descriptor into the writer stream.
-    /// </summary>
-    public static void PutEFTSetVariableOperationDescriptor(this NetDataWriter writer, SetVariableOperationDescriptor target)
-    {
-        writer.Put(target.OperationId);
-        writer.PutMongoID(target.OwnerId);
-        writer.PutMongoID(target.VariableId);
-        writer.Put(target.Value);
-    }
-
-    /// <summary>
-    /// Deserializes and reconstructs a SetVariableOperationDescriptor object from the reader stream.
-    /// </summary>
-    public static SetVariableOperationDescriptor GetEFTSetVariableOperationDescriptor(this NetDataReader reader)
-    {
-        return new SetVariableOperationDescriptor
-        {
-            OperationId = reader.GetUShort(),
-            OwnerId = reader.GetMongoID(),
-            VariableId = reader.GetMongoID(),
-            Value = reader.GetInt()
         };
     }
 
@@ -4136,6 +4382,7 @@ public static class EFTSerializationExtensions
     {
         writer.Put(target.Id);
         writer.Put(target.Progress);
+        writer.Put(target.KillCount);
     }
 
     /// <summary>
@@ -4146,7 +4393,8 @@ public static class EFTSerializationExtensions
         return new SkillsDescriptor.MasteringInfoDescriptor
         {
             Id = reader.GetString(),
-            Progress = reader.GetFloat()
+            Progress = reader.GetFloat(),
+            KillCount = reader.GetInt()
         };
     }
 
@@ -4269,7 +4517,7 @@ public static class EFTSerializationExtensions
             SlotNumber = reader.GetByte()
         };
         var num = reader.GetInt();
-        gclass.ContainedItems = new List<ItemDescriptor>(num);
+        gclass.ContainedItems = new Il2CppSystem.Collections.Generic.List<ItemDescriptor>(num);
         for (var i = 0; i < num; i++)
         {
             gclass.ContainedItems.Add(reader.GetEFTItemDescriptor());
@@ -4337,7 +4585,7 @@ public static class EFTSerializationExtensions
         if (reader.GetBool())
         {
             var num = reader.GetInt();
-            gclass.DestroyedItems = new List<DestroyedItem>(num);
+            gclass.DestroyedItems = new Il2CppSystem.Collections.Generic.List<DestroyedItem>(num);
             for (var i = 0; i < num; i++)
             {
                 gclass.DestroyedItems.Add(reader.GetEFTDestroyedItem());
@@ -4456,7 +4704,7 @@ public static class EFTSerializationExtensions
         if (reader.GetBool())
         {
             var num = reader.GetInt();
-            throwDescriptorClass.DestroyedItems = new List<DestroyedItem>(num);
+            throwDescriptorClass.DestroyedItems = new Il2CppSystem.Collections.Generic.List<DestroyedItem>(num);
             for (var i = 0; i < num; i++)
             {
                 throwDescriptorClass.DestroyedItems.Add(reader.GetEFTDestroyedItem());
@@ -4520,6 +4768,7 @@ public static class EFTSerializationExtensions
         writer.Put(target.Standing);
         writer.Put(target.NextResupply);
         writer.Put(target.Disabled);
+        writer.Put(target.DialogAvailable);
     }
 
     /// <summary>
@@ -4534,7 +4783,8 @@ public static class EFTSerializationExtensions
             SalesSum = reader.GetLong(),
             Standing = reader.GetDouble(),
             NextResupply = reader.GetInt(),
-            Disabled = reader.GetBool()
+            Disabled = reader.GetBool(),
+            DialogAvailable = reader.GetBool()
         };
     }
 
@@ -4579,7 +4829,7 @@ public static class EFTSerializationExtensions
             WasPurchasedInThisRaid = reader.GetBool()
         };
         var num = reader.GetInt();
-        traderServicesClass.ItemsToPay = new Dictionary<MongoID, int>();
+        traderServicesClass.ItemsToPay = new Il2CppSystem.Collections.Generic.Dictionary<MongoID, int>();
         for (var i = 0; i < num; i++)
         {
             traderServicesClass.ItemsToPay[reader.GetMongoID()] = reader.GetInt();
@@ -4591,7 +4841,7 @@ public static class EFTSerializationExtensions
             traderServicesClass.UniqueItems[j] = reader.GetMongoID();
         }
         var num3 = reader.GetInt();
-        traderServicesClass.SubServices = new Dictionary<string, int>();
+        traderServicesClass.SubServices = new Il2CppSystem.Collections.Generic.Dictionary<string, int>();
         for (var k = 0; k < num3; k++)
         {
             traderServicesClass.SubServices[reader.GetString()] = reader.GetInt();
@@ -4683,7 +4933,7 @@ public static class EFTSerializationExtensions
         writer.Put(target.ProfileId);
         writer.Put(target.Name);
         writer.PutEnum(target.Side);
-        writer.PutTimeSpan(target.Time);
+        writer.PutTimeSpan((target.Time).ToManaged());
         writer.Put(target.Level);
         writer.Put(target.PrestigeLevel);
         writer.PutEnum(target.BodyPart);
@@ -4704,7 +4954,7 @@ public static class EFTSerializationExtensions
             ProfileId = reader.GetString(),
             Name = reader.GetString(),
             Side = reader.GetEnum<EPlayerSide>(),
-            Time = reader.GetTimeSpan(),
+            Time = (reader.GetTimeSpan()).ToIl2Cpp(),
             Level = reader.GetInt(),
             PrestigeLevel = reader.GetInt(),
             BodyPart = reader.GetEnum<EBodyPart>(),
@@ -4775,6 +5025,15 @@ public static class EFTSerializationExtensions
         writer.Put(target.GameVersion);
         writer.Put(target.HasCoopExtension);
         writer.PutEFTProfileHealthInfo(target.Health);
+        writer.Put(target.UnlockedLocations?.Count ?? -1);
+        if (target.UnlockedLocations != null)
+        {
+            foreach (var location in target.UnlockedLocations)
+            {
+                writer.Put(location);
+            }
+        }
+        writer.Put(target.TeamGameEditionExpBonus);
     }
 
     /// <summary>
@@ -4782,7 +5041,7 @@ public static class EFTSerializationExtensions
     /// </summary>
     public static PlayerInfo GetJsonTypePlayerInfo(this NetDataReader reader)
     {
-        return new PlayerInfo
+        var info = new PlayerInfo
         {
             Nickname = reader.GetString(),
             Side = reader.GetEnum<EPlayerSide>(),
@@ -4796,6 +5055,17 @@ public static class EFTSerializationExtensions
             HasCoopExtension = reader.GetBool(),
             Health = reader.GetEFTProfileHealthInfo()
         };
+        var locationCount = reader.GetInt();
+        if (locationCount >= 0)
+        {
+            info.UnlockedLocations = new Il2CppSystem.Collections.Generic.HashSet<string>();
+            for (var i = 0; i < locationCount; i++)
+            {
+                info.UnlockedLocations.Add(reader.GetString());
+            }
+        }
+        info.TeamGameEditionExpBonus = reader.GetFloat();
+        return info;
     }
 
     /// <summary>

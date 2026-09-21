@@ -1,23 +1,24 @@
 ﻿using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Fika.Core.Networking.Models;
 
 [DataContract]
 public struct GetHostStunRequest
 {
-    [DataMember(Name = "requestType")]
+    [JsonPropertyName("requestType")]
     public string RequestType;
 
-    [DataMember(Name = "sessionId")]
+    [JsonPropertyName("sessionId")]
     public string SessionId;
 
-    [DataMember(Name = "serverId")]
+    [JsonPropertyName("serverId")]
     public string ServerId;
 
-    [DataMember(Name = "stunIp")]
+    [JsonPropertyName("stunIp")]
     public string StunIp;
 
-    [DataMember(Name = "stunPort")]
+    [JsonPropertyName("stunPort")]
     public int StunPort;
 
     public GetHostStunRequest(string serverId, string sessionId, string stunIp, int stunPort)

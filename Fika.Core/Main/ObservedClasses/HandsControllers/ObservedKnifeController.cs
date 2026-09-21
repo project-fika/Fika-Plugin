@@ -6,12 +6,18 @@ using EFT.Ballistics;
 using EFT.InventoryLogic;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
-using Systems.Effects;
+using Il2CppSystems.Effects;
+using System;
+using Il2CppInterop.Runtime.Injection;
 
 namespace Fika.Core.Main.ObservedClasses.HandsControllers;
 
 internal class ObservedKnifeController : Player.KnifeController
 {
+    public ObservedKnifeController(IntPtr pointer) : base(pointer)
+    {
+    }
+
     protected ObservedPlayer _observedPlayer;
 
     public static ObservedKnifeController Create(ObservedPlayer observerdPlayer, KnifeComponent item)

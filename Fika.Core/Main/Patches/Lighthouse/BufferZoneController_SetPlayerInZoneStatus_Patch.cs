@@ -4,7 +4,8 @@ using EFT.BufferZone;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.World;
-using SPT.Reflection.Patching;
+using HarmonyLib;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.Lighthouse;
 
@@ -12,13 +13,18 @@ public class BufferZoneController_SetPlayerInZoneStatus_Patch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(BufferZoneController)
-            .GetMethod(nameof(BufferZoneController.SetPlayerInZoneStatus));
+        return AccessTools.Method(typeof(BufferZoneController),
+            nameof(BufferZoneController.OnPlayerInZoneStatusChanged));
     }
 
     [PatchPostfix]
-    public static void Postfix(string profileID, bool inZone)
+    public static void Postfix(int playerRaidID, bool inZone)
     {
+        if (FikaBackendUtils.IsTutorial)
+        {
+            return;
+        }
+
         if (FikaBackendUtils.IsClient)
         {
             return;
@@ -26,10 +32,10 @@ public class BufferZoneController_SetPlayerInZoneStatus_Patch : ModulePatch
 
         BufferZonePacket packet = new(EBufferZoneData.PlayerInZoneStatusChange)
         {
-            ProfileId = profileID,
+            PlayerRaidId = playerRaidID,
             Available = inZone
         };
 
-        Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+        FikaGlobals.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered);
     }
 }

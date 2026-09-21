@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using EFT.RocketLauncher;
 using Fika.Core.Main.Utils;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.Rockets;
 
@@ -19,6 +19,11 @@ public class RocketProjectile_TryVehicleCollision_Patch : ModulePatch
     [PatchPrefix]
     public static bool Prefix()
     {
+        if (FikaBackendUtils.IsTutorial)
+        {
+            return true;
+        }
+
         return FikaBackendUtils.IsServer;
     }
 }

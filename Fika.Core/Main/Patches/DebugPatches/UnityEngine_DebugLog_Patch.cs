@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using System.Threading.Tasks;
 using HarmonyLib;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.DebugPatches;
 
@@ -12,11 +12,11 @@ public static class TasksExtensions_HandleFinishedTask_Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(TasksExtensions), nameof(TasksExtensions.HandleFinishedTask), [typeof(Task)]);
+            return AccessTools.Method(typeof(TasksExtensions), nameof(TasksExtensions.HandleFinishedTask), [typeof(Il2CppSystem.Threading.Tasks.Task)]);
         }
 
         [PatchPrefix]
-        public static bool Prefix(Task task)
+        public static bool Prefix(Il2CppSystem.Threading.Tasks.Task task)
         {
             if (task.IsFaulted)
             {
@@ -32,11 +32,11 @@ public static class TasksExtensions_HandleFinishedTask_Patches
     {
         protected override MethodBase GetTargetMethod()
         {
-            return AccessTools.Method(typeof(TasksExtensions), nameof(TasksExtensions.HandleFinishedTask), [typeof(Task), typeof(object)]);
+            return AccessTools.Method(typeof(TasksExtensions), nameof(TasksExtensions.HandleFinishedTask), [typeof(Il2CppSystem.Threading.Tasks.Task), typeof(Il2CppSystem.Object)]);
         }
 
         [PatchPrefix]
-        public static bool Prefix(Task task, object errorMessage)
+        public static bool Prefix(Il2CppSystem.Threading.Tasks.Task task, Il2CppSystem.Object errorMessage)
         {
             if (task.IsFaulted)
             {

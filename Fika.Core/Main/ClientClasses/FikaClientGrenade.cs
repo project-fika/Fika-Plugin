@@ -1,10 +1,17 @@
 ﻿using EFT;
 using System.Collections;
+using System;
+using Il2CppInterop.Runtime.Injection;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.ClientClasses;
 
 public class FikaClientGrenade : ObservedGrenade
 {
+    public FikaClientGrenade(IntPtr pointer) : base(pointer)
+    {
+    }
+
     private const float _smoothSpeed = 10f;
 
     private GrenadeSyncPacket _packet;
@@ -12,19 +19,19 @@ public class FikaClientGrenade : ObservedGrenade
 
     private Coroutine _interpolationRoutine;
 
-    public override void ApplyNetPacket(GrenadeSyncPacket packet)
+    public override void ApplyNetPacket(GrenadeSyncPacket packet, float remoteTime)
     {
         _packet = packet;
         _hasPacket = true;
 
         CollisionNumber = _packet.CollisionNumber;
 
-        _interpolationRoutine ??= StartCoroutine(SmoothingCoroutine());
+        _interpolationRoutine ??= StartCoroutine((SmoothingCoroutine()).ToIl2Cpp());
 
         if (_packet.Done)
         {
             transform.SetPositionAndRotation(_packet.Position, _packet.Rotation);
-            SetVelocity(_packet);
+            this.SetNetVelocity(_packet);
             OnDoneFromNet();
 
             _hasPacket = false;
@@ -53,7 +60,7 @@ public class FikaClientGrenade : ObservedGrenade
                 }
                 else
                 {
-                    SetVelocity(_packet);
+                    this.SetNetVelocity(_packet);
                 }
             }
         }

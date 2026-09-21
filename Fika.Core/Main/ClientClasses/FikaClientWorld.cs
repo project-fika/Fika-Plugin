@@ -4,6 +4,9 @@ using EFT;
 using EFT.Interactive;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.World;
+using System;
+using Il2CppInterop.Runtime.Injection;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.ClientClasses;
 
@@ -12,6 +15,10 @@ namespace Fika.Core.Main.ClientClasses;
 /// </summary>
 public class FikaClientWorld : World
 {
+    public FikaClientWorld(IntPtr pointer) : base(pointer)
+    {
+    }
+
     public List<EFT.LootSyncPacket> LootSyncPackets;
     public List<SynchronizableObjectPacket> SyncObjectPackets;
     public WorldPacket WorldPacket;
@@ -41,7 +48,7 @@ public class FikaClientWorld : World
     public void Update()
     {
         UpdateLootItems(_clientGameWorld.LootItems);
-        _clientGameWorld.ClientSynchronizableObjectLogicProcessor.ProcessSyncObjectPackets(SyncObjectPackets);
+        _clientGameWorld.ClientSynchronizableObjectLogicProcessor.ProcessSyncObjectPackets((SyncObjectPackets).ToIl2CppList());
     }
 
     public void AddLootSyncStruct(EFT.LootSyncPacket syncStruct)
@@ -92,7 +99,7 @@ public class FikaClientWorld : World
     /// <summary>
     /// Sets up all the <see cref="BorderZone"/>s on the map
     /// </summary>
-    public override void SubscribeToBorderZones(BorderZone[] zones)
+    public override void SubscribeToBorderZones(Il2CppInterop.Runtime.InteropTypes.Arrays.Il2CppReferenceArray<BorderZone> zones)
     {
         for (var i = 0; i < zones.Length; i++)
         {

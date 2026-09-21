@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using EFT;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.Patches.PlayerPatches;
 
@@ -13,9 +14,14 @@ public class Player_Hide_Patch : ModulePatch
     }
 
     [PatchPrefix]
-    public static bool Prefix(OfflinePlayerCulling ___botPlayerCulling)
+    public static bool Prefix(EFT.LocalPlayer __instance)
     {
-        ___botPlayerCulling.Hide();
+        if (FikaBackendUtils.IsTutorial)
+        {
+            return true;
+        }
+
+        __instance.botPlayerCulling.Hide();
         return false;
     }
 }
