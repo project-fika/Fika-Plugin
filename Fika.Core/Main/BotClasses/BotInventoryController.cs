@@ -14,11 +14,17 @@ using Fika.Core.Networking.Pooling;
 using JetBrains.Annotations;
 using Diz.LanguageExtensions;
 using static EFT.Player;
+using System;
+using Il2CppInterop.Runtime.Injection;
 
 namespace Fika.Core.Main.BotClasses;
 
 public sealed class BotInventoryController : BaseInventoryController
 {
+    public BotInventoryController(IntPtr pointer) : base(pointer)
+    {
+    }
+
     public override bool HasDiscardLimits
     {
         get
@@ -29,10 +35,10 @@ public sealed class BotInventoryController : BaseInventoryController
     private readonly FikaBot _fikaBot;
     private readonly BotInventoryOperationHandlerPool _botInventoryOperationHandlerPool;
 
-    public BotInventoryController(Player player, Profile profile, bool examined, MongoID currentId, ushort nextOperationId) : base(player, profile, examined, false)
+    public BotInventoryController(Player player, Profile profile, bool examined, MongoID currentId, ushort nextOperationId) : base(Il2CppInjection.Allocate<BotInventoryController>(), player, profile, examined, false)
     {
         _fikaBot = (FikaBot)player;
-        _currentId = currentId;
+        IdSource = currentId;
         _nextOperationId = nextOperationId;
         PlayerSearchController = new BotSearchController(profile);
         _botInventoryOperationHandlerPool = BotInventoryOperationHandlerPool.Instance;
@@ -63,14 +69,14 @@ public sealed class BotInventoryController : BaseInventoryController
         _botInventoryOperationHandlerPool.ReturnHandler(handler);
     }
 
-    public override void Execute(EFT.InventoryLogic.Operations.AbstractOperation operation, [CanBeNull] Callback callback)
+    public override void Execute(EFT.InventoryLogic.Operations.AbstractOperation operation, Callback callback)
     {
 #if DEBUG
         FikaGlobals.LogInfo($"Sending bot operation {operation.GetType()} from {_fikaBot.Profile.Nickname}");
 #endif
         _fikaBot.PacketSender.NetworkManager.SendGenericPacket(EGenericSubPacketType.InventoryOperation,
             InventoryPacket.FromValue(_fikaBot.NetId, operation), true);
-        HandleOperation(operation, callback).HandleExceptions();
+        HandleOperation(operation, callback).Forget();
     }
 
     /// <summary>
@@ -81,8 +87,7 @@ public sealed class BotInventoryController : BaseInventoryController
         var gstruct = ItemManipulator.SimulatePlantTripwire(this, grenade, plantingKit);
         if (!gstruct.Failed)
         {
-            HandleOperation(new PlantTripwireOperation(GetAndIncrementNextOperationId(), this, gstruct.Value, fromPosition, toPosition, _fikaBot), callback)
-                .HandleExceptions();
+            RunBotOperation(new PlantTripwireOperation(GetAndIncrementNextOperationId(), this, gstruct.Value, fromPosition, toPosition, _fikaBot), callback);
             return;
         }
         callback?.Invoke(gstruct.ToResult());
@@ -105,7 +110,7 @@ public sealed class BotInventoryController : BaseInventoryController
         {
             if (CanExecute(operation))
             {
-                handler.Operation.Execute(handler.HandleResult);
+                handler.Operation.Execute(new System.Action<Comfort.Common.IResult>(handler.HandleResult));
                 return;
             }
             handler.Operation.Dispose();

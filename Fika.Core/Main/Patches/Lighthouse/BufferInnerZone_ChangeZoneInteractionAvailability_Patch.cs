@@ -4,7 +4,7 @@ using EFT.BufferZone;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.World;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.Lighthouse;
 
@@ -19,6 +19,11 @@ public class BufferInnerZone_ChangeZoneInteractionAvailability_Patch : ModulePat
     [PatchPostfix]
     public static void Postfix(bool isAvailable, EBufferZoneData changesDataType)
     {
+        if (FikaBackendUtils.IsTutorial)
+        {
+            return;
+        }
+
         if (FikaBackendUtils.IsClient)
         {
             return;
@@ -29,6 +34,6 @@ public class BufferInnerZone_ChangeZoneInteractionAvailability_Patch : ModulePat
             Available = isAvailable
         };
 
-        Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+        FikaGlobals.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered);
     }
 }

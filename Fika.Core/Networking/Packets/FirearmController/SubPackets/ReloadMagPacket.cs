@@ -67,7 +67,7 @@ public sealed class ReloadMagPacket : IPoolSubPacket
                 {
                     gridItemAddress = player.InventoryController.ToItemAddress(Descriptor);
                 }
-                catch (HTTPNetworkException exception2)
+                catch (Il2CppInterop.Runtime.Il2CppException exception2)
                 {
                     FikaGlobals.LogError(exception2);
                 }

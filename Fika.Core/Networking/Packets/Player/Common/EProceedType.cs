@@ -63,5 +63,10 @@ public enum EProceedType : byte
     /// <summary>
     /// Attempt to proceed action.
     /// </summary>
-    TryProceed
+    TryProceed,
+
+    /// <summary>
+    /// Tape recorder held.
+    /// </summary>
+    Recorder
 }

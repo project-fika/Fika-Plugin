@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Reflection;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.AI;
 
@@ -16,9 +16,9 @@ public class AIPlaceLogicPartisan_Dispose_Patch : ModulePatch
     }
 
     [PatchPrefix]
-    public static bool Prefix(AIPlaceInfo ____aiPlaceInfo)
+    public static bool Prefix(AIPlaceLogicPartisan __instance)
     {
-        if (____aiPlaceInfo == null)
+        if (__instance._aiPlaceInfo == null)
         {
             return false;
         }

@@ -4,15 +4,12 @@ using EFT;
 using EFT.Interactive;
 using Fika.Core.Main.Components;
 using Fika.Core.Main.Utils;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.GameWorldPatches;
 
 public sealed class GameWorld_ThrowItem_Patch : ModulePatch
 {
-    private static readonly FieldInfo _networkPhysics = typeof(ObservedLootItem)
-        .GetField("_isNetworkGame", BindingFlags.Instance | BindingFlags.NonPublic);
-
     protected override MethodBase GetTargetMethod()
     {
         return typeof(GameWorld).GetMethods()
@@ -27,11 +24,11 @@ public sealed class GameWorld_ThrowItem_Patch : ModulePatch
             if (player.IsYourPlayer || player.IsAI)
             {
                 ItemPositionSyncer.Create(observedLootItem.gameObject, FikaBackendUtils.IsServer, observedLootItem);
-                _networkPhysics.SetValue(observedLootItem, false);
+                observedLootItem._isNetworkGame = false;
                 return;
             }
 
-            _networkPhysics.SetValue(observedLootItem, true);
+            observedLootItem._isNetworkGame = true;
         }
     }
 }

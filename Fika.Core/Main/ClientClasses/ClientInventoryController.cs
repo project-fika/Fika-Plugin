@@ -17,11 +17,16 @@ using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
 using Fika.Core.Networking.Packets.World;
 using Fika.Core.Networking.Pooling;
+using Il2CppInterop.Runtime.Injection;
 
 namespace Fika.Core.Main.ClientClasses;
 
 public sealed class ClientInventoryController : BaseInventoryController
 {
+    public ClientInventoryController(IntPtr pointer) : base(pointer)
+    {
+    }
+
     public FikaPlayer FikaPlayer { get; }
 
     public override bool HasDiscardLimits
@@ -34,11 +39,11 @@ public sealed class ClientInventoryController : BaseInventoryController
     private readonly Player _player;
     private readonly ClientInventoryOperationHandlerPool _clientInventoryOperationHandlerPool;
 
-    public ClientInventoryController(Player player, Profile profile, bool examined, bool strictSync) : base(player, profile, examined, strictSync)
+    public ClientInventoryController(Player player, Profile profile, bool examined, bool strictSync) : base(Il2CppInjection.Allocate<ClientInventoryController>(), player, profile, examined, strictSync)
     {
         _player = player;
         FikaPlayer = (FikaPlayer)player;
-        _currentId = MongoID.Generate(true);
+        IdSource = MongoID.Generate(true);
         PlayerSearchController = new ActiveSearchController(profile, this);
         _clientInventoryOperationHandlerPool = new ClientInventoryOperationHandlerPool(8, ClientInventoryOperationHandler.CreateInstance);
     }
@@ -59,7 +64,7 @@ public sealed class ClientInventoryController : BaseInventoryController
                 }
             };
 
-            Singleton<IFikaNetworkManager>.Instance.SendData(ref request, DeliveryMethod.ReliableOrdered);
+            FikaGlobals.NetworkManager.SendData(ref request, DeliveryMethod.ReliableOrdered);
             return;
         }
 
@@ -82,7 +87,7 @@ public sealed class ClientInventoryController : BaseInventoryController
 
     public override void Execute(EFT.InventoryLogic.Operations.AbstractOperation operation, Callback callback)
     {
-        HandleOperation(operation, callback).HandleExceptions();
+        HandleOperation(operation, callback).Forget();
     }
 
     private async Task HandleOperation(EFT.InventoryLogic.Operations.AbstractOperation operation, Callback callback)
@@ -153,8 +158,8 @@ public sealed class ClientInventoryController : BaseInventoryController
             return;
         }
 
-        // Do not replicate search operations
-        if (operation is SinglePlayerSearchContentOperation or SetDialogProgressOperation) // search for "DialogController not available"
+        // Do not replicate search operations or studying tapess
+        if (operation is SinglePlayerSearchContentOperation or SetDialogProgressOperation or StudyItemPlayerOperation) // search for "DialogController not available"
         {
             base.Execute(operation, callback);
             return;
@@ -173,7 +178,7 @@ public sealed class ClientInventoryController : BaseInventoryController
     public override bool HasCultistAmulet(out CultistAmulet amulet)
     {
         amulet = null;
-        using var enumerator = Inventory.GetItemsInSlots([EquipmentSlot.Pockets])
+        using var enumerator = Inventory.GetItemsInSlots(new[] { EquipmentSlot.Pockets }.ToIl2CppList())
             .GetEnumerator();
 
         while (enumerator.MoveNext())

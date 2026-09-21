@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using EFT;
 using EFT.InventoryLogic;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.PlayerPatches;
 

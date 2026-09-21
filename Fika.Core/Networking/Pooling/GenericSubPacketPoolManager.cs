@@ -34,7 +34,8 @@ internal sealed class GenericSubPacketPoolManager : BasePacketPoolManager<EGener
             PingPacket.CreateInstance,                  // EGenericSubPacketType.Ping = 14
             SendCharacterPacket.CreateInstance,         // EGenericSubPacketType.SendCharacterPacket = 15
             SyncableItemPacket.CreateInstance,          // EGenericSubPacketType.SyncableItem = 16
-            SpawnAI.CreateInstance                     // EGenericSubPacketType.SyncableItem = 17
+            SpawnAI.CreateInstance,                    // EGenericSubPacketType.SpawnAI = 17
+            DialogEntryPacket.CreateInstance           // EGenericSubPacketType.DialogEntry = 18
         ];
     }
 }

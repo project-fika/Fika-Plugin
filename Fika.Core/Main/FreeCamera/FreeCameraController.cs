@@ -15,6 +15,8 @@ using HarmonyLib;
 using Koenigz.PerfectCulling;
 using Koenigz.PerfectCulling.EFT;
 using TMPro;
+using System;
+using Il2CppInterop.Runtime.Injection;
 
 namespace Fika.Core.Main.FreeCamera;
 
@@ -25,6 +27,10 @@ namespace Fika.Core.Main.FreeCamera;
 
 public class FreeCameraController : MonoBehaviour
 {
+    public FreeCameraController(IntPtr pointer) : base(pointer)
+    {
+    }
+
     private FikaPlayer Player
     {
         get
@@ -198,7 +204,7 @@ public class FreeCameraController : MonoBehaviour
             _deathFadeEnabled = true;
         }
 
-        StartCoroutine(DeathRoutine());
+        StartCoroutine((DeathRoutine()).ToIl2Cpp());
     }
 
     protected void Update()
@@ -325,15 +331,14 @@ public class FreeCameraController : MonoBehaviour
 
         cameraClass.EffectsController.OnGlassesChanged(null, false);
 
-        var effectsController = Traverse.Create(cameraClass.EffectsController);
 
-        var bloodOnScreen = effectsController.Field<BloodOnScreen>("_bloodOnScreen").Value;
+        var bloodOnScreen = cameraClass.EffectsController._bloodOnScreen;
         if (bloodOnScreen != null)
         {
             Destroy(bloodOnScreen);
         }
 
-        var effectsManagerList = effectsController.Field<List<EffectsController.EffectAccumulator>>("_effectAccumulators").Value;
+        var effectsManagerList = cameraClass.EffectsController._effectAccumulators;
         if (effectsManagerList != null)
         {
             for (var i = 0; i < effectsManagerList.Count; i++)
@@ -446,6 +451,7 @@ public class FreeCameraController : MonoBehaviour
                 Player.PlayerBody.PointOfView.Value = EPointOfView.FreeCamera;
                 Player.GetComponent<PlayerCameraController>().UpdatePointOfView();
             }
+            SetExternalCameraControl(Player, true);
             _gamePlayerOwner.enabled = false;
             _freeCamScript.SetActive(true, _extracted);
 
@@ -489,8 +495,19 @@ public class FreeCameraController : MonoBehaviour
             localPlayer.GetComponent<PlayerCameraController>().UpdatePointOfView();
         }
 
+        SetExternalCameraControl(localPlayer, true);
         _gamePlayerOwner.enabled = false;
         _freeCamScript.SetActive(true, _extracted);
+    }
+
+    // BetterCamController snaps the camera back to the player each LateUpdate unless this is set.
+    private static void SetExternalCameraControl(Player localPlayer, bool external)
+    {
+        var controller = localPlayer.GetComponent<PlayerCameraController>();
+        if (controller != null)
+        {
+            controller.ExternalControl = external;
+        }
     }
 
     /// <summary>
@@ -502,6 +519,7 @@ public class FreeCameraController : MonoBehaviour
         // re-enable _gamePlayerOwner
         _gamePlayerOwner.enabled = true;
         _freeCamScript.SetActive(false, _extracted);
+        SetExternalCameraControl(localPlayer, false);
 
         localPlayer.PointOfView = EPointOfView.FirstPerson;
         CameraManager.Instance.SetOcclusionCullingEnabled(true);

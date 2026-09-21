@@ -3,7 +3,7 @@
 using System.Reflection;
 using EFT.UI;
 using EFT.UI.Matchmaker;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.UI.Patches;
 
@@ -18,11 +18,11 @@ public class DisableMatchSettingsReadyButton_Patch : ModulePatch
     }
 
     [PatchPostfix]
-    static void Postfix(DefaultUIButton ____readyButton)
+    static void Postfix(EFT.UI.Matchmaker.MatchmakerOfflineRaidScreen __instance)
     {
-        ____readyButton.SetDisabledTooltip("Disabled with Fika");
-        ____readyButton.SetEnabledTooltip("Disabled with Fika");
+        __instance._readyButton.SetDisabledTooltip("Disabled with Fika");
+        __instance._readyButton.SetEnabledTooltip("Disabled with Fika");
 
-        ____readyButton.Interactable = false;
+        __instance._readyButton.Interactable = false;
     }
 }

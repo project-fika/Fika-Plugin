@@ -4,11 +4,17 @@ using EFT.Interactive;
 using EFT.InventoryLogic;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
+using System;
+using Il2CppInterop.Runtime.Injection;
 
 namespace Fika.Core.Main.Components;
 
 public class ItemPositionSyncer : MonoBehaviour
 {
+    public ItemPositionSyncer(IntPtr pointer) : base(pointer)
+    {
+    }
+
     private FikaServer _server;
     private FikaClient _client;
     private bool _isServer;

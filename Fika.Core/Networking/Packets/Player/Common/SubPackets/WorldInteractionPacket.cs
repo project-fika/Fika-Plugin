@@ -89,7 +89,7 @@ public sealed class WorldInteractionPacket : IPoolSubPacket
 
                 if (InteractionStage != EInteractionStage.Execute)
                 {
-                    worldInteractiveObject.Interact(interactionResult);
+                    player.CancelDoorInteraction(worldInteractiveObject, interactionResult);
                     return;
                 }
 

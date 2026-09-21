@@ -1,9 +1,22 @@
 ﻿using EFT;
+using System;
+using Il2CppInterop.Runtime.Injection;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.ObservedClasses.MovementStates;
 
-public class ObservedJumpState(MovementContext movementContext) : JumpPlayerState(movementContext)
+public class ObservedJumpState : JumpPlayerState
 {
+    public ObservedJumpState(IntPtr pointer) : base(pointer)
+    {
+    }
+
+    public ObservedJumpState(MovementContext movementContext) : base(Il2CppInjection.Allocate<ObservedJumpState>())
+    {
+        ClassInjector.DerivedConstructorBody(this);
+        ClassInjector.InvokeBaseConstructor<JumpPlayerState>(this, movementContext);
+    }
+
     public override void ApplyMovementAndRotation(float deltaTime)
     {
         var quaternion = Quaternion.Lerp(MovementContext.TransformRotation,

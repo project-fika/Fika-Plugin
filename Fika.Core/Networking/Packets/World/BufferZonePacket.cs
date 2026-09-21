@@ -6,7 +6,7 @@ public struct BufferZonePacket(EBufferZoneData status) : INetSerializable
 {
     public EBufferZoneData Status = status;
     public bool Available;
-    public string ProfileId;
+    public int PlayerRaidId;
 
     public void Deserialize(NetDataReader reader)
     {
@@ -23,13 +23,13 @@ public struct BufferZonePacket(EBufferZoneData status) : INetSerializable
             case EBufferZoneData.PlayerAccessStatus:
                 {
                     Available = reader.GetBool();
-                    ProfileId = reader.GetString();
+                    PlayerRaidId = reader.GetInt();
                 }
                 break;
             case EBufferZoneData.PlayerInZoneStatusChange:
                 {
                     Available = reader.GetBool();
-                    ProfileId = reader.GetString();
+                    PlayerRaidId = reader.GetInt();
                 }
                 break;
             default:
@@ -52,13 +52,13 @@ public struct BufferZonePacket(EBufferZoneData status) : INetSerializable
             case EBufferZoneData.PlayerAccessStatus:
                 {
                     writer.Put(Available);
-                    writer.Put(ProfileId);
+                    writer.Put(PlayerRaidId);
                 }
                 break;
             case EBufferZoneData.PlayerInZoneStatusChange:
                 {
                     writer.Put(Available);
-                    writer.Put(ProfileId);
+                    writer.Put(PlayerRaidId);
                 }
                 break;
             default:

@@ -1,15 +1,24 @@
 ﻿using Comfort.Common;
 using EFT;
 using EFT.WeaponMounting;
+using System;
+using Il2CppInterop.Runtime.Injection;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.ObservedClasses.MovementStates;
 
 public class ObservedMountedState : MovementState
 {
-    public ObservedMountedState(MovementContext movementContext, Player observedPlayer) : base(movementContext)
+    public ObservedMountedState(IntPtr pointer) : base(pointer)
     {
+    }
+
+    public ObservedMountedState(MovementContext movementContext, Player observedPlayer) : base(Il2CppInjection.Allocate<ObservedMountedState>())
+    {
+        ClassInjector.DerivedConstructorBody(this);
         _mountingMovementSettings = Singleton<GlobalConfiguration>.Instance.MountingSettings.MovementSettings;
         _player = observedPlayer;
+        ClassInjector.InvokeBaseConstructor<MovementState>(this, movementContext);
         RotationSpeedClamp = _mountingMovementSettings.RotationSpeedClamp;
         StateSensitivity = _mountingMovementSettings.SensitivityMultiplier;
     }
@@ -158,7 +167,7 @@ public class ObservedMountedState : MovementState
         {
             return;
         }
-        onEnterMountedState(_playerMountingPointData.CurrentApproachTime);
+        onEnterMountedState.Invoke(_playerMountingPointData.CurrentApproachTime);
     }
 
     public override void Exit(bool toSameState)
@@ -186,7 +195,7 @@ public class ObservedMountedState : MovementState
         {
             return;
         }
-        onExitMountedState(0f);
+        onExitMountedState.Invoke(0f);
     }
 
     public override void Jump()
@@ -397,7 +406,7 @@ public class ObservedMountedState : MovementState
         {
             return;
         }
-        onExitMountedState(_mountingMovementSettings.ExitTime);
+        onExitMountedState.Invoke(_mountingMovementSettings.ExitTime);
     }
 
     public override void Vaulting()

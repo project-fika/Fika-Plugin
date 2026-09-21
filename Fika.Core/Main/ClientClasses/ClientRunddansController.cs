@@ -6,28 +6,43 @@ using EFT;
 using EFT.Weather;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
+using System;
+using Il2CppInterop.Runtime.Injection;
 
 namespace Fika.Core.Main.ClientClasses;
 
 public class ClientRunddansController : NetworkRunddansController
 {
-    public ClientRunddansController(GlobalConfiguration.RunddansGlobalSettings settings, LocationSettings.Location location) : base(settings, location)
+    public ClientRunddansController(IntPtr pointer) : base(pointer)
     {
-        HandleWeather(settings.ApplyFrozenEveryMS, _cts.Token)
-            .HandleExceptions();
     }
 
-    public async Task HandleWeather(int delay, CancellationToken token)
+    public ClientRunddansController(RunddansGlobalSettings settings, LocationSettings.Location location) : base(Il2CppInjection.Allocate<ClientRunddansController>())
+    {
+        ClassInjector.DerivedConstructorBody(this);
+        ClassInjector.InvokeBaseConstructor<NetworkRunddansController>(this, settings, location);
+        HandleWeather(settings.ApplyFrozenEveryMS, _cts)
+            .Forget();
+    }
+
+    public async Task HandleWeather(int delay, Il2CppSystem.Threading.CancellationTokenSource cancellation)
     {
         var gameTimer = Singleton<AbstractGame>.Instance.GameTimer;
         while (true)
         {
             try
             {
-                token.ThrowIfCancellationRequested();
-                await Task.Delay(delay, token);
+                if (cancellation.IsCancellationRequested)
+                {
+                    break;
+                }
+                await Task.Delay(delay);
             }
             catch
+            {
+                break;
+            }
+            if (cancellation.IsCancellationRequested)
             {
                 break;
             }
@@ -38,7 +53,7 @@ public class ClientRunddansController : NetworkRunddansController
                     && !myPlayer.AIData.IsInside && !CheckBonfires(myPlayer)
                     && !(WeatherController.Instance == null) && WeatherController.Instance.WeatherCurve.Rain
                     >= settings.rainForFrozen &&
-                    (DateTimeExtensions.UtcNow - myPlayer.AIData.DrinkTimestamp).TotalSeconds >= (double)settings.drunkImmunitySec)
+                    (DateTimeExtensions.UtcNow.ToManaged() - myPlayer.AIData.DrinkTimestamp.ToManaged()).TotalSeconds >= (double)settings.drunkImmunitySec)
                 {
                     var activeHealthController = myPlayer.ActiveHealthController;
                     if (activeHealthController != null)

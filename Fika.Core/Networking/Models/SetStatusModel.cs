@@ -1,15 +1,16 @@
 ﻿using System.Runtime.Serialization;
 using static Fika.Core.UI.Models.LobbyEntry;
+using System.Text.Json.Serialization;
 
 namespace Fika.Core.Networking.Models;
 
 [DataContract]
 public struct SetStatusModel
 {
-    [DataMember(Name = "serverId")]
+    [JsonPropertyName("serverId")]
     public string ServerId;
 
-    [DataMember(Name = "status")]
+    [JsonPropertyName("status")]
     public ELobbyStatus Status;
 
     public SetStatusModel(string serverId, ELobbyStatus status)

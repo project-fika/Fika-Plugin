@@ -19,6 +19,16 @@ public sealed class ScopeStatesPacket : IPoolSubPacket
         return packet;
     }
 
+    public static ScopeStatesPacket FromZoom(string sightId, int scopeIndexInsideSight, float zoomValue)
+    {
+        var packet = FirearmSubPacketPoolManager.Instance.GetPacket<ScopeStatesPacket>(EFirearmSubPacketType.ToggleScopeStates);
+        packet.IsZoom = true;
+        packet.ZoomId = sightId;
+        packet.ZoomScopeIndex = scopeIndexInsideSight;
+        packet.ZoomValue = zoomValue;
+        return packet;
+    }
+
     public static ScopeStatesPacket CreateInstance()
     {
         return new();
@@ -26,17 +36,36 @@ public sealed class ScopeStatesPacket : IPoolSubPacket
 
     public int Amount;
     public ScopeState[] States;
+    public bool IsZoom;
+    public string ZoomId;
+    public int ZoomScopeIndex;
+    public float ZoomValue;
 
     public void Execute(FikaPlayer player)
     {
         if (player.HandsController is ObservedFirearmController controller)
         {
+            if (IsZoom)
+            {
+                controller.SetScopeZoom(ZoomId, ZoomScopeIndex, ZoomValue);
+                return;
+            }
+
             controller.SetScopeMode(States);
         }
     }
 
     public void Serialize(NetDataWriter writer)
     {
+        writer.Put(IsZoom);
+        if (IsZoom)
+        {
+            writer.Put(ZoomId);
+            writer.Put(ZoomScopeIndex);
+            writer.Put(ZoomValue);
+            return;
+        }
+
         writer.Put(Amount);
         if (Amount > 0)
         {
@@ -52,6 +81,15 @@ public sealed class ScopeStatesPacket : IPoolSubPacket
 
     public void Deserialize(NetDataReader reader)
     {
+        IsZoom = reader.GetBool();
+        if (IsZoom)
+        {
+            ZoomId = reader.GetString();
+            ZoomScopeIndex = reader.GetInt();
+            ZoomValue = reader.GetFloat();
+            return;
+        }
+
         Amount = reader.GetInt();
         if (Amount > 0)
         {
@@ -73,5 +111,9 @@ public sealed class ScopeStatesPacket : IPoolSubPacket
     {
         Amount = 0;
         States = null;
+        IsZoom = false;
+        ZoomId = null;
+        ZoomScopeIndex = 0;
+        ZoomValue = 0f;
     }
 }

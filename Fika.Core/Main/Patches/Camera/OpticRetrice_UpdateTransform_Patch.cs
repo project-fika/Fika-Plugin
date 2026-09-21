@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 using EFT.CameraControl;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.Camera;
 
@@ -12,8 +12,8 @@ public class OpticRetrice_UpdateTransform_Patch : ModulePatch
     }
 
     [PatchPrefix]
-    public static bool Prefix(OpticSight opticSight, SkinnedMeshRenderer ____renderer)
+    public static bool Prefix(EFT.CameraControl.OpticRetrice __instance, OpticSight opticSight)
     {
-        return opticSight.ScopeData != null && opticSight.ScopeData.Reticle != null && ____renderer != null;
+        return opticSight.ScopeData != null && opticSight.ScopeData.Reticle != null && __instance._renderer != null;
     }
 }

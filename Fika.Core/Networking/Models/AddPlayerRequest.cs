@@ -1,17 +1,18 @@
 using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Fika.Core.Networking.Models;
 
 [DataContract]
 public struct AddPlayerRequest
 {
-    [DataMember(Name = "serverId")]
+    [JsonPropertyName("serverId")]
     public string ServerId;
 
-    [DataMember(Name = "profileId")]
+    [JsonPropertyName("profileId")]
     public string ProfileId;
 
-    [DataMember(Name = "isSpectator")]
+    [JsonPropertyName("isSpectator")]
     public bool IsSpectator;
 
     public AddPlayerRequest(string serverId, string profileId, bool isSpectator)

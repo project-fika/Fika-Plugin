@@ -14,7 +14,7 @@ namespace Fika.Core.Main.Utils;
 /// </summary>
 internal static class MultiSelect
 {
-    private static readonly Version _requiredVersion = new(2, 5);
+    private static readonly SemanticVersioning.Version _requiredVersion = new(2, 5, 0);
     private static readonly Item[] _emptyArray = [];
 
     private static bool? _uIFixesLoaded;
@@ -101,7 +101,7 @@ internal static class MultiSelect
         {
             if (!_uIFixesLoaded.HasValue)
             {
-                var present = Chainloader.PluginInfos.TryGetValue("com.tyfon.uifixes", out var pluginInfo);
+                var present = BepInEx.Unity.IL2CPP.IL2CPPChainloader.Instance.Plugins.TryGetValue("com.tyfon.uifixes", out var pluginInfo);
                 _uIFixesLoaded = present && pluginInfo.Metadata.Version >= _requiredVersion;
 
                 if (_uIFixesLoaded.Value)

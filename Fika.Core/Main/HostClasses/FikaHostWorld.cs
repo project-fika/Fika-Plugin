@@ -7,6 +7,9 @@ using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
 using Fika.Core.Networking.Packets.World;
+using System;
+using Il2CppInterop.Runtime.Injection;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.HostClasses;
 
@@ -15,6 +18,10 @@ namespace Fika.Core.Main.HostClasses;
 /// </summary>
 public class FikaHostWorld : World
 {
+    public FikaHostWorld(IntPtr pointer) : base(pointer)
+    {
+    }
+
     public List<EFT.LootSyncPacket> LootSyncPackets;
     public WorldPacket WorldPacket;
 
@@ -130,7 +137,7 @@ public class FikaHostWorld : World
     /// <summary>
     /// Sets up all the <see cref="BorderZone"/>s on the map
     /// </summary>
-    public override void SubscribeToBorderZones(BorderZone[] zones)
+    public override void SubscribeToBorderZones(Il2CppInterop.Runtime.InteropTypes.Arrays.Il2CppReferenceArray<BorderZone> zones)
     {
         foreach (var borderZone in zones)
         {

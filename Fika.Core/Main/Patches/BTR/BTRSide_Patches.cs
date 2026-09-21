@@ -4,7 +4,8 @@ using System.Reflection;
 using EFT;
 using EFT.Vehicle;
 using HarmonyLib;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.Patches.BTR;
 
@@ -20,14 +21,19 @@ public class BTRSide_Patches
         }
 
         [PatchPrefix]
-        public static bool Prefix(BTRSide __instance, Player player, int placeId, Transform ____startPoint)
+        public static bool Prefix(BTRSide __instance, Player player, int placeId)
         {
+            if (FikaBackendUtils.IsTutorial)
+            {
+                return true;
+            }
+
             if (player.IsYourPlayer)
             {
                 return true;
             }
 
-            player.Transform.Original.parent = ____startPoint;
+            player.Transform.Original.parent = __instance._startPoint;
             __instance.ResetPlayerTransform(player);
             Passengers.Add(new ValueTuple<BTRSide, Player, int>(__instance, player, placeId));
             __instance.ApplyLocalPassenger();
@@ -45,6 +51,11 @@ public class BTRSide_Patches
         [PatchPrefix]
         public static bool Prefix(BTRSide __instance, Player player)
         {
+            if (FikaBackendUtils.IsTutorial)
+            {
+                return true;
+            }
+
             if (player.IsYourPlayer)
             {
                 return true;
@@ -72,8 +83,13 @@ public class BTRSide_Patches
         }
 
         [PatchPrefix]
-        public static void Prefix(BTRSide __instance, Transform ____startPoint)
+        public static void Prefix(BTRSide __instance)
         {
+            if (FikaBackendUtils.IsTutorial)
+            {
+                return;
+            }
+
             for (var i = 0; i < Passengers.Count; i++)
             {
                 var tuple = Passengers[i];
@@ -84,16 +100,16 @@ public class BTRSide_Patches
                         case EPlayerBtrState.GoIn:
                         case EPlayerBtrState.GoOut:
                             {
-                                tuple.Item2.Teleport(____startPoint.position);
-                                (var start, var target) = __instance.GoInPoints();
-                                __instance.ApplyPlayerRotation(tuple.Item2.MovementContext, start, target);
+                                tuple.Item2.Teleport(__instance._startPoint.position);
+                                var points = __instance.GoInPoints();
+                                __instance.ApplyPlayerRotation(tuple.Item2.MovementContext, points.Item1, points.Item2);
                                 break;
                             }
                         case EPlayerBtrState.Inside:
                             {
                                 tuple.Item2.Teleport(__instance.PlacePosition(tuple.Item3));
-                                (var start, var target) = __instance.GoInPoints();
-                                __instance.ApplyPlayerRotation(tuple.Item2.MovementContext, start, target);
+                                var points = __instance.GoInPoints();
+                                __instance.ApplyPlayerRotation(tuple.Item2.MovementContext, points.Item1, points.Item2);
                                 var num = Mathf.Lerp(0f, 0.05f, Mathf.InverseLerp(0f, __instance.BtrView.MoveSpeed, __instance.BtrView.CurrentSpeed));
                                 if (num > Mathf.Epsilon)
                                 {

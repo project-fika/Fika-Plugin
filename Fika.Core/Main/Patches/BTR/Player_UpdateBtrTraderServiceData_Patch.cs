@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using EFT;
 using Fika.Core.Main.Utils;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.BTR;
 
@@ -14,12 +14,12 @@ public class Player_UpdateBtrTraderServiceData_Patch : ModulePatch
     }
 
     [PatchPrefix]
-    public static bool Prefix(LocalPlayer __instance, ref Task __result)
+    public static bool Prefix(LocalPlayer __instance, ref Il2CppSystem.Threading.Tasks.Task __result)
     {
         if (FikaBackendUtils.IsClient)
         {
             __instance.InventoryController.GetTraderServicesDataFromServer(Profile.TraderInfo.BTR_TRADER_ID);
-            __result = Task.CompletedTask;
+            __result = Il2CppSystem.Threading.Tasks.Task.CompletedTask;
             return false;
         }
         return true;

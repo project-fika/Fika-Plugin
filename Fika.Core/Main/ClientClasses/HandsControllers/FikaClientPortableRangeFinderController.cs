@@ -3,11 +3,18 @@ using EFT.InventoryLogic;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Packets.Player.Common;
 using Fika.Core.Networking.Packets.Player.Common.SubPackets;
+using System;
+using Il2CppInterop.Runtime.Injection;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.ClientClasses.HandsControllers;
 
 public class FikaClientPortableRangeFinderController : PortableRangeFinderController
 {
+    public FikaClientPortableRangeFinderController(IntPtr pointer) : base(pointer)
+    {
+    }
+
     protected FikaPlayer _fikaPlayer;
 
     public static FikaClientPortableRangeFinderController Create(FikaPlayer player, Item item)
@@ -45,7 +52,7 @@ public class FikaClientPortableRangeFinderController : PortableRangeFinderContro
         if (IsAiming != isAiming)
         {
             _fikaPlayer.CommonPacket.Type = ECommonSubPacketType.UsableItem;
-            _fikaPlayer.CommonPacket.SubPacket = UsableItemPacket.FromValue(false, false, false, true, isAiming);
+            _fikaPlayer.CommonPacket.SubPacket = UsableItemPacket.FromValue(false, false, false, true, IsAiming);
             _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _fikaPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
         }
     }

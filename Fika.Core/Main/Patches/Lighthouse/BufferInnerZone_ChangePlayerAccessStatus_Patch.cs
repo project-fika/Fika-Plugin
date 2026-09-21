@@ -4,7 +4,7 @@ using EFT.BufferZone;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.World;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.Lighthouse;
 
@@ -17,8 +17,13 @@ public class BufferInnerZone_ChangePlayerAccessStatus_Patch : ModulePatch
     }
 
     [PatchPostfix]
-    public static void Postfix(string profileID, bool status)
+    public static void Postfix(int raidID, bool status)
     {
+        if (FikaBackendUtils.IsTutorial)
+        {
+            return;
+        }
+
         if (FikaBackendUtils.IsClient)
         {
             return;
@@ -26,10 +31,10 @@ public class BufferInnerZone_ChangePlayerAccessStatus_Patch : ModulePatch
 
         BufferZonePacket packet = new(EBufferZoneData.PlayerAccessStatus)
         {
-            ProfileId = profileID,
+            PlayerRaidId = raidID,
             Available = status
         };
 
-        Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+        FikaGlobals.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered);
     }
 }

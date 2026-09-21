@@ -2,12 +2,25 @@
 using EFT;
 using EFT.Ballistics;
 using Fika.Core.Main.Players;
+using System;
+using Il2CppInterop.Runtime.Injection;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.BotClasses;
 
-public sealed class BotPlayerBridge(FikaBot bot) : BodyPartCollider.IObserverToPlayerBridge
+public sealed class BotPlayerBridge : Il2CppSystem.Object, BodyPartCollider.IObserverToPlayerBridge
 {
-    private readonly FikaBot _bot = bot;
+    private readonly FikaBot _bot;
+
+    public BotPlayerBridge(IntPtr pointer) : base(pointer)
+    {
+    }
+
+    public BotPlayerBridge(FikaBot bot) : base(Il2CppInjection.Allocate<BotPlayerBridge>())
+    {
+        ClassInjector.DerivedConstructorBody(this);
+        _bot = bot;
+    }
 
     public IPlayer iPlayer
     {

@@ -7,26 +7,41 @@ using EFT;
 using EFT.HealthSystem;
 using EFT.InventoryLogic;
 using Fika.Core.Main.Players;
+using Il2CppInterop.Runtime.Injection;
+using Fika.Core.Main.Utils;
+using Il2CppInterop.Runtime.InteropTypes.Arrays;
 
 namespace Fika.Core.Main.ObservedClasses;
 
-public sealed class ObservedHealthController(byte[] serializedState, ObservedPlayer player, InventoryController inventory, SkillManager skills)
-    : NetworkHealthController(serializedState, inventory, skills)
+public sealed class ObservedHealthController : NetworkHealthController
 {
+    public ObservedHealthController(IntPtr pointer) : base(pointer)
+    {
+    }
+
+    public ObservedHealthController(Il2CppStructArray<byte> serializedState, ObservedPlayer player, InventoryController inventory, SkillManager skills) : base(Il2CppInjection.Allocate<ObservedHealthController>())
+    {
+        ClassInjector.DerivedConstructorBody(this);
+        _player = player;
+        ClassInjector.InvokeBaseConstructor<NetworkHealthController>(this, serializedState, inventory, skills);
+    }
+
+    private readonly ObservedPlayer _player;
+
     public override Player Player
     {
         get
         {
-            return player;
+            return _player;
         }
     }
 
-    public override bool ApplyItem(Item item, EBodyPart bodyPart, float? amount = null)
+    public override bool ApplyItem(Item item, EBodyPart bodyPart, Il2CppSystem.Nullable<float> amount = null)
     {
         return false;
     }
 
-    public override bool ApplyItem(Item item, OneAndList<EBodyPart> bodyPart, float? amount = null)
+    public override bool ApplyItem(Item item, OneAndList<EBodyPart> bodyPart, Il2CppSystem.Nullable<float> amount = null)
     {
         return false;
     }

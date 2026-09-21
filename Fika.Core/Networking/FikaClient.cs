@@ -40,6 +40,7 @@ using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using static Fika.Core.Networking.NetworkUtils;
+using Il2CppInterop.Runtime.Injection;
 
 namespace Fika.Core.Networking;
 
@@ -48,6 +49,10 @@ namespace Fika.Core.Networking;
 /// </summary>
 public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFikaNetworkManager
 {
+    public FikaClient(IntPtr pointer) : base(pointer)
+    {
+    }
+
     public FikaPlayer MyPlayer;
     public int Ping;
     public int ServerFPS;
@@ -156,7 +161,7 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
         _inventoryOperations = new(8);
         _missingIds = [];
         _startTime = DateTime.Now;
-        _handleInventoryOperationCallback = HandleResult;
+        _handleInventoryOperationCallback = new System.Action<Comfort.Common.IResult>(HandleResult);
         ObservedPlayers = [];
         PlayerAmount = 1;
 
@@ -164,7 +169,7 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
         ServerFPS = 0;
         ReadyClients = 0;
 
-        TemporaryStash = Singleton<ItemFactory>.Instance.CreateFakeStash();
+        TemporaryStash = Singleton<ItemFactory>.Instance.CreateFakeStash(new Il2CppSystem.Nullable<MongoID>());
 
         NetworkGameSession.Rtt = 0;
         NetworkGameSession.LossPercent = 0;
@@ -227,7 +232,7 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
             Destroy(mirrorCommsNetwork);
 
             DissonanceComms_Start_Patch.IsReady = true;
-            gameObj.GetComponent<DissonanceComms>().Invoke("Start", 0);
+            gameObj.GetComponent<DissonanceComms>().Initialize();
         }
         else
         {
@@ -255,10 +260,13 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
         RegisterPacket<InformationPacket>(OnInformationPacketReceived);
         RegisterPacket<TextMessagePacket>(OnTextMessagePacketReceived);
         RegisterPacket<QuestConditionPacket>(OnQuestConditionPacketReceived);
+        RegisterPacket<QuestRelayPacket>(OnQuestRelayPacketReceived);
         RegisterPacket<QuestItemPacket>(OnQuestItemPacketReceived);
         RegisterPacket<QuestDropItemPacket>(OnQuestDropItemPacketReceived);
         RegisterPacket<HalloweenEventPacket>(OnHalloweenEventPacketReceived);
         RegisterPacket<InteractableInitPacket>(OnInteractableInitPacketReceived);
+        RegisterPacket<PasscodeInitPacket>(OnPasscodeInitPacketReceived);
+        RegisterPacket<PasscodeResultPacket>(OnPasscodeResultPacketReceived);
         RegisterPacket<StatisticsPacket>(OnStatisticsPacketReceived);
         RegisterPacket<WorldLootPacket>(OnWorldLootPacketReceived);
         RegisterPacket<ReconnectPacket>(OnReconnectPacketReceived);
@@ -283,9 +291,13 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
         RegisterPacket<LoadingScreenPacket>(OnLoadingScreenPacketReceived);
         RegisterPacket<LoadingScreenPlayersPacket>(OnLoadingScreenPlayersPacketReceived);
         RegisterPacket<SyncEventPacket>(OnSyncEventPacketReceived);
+        RegisterPacket<FinalMissionPacket>(OnFinalMissionPacketReceived);
         RegisterPacket<ClearSnapshotterPacket>(OnClearSnapshotterPacketReceived);
         RegisterPacket<ProceedResponsePacket>(OnProceedResponsePacketReceived);
         RegisterPacket<SpawnItemInInventoryPacket>(SpawnItemInInventoryPacketReceived);
+        RegisterPacket<CutsceneStartPacket>(OnCutsceneStartPacketReceived);
+        RegisterPacket<CutsceneSkipPacket>(OnCutsceneSkipPacketReceived);
+        RegisterPacket<CutsceneEndPacket>(OnCutsceneEndPacketReceived);
 
         RegisterReusable<WorldPacket>(OnWorldPacketReceived);
 
@@ -465,7 +477,7 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
 
     public void OnPeerConnected(NetPeer peer)
     {
-        NotificationManager.DisplayMessageNotification(string.Format(LocaleUtils.CONNECTED_TO_SERVER.Localized(), FikaBackendUtils.RemoteEndPoint.Port),
+        FikaGlobals.DisplayMessage(string.Format(LocaleUtils.CONNECTED_TO_SERVER.Localized(), FikaBackendUtils.RemoteEndPoint.Port),
             ENotificationDurationType.Default, ENotificationIconType.Friend);
 
         var ownProfile = FikaGlobals.GetLiteProfile(FikaBackendUtils.IsScav);
@@ -530,7 +542,7 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
             case EPacketType.VOIP:
                 if (VOIPClient != null)
                 {
-                    VOIPClient.NetworkReceivedPacket(reader.GetRemainingBytesSegment());
+                    VOIPClient.NetworkReceivedPacket((reader.GetRemainingBytesSegment()).ToIl2Cpp());
                 }
                 break;
         }

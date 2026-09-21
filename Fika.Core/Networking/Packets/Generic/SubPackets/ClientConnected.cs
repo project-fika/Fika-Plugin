@@ -28,7 +28,7 @@ public sealed class ClientConnected : IPoolSubPacket
     public void Execute(FikaPlayer player = null)
     {
         var message = string.Format(LocaleUtils.UI_PLAYER_CONNECTED.Localized(), ColorizeText(EColor.BLUE, Name));
-        NotificationManager.DisplayMessageNotification(message);
+        FikaGlobals.DisplayMessage(message, textColor: new Il2CppSystem.Nullable<Color>());
     }
 
     public void Serialize(NetDataWriter writer)

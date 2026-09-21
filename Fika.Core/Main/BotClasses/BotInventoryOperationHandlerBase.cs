@@ -21,7 +21,7 @@ public sealed class BotInventoryOperationHandler : IDisposable
 
     private BotInventoryOperationHandler()
     {
-        HandleResultDelegate = HandleResult;
+        HandleResultDelegate = new System.Action<Comfort.Common.IResult>(HandleResult);
     }
 
     public void Set(BotInventoryController controller, EFT.InventoryLogic.Operations.AbstractOperation operation, Callback callback)

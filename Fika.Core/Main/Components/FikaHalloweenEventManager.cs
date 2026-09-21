@@ -4,16 +4,22 @@ using Comfort.Common;
 using EFT.GlobalEvents;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.World;
+using Il2CppInterop.Runtime.Injection;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.Components;
 
 internal class FikaHalloweenEventManager : MonoBehaviour
 {
+    public FikaHalloweenEventManager(IntPtr pointer) : base(pointer)
+    {
+    }
+
     private ManualLogSource _logger;
 
-    private Action _summonStartedAction;
-    private Action _syncStateEvent;
-    private Action _syncExitsEvent;
+    private Il2CppSystem.Action _summonStartedAction;
+    private Il2CppSystem.Action _syncStateEvent;
+    private Il2CppSystem.Action _syncExitsEvent;
 
     private FikaServer _server;
 
@@ -28,9 +34,9 @@ internal class FikaHalloweenEventManager : MonoBehaviour
 
         _server = Singleton<FikaServer>.Instance;
 
-        _summonStartedAction = GlobalEventsController.Instance.SubscribeOnEvent<HalloweenSummonStartedEvent>(OnHalloweenSummonStarted);
-        _syncStateEvent = GlobalEventsController.Instance.SubscribeOnEvent<HalloweenSyncStateEvent>(OnHalloweenSyncStateEvent);
-        _syncExitsEvent = GlobalEventsController.Instance.SubscribeOnEvent<HalloweenSyncExitsEvent>(OnHalloweenSyncExitsEvent);
+        _summonStartedAction = GlobalEventsController.Instance.SubscribeOnEvent<HalloweenSummonStartedEvent>(new System.Action<EFT.GlobalEvents.HalloweenSummonStartedEvent>(OnHalloweenSummonStarted));
+        _syncStateEvent = GlobalEventsController.Instance.SubscribeOnEvent<HalloweenSyncStateEvent>(new System.Action<EFT.GlobalEvents.HalloweenSyncStateEvent>(OnHalloweenSyncStateEvent));
+        _syncExitsEvent = GlobalEventsController.Instance.SubscribeOnEvent<HalloweenSyncExitsEvent>(new System.Action<EFT.GlobalEvents.HalloweenSyncExitsEvent>(OnHalloweenSyncExitsEvent));
     }
 
     protected void OnDestroy()

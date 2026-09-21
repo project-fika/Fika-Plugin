@@ -16,6 +16,7 @@ using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
+using Il2CppInterop.Runtime.Injection;
 
 namespace Fika.Core.Main.Components;
 
@@ -24,6 +25,10 @@ namespace Fika.Core.Main.Components;
 /// </summary>
 public class CoopHandler : MonoBehaviour
 {
+    public CoopHandler(IntPtr pointer) : base(pointer)
+    {
+    }
+
     #region Fields/Properties
     /// <summary>
     /// Reference to the local <see cref="CoopGame"/> instance
@@ -109,7 +114,7 @@ public class CoopHandler : MonoBehaviour
     public static bool TryGetCoopHandler(out CoopHandler coopHandler)
     {
         coopHandler = null;
-        var networkManager = Singleton<IFikaNetworkManager>.Instance;
+        var networkManager = FikaGlobals.NetworkManager;
         if (networkManager != null)
         {
             coopHandler = networkManager.CoopHandler;
@@ -121,7 +126,7 @@ public class CoopHandler : MonoBehaviour
 
     public static string GetServerId()
     {
-        var networkManager = Singleton<IFikaNetworkManager>.Instance;
+        var networkManager = FikaGlobals.NetworkManager;
         if (networkManager != null && networkManager.CoopHandler != null)
         {
             return networkManager.CoopHandler.ServerId;
@@ -214,12 +219,13 @@ public class CoopHandler : MonoBehaviour
             }
         }
 
+        FikaFinalMissionDirector.Instance?.Tick();
         ProcessQuitting();
     }
 
     private void SyncPlayersWithClients()
     {
-        Singleton<IFikaNetworkManager>.Instance.SendGenericPacket(EGenericSubPacketType.CharacterSync,
+        FikaGlobals.NetworkManager.SendGenericPacket(EGenericSubPacketType.CharacterSync,
             CharacterSyncPacket.FromValue(Players), true);
     }
 
@@ -319,11 +325,11 @@ public class CoopHandler : MonoBehaviour
             return;
         }
 
-        await JobScheduler.Yield();
+        await JobScheduler.Yield().AsManaged();
         try
         {
             await Singleton<ObjectsFactory>.Instance.LoadBundlesAndCreatePools(ObjectsFactory.PoolsCategory.Raid,
-                ObjectsFactory.AssemblyType.Local, allPrefabPaths, FikaPlugin.Instance.Settings.LoadPriority.Value.ToLoadPriorty());
+                ObjectsFactory.AssemblyType.Local, allPrefabPaths.ToIl2CppList(), FikaPlugin.Instance.Settings.LoadPriority.Value.ToLoadPriorty(), null, new Il2CppSystem.Threading.CancellationToken());
         }
         catch (OperationCanceledException)
         {
@@ -333,7 +339,7 @@ public class CoopHandler : MonoBehaviour
         {
             _logger.LogError($"SpawnPlayer::{spawnObject.Profile.Info.Nickname}::Load Failed: {ex.Message}");
         }
-        await JobScheduler.Yield();
+        await JobScheduler.Yield().AsManaged();
 
         var otherPlayer = await SpawnObservedPlayer(spawnObject);
 
@@ -347,14 +353,14 @@ public class CoopHandler : MonoBehaviour
         {
             if (LocalGameInstance != null)
             {
-                var botController = (Singleton<IFikaGame>.Instance.GameController as HostGameController).BotsController;
+                var botController = (FikaGlobals.FikaGame.GameController as HostGameController).BotsController;
                 if (botController != null)
                 {
                     // Start Coroutine as botController might need a while to start sometimes...
 #if DEBUG
                     _logger.LogInfo("Starting AddClientToBotEnemies routine.");
 #endif
-                    StartCoroutine(AddClientToBotEnemies(botController, otherPlayer));
+                    StartCoroutine((AddClientToBotEnemies(botController, otherPlayer)).ToIl2Cpp());
                 }
                 else
                 {
@@ -401,9 +407,9 @@ public class CoopHandler : MonoBehaviour
         if (controllerType != EHandsControllerType.None)
         {
             spawnObject.ControllerType = controllerType;
-            if (itemId.HasValue)
+            if (itemId is not null)
             {
-                spawnObject.ItemId = itemId.Value;
+                spawnObject.ItemId = itemId;
             }
         }
         if (healthByteArray != null)
@@ -477,9 +483,9 @@ public class CoopHandler : MonoBehaviour
             return null;
         }
 
-        Singleton<IFikaNetworkManager>.Instance.ObservedPlayers.Add(otherPlayer);
+        FikaGlobals.NetworkManager.ObservedPlayers.Add(otherPlayer);
 #if DEBUG
-        _logger.LogInfo($"SpawnObservedPlayer: {profile.GetCorrectedNickname()} spawning with NetId {netId} at [{position:F1}]");
+        _logger.LogInfo($"SpawnObservedPlayer: {profile.GetCorrectedNickname()} spawning with NetId {netId} at [{position.ToString("F1")}]");
 #endif
 
         if (!Players.ContainsKey(netId))
@@ -519,7 +525,7 @@ public class CoopHandler : MonoBehaviour
         var isStationary = spawnObject.IsStationary;
         if (controllerType != EHandsControllerType.None)
         {
-            if (controllerType != EHandsControllerType.Empty && itemId == default)
+            if (controllerType != EHandsControllerType.Empty && itemId is null)
             {
                 _logger.LogError($"CreateLocalPlayer: ControllerType was not Empty but itemId was default! ControllerType: {controllerType}");
             }

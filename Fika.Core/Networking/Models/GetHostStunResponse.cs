@@ -1,18 +1,19 @@
 ﻿using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 [DataContract]
 public struct GetHostStunResponse
 {
-    [DataMember(Name = "requestType")]
+    [JsonPropertyName("requestType")]
     public string RequestType;
 
-    [DataMember(Name = "sessionId")]
+    [JsonPropertyName("sessionId")]
     public string SessionId;
 
-    [DataMember(Name = "StunIp")]
+    [JsonPropertyName("StunIp")]
     public string StunIp;
 
-    [DataMember(Name = "StunPort")]
+    [JsonPropertyName("StunPort")]
     public int StunPort;
 
     public GetHostStunResponse(string sessionId, string stunIp, int stunPort)

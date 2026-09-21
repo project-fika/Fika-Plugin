@@ -9,7 +9,7 @@ public sealed class BtrSpawn : IPoolSubPacket
 {
     public Vector3 Position;
     public Quaternion Rotation;
-    public string PlayerProfileId;
+    public int PlayerRaidId;
 
     private BtrSpawn() { }
 
@@ -18,12 +18,12 @@ public sealed class BtrSpawn : IPoolSubPacket
         return new BtrSpawn();
     }
 
-    public static BtrSpawn FromValue(Vector3 position, Quaternion rotation, string profileId)
+    public static BtrSpawn FromValue(Vector3 position, Quaternion rotation, int playerRaidId)
     {
         var packet = GenericSubPacketPoolManager.Instance.GetPacket<BtrSpawn>(EGenericSubPacketType.SpawnBTR);
         packet.Position = position;
         packet.Rotation = rotation;
-        packet.PlayerProfileId = profileId;
+        packet.PlayerRaidId = playerRaidId;
         return packet;
     }
 
@@ -31,27 +31,27 @@ public sealed class BtrSpawn : IPoolSubPacket
     {
         FikaGlobals.LogInfo("Received BTR spawn event from server");
         GlobalEventsController.CreateEvent<BtrSpawnOnThePathEvent>()
-            .Invoke(Position, Rotation, PlayerProfileId);
+            .Invoke(Position, Rotation, PlayerRaidId);
     }
 
     public void Serialize(NetDataWriter writer)
     {
         writer.PutUnmanaged(Position);
         writer.PutUnmanaged(Rotation);
-        writer.Put(PlayerProfileId);
+        writer.Put(PlayerRaidId);
     }
 
     public void Deserialize(NetDataReader reader)
     {
         Position = reader.GetUnmanaged<Vector3>();
         Rotation = reader.GetUnmanaged<Quaternion>();
-        PlayerProfileId = reader.GetString();
+        PlayerRaidId = reader.GetInt();
     }
 
     public void Dispose()
     {
         Position = default;
         Rotation = default;
-        PlayerProfileId = null;
+        PlayerRaidId = 0;
     }
 }

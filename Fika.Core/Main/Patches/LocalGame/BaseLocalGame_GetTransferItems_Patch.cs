@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using Fika.Core.Main.Utils;
+using System.Collections.Generic;
 using System.Reflection;
 using EFT;
 using Fika.Core.Main.GameMode;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 using JsonType;
 
 namespace Fika.Core.Main.Patches.LocalGame;
@@ -19,7 +20,7 @@ public class BaseLocalGame_GetTransferItems_Patch : ModulePatch
     }
 
     [PatchPrefix]
-    public static bool Prefix(BaseLocalGame<EftGamePlayerOwner> __instance, ref Dictionary<string, FlatItem[]> __result)
+    public static bool Prefix(BaseLocalGame<EftGamePlayerOwner> __instance, ref Il2CppSystem.Collections.Generic.Dictionary<string, Il2CppInterop.Runtime.InteropTypes.Arrays.Il2CppReferenceArray<FlatItem>> __result)
     {
         if (__instance is CoopGame coopGame)
         {

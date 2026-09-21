@@ -51,13 +51,16 @@ public class TransitEventPacket : INetSerializable
 #endif
                         timers.Add(key, value);
                     }
-                    timerEvent.Timers = timers;
+                    timerEvent.Timers = (timers).ToIl2CppDictionary();
                     TransitEvent = timerEvent;
                 }
                 break;
             case ETransitEventType.GroupSize:
                 {
-                    TransitGroupSizeEvent sizeEvent = new();
+                    TransitGroupSizeEvent sizeEvent = new()
+                    {
+                        PointId = reader.GetInt()
+                    };
                     var sizeAmount = reader.GetInt();
                     Dictionary<int, byte> sizes = [];
                     for (var i = 0; i < sizeAmount; i++)
@@ -69,7 +72,7 @@ public class TransitEventPacket : INetSerializable
 #endif
                         sizes.Add(key, value);
                     }
-                    sizeEvent.Sizes = sizes;
+                    sizeEvent.Sizes = (sizes).ToIl2CppDictionary();
                     TransitEvent = sizeEvent;
                 }
                 break;
@@ -77,7 +80,7 @@ public class TransitEventPacket : INetSerializable
                 {
                     TransitEvent = (TransitInteractionEvent)new()
                     {
-                        PlayerId = reader.GetInt(),
+                        PlayerRaidId = reader.GetInt(),
                         PointId = reader.GetInt(),
                         Type = (TransitInteractionEvent.EType)reader.GetByte()
                     };
@@ -94,7 +97,7 @@ public class TransitEventPacket : INetSerializable
                         var value = (TransitMessagesEvent.EType)reader.GetByte();
                         messages.Add(key, value);
                     }
-                    messagesEvent.Messages = messages;
+                    messagesEvent.Messages = (messages).ToIl2CppDictionary();
                     TransitEvent = messagesEvent;
                 }
                 break;
@@ -144,6 +147,7 @@ public class TransitEventPacket : INetSerializable
                 {
                     if (TransitEvent is TransitGroupSizeEvent sizeEvent)
                     {
+                        writer.Put(sizeEvent.PointId);
                         writer.Put(sizeEvent.Sizes.Count);
                         foreach (var size in sizeEvent.Sizes)
                         {
@@ -157,7 +161,7 @@ public class TransitEventPacket : INetSerializable
                 {
                     if (TransitEvent is TransitInteractionEvent interactionEvent)
                     {
-                        writer.Put(interactionEvent.PlayerId);
+                        writer.Put(interactionEvent.PlayerRaidId);
                         writer.Put(interactionEvent.PointId);
                         writer.Put((byte)interactionEvent.Type);
                     }

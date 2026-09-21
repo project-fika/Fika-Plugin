@@ -1,95 +1,80 @@
 ﻿using System;
-using System.Collections.Generic;
+using Comfort.Common;
+using Dissonance.Integrations.MirrorIgnorance;
 using Dissonance.Networking;
 using Dissonance.Networking.Server;
 using Fika.Core.Main.Utils;
+using Il2CppInterop.Runtime.Injection;
 
 namespace Fika.Core.Networking.VOIP;
 
-public class FikaVOIPServer(FikaCommsNetwork commsNetwork) : BaseServer<FikaVOIPServer, FikaVOIPClient, FikaVOIPPeer>
+public class FikaVOIPServer : MirrorIgnoranceServer
 {
-    private readonly List<NetPeer> _peers = [];
-    private readonly FikaCommsNetwork _fikaComms = commsNetwork;
+    private static readonly Action<BaseServer<MirrorIgnoranceServer, MirrorIgnoranceClient, MirrorConn>> _baseConnect =
+        typeof(BaseServer<MirrorIgnoranceServer, MirrorIgnoranceClient, MirrorConn>).GetMethod(nameof(Connect))
+            .CreateBaseCall<Action<BaseServer<MirrorIgnoranceServer, MirrorIgnoranceClient, MirrorConn>>>();
 
-    protected override void AddClient(ClientInfo<FikaVOIPPeer> client)
+    private static readonly Action<BaseServer<MirrorIgnoranceServer, MirrorIgnoranceClient, MirrorConn>> _baseDisconnect =
+        typeof(BaseServer<MirrorIgnoranceServer, MirrorIgnoranceClient, MirrorConn>).GetMethod(nameof(Disconnect))
+            .CreateBaseCall<Action<BaseServer<MirrorIgnoranceServer, MirrorIgnoranceClient, MirrorConn>>>();
+
+    public FikaVOIPServer(IntPtr pointer) : base(pointer)
     {
-        base.AddClient(client);
-        if (client.PlayerName != _fikaComms.PlayerName)
-        {
-            if (client.Connection.Peer is RemotePeer peer)
-            {
-                _peers.Add(peer.Peer);
-                return;
-            }
-            FikaGlobals.LogError($"FikaVOIPServer::AddClient: Connection.Peer was not a RemotePeer!");
-        }
+    }
+
+    public FikaVOIPServer(FikaCommsNetwork commsNetwork) : base(Il2CppInjection.Allocate<FikaVOIPServer>())
+    {
+        ClassInjector.DerivedConstructorBody(this);
+        ClassInjector.InvokeBaseConstructor<MirrorIgnoranceServer>(this, commsNetwork);
+    }
+
+    public override void Connect()
+    {
+        _baseConnect(this);
+    }
+
+    public override void Disconnect()
+    {
+        _baseDisconnect(this);
+        FikaVOIPPeers.Clear();
     }
 
     public override ServerState Update()
     {
-        for (var i = _peers.Count - 1; i >= 0; i--)
-        {
-            if (_peers[i].ConnectionState != ConnectionState.Connected)
-            {
-                var peer = _peers[i];
-                FikaGlobals.LogInfo($"FikaVOIPServer::Update: Peer {peer} disconnected from VOIP service");
-                ClientDisconnected(new(new RemotePeer(peer)));
-                _peers.RemoveAt(i);
-            }
-        }
+        FikaVOIPPeers.UpdateConnectionStates();
         return base.Update();
     }
 
-    protected override void ReadMessages()
+    public override void SendReliable(MirrorConn connection, Il2CppSystem.ArraySegment<byte> packet)
     {
-
+        Send(connection, packet, DeliveryMethod.ReliableOrdered);
     }
 
-    protected override void SendReliable(FikaVOIPPeer connection, ArraySegment<byte> packet)
+    public override void SendUnreliable(MirrorConn connection, Il2CppSystem.ArraySegment<byte> packet)
     {
-        if (packet.Array?.Length == 0)
+        Send(connection, packet, DeliveryMethod.Sequenced);
+    }
+
+    private static void Send(MirrorConn connection, Il2CppSystem.ArraySegment<byte> packet, DeliveryMethod deliveryMethod)
+    {
+        if (packet.Count == 0)
         {
             FikaGlobals.LogError("Packet length was 0!");
             return;
         }
 
-        connection.Peer.SendData(packet, DeliveryMethod.ReliableOrdered);
-    }
-
-    protected override void SendUnreliable(FikaVOIPPeer connection, ArraySegment<byte> packet)
-    {
-        if (packet.Array?.Length == 0)
+        if (FikaVOIPPeers.IsLocal(connection))
         {
-            FikaGlobals.LogError("Packet length was 0!");
+            FikaVOIPPeers.SendToLocalClient(packet);
             return;
         }
 
-        connection.Peer.SendData(packet, DeliveryMethod.Sequenced);
-    }
-
-    public override void SendReliable(List<FikaVOIPPeer> connections, ArraySegment<byte> packet)
-    {
-        if (connections == null)
+        if (FikaVOIPPeers.TryGetPeer(connection, out var peer))
         {
-            throw new ArgumentNullException("connections");
+            FikaGlobals.NetworkManager.SendVOIPData(packet.ToManaged(), deliveryMethod, peer);
+            return;
         }
 
-        for (var i = 0; i < connections.Count; i++)
-        {
-            SendReliable(connections[i], packet);
-        }
-    }
-
-    public override void SendUnreliable(List<FikaVOIPPeer> connections, ArraySegment<byte> packet)
-    {
-        if (connections == null)
-        {
-            throw new ArgumentNullException(nameof(connections));
-        }
-
-        for (var i = 0; i < connections.Count; i++)
-        {
-            SendUnreliable(connections[i], packet);
-        }
+        FikaGlobals.LogError("FikaVOIPServer: no peer for this connection");
     }
 }

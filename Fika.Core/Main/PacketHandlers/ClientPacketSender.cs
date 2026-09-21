@@ -18,11 +18,16 @@ using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
 using Fika.Core.Networking.Packets.Player;
 using Fika.Core.UI.Custom;
+using Il2CppInterop.Runtime.Injection;
 
 namespace Fika.Core.Main.PacketHandlers;
 
 public class ClientPacketSender : MonoBehaviour, IPacketSender
 {
+    public ClientPacketSender(IntPtr pointer) : base(pointer)
+    {
+    }
+
     public bool SendState { get; set; }
     public IFikaNetworkManager NetworkManager { get; set; }
 
@@ -43,7 +48,7 @@ public class ClientPacketSender : MonoBehaviour, IPacketSender
         {
             return FikaPlugin.Instance.Settings.UsePingSystem.Value && _player.IsYourPlayer && Input.GetKey(FikaPlugin.Instance.Settings.PingButton.Value.MainKey)
                 && FikaGlobals.AreModifiersPressed(FikaPlugin.Instance.Settings.PingButton.Value) && !MonoBehaviourSingleton<PreloaderUI>.Instance.Console.IsConsoleVisible
-                && _lastPingTime < DateTime.Now.AddSeconds(-3) && !FikaChatUIScript.IsActive && Singleton<IFikaGame>.Instance is CoopGame coopGame && coopGame.Status is GameStatus.Started
+                && _lastPingTime < DateTime.Now.AddSeconds(-3) && !FikaChatUIScript.IsActive && FikaGlobals.FikaGame is CoopGame coopGame && coopGame.Status is GameStatus.Started
                 && !_player.IsInventoryOpened;
         }
     }

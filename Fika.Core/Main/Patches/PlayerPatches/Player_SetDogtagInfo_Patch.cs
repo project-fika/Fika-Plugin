@@ -3,7 +3,8 @@ using System.Reflection;
 using System.Reflection.Emit;
 using EFT;
 using HarmonyLib;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.Patches.PlayerPatches;
 
@@ -17,15 +18,14 @@ public class Player_SetDogtagInfo_Patch : ModulePatch
         return typeof(Player).GetMethod(nameof(Player.SetDogtagInfo));
     }
 
-    [PatchTranspiler]
-    public static IEnumerable<CodeInstruction> Transpile(IEnumerable<CodeInstruction> instructions)
+    [PatchPrefix]
+    public static bool Prefix()
     {
-        // Create a new set of instructions
-        List<CodeInstruction> instructionsList =
-        [
-            new CodeInstruction(OpCodes.Ret) // Return immediately
-        ];
+        if (FikaBackendUtils.IsTutorial)
+        {
+            return true;
+        }
 
-        return instructionsList;
+        return false;
     }
 }

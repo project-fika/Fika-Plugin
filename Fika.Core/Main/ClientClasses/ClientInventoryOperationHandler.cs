@@ -34,8 +34,8 @@ public sealed class ClientInventoryOperationHandler : IDisposable
 
     private ClientInventoryOperationHandler()
     {
-        ExecuteResultDelegate = ExecuteResult;
-        HandleResultDelegate = HandleResult;
+        ExecuteResultDelegate = new System.Action<Comfort.Common.IResult>(ExecuteResult);
+        HandleResultDelegate = new System.Action<Comfort.Common.IResult>(HandleResult);
         ServerStatusDelegate = ReceiveStatusFromServer;
     }
 
@@ -48,11 +48,11 @@ public sealed class ClientInventoryOperationHandler : IDisposable
                 Operation.ExecuteWithoutDispose(ExecuteResultDelegate);
                 return;
             case EOperationStatus.Succeeded:
-                HandleResultDelegate(SuccessfulResult.New);
+                HandleResultDelegate.Invoke(SuccessfulResult.New);
                 return;
             case EOperationStatus.Failed:
                 FikaGlobals.LogError($"{InventoryController.ID} - Client operation rejected by server: {Operation.Id} - {Operation}\r\nReason: {serverStatus.Error}");
-                HandleResultDelegate(new FailedResult(serverStatus.Error));
+                HandleResultDelegate.Invoke(new FailedResult(serverStatus.Error));
                 break;
             default:
                 FikaGlobals.LogError("ReceiveStatusFromServer: Status was missing?");
@@ -66,7 +66,7 @@ public sealed class ClientInventoryOperationHandler : IDisposable
         {
             FikaGlobals.LogError($"{InventoryController.ID} - Client operation critical failure: {Operation.Id} server status:  - {Operation}\r\nError: {executeResult.Error}");
         }
-        HandleResultDelegate(executeResult);
+        HandleResultDelegate.Invoke(executeResult);
     }
 
     private void HandleResult(IResult result)

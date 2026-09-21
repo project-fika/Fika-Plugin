@@ -1,27 +1,28 @@
 using System;
 using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Fika.Core.Networking.Models;
 
 [DataContract]
 public struct GetHostResponse(string[] ips, Guid serverGuid, ushort port, bool natPunch, bool useFikaNatPunchServer, bool isHeadless)
 {
-    [DataMember(Name = "ips")]
+    [JsonPropertyName("ips")]
     public string[] IPs = ips;
 
-    [DataMember(Name = "serverGuid")]
+    [JsonPropertyName("serverGuid")]
     public Guid ServerGuid = serverGuid;
 
-    [DataMember(Name = "port")]
+    [JsonPropertyName("port")]
     public ushort Port = port;
 
-    [DataMember(Name = "natPunch")]
+    [JsonPropertyName("natPunch")]
     public bool NatPunch = natPunch;
 
-    [DataMember(Name = "useFikaNatPunchServer")]
+    [JsonPropertyName("useFikaNatPunchServer")]
     public bool UseFikaNatPunchServer = useFikaNatPunchServer;
 
-    [DataMember(Name = "isHeadless")]
+    [JsonPropertyName("isHeadless")]
     public bool IsHeadless = isHeadless;
 
     public override readonly string ToString()

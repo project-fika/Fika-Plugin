@@ -61,13 +61,19 @@ public sealed class SyncableItemPacket : IPoolSubPacket
         }
         else
         {
-            if (Singleton<GameWorld>.Instance.Windows.TryGetByKey(NetId, out var windowBreaker))
+            var gameWorld = Singleton<GameWorld>.Instance;
+            if (gameWorld == null)
+            {
+                return;
+            }
+
+            if (gameWorld.Windows.TryGetByKey(NetId, out var windowBreaker))
             {
                 DamageInfo damageInfoStruct = new()
                 {
                     HitPoint = HitPoint
                 };
-                windowBreaker.MakeHit(in damageInfoStruct);
+                windowBreaker.MakeHit(ref damageInfoStruct);
             }
             else
             {

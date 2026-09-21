@@ -1,7 +1,7 @@
 ﻿using JsonType;
 using System.Collections.Generic;
 using EFT;
-using Newtonsoft.Json;
+using Il2CppInterop.Runtime.InteropTypes.Arrays;
 
 namespace Fika.Core.Networking.Packets.Backend;
 
@@ -24,7 +24,7 @@ public struct InRaidQuestPacket : INetSerializable
                     Items = new(length);
                     for (var i = 0; i < length; i++)
                     {
-                        Items.Add(JsonConvert.DeserializeObject<FlatItem[]>(reader.GetString()));
+                        Items.Add(JsonExtensions.ParseJsonTo<Il2CppReferenceArray<FlatItem>>(reader.GetString()));
                     }
                 }
                 break;
@@ -54,7 +54,7 @@ public struct InRaidQuestPacket : INetSerializable
                 writer.Put((ushort)Items.Count);
                 for (var i = 0; i < Items.Count; i++)
                 {
-                    writer.Put(JsonConvert.SerializeObject(Items[i]));
+                    writer.Put(JsonExtensions.ToJson(new Il2CppReferenceArray<FlatItem>(Items[i])));
                 }
                 break;
             case InraidQuestType.Handover:

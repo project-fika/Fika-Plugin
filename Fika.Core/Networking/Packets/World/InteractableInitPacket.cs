@@ -15,7 +15,7 @@ public struct InteractableInitPacket(bool isRequest) : INetSerializable
         if (!IsRequest)
         {
             RawData = reader.GetByteArray();
-            Interactables = SimpleZlib.Decompress(RawData, null).ParseJsonTo<Dictionary<string, int>>();
+            Interactables = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, int>>(SimpleZlib.Decompress(RawData, null));
         }
     }
 
@@ -24,7 +24,7 @@ public struct InteractableInitPacket(bool isRequest) : INetSerializable
         writer.Put(IsRequest);
         if (!IsRequest)
         {
-            var data = SimpleZlib.CompressToBytes(Interactables.ToJson([]), 6);
+            var data = SimpleZlib.CompressToBytes(System.Text.Json.JsonSerializer.Serialize(Interactables), 6);
             writer.PutByteArray(data);
         }
     }

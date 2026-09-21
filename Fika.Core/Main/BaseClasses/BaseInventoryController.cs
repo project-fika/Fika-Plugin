@@ -9,6 +9,8 @@ using EFT.InventoryLogic.Operations;
 using EFT.UI;
 using Diz.LanguageExtensions;
 using Diz.Utils;
+using Il2CppInterop.Runtime.Injection;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.BaseClasses;
 
@@ -17,6 +19,10 @@ namespace Fika.Core.Main.BaseClasses;
 /// </summary>
 public class BaseInventoryController : Player.PlayerOwnerInventoryController
 {
+    public BaseInventoryController(IntPtr pointer) : base(pointer)
+    {
+    }
+
     /// <summary>
     /// Whether strict inventory syncing is active
     /// </summary>
@@ -25,11 +31,17 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
     protected readonly bool _instantLoad;
     protected readonly bool _fastLoad;
 
-    public BaseInventoryController(Player player, Profile profile, bool examined, bool strictSync) : base(player, profile, examined)
+    protected BaseInventoryController(IntPtr pointer, Player player, Profile profile, bool examined, bool strictSync) : base(pointer)
     {
+        ClassInjector.DerivedConstructorBody(this);
         _instantLoad = FikaPlugin.Instance.Settings.InstantLoad;
         _fastLoad = !_instantLoad && FikaPlugin.Instance.Settings.FastLoad;
+        ClassInjector.InvokeBaseConstructor<Player.PlayerOwnerInventoryController>(this, player, profile, examined);
         StrictSync = strictSync;
+    }
+
+    public BaseInventoryController(Player player, Profile profile, bool examined, bool strictSync) : this(Il2CppInjection.Allocate<BaseInventoryController>(), player, profile, examined, strictSync)
+    {
     }
 
     public override SearchContentOperation CreateSearchOperation(SearchableItem item)
@@ -37,7 +49,12 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
         throw new NotImplementedException();
     }
 
-    public override Task<IResult> LoadMagazine(Ammo sourceAmmo, Magazine magazine, int loadCount, bool ignoreRestrictions)
+    public override void RemoveItem(Item item, Callback callback)
+    {
+        TryRunNetworkTransaction(ItemManipulator.Remove(item, this, true), callback);
+    }
+
+    public override Il2CppSystem.Threading.Tasks.Task<IResult> LoadMagazine(Ammo sourceAmmo, Magazine magazine, int loadCount, bool ignoreRestrictions)
     {
         if (_instantLoad)
         {
@@ -55,7 +72,7 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
 
         if (_fastLoad)
         {
-            return QuickLoadMagazine(sourceAmmo, magazine, loadCount, ignoreRestrictions);
+            return QuickLoadMagazine(sourceAmmo, magazine, loadCount, ignoreRestrictions).ToIl2Cpp();
         }
 
         return base.LoadMagazine(sourceAmmo, magazine, loadCount, ignoreRestrictions);
@@ -89,17 +106,18 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
             return readinessResult;
         }
 
-        _loadProcess = new CustomAmmoLoader(this, magazine, sourceAmmo, loadCount,
+        var loader = new CustomAmmoLoader(this, magazine, sourceAmmo, loadCount,
             Profile.Skills.MagDrillsLoadProgression, finalLoadSpeed, loadPerTick);
+        _loadProcess = loader;
 
-        var executionResult = await _loadProcess.Start();
+        var executionResult = await loader.StartLoading();
 
         _loadProcess = null;
 
         return executionResult;
     }
 
-    public override Task<IResult> UnloadMagazine(Magazine magazine, bool equipmentBlocked)
+    public override Il2CppSystem.Threading.Tasks.Task<IResult> UnloadMagazine(Magazine magazine, bool equipmentBlocked)
     {
         if (_instantLoad)
         {
@@ -108,7 +126,7 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
 
         if (_fastLoad)
         {
-            return QuickUnloadMagazine(magazine);
+            return QuickUnloadMagazine(magazine).ToIl2Cpp();
         }
 
         return base.UnloadMagazine(magazine, equipmentBlocked);
@@ -127,8 +145,9 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
             return awaitClear;
         }
 
-        _loadProcess = new CustomAmmoUnloader(this, magazine, unloadPerTick, unloadOneAmmoSpeed, Profile.Skills.MagDrillsLoadProgression);
-        var result = await _loadProcess.Start();
+        var unloader = new CustomAmmoUnloader(this, magazine, unloadPerTick, unloadOneAmmoSpeed, Profile.Skills.MagDrillsLoadProgression);
+        _loadProcess = unloader;
+        var result = await unloader.StartUnloading();
 
         _loadProcess = null;
 
@@ -163,7 +182,7 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
 
     public override IPlayerSearchController PlayerSearchController { get; }
 
-    private sealed class CustomAmmoLoader : IMagazineLoadingProcess
+    private sealed class CustomAmmoLoader : Il2CppSystem.Object, IMagazineLoadingProcess
     {
         private readonly InventoryController _inventoryController;
         private readonly Magazine _magazine;
@@ -181,9 +200,14 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
 
         public bool IsCancelled => _cts?.IsCancellationRequested != false;
 
-        public CustomAmmoLoader(InventoryController inventoryController, Magazine magazine, Ammo sourceAmmo,
-            int count, bool elite, float loadOneAmmoSpeed, int loadPerTick)
+        public CustomAmmoLoader(IntPtr pointer) : base(pointer)
         {
+        }
+
+        public CustomAmmoLoader(InventoryController inventoryController, Magazine magazine, Ammo sourceAmmo,
+            int count, bool elite, float loadOneAmmoSpeed, int loadPerTick) : base(Il2CppInjection.Allocate<CustomAmmoLoader>())
+        {
+            ClassInjector.DerivedConstructorBody(this);
             _inventoryController = inventoryController;
             _magazine = magazine;
             _sourceAmmo = sourceAmmo;
@@ -197,13 +221,18 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
             _loadPerTick = loadPerTick;
         }
 
-        public async Task<IResult> Start()
+        public Il2CppSystem.Threading.Tasks.Task<IResult> Start()
+        {
+            return StartLoading().ToIl2Cpp();
+        }
+
+        public async Task<IResult> StartLoading()
         {
             ResetToken();
             _cts = new CancellationTokenSource();
 
             var cancellationHandlerSource = new TaskCompletionSource<IResult>();
-            _cts.Token.Register(cancellationHandlerSource.Succeed);
+            _cts.Token.Register(() => cancellationHandlerSource.TrySetResult(SuccessfulResult.New));
             RaiseEvents(CommandStatus.Begin);
             var result = await await Task.WhenAny(DoLoadLoopAsync(), cancellationHandlerSource.Task);
 
@@ -290,7 +319,7 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
                 var operation = _inventoryController.ConvertOperationResultToOperation(gstruct.Value);
                 var executionSource = new TaskCompletionSource<IResult>();
 
-                _inventoryController.Execute(operation, executionSource.SetResult);
+                _inventoryController.Execute(operation, new System.Action<Comfort.Common.IResult>(executionSource.SetResult));
 
                 var operationResult = await executionSource.Task;
 
@@ -332,7 +361,7 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
         }
     }
 
-    private sealed class CustomAmmoUnloader : IMagazineLoadingProcess
+    private sealed class CustomAmmoUnloader : Il2CppSystem.Object, IMagazineLoadingProcess
     {
         private readonly BaseInventoryController _inventoryController;
         private readonly Magazine _magazine;
@@ -347,8 +376,14 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
         private Item _currentAmmoItem;
         private Item _targetItem;
 
-        public CustomAmmoUnloader(BaseInventoryController baseInventoryController, Magazine magazine, int unloadPerTick, float unloadOneAmmoSpeed, bool isElite)
+        public CustomAmmoUnloader(IntPtr pointer) : base(pointer)
         {
+        }
+
+        public CustomAmmoUnloader(BaseInventoryController baseInventoryController, Magazine magazine, int unloadPerTick, float unloadOneAmmoSpeed, bool isElite)
+            : base(Il2CppInjection.Allocate<CustomAmmoUnloader>())
+        {
+            ClassInjector.DerivedConstructorBody(this);
             _inventoryController = baseInventoryController;
             _magazine = magazine;
             _unloadPerTick = unloadPerTick;
@@ -360,7 +395,12 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
             _remainingAmmoCount = _totalAmmoCount;
         }
 
-        public async Task<IResult> Start()
+        public Il2CppSystem.Threading.Tasks.Task<IResult> Start()
+        {
+            return StartUnloading().ToIl2Cpp();
+        }
+
+        public async Task<IResult> StartUnloading()
         {
             Cancel();
 
@@ -432,7 +472,7 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
                 }
 
                 var findPlaceResult = ItemManipulator.QuickFindAppropriatePlace(ammoItem, _inventoryController,
-                    _inventoryController.Inventory.Equipment.ToEnumerable(),
+                    _inventoryController.Inventory.Equipment.AsIl2CppEnumerable<CompoundItem>(),
                     ItemManipulator.EMoveItemOrder.UnloadAmmo, true);
 
                 if (findPlaceResult.Failed)
@@ -498,7 +538,7 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
 
                 var executionTcs = new TaskCompletionSource<IResult>();
 
-                _inventoryController.Execute(operation, new Callback(res => executionTcs.SetResult(res)));
+                _inventoryController.Execute(operation, new Action<IResult>(res => executionTcs.SetResult(res)));
 
                 var executionResult = await executionTcs.Task;
                 if (executionResult.Failed)

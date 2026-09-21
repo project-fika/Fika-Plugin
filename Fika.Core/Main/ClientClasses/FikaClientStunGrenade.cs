@@ -1,11 +1,18 @@
 ﻿using EFT;
+using System;
+using Il2CppInterop.Runtime.Injection;
+using Fika.Core.Main.Utils;
 namespace Fika.Core.Main.ClientClasses;
 
 public class FikaClientStunGrenade : ObservedStunGrenade
 {
+    public FikaClientStunGrenade(IntPtr pointer) : base(pointer)
+    {
+    }
+
     private const float _smoothSpeed = 10f;
 
-    public override void ApplyNetPacket(GrenadeSyncPacket packet)
+    public override void ApplyNetPacket(GrenadeSyncPacket packet, float remoteTime)
     {
         var t = 1f - Mathf.Exp(-_smoothSpeed * Time.deltaTime);
 
@@ -23,13 +30,13 @@ public class FikaClientStunGrenade : ObservedStunGrenade
         }
         else
         {
-            SetVelocity(packet);
+            this.SetNetVelocity(packet);
         }
 
         if (packet.Done)
         {
             transform.SetPositionAndRotation(packet.Position, packet.Rotation);
-            SetVelocity(packet);
+            this.SetNetVelocity(packet);
             OnDoneFromNet();
         }
     }

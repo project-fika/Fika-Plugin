@@ -3,6 +3,7 @@ using System.Runtime.Serialization;
 using EFT;
 using Fika.Core.Main.Utils;
 using JsonType;
+using System.Text.Json.Serialization;
 
 namespace Fika.Core.Networking.Models;
 
@@ -10,39 +11,39 @@ namespace Fika.Core.Networking.Models;
 public struct CreateMatch(string raidCode, MongoID serverId, Guid serverGuid, string hostUsername, bool isSpectator,
     long timestamp, RaidSettings settings, uint crc32, ESideType side, EDateTime time, FikaCustomRaidSettings customRaidSettings)
 {
-    [DataMember(Name = "raidCode")]
+    [JsonPropertyName("raidCode")]
     public string RaidCode = raidCode;
 
-    [DataMember(Name = "serverId")]
+    [JsonPropertyName("serverId")]
     public MongoID ServerId = serverId;
 
-    [DataMember(Name = "serverGuid")]
+    [JsonPropertyName("serverGuid")]
     public Guid ServerGuid = serverGuid;
 
-    [DataMember(Name = "hostUsername")]
+    [JsonPropertyName("hostUsername")]
     public string HostUsername = hostUsername;
 
-    [DataMember(Name = "timestamp")]
+    [JsonPropertyName("timestamp")]
     public long Timestamp = timestamp;
 
-    [DataMember(Name = "settings")]
+    [JsonPropertyName("settings")]
     public RaidSettings Settings = settings;
 
-    [DataMember(Name = "gameVersion")]
+    [JsonPropertyName("gameVersion")]
     public string GameVersion = FikaPlugin.EFTVersionMajor;
 
-    [DataMember(Name = "crc32")]
+    [JsonPropertyName("crc32")]
     public uint Crc32 = crc32;
 
-    [DataMember(Name = "side")]
+    [JsonPropertyName("side")]
     public ESideType Side = side;
 
-    [DataMember(Name = "time")]
+    [JsonPropertyName("time")]
     public EDateTime Time = time;
 
-    [DataMember(Name = "isSpectator")]
+    [JsonPropertyName("isSpectator")]
     public bool IsSpectator = isSpectator;
 
-    [DataMember(Name = "customRaidSettings")]
+    [JsonPropertyName("customRaidSettings")]
     public FikaCustomRaidSettings CustomRaidSettings = customRaidSettings;
 }

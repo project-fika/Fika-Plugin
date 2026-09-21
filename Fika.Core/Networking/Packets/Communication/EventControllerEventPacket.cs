@@ -16,7 +16,7 @@ public struct EventControllerEventPacket : INetSerializable
         {
             RunddansStateEvent stateEvent = new()
             {
-                PlayerId = reader.GetInt()
+                PlayerRaidId = reader.GetInt()
             };
             var amount = reader.GetInt();
             stateEvent.Objects = new(amount);
@@ -31,7 +31,7 @@ public struct EventControllerEventPacket : INetSerializable
         {
             Event = new RunddansMessagesEvent()
             {
-                PlayerId = reader.GetInt(),
+                PlayerRaidId = reader.GetInt(),
                 Type = (RunddansMessagesEvent.EType)reader.GetByte()
             };
         }
@@ -47,7 +47,7 @@ public struct EventControllerEventPacket : INetSerializable
         if (Type == EEventType.StateEvent)
         {
             var stateEvent = (RunddansStateEvent)Event;
-            writer.Put(stateEvent.PlayerId);
+            writer.Put(stateEvent.PlayerRaidId);
             writer.Put(stateEvent.Objects.Count);
             foreach ((var objectId, var state) in stateEvent.Objects)
             {
@@ -58,7 +58,7 @@ public struct EventControllerEventPacket : INetSerializable
         else if (Type == EEventType.MessageEvent)
         {
             var messagesEvent = (RunddansMessagesEvent)Event;
-            writer.Put(messagesEvent.PlayerId);
+            writer.Put(messagesEvent.PlayerRaidId);
             writer.Put((byte)messagesEvent.Type);
         }
         else if (Type == EEventType.RemoveItem)

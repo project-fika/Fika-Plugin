@@ -2,7 +2,7 @@
 using Comfort.Common;
 using EFT;
 using Fika.Core.Main.HostClasses;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.GameWorldPatches;
 
@@ -26,7 +26,7 @@ public class GameWorld_GrenadeDestroyEvent_Patch : ModulePatch
                 hostWorld.SetCritical();
             }
         }
-
-        return false;
+        
+        return true;
     }
 }

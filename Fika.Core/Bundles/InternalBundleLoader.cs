@@ -22,7 +22,7 @@ internal class InternalBundleLoader
 
     public InternalBundleLoader()
     {
-        Task.Run(LoadBundles);
+        _ = LoadBundles();
         Instance = this;
     }
 
@@ -51,7 +51,7 @@ internal class InternalBundleLoader
             else
             {
                 FikaGlobals.LogFatal("Unknown bundle loaded! Terminating...");
-                AsyncWorker.RunInMainTread(Application.Quit);
+                MainThread.Post(Application.Quit);
             }
         }
     }
@@ -70,7 +70,7 @@ internal class InternalBundleLoader
             throw new NullReferenceException("GetFikaAsset::MasterBundle did not exist!");
         }
 
-        return asset switch
+        return (asset switch
         {
             EFikaAsset.Ping => _masterBundle.LoadAsset<GameObject>("BasePingPrefab.prefab"),
             EFikaAsset.SendItemMenu => _masterBundle.LoadAsset<GameObject>("SendItemMenu.prefab"),
@@ -78,13 +78,14 @@ internal class InternalBundleLoader
             EFikaAsset.MatchmakerUI => _masterBundle.LoadAsset<GameObject>("NewMatchMakerUI.prefab"),
             EFikaAsset.PlayerUI => _masterBundle.LoadAsset<GameObject>("PlayerFriendlyUI.prefab"),
             EFikaAsset.FreecamUI => _masterBundle.LoadAsset<GameObject>("FreecamUI.prefab"),
+            EFikaAsset.ListPlayer => _masterBundle.LoadAsset<GameObject>("ListPlayer.prefab"),
             EFikaAsset.AdminUI => _masterBundle.LoadAsset<GameObject>("AdminSettingsUI.prefab"),
             EFikaAsset.FikaChatUI => _masterBundle.LoadAsset<GameObject>("FikaChatUI.prefab"),
             EFikaAsset.RaidAdminUI => _masterBundle.LoadAsset<GameObject>("RaidAdminUI.prefab"),
             EFikaAsset.LoadingScreenUI => _masterBundle.LoadAsset<GameObject>("LoadingScreenUI.prefab"),
             EFikaAsset.DebugUI => _masterBundle.LoadAsset<GameObject>("DebugUI.prefab"),
             _ => throw new ArgumentOutOfRangeException(nameof(asset), "Invalid type was given")
-        };
+        }).KeepLoaded();
     }
 
     /// <summary>
@@ -95,12 +96,12 @@ internal class InternalBundleLoader
     {
         Dictionary<EFikaSprite, Sprite> sprites = [];
 
-        sprites.Add(EFikaSprite.PingPoint, _masterBundle.LoadAsset<Sprite>("PingPoint.png"));
-        sprites.Add(EFikaSprite.PingPlayer, _masterBundle.LoadAsset<Sprite>("PingPlayer.png"));
-        sprites.Add(EFikaSprite.PingLootableContainer, _masterBundle.LoadAsset<Sprite>("PingLootableContainer.png"));
-        sprites.Add(EFikaSprite.PingDoor, _masterBundle.LoadAsset<Sprite>("PingDoor.png"));
-        sprites.Add(EFikaSprite.PingDeadBody, _masterBundle.LoadAsset<Sprite>("PingDeadBody.png"));
-        sprites.Add(EFikaSprite.PingLootItem, _masterBundle.LoadAsset<Sprite>("PingLootItem.png"));
+        sprites.Add(EFikaSprite.PingPoint, _masterBundle.LoadAsset<Sprite>("PingPoint.png").KeepLoaded());
+        sprites.Add(EFikaSprite.PingPlayer, _masterBundle.LoadAsset<Sprite>("PingPlayer.png").KeepLoaded());
+        sprites.Add(EFikaSprite.PingLootableContainer, _masterBundle.LoadAsset<Sprite>("PingLootableContainer.png").KeepLoaded());
+        sprites.Add(EFikaSprite.PingDoor, _masterBundle.LoadAsset<Sprite>("PingDoor.png").KeepLoaded());
+        sprites.Add(EFikaSprite.PingDeadBody, _masterBundle.LoadAsset<Sprite>("PingDeadBody.png").KeepLoaded());
+        sprites.Add(EFikaSprite.PingLootItem, _masterBundle.LoadAsset<Sprite>("PingLootItem.png").KeepLoaded());
 
         return sprites;
     }
@@ -123,6 +124,7 @@ internal class InternalBundleLoader
         MatchmakerUI,
         PlayerUI,
         FreecamUI,
+        ListPlayer,
         AdminUI,
         FikaChatUI,
         RaidAdminUI,

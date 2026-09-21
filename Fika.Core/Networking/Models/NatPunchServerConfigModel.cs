@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Runtime.Serialization;
 using Fika.Core.Main.Utils;
+using System.Text.Json.Serialization;
 
 namespace Fika.Core.Networking.Models;
 
 [DataContract]
 public struct NatPunchServerConfigModel
 {
-    [DataMember(Name = "enable")]
+    [JsonPropertyName("enable")]
     public bool Enable;
 
-    [DataMember(Name = "port")]
+    [JsonPropertyName("port")]
     public int Port;
 
     public NatPunchServerConfigModel(bool enable, int port)

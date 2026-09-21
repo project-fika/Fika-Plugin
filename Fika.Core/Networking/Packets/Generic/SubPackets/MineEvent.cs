@@ -28,11 +28,15 @@ public sealed class MineEvent : IPoolSubPacket
     {
         if (Singleton<GameWorld>.Instance.MineManager != null)
         {
-            NetworkGame<EftGamePlayerOwner>.CG_ParseMineExplosionData mineSeeker = new()
+            MineDirectional mineDirectional = null;
+            foreach (var mine in Singleton<GameWorld>.Instance.MineManager.Mines)
             {
-                minePosition = MinePosition
-            };
-            var mineDirectional = Singleton<GameWorld>.Instance.MineManager.Mines.FirstOrDefault(mineSeeker.method_0);
+                if (Vector3.Distance(mine.transform.position, MinePosition) < Mathf.Epsilon)
+                {
+                    mineDirectional = mine;
+                    break;
+                }
+            }
             if (mineDirectional == null)
             {
                 return;

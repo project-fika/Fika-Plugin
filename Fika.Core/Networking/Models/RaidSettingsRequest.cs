@@ -1,12 +1,13 @@
 using System.Runtime.Serialization;
 using Fika.Core.Main.Components;
+using System.Text.Json.Serialization;
 
 namespace Fika.Core.Networking.Models;
 
 [DataContract]
 public struct RaidSettingsRequest
 {
-    [DataMember(Name = "serverId")]
+    [JsonPropertyName("serverId")]
     public string ServerId;
 
     public RaidSettingsRequest()

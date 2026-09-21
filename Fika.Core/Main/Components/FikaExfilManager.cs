@@ -9,11 +9,18 @@ using Fika.Core.Main.Players;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
+using System;
+using Il2CppInterop.Runtime.Injection;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.Components;
 
 public class FikaExfilManager : MonoBehaviour
 {
+    public FikaExfilManager(IntPtr pointer) : base(pointer)
+    {
+    }
+
     private CoopGame _game;
     private List<ExtractionPlayerHandler> _playerHandlers;
     private List<ExfiltrationPoint> _countdownPoints;
@@ -76,7 +83,9 @@ public class FikaExfilManager : MonoBehaviour
                     }
                 }
 
-                exfiltrationPoint.ExternalSetStatus(EExfiltrationStatus.NotPresent);
+                exfiltrationPoint.ExternalSetStatus(exfiltrationPoint.Reusable
+                    ? EExfiltrationStatus.UncompleteRequirements
+                    : EExfiltrationStatus.NotPresent);
                 _countdownPoints.Remove(exfiltrationPoint);
             }
         }
@@ -87,27 +96,27 @@ public class FikaExfilManager : MonoBehaviour
         for (var i = 0; i < exfilPoints.Length; i++)
         {
             var exfiltrationPoint = exfilPoints[i];
-            exfiltrationPoint.OnStartExtraction += ExfiltrationPoint_OnStartExtraction;
-            exfiltrationPoint.OnCancelExtraction += ExfiltrationPoint_OnCancelExtraction;
+            exfiltrationPoint.OnStartExtraction += new System.Action<ExfiltrationPoint, Player>(ExfiltrationPoint_OnStartExtraction);
+            exfiltrationPoint.OnCancelExtraction += new System.Action<ExfiltrationPoint, Player>(ExfiltrationPoint_OnCancelExtraction);
             exfiltrationPoint.OnStatusChanged += ExfiltrationPoint_OnStatusChanged;
             exfiltrationPoint.OnStatusChanged += _game.OnStatusChangedHandler;
             _game.UpdateExfiltrationUi(exfiltrationPoint, false, true);
-            if (FikaPlugin.Instance.Settings.DynamicVExfils && exfiltrationPoint.Settings.PlayersCount > 0 && exfiltrationPoint.Settings.PlayersCount < Singleton<IFikaNetworkManager>.Instance.PlayerAmount)
+            if (FikaPlugin.Instance.Settings.DynamicVExfils && exfiltrationPoint.Settings.PlayersCount > 0 && exfiltrationPoint.Settings.PlayersCount < FikaGlobals.NetworkManager.PlayerAmount)
             {
-                exfiltrationPoint.Settings.PlayersCount = Singleton<IFikaNetworkManager>.Instance.PlayerAmount;
+                exfiltrationPoint.Settings.PlayersCount = FikaGlobals.NetworkManager.PlayerAmount;
             }
         }
 
         for (var i = 0; i < secretExfilPoints.Length; i++)
         {
             var secretExfiltrationPoint = secretExfilPoints[i];
-            secretExfiltrationPoint.OnStartExtraction += ExfiltrationPoint_OnStartExtraction;
-            secretExfiltrationPoint.OnCancelExtraction += ExfiltrationPoint_OnCancelExtraction;
+            secretExfiltrationPoint.OnStartExtraction += new System.Action<ExfiltrationPoint, Player>(ExfiltrationPoint_OnStartExtraction);
+            secretExfiltrationPoint.OnCancelExtraction += new System.Action<ExfiltrationPoint, Player>(ExfiltrationPoint_OnCancelExtraction);
             secretExfiltrationPoint.OnStatusChanged += ExfiltrationPoint_OnStatusChanged;
             secretExfiltrationPoint.OnStatusChanged += _game.OnStatusChangedHandler;
             secretExfiltrationPoint.OnStatusChanged += _game.ShowNewSecretExit;
             _game.UpdateExfiltrationUi(secretExfiltrationPoint, false, true);
-            secretExfiltrationPoint.OnPointFoundEvent += SecretExfiltrationPoint_OnPointFoundEvent;
+            secretExfiltrationPoint.OnPointFoundEvent += new System.Action<string, bool>(SecretExfiltrationPoint_OnPointFoundEvent);
         }
 
         _exfiltrationPoints = exfilPoints;
@@ -117,7 +126,7 @@ public class FikaExfilManager : MonoBehaviour
     private void SecretExfiltrationPoint_OnPointFoundEvent(string exitName, bool sharedExit)
     {
         var mainPlayer = (FikaPlayer)Singleton<GameWorld>.Instance.MainPlayer;
-        Singleton<IFikaNetworkManager>.Instance.SendGenericPacket(EGenericSubPacketType.SecretExfilFound,
+        FikaGlobals.NetworkManager.SendGenericPacket(EGenericSubPacketType.SecretExfilFound,
             SecretExfilFound.FromValue(mainPlayer.GroupId, exitName), true);
     }
 
@@ -131,8 +140,8 @@ public class FikaExfilManager : MonoBehaviour
             for (var i = 0; i < _exfiltrationPoints.Length; i++)
             {
                 var exfiltrationPoint = _exfiltrationPoints[i];
-                exfiltrationPoint.OnStartExtraction -= ExfiltrationPoint_OnStartExtraction;
-                exfiltrationPoint.OnCancelExtraction -= ExfiltrationPoint_OnCancelExtraction;
+                exfiltrationPoint.OnStartExtraction -= new System.Action<ExfiltrationPoint, Player>(ExfiltrationPoint_OnStartExtraction);
+                exfiltrationPoint.OnCancelExtraction -= new System.Action<ExfiltrationPoint, Player>(ExfiltrationPoint_OnCancelExtraction);
                 exfiltrationPoint.OnStatusChanged -= ExfiltrationPoint_OnStatusChanged;
                 exfiltrationPoint.OnStatusChanged -= _game.OnStatusChangedHandler;
                 exfiltrationPoint.Disable();
@@ -144,12 +153,12 @@ public class FikaExfilManager : MonoBehaviour
             for (var i = 0; i < _secretExfiltrationPoints.Length; i++)
             {
                 var secretExfiltrationPoint = _secretExfiltrationPoints[i];
-                secretExfiltrationPoint.OnStartExtraction -= ExfiltrationPoint_OnStartExtraction;
-                secretExfiltrationPoint.OnCancelExtraction -= ExfiltrationPoint_OnCancelExtraction;
+                secretExfiltrationPoint.OnStartExtraction -= new System.Action<ExfiltrationPoint, Player>(ExfiltrationPoint_OnStartExtraction);
+                secretExfiltrationPoint.OnCancelExtraction -= new System.Action<ExfiltrationPoint, Player>(ExfiltrationPoint_OnCancelExtraction);
                 secretExfiltrationPoint.OnStatusChanged -= ExfiltrationPoint_OnStatusChanged;
                 secretExfiltrationPoint.OnStatusChanged -= _game.OnStatusChangedHandler;
                 secretExfiltrationPoint.OnStatusChanged -= _game.ShowNewSecretExit;
-                secretExfiltrationPoint.OnPointFoundEvent -= SecretExfiltrationPoint_OnPointFoundEvent;
+                secretExfiltrationPoint.OnPointFoundEvent -= new System.Action<string, bool>(SecretExfiltrationPoint_OnPointFoundEvent);
                 secretExfiltrationPoint.Disable();
             }
         }
@@ -159,14 +168,14 @@ public class FikaExfilManager : MonoBehaviour
     {
         if (enable)
         {
-            point.OnStartExtraction += ExfiltrationPoint_OnStartExtraction;
-            point.OnCancelExtraction += ExfiltrationPoint_OnCancelExtraction;
+            point.OnStartExtraction += new System.Action<ExfiltrationPoint, Player>(ExfiltrationPoint_OnStartExtraction);
+            point.OnCancelExtraction += new System.Action<ExfiltrationPoint, Player>(ExfiltrationPoint_OnCancelExtraction);
             point.OnStatusChanged += ExfiltrationPoint_OnStatusChanged;
         }
         else
         {
-            point.OnStartExtraction -= ExfiltrationPoint_OnStartExtraction;
-            point.OnCancelExtraction -= ExfiltrationPoint_OnCancelExtraction;
+            point.OnStartExtraction -= new System.Action<ExfiltrationPoint, Player>(ExfiltrationPoint_OnStartExtraction);
+            point.OnCancelExtraction -= new System.Action<ExfiltrationPoint, Player>(ExfiltrationPoint_OnCancelExtraction);
             point.OnStatusChanged -= ExfiltrationPoint_OnStatusChanged;
         }
     }
@@ -212,7 +221,7 @@ public class FikaExfilManager : MonoBehaviour
             if (point.ExfiltrationStartTime is <= 0 and > -90)
             {
                 point.ExfiltrationStartTime = _game.PastTime;
-                Singleton<IFikaNetworkManager>.Instance.SendGenericPacket(EGenericSubPacketType.ExfilCountdown,
+                FikaGlobals.NetworkManager.SendGenericPacket(EGenericSubPacketType.ExfilCountdown,
                         ExfilCountdown.FromValue(point.Settings.Name, point.ExfiltrationStartTime), true);
             }
             _countdownPoints.Add(point);

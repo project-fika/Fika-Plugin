@@ -1,6 +1,7 @@
 ﻿using Comfort.Common;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Pooling;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Networking.Packets.Generic.SubPackets;
 
@@ -24,7 +25,7 @@ public sealed class UpdateBackendData : IPoolSubPacket
 
     public void Execute(FikaPlayer player = null)
     {
-        Singleton<IFikaNetworkManager>.Instance.PlayerAmount = PlayerAmount;
+        FikaGlobals.NetworkManager.PlayerAmount = PlayerAmount;
     }
 
     public void Serialize(NetDataWriter writer)

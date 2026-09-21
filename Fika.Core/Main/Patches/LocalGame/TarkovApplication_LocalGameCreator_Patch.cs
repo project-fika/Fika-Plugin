@@ -22,8 +22,7 @@ using Fika.Core.Networking.Models;
 using Fika.Core.Networking.Packets.Backend;
 using Fika.Core.UI.Custom;
 using HarmonyLib;
-using SPT.Reflection.Patching;
-using SPT.SinglePlayer.Utils.InRaid;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.LocalGame;
 
@@ -40,20 +39,22 @@ public sealed class TarkovApplication_LocalGameCreator_Patch : ModulePatch
     }
 
     [PatchPrefix]
-    public static bool Prefix(ref Task __result, TarkovApplication __instance, TimeAndWeatherSettings timeAndWeather,
-        RaidSettings ____raidSettings, InputTree ____inputTree, GameDateTime ____localGameDateTime,
-        float ____fixedDeltaTime, ClientMetricsEvents metricsEvents,
-        ClientMetricsConfig metricsConfig, GameWorld gameWorld, MainMenuShowOperation ____menuOperation,
-        CompositeDisposable ____unsubscriber, BundleLock ___BundleLock)
+    public static bool Prefix(ref Il2CppSystem.Threading.Tasks.Task __result, TarkovApplication __instance, TimeAndWeatherSettings timeAndWeather, ClientMetricsEvents metricsEvents,
+        ClientMetricsConfig metricsConfig, GameWorld gameWorld)
     {
+        if (FikaBackendUtils.IsTutorial)
+        {
+            return true;
+        }
+
 #if DEBUG
         Logger.LogInfo("TarkovApplication_LocalGameCreator_Patch:Prefix");
 
 #endif
-        __result = CreateFikaGame(__instance, timeAndWeather, ____raidSettings,
-            ____inputTree, ____localGameDateTime, ____fixedDeltaTime,
-            metricsEvents, metricsConfig, gameWorld, ____menuOperation,
-            ____unsubscriber, ___BundleLock);
+        __result = CreateFikaGame(__instance, timeAndWeather, __instance._raidSettings,
+            __instance._inputTree, __instance._localGameDateTime, __instance._fixedDeltaTime,
+            metricsEvents, metricsConfig, gameWorld, __instance._menuOperation,
+            __instance._unsubscriber, __instance.BundleLock).ToIl2Cpp();
         return false;
     }
 
@@ -69,9 +70,13 @@ public sealed class TarkovApplication_LocalGameCreator_Patch : ModulePatch
         if (FikaPlugin.Instance.Settings.NoAI.Value)
         {
             FikaGlobals.LogWarning("No AI enabled - stopping bot spawns");
-            raidSettings.BotSettings.BotAmount = EFT.Bots.EBotAmount.NoBots;
-            raidSettings.WavesSettings.BotAmount = EFT.Bots.EBotAmount.NoBots;
-            raidSettings.WavesSettings.IsBosses = false;
+            var botSettings = raidSettings.BotSettings;
+            botSettings.BotAmount = EFT.Bots.EBotAmount.NoBots;
+            raidSettings.BotSettings = botSettings;
+            var wavesSettings = raidSettings.WavesSettings;
+            wavesSettings.BotAmount = EFT.Bots.EBotAmount.NoBots;
+            wavesSettings.IsBosses = false;
+            raidSettings.WavesSettings = wavesSettings;
         }
 
         if (isServer && !isTransit)
@@ -136,13 +141,14 @@ public sealed class TarkovApplication_LocalGameCreator_Patch : ModulePatch
             playerSide = raidSettings.Side,
             transitionType = raidSettings.transitionType
         };
-        var applicationTraverse = Traverse.Create(instance);
-        applicationTraverse.Field<LocalRaidSettings>("_localRaidSettings").Value = localRaidSettings;
+        instance._localRaidSettings = localRaidSettings;
 
         var localSettings = await instance.Session.LocalRaidStarted(localRaidSettings);
-        raidSettings.BotSettings.ExcludedBosses = localSettings.excludedBosses;
-        var raidSettingsToUpdate = applicationTraverse.Field<LocalRaidSettings>("_localRaidSettings").Value;
-        var escapeTimeLimit = raidSettings.IsScav ? RaidChangesUtil.NewEscapeTimeMinutes : raidSettings.SelectedLocation.EscapeTimeLimit;
+        var botControllerSettings = raidSettings.BotSettings;
+        botControllerSettings.ExcludedBosses = localSettings.excludedBosses;
+        raidSettings.BotSettings = botControllerSettings;
+        var raidSettingsToUpdate = instance._localRaidSettings;
+        var escapeTimeLimit = raidSettings.SelectedLocation.EscapeTimeLimit;
         raidSettings.SelectedLocation = localSettings.locationLoot;
         raidSettings.SelectedLocation.EscapeTimeLimit = escapeTimeLimit;
         raidSettingsToUpdate.serverId = localSettings.serverId;
@@ -161,7 +167,7 @@ public sealed class TarkovApplication_LocalGameCreator_Patch : ModulePatch
 
         if (!isServer)
         {
-            instance.Matchmaker.UpdateMatchingStatus("Joining coop game...");
+            ScreenUpdater.Show(instance.Matchmaker, "Joining coop game...");
 
             RaidSettingsRequest data = new();
             var raidSettingsResponse = await FikaRequestHandler.GetRaidSettings(data);
@@ -181,7 +187,7 @@ public sealed class TarkovApplication_LocalGameCreator_Patch : ModulePatch
         }
         else
         {
-            instance.Matchmaker.UpdateMatchingStatus("Hosting coop game...");
+            ScreenUpdater.Show(instance.Matchmaker, "Hosting coop game...");
             Singleton<FikaServer>.Instance.LocationReceived = true;
         }
 
@@ -197,15 +203,16 @@ public sealed class TarkovApplication_LocalGameCreator_Patch : ModulePatch
 
         var coopGame = CoopGame.Create(inputTree, profile, gameWorld, localGameDateTime, instance.Session.InsuranceCompany,
             MonoBehaviourSingleton<GameUI>.Instance, raidSettings.SelectedLocation,
-            timeAndWeather, raidSettings.WavesSettings, raidSettings.SelectedDateTime, startHandler.HandleStop,
+            timeAndWeather, raidSettings.WavesSettings, raidSettings.SelectedDateTime, new Action<Result<ExitStatus, Il2CppSystem.TimeSpan, ClientMetrics>>(startHandler.HandleStop),
             fixedDeltaTime, instance.PlayerUpdateQueue, instance.Session, raidLimits, metricsEvents,
             new ClientMetricsCollector(metricsConfig, instance), localRaidSettings, raidSettings);
 
         startHandler.CoopGame = coopGame;
 
         Singleton<AbstractGame>.Create(coopGame);
-        unsubscriber.AddDisposable(coopGame);
-        unsubscriber.AddDisposable(startHandler.ReleaseSingleton);
+        unsubscriber.AddDisposable(coopGame.Cast<AbstractGame>());
+        Il2CppSystem.Action releaseSingleton = new Action(startHandler.ReleaseSingleton);
+        unsubscriber.AddDisposable(releaseSingleton);
         metricsEvents.SetGameCreated();
         FikaEventDispatcher.DispatchEvent(new AbstractGameCreatedEvent(coopGame));
 
@@ -260,7 +267,7 @@ public sealed class TarkovApplication_LocalGameCreator_Patch : ModulePatch
         private readonly LocationSettings.Location _location = location;
         public CoopGame CoopGame;
 
-        public void HandleStop(Result<ExitStatus, TimeSpan, ClientMetrics> result)
+        public void HandleStop(Result<ExitStatus, Il2CppSystem.TimeSpan, ClientMetrics> result)
         {
             _tarkovApplication.OnGameEnd(_pmcProfile.Id, _scavProfile, _location, result);
         }
@@ -268,7 +275,7 @@ public sealed class TarkovApplication_LocalGameCreator_Patch : ModulePatch
         public void ReleaseSingleton()
         {
             Singleton<AbstractGame>.Release(CoopGame);
-            Singleton<IFikaGame>.Release(CoopGame);
+            FikaGlobals.FikaGame = null;
         }
     }
 
@@ -296,6 +303,13 @@ public sealed class TarkovApplication_LocalGameCreator_Patch : ModulePatch
 
 internal class ScreenUpdater : IDisposable
 {
+    public static string StatusText { get; private set; }
+
+    public static void SetStatusText(string text)
+    {
+        StatusText = text;
+    }
+
     private readonly MatchmakerPlayersController _matchmakerPlayerControllerClass;
     private readonly CoopGame _coopGame;
 
@@ -303,16 +317,33 @@ internal class ScreenUpdater : IDisposable
     {
         _matchmakerPlayerControllerClass = controller;
         _coopGame = game;
-        game.OnMatchingStatusChanged += UpdateStatus;
+        game.ScreenUpdater = this;
+    }
+    
+    public static void Show(MatchmakerPlayersController controller, string text, float? progress = null)
+    {
+        StatusText = text;
+        controller.UpdateMatchingStatus(controller.MatchingProgress.CurrentStage,
+            progress.HasValue ? new Il2CppSystem.Nullable<float>(progress.Value) : new Il2CppSystem.Nullable<float>());
     }
 
-    private void UpdateStatus(string text, float? progress)
+    public void UpdateStatus(EMatchingStage stage, Il2CppSystem.Nullable<float> progress)
     {
-        _matchmakerPlayerControllerClass.UpdateMatchingStatus(text, progress);
+        if (stage == EMatchingStage.None)
+        {
+            stage = _matchmakerPlayerControllerClass.MatchingProgress.CurrentStage;
+        }
+        else
+        {
+            StatusText = null;
+        }
+        _matchmakerPlayerControllerClass.UpdateMatchingStatus(stage, progress);
     }
 
     public void Dispose()
     {
-        _coopGame.OnMatchingStatusChanged -= UpdateStatus;
+        _coopGame.ScreenUpdater = null;
+        StatusText = null;
     }
 }
+

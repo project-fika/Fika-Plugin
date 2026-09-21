@@ -93,7 +93,12 @@ public enum EGenericSubPacketType : byte
     /// <summary>
     /// AI loaded by all clients
     /// </summary>
-    SpawnAI
+    SpawnAI,
+
+    /// <summary>
+    /// Trader dialog entry
+    /// </summary>
+    DialogEntry
 
     /// <summary>
     /// Train synchronization event (commented out).

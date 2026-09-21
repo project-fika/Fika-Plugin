@@ -3,7 +3,11 @@ using System.Reflection;
 using System.Reflection.Emit;
 using EFT;
 using HarmonyLib;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
+using System;
+using Fika.Core.Main.Players;
+using Fika.Core.Main.Utils;
+using EFT.Ballistics;
 
 namespace Fika.Core.Main.Patches.PlayerPatches;
 
@@ -18,14 +22,18 @@ public class Player_ManageAggressor_Patch : ModulePatch
             .GetMethod(nameof(LocalPlayer.ManageAggressor));
     }
 
-    [PatchTranspiler]
-    public static IEnumerable<CodeInstruction> Transpile()
+    private static readonly Action<Player, DamageInfo, EBodyPart, EBodyPartColliderType> _playerManageAggressor =
+        typeof(Player).GetMethod(nameof(Player.ManageAggressor)).CreateBaseCall<Action<Player, DamageInfo, EBodyPart, EBodyPartColliderType>>();
+
+    [PatchPrefix]
+    public static bool Prefix(LocalPlayer __instance, DamageInfo damageInfo, EBodyPart bodyPart, EBodyPartColliderType colliderType)
     {
-        yield return new CodeInstruction(OpCodes.Ldarg_0);
-        yield return new CodeInstruction(OpCodes.Ldarg_1);
-        yield return new CodeInstruction(OpCodes.Ldarg_2);
-        yield return new CodeInstruction(OpCodes.Ldarg_3);
-        yield return new CodeInstruction(OpCodes.Call, typeof(Player).GetMethod(nameof(Player.ManageAggressor)));
-        yield return new CodeInstruction(OpCodes.Ret);
+        if (__instance is not FikaPlayer)
+        {
+            return true;
+        }
+
+        _playerManageAggressor(__instance, damageInfo, bodyPart, colliderType);
+        return false;
     }
 }

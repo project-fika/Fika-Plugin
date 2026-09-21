@@ -3,12 +3,25 @@ using EFT;
 using EFT.Ballistics;
 using EFT.HealthSystem;
 using Fika.Core.Main.Players;
+using System;
+using Il2CppInterop.Runtime.Injection;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.ObservedClasses.PlayerBridge;
 
-public sealed class ObservedHostBridge(ObservedPlayer observedPlayer) : BodyPartCollider.IObserverToPlayerBridge
+public sealed class ObservedHostBridge : Il2CppSystem.Object, BodyPartCollider.IObserverToPlayerBridge
 {
-    private readonly ObservedPlayer _observedPlayer = observedPlayer;
+    private readonly ObservedPlayer _observedPlayer;
+
+    public ObservedHostBridge(IntPtr pointer) : base(pointer)
+    {
+    }
+
+    public ObservedHostBridge(ObservedPlayer observedPlayer) : base(Il2CppInjection.Allocate<ObservedHostBridge>())
+    {
+        ClassInjector.DerivedConstructorBody(this);
+        _observedPlayer = observedPlayer;
+    }
 
     public IPlayer iPlayer
     {

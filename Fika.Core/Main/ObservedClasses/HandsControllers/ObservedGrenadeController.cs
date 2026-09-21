@@ -7,11 +7,17 @@ using EFT;
 using EFT.InventoryLogic;
 using EFT.InventoryLogic.Operations;
 using Fika.Core.Main.Players;
+using Il2CppInterop.Runtime.Injection;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.ObservedClasses.HandsControllers;
 
 internal sealed class ObservedGrenadeController : Player.GrenadeHandsController
 {
+    public ObservedGrenadeController(IntPtr pointer) : base(pointer)
+    {
+    }
+
     private ObservedPlayer _observedPlayer;
 
     public static ObservedGrenadeController Create(ObservedPlayer observedPlayer, ThrowWeap item)
@@ -21,10 +27,10 @@ internal sealed class ObservedGrenadeController : Player.GrenadeHandsController
         return controller;
     }
 
-    public override Dictionary<Type, OperationFactoryDelegate> GetOperationFactoryDelegates()
+    public override Il2CppSystem.Collections.Generic.Dictionary<Il2CppSystem.Type, OperationFactoryDelegate> GetOperationFactoryDelegates()
     {
         var operationFactoryDelegates = base.GetOperationFactoryDelegates();
-        operationFactoryDelegates[typeof(Player.GrenadeHandsController.PlantTripwireOperation)] = new OperationFactoryDelegate(Grenade1);
+        operationFactoryDelegates[(typeof(Player.GrenadeHandsController.PlantTripwireOperation)).ToIl2Cpp()] = new System.Func<Player.ObjectInHandsOperation>(Grenade1);
         return operationFactoryDelegates;
     }
 
@@ -87,21 +93,32 @@ internal sealed class ObservedGrenadeController : Player.GrenadeHandsController
     }
 }
 
-public sealed class ObservedTripwireState(Player.GrenadeHandsController controller, FikaPlayer player) : Player.GrenadeHandsController.PlantTripwireOperation(controller)
+public sealed class ObservedTripwireState : Player.GrenadeHandsController.PlantTripwireOperation
 {
-    private readonly FikaPlayer _fikaPlayer = player;
+    public ObservedTripwireState(IntPtr pointer) : base(pointer)
+    {
+    }
+
+    public ObservedTripwireState(Player.GrenadeHandsController controller, FikaPlayer player) : base(Il2CppInjection.Allocate<ObservedTripwireState>())
+    {
+        ClassInjector.DerivedConstructorBody(this);
+        ClassInjector.InvokeBaseConstructor<Player.GrenadeHandsController.PlantTripwireOperation>(this, controller);
+        _fikaPlayer = player;
+    }
+
+    private readonly FikaPlayer _fikaPlayer;
 
     public new void Start()
     {
         Controller.FirearmsAnimator.SetFireMode(Weapon.EFireMode.greanadePlanting, false);
-        _plantOperationState = EPlantOperationState.StateIn;
+        PlantOperationState = EPlantOperationState.StateIn;
         State = Player.EOperationState.Executing;
         SetLeftStanceAnimOnStartOperation();
     }
 
     public override void OnIdleStartAction()
     {
-        _plantOperationState = EPlantOperationState.Idling;
+        PlantOperationState = EPlantOperationState.Idling;
     }
 
     public override void OnEnd()
@@ -127,7 +144,7 @@ public sealed class ObservedTripwireState(Player.GrenadeHandsController controll
 
     public override void PlantTripwire()
     {
-        _plantOperationState = EPlantOperationState.Planting;
+        PlantOperationState = EPlantOperationState.Planting;
         Controller.FirearmsAnimator.SetGrenadeFire(FirearmsAnimator.EGrenadeFire.Throw);
     }
 }

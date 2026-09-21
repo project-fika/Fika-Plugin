@@ -2,6 +2,7 @@
 using EFT;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Pooling;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Networking.Packets.Generic.SubPackets;
 

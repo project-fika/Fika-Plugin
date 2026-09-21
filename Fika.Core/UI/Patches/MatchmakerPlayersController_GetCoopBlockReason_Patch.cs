@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 using EFT.UI.Matchmaker;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.UI.Patches;
 

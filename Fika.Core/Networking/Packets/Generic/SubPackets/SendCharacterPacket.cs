@@ -2,6 +2,7 @@
 using EFT;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Pooling;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Networking.Packets.Generic.SubPackets;
 
@@ -33,7 +34,7 @@ public sealed class SendCharacterPacket : IPoolSubPacket
 
     public void Execute(FikaPlayer player = null)
     {
-        var handler = Singleton<IFikaNetworkManager>.Instance.CoopHandler;
+        var handler = FikaGlobals.NetworkManager.CoopHandler;
         if (handler != null)
         {
             handler.QueueProfile(PlayerInfoPacket.Profile, PlayerInfoPacket.HealthByteArray, Position, NetId, IsAlive, IsAI,

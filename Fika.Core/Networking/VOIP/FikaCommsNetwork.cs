@@ -1,20 +1,23 @@
 ﻿using System;
-using System.Collections.Generic;
 using Comfort.Common;
 using Dissonance;
-using Dissonance.Datastructures;
-using Dissonance.Extensions;
+using Dissonance.Integrations.MirrorIgnorance;
 using Dissonance.Networking;
 using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Networking.VOIP;
 
-public class FikaCommsNetwork : BaseCommsNetwork<FikaVOIPServer, FikaVOIPClient, FikaVOIPPeer, Unit, Unit>
+public class FikaCommsNetwork : MirrorIgnoranceCommsNetwork
 {
-    private readonly ConcurrentPool<byte[]> _loopbackBuffers = new(8, () => new byte[1024]);
-    private readonly List<ArraySegment<byte>> _loopbackQueue = [];
+    private static readonly Action<BaseCommsNetwork<MirrorIgnoranceServer, MirrorIgnoranceClient, MirrorConn, Unit, Unit>> _baseUpdate =
+        typeof(BaseCommsNetwork<MirrorIgnoranceServer, MirrorIgnoranceClient, MirrorConn, Unit, Unit>).GetMethod(nameof(Update))
+            .CreateBaseCall<Action<BaseCommsNetwork<MirrorIgnoranceServer, MirrorIgnoranceClient, MirrorConn, Unit, Unit>>>();
 
-    protected override FikaVOIPClient CreateClient(Unit connectionParameters)
+    public FikaCommsNetwork(IntPtr pointer) : base(pointer)
+    {
+    }
+
+    public override MirrorIgnoranceClient CreateClient(Unit connectionParameters)
     {
         FikaVOIPClient client = new(this);
         if (FikaBackendUtils.IsClient)
@@ -28,36 +31,19 @@ public class FikaCommsNetwork : BaseCommsNetwork<FikaVOIPServer, FikaVOIPClient,
         return client;
     }
 
-    protected override FikaVOIPServer CreateServer(Unit connectionParameters)
+    public override MirrorIgnoranceServer CreateServer(Unit connectionParameters)
     {
         FikaVOIPServer server = new(this);
         Singleton<FikaServer>.Instance.VOIPServer = server;
         return server;
     }
 
-    public bool PreprocessPacketToClient(ArraySegment<byte> packet, FikaVOIPPeer peer)
+    public override void Initialize()
     {
-        if (Server == null)
-        {
-            FikaGlobals.LogError("Server packet processing running, but this peer is not a server");
-            return true;
-        }
-        if (Client == null)
-        {
-            return false;
-        }
-        if (!peer.Peer.IsLocal)
-        {
-            return false;
-        }
-        if (Client != null)
-        {
-            _loopbackQueue.Add(packet.CopyToSegment(_loopbackBuffers.Get(), 0));
-        }
-        return true;
     }
 
-    public bool PreprocessPacketToServer(ArraySegment<byte> packet)
+    // Host loopback, the local client's packets reach the server without the network
+    public bool PreprocessPacketToServer(Il2CppSystem.ArraySegment<byte> packet)
     {
         if (Client == null)
         {
@@ -68,11 +54,11 @@ public class FikaCommsNetwork : BaseCommsNetwork<FikaVOIPServer, FikaVOIPClient,
         {
             return false;
         }
-        Server.NetworkReceivedPacket(new(new LocalPeer()), packet);
+        Server.NetworkReceivedPacket(FikaVOIPPeers.Local, packet);
         return true;
     }
 
-    protected override void Update()
+    public override void Update()
     {
         if (IsInitialized)
         {
@@ -95,17 +81,8 @@ public class FikaCommsNetwork : BaseCommsNetwork<FikaVOIPServer, FikaVOIPClient,
         else if (Mode != NetworkMode.None)
         {
             Stop();
-            _loopbackQueue.Clear();
         }
-        for (var i = 0; i < _loopbackQueue.Count; i++)
-        {
-            var segment = _loopbackQueue[i];
-            if (Client != null)
-            {
-                Client.NetworkReceivedPacket(segment);
-            }
-            _loopbackBuffers.Put(segment.Array);
-        }
-        base.Update();
+
+        _baseUpdate(this);
     }
 }

@@ -2,11 +2,18 @@
 
 using EFT;
 using Fika.Core.Main.Players;
+using System;
+using Il2CppInterop.Runtime.Injection;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.ObservedClasses.HandsControllers;
 
 internal sealed class ObservedEmptyHandsController : Player.EmptyHandsController
 {
+    public ObservedEmptyHandsController(IntPtr pointer) : base(pointer)
+    {
+    }
+
     private ObservedPlayer _observedPlayer;
 
     public static ObservedEmptyHandsController Create(ObservedPlayer observedPlayer)

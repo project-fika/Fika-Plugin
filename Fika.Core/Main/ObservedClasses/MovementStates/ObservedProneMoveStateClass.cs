@@ -1,9 +1,20 @@
 ﻿using EFT;
+using System;
+using Il2CppInterop.Runtime.Injection;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.ObservedClasses.MovementStates;
 
-public class ObservedProneMoveStateClass(MovementContext movementContext) : ObservedRunState(movementContext)
+public class ObservedProneMoveStateClass : ObservedRunState
 {
+    public ObservedProneMoveStateClass(IntPtr pointer) : base(pointer)
+    {
+    }
+
+    public ObservedProneMoveStateClass(MovementContext movementContext) : base(Il2CppInjection.Allocate<ObservedProneMoveStateClass>(), movementContext)
+    {
+    }
+
     public override void Rotate(Vector2 deltaRotation, bool ignoreClamp = false)
     {
         if (!ignoreClamp)
@@ -16,6 +27,6 @@ public class ObservedProneMoveStateClass(MovementContext movementContext) : Obse
     public override void ManualAnimatorMoveUpdate(float deltaTime)
     {
         base.ManualAnimatorMoveUpdate(deltaTime);
-        MovementContext.AlignToSurface(deltaTime, null);
+        MovementContext.AlignToSurface(deltaTime, new Il2CppSystem.Nullable<Vector3>());
     }
 }

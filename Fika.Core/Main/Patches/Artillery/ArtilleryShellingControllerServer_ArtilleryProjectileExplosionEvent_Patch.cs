@@ -1,6 +1,7 @@
 ﻿using CommonAssets.Scripts.ArtilleryShelling;
 using System.Reflection;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.Patches.Artillery;
 
@@ -14,6 +15,11 @@ public class ArtilleryShellingControllerServer_ArtilleryProjectileExplosionEvent
     [PatchPrefix]
     public static void Prefix(ArtilleryShellingControllerServer __instance, ArtilleryProjectileServer serverProjectile)
     {
+        if (FikaBackendUtils.IsTutorial)
+        {
+            return;
+        }
+
         __instance.WriteArtilleryExplosionProjectilePacket(serverProjectile);
     }
 }

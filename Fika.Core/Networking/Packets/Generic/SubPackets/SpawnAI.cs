@@ -28,7 +28,7 @@ public sealed class SpawnAI : IPoolSubPacket
 
     public void Execute(FikaPlayer player = null)
     {
-        var coopHandler = Singleton<IFikaNetworkManager>.Instance.CoopHandler;
+        var coopHandler = FikaGlobals.NetworkManager.CoopHandler;
         if (coopHandler == null)
         {
             FikaGlobals.LogError("SpawnAI: CoopHandler was null!");

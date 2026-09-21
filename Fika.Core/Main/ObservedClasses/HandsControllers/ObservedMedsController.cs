@@ -1,6 +1,7 @@
 ﻿// © 2026 Lacyway All Rights Reserved
 
 using System;
+using Il2CppInterop.Runtime;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -10,16 +11,18 @@ using EFT.InventoryLogic;
 using EFT.NetworkPackets;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
+using Il2CppInterop.Runtime.Injection;
 
 namespace Fika.Core.Main.ObservedClasses.HandsControllers;
 
 internal sealed class ObservedMedsController : Player.MedsController
 {
+    public ObservedMedsController(IntPtr pointer) : base(pointer)
+    {
+    }
+
     private FikaPlayer _fikaPlayer;
     private int _animation;
-
-    private readonly static FieldInfo _onOutUseActionField = typeof(Player.MedsController)
-        .GetField("_onOutUseEvent", BindingFlags.NonPublic | BindingFlags.Instance);
 
     private ObservedMedsOperation ObservedOperation
     {
@@ -32,29 +35,21 @@ internal sealed class ObservedMedsController : Player.MedsController
     public static ObservedMedsController Create(FikaPlayer player, Item item, OneAndList<EBodyPart> bodyParts, float amount, int animationVariant)
     {
         var controller = CreateController<ObservedMedsController>(player, item, bodyParts, amount, animationVariant);
-        var action = (Action)_onOutUseActionField.GetValue(controller);
-        _onOutUseActionField.SetValue(controller, FikaGlobals.ClearDelegates(action));
+        controller.OnOutUseEventField = null;
         controller._fikaPlayer = player;
         controller._animation = animationVariant;
         return controller;
     }
 
-    public override Dictionary<Type, OperationFactoryDelegate> GetOperationFactoryDelegates()
+    public override Il2CppSystem.Collections.Generic.Dictionary<Il2CppSystem.Type, OperationFactoryDelegate> GetOperationFactoryDelegates()
     {
-        return new Dictionary<Type, OperationFactoryDelegate>
-        {
-            {
-                typeof(MedsInHandsOperation),
-                new OperationFactoryDelegate(GetObservedMedsOperation)
-            },
-            {
-                typeof(ObservedMedsOperation),
-                new OperationFactoryDelegate(GetObservedMedsOperation)
-            }
-        };
+        var operationFactoryDelegates = new Il2CppSystem.Collections.Generic.Dictionary<Il2CppSystem.Type, OperationFactoryDelegate>();
+        operationFactoryDelegates[Il2CppType.Of<MedsInHandsOperation>()] = new System.Func<Player.ObjectInHandsOperation>(GetObservedMedsOperation);
+        operationFactoryDelegates[Il2CppType.Of<ObservedMedsOperation>()] = new System.Func<Player.ObjectInHandsOperation>(GetObservedMedsOperation);
+        return operationFactoryDelegates;
     }
 
-    public override void Spawn(float animationSpeed, Action callback)
+    public override void Spawn(float animationSpeed, Il2CppSystem.Action callback)
     {
         FirearmsAnimator.SetAnimationSpeed(animationSpeed);
         FirearmsAnimator.SetPointOfViewOnSpawn(EPointOfView.ThirdPerson);
@@ -81,20 +76,18 @@ internal sealed class ObservedMedsController : Player.MedsController
         base.OnPlayerDead();
     }
 
-    public override void Drop(float animationSpeed, Action callback, bool fastDrop = false, Item nextControllerItem = null)
+    public override void Drop(float animationSpeed, Il2CppSystem.Action callback, bool fastDrop = false, Item nextControllerItem = null)
     {
-        DropController().HandleExceptions();
+        DropController().Forget();
     }
 
     private async Task DropController()
     {
-        if (ObservedOperation != null)
-        {
-            ObservedOperation.RequestDestroy();
-        }
+        var operation = ObservedOperation;
+        operation?.RequestDestroy();
         await Task.Delay(600);
         Destroyed = true;
-        ObservedOperation.HideObservedWeapon();
+        operation?.HideObservedWeapon();
     }
 
     private Player.ObjectInHandsOperation GetObservedMedsOperation()
@@ -122,18 +115,39 @@ internal sealed class ObservedMedsController : Player.MedsController
         ObservedOperation.FastForwardObserved();
     }
 
+    public override void FastForwardCurrentOutdatedState()
+    {
+        var operation = ObservedOperation;
+
+        if (operation != null && operation.IsOutdate())
+        {
+            operation.FastForwardObserved();
+        }
+    }
+
     public override void IEventsConsumerOnWeapOut()
     {
         ObservedOperation.HideObservedWeaponComplete();
     }
 
-    private sealed class ObservedMedsOperation(Player.MedsController controller) : Player.MedsController.MedsInHandsOperation(controller)
+    private sealed class ObservedMedsOperation : Player.MedsController.MedsInHandsOperation
     {
-        private readonly ObservedMedsController _observedMedsController = (ObservedMedsController)controller;
+        public ObservedMedsOperation(IntPtr pointer) : base(pointer)
+        {
+        }
+
+        public ObservedMedsOperation(Player.MedsController controller) : base(Il2CppInjection.Allocate<ObservedMedsOperation>())
+        {
+            ClassInjector.DerivedConstructorBody(this);
+            ClassInjector.InvokeBaseConstructor<Player.MedsController.MedsInHandsOperation>(this, controller);
+            _observedMedsController = (ObservedMedsController)controller;
+        }
+
+        private readonly ObservedMedsController _observedMedsController;
         private int _animation;
         private bool _destroyRequested;
 
-        public void ObservedStart(Action callback)
+        public void ObservedStart(Il2CppSystem.Action callback)
         {
             State = Player.EOperationState.Executing;
             SetLeftStanceAnimOnStartOperation();
@@ -156,7 +170,6 @@ internal sealed class ObservedMedsController : Player.MedsController
 
         public void HealthController_EffectRemovedEvent(IHealthEffect effect)
         {
-            // Look for GClass increments
             if (effect is not IMedEffect)
             {
                 return;

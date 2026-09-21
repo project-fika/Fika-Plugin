@@ -1,67 +1,75 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using Comfort.Common;
+using Dissonance.Integrations.MirrorIgnorance;
+using EFT.Network;
 
 namespace Fika.Core.Networking.VOIP;
 
-public readonly struct FikaVOIPPeer(IPeer connection) : IEquatable<FikaVOIPPeer>
+public static class FikaVOIPPeers
 {
-    public readonly IPeer Peer = connection;
+    private const int LOCAL_INDEX = -1;
 
-    public override int GetHashCode()
-    {
-        return Peer.GetHashCode();
-    }
+    private static readonly Dictionary<int, NetPeer> _peers = [];
+    private static readonly Dictionary<int, NetworkConnection> _connections = [];
 
-    public override string ToString()
+    public static MirrorConn Local
     {
-        return Peer.ToString();
-    }
-
-    public override bool Equals(object obj)
-    {
-        return obj != null && obj is FikaVOIPPeer peer && Equals(peer);
-    }
-
-    public bool Equals(FikaVOIPPeer other)
-    {
-        if (Peer == null)
+        get
         {
-            return other.Peer == null;
+            return new MirrorConn(GetConnection(LOCAL_INDEX));
+        }
+    }
+
+    public static MirrorConn ForPeer(NetPeer peer)
+    {
+        _peers[peer.Id] = peer;
+        return new MirrorConn(GetConnection(peer.Id));
+    }
+
+    public static bool IsLocal(MirrorConn connection)
+    {
+        return connection.Connection != null && connection.Connection.ConnectionIndex == LOCAL_INDEX;
+    }
+
+    public static bool TryGetPeer(MirrorConn connection, out NetPeer peer)
+    {
+        peer = null;
+        return connection.Connection != null && _peers.TryGetValue(connection.Connection.ConnectionIndex, out peer);
+    }
+
+    public static void UpdateConnectionStates()
+    {
+        foreach (var (id, peer) in _peers)
+        {
+            if (peer.ConnectionState != ConnectionState.Connected && _connections.TryGetValue(id, out var connection))
+            {
+                connection.IsConnected = false;
+            }
+        }
+    }
+
+    public static void SendToLocalClient(Il2CppSystem.ArraySegment<byte> data)
+    {
+        Singleton<FikaServer>.Instance.VOIPClient?.NetworkReceivedPacket(data);
+    }
+
+    public static void Clear()
+    {
+        _peers.Clear();
+        _connections.Clear();
+    }
+
+    private static NetworkConnection GetConnection(int index)
+    {
+        if (!_connections.TryGetValue(index, out var connection))
+        {
+            connection = new NetworkConnection(0, index, "fika", 0)
+            {
+                IsConnected = true
+            };
+            _connections[index] = connection;
         }
 
-        if (Peer is RemotePeer localRemote && other.Peer is RemotePeer otherRemote)
-        {
-            return localRemote.Peer.Equals(otherRemote.Peer);
-        }
-
-        return Peer.Equals(other.Peer);
-    }
-}
-
-public interface IPeer
-{
-    public bool IsLocal { get; set; }
-    void SendData(ArraySegment<byte> data, DeliveryMethod deliveryMethod);
-}
-
-public class LocalPeer : IPeer
-{
-    public bool IsLocal { get; set; } = true;
-
-    public void SendData(ArraySegment<byte> data, DeliveryMethod deliveryMethod)
-    {
-        Singleton<FikaServer>.Instance.VOIPClient.NetworkReceivedPacket(data);
-    }
-}
-
-public struct RemotePeer(NetPeer peer) : IPeer
-{
-    public bool IsLocal { get; set; }
-
-    public readonly NetPeer Peer { get; } = peer;
-
-    public readonly void SendData(ArraySegment<byte> data, DeliveryMethod deliveryMethod)
-    {
-        Singleton<IFikaNetworkManager>.Instance.SendVOIPData(data, deliveryMethod, Peer);
+        return connection;
     }
 }

@@ -11,7 +11,7 @@ using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.World;
 using HarmonyLib;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.BTR;
 
@@ -24,13 +24,18 @@ public class BTRView_GoIn_Patch : ModulePatch
     }
 
     [PatchPrefix]
-    public static bool Prefix(BTRView __instance, Player player, BTRSide side, byte placeId, bool fast, ref Task __result)
+    public static bool Prefix(BTRView __instance, Player player, BTRSide side, byte placeId, bool fast, ref Il2CppSystem.Threading.Tasks.Task __result)
     {
+        if (FikaBackendUtils.IsTutorial)
+        {
+            return true;
+        }
+
         var isServer = FikaBackendUtils.IsServer;
         if (player is ObservedPlayer observedPlayer)
         {
-            __result = ObservedGoIn(__instance, observedPlayer, side, placeId, fast);
-            Singleton<IFikaNetworkManager>.Instance.ObservedPlayers.Remove(observedPlayer);
+            __result = ObservedGoIn(__instance, observedPlayer, side, placeId, fast).ToIl2Cpp();
+            FikaGlobals.NetworkManager.ObservedPlayers.Remove(observedPlayer);
             return false;
         }
 
@@ -53,7 +58,7 @@ public class BTRView_GoIn_Patch : ModulePatch
                     }
                 };
 
-                Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+                FikaGlobals.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered);
             }
         }
 
@@ -69,7 +74,7 @@ public class BTRView_GoIn_Patch : ModulePatch
             observedPlayer.BtrState = EPlayerBtrState.Approach;
             if (!fast)
             {
-                ValueTuple<Vector3, Vector3> valueTuple = side.GoInPoints();
+                var valueTuple = side.GoInPoints();
                 await side.ProcessApproach(observedPlayer, valueTuple.Item1, valueTuple.Item2 + Vector3.up * 1.4f);
                 if (cancellationToken.IsCancellationRequested)
                 {
@@ -80,7 +85,7 @@ public class BTRView_GoIn_Patch : ModulePatch
             observedPlayer.CharacterController.isEnabled = false;
             observedPlayer.BtrState = EPlayerBtrState.GoIn;
             side.AddPassenger(observedPlayer, placeId);
-            var soundController = Traverse.Create(view).Field<BtrSoundController>("_soundController").Value;
+            var soundController = view._soundController;
             if (soundController != null)
             {
                 soundController.UpdateBtrAudioRoom(EnvironmentType.Indoor, observedPlayer);

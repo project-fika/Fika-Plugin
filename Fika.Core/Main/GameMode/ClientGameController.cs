@@ -30,9 +30,17 @@ using static JsonType.LocationSettings;
 
 namespace Fika.Core.Main.GameMode;
 
-public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, GameWorld gameWorld, IEftSession session)
-    : BaseGameController(game, updateQueue, gameWorld, session)
+public class ClientGameController : BaseGameController
 {
+    public ClientGameController(IntPtr pointer) : base(pointer)
+    {
+    }
+
+    public ClientGameController(IFikaGame game, EUpdateQueue updateQueue, GameWorld gameWorld, IEftSession session)
+        : base(Il2CppInjection.Allocate<ClientGameController>(), game, updateQueue, gameWorld, session)
+    {
+    }
+
     public bool ExfiltrationReceived { get; set; }
     public bool HasReceivedLoot { get; set; }
     public bool InteractablesInitialized { get; set; }
@@ -64,7 +72,7 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
             if (FikaPlugin.Instance.Settings.DevMode.Value)
             {
                 Logger.LogWarning("DevMode is enabled, skipping wait...");
-                NotificationManager.DisplayMessageNotification("DevMode enabled, starting automatically...", iconType: EFT.Communications.ENotificationIconType.Note);
+                FikaGlobals.DisplayMessage("DevMode enabled, starting automatically...", iconType: EFT.Communications.ENotificationIconType.Note);
                 var fikaClient = Singleton<FikaClient>.Instance ?? throw new NullReferenceException("CreateStartButton::FikaClient was null!");
                 InformationPacket devModePacket = new()
                 {
@@ -91,7 +99,7 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
 
     public override async Task WaitForOtherPlayersToLoad()
     {
-        float expectedPlayers = Singleton<IFikaNetworkManager>.Instance.PlayerAmount;
+        float expectedPlayers = FikaGlobals.NetworkManager.PlayerAmount;
         if (FikaBackendUtils.IsHeadlessGame)
         {
             expectedPlayers--;
@@ -180,7 +188,7 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
         if (!spawnTogether)
         {
             Logger.LogInfo("Using random spawn points!");
-            NotificationManager.DisplayMessageNotification(LocaleUtils.RANDOM_SPAWNPOINTS.Localized(),
+            FikaGlobals.DisplayMessage(LocaleUtils.RANDOM_SPAWNPOINTS.Localized(),
                 iconType: EFT.Communications.ENotificationIconType.Alert);
 
             CreateSpawnSystem(profile);
@@ -221,11 +229,11 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
 
     public override void CreateSpawnSystem(Profile profile)
     {
-        _spawnPoints = SpawnPointsCollection.CreateFromScene(new DateTime?(DateTimeExtensions.LocalDateTimeFromUnixTime(Location.UnixDateTime)),
+        _spawnPoints = SpawnPointsCollection.CreateFromScene(new Il2CppSystem.Nullable<Il2CppSystem.DateTime>(DateTimeExtensions.LocalDateTimeFromUnixTime(Location.UnixDateTime)),
                                 Location.SpawnPointParams);
         var spawnSafeDistance = (Location.SpawnSafeDistanceMeters > 0) ? Location.SpawnSafeDistanceMeters : 100;
         SpawnSystemSettings settings = new(Location.MinDistToFreePoint, Location.MaxDistToFreePoint, Location.MaxBotPerZone, spawnSafeDistance, Location.NoGroupSpawn, Location.OneTimeSpawn);
-        SpawnSystem = SpawnSystemFactory.CreateSpawnSystem(settings, FikaGlobals.GetApplicationTime, Singleton<GameWorld>.Instance, null, _spawnPoints);
+        SpawnSystem = SpawnSystemFactory.CreateSpawnSystem(settings, new System.Func<float>(FikaGlobals.GetApplicationTime), Singleton<GameWorld>.Instance, null, _spawnPoints);
         _spawnPoint = SpawnSystem.SelectSpawnPoint(ESpawnCategory.Player, profile.Info.Side, null, null, null, null, profile.Id);
         InfiltrationPoint = string.IsNullOrEmpty(_spawnPoint.Infiltration) ? "MissingInfiltration" : _spawnPoint.Infiltration;
         ClientSpawnPosition = _spawnPoint.Position;
@@ -268,6 +276,7 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
         var client = Singleton<FikaClient>.Instance;
         WorldLootPacket packet = new()
         {
+            LocationId = location.Id,
             Data = []
         };
         do
@@ -327,7 +336,7 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
             throw new NullReferenceException("Could not find CoopGame");
         }
 
-        coopGame.GameTimer.Start(GameTime, SessionTime);
+        coopGame.GameTimer.Start(GameTime.ToIl2Cpp(), SessionTime.ToIl2Cpp());
         coopGame.Spawn();
 
         var skills = coopGame.Profile.Skills.Skills;
@@ -397,7 +406,7 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
 
         if (coopGame.ExitStatus == ExitStatus.MissingInAction)
         {
-            NotificationManager.DisplayMessageNotification(LocaleUtils.PLAYER_MIA.Localized(), iconType: EFT.Communications.ENotificationIconType.Alert, textColor: Color.red);
+            FikaGlobals.DisplayMessage(LocaleUtils.PLAYER_MIA.Localized(), iconType: EFT.Communications.ENotificationIconType.Alert, textColor: Color.red);
         }
 
         if (player.QuestController is ClientQuestController clientQuestController)
@@ -410,9 +419,14 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
             sharedQuestController.ToggleQuestSharing(false);
         }
 
+        if (player.StatisticsManager is HealthStatisticsManager statisticsManager)
+        {
+            statisticsManager.ConsumeExperience();
+        }
+
 #if !DEBUG
         var matchEndConfig = Singleton<GlobalConfiguration>.Instance.Experience.MatchEnd;
-        if (player.Profile.EftStats.SessionCounters.GetAllInt([CounterTag.Exp]) < matchEndConfig.SurvivedExpRequirement && coopGame.PastTime < matchEndConfig.SurvivedTimeRequirement)
+        if (player.Profile.EftStats.SessionCounters.GetAllInt(new Il2CppSystem.Object[] { CounterTag.Exp.BoxIl2Cpp() }) <= matchEndConfig.SurvivedExpRequirement && coopGame.PastTime <= matchEndConfig.SurvivedTimeRequirement)
         {
             coopGame.ExitStatus = ExitStatus.Runner;
         }
@@ -425,14 +439,14 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
             if (exfiltrationPoint.HasRequirements && exfiltrationPoint.TransferItemRequirement?.Met(player, exfiltrationPoint) == true && player.IsYourPlayer)
             {
                 // Seems to already be handled by SPT so we only add it visibly
-                player.Profile.EftStats.SessionCounters.AddDouble(0.2d, [CounterTag.FenceStanding, EFenceStandingSource.ExitStanding]);
+                player.Profile.EftStats.SessionCounters.AddDouble(0.2d, new Il2CppSystem.Object[] { CounterTag.FenceStanding.BoxIl2Cpp(), EFenceStandingSource.ExitStanding.BoxIl2Cpp() });
             }
         }
 
         if (player.Side == EPlayerSide.Savage)
         {
             // Seems to already be handled by SPT so we only add it visibly
-            player.Profile.EftStats.SessionCounters.AddDouble(0.01d, [CounterTag.FenceStanding, EFenceStandingSource.ExitStanding]);
+            player.Profile.EftStats.SessionCounters.AddDouble(0.01d, new Il2CppSystem.Object[] { CounterTag.FenceStanding.BoxIl2Cpp(), EFenceStandingSource.ExitStanding.BoxIl2Cpp() });
         }
 
         var transitController = Singleton<GameWorld>.Instance.TransitController;
@@ -454,7 +468,7 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
         {
             try // This is to allow clients to extract if they lose connection
             {
-                Singleton<IFikaNetworkManager>.Instance.SendGenericPacket(EGenericSubPacketType.ClientExtract,
+                FikaGlobals.NetworkManager.SendGenericPacket(EGenericSubPacketType.ClientExtract,
                     ClientExtract.FromValue(player.NetId), true);
             }
             catch
@@ -467,14 +481,14 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
             _coopHandler.ExtractedPlayers.Add(fikaPlayer.NetId);
             _coopHandler.Players.Remove(fikaPlayer.NetId);
 
-            preloaderUI.StartBlackScreenShow(2f, 2f, () => preloaderUI.FadeBlackScreen(2f, -2f));
+            preloaderUI.StartBlackScreenShow(2f, 2f, new System.Action(() => preloaderUI.FadeBlackScreen(2f, -2f)));
 
             player.ActiveHealthController.SetDamageCoeff(0);
             player.ActiveHealthController.DamageMultiplier = 0;
             player.ActiveHealthController.DisableMetabolism();
             player.ActiveHealthController.PauseAllEffects();
 
-            _extractRoutine = coopGame.StartCoroutine(ExtractRoutine(player, coopGame));
+            _extractRoutine = coopGame.StartCoroutine((ExtractRoutine(player, coopGame)).ToIl2Cpp());
 
             // Prevents players from looting after extracting
             EftScreenManager.Instance.CloseAllScreensForced();

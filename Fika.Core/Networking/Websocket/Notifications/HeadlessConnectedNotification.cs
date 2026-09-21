@@ -2,12 +2,24 @@
 using EFT.Communications;
 using Fika.Core.Main.Utils;
 using Fika.Core.UI;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
+using System;
+using Il2CppInterop.Runtime.Injection;
 
 namespace Fika.Core.Networking.Websocket.Notifications;
 
 public class HeadlessConnectedNotification : Notification
 {
+    public HeadlessConnectedNotification(IntPtr pointer) : base(pointer)
+    {
+    }
+
+    public HeadlessConnectedNotification() : base(Il2CppInjection.Allocate<HeadlessConnectedNotification>())
+    {
+        ClassInjector.DerivedConstructorBody(this);
+        ClassInjector.InvokeBaseConstructor<Notification>(this);
+    }
+
     public override ENotificationIconType Icon
     {
         get
@@ -25,6 +37,6 @@ public class HeadlessConnectedNotification : Notification
         }
     }
 
-    [JsonProperty("name")]
+    [JsonPropertyName("name")]
     public string Name { get; set; }
 }

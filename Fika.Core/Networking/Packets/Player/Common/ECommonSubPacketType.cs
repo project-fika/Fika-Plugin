@@ -93,5 +93,15 @@ public enum ECommonSubPacketType : byte
     /// <summary>
     /// A player is being revived or revive was cancelled
     /// </summary>
-    RevivingPlayer
+    RevivingPlayer,
+
+    /// <summary>
+    /// Tape recorder hands action
+    /// </summary>
+    RecorderAction,
+
+    /// <summary>
+    /// The owner's hands operation timed out and was ended locally
+    /// </summary>
+    FastForwardOutdated
 }

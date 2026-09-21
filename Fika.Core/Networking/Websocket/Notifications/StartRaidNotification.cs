@@ -2,13 +2,25 @@
 using EFT.Communications;
 using Fika.Core.Main.Utils;
 using JsonType;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 using static Fika.Core.UI.FikaUIGlobals;
+using System;
+using Il2CppInterop.Runtime.Injection;
 
 namespace Fika.Core.Networking.Websocket.Notifications;
 
 public class StartRaidNotification : Notification
 {
+    public StartRaidNotification(IntPtr pointer) : base(pointer)
+    {
+    }
+
+    public StartRaidNotification() : base(Il2CppInjection.Allocate<StartRaidNotification>())
+    {
+        ClassInjector.DerivedConstructorBody(this);
+        ClassInjector.InvokeBaseConstructor<Notification>(this);
+    }
+
     public override ENotificationIconType Icon
     {
         get
@@ -38,12 +50,12 @@ public class StartRaidNotification : Notification
         }
     }
 
-    [JsonProperty("nickname")]
+    [JsonPropertyName("nickname")]
     public string Nickname;
 
-    [JsonProperty("location")]
+    [JsonPropertyName("location")]
     public string Location;
 
-    [JsonProperty("raidTime")]
+    [JsonPropertyName("raidTime")]
     public EDateTime RaidTime;
 }

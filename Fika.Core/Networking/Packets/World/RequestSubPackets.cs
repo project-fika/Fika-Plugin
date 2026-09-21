@@ -42,7 +42,7 @@ public static class RequestSubPackets
 
         public void HandleRequest(NetPeer peer, FikaServer server)
         {
-            var fikaGame = Singleton<IFikaGame>.Instance;
+            var fikaGame = FikaGlobals.FikaGame;
             if (fikaGame != null)
             {
                 if (FikaBackendUtils.IsServer && !string.IsNullOrEmpty(fikaGame.GameController.InfiltrationPoint) && fikaGame.GameController.SpawnPoint != null)
@@ -64,7 +64,7 @@ public static class RequestSubPackets
 
         public void HandleResponse()
         {
-            var fikaGame = Singleton<IFikaGame>.Instance;
+            var fikaGame = FikaGlobals.FikaGame;
             if (fikaGame != null)
             {
                 if (!string.IsNullOrEmpty(Infiltration))
@@ -115,7 +115,7 @@ public static class RequestSubPackets
 
         public void HandleRequest(NetPeer peer, FikaServer server)
         {
-            var fikaGame = Singleton<IFikaGame>.Instance;
+            var fikaGame = FikaGlobals.FikaGame;
             if (fikaGame != null && fikaGame.GameController.WeatherClasses != null && fikaGame.GameController.WeatherClasses.Length > 0)
             {
                 RequestPacket response = new()
@@ -135,7 +135,7 @@ public static class RequestSubPackets
 
         public void HandleResponse()
         {
-            var fikaGame = Singleton<IFikaGame>.Instance;
+            var fikaGame = FikaGlobals.FikaGame;
             if (fikaGame != null)
             {
                 fikaGame.Season = Season;
@@ -240,10 +240,10 @@ public static class RequestSubPackets
                 var name = reader.GetString();
                 var status = reader.GetEnum<EExfiltrationStatus>();
                 var startTime = reader.GetInt();
-                var exfilStartTime = -1;
+                var exfilStartTime = -1f;
                 if (status == EExfiltrationStatus.Countdown)
                 {
-                    exfilStartTime = reader.GetInt();
+                    exfilStartTime = reader.GetFloat();
                 }
 
                 var exfilPoint = allExfils.FirstOrDefault(x => x.Settings.Name == name);
@@ -258,7 +258,7 @@ public static class RequestSubPackets
                 }
             }
 
-            var fikaGame = Singleton<IFikaGame>.Instance;
+            var fikaGame = FikaGlobals.FikaGame;
             if (fikaGame != null)
             {
                 (fikaGame.GameController as ClientGameController).ExfiltrationReceived = true;
@@ -305,7 +305,7 @@ public static class RequestSubPackets
 
         public void HandleRequest(NetPeer peer, FikaServer server)
         {
-            if (Singleton<IFikaNetworkManager>.Instance.CoopHandler.Players.TryGetValue(NetId, out var playerToApply))
+            if (FikaGlobals.NetworkManager.CoopHandler.Players.TryGetValue(NetId, out var playerToApply))
             {
                 var services = playerToApply.GetAvailableTraderServices(TraderId).ToList();
                 RequestPacket response = new()
@@ -330,9 +330,9 @@ public static class RequestSubPackets
                 return;
             }
 
-            if (Singleton<IFikaNetworkManager>.Instance.CoopHandler.Players.TryGetValue(NetId, out var playerToApply))
+            if (FikaGlobals.NetworkManager.CoopHandler.Players.TryGetValue(NetId, out var playerToApply))
             {
-                playerToApply.UpdateTraderServiceData(Services);
+                playerToApply.UpdateTraderServiceData((Services).ToIl2CppList());
             }
         }
 

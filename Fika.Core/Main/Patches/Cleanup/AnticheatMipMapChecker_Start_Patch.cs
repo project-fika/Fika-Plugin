@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 using HarmonyLib;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.Cleanup;
 

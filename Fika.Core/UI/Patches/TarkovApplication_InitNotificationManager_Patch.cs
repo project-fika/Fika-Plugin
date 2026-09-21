@@ -2,7 +2,7 @@
 using System.Reflection;
 using EFT;
 using Fika.Core.Networking.Websocket;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.UI.Patches;
 

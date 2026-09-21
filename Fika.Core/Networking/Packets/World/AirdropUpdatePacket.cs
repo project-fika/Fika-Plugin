@@ -9,7 +9,8 @@ public struct AirdropUpdatePacket : INetSerializable
 
     public void Deserialize(NetDataReader reader)
     {
-        ref var data = ref Data;
+        Data ??= new SynchronizableObjectPacket();
+        var data = Data;
         data.ObjectId = reader.GetInt();
         data.Position = reader.GetUnmanaged<Vector3>();
         data.Rotation = reader.GetUnmanaged<Vector3>();
@@ -17,15 +18,22 @@ public struct AirdropUpdatePacket : INetSerializable
 
         if (data.ObjectType == SynchronizableObjectType.AirDrop)
         {
-            ref var airdrop = ref data.PacketData.AirdropDataPacket;
+            var packetData = data.PacketData;
+            var airdrop = packetData.AirdropDataPacket;
             airdrop.SignalFire = reader.GetBool();
             airdrop.FallingStage = (EAirdropFallingStage)reader.GetByte();
             airdrop.AirdropType = (EAirdropType)reader.GetByte();
             airdrop.UniqueId = reader.GetInt();
+            packetData.AirdropDataPacket = airdrop;
+            data.PacketData = packetData;
         }
         else
         {
-            data.PacketData.AirplaneDataPacket.AirplanePercent = reader.GetInt();
+            var packetData = data.PacketData;
+            var airplane = packetData.AirplaneDataPacket;
+            airplane.AirplanePercent = reader.GetInt();
+            packetData.AirplaneDataPacket = airplane;
+            data.PacketData = packetData;
         }
 
         var flags = reader.GetByte();

@@ -48,6 +48,7 @@ using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Player.Common;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
 using Fika.Core.Networking.Snapshotting;
+using Il2CppInterop.Runtime.Injection;
 
 namespace Fika.Core.Networking;
 
@@ -56,6 +57,10 @@ namespace Fika.Core.Networking;
 /// </summary>
 public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatPunchListener, IAirdropDataSender, IFikaNetworkManager
 {
+    public FikaServer(IntPtr pointer) : base(pointer)
+    {
+    }
+
     public int ReadyClients;
     public DateTime TimeSinceLastPeerDisconnected;
     public bool HasHadPeer;
@@ -76,7 +81,7 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
         {
             if (_gameStartTime == null)
             {
-                _gameStartTime = DateTimeExtensions.UtcNow;
+                _gameStartTime = (DateTimeExtensions.UtcNow).ToManaged();
             }
             return _gameStartTime;
         }
@@ -183,7 +188,7 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
 
         ReadyClients = 0;
 
-        TemporaryStash = Singleton<ItemFactory>.Instance.CreateFakeStash();
+        TemporaryStash = Singleton<ItemFactory>.Instance.CreateFakeStash(new Il2CppSystem.Nullable<MongoID>());
 
         MaxMTU = NetConstants.PossibleMtu[0] - NetConstants.HeaderSize; // we assume minimum MTU + unreliable header size
 
@@ -256,7 +261,7 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
         {
             if (FikaPlugin.Instance.WanIP == null)
             {
-                NotificationManager.DisplayMessageNotification("No WAN IP could be found, external players will not be able to join",
+                FikaGlobals.DisplayMessage("No WAN IP could be found, external players will not be able to join",
                     iconType: EFT.Communications.ENotificationIconType.Alert, textColor: Color.red);
             }
 
@@ -324,7 +329,7 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
 
         _logger.LogInfo("Started Fika Server");
 
-        NotificationManager.DisplayMessageNotification(string.Format(LocaleUtils.SERVER_STARTED.Localized(), _port),
+        FikaGlobals.DisplayMessage(string.Format(LocaleUtils.SERVER_STARTED.Localized(), _port),
             EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
 
         List<string> ipAddresses = [_externalIp];
@@ -340,7 +345,7 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
         if (ipAddresses.Count < 1)
         {
             ipAddresses = [_externalIp, ""];
-            NotificationManager.DisplayMessageNotification(LocaleUtils.NO_VALID_IP.Localized(),
+            FikaGlobals.DisplayMessage(LocaleUtils.NO_VALID_IP.Localized(),
                 iconType: EFT.Communications.ENotificationIconType.Alert);
         }
 
@@ -378,7 +383,7 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
 
             DissonanceComms_Start_Patch.IsReady = true;
             var dissonance = gameObj.GetComponent<DissonanceComms>();
-            dissonance.Invoke("Start", 0);
+            dissonance.Initialize();
         }
         else if (FikaBackendUtils.IsHeadless)
         {
@@ -398,7 +403,7 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
 
             DissonanceComms_Start_Patch.IsReady = true;
             var dissonance = gameObj.GetComponent<DissonanceComms>();
-            dissonance.Invoke("Start", 0);
+            dissonance.Initialize();
         }
         else
         {
@@ -436,9 +441,13 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
         RegisterPacket<InformationPacket, NetPeer>(OnInformationPacketReceived);
         RegisterPacket<TextMessagePacket, NetPeer>(OnTextMessagePacketReceived);
         RegisterPacket<QuestConditionPacket, NetPeer>(OnQuestConditionPacketReceived);
+        RegisterPacket<QuestRelayPacket, NetPeer>(OnQuestRelayPacketReceived);
         RegisterPacket<QuestItemPacket, NetPeer>(OnQuestItemPacketReceived);
         RegisterPacket<QuestDropItemPacket, NetPeer>(OnQuestDropItemPacketReceived);
         RegisterPacket<InteractableInitPacket, NetPeer>(OnInteractableInitPacketReceived);
+        RegisterPacket<PasscodeInitPacket, NetPeer>(OnPasscodeInitPacketReceived);
+        RegisterPacket<FinalMissionPacket, NetPeer>(OnFinalMissionPacketReceived);
+        RegisterPacket<PasscodeAttemptPacket, NetPeer>(OnPasscodeAttemptPacketReceived);
         RegisterPacket<WorldLootPacket, NetPeer>(OnWorldLootPacketReceived);
         RegisterPacket<ReconnectPacket, NetPeer>(OnReconnectPacketReceived);
         RegisterPacket<BTRInteractionPacket, NetPeer>(OnBTRInteractionPacketReceived);
@@ -459,6 +468,8 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
         RegisterPacket<KnifeHitPacket, NetPeer>(OnKnifeHitPacketReceived);
         RegisterPacket<QuestSyncPacket, NetPeer>(OnQuestSyncPacketReceived);
         RegisterPacket<SpawnItemInInventoryPacket, NetPeer>(SpawnItemInInventoryPacketReceived);
+        RegisterPacket<CutsceneSkipIntentionPacket, NetPeer>(OnCutsceneSkipIntentionPacketReceived);
+        RegisterPacket<CutsceneViewCompletePacket, NetPeer>(OnCutsceneViewCompletePacketReceived);
 
         RegisterReusable<WorldPacket, NetPeer>(OnWorldPacketReceived);
 
@@ -766,7 +777,7 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
 
     public void OnPeerConnected(NetPeer peer)
     {
-        NotificationManager.DisplayMessageNotification(string.Format(LocaleUtils.PEER_CONNECTED.Localized(), peer.Port),
+        FikaGlobals.DisplayMessage(string.Format(LocaleUtils.PEER_CONNECTED.Localized(), peer.Port),
             iconType: ENotificationIconType.Friend);
         _logger.LogInfo($"Connection established with {peer.Address}:{peer.Port}, id: {peer.Id}");
 
@@ -798,7 +809,7 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
     public void OnNetworkReceiveUnconnected(IPEndPoint remoteEndPoint, NetPacketReader reader, UnconnectedMessageType messageType)
     {
         var started = false;
-        if (_coopHandler != null && _coopHandler.LocalGameInstance != null && Singleton<IFikaGame>.Instance.GameController.RaidStarted)
+        if (_coopHandler != null && _coopHandler.LocalGameInstance != null && FikaGlobals.FikaGame.GameController.RaidStarted)
         {
             started = true;
         }
@@ -843,7 +854,7 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
 
     public void OnConnectionRequest(ConnectionRequest request)
     {
-        if (_coopHandler != null && _coopHandler.LocalGameInstance != null && Singleton<IFikaGame>.Instance.GameController.RaidStarted)
+        if (_coopHandler != null && _coopHandler.LocalGameInstance != null && FikaGlobals.FikaGame.GameController.RaidStarted)
         {
             if (request.Data.GetString() == "fika.reconnect")
             {
@@ -865,7 +876,7 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
         _logger.LogInfo($"Peer disconnected {peer.Port}, info: {disconnectInfo.Reason}");
         if (disconnectInfo.Reason != DisconnectReason.RemoteConnectionClose)
         {
-            NotificationManager.DisplayMessageNotification(string.Format(LocaleUtils.PEER_DISCONNECTED.Localized(), [peer.Port, disconnectInfo.Reason]),
+            FikaGlobals.DisplayMessage(string.Format(LocaleUtils.PEER_DISCONNECTED.Localized(), [peer.Port, disconnectInfo.Reason]),
                     iconType: EFT.Communications.ENotificationIconType.Alert);
         }
 
@@ -875,6 +886,11 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
             disconnectPacket.Execute();
             SendGenericPacket(EGenericSubPacketType.ClientDisconnected,
                 disconnectPacket, true, peer);
+        }
+
+        if (peer.Player != null)
+        {
+            DialogEntryOccupancy.ReleaseAllFor(peer.Player.NetId);
         }
 
         PlayerAmount--;
@@ -917,20 +933,20 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
         if (_netServer.ConnectedPeersCount == 0)
         {
             _logger.LogInfo("No reconnect was made, stopping session");
-            AsyncWorker.RunInMainTread(DisconnectHeadless);
+            MainThread.Post(DisconnectHeadless);
         }
     }
 
     private void DisconnectHeadless()
     {
-        if (!Singleton<IFikaGame>.Instantiated)
+        if (FikaGlobals.FikaGame == null)
         {
             _logger.LogError("Headless is trying to disconnect when there is no FikaGame started, stopping client...");
             Application.Quit();
             return;
         }
 
-        Singleton<IFikaGame>.Instance.Stop(null, ExitStatus.Survived, "");
+        FikaGlobals.FikaGame.Stop(null, ExitStatus.Survived, "");
     }
 
     public void OnNetworkReceive(NetPeer peer, NetPacketReader reader, byte channelNumber, DeliveryMethod deliveryMethod)
@@ -960,8 +976,8 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
             case EPacketType.VOIP:
                 if (VOIPServer != null)
                 {
-                    VOIPServer.NetworkReceivedPacket(new(new RemotePeer(peer)),
-                        reader.GetRemainingBytesSegment());
+                    VOIPServer.NetworkReceivedPacket(FikaVOIPPeers.ForPeer(peer),
+                        (reader.GetRemainingBytesSegment()).ToIl2Cpp());
                 }
                 break;
         }

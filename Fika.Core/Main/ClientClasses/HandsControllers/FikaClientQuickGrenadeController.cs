@@ -4,6 +4,9 @@ using EFT.InventoryLogic;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Packets.FirearmController;
 using Fika.Core.Networking.Packets.FirearmController.SubPackets;
+using System;
+using Il2CppInterop.Runtime.Injection;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.ClientClasses.HandsControllers;
 
@@ -12,6 +15,10 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers;
 /// </summary>
 public class FikaClientQuickGrenadeController : EFT.Player.QuickGrenadeThrowHandsController
 {
+    public FikaClientQuickGrenadeController(IntPtr pointer) : base(pointer)
+    {
+    }
+
     protected FikaPlayer _fikaPlayer;
     private WeaponPacket _packet;
 

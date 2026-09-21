@@ -30,7 +30,7 @@ public sealed class ExfilCountdown : IPoolSubPacket
 
     public void Execute(FikaPlayer player = null)
     {
-        var coopHandler = Singleton<IFikaNetworkManager>.Instance.CoopHandler;
+        var coopHandler = FikaGlobals.NetworkManager.CoopHandler;
         if (coopHandler == null)
         {
             FikaGlobals.LogError("ClientExtract: CoopHandler was null!");
@@ -39,7 +39,7 @@ public sealed class ExfilCountdown : IPoolSubPacket
 
         if (ExfiltrationController.Instance != null)
         {
-            var fikaGame = Singleton<IFikaGame>.Instance;
+            var fikaGame = FikaGlobals.FikaGame;
             if (fikaGame == null)
             {
                 FikaGlobals.LogError("ExfilCountdown: FikaGame was null");

@@ -10,7 +10,7 @@ using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.World;
 using HarmonyLib;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.BTR;
 
@@ -23,12 +23,17 @@ public class BTRView_GoOut_Patch : ModulePatch
     }
 
     [PatchPrefix]
-    public static bool Prefix(BTRView __instance, Player player, BTRSide side, bool fast, byte placeId, ref Task __result)
+    public static bool Prefix(BTRView __instance, Player player, BTRSide side, bool fast, byte placeId, ref Il2CppSystem.Threading.Tasks.Task __result)
     {
+        if (FikaBackendUtils.IsTutorial)
+        {
+            return true;
+        }
+
         if (player is ObservedPlayer observedPlayer)
         {
-            __result = ObservedGoOut(__instance, observedPlayer, side, fast);
-            Singleton<IFikaNetworkManager>.Instance.ObservedPlayers.Add(observedPlayer);
+            __result = ObservedGoOut(__instance, observedPlayer, side, fast).ToIl2Cpp();
+            FikaGlobals.NetworkManager.ObservedPlayers.Add(observedPlayer);
             return false;
         }
 
@@ -50,7 +55,7 @@ public class BTRView_GoOut_Patch : ModulePatch
                     }
                 };
 
-                Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+                FikaGlobals.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered);
             }
         }
 
@@ -63,13 +68,13 @@ public class BTRView_GoOut_Patch : ModulePatch
         {
             var cancellationToken = view.PlayerToken(observedPlayer);
             observedPlayer.BtrState = EPlayerBtrState.GoOut;
-            var soundController = Traverse.Create(view).Field<BtrSoundController>("_soundController").Value;
+            var soundController = view._soundController;
             if (soundController != null)
             {
                 soundController.UpdateBtrAudioRoom(EnvironmentType.Outdoor, observedPlayer);
             }
             await view.GoOutAnimation(observedPlayer.MovementContext.PlayerAnimator, fast, true, cancellationToken);
-            ValueTuple<Vector3, Vector3> valueTuple = side.GoOutPoints();
+            var valueTuple = side.GoOutPoints();
             side.ApplyPlayerRotation(observedPlayer.MovementContext, valueTuple.Item1, valueTuple.Item2 + Vector3.up * 1.9f);
             observedPlayer.BtrState = EPlayerBtrState.Outside;
             observedPlayer.CharacterController.isEnabled = true;

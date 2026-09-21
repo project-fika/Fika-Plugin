@@ -3,42 +3,43 @@ using EFT;
 using EFT.Bots;
 using Fika.Core.Main.Utils;
 using JsonType;
+using System.Text.Json.Serialization;
 
 namespace Fika.Core.Networking.Models.Headless;
 
 [DataContract]
 public struct StartHeadlessRequest
 {
-    [DataMember(Name = "headlessSessionID")]
+    [JsonPropertyName("headlessSessionID")]
     public string HeadlessSessionID { get; set; }
 
-    [DataMember(Name = "time")]
+    [JsonPropertyName("time")]
     public EDateTime Time { get; set; }
 
-    [DataMember(Name = "locationId")]
+    [JsonPropertyName("locationId")]
     public string LocationId { readonly get; set; }
 
-    [DataMember(Name = "spawnPlace")]
+    [JsonPropertyName("spawnPlace")]
     public EPlayersSpawnPlace SpawnPlace { readonly get; set; }
 
-    [DataMember(Name = "metabolismDisabled")]
+    [JsonPropertyName("metabolismDisabled")]
     public bool MetabolismDisabled { readonly get; set; }
 
-    [DataMember(Name = "timeAndWeatherSettings")]
+    [JsonPropertyName("timeAndWeatherSettings")]
     public TimeAndWeatherSettings TimeAndWeatherSettings { readonly get; set; }
 
-    [DataMember(Name = "botSettings")]
+    [JsonPropertyName("botSettings")]
     public BotControllerSettings BotSettings { readonly get; set; }
 
-    [DataMember(Name = "wavesSettings")]
+    [JsonPropertyName("wavesSettings")]
     public WavesSettings WavesSettings { readonly get; set; }
 
-    [DataMember(Name = "side")]
+    [JsonPropertyName("side")]
     public ESideType Side { readonly get; set; }
 
-    [DataMember(Name = "customRaidSettings")]
+    [JsonPropertyName("customRaidSettings")]
     public FikaCustomRaidSettings CustomRaidSettings { readonly get; set; }
 
-    [DataMember(Name = "useEvent")]
+    [JsonPropertyName("useEvent")]
     public bool UseEvent { readonly get; set; }
 }

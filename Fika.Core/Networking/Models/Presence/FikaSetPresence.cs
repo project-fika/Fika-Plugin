@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Runtime.Serialization;
 using static Fika.Core.UI.FikaUIGlobals;
+using System.Text.Json.Serialization;
 
 namespace Fika.Core.Networking.Models.Presence;
 
 [DataContract]
 public struct FikaSetPresence
 {
-    [DataMember(Name = "activity")]
+    [JsonPropertyName("activity")]
     public EFikaPlayerPresence Presence;
 
-    [DataMember(Name = "raidInformation")]
+    [JsonPropertyName("raidInformation")]
     public RaidInformation? RaidInformation;
 
     public FikaSetPresence(EFikaPlayerPresence presence)

@@ -34,7 +34,9 @@ internal sealed class CommonSubPacketPoolManager : BasePacketPoolManager<ECommon
             UsableItemPacket.CreateInstance,          // ECommonSubPacketType.UsableItem = 14
             DownedSyncPacket.CreateInstance,          // ECommonSubPacketType.DownedSync = 15
             RevivedPlayerPacket.CreateInstance,       // ECommonSubPacketType.RevivePlayer = 16
-            RevivingPlayerPacket.CreateInstance       // ECommonSubPacketType.RevivingPlayer = 17
+            RevivingPlayerPacket.CreateInstance,      // ECommonSubPacketType.RevivingPlayer = 17
+            RecorderActionPacket.CreateInstance,      // ECommonSubPacketType.RecorderAction = 18
+            FastForwardOutdatedPacket.CreateInstance  // ECommonSubPacketType.FastForwardOutdated = 19
         ];
     }
 }

@@ -3,6 +3,9 @@
 using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Main.Players;
+using System;
+using Il2CppInterop.Runtime.Injection;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.ObservedClasses.HandsControllers;
 
@@ -11,6 +14,10 @@ namespace Fika.Core.Main.ObservedClasses.HandsControllers;
 /// </summary>
 internal sealed class ObservedQuickGrenadeController : Player.QuickGrenadeThrowHandsController
 {
+    public ObservedQuickGrenadeController(IntPtr pointer) : base(pointer)
+    {
+    }
+
     public static ObservedQuickGrenadeController Create(FikaPlayer player, ThrowWeap item)
     {
         return CreateController<ObservedQuickGrenadeController>(player, item);

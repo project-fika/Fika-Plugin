@@ -30,7 +30,7 @@ public sealed class ClientExtract : IPoolSubPacket
 
     public void Execute(FikaPlayer player = null)
     {
-        var coopHandler = Singleton<IFikaNetworkManager>.Instance.CoopHandler;
+        var coopHandler = FikaGlobals.NetworkManager.CoopHandler;
         if (coopHandler == null)
         {
             FikaGlobals.LogWarning("ClientExtract: CoopHandler was null! This is probably harmless.");
@@ -44,7 +44,7 @@ public sealed class ClientExtract : IPoolSubPacket
             if (!coopHandler.ExtractedPlayers.Contains(NetId))
             {
                 coopHandler.ExtractedPlayers.Add(NetId);
-                var fikaGame = Singleton<IFikaGame>.Instance;
+                var fikaGame = FikaGlobals.FikaGame;
                 if (fikaGame != null)
                 {
                     fikaGame.ExtractedPlayers.Add(NetId);
@@ -56,9 +56,10 @@ public sealed class ClientExtract : IPoolSubPacket
                     if (FikaPlugin.Instance.Settings.ShowNotifications.Value)
                     {
                         var nickname = !string.IsNullOrEmpty(playerToApply.Profile.Info.MainProfileNickname) ? playerToApply.Profile.Info.MainProfileNickname : playerToApply.Profile.Nickname;
-                        NotificationManager.DisplayMessageNotification(string.Format(LocaleUtils.GROUP_MEMBER_EXTRACTED.Localized(),
+                        FikaGlobals.DisplayMessage(string.Format(LocaleUtils.GROUP_MEMBER_EXTRACTED.Localized(),
                             ColorizeText(EColor.GREEN, nickname)),
-                        EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
+                        EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint,
+                        new Il2CppSystem.Nullable<Color>());
                     }
                 }
             }

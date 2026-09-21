@@ -16,11 +16,17 @@ using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
 using Fika.Core.Networking.Packets.World;
 using Fika.Core.Networking.Pooling;
+using System;
+using Il2CppInterop.Runtime.Injection;
 
 namespace Fika.Core.Main.HostClasses;
 
 public sealed class HostInventoryController : BaseInventoryController
 {
+    public HostInventoryController(IntPtr pointer) : base(pointer)
+    {
+    }
+
     public FikaPlayer FikaPlayer { get; }
 
     public override bool HasDiscardLimits
@@ -33,7 +39,7 @@ public sealed class HostInventoryController : BaseInventoryController
     private readonly Player _player;
     private readonly HostInventoryOperationHandlerPool _hostInventoryOperationHandlerPool;
 
-    public HostInventoryController(Player player, Profile profile, bool examined, bool strictSync) : base(player, profile, examined, strictSync)
+    public HostInventoryController(Player player, Profile profile, bool examined, bool strictSync) : base(Il2CppInjection.Allocate<HostInventoryController>(), player, profile, examined, strictSync)
     {
         _player = player;
         FikaPlayer = (FikaPlayer)player;
@@ -74,7 +80,7 @@ public sealed class HostInventoryController : BaseInventoryController
 
     public override void Execute(EFT.InventoryLogic.Operations.AbstractOperation operation, Callback callback)
     {
-        HandleOperation(operation, callback).HandleExceptions();
+        HandleOperation(operation, callback).Forget();
     }
 
     private async Task HandleOperation(EFT.InventoryLogic.Operations.AbstractOperation operation, Callback callback)
@@ -142,8 +148,8 @@ public sealed class HostInventoryController : BaseInventoryController
             }
         }
 
-        // Do not replicate search operations
-        if (operation is SinglePlayerSearchContentOperation)
+        // Do not replicate search operations or studying tapes
+        if (operation is SinglePlayerSearchContentOperation or StudyItemPlayerOperation)
         {
             base.Execute(operation, callback);
             return;
@@ -182,7 +188,7 @@ public sealed class HostInventoryController : BaseInventoryController
     public override bool HasCultistAmulet(out CultistAmulet amulet)
     {
         amulet = null;
-        using var enumerator = Inventory.GetItemsInSlots([EquipmentSlot.Pockets]).GetEnumerator();
+        using var enumerator = Inventory.GetItemsInSlots(new[] { EquipmentSlot.Pockets }.ToIl2CppList()).GetEnumerator();
         while (enumerator.MoveNext())
         {
             if (enumerator.Current is CultistAmulet cultistAmuletClass)

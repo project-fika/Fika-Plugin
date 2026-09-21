@@ -1,4 +1,5 @@
-﻿using EFT.InventoryLogic;
+﻿using Fika.Core.Main.Utils;
+using EFT.InventoryLogic;
 using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Pooling;
@@ -48,7 +49,7 @@ public sealed class CylinderMagPacket : IPoolSubPacket
             if (Status == EReloadWithAmmoStatus.StartReload)
             {
                 var bullets = controller.FindAmmoByIds(AmmoIds);
-                AmmoPack ammoPack = new(bullets);
+                AmmoPack ammoPack = new((bullets).ToIl2CppList());
                 controller.FastForwardCurrentState();
                 controller.CurrentOperation.ReloadCylinderMagazine(ammoPack, null, null);
             }

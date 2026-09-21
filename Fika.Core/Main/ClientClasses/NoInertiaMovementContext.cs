@@ -1,6 +1,8 @@
 ﻿using System;
 using Comfort.Common;
 using EFT;
+using Il2CppInterop.Runtime.Injection;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.ClientClasses;
 
@@ -9,9 +11,19 @@ namespace Fika.Core.Main.ClientClasses;
 /// </summary>
 public class NoInertiaMovementContext : ClientMovementContext
 {
-    public new static NoInertiaMovementContext Create(Player player, Func<IAnimator> animatorGetter, Func<ICharacterController> characterControllerGetter, LayerMask groundMask)
+    public NoInertiaMovementContext(IntPtr pointer) : base(pointer)
     {
-        var movementContext = Create<NoInertiaMovementContext>(player, animatorGetter, characterControllerGetter, groundMask);
+    }
+
+    public NoInertiaMovementContext() : base(Il2CppInjection.Allocate<NoInertiaMovementContext>())
+    {
+        ClassInjector.DerivedConstructorBody(this);
+        ClassInjector.InvokeBaseConstructor<MovementContext>(this);
+    }
+
+    public new static NoInertiaMovementContext Create(Player player, Il2CppSystem.Func<ICharacterController> characterControllerGetter, LayerMask groundMask)
+    {
+        var movementContext = Create<NoInertiaMovementContext>(player, characterControllerGetter, groundMask);
         return movementContext;
     }
 
@@ -25,6 +37,7 @@ public class NoInertiaMovementContext : ClientMovementContext
 
     public override void WeightRelatedValuesUpdated()
     {
+        UpdateStrengthCurveCache();
         if (_player.ProceduralWeaponAnimation != null)
         {
             _player.ProceduralWeaponAnimation.Overweight = _player.Physical.Overweight;
@@ -33,6 +46,7 @@ public class NoInertiaMovementContext : ClientMovementContext
             _player.ProceduralWeaponAnimation.WeaponFlipSpeed = InertiaSettings.WeaponFlipSpeed.Evaluate(_player.Physical.Inertia);
         }
         UpdateCovertEfficiency(_player.MovementContext.ClampedSpeed, true);
+        UpdateInertiaCurveCache();
         _player.HealthController.FallSafeHeight = Mathf.Lerp(Singleton<GlobalConfiguration>.Instance.Health.Falling.SafeHeight, Singleton<GlobalConfiguration>.Instance.Stamina.SafeHeightOverweight, _player.Physical.Overweight);
         PlayerAnimatorTransitionSpeed = TransitionSpeed;
         if (PoseLevel > _player.Physical.MaxPoseLevel && CurrentState is MovementState movementState)

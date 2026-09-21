@@ -10,18 +10,25 @@ using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.FirearmController;
 using Fika.Core.Networking.Packets.FirearmController.SubPackets;
+using Fika.Core.Networking.Packets.Player.Common;
+using Fika.Core.Networking.Packets.Player.Common.SubPackets;
 using Fika.Core.Networking.Pooling;
 using ReloadMagPacket = Fika.Core.Networking.Packets.FirearmController.SubPackets.ReloadMagPacket;
 using RollCylinderPacket = Fika.Core.Networking.Packets.FirearmController.SubPackets.RollCylinderPacket;
+using Il2CppInterop.Runtime.Injection;
 
 namespace Fika.Core.Main.ClientClasses.HandsControllers;
 
 public class FikaClientFirearmController : Player.FirearmController
 {
+    public FikaClientFirearmController(IntPtr pointer) : base(pointer)
+    {
+    }
+
     protected FikaPlayer _fikaPlayer;
     protected WeaponPacket _packet;
     private bool _isClient;
-    private bool _isGrenadeLauncher;
+    protected bool _isGrenadeLauncher;
 
     public static FikaClientFirearmController Create(FikaPlayer player, Weapon weapon)
     {
@@ -62,6 +69,12 @@ public class FikaClientFirearmController : Player.FirearmController
     public override void Destroy()
     {
         _packet = null;
+
+        if (FikaGlobals.IsQuitting)
+        {
+            return;
+        }
+
         base.Destroy();
     }
 
@@ -77,12 +90,12 @@ public class FikaClientFirearmController : Player.FirearmController
         _fikaPlayer.LeftStanceDisabled = DisableLeftStanceByOverlap;
     }
 
-    public override Dictionary<Type, OperationFactoryDelegate> GetOperationFactoryDelegates()
+    public override Il2CppSystem.Collections.Generic.Dictionary<Il2CppSystem.Type, OperationFactoryDelegate> GetOperationFactoryDelegates()
     {
         var operationFactoryDelegates = base.GetOperationFactoryDelegates();
-        operationFactoryDelegates[typeof(Player.FirearmController.ReloadInternalMagBase)] = new OperationFactoryDelegate(Weapon1);
-        operationFactoryDelegates[typeof(Player.FirearmController.ReloadCylinderMagOperation)] = new OperationFactoryDelegate(Weapon2);
-        operationFactoryDelegates[typeof(Player.FirearmController.FireOperation)] = new OperationFactoryDelegate(Weapon3);
+        operationFactoryDelegates[(typeof(Player.FirearmController.ReloadInternalMagBase)).ToIl2Cpp()] = new System.Func<Player.ObjectInHandsOperation>(Weapon1);
+        operationFactoryDelegates[(typeof(Player.FirearmController.ReloadCylinderMagOperation)).ToIl2Cpp()] = new System.Func<Player.ObjectInHandsOperation>(Weapon2);
+        operationFactoryDelegates[(typeof(Player.FirearmController.FireOperation)).ToIl2Cpp()] = new System.Func<Player.ObjectInHandsOperation>(Weapon3);
         return operationFactoryDelegates;
     }
 
@@ -95,14 +108,28 @@ public class FikaClientFirearmController : Player.FirearmController
         base.OnPlayerDead();
     }
 
-    public override bool CanStartReload()
+    public override void FastForwardCurrentOutdatedState()
+    {
+        var operation = CurrentOperation;
+        if (operation == null || !operation.IsOutdate())
+        {
+            return;
+        }
+
+        base.FastForwardCurrentOutdatedState();
+        _fikaPlayer.CommonPacket.Type = ECommonSubPacketType.FastForwardOutdated;
+        _fikaPlayer.CommonPacket.SubPacket = FastForwardOutdatedPacket.FromValue();
+        _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _fikaPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
+    }
+
+    public override bool CanStartReload(bool checkWeaponMalfunctions = true)
     {
         if (_isClient)
         {
-            return !_fikaPlayer.WaitingForCallback && base.CanStartReload();
+            return !_fikaPlayer.WaitingForCallback && base.CanStartReload(checkWeaponMalfunctions);
         }
 
-        return base.CanStartReload();
+        return base.CanStartReload(checkWeaponMalfunctions);
     }
 
     public override bool CanPressTrigger()
@@ -198,7 +225,7 @@ public class FikaClientFirearmController : Player.FirearmController
     public override bool ChangeFireMode(Weapon.EFireMode fireMode)
     {
         var flag = base.ChangeFireMode(fireMode);
-        if (flag)
+        if (flag && _packet != null && _fikaPlayer.PacketSender != null)
         {
             _packet.Type = EFirearmSubPacketType.ChangeFireMode;
             _packet.SubPacket = ChangeFireModePacket.FromValue(fireMode);
@@ -270,7 +297,7 @@ public class FikaClientFirearmController : Player.FirearmController
         return flag;
     }
 
-    public override void InitiateShot(IWeapon weapon, Ammo ammo, Vector3 shotPosition, Vector3 shotDirection, Vector3 fireportPosition, int chamberIndex, float overheat)
+    internal void SendShotInfo(IWeapon weapon, Ammo ammo, Vector3 shotPosition, Vector3 shotDirection, Vector3 fireportPosition, int chamberIndex, float overheat)
     {
         EShotType shotType = default;
 
@@ -303,8 +330,6 @@ public class FikaClientFirearmController : Player.FirearmController
             weapon.MalfState.SlideOnOverheatReached, shotType);
         _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
         _fikaPlayer.StatisticsManager.OnShot(Weapon, ammo);
-
-        base.InitiateShot(weapon, ammo, shotPosition, shotDirection, fireportPosition, chamberIndex, overheat);
     }
 
     public override void QuickReloadMag(Magazine magazine, Callback callback)
@@ -325,8 +350,9 @@ public class FikaClientFirearmController : Player.FirearmController
     {
         if (CanStartReload() && ammoPack.AmmoCount > 0)
         {
+            _player.ResetGestureInHands();
             ReloadBarrelsHandler handler = new(_fikaPlayer, this, placeToPutContainedAmmoMagazine, ammoPack);
-            CurrentOperation.ReloadBarrels(ammoPack, placeToPutContainedAmmoMagazine, callback, handler.Process);
+            CurrentOperation.ReloadBarrels(ammoPack, placeToPutContainedAmmoMagazine, callback, new System.Action<Comfort.Common.IResult>(handler.Process));
             return;
         }
 
@@ -345,10 +371,11 @@ public class FikaClientFirearmController : Player.FirearmController
         }
         if (CanStartReload())
         {
+            _player.ResetGestureInHands();
             ReloadCylinderMagazineHandler handler = new(_fikaPlayer, this, quickReload, ammoPack.GetReloadingAmmoIds(),
             [], (CylinderMagazine)Item.GetCurrentMagazine());
-            Weapon.GetShellsIndexes(handler.ShellsIndexes);
-            CurrentOperation.ReloadCylinderMagazine(ammoPack, callback, handler.Process, handler.QuickReload);
+            Weapon.GetShellsIndexes((handler.ShellsIndexes).ToIl2CppList());
+            CurrentOperation.ReloadCylinderMagazine(ammoPack, callback, new System.Action<Comfort.Common.IResult>(handler.Process), handler.QuickReload);
             return;
         }
 
@@ -357,8 +384,9 @@ public class FikaClientFirearmController : Player.FirearmController
 
     public override void ReloadGrenadeLauncher(AmmoPack ammoPack, Callback callback)
     {
-        if (CanStartReload())
+        if (CanStartReload(false))
         {
+            _player.ResetGestureInHands();
             var reloadingAmmoIds = ammoPack.GetReloadingAmmoIds();
             _packet.Type = EFirearmSubPacketType.ReloadLauncher;
             _packet.SubPacket = ReloadLauncherPacket.FromValue(true, reloadingAmmoIds);
@@ -378,11 +406,11 @@ public class FikaClientFirearmController : Player.FirearmController
             return;
         }
 
-        _player.MovementContext.PlayerAnimator.AnimatedInteractions.ForceStopInteractions();
+        _player.ResetGestureInHands();
         if (!_player.MovementContext.PlayerAnimator.AnimatedInteractions.IsInteractionPlaying)
         {
             ReloadMagHandler handler = new(_fikaPlayer, this, itemAddress, magazine);
-            CurrentOperation.ReloadMag(magazine, itemAddress, callback, handler.Process);
+            CurrentOperation.ReloadMag(magazine, itemAddress, callback, new System.Action<Comfort.Common.IResult>(handler.Process));
             return;
         }
 
@@ -397,15 +425,22 @@ public class FikaClientFirearmController : Player.FirearmController
         }
         if (CanStartReload())
         {
+            _player.ResetGestureInHands();
+            if (Item is Revolver)
+            {
+                ReloadCylinderMagazine(ammoPack, callback);
+                return;
+            }
+
             ReloadWithAmmoHandler handler = new(_fikaPlayer, this, ammoPack.GetReloadingAmmoIds());
-            CurrentOperation.ReloadWithAmmo(ammoPack, callback, handler.Process);
+            CurrentOperation.ReloadWithAmmo(ammoPack, callback, new System.Action<Comfort.Common.IResult>(handler.Process));
             return;
         }
 
         callback?.Fail("Can't start ReloadWithAmmo");
     }
 
-    public override bool SetLightsState(LightsState[] lightsStates, bool force = false, bool animated = true)
+    public override bool SetLightsState(Il2CppInterop.Runtime.InteropTypes.Arrays.Il2CppReferenceArray<LightsState> lightsStates, bool force = false, bool animated = true)
     {
         if (force || CurrentOperation.CanChangeLightState(lightsStates))
         {
@@ -417,18 +452,18 @@ public class FikaClientFirearmController : Player.FirearmController
         return base.SetLightsState(lightsStates, force, animated);
     }
 
-    public override void SetScopeMode(ScopeState[] scopeStates)
+    public override void SetScopeMode(Il2CppInterop.Runtime.InteropTypes.Arrays.Il2CppReferenceArray<ScopeState> scopeStates)
     {
         SendScopeStates(scopeStates);
         base.SetScopeMode(scopeStates);
     }
-    public override void OpticCalibrationSwitchUp(ScopeState[] scopeStates)
+    public override void OpticCalibrationSwitchUp(Il2CppInterop.Runtime.InteropTypes.Arrays.Il2CppReferenceArray<ScopeState> scopeStates)
     {
         SendScopeStates(scopeStates);
         base.OpticCalibrationSwitchUp(scopeStates);
     }
 
-    public override void OpticCalibrationSwitchDown(ScopeState[] scopeStates)
+    public override void OpticCalibrationSwitchDown(Il2CppInterop.Runtime.InteropTypes.Arrays.Il2CppReferenceArray<ScopeState> scopeStates)
     {
         SendScopeStates(scopeStates);
         base.OpticCalibrationSwitchDown(scopeStates);
@@ -443,6 +478,25 @@ public class FikaClientFirearmController : Player.FirearmController
 
         _packet.Type = EFirearmSubPacketType.ToggleScopeStates;
         _packet.SubPacket = ScopeStatesPacket.FromValue(scopeStates.Length, scopeStates);
+        _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
+    }
+
+    public override void SmoothScopeZoomValueChanged(SightComponent sightComponent, float scopeZoomValue)
+    {
+        base.SmoothScopeZoomValueChanged(sightComponent, scopeZoomValue);
+        if (sightComponent == null || sightComponent.ScopesCount == 0)
+        {
+            return;
+        }
+
+        var sightItem = sightComponent.Item;
+        if (sightItem == null)
+        {
+            return;
+        }
+
+        _packet.Type = EFirearmSubPacketType.ToggleScopeStates;
+        _packet.SubPacket = ScopeStatesPacket.FromZoom(sightItem.Id, sightComponent.SelectedScope, scopeZoomValue);
         _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
     }
 
@@ -476,7 +530,7 @@ public class FikaClientFirearmController : Player.FirearmController
         base.ShotMisfired(ammo, malfunctionState, overheat);
     }
 
-    public override bool ToggleLauncher(Action callback = null)
+    public override bool ToggleLauncher(Il2CppSystem.Action callback = null)
     {
         var flag = base.ToggleLauncher(callback);
         if (flag)
@@ -497,6 +551,12 @@ public class FikaClientFirearmController : Player.FirearmController
     public override void SetInventoryOpened(bool opened)
     {
         base.SetInventoryOpened(opened);
+        
+        if (_fikaPlayer.PacketSender?.NetworkManager == null)
+        {
+            return;
+        }
+
         _packet.Type = EFirearmSubPacketType.ToggleInventory;
         _packet.SubPacket = ToggleInventoryPacket.FromValue(opened);
         _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
@@ -570,8 +630,19 @@ public class FikaClientFirearmController : Player.FirearmController
         _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
     }
 
-    private class CylinderReloadOperation(Player.FirearmController controller) : Player.FirearmController.ReloadCylinderMagOperation(controller)
+    private class CylinderReloadOperation : Player.FirearmController.ReloadCylinderMagOperation
     {
+        public CylinderReloadOperation(IntPtr pointer) : base(pointer)
+        {
+        }
+
+        public CylinderReloadOperation(Player.FirearmController controller) : base(Il2CppInjection.Allocate<CylinderReloadOperation>())
+        {
+            ClassInjector.DerivedConstructorBody(this);
+            coopClientFirearmController = (FikaClientFirearmController)controller;
+            ClassInjector.InvokeBaseConstructor<Player.FirearmController.ReloadCylinderMagOperation>(this, controller);
+        }
+
         public override void SetTriggerPressed(bool pressed)
         {
             var bool_ = ReloadAborted;
@@ -589,11 +660,22 @@ public class FikaClientFirearmController : Player.FirearmController
             base.SwitchToIdle();
         }
 
-        private readonly FikaClientFirearmController coopClientFirearmController = (FikaClientFirearmController)controller;
+        private readonly FikaClientFirearmController coopClientFirearmController;
     }
 
-    private class AmmoPackReloadInternalOneChamberOperation(Player.FirearmController controller) : Player.FirearmController.ReloadInternalMagOperation(controller)
+    private class AmmoPackReloadInternalOneChamberOperation : Player.FirearmController.ReloadInternalMagOperation
     {
+        public AmmoPackReloadInternalOneChamberOperation(IntPtr pointer) : base(pointer)
+        {
+        }
+
+        public AmmoPackReloadInternalOneChamberOperation(Player.FirearmController controller) : base(Il2CppInjection.Allocate<AmmoPackReloadInternalOneChamberOperation>())
+        {
+            ClassInjector.DerivedConstructorBody(this);
+            _coopClientFirearmController = (FikaClientFirearmController)controller;
+            ClassInjector.InvokeBaseConstructor<Player.FirearmController.ReloadInternalMagOperation>(this, controller);
+        }
+
         public override void SetTriggerPressed(bool pressed)
         {
             var bool_ = ReloadAborted;
@@ -610,11 +692,22 @@ public class FikaClientFirearmController : Player.FirearmController
             base.SwitchToIdle();
         }
 
-        private readonly FikaClientFirearmController _coopClientFirearmController = (FikaClientFirearmController)controller;
+        private readonly FikaClientFirearmController _coopClientFirearmController;
     }
 
-    private class AmmoPackReloadInternalBoltOpenOperation(Player.FirearmController controller) : Player.FirearmController.ReloadInternalMagWithOpenBoltOperation(controller)
+    private class AmmoPackReloadInternalBoltOpenOperation : Player.FirearmController.ReloadInternalMagWithOpenBoltOperation
     {
+        public AmmoPackReloadInternalBoltOpenOperation(IntPtr pointer) : base(pointer)
+        {
+        }
+
+        public AmmoPackReloadInternalBoltOpenOperation(Player.FirearmController controller) : base(Il2CppInjection.Allocate<AmmoPackReloadInternalBoltOpenOperation>())
+        {
+            ClassInjector.DerivedConstructorBody(this);
+            _coopClientFirearmController = (FikaClientFirearmController)controller;
+            ClassInjector.InvokeBaseConstructor<Player.FirearmController.ReloadInternalMagWithOpenBoltOperation>(this, controller);
+        }
+
         public override void SetTriggerPressed(bool pressed)
         {
             var bool_ = ReloadAborted;
@@ -631,11 +724,22 @@ public class FikaClientFirearmController : Player.FirearmController
             base.SwitchToIdle();
         }
 
-        private readonly FikaClientFirearmController _coopClientFirearmController = (FikaClientFirearmController)controller;
+        private readonly FikaClientFirearmController _coopClientFirearmController;
     }
 
-    private class DefaultFireOperation(Player.FirearmController controller) : Player.FirearmController.BoltActionFireOperation(controller)
+    private class DefaultFireOperation : Player.FirearmController.BoltActionFireOperation
     {
+        public DefaultFireOperation(IntPtr pointer) : base(pointer)
+        {
+        }
+
+        public DefaultFireOperation(Player.FirearmController controller) : base(Il2CppInjection.Allocate<DefaultFireOperation>())
+        {
+            ClassInjector.DerivedConstructorBody(this);
+            _coopClientFirearmController = (FikaClientFirearmController)controller;
+            ClassInjector.InvokeBaseConstructor<Player.FirearmController.BoltActionFireOperation>(this, controller);
+        }
+
         public override void Start()
         {
             base.Start();
@@ -693,7 +797,7 @@ public class FikaClientFirearmController : Player.FirearmController
             _hasSent = false;
         }
 
-        private readonly FikaClientFirearmController _coopClientFirearmController = (FikaClientFirearmController)controller;
+        private readonly FikaClientFirearmController _coopClientFirearmController;
         private bool _hasSent;
     }
 

@@ -4,7 +4,7 @@ using Fika.Core.Main.BotClasses;
 using Fika.Core.Main.ObservedClasses.PlayerBridge;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.PlayerPatches;
 

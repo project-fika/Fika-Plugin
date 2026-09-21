@@ -2,7 +2,7 @@
 using System.Reflection;
 using EFT.UI;
 using EFT.UI.Matchmaker;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.UI.Patches;
 
@@ -18,18 +18,18 @@ public sealed class RaidSettingsWindow_SetBots_Patch : ModulePatch
     }
 
     [PatchPrefix]
-    public static bool Prefix(CanvasGroup ____aiDifficultyCanvasGroup, CanvasGroup ____aiAmountCanvasGroup, DropDownBox ____aiAmountDropdown, List<CanvasGroup> ____wavesCanvasGroups)
+    public static bool Prefix(EFT.UI.Matchmaker.RaidSettingsWindow __instance)
     {
-        var hasAi = ____aiAmountDropdown.CurrentIndex != 1;
-        foreach (var canvasGroup in ____wavesCanvasGroups)
+        var hasAi = __instance._aiAmountDropdown.CurrentIndex != 1;
+        foreach (var canvasGroup in __instance._wavesCanvasGroups)
         {
             canvasGroup.interactable = hasAi;
             canvasGroup.blocksRaycasts = hasAi;
             canvasGroup.alpha = hasAi ? 1f : 0.3f;
         }
 
-        ____aiDifficultyCanvasGroup.SetUnlockStatus(hasAi, true);
-        ____aiAmountCanvasGroup.SetUnlockStatus(true, true);
+        __instance._aiDifficultyCanvasGroup.SetUnlockStatus(hasAi, true);
+        __instance._aiAmountCanvasGroup.SetUnlockStatus(true, true);
 
         return false;
     }

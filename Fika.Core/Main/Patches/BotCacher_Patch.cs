@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using EFT;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches;
 

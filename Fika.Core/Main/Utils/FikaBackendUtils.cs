@@ -14,7 +14,7 @@ using Fika.Core.Networking;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Models;
 using HarmonyLib;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace Fika.Core.Main.Utils;
 
@@ -91,7 +91,18 @@ public static class FikaBackendUtils
     public static BindableList<RaidPlayer> GroupPlayers { get; set; } = [];
     public static FikaCustomRaidSettings CustomRaidSettings { get; set; } = new();
 
+    /// <summary>
+    /// If the current raid is the tutorial level
+    /// </summary>
+    public static bool IsTutorial { get; internal set; }
+
+    internal static bool IsTutorialLocation(string locationId)
+    {
+        return string.Equals(locationId, "Sandbox_start", StringComparison.OrdinalIgnoreCase);
+    }
+
     internal static bool RequestFikaWorld;
+    internal static bool RequestTutorialWorld;
     internal static Vector3 ReconnectPosition;
     internal static Vector2 ReconnectRotation;
 
@@ -169,7 +180,7 @@ public static class FikaBackendUtils
                 transitionType = ELocationTransition.None,
                 transitionCount = 0,
                 transitionRaidId = FikaGlobals.DefaultTransitId,
-                visitedLocations = []
+                visitedLocations = new Il2CppInterop.Runtime.InteropTypes.Arrays.Il2CppStringArray(0)
             };
         }
         set
@@ -297,7 +308,7 @@ public static class FikaBackendUtils
                 var menuUi = Singleton<MenuUI>.Instance;
                 if (menuUi != null)
                 {
-                    var panel = Traverse.Create(menuUi.MatchmakerTimeHasCome).Field<PartyInfoPanel>("_partyInfoPanel").Value;
+                    var panel = menuUi.MatchmakerTimeHasCome._partyInfoPanel;
                     panel.Close();
                     panel.Show(GroupPlayers, Profile, false);
                     return;
@@ -313,16 +324,16 @@ public static class FikaBackendUtils
 
 public class FikaCustomRaidSettings
 {
-    [JsonProperty("useCustomWeather")]
+    [JsonPropertyName("useCustomWeather")]
     public bool UseCustomWeather { get; set; }
 
-    [JsonProperty("disableOverload")]
+    [JsonPropertyName("disableOverload")]
     public bool DisableOverload { get; set; }
 
-    [JsonProperty("disableLegStamina")]
+    [JsonPropertyName("disableLegStamina")]
     public bool DisableLegStamina { get; set; }
 
-    [JsonProperty("disableArmStamina")]
+    [JsonPropertyName("disableArmStamina")]
     public bool DisableArmStamina { get; set; }
 
     public override string ToString()

@@ -36,7 +36,7 @@ public sealed class ReloadBarrelsPacket : IPoolSubPacket
         if (player.HandsController is ObservedFirearmController controller)
         {
             var ammo = controller.FindAmmoByIds(AmmoIds);
-            AmmoPack ammoPack = new(ammo);
+            AmmoPack ammoPack = new((ammo).ToIl2CppList());
             ItemAddress gridItemAddress = null;
 
             if (Descriptor != null)
@@ -45,7 +45,7 @@ public sealed class ReloadBarrelsPacket : IPoolSubPacket
                 {
                     gridItemAddress = player.InventoryController.ToItemAddress(Descriptor);
                 }
-                catch (HTTPNetworkException exception2)
+                catch (Il2CppInterop.Runtime.Il2CppException exception2)
                 {
                     FikaGlobals.LogError(exception2);
                 }

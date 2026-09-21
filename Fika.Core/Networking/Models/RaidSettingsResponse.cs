@@ -1,6 +1,7 @@
 using System.Runtime.Serialization;
 using EFT;
 using Fika.Core.Main.Utils;
+using System.Text.Json.Serialization;
 
 namespace Fika.Core.Networking.Models;
 
@@ -8,21 +9,21 @@ namespace Fika.Core.Networking.Models;
 public struct RaidSettingsResponse(bool received, bool metabolismDisabled,
     FikaCustomRaidSettings customRaidSettings, int playersSpawnPlace, int hourOfDay, int timeFlowType)
 {
-    [DataMember(Name = "received")]
+    [JsonPropertyName("received")]
     public bool Received = received;
 
-    [DataMember(Name = "metabolismDisabled")]
+    [JsonPropertyName("metabolismDisabled")]
     public bool MetabolismDisabled = metabolismDisabled;
 
-    [DataMember(Name = "customRaidSettings")]
+    [JsonPropertyName("customRaidSettings")]
     public FikaCustomRaidSettings CustomRaidSettings = customRaidSettings;
 
-    [DataMember(Name = "playersSpawnPlace")]
+    [JsonPropertyName("playersSpawnPlace")]
     public EPlayersSpawnPlace PlayersSpawnPlace = (EPlayersSpawnPlace)playersSpawnPlace;
 
-    [DataMember(Name = "hourOfDay")]
+    [JsonPropertyName("hourOfDay")]
     public int HourOfDay = hourOfDay;
 
-    [DataMember(Name = "timeFlowType")]
+    [JsonPropertyName("timeFlowType")]
     public ETimeFlowType TimeFlowType = (ETimeFlowType)timeFlowType;
 }

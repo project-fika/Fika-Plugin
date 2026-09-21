@@ -10,11 +10,16 @@ using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Packets.Player.Common;
 using Fika.Core.Networking.Packets.Player.Common.SubPackets;
 using static EFT.Player;
+using Il2CppInterop.Runtime.Injection;
 
 namespace Fika.Core.Main.Components;
 
 internal sealed class ReviveInteractable : InteractableObject
 {
+    public ReviveInteractable(IntPtr pointer) : base(pointer)
+    {
+    }
+
     private static readonly int _playerLayer = LayerMask.NameToLayer("Player");
     private static readonly int _ragdollLayer = LayerMask.NameToLayer("Deadbody");
     private static readonly int _bodyPartHitLayer = LayerMask.NameToLayer("HitCollider");
@@ -43,7 +48,7 @@ internal sealed class ReviveInteractable : InteractableObject
         component._startReviveDelegate = component.StartRevive;
         component._revivePlayerDelegate = component.RevivePlayer;
         component._startSearchingDelegate = component.StartSearching;
-        component._finishLootingDelegate = component.FinishLooting;
+        component._finishLootingDelegate = new System.Action<Comfort.Common.IResult>(component.FinishLooting);
         component.Init();
         return component;
     }
@@ -91,9 +96,9 @@ internal sealed class ReviveInteractable : InteractableObject
             EFTHardSettings.Instance.CorpseMaxDepenetrationVelocity,
             CollisionDetectionMode.Discrete,
             _observedPlayer,
-            CheckCorpseIsStill,
+            new System.Func<bool, float, bool>(CheckCorpseIsStill),
             _observedPlayer.PlayerBody,
-            _observedPlayer.PlayerBody.IsVisible,
+            new System.Func<bool>(_observedPlayer.PlayerBody.IsVisible),
             FikaGlobals.EmptyActionDelegate,
             false,
             false
@@ -110,7 +115,7 @@ internal sealed class ReviveInteractable : InteractableObject
             return;
         }
 
-        _observedPlayer.Speaker.Play(EPhraseTrigger.OnAgony, _observedPlayer.HealthStatus, true);
+        _observedPlayer.Speaker.Play(EPhraseTrigger.OnAgony, _observedPlayer.HealthStatus, true, new Il2CppSystem.Nullable<int>());
     }
 
     public void RemoveRagdoll()

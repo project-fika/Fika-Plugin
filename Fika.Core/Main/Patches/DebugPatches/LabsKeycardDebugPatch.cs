@@ -1,9 +1,6 @@
 ﻿using EFT;
-using System.Collections.Generic;
 using System.Reflection;
-using System.Reflection.Emit;
-using HarmonyLib;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.DebugPatches;
 
@@ -15,14 +12,15 @@ internal class LabsKeycardDebugPatch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return typeof(MainMenuShowOperation)
-            .GetMethod(nameof(MainMenuShowOperation.method_53));
+        return typeof(MatchmakerOperation)
+            .GetMethod(nameof(MatchmakerOperation.TryGetAccessToLocation));
     }
 
-    [PatchTranspiler]
-    public static IEnumerable<CodeInstruction> Transpile()
+    [PatchPrefix]
+    public static bool Prefix(ref string keyId, ref bool __result)
     {
-        yield return new(OpCodes.Ldc_I4_1);
-        yield return new(OpCodes.Ret);
+        keyId = string.Empty;
+        __result = true;
+        return false;
     }
 }

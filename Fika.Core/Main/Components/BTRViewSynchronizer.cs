@@ -2,6 +2,9 @@
 using EFT.Vehicle;
 using Fika.Core.Main.Custom;
 using Fika.Core.Networking;
+using System;
+using Il2CppInterop.Runtime.Injection;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.Components;
 
@@ -10,6 +13,10 @@ namespace Fika.Core.Main.Components;
 /// </summary>
 internal class BTRViewSynchronizer : ThrottledMono
 {
+    public BTRViewSynchronizer(IntPtr pointer) : base(pointer)
+    {
+    }
+
     private FikaServer _server;
 
     public override float UpdateRate
@@ -30,7 +37,8 @@ internal class BTRViewSynchronizer : ThrottledMono
     {
         if (_server != null)
         {
-            _server.SendBTRPacket(ref BtrController.Instance._offlineSyncPacket);
+            var packet = BtrController.Instance._offlineSyncPacket;
+            _server.SendBTRPacket(ref packet);
         }
     }
 }

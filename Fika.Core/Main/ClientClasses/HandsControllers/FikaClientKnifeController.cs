@@ -12,11 +12,17 @@ using Fika.Core.Networking.Packets.FirearmController;
 using Fika.Core.Networking.Packets.FirearmController.SubPackets;
 using Fika.Core.Networking.Packets.World;
 using KnifePacket = Fika.Core.Networking.Packets.FirearmController.SubPackets.KnifePacket;
+using System;
+using Il2CppInterop.Runtime.Injection;
 
 namespace Fika.Core.Main.ClientClasses.HandsControllers;
 
 public class FikaClientKnifeController : Player.KnifeController
 {
+    public FikaClientKnifeController(IntPtr pointer) : base(pointer)
+    {
+    }
+
     protected FikaPlayer _fikaPlayer;
     private WeaponPacket _packet;
 

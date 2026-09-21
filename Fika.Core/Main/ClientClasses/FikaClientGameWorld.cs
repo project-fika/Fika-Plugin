@@ -14,7 +14,8 @@ using EFT.SynchronizableObjects;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using HarmonyLib;
-using Systems.Effects;
+using Il2CppSystems.Effects;
+using Il2CppInterop.Runtime.Injection;
 
 namespace Fika.Core.Main.ClientClasses;
 
@@ -23,16 +24,21 @@ namespace Fika.Core.Main.ClientClasses;
 /// </summary>
 public class FikaClientGameWorld : ClientLocalGameWorld
 {
-    public FikaClientWorld FikaClientWorld { get; private set; }
-    public Dictionary<int, Turnable> TurnableDict => Turnables;
+    public FikaClientGameWorld(IntPtr pointer) : base(pointer)
+    {
+    }
 
-    public static FikaClientGameWorld Create(GameObject gameObject, ObjectsFactory objectsFactory, EUpdateQueue updateQueue, string currentProfileId)
+    public FikaClientWorld FikaClientWorld { get; private set; }
+    public Dictionary<int, Turnable> TurnableDict => (Turnables).ToManagedDictionary();
+
+    public static FikaClientGameWorld Create(GameObject gameObject, ObjectsFactory objectsFactory, EUpdateQueue updateQueue, Il2CppSystem.Nullable<MongoID> currentProfileId)
     {
         var gameWorld = gameObject.AddComponent<FikaClientGameWorld>();
         gameWorld.ObjectsFactory = objectsFactory;
-        Traverse.Create(gameWorld).Field<EUpdateQueue>("_updateQueue").Value = updateQueue;
+        gameWorld._updateQueue = updateQueue;
         gameWorld.SpeakerManager = gameObject.AddComponent<SpeakerManager>();
         gameWorld.ExfiltrationController = new ExfiltrationController();
+        gameWorld.RaidDialogEntryController = new RaidDialogEntryController();
         gameWorld.BufferZoneController = new BufferZoneController();
         gameWorld.CurrentProfileId = currentProfileId;
         gameWorld.UnityTickListener = GameWorldUnityTickListener.Create(gameObject, gameWorld);
@@ -66,7 +72,7 @@ public class FikaClientGameWorld : ClientLocalGameWorld
                     }
                 }
                 Grenade.Explosion(null, itemComponent, shotResult.HitPoint,
-                    shotResult.Player.iPlayer.ProfileId, SharedBallisticsCalculator,
+                    shotResult.Player.iPlayer.RaidId, SharedBallisticsCalculator,
                     shotResult.Weapon, shotResult.HitNormal * 0.08f, false);
                 return;
             }
@@ -87,6 +93,12 @@ public class FikaClientGameWorld : ClientLocalGameWorld
         for (var i = AllAlivePlayersList.Count - 1; i >= 0; i--)
         {
             var player = AllAlivePlayersList[i];
+
+            if (!player.enabled)
+            {
+                continue;
+            }
+
             try
             {
                 player.UpdateTick();
@@ -137,7 +149,7 @@ public class FikaClientGameWorld : ClientLocalGameWorld
         }
     }
 
-    public override void PlantTripwire(Item item, string profileId, Vector3 fromPosition, Vector3 toPosition)
+    public override void PlantTripwire(Item item, int playerRaidId, Vector3 fromPosition, Vector3 toPosition)
     {
         // Do nothing
     }

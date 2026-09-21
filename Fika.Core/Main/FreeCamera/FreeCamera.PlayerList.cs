@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
+using Fika.Core.UI.Custom;
 
 namespace Fika.Core.Main.FreeCamera;
 
@@ -9,6 +10,7 @@ public partial class FreeCamera
     private bool _hidePlayerList;
     private FikaPlayer _lastSpectatingPlayer;
     private Dictionary<int, ListPlayer> _playersTracker;
+    private GameObject _listPlayerPrefab;
 
     ECameraState _cameraState;
 
@@ -17,7 +19,7 @@ public partial class FreeCamera
 #if DEBUG
         FikaGlobals.LogInfo($"Adding ListPlayer for {player.Profile.GetCorrectedNickname()}");
 #endif
-        if (!_allowSpectateBots && (player.IsAI || player.IsObservedAI))
+        if (!_allowSpectateBots && (player is FikaBot || player.IsAI || player.IsObservedAI))
         {
             for (var i = 0; i < _coopHandler.HumanPlayers.Count; i++)
             {
@@ -31,8 +33,14 @@ public partial class FreeCamera
 
         if (!_playersTracker.ContainsKey(player.NetId))
         {
-            var newObj = Instantiate(_freecamUI.ListPlayerPrefab, _freecamUI.ListOfPlayers.transform);
-            var listPlayer = newObj.GetComponent<ListPlayer>();
+            var newObj = Instantiate(_listPlayerPrefab, _freecamUI.ListOfPlayers.transform);
+            var listPlayer = PrefabWiring.Attach<ListPlayer>(newObj);
+            if (listPlayer == null)
+            {
+                Destroy(newObj);
+                return;
+            }
+
             _playersTracker.Add(player.NetId, listPlayer);
             listPlayer.Init(player);
             RecalculatePlayerList();

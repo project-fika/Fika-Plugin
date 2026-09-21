@@ -3,11 +3,17 @@ using EFT;
 using EFT.Interactive;
 using Fika.Core.Main.HostClasses;
 using Fika.Core.Main.Utils;
+using System;
+using Il2CppInterop.Runtime.Injection;
 
 namespace Fika.Core.Main.Components;
 
 internal class CorpsePositionSyncer : MonoBehaviour
 {
+    public CorpsePositionSyncer(IntPtr pointer) : base(pointer)
+    {
+    }
+
     private Corpse _corpse;
     private CorpseSyncPacket _data;
     private FikaHostWorld _world;

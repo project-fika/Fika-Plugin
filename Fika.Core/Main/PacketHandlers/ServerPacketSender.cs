@@ -18,11 +18,16 @@ using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
 using Fika.Core.Networking.Packets.Player;
 using Fika.Core.UI.Custom;
+using Il2CppInterop.Runtime.Injection;
 
 namespace Fika.Core.Main.PacketHandlers;
 
 public sealed class ServerPacketSender : MonoBehaviour, IPacketSender
 {
+    public ServerPacketSender(IntPtr pointer) : base(pointer)
+    {
+    }
+
     public bool Enabled { get; set; }
     public bool SendState { get; set; }
     public IFikaNetworkManager NetworkManager { get; set; }
@@ -43,8 +48,8 @@ public sealed class ServerPacketSender : MonoBehaviour, IPacketSender
         {
             return FikaPlugin.Instance.Settings.UsePingSystem.Value && _player.IsYourPlayer && Input.GetKey(FikaPlugin.Instance.Settings.PingButton.Value.MainKey)
                 && FikaGlobals.AreModifiersPressed(FikaPlugin.Instance.Settings.PingButton.Value) && !MonoBehaviourSingleton<PreloaderUI>.Instance.Console.IsConsoleVisible
-                && _lastPingTime < DateTime.Now.AddSeconds(-3) && !FikaChatUIScript.IsActive && Singleton<IFikaGame>.Instantiated &&
-                Singleton<IFikaGame>.Instance.GameController.GameInstance.Status is GameStatus.Started && !_player.IsInventoryOpened;
+                && _lastPingTime < DateTime.Now.AddSeconds(-3) && !FikaChatUIScript.IsActive && FikaGlobals.FikaGame != null &&
+                FikaGlobals.FikaGame.GameController.GameInstance.Status is GameStatus.Started && !_player.IsInventoryOpened;
         }
     }
 

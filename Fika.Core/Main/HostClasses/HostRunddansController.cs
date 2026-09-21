@@ -4,12 +4,23 @@ using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Communication;
 using JsonType;
+using System;
+using Il2CppInterop.Runtime.Injection;
 
 namespace Fika.Core.Main.HostClasses;
 
-public class HostRunddansController(GlobalConfiguration.RunddansGlobalSettings settings, LocationSettings.Location location)
-    : LocalRunddansController(settings, location)
+public class HostRunddansController : LocalRunddansController
 {
+    public HostRunddansController(IntPtr pointer) : base(pointer)
+    {
+    }
+
+    public HostRunddansController(RunddansGlobalSettings settings, LocationSettings.Location location) : base(Il2CppInjection.Allocate<HostRunddansController>())
+    {
+        ClassInjector.DerivedConstructorBody(this);
+        ClassInjector.InvokeBaseConstructor<LocalRunddansController>(this, settings, location);
+    }
+
     public override void InteractWithEventObject(Player player, InteractWithEventObjectPacket packet)
     {
         if (!IsValid(player, out LocalTransitController transitController, out var transitDataClass)
@@ -56,7 +67,7 @@ public class HostRunddansController(GlobalConfiguration.RunddansGlobalSettings s
         {
             Type = EventControllerEventPacket.EEventType.StartedEvent
         };
-        Singleton<IFikaNetworkManager>.Instance.SendData(ref startPacket, DeliveryMethod.ReliableOrdered);
+        FikaGlobals.NetworkManager.SendData(ref startPacket, DeliveryMethod.ReliableOrdered);
     }
 
     public void ObservedInteractWithEventObject(Player player, InteractWithEventObjectPacket packet, NetPeer peer)
@@ -113,14 +124,14 @@ public class HostRunddansController(GlobalConfiguration.RunddansGlobalSettings s
         {
             Type = EventControllerEventPacket.EEventType.StartedEvent
         };
-        Singleton<IFikaNetworkManager>.Instance.SendData(ref startPacket, DeliveryMethod.ReliableOrdered);
+        FikaGlobals.NetworkManager.SendData(ref startPacket, DeliveryMethod.ReliableOrdered);
 
         var removePacket = new EventControllerEventPacket
         {
             NetId = player.Id,
             Type = EventControllerEventPacket.EEventType.RemoveItem
         };
-        Singleton<IFikaNetworkManager>.Instance.SendData(ref removePacket, DeliveryMethod.ReliableOrdered);
+        FikaGlobals.NetworkManager.SendData(ref removePacket, DeliveryMethod.ReliableOrdered);
     }
 
     private void ObservedHeadlessInteractWithEventObject(Player player, InteractWithEventObjectPacket packet, NetPeer peer)
@@ -170,14 +181,14 @@ public class HostRunddansController(GlobalConfiguration.RunddansGlobalSettings s
         {
             Type = EventControllerEventPacket.EEventType.StartedEvent
         };
-        Singleton<IFikaNetworkManager>.Instance.SendData(ref startPacket, DeliveryMethod.ReliableOrdered);
+        FikaGlobals.NetworkManager.SendData(ref startPacket, DeliveryMethod.ReliableOrdered);
 
         var removePacket = new EventControllerEventPacket
         {
             NetId = player.Id,
             Type = EventControllerEventPacket.EEventType.RemoveItem
         };
-        Singleton<IFikaNetworkManager>.Instance.SendData(ref removePacket, DeliveryMethod.ReliableOrdered);
+        FikaGlobals.NetworkManager.SendData(ref removePacket, DeliveryMethod.ReliableOrdered);
     }
 
     public override void OnTriggerStateChanged(EventObject.EState state)
@@ -188,7 +199,7 @@ public class HostRunddansController(GlobalConfiguration.RunddansGlobalSettings s
         base.OnTriggerStateChanged(state);
         RunddansStateEvent stateEvent = new()
         {
-            PlayerId = 0,
+            PlayerRaidId = 0,
             Objects = []
         };
         foreach ((var id, var eventObject) in Objects)
@@ -200,7 +211,7 @@ public class HostRunddansController(GlobalConfiguration.RunddansGlobalSettings s
             Type = EventControllerEventPacket.EEventType.StateEvent,
             Event = stateEvent
         };
-        Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+        FikaGlobals.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered);
     }
 
     private void NoRequiredItemNotification(Player player)
@@ -216,11 +227,11 @@ public class HostRunddansController(GlobalConfiguration.RunddansGlobalSettings s
             Type = EventControllerEventPacket.EEventType.MessageEvent,
             Event = new RunddansMessagesEvent
             {
-                PlayerId = player.Id,
+                PlayerRaidId = player.RaidId,
                 Type = RunddansMessagesEvent.EType.NoRequiredItem
             }
         };
-        Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+        FikaGlobals.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered);
     }
 
     private void NotInteractableNotification(Player player)
@@ -236,10 +247,10 @@ public class HostRunddansController(GlobalConfiguration.RunddansGlobalSettings s
             Type = EventControllerEventPacket.EEventType.MessageEvent,
             Event = new RunddansMessagesEvent()
             {
-                PlayerId = player.Id,
+                PlayerRaidId = player.RaidId,
                 Type = RunddansMessagesEvent.EType.NonInteractive
             }
         };
-        Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+        FikaGlobals.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered);
     }
 }

@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using EFT;
 using EFT.HealthSystem;
 using EFT.InventoryLogic;
+using Il2CppInterop.Runtime.Injection;
+using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.ObservedClasses;
 
@@ -11,19 +13,32 @@ namespace Fika.Core.Main.ObservedClasses;
 /// Created by: Paulov
 /// Paulov: Uses stubs for all of Statistics Manager
 /// </summary>
-public sealed class ObservedStatisticsManager : IStatisticsManager
+public sealed class ObservedStatisticsManager : Il2CppSystem.Object, IStatisticsManager
 {
-    public TimeSpan CurrentSessionLength
+    public ObservedStatisticsManager(IntPtr pointer) : base(pointer)
+    {
+    }
+
+    public ObservedStatisticsManager() : base(Il2CppInjection.Allocate<ObservedStatisticsManager>())
+    {
+        ClassInjector.DerivedConstructorBody(this);
+    }
+
+    public Il2CppSystem.TimeSpan CurrentSessionLength
     {
         get
         {
-            return default;
+            return new Il2CppSystem.TimeSpan();
         }
     }
 
-#pragma warning disable CS0067
-    public event Action OnUniqueLoot;
-#pragma warning restore CS0067
+    public void add_OnUniqueLoot(Il2CppSystem.Action value)
+    {
+    }
+
+    public void remove_OnUniqueLoot(Il2CppSystem.Action value)
+    {
+    }
 
     public void AddDoorExperience(bool breached)
     {
@@ -45,12 +60,12 @@ public sealed class ObservedStatisticsManager : IStatisticsManager
 
     }
 
-    public void OnEnemyDamage(DamageInfo damage, EBodyPart bodyPart, string playerProfileId, EPlayerSide playerSide, WildSpawnType role, string groupId, float fullHealth, bool isHeavyDamage, float distance, int hour, List<string> targetEquipment, HealthEffects enemyEffects, List<string> zoneIds)
+    public void OnEnemyDamage(DamageInfo damage, EBodyPart bodyPart, string playerProfileId, EPlayerSide playerSide, WildSpawnType role, string groupId, float fullHealth, bool isHeavyDamage, float distance, int hour, Il2CppSystem.Collections.Generic.List<string> targetEquipment, HealthEffects enemyEffects, Il2CppSystem.Collections.Generic.List<string> zoneIds)
     {
         // Do nothing
     }
 
-    public void OnEnemyKill(DamageInfo damage, EDamageType lethalDamageType, EBodyPart bodyPart, EPlayerSide playerSide, WildSpawnType role, string playerAccountId, string playerProfileId, string playerName, string groupId, int level, int killExp, float distance, int hour, List<string> targetEquipment, HealthEffects enemyEffects, List<string> zoneIds, bool isFriendly, bool isAI)
+    public void OnEnemyKill(DamageInfo damage, EDamageType lethalDamageType, EBodyPart bodyPart, EPlayerSide playerSide, WildSpawnType role, string playerAccountId, string playerProfileId, string playerName, string groupId, int level, int killExp, float distance, int hour, Il2CppSystem.Collections.Generic.List<string> targetEquipment, HealthEffects enemyEffects, Il2CppSystem.Collections.Generic.List<string> zoneIds, bool isFriendly, bool isAI)
     {
         // Do nothing
     }

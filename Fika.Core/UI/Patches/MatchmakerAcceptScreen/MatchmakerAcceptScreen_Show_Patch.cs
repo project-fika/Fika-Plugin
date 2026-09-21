@@ -5,7 +5,7 @@ using EFT.UI;
 using EFT.UI.Matchmaker;
 using Fika.Core.Main.Utils;
 using Fika.Core.UI.Custom;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.UI.Patches.MatchmakerAcceptScreen;
 
@@ -18,14 +18,14 @@ public class MatchmakerAcceptScreen_Show_Patch : ModulePatch
     }
 
     [PatchPrefix]
-    public static void Prefix(MatchMakerAcceptScreen __instance, ref RaidSettings raidSettings, DefaultUIButton ____acceptButton, DefaultUIButton ____backButton)
+    public static void Prefix(MatchMakerAcceptScreen __instance, ref RaidSettings raidSettings)
     {
         FikaBackendUtils.IsScav = raidSettings.IsScav;
 
         var newMatchMaker = __instance.gameObject.GetOrAddComponent<MatchMakerUIScript>();
         newMatchMaker.RaidSettings = raidSettings;
-        newMatchMaker.AcceptButton = ____acceptButton;
-        newMatchMaker.BackButton = ____backButton;
+        newMatchMaker.AcceptButton = __instance._acceptButton;
+        newMatchMaker.BackButton = __instance._backButton;
     }
 
     [PatchPostfix]
