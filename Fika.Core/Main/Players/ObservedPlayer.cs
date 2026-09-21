@@ -1978,7 +1978,6 @@ public sealed class ObservedPlayer : FikaPlayer
                 {
                     num5 = 0f;
                 }
-                ProceduralWeaponAnimation.GetLeftStanceCurrentCurveValue(num4);
                 PlayerBones.ShiftWeaponRoot(deltaTime, EPointOfView.ThirdPerson, num5);
             }
             PlayerBones.RotateHead(0f, ProceduralWeaponAnimation.GetHeadRotation(),
