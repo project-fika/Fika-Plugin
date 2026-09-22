@@ -488,11 +488,11 @@ public sealed class ObservedPlayer : FikaPlayer
         // Do nothing
     }
 
-    public override void ShotReactions(DamageInfo shot, EBodyPart bodyPart)
+    /*public override void ShotReactions(DamageInfo shot, EBodyPart bodyPart)
     {
         TurnOffFbbikAt = Time.time + 0.6f;
         base.ShotReactions(shot, bodyPart);
-    }
+    }*/
 
     public override void ManageAggressor(DamageInfo DamageInfo, EBodyPart bodyPart, EBodyPartColliderType colliderType)
     {
