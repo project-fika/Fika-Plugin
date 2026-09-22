@@ -1947,8 +1947,9 @@ public sealed class ObservedPlayer : FikaPlayer
         if (_armsupdated && isVisibleOrClose && !UsedSimplifiedSkeleton)
         {
             ProceduralWeaponAnimation.ProcessEffectors(deltaTime, 2, Motion, Velocity);
-            PlayerBones.Offset = ProceduralWeaponAnimation.HandsContainer.WeaponRootAnim.localPosition;
-            PlayerBones.DeltaRotation = ProceduralWeaponAnimation.HandsContainer.WeaponRootAnim.localRotation;
+            var weaponRoot = ProceduralWeaponAnimation.HandsContainer.WeaponRootAnim;
+            PlayerBones.Offset = weaponRoot.localPosition;
+            PlayerBones.DeltaRotation = weaponRoot.localRotation;
         }
 
         if (isVisibleOrClose && !UsedSimplifiedSkeleton)
