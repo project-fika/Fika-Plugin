@@ -294,16 +294,8 @@ public sealed class ObservedPlayer : FikaPlayer
         player.CurrentPlayerState = new ObservedState(position, player.Rotation);
         player._isZombie = player.UsedSimplifiedSkeleton;
 
-        if (ObservedPlayerController._evenOrNotEvenUpdateLastValue == 0)
-        {
-            ObservedPlayerController._evenOrNotEvenUpdateLastValue = 1;
-            player._frameSkip = 1;
-        }
-        else
-        {
-            ObservedPlayerController._evenOrNotEvenUpdateLastValue = 0;
-            player._frameSkip = 0;
-        }
+        player._frameSkip = ObservedPlayerController._evenOrNotEvenUpdateLastValue;
+        ObservedPlayerController._evenOrNotEvenUpdateLastValue = (ObservedPlayerController._evenOrNotEvenUpdateLastValue + 1) % 3;
 
         CameraManager.Instance.FoVUpdateAction -= player.OnFovUpdatedEvent;
 
@@ -2276,11 +2268,13 @@ public sealed class ObservedPlayer : FikaPlayer
     private void ObservedFBBIKUpdate(float distance, int ikUpdateInterval)
     {
         _fbbik.solver.iterations = (int)Mathf.Clamp(15f / distance, 0f, 2f);
+
         if (!_fbbik.solver.Quick && Time.time > TurnOffFbbikAt)
         {
             _fbbik.solver.Quick = true;
         }
-        if (!_fbbik.solver.Quick || Time.frameCount % ikUpdateInterval == 0)
+
+        if (!_fbbik.solver.Quick || (Time.frameCount + _frameSkip) % ikUpdateInterval == 0)
         {
             _fbbik.solver.Update();
         }
