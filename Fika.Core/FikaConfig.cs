@@ -241,7 +241,7 @@ public sealed class FikaConfig(ConfigFile config)
         IKCullDistance = SetupSetting(advancedDefaultHeader, "IK Cull Distance", 40f,
             new ConfigDescription("Distance when IK should cull (not update). Does not affect local players (bots as host)\n" +
             "If another player is beyond this distance, their arms won't update (floating gun).",
-            new AcceptableValueRange<float>(20, 200), new ConfigurationManagerAttributes
+            new AcceptableValueRange<float>(20f, 200f), new ConfigurationManagerAttributes
             {
                 IsAdvanced = true,
                 Category = advancedHeader,
