@@ -1,4 +1,4 @@
-﻿using Diz.Jobs;
+using Diz.Jobs;
 using EFT.Settings;
 using EFT.Settings.Sound;
 using JsonType;
@@ -25,13 +25,34 @@ using static Fika.Core.Networking.IFikaNetworkManager;
 
 namespace Fika.Core.Main.Utils;
 
+/// <summary>
+/// Global utility constants, properties, and helper methods used across the Fika plugin.
+/// </summary>
 public static class FikaGlobals
 {
+    /// <summary>
+    /// The MongoDB ObjectId string for the transit trader (BTR).
+    /// </summary>
     public const string TransitTraderId = "656f0f98d80a697f855d34b1";
+
+    /// <summary>
+    /// The display and lookup name of the transit trader.
+    /// </summary>
     public const string TransitTraderName = "BTR";
+
+    /// <summary>
+    /// The default transit location identifier.
+    /// </summary>
     public const string DefaultTransitId = "66f5750951530ca5ae09876d";
+
+    /// <summary>
+    /// The group identifier assigned to players participating in a Fika co-op session.
+    /// </summary>
     public const string FikaGroupId = "Fika";
 
+    /// <summary>
+    /// Layer mask used for raycasting pings against the environment and entities.
+    /// </summary>
     public static int PingMask = LayerMask.GetMask(["HighPolyCollider", "Interactive", "Deadbody", "Player", "Loot", "Terrain"]);
 
     /// <summary>
@@ -43,10 +64,16 @@ public static class FikaGlobals
     /// </summary>
     public static Action EmptyActionDelegate => EmptyAction;
 
+    /// <summary>
+    /// The maximum raycast distance in meters for placing pings.
+    /// </summary>
     public const int PingRange = 1000;
 
     private static readonly ManualLogSource _logger = Logger.CreateLogSource("FikaGlobals");
 
+    /// <summary>
+    /// Interactions that are blocked from being executed in co-op.
+    /// </summary>
     internal static readonly List<EInteraction> BlockedInteractions =
     [
         EInteraction.DropBackpack, EInteraction.NightVisionOffGear, EInteraction.NightVisionOnGear,
@@ -54,11 +81,17 @@ public static class FikaGlobals
         EInteraction.BipodForwardOff, EInteraction.BipodBackwardOn, EInteraction.BipodBackwardOff
     ];
 
+    /// <summary>
+    /// Equipment slots that represent weapon slots.
+    /// </summary>
     internal static readonly List<EquipmentSlot> WeaponSlots =
     [
         EquipmentSlot.FirstPrimaryWeapon, EquipmentSlot.SecondPrimaryWeapon, EquipmentSlot.Holster
     ];
 
+    /// <summary>
+    /// Gets the search controller serializer singleton where all items are treated as fully searched.
+    /// </summary>
     public static ISearchController SearchControllerSerializer
     {
         get
@@ -67,6 +100,9 @@ public static class FikaGlobals
         }
     }
 
+    /// <summary>
+    /// Gets the global EFT <see cref="InputTree"/> component.
+    /// </summary>
     public static InputTree InputTree
     {
         get
@@ -85,6 +121,9 @@ public static class FikaGlobals
 
     private static InputTree _inputTree;
 
+    /// <summary>
+    /// Gets the VoIP settings handler, initializing default push-to-talk and quality settings if needed.
+    /// </summary>
     public static VoipSettings VOIPHandler
     {
         get
@@ -107,7 +146,7 @@ public static class FikaGlobals
     /// <summary>
     /// Checks whether the game client is in a raid
     /// </summary>
-    /// <returns></returns>
+    /// <returns><see langword="true"/> if the client is currently in a raid; otherwise, <see langword="false"/>.</returns>
     public static bool IsInRaid
     {
         get
@@ -118,51 +157,97 @@ public static class FikaGlobals
 
     private static VoipSettings _voipHandler;
 
+    /// <summary>
+    /// Gets the default mouse sensitivity multiplier applied to other players.
+    /// </summary>
+    /// <returns>A sensitivity float value of 1.0f.</returns>
     internal static float GetOtherPlayerSensitivity()
     {
         return 1f;
     }
 
+    /// <summary>
+    /// Gets the local player's configured mouse sensitivity from game control settings.
+    /// </summary>
+    /// <returns>The mouse sensitivity value.</returns>
     internal static float GetLocalPlayerSensitivity()
     {
         return Singleton<SettingsManager>.Instance.Control.Settings.MouseSensitivity;
     }
 
+    /// <summary>
+    /// Gets the local player's configured mouse aiming sensitivity from game control settings.
+    /// </summary>
+    /// <returns>The mouse aiming sensitivity value.</returns>
     internal static float GetLocalPlayerAimingSensitivity()
     {
         return Singleton<SettingsManager>.Instance.Control.Settings.MouseAimingSensitivity;
     }
 
+    /// <summary>
+    /// Gets the current application runtime in seconds since the game started.
+    /// </summary>
+    /// <returns>Current application time in seconds.</returns>
     public static float GetApplicationTime()
     {
         return Time.time;
     }
 
+    /// <summary>
+    /// Checks whether the lamp controller has a non-zero network ID.
+    /// </summary>
+    /// <param name="controller">The <see cref="LampController"/> to check.</param>
+    /// <returns><see langword="true"/> if the lamp controller's NetId is not 0; otherwise, <see langword="false"/>.</returns>
     internal static bool LampControllerNetIdNot0(LampController controller)
     {
         return controller.NetId != 0;
     }
 
+    /// <summary>
+    /// Gets the network ID of the specified lamp controller.
+    /// </summary>
+    /// <param name="controller">The <see cref="LampController"/> to inspect.</param>
+    /// <returns>The network ID of the lamp controller.</returns>
     internal static int LampControllerGetNetId(LampController controller)
     {
         return controller.NetId;
     }
 
+    /// <summary>
+    /// Checks whether a window breaker is available to synchronize.
+    /// </summary>
+    /// <param name="breaker">The <see cref="WindowBreaker"/> to check.</param>
+    /// <returns><see langword="true"/> if available to synchronize; otherwise, <see langword="false"/>.</returns>
     internal static bool WindowBreakerAvailableToSync(WindowBreaker breaker)
     {
         return breaker.AvailableToSync;
     }
 
+    /// <summary>
+    /// Retrieves the underlying <see cref="Item"/> from a <see cref="JsonLootItem"/>.
+    /// </summary>
+    /// <param name="positionClass">The JSON loot item wrapper.</param>
+    /// <returns>The contained <see cref="Item"/>.</returns>
     internal static Item GetLootItemPositionItem(JsonLootItem positionClass)
     {
         return positionClass.Item;
     }
 
+    /// <summary>
+    /// Gets the body part type corresponding to the specified collider.
+    /// </summary>
+    /// <param name="collider">The body part collider.</param>
+    /// <returns>The corresponding <see cref="EBodyPart"/> type.</returns>
     internal static EBodyPart GetBodyPartFromCollider(BodyPartCollider collider)
     {
         return collider.BodyPartType;
     }
 
+    /// <summary>
+    /// Formats a byte size into a human-readable string representation with appropriate unit suffixes (B, KB, MB, etc.).
+    /// </summary>
+    /// <param name="bytes">The size in bytes.</param>
+    /// <returns>A formatted string representing the file size.</returns>
     internal static string FormatFileSize(long bytes)
     {
         const int unit = 1024;
@@ -172,11 +257,22 @@ public static class FikaGlobals
         return $"{bytes / Math.Pow(unit, exp):F2} {("KMGTPE")[exp - 1]}B";
     }
 
+    /// <summary>
+    /// Asynchronously loads asset bundles and pools for an item and sets up/spawns it in the world in front of the player.
+    /// </summary>
+    /// <param name="item">The item to spawn.</param>
+    /// <param name="player">The player in front of whom the item will be spawned.</param>
     internal static void SpawnItemInWorld(Item item, FikaPlayer player)
     {
         StaticManager.BeginCoroutine(SpawnItemRoutine(item, player));
     }
 
+    /// <summary>
+    /// Coroutine that loads item bundles and creates pools, then instantiates the item in the world.
+    /// </summary>
+    /// <param name="item">The item to spawn.</param>
+    /// <param name="player">The player in front of whom the item will be spawned.</param>
+    /// <returns>An enumerator for coroutine progression.</returns>
     private static IEnumerator SpawnItemRoutine(Item item, FikaPlayer player)
     {
         List<ResourceKey> collection = [];
@@ -207,8 +303,8 @@ public static class FikaGlobals
     /// <summary>
     /// Forces the <see cref="ProfileInfo.MainProfileNickname"/> to be set on a profile
     /// </summary>
-    /// <param name="infoClass"></param>
-    /// <param name="nickname"></param>
+    /// <param name="infoClass">The profile information instance to modify.</param>
+    /// <param name="nickname">The nickname to assign to the main profile.</param>
     public static void SetProfileNickname(this ProfileInfo infoClass, string nickname)
     {
         Traverse.Create(infoClass).Field<string>("MainProfileNickname").Value = nickname;
@@ -217,8 +313,8 @@ public static class FikaGlobals
     /// <summary>
     /// Checks whether a profile belongs to a player or an AI
     /// </summary>
-    /// <param name="profile"></param>
-    /// <returns>True if the profile belongs to a player, false if it belongs to an AI</returns>
+    /// <param name="profile">The profile to inspect.</param>
+    /// <returns><see langword="true"/> if the profile belongs to a player; otherwise, <see langword="false"/> if it belongs to an AI.</returns>
     public static bool IsPlayerProfile(this Profile profile)
     {
         return !string.IsNullOrEmpty(profile.PetId) || profile.Info.RegistrationDate > 0 || !string.IsNullOrEmpty(profile.Info.MainProfileNickname);
@@ -281,7 +377,7 @@ public static class FikaGlobals
     /// <summary>
     /// Gets the states from a <see cref="TacticalComboVisualController"/>
     /// </summary>
-    /// <param name="controller"></param>
+    /// <param name="controller">The controller to inspect.</param>
     /// <returns><see cref="LightsState"/></returns>
     public static LightsState GetFirearmLightStates(TacticalComboVisualController controller)
     {
@@ -324,9 +420,10 @@ public static class FikaGlobals
     }
 
     /// <summary>
-    /// Unsubscribes all delegates from an <see cref="Action{T}"/>
+    /// Unsubscribes all delegates from an <see cref="Action"/>
     /// </summary>
-    /// <param name="action"></param>
+    /// <param name="action">The action delegate to clear.</param>
+    /// <returns>The cleared action delegate.</returns>
     public static Action ClearDelegates(Action action)
     {
         var list = action.GetInvocationList();
@@ -344,8 +441,9 @@ public static class FikaGlobals
     /// <summary>
     /// Unsubscribes all delegates from an <see cref="Action{T}"/>
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="action"></param>
+    /// <typeparam name="T">The parameter type of the action delegate.</typeparam>
+    /// <param name="action">The action delegate to clear.</param>
+    /// <returns>The cleared action delegate.</returns>
     public static Action<T> ClearDelegates<T>(Action<T> action) where T : class
     {
         var list = action.GetInvocationList();
@@ -363,9 +461,10 @@ public static class FikaGlobals
     /// <summary>
     /// Unsubscribes all delegates from an <see cref="Action{T, Y}"/>
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <typeparam name="Y"></typeparam>
-    /// <param name="action"></param>
+    /// <typeparam name="T">The first parameter type of the action delegate.</typeparam>
+    /// <typeparam name="Y">The second parameter type of the action delegate.</typeparam>
+    /// <param name="action">The action delegate to clear.</param>
+    /// <returns>The cleared action delegate.</returns>
     public static Action<T, Y> ClearDelegates<T, Y>(Action<T, Y> action)
         where T : class
         where Y : class
@@ -382,6 +481,11 @@ public static class FikaGlobals
         return action;
     }
 
+    /// <summary>
+    /// Logs an informational message with the calling member name prefixed.
+    /// </summary>
+    /// <param name="message">The message to log.</param>
+    /// <param name="caller">The name of the calling member, populated automatically via <see cref="CallerMemberNameAttribute"/>.</param>
     public static void LogInfo(string message, [CallerMemberName] string caller = "")
     {
         if (string.IsNullOrEmpty(message))
@@ -392,6 +496,11 @@ public static class FikaGlobals
         Instance.FikaLogger.LogInfo($"[{caller}]: {message}");
     }
 
+    /// <summary>
+    /// Logs a warning message with the calling member name prefixed.
+    /// </summary>
+    /// <param name="message">The message to log.</param>
+    /// <param name="caller">The name of the calling member, populated automatically via <see cref="CallerMemberNameAttribute"/>.</param>
     public static void LogWarning(string message, [CallerMemberName] string caller = "")
     {
         if (string.IsNullOrEmpty(message))
@@ -402,6 +511,11 @@ public static class FikaGlobals
         Instance.FikaLogger.LogWarning($"[{caller}]: {message}");
     }
 
+    /// <summary>
+    /// Logs an error message with the calling member name prefixed.
+    /// </summary>
+    /// <param name="message">The message to log.</param>
+    /// <param name="caller">The name of the calling member, populated automatically via <see cref="CallerMemberNameAttribute"/>.</param>
     public static void LogError(string message, [CallerMemberName] string caller = "")
     {
         if (string.IsNullOrEmpty(message))
@@ -412,11 +526,21 @@ public static class FikaGlobals
         Instance.FikaLogger.LogError($"[{caller}]: {message}");
     }
 
+    /// <summary>
+    /// Logs an object representation as an error with the calling member name prefixed.
+    /// </summary>
+    /// <param name="obj">The object to log as a string.</param>
+    /// <param name="caller">The name of the calling member, populated automatically via <see cref="CallerMemberNameAttribute"/>.</param>
     public static void LogError(object obj, [CallerMemberName] string caller = "")
     {
         Instance.FikaLogger.LogError($"[{caller}]: {obj}");
     }
 
+    /// <summary>
+    /// Logs a fatal error message with the calling member name prefixed.
+    /// </summary>
+    /// <param name="message">The message to log.</param>
+    /// <param name="caller">The name of the calling member, populated automatically via <see cref="CallerMemberNameAttribute"/>.</param>
     public static void LogFatal(string message, [CallerMemberName] string caller = "")
     {
         if (string.IsNullOrEmpty(message))
@@ -427,6 +551,11 @@ public static class FikaGlobals
         Instance.FikaLogger.LogFatal($"[{caller}]: {message}");
     }
 
+    /// <summary>
+    /// Converts an <see cref="ESendRate"/> enum value into its corresponding numeric tick rate.
+    /// </summary>
+    /// <param name="rate">The network send rate enum value.</param>
+    /// <returns>The tick rate as an integer frequency value (e.g. 10, 20, 30).</returns>
     public static int ToNumber(this ESendRate rate)
     {
         return rate switch
@@ -438,11 +567,18 @@ public static class FikaGlobals
         };
     }
 
+    /// <summary>
+    /// An empty action method used as a no-op delegate to avoid allocations.
+    /// </summary>
     public static void EmptyAction()
     {
 
     }
 
+    /// <summary>
+    /// An empty callback method used as a no-op delegate for asynchronous results.
+    /// </summary>
+    /// <param name="result">The result of the asynchronous operation (unused).</param>
     private static void EmptyCallback(IResult result)
     {
 
@@ -563,6 +699,7 @@ public static class FikaGlobals
     /// <summary>
     /// Checks whether the shot type is a misfire
     /// </summary>
+    /// <param name="shotType">The shot type to check.</param>
     /// <returns><see langword="true"/> if the shot is a misfire; otherwise <see langword="false"/></returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsMisfire(this EShotType shotType)
