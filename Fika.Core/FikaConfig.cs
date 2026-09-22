@@ -35,6 +35,7 @@ public sealed class FikaConfig(ConfigFile config)
     public ConfigEntry<bool> NoLoot { get; set; }
     public ConfigEntry<ELoadPriority> LoadPriority { get; set; }
     public ConfigEntry<int> MaxBundleLock { get; set; }
+    public ConfigEntry<float> IKCullDistance { get; set; }
 
     // Coop
     public ConfigEntry<bool> UseHeadlessIfAvailable { get; set; }
@@ -185,7 +186,7 @@ public sealed class FikaConfig(ConfigFile config)
                     IsAdvanced = true,
                     Category = advancedHeader,
                     DispName = LocaleUtils.BEPINEX_OFFICIAL_VERSION_T.Localized(),
-                    Order = 6
+                    Order = 7
                 }),
                 "Official Version", ref failed, headers);
 
@@ -195,7 +196,7 @@ public sealed class FikaConfig(ConfigFile config)
                 IsAdvanced = true,
                 Category = advancedHeader,
                 DispName = "Developer Mode",
-                Order = 5
+                Order = 6
             }), "Developer Mode", ref failed, headers);
 
         NoAI = SetupSetting(advancedDefaultHeader, "No AI", false,
@@ -204,7 +205,7 @@ public sealed class FikaConfig(ConfigFile config)
                 IsAdvanced = true,
                 Category = advancedHeader,
                 DispName = "No AI",
-                Order = 4
+                Order = 5
             }), "No AI", ref failed, headers);
 
         NoLoot = SetupSetting(advancedDefaultHeader, "No Loot", false,
@@ -213,7 +214,7 @@ public sealed class FikaConfig(ConfigFile config)
                 IsAdvanced = true,
                 Category = advancedHeader,
                 DispName = "No Loot",
-                Order = 3
+                Order = 4
             }), "No Loot", ref failed, headers);
 
         LoadPriority = SetupSetting(advancedDefaultHeader, "Player Load Priority", ELoadPriority.Low,
@@ -222,7 +223,7 @@ public sealed class FikaConfig(ConfigFile config)
                 IsAdvanced = true,
                 Category = advancedHeader,
                 DispName = "Player Load Priority",
-                Order = 2
+                Order = 3
             }), "Player Load Priority", ref failed, headers);
 
         MaxBundleLock = SetupSetting(advancedDefaultHeader, "Max Bundle Lock", 5,
@@ -234,8 +235,19 @@ public sealed class FikaConfig(ConfigFile config)
                 IsAdvanced = true,
                 Category = advancedHeader,
                 DispName = "Max Bundle Lock",
-                Order = 1
+                Order = 2
             }), "Max Bundle Lock", ref failed, headers);
+
+        IKCullDistance = SetupSetting(advancedDefaultHeader, "IK Cull Distance", 40f,
+            new ConfigDescription("Distance when IK should cull (not update). Does not affect local players (bots as host)\n" +
+            "If another player is beyond this distance, their arms won't update (floating gun).",
+            new AcceptableValueRange<float>(20, 200), new ConfigurationManagerAttributes
+            {
+                IsAdvanced = true,
+                Category = advancedHeader,
+                DispName = "IK Cull Distance",
+                Order = 1
+            }), "IK Cull Distance", ref failed, headers);
 
         // Coop
 

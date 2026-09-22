@@ -71,7 +71,7 @@ public sealed class FikaPlugin : BaseUnityPlugin
     internal FikaNotificationManager NotificationManager { get; set; }
 
 #if RELEASE || GOLDMASTER
-    private static readonly System.Version _requiredServerVersion = new("2.4.0");
+    private static readonly System.Version _requiredServerVersion = new("2.4.1");
 #endif
     private PatchManager _patchManager;
     private TarkovApplication _tarkovApp;
@@ -142,12 +142,6 @@ public sealed class FikaPlugin : BaseUnityPlugin
         if (Settings.AllowItemSending)
         {
             _patchManager.EnablePatch(new ItemContext_Patch());
-        }
-
-        if (Settings.FastLoad)
-        {
-            /*_patchManager.EnablePatch(new LoadAmmo_Task_Transpiler());
-            _patchManager.EnablePatch(new ItemViewLoadAmmoComponent_Show_Patch());*/
         }
     }
 
@@ -278,8 +272,15 @@ public sealed class FikaPlugin : BaseUnityPlugin
         }
         Logger.LogInfo("Locales are ready!");
         Settings.SetupConfig();
+        EFTHardSettings.Instance.CULL_GROUNDER = Settings.IKCullDistance.Value;
+        Settings.IKCullDistance.SettingChanged += IKCullDistance_SettingChanged;
         LocalesLoaded = true;
         AsyncWorker.RunInMainTread(FikaVersionLabel_Patch.UpdateVersionLabel);
+    }
+
+    private void IKCullDistance_SettingChanged(object _, EventArgs __)
+    {
+        EFTHardSettings.Instance.CULL_GROUNDER = Settings.IKCullDistance.Value;
     }
 
     internal string[] GetLocalAddresses()
