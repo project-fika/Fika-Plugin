@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-#if DEBUG
-using Fika.Core.Main.Utils;
-#endif
 
 namespace Fika.Core.Networking.Snapshotting;
 
@@ -16,12 +13,18 @@ namespace Fika.Core.Networking.Snapshotting;
 /// </remarks>
 public sealed class PlayerSnapshotter<T> where T : struct, ISnapshot
 {
+    /// <summary> Default capacity for the ring buffer. Must be a power of two. </summary>
+    private const int _defaultCapacity = 32;
+
+    /// <summary> Default maximum duration (in seconds) to allow velocity-based extrapolation. </summary>
+    private const double _defaultMaxExtrapolationTime = 0.1d;
+
     /// <summary> Capacity must be a power of two to allow bitwise wrapping via <see cref="_mask"/>. </summary>
-    private const int _capacity = 16;
-    private const int _mask = _capacity - 1;
+    private readonly int _capacity;
+    private readonly int _mask;
 
     /// <summary> Contiguous memory block of snapshots to maximize CPU L1/L2 cache hits. </summary>
-    private readonly T[] _buffer = new T[_capacity];
+    private readonly T[] _buffer;
 
     /// <summary> Clock synchronization manager. </summary>
     private TimeSyncEMA _timeSync;
@@ -29,10 +32,74 @@ public sealed class PlayerSnapshotter<T> where T : struct, ISnapshot
     /// <summary> Manages the dynamic interpolation delay for this entity. </summary>
     private AdaptiveJitterBuffer _adaptiveJitterBuffer;
 
+    /// <summary> Maximum duration allowed for extrapolation before declaring the state stale. </summary>
+    private readonly double _maxExtrapolationTime;
+
     /// <summary> Total number of snapshots added over the lifetime of this object. Used to calculate ring indices. </summary>
-    private long _totalAdded;
-    private double _lastLocalTime;
-    private double _lastRemoteTime;
+    private int _totalAdded;
+
+    /// <summary>
+    /// Initializes a new instance of <see cref="Snapshotter{T}"/> with default capacity and delay settings.
+    /// </summary>
+    public PlayerSnapshotter() : this(_defaultCapacity, AdaptiveJitterBuffer.DefaultBaseDelay, AdaptiveJitterBuffer.DefaultMaxDelay, _defaultMaxExtrapolationTime)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of <see cref="Snapshotter{T}"/> with custom capacity, delay, and extrapolation bounds.
+    /// </summary>
+    /// <param name="capacity">Buffer size. Must be a power of two and at least 2. Defaults to 32.</param>
+    /// <param name="baseDelay">Minimum interpolation delay in seconds. Defaults to 0.05s.</param>
+    /// <param name="maxDelay">Maximum interpolation delay in seconds. Defaults to 0.25s.</param>
+    /// <param name="maxExtrapolationTime">Maximum allowed extrapolation duration in seconds. Defaults to 0.1s.</param>
+    public PlayerSnapshotter(int capacity = _defaultCapacity, double baseDelay = AdaptiveJitterBuffer.DefaultBaseDelay,
+        double maxDelay = AdaptiveJitterBuffer.DefaultMaxDelay,
+        double maxExtrapolationTime = _defaultMaxExtrapolationTime)
+    {
+        if (capacity < 2 || (capacity & (capacity - 1)) != 0)
+        {
+            throw new ArgumentException("Capacity must be a power of two and at least 2.", nameof(capacity));
+        }
+
+        if (maxExtrapolationTime < 0d)
+        {
+            throw new ArgumentOutOfRangeException(nameof(maxExtrapolationTime), "Max extrapolation time cannot be negative.");
+        }
+
+        _capacity = capacity;
+        _mask = capacity - 1;
+        _buffer = new T[capacity];
+        _timeSync = new TimeSyncEMA();
+        _adaptiveJitterBuffer = new AdaptiveJitterBuffer(baseDelay, maxDelay);
+        _maxExtrapolationTime = maxExtrapolationTime;
+    }
+
+    /// <summary> Gets the total capacity of the circular buffer. </summary>
+    public int Capacity => _capacity;
+
+    /// <summary> Gets the number of valid snapshots currently stored in the buffer. </summary>
+    public int Count => Math.Min(_totalAdded, _capacity);
+
+    /// <summary> Gets whether the buffer contains no snapshots. </summary>
+    public bool IsEmpty => _totalAdded == 0;
+
+    /// <summary> Gets the current smoothed clock offset (ServerTime - LocalTime). </summary>
+    public double SmoothOffset => _timeSync.SmoothOffset;
+
+    /// <summary> Gets the current calculated adaptive interpolation delay. </summary>
+    public double CurrentDelay => _adaptiveJitterBuffer.CurrentDelay;
+
+    /// <summary> Gets the current smoothed jitter variance. </summary>
+    public double CurrentJitter => _adaptiveJitterBuffer.CurrentJitter;
+
+    /// <summary> Gets the maximum allowed extrapolation time in seconds. </summary>
+    public double MaxExtrapolationTime => _maxExtrapolationTime;
+
+    /// <summary> Gets the index of the newest snapshot in the buffer, or -1 if empty. </summary>
+    public int NewestIndex => _totalAdded > 0 ? ((_totalAdded - 1) & _mask) : -1;
+
+    /// <summary> Gets the index of the oldest snapshot in the buffer, or -1 if empty. </summary>
+    public int OldestIndex => _totalAdded > 0 ? (_totalAdded < _capacity ? 0 : (_totalAdded & _mask)) : -1;
 
     /// <summary>
     /// Inserts a new snapshot into the ring buffer and updates the clock synchronization offset.
@@ -43,7 +110,7 @@ public sealed class PlayerSnapshotter<T> where T : struct, ISnapshot
     {
         if (_totalAdded > 0)
         {
-            var newestIdx = (int)((_totalAdded - 1) & _mask);
+            var newestIdx = (_totalAdded - 1) & _mask;
             ref readonly var newestSnap = ref _buffer[newestIdx];
 
             // sequence validation: drop out-of-order or duplicate packets
@@ -52,9 +119,9 @@ public sealed class PlayerSnapshotter<T> where T : struct, ISnapshot
                 return;
             }
 
-            // calculate the physical time it took for the packet to arrive versus the expected server interval
-            var localDelta = snapshot.LocalTime - _lastLocalTime;
-            var remoteDelta = snapshot.RemoteTime - _lastRemoteTime;
+            // calculate physical arrival delta vs remote tick delta
+            var localDelta = snapshot.LocalTime - newestSnap.LocalTime;
+            var remoteDelta = snapshot.RemoteTime - newestSnap.RemoteTime;
 
             // update the jitter variance
             _adaptiveJitterBuffer.Update(localDelta, remoteDelta);
@@ -66,9 +133,6 @@ public sealed class PlayerSnapshotter<T> where T : struct, ISnapshot
 
         // update the EMA Offset (ServerTime - LocalTime) to synchronize the playback timeline
         _timeSync.Update(snapshot.RemoteTime, snapshot.LocalTime);
-
-        _lastLocalTime = snapshot.LocalTime;
-        _lastRemoteTime = snapshot.RemoteTime;
     }
 
     /// <summary>
@@ -83,9 +147,9 @@ public sealed class PlayerSnapshotter<T> where T : struct, ISnapshot
     public EBufferState GetInterpolationIndices(double localTime, out int fromIdx, out int toIdx, out float t)
     {
         fromIdx = toIdx = -1;
-        t = 0;
+        t = 0f;
 
-        var count = (int)Math.Min(_totalAdded, _capacity);
+        var count = Math.Min(_totalAdded, _capacity);
         if (count < 2)
         {
             return EBufferState.Stale;
@@ -93,16 +157,17 @@ public sealed class PlayerSnapshotter<T> where T : struct, ISnapshot
 
         // consume the dynamic delay from the AdaptiveJitterBuffer
         var renderTime = localTime + _timeSync.SmoothOffset - _adaptiveJitterBuffer.CurrentDelay;
-        var offset = Math.Max(0, _totalAdded - _capacity);
+
+        var newestIdx = (_totalAdded - 1) & _mask;
+        ref readonly var newestSnap = ref _buffer[newestIdx];
 
         // check if we need to extrapolate before searching
-        var newestIdx = (int)((offset + count - 1) & _mask);
-        if (renderTime > _buffer[newestIdx].RemoteTime)
+        if (renderTime > newestSnap.RemoteTime)
         {
-            var timeSinceNewest = renderTime - _buffer[newestIdx].RemoteTime;
+            var timeSinceNewest = renderTime - newestSnap.RemoteTime;
 
-            // hard limit extrapolation to 100ms. beyond this, predictions diverge too far from reality.
-            if (timeSinceNewest > 0.1d)
+            // hard limit extrapolation. beyond this, predictions diverge too far from reality.
+            if (timeSinceNewest > _maxExtrapolationTime)
             {
                 return EBufferState.Stale;
             }
@@ -112,12 +177,21 @@ public sealed class PlayerSnapshotter<T> where T : struct, ISnapshot
             return EBufferState.Extrapolating;
         }
 
+        var oldestIdx = _totalAdded < _capacity ? 0 : (_totalAdded & _mask);
+        ref readonly var oldestSnap = ref _buffer[oldestIdx];
+
+        // O(1) stale pre-check: if renderTime is older than our oldest buffered snapshot
+        if (renderTime < oldestSnap.RemoteTime)
+        {
+            return EBufferState.Stale;
+        }
+
         var low = 0;
         var high = count - 1;
         while (low < high)
         {
-            var mid = low + ((high - low) / 2);
-            if (_buffer[(offset + mid) & _mask].RemoteTime < renderTime)
+            var mid = (low + high) >> 1;
+            if (_buffer[(oldestIdx + mid) & _mask].RemoteTime < renderTime)
             {
                 low = mid + 1;
             }
@@ -127,21 +201,32 @@ public sealed class PlayerSnapshotter<T> where T : struct, ISnapshot
             }
         }
 
-        // if low is 0, the renderTime is older than our oldest buffered snapshot
+        // boundary edge case: if low == 0, renderTime exactly equals oldestSnap.RemoteTime
         if (low == 0)
         {
-            return EBufferState.Stale;
+            fromIdx = oldestIdx;
+            toIdx = (oldestIdx + 1) & _mask;
+            t = 0f;
+            return EBufferState.Interpolating;
         }
 
-        fromIdx = (int)((offset + low - 1) & _mask);
-        toIdx = (int)((offset + low) & _mask);
+        fromIdx = (oldestIdx + low - 1) & _mask;
+        toIdx = (oldestIdx + low) & _mask;
 
         // access via ref readonly to avoid stack-copying the large ISnapshot structs
         ref readonly var snapFrom = ref _buffer[fromIdx];
         ref readonly var snapTo = ref _buffer[toIdx];
 
         var range = snapTo.RemoteTime - snapFrom.RemoteTime;
-        t = range > 0 ? (float)((renderTime - snapFrom.RemoteTime) / range) : 0f;
+        if (range > 0d)
+        {
+            var factor = (float)((renderTime - snapFrom.RemoteTime) / range);
+            t = factor < 0f ? 0f : (factor > 1f ? 1f : factor);
+        }
+        else
+        {
+            t = 0f;
+        }
 
         return EBufferState.Interpolating;
     }
@@ -158,19 +243,13 @@ public sealed class PlayerSnapshotter<T> where T : struct, ISnapshot
     }
 
     /// <summary>
-    /// Clears the snapshotter and resets it to default
+    /// Clears the snapshotter and resets state to initial baseline while preserving configuration.
     /// </summary>
     public void Clear()
     {
         Array.Clear(_buffer, 0, _buffer.Length);
         _totalAdded = 0;
-        _timeSync = default;
-        _adaptiveJitterBuffer = default;
-        _lastLocalTime = 0;
-        _lastRemoteTime = 0;
-
-#if DEBUG
-        FikaGlobals.LogWarning("Cleared snapshotter");
-#endif
+        _timeSync.Reset();
+        _adaptiveJitterBuffer.Reset();
     }
 }
