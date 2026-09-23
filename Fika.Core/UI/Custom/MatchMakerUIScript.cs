@@ -297,8 +297,7 @@ public class MatchMakerUIScript : MonoBehaviour
                     FikaPlugin.HeadlessRequesterWebSocket.Connect();
                 }
 
-                var raidSettings = Traverse.Create(tarkovApplication).Field<RaidSettings>("_raidSettings").Value;
-
+                var raidSettings = tarkovApplication._raidSettings;
                 var headlessSessionId = availableHeadlesses[0].HeadlessSessionID;
                 var multipleHeadlesses = availableHeadlesses.Length > 1;
 
@@ -353,7 +352,7 @@ public class MatchMakerUIScript : MonoBehaviour
         UnityEngine.Events.UnityEvent newEvent = new();
         newEvent.AddListener(BackButton.OnClick.Invoke);
         var newButtonComponent = _newBackButton.GetComponent<DefaultUIButton>();
-        Traverse.Create(newButtonComponent).Field("OnClick").SetValue(newEvent);
+        newButtonComponent.OnClick = newEvent;
 
         if (!_newBackButton.active)
         {

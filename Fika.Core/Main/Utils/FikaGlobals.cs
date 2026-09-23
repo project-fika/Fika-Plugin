@@ -307,7 +307,7 @@ public static class FikaGlobals
     /// <param name="nickname">The nickname to assign to the main profile.</param>
     public static void SetProfileNickname(this ProfileInfo infoClass, string nickname)
     {
-        Traverse.Create(infoClass).Field<string>("MainProfileNickname").Value = nickname;
+        infoClass.MainProfileNickname = nickname;
     }
 
     /// <summary>

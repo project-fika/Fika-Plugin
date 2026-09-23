@@ -40,7 +40,6 @@ public sealed class ObservedFirearmController : FirearmController
     private float _overlapCounter;
     private bool _hasFired;
     private Firearms _weaponManager;
-    private UnderbarrelContainer _underBarrelManager;
     private bool _boltActionReload;
     private bool _isThrowingPatron;
     private bool _stationaryWeapon;
@@ -117,11 +116,6 @@ public sealed class ObservedFirearmController : FirearmController
     {
         _objectInHandsAnimator.SetAiming(false);
         _weaponManager = _weaponPrefab.ObjectInHands as Firearms;
-        if (UnderbarrelWeapon != null)
-        {
-            var weaponTraverse = Traverse.Create(this);
-            _underBarrelManager = weaponTraverse.Field<Player.FirearmController.UnderbarrelContainer>("_underbarrelContainer").Value;
-        }
         IsRevolver = Weapon is Revolver;
         _stationaryWeapon = Weapon.IsStationaryWeapon;
     }
@@ -328,10 +322,9 @@ public sealed class ObservedFirearmController : FirearmController
     private IEnumerator BreakFiringLoop()
     {
         WeaponSoundPlayer.Release();
-        var isFiring = Traverse.Create(WeaponSoundPlayer).Field<bool>("_isFiring");
         var attempts = 0;
         WaitForEndOfFrame waitForEndOfFrame = new();
-        while (isFiring.Value && attempts < 10)
+        while (WeaponSoundPlayer._isFiring && attempts < 10)
         {
             yield return waitForEndOfFrame;
             WeaponSoundPlayer.StopFiringLoop();
@@ -658,7 +651,7 @@ public sealed class ObservedFirearmController : FirearmController
                 {
                     grenadeBullet.IsUsed = true;
                     UnderbarrelWeapon.Chamber.RemoveItem();
-                    _underBarrelManager?.DestroyPatronInWeapon();
+                    _underbarrelContainer?.DestroyPatronInWeapon();
                 }
                 FirearmsAnimator.SetFire(false);
                 return;

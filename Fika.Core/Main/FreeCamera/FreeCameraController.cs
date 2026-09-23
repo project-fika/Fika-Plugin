@@ -325,15 +325,14 @@ public class FreeCameraController : MonoBehaviour
 
         cameraClass.EffectsController.OnGlassesChanged(null, false);
 
-        var effectsController = Traverse.Create(cameraClass.EffectsController);
-
-        var bloodOnScreen = effectsController.Field<BloodOnScreen>("_bloodOnScreen").Value;
+        var effectsController = cameraClass.EffectsController;
+        var bloodOnScreen = effectsController._bloodOnScreen;
         if (bloodOnScreen != null)
         {
             Destroy(bloodOnScreen);
         }
 
-        var effectsManagerList = effectsController.Field<List<EffectsController.EffectAccumulator>>("_effectAccumulators").Value;
+        var effectsManagerList = effectsController._effectAccumulators;
         if (effectsManagerList != null)
         {
             for (var i = 0; i < effectsManagerList.Count; i++)

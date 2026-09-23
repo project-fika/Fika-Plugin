@@ -661,7 +661,7 @@ public sealed partial class FikaClient
                             _logger.LogWarning("Received reconnect packet for interactives: " + packet.InteractivesData.Count);
 #endif
                             var localizedString = LocaleUtils.UI_SYNC_INTERACTABLES.Localized();
-                            var worldInteractiveObjects = Traverse.Create(Singleton<GameWorld>.Instance.World).Field<WorldInteractiveObject[]>("_interactableObjectsForNetSync").Value;
+                            var worldInteractiveObjects = Singleton<GameWorld>.Instance.World._interactableObjectsForNetSync;
                             Dictionary<int, WorldInteractiveObject.InteractiveObjectStatusInfo> netIdDictionary = [];
                             {
                                 foreach (var data in packet.InteractivesData)

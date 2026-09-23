@@ -63,7 +63,7 @@ public class BTRView_GoOut_Patch : ModulePatch
         {
             var cancellationToken = view.PlayerToken(observedPlayer);
             observedPlayer.BtrState = EPlayerBtrState.GoOut;
-            var soundController = Traverse.Create(view).Field<BtrSoundController>("_soundController").Value;
+            var soundController = view._soundController;
             if (soundController != null)
             {
                 soundController.UpdateBtrAudioRoom(EnvironmentType.Outdoor, observedPlayer);

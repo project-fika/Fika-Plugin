@@ -30,7 +30,7 @@ public class FikaClientGameWorld : ClientLocalGameWorld
     {
         var gameWorld = gameObject.AddComponent<FikaClientGameWorld>();
         gameWorld.ObjectsFactory = objectsFactory;
-        Traverse.Create(gameWorld).Field<EUpdateQueue>("_updateQueue").Value = updateQueue;
+        gameWorld._updateQueue = updateQueue;
         gameWorld.SpeakerManager = gameObject.AddComponent<SpeakerManager>();
         gameWorld.ExfiltrationController = new ExfiltrationController();
         gameWorld.BufferZoneController = new BufferZoneController();

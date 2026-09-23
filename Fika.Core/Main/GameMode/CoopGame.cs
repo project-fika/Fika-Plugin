@@ -91,7 +91,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
     private static ManualLogSource _logger;
 
     private Func<LocalPlayer, EftGamePlayerOwner> _func_1;
-    private FikaPlayer _localPlayer;
+    private FikaPlayer _localFikaPlayer;
     private bool _hasSaved;
     private float _voipDistance;
 
@@ -562,8 +562,8 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
 
         myPlayer.OnEpInteraction += OnEpInteraction;
 
-        _localPlayer = myPlayer as FikaPlayer;
-        GameController.SetLocalPlayer(_localPlayer);
+        _localFikaPlayer = myPlayer as FikaPlayer;
+        GameController.SetLocalPlayer(_localFikaPlayer);
 
         _logger.LogInfo("Local player created");
         return myPlayer;
@@ -1183,12 +1183,12 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         {
             return false;
         }
-        if (_localPlayer == null)
+        if (_localFikaPlayer == null)
         {
             return true;
         }
         var flag = VoiceClient.IsTalkDetected();
-        _localPlayer.TalkDateTime = flag ? DateTimeExtensions.UtcNow : default;
+        _localFikaPlayer.TalkDateTime = flag ? DateTimeExtensions.UtcNow : default;
         bool flag2;
         bool flag3;
         if (_players.Count == 1)
@@ -1200,7 +1200,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         {
             flag2 = false;
             flag3 = false;
-            var position = _localPlayer.Position;
+            var position = _localFikaPlayer.Position;
             foreach (var humanPlayer in GameController.CoopHandler.HumanPlayers)
             {
                 if (humanPlayer.IsYourPlayer)

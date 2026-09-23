@@ -558,8 +558,6 @@ public sealed partial class FikaServer
             }
 
             var gameWorld = Singleton<GameWorld>.Instance;
-            var worldTraverse = Traverse.Create(gameWorld.World);
-
             var grenades = gameWorld.Grenades.GetValuesEnumerator();
             List<SmokeGrenadeNetworkData> smokeData = [];
             foreach (var item in grenades)
@@ -582,7 +580,7 @@ public sealed partial class FikaServer
             }
 
             List<WorldInteractiveObject.InteractiveObjectStatusInfo> interactivesData = [];
-            foreach (var interactiveObject in worldTraverse.Field<WorldInteractiveObject[]>("_interactableObjectsForNetSync").Value)
+            foreach (var interactiveObject in gameWorld.World._interactableObjectsForNetSync)
             {
                 if ((interactiveObject.DoorState != interactiveObject.InitialDoorState
                     && interactiveObject.DoorState != EDoorState.Interacting)

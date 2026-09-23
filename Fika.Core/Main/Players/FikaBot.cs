@@ -86,13 +86,12 @@ public sealed class FikaBot : FikaPlayer
             IsAI = true
         };
 
-        var botTraverse = Traverse.Create(player);
-        botTraverse.Field<OfflinePlayerCulling>("botPlayerCulling").Value = new();
-        botTraverse.Field<OfflinePlayerCulling>("botPlayerCulling").Value.Initialize(player, player.PlayerBones);
+        player.botPlayerCulling = new();
+        player.botPlayerCulling.Initialize(player, player.PlayerBones);
 
         if (FikaBackendUtils.IsHeadless)
         {
-            botTraverse.Field<OfflinePlayerCulling>("botPlayerCulling").Value.SetMode(OfflinePlayerCulling.EMode.Disabled);
+            player.botPlayerCulling.SetMode(BasePlayerCulling.EMode.Disabled);
         }
 
         player.AggressorFound = false;

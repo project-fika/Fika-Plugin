@@ -44,9 +44,8 @@ public class GameWorld_Create_Patch : ModulePatch
     private static GameWorld CreateHideoutWorld(GameObject gameObject, ObjectsFactory objectsFactory, EUpdateQueue updateQueue, MongoID? currentProfileId)
     {
         var gameWorld = gameObject.AddComponent<HideoutGameWorld>();
-        var gameWorldTraverse = Traverse.Create(gameWorld);
-        gameWorldTraverse.Field<ObjectsFactory>("ObjectsFactory").Value = objectsFactory;
-        gameWorldTraverse.Field<EUpdateQueue>("_updateQueue").Value = updateQueue;
+        gameWorld.ObjectsFactory = objectsFactory;
+        gameWorld._updateQueue = updateQueue;
         gameWorld.SpeakerManager = gameObject.AddComponent<SpeakerManager>();
         gameWorld.ExfiltrationController = new ExfiltrationController();
         gameWorld.BufferZoneController = new BufferZoneController();

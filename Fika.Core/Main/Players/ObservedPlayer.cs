@@ -180,11 +180,8 @@ public sealed class ObservedPlayer : FikaPlayer
 
     internal ObservedState CurrentPlayerState;
     private float _lastDistance;
-    private OfflinePlayerCulling _cullingHandler;
     private float _rightHand;
     private float _leftHand;
-    private LimbIK[] _observedLimbs;
-    private Transform[] _observedMarkers;
     private bool _shouldCullController;
     private readonly List<ObservedSlotViewHandler> _observedSlotViewHandlers = [];
     private ObservedCorpseCulling _observedCorpseCulling;
@@ -260,14 +257,12 @@ public sealed class ObservedPlayer : FikaPlayer
 
         player.AIData = new AIData(null, player);
 
-        var observedTraverse = Traverse.Create(player);
-        observedTraverse.Field<OfflinePlayerCulling>("botPlayerCulling").Value = new();
-        player._cullingHandler = observedTraverse.Field<OfflinePlayerCulling>("botPlayerCulling").Value;
-        player._cullingHandler.Initialize(player, player.PlayerBones);
+        player.botPlayerCulling = new();
+        player.botPlayerCulling.Initialize(player, player.PlayerBones);
 
         if (FikaBackendUtils.IsHeadless || profile.IsPlayerProfile())
         {
-            player._cullingHandler.Disable();
+            player.botPlayerCulling.Disable();
         }
 
         if (FikaBackendUtils.IsHeadless)
@@ -277,15 +272,12 @@ public sealed class ObservedPlayer : FikaPlayer
 
         if (!aiControl)
         {
-            var services = Traverse.Create(player).Field<HashSet<ETraderServiceType>>("_notYetPurchasedTraderServiceTypes").Value;
+            var services = player._notYetPurchasedTraderServiceTypes;
             foreach (var etraderServiceType in Singleton<GlobalConfiguration>.Instance.ServicesData.Keys)
             {
                 services.Add(etraderServiceType);
             }
         }
-
-        player._observedLimbs = player.GetComponent<PlayerPoolObject>().LimbIks;
-        player._observedMarkers = observedTraverse.Field<Transform[]>("_markers").Value;
 
         player.AggressorFound = false;
         player._animators[0].enabled = true;
@@ -720,7 +712,7 @@ public sealed class ObservedPlayer : FikaPlayer
 
     public override void ApplyCorpseImpulse()
     {
-        if (_cullingHandler.IsVisible || _isServer)
+        if (botPlayerCulling.IsVisible || _isServer)
         {
             if (CorpseSyncPacket.BodyPartColliderType != EBodyPartColliderType.None
                     && PlayerBones.BodyPartCollidersDictionary.TryGetValue(CorpseSyncPacket.BodyPartColliderType, out var bodyPartCollider))
@@ -965,7 +957,7 @@ public sealed class ObservedPlayer : FikaPlayer
             currentState.Velocity = snapFrom.Data.Velocity;
         }
 
-        if (!_cullingHandler.IsVisible)
+        if (!botPlayerCulling.IsVisible)
         {
             Position = CurrentPlayerState.Position;
             Rotation = CurrentPlayerState.Rotation;
@@ -1169,9 +1161,9 @@ public sealed class ObservedPlayer : FikaPlayer
         }
         Singleton<BetterAudio>.Instance.ProtagonistHearingChanged -= UpdateSoundRolloff;
         base.OnDead(damageType);
-        if (_cullingHandler != null)
+        if (botPlayerCulling != null)
         {
-            _cullingHandler.DisableCullingOnDead();
+            botPlayerCulling.DisableCullingOnDead();
         }
         if (!FikaBackendUtils.IsHeadless)
         {
@@ -1509,7 +1501,6 @@ public sealed class ObservedPlayer : FikaPlayer
     public void InitObservedPlayer()
     {
         PacketSender = gameObject.AddComponent<ObservedPacketSender>();
-        var playerTraverse = Traverse.Create(this);
 
         if (IsObservedAI)
         {
@@ -1521,19 +1512,18 @@ public sealed class ObservedPlayer : FikaPlayer
 
             PacketSender.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered);
 
-            var vaultingComponent = playerTraverse.Field<IVaultingComponent>("_vaultingComponent").Value;
-            if (vaultingComponent != null)
+            if (_vaultingComponent != null)
             {
-                UpdateEvent -= vaultingComponent.DoVaultingTick;
+                UpdateEvent -= _vaultingComponent.DoVaultingTick;
             }
 
-            playerTraverse.Field("_vaultingComponent").SetValue(null);
-            playerTraverse.Field("_vaultingComponentDebug").SetValue(null);
-            playerTraverse.Field("_vaultingParameters").SetValue(null);
-            playerTraverse.Field("_vaultingGameplayRestrictions").SetValue(null);
-            playerTraverse.Field("_vaultAudioController").SetValue(null);
-            playerTraverse.Field("_sprintVaultAudioController").SetValue(null);
-            playerTraverse.Field("_climbAudioController").SetValue(null);
+            _vaultingComponent = null;
+            _vaultingComponentDebug = null;
+            _vaultingParameters = null;
+            _vaultingGameplayRestrictions = null;
+            _vaultAudioController = null;
+            _sprintVaultAudioController = null;
+            _climbAudioController = null;
         }
 
         if (!IsObservedAI)
@@ -1545,15 +1535,14 @@ public sealed class ObservedPlayer : FikaPlayer
                 _waitForStartRoutine = StartCoroutine(CreateHealthBar());
             }
 
-            var vaultingComponent = playerTraverse.Field<IVaultingComponent>("_vaultingComponent").Value;
-            if (vaultingComponent != null)
+            if (_vaultingComponent != null)
             {
-                UpdateEvent -= vaultingComponent.DoVaultingTick;
+                UpdateEvent -= _vaultingComponent.DoVaultingTick;
             }
-            playerTraverse.Field("_vaultingComponent").SetValue(null);
-            playerTraverse.Field("_vaultingComponentDebug").SetValue(null);
-            playerTraverse.Field("_vaultingParameters").SetValue(null);
-            playerTraverse.Field("_vaultingGameplayRestrictions").SetValue(null);
+            _vaultingComponent = null;
+            _vaultingComponentDebug = null;
+            _vaultingParameters = null;
+            _vaultingGameplayRestrictions = null;
 
             InitVaultingAudioControllers(_observedVaultingParameters);
 
@@ -1651,8 +1640,7 @@ public sealed class ObservedPlayer : FikaPlayer
 
     public new void CreateCompass()
     {
-        var compassInstantiated = Traverse.Create(this).Field<bool>("_compassInstantiated").Value;
-        if (!compassInstantiated)
+        if (!_compassInstantiated)
         {
             var transform = Singleton<ObjectsFactory>.Instance.CreateFromPool<Transform>(new ResourceKey
             {
@@ -1662,7 +1650,7 @@ public sealed class ObservedPlayer : FikaPlayer
             transform.localRotation = Quaternion.identity;
             transform.localPosition = Vector3.zero;
             UpdateCompassController(transform.gameObject);
-            Traverse.Create(this).Field("_compassInstantiated").SetValue(true);
+            _compassInstantiated = true;
         }
     }
 
@@ -1706,9 +1694,9 @@ public sealed class ObservedPlayer : FikaPlayer
         {
             if (Time.frameCount % 2 == _frameSkip)
             {
-                UpdateTriggerColliderSearcher(deltaTime, _cullingHandler.IsCloseToMyPlayerCamera);
+                UpdateTriggerColliderSearcher(deltaTime, botPlayerCulling.IsCloseToMyPlayerCamera);
             }
-            _cullingHandler.ManualUpdate(deltaTime);
+            botPlayerCulling.ManualUpdate(deltaTime);
             switch (_currentState)
             {
                 case EPlayerState.Idle:
@@ -1936,7 +1924,7 @@ public sealed class ObservedPlayer : FikaPlayer
 
     private void ObservedVisualPass(float deltaTime, int ikUpdateInterval)
     {
-        if (CustomAnimationsAreProcessing || !_cullingHandler.IsVisible || !HealthController.IsAlive)
+        if (CustomAnimationsAreProcessing || !botPlayerCulling.IsVisible || !HealthController.IsAlive)
         {
             return;
         }
@@ -1977,14 +1965,14 @@ public sealed class ObservedPlayer : FikaPlayer
                 MovementContext.LeftStanceEnabled && HasFirearmInHands(), num4,
                 ProceduralWeaponAnimation.IsAiming);
             HandPosers[0].weight = _leftHand;
-            _observedLimbs[0].solver.IKRotationWeight = _observedLimbs[0].solver.IKPositionWeight = _leftHand;
-            _observedLimbs[1].solver.IKRotationWeight = _observedLimbs[1].solver.IKPositionWeight = _rightHand;
+            _limbs[0].solver.IKRotationWeight = _limbs[0].solver.IKPositionWeight = _leftHand;
+            _limbs[1].solver.IKRotationWeight = _limbs[1].solver.IKPositionWeight = _rightHand;
             IkProcess(_lastDistance);
             AdjustElbows(num2);
             IkApply(_lastDistance);
             if (_rightHand < 1f)
             {
-                PlayerBones.Kinematics(_observedMarkers[1], _rightHand);
+                PlayerBones.Kinematics(_markers[1], _rightHand);
             }
             var num6 = GetCurveValue(PlayerAnimator.AIMING_LAYER_CURVE);
             MovementContext.PlayerAnimator.Animator.SetLayerWeight(6, 1f - num6);

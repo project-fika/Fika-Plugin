@@ -134,7 +134,7 @@ public class MainMenuUIScript : MonoBehaviour
     private void CreateMainMenuUI()
     {
         var mainMenuUIPrefab = InternalBundleLoader.Instance.GetFikaAsset(InternalBundleLoader.EFikaAsset.MainMenuUI);
-        var mainMenuUI = GameObject.Instantiate(mainMenuUIPrefab);
+        var mainMenuUI = Instantiate(mainMenuUIPrefab);
         _mainMenuUI = mainMenuUI.GetComponent<MainMenuUI>();
         _playerTemplate = _mainMenuUI.PlayerTemplate;
         var newParent = Singleton<CommonUI>.Instance.MenuScreen.gameObject.transform;
@@ -180,7 +180,7 @@ public class MainMenuUIScript : MonoBehaviour
     {
         foreach (var item in _players)
         {
-            GameObject.Destroy(item);
+            Destroy(item);
         }
         _players.Clear();
 
@@ -214,7 +214,7 @@ public class MainMenuUIScript : MonoBehaviour
     {
         foreach (var presence in responses)
         {
-            var newPlayer = GameObject.Instantiate(_playerTemplate, _playerTemplate.transform.parent);
+            var newPlayer = Instantiate(_playerTemplate, _playerTemplate.transform.parent);
             var mainMenuUIPlayer = newPlayer.GetComponent<MainMenuUIPlayer>();
             mainMenuUIPlayer.SetActivity(presence.Nickname, presence.Level, presence.Activity);
             if (presence.Activity is EFikaPlayerPresence.IN_RAID && presence.RaidInformation.HasValue)
@@ -278,8 +278,7 @@ public class MainMenuUIScript : MonoBehaviour
                             return;
                         }
 
-                        var tarkovAppTraverse = Traverse.Create(tarkovApplication);
-                        var mmc = tarkovAppTraverse.Field<MainMenuShowOperation>("_menuOperation").Value;
+                        var mmc = tarkovApplication._menuOperation;
 
 #if !DEBUG
                         if (location.AccessKeys.Length > 0 && information.Side is ESideType.Pmc)
@@ -293,7 +292,7 @@ public class MainMenuUIScript : MonoBehaviour
                                 {
                                     NotificationManager.DisplayMessageNotification(string.Format(LocaleUtils.MISSING_KEY_FOR_LOCATION.Localized(),
                                         $"{location.AccessKeys[0]} Name".Localized()),
-                                        iconType: EFT.Communications.ENotificationIconType.Alert);
+                                        iconType: ENotificationIconType.Alert);
                                     JoinInProgress = false;
                                     return;
                                 }
@@ -302,7 +301,7 @@ public class MainMenuUIScript : MonoBehaviour
 #endif
 
                         NotificationManager.DisplayMessageNotification(LocaleUtils.CONNECTING_TO_SESSION.Localized(),
-                            iconType: EFT.Communications.ENotificationIconType.EntryPoint);
+                            iconType: ENotificationIconType.EntryPoint);
                         using var pingingClient = await NetManagerUtils.CreatePingingClient();
 
                         if (pingingClient.Init(information.MatchId))
@@ -367,7 +366,7 @@ public class MainMenuUIScript : MonoBehaviour
                                 return;
                             }
 
-                            tarkovAppTraverse.Field<RaidSettings>("_raidSettings").Value = raidSettings;
+                            tarkovApplication._raidSettings = raidSettings;
                             controller.MatchingStartTime = DateTimeExtensions.Now;
 
                             try

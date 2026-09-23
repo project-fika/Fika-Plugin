@@ -136,12 +136,11 @@ public sealed class TarkovApplication_LocalGameCreator_Patch : ModulePatch
             playerSide = raidSettings.Side,
             transitionType = raidSettings.transitionType
         };
-        var applicationTraverse = Traverse.Create(instance);
-        applicationTraverse.Field<LocalRaidSettings>("_localRaidSettings").Value = localRaidSettings;
+        instance._localRaidSettings = localRaidSettings;
 
         var localSettings = await instance.Session.LocalRaidStarted(localRaidSettings);
         raidSettings.BotSettings.ExcludedBosses = localSettings.excludedBosses;
-        var raidSettingsToUpdate = applicationTraverse.Field<LocalRaidSettings>("_localRaidSettings").Value;
+        var raidSettingsToUpdate = instance._localRaidSettings;
         var escapeTimeLimit = raidSettings.IsScav ? RaidChangesUtil.NewEscapeTimeMinutes : raidSettings.SelectedLocation.EscapeTimeLimit;
         raidSettings.SelectedLocation = localSettings.locationLoot;
         raidSettings.SelectedLocation.EscapeTimeLimit = escapeTimeLimit;

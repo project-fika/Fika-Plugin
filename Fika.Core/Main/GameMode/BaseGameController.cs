@@ -325,7 +325,7 @@ public abstract class BaseGameController
         if (MenuUI.Instantiated)
         {
             var menuUI = MenuUI.Instance;
-            var backButton = Traverse.Create(menuUI.MatchmakerTimeHasCome).Field<DefaultUIButton>("_cancelButton").Value;
+            var backButton = menuUI.MatchmakerTimeHasCome._cancelButton;
             var customButton = GameObject.Instantiate(backButton.gameObject, backButton.gameObject.transform.parent);
             customButton.gameObject.name = "FikaStartButton";
             customButton.gameObject.SetActive(true);
@@ -348,7 +348,7 @@ public abstract class BaseGameController
                 };
                 fikaClient.SendData(ref packet, DeliveryMethod.ReliableOrdered);
             });
-            Traverse.Create(backButtonComponent).Field("OnClick").SetValue(newEvent);
+            backButtonComponent.OnClick = newEvent;
 
             Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.QuestStarted);
 
@@ -859,11 +859,11 @@ public abstract class BaseGameController
         var raidCode = FikaBackendUtils.RaidCode;
         if (!string.IsNullOrEmpty(raidCode))
         {
-            var preloaderUiTraverse = Traverse.Create(MonoBehaviourSingleton<PreloaderUI>.Instance);
+            var preloaderUI = MonoBehaviourSingleton<PreloaderUI>.Instance;
             // Raid code
-            preloaderUiTraverse.Field("string_3").SetValue($"{raidCode}");
+            preloaderUI.string_3 = $"{raidCode}";
             // Update version label
-            preloaderUiTraverse.Method("RefreshCornerLabel").GetValue();
+            preloaderUI.RefreshCornerLabel();
 
             Logger.LogInfo($"MatchingType: {FikaBackendUtils.ClientType}, Raid Code: {raidCode}");
         }
