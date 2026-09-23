@@ -175,6 +175,11 @@ public sealed class ItemContext_Patch : ModulePatch
 
                 sendItemUI.SendButton.onClick.AddListener(() =>
                 {
+                    if (sendItemUI.PlayersDropdown.options.Count == 0) // no one valid to send to
+                    {
+                        return;
+                    }
+
                     if (sendItemUI.PlayersDropdown.options[sendItemUI.PlayersDropdown.value].text != null)
                     {
                         var player = sendItemUI.PlayersDropdown.options[sendItemUI.PlayersDropdown.value].text;
