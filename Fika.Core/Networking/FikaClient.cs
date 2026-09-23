@@ -37,6 +37,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using static Fika.Core.Networking.NetworkUtils;
@@ -509,10 +510,8 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
                 var remoteTime = reader.GetDouble();
                 var localTime = NetworkTimeSync.NetworkTime;
                 var remaining = reader.GetRemainingBytesSpan();
-                var snapshots = MemoryMarshal.Cast<byte, PlayerStateData>(remaining);
-                for (var i = 0; i < snapshots.Length; i++)
+                foreach (ref readonly var snapshot in MemoryMarshal.Cast<byte, PlayerStateData>(remaining))
                 {
-                    ref readonly var snapshot = ref snapshots[i];
                     if (_coopHandler.Players.TryGetValue(snapshot.NetId, out var player))
                     {
                         var header = new PlayerStateSnapshot(in snapshot, remoteTime, localTime);
@@ -521,7 +520,7 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
                 }
                 break;
             case EPacketType.BTR:
-                var data = reader.GetUnmanaged<ShapshotBTRMessage>();
+                ref var data = ref Unsafe.As<byte, ShapshotBTRMessage>(ref MemoryMarshal.GetReference(reader.GetRemainingBytesSpan()));
                 if (BtrController.Instance.BtrView != null)
                 {
                     BtrController.Instance.BtrView.SyncViewFromServer(ref data);
