@@ -1,12 +1,12 @@
-﻿using EFT.Communications;
-using System;
-using System.Collections;
+﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using BepInEx.Logging;
 using Comfort.Common;
 using Diz.Jobs;
 using EFT;
+using EFT.Communications;
 using EFT.InventoryLogic;
 using EFT.UI;
 using Fika.Core.Main.GameMode;
@@ -350,11 +350,8 @@ public class CoopHandler : MonoBehaviour
                 var botController = (Singleton<IFikaGame>.Instance.GameController as HostGameController).BotsController;
                 if (botController != null)
                 {
-                    // Start Coroutine as botController might need a while to start sometimes...
-#if DEBUG
-                    _logger.LogInfo("Starting AddClientToBotEnemies routine.");
-#endif
-                    StartCoroutine(AddClientToBotEnemies(botController, otherPlayer));
+                    AddClientToBotEnemiesAsync(botController, otherPlayer, destroyCancellationToken)
+                        .Forget();
                 }
                 else
                 {
@@ -531,45 +528,63 @@ public class CoopHandler : MonoBehaviour
         return otherPlayer;
     }
 
-    private IEnumerator AddClientToBotEnemies(BotsController botController, LocalPlayer playerToAdd)
+    private async Task AddClientToBotEnemiesAsync(BotsController botController, LocalPlayer playerToAdd, CancellationToken cancellationToken = default)
     {
-        var coopGame = LocalGameInstance;
-        _logger.LogInfo($"AddClientToBotEnemies: {playerToAdd.Profile.GetCorrectedNickname()}");
-        while (coopGame.GameController.GameInstance.Status != GameStatus.Running && !botController.IsEnable)
+        try
         {
-            yield return null;
-        }
+            var coopGame = LocalGameInstance;
+            _logger.LogInfo($"AddClientToBotEnemies: {playerToAdd?.Profile?.GetCorrectedNickname()}");
 
-        while (botController.BotSpawner == null)
-        {
-            yield return null;
-        }
-
-#if DEBUG
-        _logger.LogInfo($"Adding Client {playerToAdd.Profile.GetCorrectedNickname()} to enemy list");
-#endif
-        botController.AddActivePLayer(playerToAdd);
-
-        var found = false;
-
-        for (var i = 0; i < botController.BotSpawner.PlayersCount; i++)
-        {
-            if (botController.BotSpawner.GetPlayer(i) == playerToAdd)
+            // Wait until game is running and bots are enabled
+            while (coopGame.GameController.GameInstance.Status != GameStatus.Running && !botController.IsEnable)
             {
-                found = true;
-                break;
+                cancellationToken.ThrowIfCancellationRequested();
+                await Task.Yield(); // Returns execution to Unity Main Thread on next frame
             }
-        }
 
-        if (found)
-        {
+            // Wait until BotSpawner is initialized
+            while (botController.BotSpawner == null)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                await Task.Yield();
+            }
+
 #if DEBUG
-            _logger.LogInfo($"Verified that {playerToAdd.Profile.GetCorrectedNickname()} was added to the enemy list.");
+            _logger.LogInfo($"Adding Client {playerToAdd.Profile.GetCorrectedNickname()} to enemy list");
 #endif
-            yield break;
-        }
+            botController.AddActivePLayer(playerToAdd);
 
-        _logger.LogError($"Failed to add {playerToAdd.Profile.GetCorrectedNickname()} to the enemy list.");
+            var found = false;
+            var spawner = botController.BotSpawner;
+            var count = spawner.PlayersCount;
+
+            for (var i = 0; i < count; i++)
+            {
+                if (spawner.GetPlayer(i) == playerToAdd)
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (found)
+            {
+#if DEBUG
+                _logger.LogInfo($"Verified that {playerToAdd.Profile.GetCorrectedNickname()} was added to the enemy list.");
+#endif
+                return;
+            }
+
+            _logger.LogError($"Failed to add {playerToAdd.Profile.GetCorrectedNickname()} to the enemy list.");
+        }
+        catch (OperationCanceledException)
+        {
+
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Exception in AddClientToBotEnemiesAsync: {ex}");
+        }
     }
 
     public void CheckIds(List<int> playerIds, List<int> missingIds)

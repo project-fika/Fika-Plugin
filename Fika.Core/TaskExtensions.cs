@@ -16,6 +16,10 @@ public static class TaskExtensions
         {
             await task;
         }
+        catch (OperationCanceledException)
+        {
+
+        }
         catch (Exception e)
         {
             Debug.LogException(e);

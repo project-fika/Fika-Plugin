@@ -51,6 +51,7 @@ using JsonType;
 using static Fika.Core.Main.ClientClasses.ClientInventoryController;
 using InteractionPacket = Fika.Core.Networking.Packets.Player.Common.SubPackets.InteractionPacket;
 using MountingPacket = Fika.Core.Networking.Packets.Player.Common.SubPackets.MountingPacket;
+using System.Threading;
 
 namespace Fika.Core.Main.Players;
 
@@ -1551,7 +1552,8 @@ public class FikaPlayer : LocalPlayer
         PacketSender.SendState = false;
         if (IsYourPlayer)
         {
-            StartCoroutine(LocalPlayerDied());
+            LocalPlayerDiedAsync(destroyCancellationToken)
+                .Forget();
         }
     }
 
@@ -1618,14 +1620,21 @@ public class FikaPlayer : LocalPlayer
         FikaGlobals.LogError($"GenerateAndSendDogTagPacket: Item or Dogtagcomponent was null on player {Profile.Nickname}, id {NetId}");
     }
 
-    private IEnumerator LocalPlayerDied()
+    private async Task LocalPlayerDiedAsync(CancellationToken token = default)
     {
-        AddPlayerRequest request = new(FikaBackendUtils.GroupId, ProfileId, FikaBackendUtils.IsSpectator);
-        var diedTask = FikaRequestHandler.PlayerDied(request);
-        WaitForEndOfFrame waitForEndOfFrame = new();
-        while (!diedTask.IsCompleted)
+        try
         {
-            yield return waitForEndOfFrame;
+            token.ThrowIfCancellationRequested();
+            AddPlayerRequest request = new(FikaBackendUtils.GroupId, ProfileId, FikaBackendUtils.IsSpectator);
+            await FikaRequestHandler.PlayerDied(request);
+        }
+        catch (OperationCanceledException)
+        {
+
+        }
+        catch (Exception ex)
+        {
+            FikaGlobals.LogError($"Failed to send PlayerDied request: {ex}");
         }
     }
 

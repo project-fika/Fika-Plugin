@@ -1,26 +1,26 @@
 ﻿// © 2026 Lacyway All Rights Reserved
 
-using EFT.CameraControl;
-using EFT.Communications;
-using EFT.Dialogs;
-using EFT.GlobalEvents;
-using EFT.HealthSystem;
-using EFT.NetworkPackets;
-using EFT.NextObservedPlayer;
-using EFT.Settings;
-using EFT.Settings.Sound;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Audio.SpatialSystem;
 using Comfort.Common;
 using Dissonance;
 using EFT;
-using EFT.AssetsManager;
 using EFT.Ballistics;
+using EFT.CameraControl;
+using EFT.Communications;
+using EFT.Dialogs;
+using EFT.GlobalEvents;
+using EFT.HealthSystem;
 using EFT.Interactive;
 using EFT.InventoryLogic;
+using EFT.NetworkPackets;
+using EFT.NextObservedPlayer;
+using EFT.Settings;
+using EFT.Settings.Sound;
 using EFT.Vaulting;
 using Fika.Core.Main.Components;
 using Fika.Core.Main.Factories;
@@ -35,9 +35,7 @@ using Fika.Core.Networking.Packets.Player;
 using Fika.Core.Networking.Packets.Player.Common;
 using Fika.Core.Networking.Packets.Player.Common.SubPackets;
 using Fika.Core.Networking.Snapshotting;
-using HarmonyLib;
 using JsonType;
-using RootMotion.FinalIK;
 using static Fika.Core.UI.FikaUIGlobals;
 
 namespace Fika.Core.Main.Players;
@@ -190,7 +188,6 @@ public sealed class ObservedPlayer : FikaPlayer
     private readonly ObservedVaultingParameters _observedVaultingParameters = new();
     private bool _leftStancedDisabled;
     private FikaHealthBar _healthBar;
-    private Coroutine _waitForStartRoutine;
     private bool _isServer;
     private VoiceBroadcastTrigger _voiceBroadcastTrigger;
     private SoundSettingsGroup _soundSettings;
@@ -1532,7 +1529,8 @@ public sealed class ObservedPlayer : FikaPlayer
             Profile.Info.TeamId = "Fika";
             if (!FikaBackendUtils.IsHeadless)
             {
-                _waitForStartRoutine = StartCoroutine(CreateHealthBar());
+                CreateHealthBarAsync(destroyCancellationToken)
+                    .Forget();
             }
 
             if (_vaultingComponent != null)
@@ -1564,29 +1562,43 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
-    private IEnumerator CreateHealthBar()
+    private async Task CreateHealthBarAsync(CancellationToken cancellationToken = default)
     {
-        var fikaGame = Singleton<IFikaGame>.Instance;
-        if (fikaGame == null)
+        try
         {
-            yield break;
-        }
+            var fikaGame = Singleton<IFikaGame>.Instance;
+            if (fikaGame == null)
+            {
+                return;
+            }
 
-        while (fikaGame.GameController.GameInstance.Status != GameStatus.Started)
-        {
-            yield return null;
-        }
+            while (fikaGame.GameController.GameInstance.Status != GameStatus.Started)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                await Task.Yield();
+            }
 
-        if (FikaPlugin.Instance.Settings.AllowNamePlates)
-        {
-            _healthBar = FikaHealthBar.Create(this);
-        }
+            if (FikaPlugin.Instance.Settings.AllowNamePlates)
+            {
+                _healthBar = FikaHealthBar.Create(this);
+            }
 
-        while (Singleton<GameWorld>.Instance.MainPlayer == null)
-        {
-            yield return null;
+            while (Singleton<GameWorld>.Instance.MainPlayer == null)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                await Task.Yield();
+            }
+
+            Singleton<GameWorld>.Instance.MainPlayer.StatisticsManager.OnGroupMemberConnected(Inventory);
         }
-        Singleton<GameWorld>.Instance.MainPlayer.StatisticsManager.OnGroupMemberConnected(Inventory);
+        catch (OperationCanceledException)
+        {
+
+        }
+        catch (Exception ex)
+        {
+            FikaGlobals.LogError($"Error in CreateHealthBarAsync: {ex}");
+        }
     }
 
     public override void LateUpdate()
