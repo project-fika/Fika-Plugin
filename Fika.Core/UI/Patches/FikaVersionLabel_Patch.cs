@@ -15,7 +15,7 @@ namespace Fika.Core.UI.Patches;
 public class FikaVersionLabel_Patch : ModulePatch
 {
     private static string _versionLabel;
-    private static Traverse _versionNumberTraverse;
+    private static Version _version;
     private static string _officialVersion;
 
     protected override MethodBase GetTargetMethod()
@@ -25,7 +25,7 @@ public class FikaVersionLabel_Patch : ModulePatch
     }
 
     [PatchPostfix]
-    internal static void PatchPostfix(string major, object __result)
+    internal static void PatchPostfix(string major, Version __result)
     {
         FikaPlugin.EFTVersionMajor = major;
 
@@ -36,38 +36,39 @@ public class FikaVersionLabel_Patch : ModulePatch
             Logger.LogInfo($"Server version: {_versionLabel}");
         }
 
-        var preloaderUiTraverse = Traverse.Create(MonoBehaviourSingleton<PreloaderUI>.Instance);
+        if (!MonoBehaviourSingleton<PreloaderUI>.Instantiated) // PreloaderUI is not ready yet
+        {
+            return;
+        }
 
-        preloaderUiTraverse.Field("_alphaVersionLabel").Property("LocalizationKey").SetValue("{0}");
+        var preloaderUI = MonoBehaviourSingleton<PreloaderUI>.Instance;
+        preloaderUI._alphaVersionLabel.LocalizationKey = "{0}";
 
-        _versionNumberTraverse = Traverse.Create(__result);
-
-        _officialVersion = _versionNumberTraverse.Field<string>("Major").Value;
+        _version = __result;
+        _officialVersion = __result.Major;
 
         UpdateVersionLabel();
     }
 
     public static void UpdateVersionLabel()
     {
-        var preloaderUiTraverse = Traverse.Create(MonoBehaviourSingleton<PreloaderUI>.Instance);
+        var preloaderUI = MonoBehaviourSingleton<PreloaderUI>.Instance;
         if (FikaPlugin.Instance.Settings.OfficialVersion != null && FikaPlugin.Instance.Settings.OfficialVersion.Value)
         {
-            preloaderUiTraverse.Field("string_2").SetValue($"{_officialVersion} Beta version");
-            _versionNumberTraverse.Field("Major").SetValue(_officialVersion);
+            preloaderUI.string_2 = $"{_officialVersion} Beta version";
+            _version.Major = _officialVersion;
         }
         else
         {
 #if DEBUG
-            preloaderUiTraverse.Field("string_2").SetValue($"FIKA {FikaPlugin.FikaVersion} (DEBUG) | {_versionLabel}");
+            preloaderUI.string_2 = $"FIKA {FikaPlugin.FikaVersion} (DEBUG) | {_versionLabel}";
 #else
-            preloaderUiTraverse.Field("string_2").SetValue($"FIKA {FikaPlugin.FikaVersion} | {_versionLabel}");
+            preloaderUI.string_2 = $"FIKA {FikaPlugin.FikaVersion} | {_versionLabel}";
 #endif
-            _versionNumberTraverse.Field("Major").SetValue($"{FikaPlugin.FikaVersion} {_versionLabel}");
+            _version.Major = $"{FikaPlugin.FikaVersion} {_versionLabel}";
         }
 
-        // Game mode
-        //preloaderUiTraverse.Field("string_4").SetValue("PvE");
-        // Update version label
-        preloaderUiTraverse.Method("RefreshCornerLabel").GetValue();
+        // update version label
+        preloaderUI.RefreshCornerLabel();
     }
 }
