@@ -295,6 +295,11 @@ public abstract class BaseGameController
     protected Coroutine _extractRoutine;
 
     /// <summary>
+    /// If the correct <see cref="GameDateTime"/> has been received from the server
+    /// </summary>
+    private bool _timeSet;
+
+    /// <summary>
     /// Sets the local player instance and assigns it to the co-op handler.
     /// </summary>
     /// <param name="player">The local player instance.</param>
@@ -970,6 +975,11 @@ public abstract class BaseGameController
     /// <param name="gameDateTime">The updated <see cref="GameDateTime"/> instance.</param>
     public void SetClientTime(DateTime gameTime, TimeSpan sessionTime, GameDateTime gameDateTime)
     {
+        if (_timeSet)
+        {
+            return;
+        }
+
         GameTime = gameTime;
         SessionTime = sessionTime;
         if (_abstractGame is CoopGame coopGame)
@@ -977,6 +987,7 @@ public abstract class BaseGameController
             Logger.LogInfo($"Received date from server, was [{coopGame.GameDateTime.Calculate():G}] - new [{gameDateTime.Calculate():G}]");
             coopGame.GameDateTime = gameDateTime;
             coopGame.GameWorld.GameDateTime = gameDateTime;
+            _timeSet = true;
         }
     }
 }
