@@ -837,7 +837,7 @@ public sealed class ObservedPlayer : FikaPlayer
 
     public override void MouseLook(bool forceApplyToOriginalRibcage = false)
     {
-        MovementContext.RotationAction.Invoke(this);
+        MovementContext.RotationAction?.Invoke(this);
     }
 
     public override bool CheckSurface(float range)
