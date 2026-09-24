@@ -48,6 +48,9 @@ namespace Fika.Core.Main.Players;
 public sealed class ObservedPlayer : FikaPlayer
 {
     #region Fields and Properties
+    /// <summary>
+    /// Gets the health bar UI component attached to this observed player.
+    /// </summary>
     public FikaHealthBar HealthBar
     {
         get
@@ -56,8 +59,14 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether weapon and obstacle overlap should be recalculated.
+    /// </summary>
     public bool ShouldOverlap { get; internal set; }
 
+    /// <summary>
+    /// Gets or sets a value indicating whether left shoulder stance is disabled on this player.
+    /// </summary>
     public override bool LeftStanceDisabled
     {
         get
@@ -75,8 +84,14 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
+    /// <summary>
+    /// Gets or sets the spatial audio source used for VOIP playback from this player.
+    /// </summary>
     public BetterSource VoipEftSource { get; set; }
 
+    /// <summary>
+    /// Gets the health controller cast to <see cref="ObservedHealthController"/> for network health synchronization.
+    /// </summary>
     public ObservedHealthController NetworkHealthController
     {
         get
@@ -85,6 +100,9 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
+    /// <summary>
+    /// Gets a value indicating whether this player can be snapped to geometry. Always returns <see langword="false"/> for observed players.
+    /// </summary>
     public override bool CanBeSnapped
     {
         get
@@ -93,6 +111,9 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
+    /// <summary>
+    /// Gets or sets the active point of view, updating player rendering, bones scaling, and animations.
+    /// </summary>
     public override EPointOfView PointOfView
     {
         get
@@ -117,6 +138,9 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
+    /// <summary>
+    /// Gets or sets the hands controller and notifies the movement context animator of weapon changes.
+    /// </summary>
     public override AbstractHandsController HandsController
     {
         get
@@ -132,6 +156,9 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
+    /// <summary>
+    /// Gets the ray used for interaction checks cast from the player's view direction.
+    /// </summary>
     public override Ray InteractionRay
     {
         get
@@ -141,6 +168,9 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
+    /// <summary>
+    /// Gets the hearing range multiplier for audio effects relative to the local protagonist hearing setting.
+    /// </summary>
     public override float ProtagonistHearing
     {
         get
@@ -149,6 +179,9 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
+    /// <summary>
+    /// Gets or sets whether this observed player is currently visible according to follower culling (always <see langword="true"/> in headless mode).
+    /// </summary>
     public override bool IsVisible
     {
         get
@@ -166,6 +199,9 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
+    /// <summary>
+    /// Gets the character controller attached to the movement context.
+    /// </summary>
     public ImpostorCharacterController ObservedCharacterController
     {
         get
@@ -174,32 +210,118 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
+    /// <summary>
+    /// Timestamp (in seconds) after which Full Body Biped IK (FBBIK) quick mode is reactivated following hit reactions.
+    /// </summary>
     public float TurnOffFbbikAt;
 
+    /// <summary>
+    /// Current interpolated/extrapolated replicated player state snapshot.
+    /// </summary>
     internal ObservedState CurrentPlayerState;
+    /// <summary>
+    /// Cached distance in meters from the camera to this observed player on the previous frame.
+    /// </summary>
     private float _lastDistance;
+    /// <summary>
+    /// Weight applied to the right hand IK solver.
+    /// </summary>
     private float _rightHand;
+    /// <summary>
+    /// Weight applied to the left hand IK solver.
+    /// </summary>
     private float _leftHand;
+    /// <summary>
+    /// Indicates whether the active hands controller model and animator should be culled at a distance.
+    /// </summary>
     private bool _shouldCullController;
+    /// <summary>
+    /// Handlers monitoring equipment slot changes to update third-person visual meshes.
+    /// </summary>
     private readonly List<ObservedSlotViewHandler> _observedSlotViewHandlers = [];
+    /// <summary>
+    /// Manages distance and frustum culling for this player's corpse after death.
+    /// </summary>
     private ObservedCorpseCulling _observedCorpseCulling;
-    private bool _compassLoaded;
+    /// <summary>
+    /// Follower culling component used to determine player visibility.
+    /// </summary>
     private FollowerCullingObject _followerCullingObject;
+    /// <summary>
+    /// Replicated vaulting parameters specifying obstacle heights, speed, and weights.
+    /// </summary>
     private readonly ObservedVaultingParameters _observedVaultingParameters = new();
+    /// <summary>
+    /// Backing field for <see cref="LeftStanceDisabled"/>.
+    /// </summary>
     private bool _leftStancedDisabled;
+    /// <summary>
+    /// Backing field for <see cref="HealthBar"/>.
+    /// </summary>
     private FikaHealthBar _healthBar;
+    /// <summary>
+    /// Cached flag indicating if this instance is running as the server/host.
+    /// </summary>
     private bool _isServer;
+    /// <summary>
+    /// Trigger component used for spatial VOIP broadcast via Dissonance.
+    /// </summary>
     private VoiceBroadcastTrigger _voiceBroadcastTrigger;
+    /// <summary>
+    /// Cached sound settings group used for voice volume bindings.
+    /// </summary>
     private SoundSettingsGroup _soundSettings;
+    /// <summary>
+    /// Interactable component added to this player when downed to allow teammates to revive them.
+    /// </summary>
     private ReviveInteractable _reviveInteractable;
+    /// <summary>
+    /// Indicates whether the VOIP audio source binding and occlusion processing have completed.
+    /// </summary>
     private bool _voipAssigned;
+    /// <summary>
+    /// Frame skip offset modulo used to stagger tick operations across observed players.
+    /// </summary>
     private int _frameSkip;
+    /// <summary>
+    /// Indicates whether this player uses the simplified zombie animation rig and skeleton.
+    /// </summary>
     private bool _isZombie;
 
+    /// <summary>
+    /// Squared threshold below which movement direction is treated as stationary.
+    /// </summary>
     private const float _movementDeadZoneSqr = 0.05f * 0.05f;
+    /// <summary>
+    /// Squared threshold below which interpolated velocity is clamped to zero.
+    /// </summary>
     private const float _velocityDeadZoneSqr = 0.20f * 0.20f;
     #endregion
 
+    /// <summary>
+    /// Asynchronously creates, configures, and spawns a new <see cref="ObservedPlayer"/> instance.
+    /// </summary>
+    /// <param name="gameWorld">The active EFT game world instance.</param>
+    /// <param name="playerId">The unique player network ID.</param>
+    /// <param name="position">Initial world spawn position.</param>
+    /// <param name="rotation">Initial rotation quaternion.</param>
+    /// <param name="layerName">Layer name to assign to the player object.</param>
+    /// <param name="prefix">Prefab name prefix.</param>
+    /// <param name="pointOfView">Initial point of view (typically third person).</param>
+    /// <param name="profile">Player profile containing skills, stats, and inventory data.</param>
+    /// <param name="healthBytes">Serialized health controller snapshot data.</param>
+    /// <param name="aiControl"><see langword="true"/> if this observed player is controlled by AI.</param>
+    /// <param name="updateQueue">Update queue channel.</param>
+    /// <param name="armsUpdateMode">Animator update mode for arms.</param>
+    /// <param name="bodyUpdateMode">Animator update mode for body.</param>
+    /// <param name="characterControllerMode">Character controller spawning mode.</param>
+    /// <param name="getSensitivity">Delegate retrieving mouse sensitivity.</param>
+    /// <param name="getAimingSensitivity">Delegate retrieving aiming mouse sensitivity.</param>
+    /// <param name="filter">Customization filter for appearance.</param>
+    /// <param name="firstId">Starting MongoID for inventory operations.</param>
+    /// <param name="firstOperationId">Starting network operation sequence ID.</param>
+    /// <param name="isZombie"><see langword="true"/> if the player is an infected/zombie entity using simple animators.</param>
+    /// <returns>A task representing the asynchronous creation operation, resolving to the initialized <see cref="ObservedPlayer"/>.</returns>
     public static async Task<ObservedPlayer> CreateObservedPlayer(GameWorld gameWorld, int playerId, Vector3 position, Quaternion rotation, string layerName,
         string prefix, EPointOfView pointOfView, Profile profile, byte[] healthBytes, bool aiControl,
         EUpdateQueue updateQueue, EUpdateMode armsUpdateMode, EUpdateMode bodyUpdateMode,
@@ -307,13 +429,17 @@ public sealed class ObservedPlayer : FikaPlayer
         return player;
     }
 
+    /// <summary>
+    /// Gets the body transform used as the tracking origin for follower culling.
+    /// </summary>
+    /// <returns>The original body transform from <see cref="PlayerBones"/>.</returns>
     private Transform GetCullingTransform()
     {
         return PlayerBones.BodyTransform.Original;
     }
 
     /// <summary>
-    /// These are redundant on observed players
+    /// Disposes vision and face cover observers that are redundant on remote observed players.
     /// </summary>
     private void DisposeObservers()
     {
@@ -323,6 +449,10 @@ public sealed class ObservedPlayer : FikaPlayer
         FaceCoverObserver.Dispose();
     }
 
+    /// <summary>
+    /// Initializes positional VOIP communications and audio sources for this player.
+    /// </summary>
+    /// <param name="voipState">The VOIP state indicating availability.</param>
     public override void InitVoip(EVoipState voipState)
     {
         if (voipState == EVoipState.Available)
@@ -350,6 +480,10 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
+    /// <summary>
+    /// Coroutine that waits for the Dissonance audio source to be assigned and configures spatial audio effects.
+    /// </summary>
+    /// <returns>An <see cref="IEnumerator"/> for coroutine execution.</returns>
     private IEnumerator SourceBindingCreated()
     {
         if (_voipAssigned)
@@ -390,6 +524,9 @@ public sealed class ObservedPlayer : FikaPlayer
         _voipAssigned = true;
     }
 
+    /// <summary>
+    /// Attaches and configures the <see cref="VoiceBroadcastTrigger"/> component for VOIP playback.
+    /// </summary>
     private void SetupVoiceBroadcastTrigger()
     {
         _voiceBroadcastTrigger = gameObject.AddComponent<VoiceBroadcastTrigger>();
@@ -398,17 +535,33 @@ public sealed class ObservedPlayer : FikaPlayer
         CompositeDisposable.BindState(_soundSettings.VoiceChatVolume, ChangeVoipDeviceSensitivity);
     }
 
+    /// <summary>
+    /// Updates the voice broadcast trigger fader volume when the user's voice volume setting changes.
+    /// </summary>
+    /// <param name="value">The sound volume level from 0 to 100.</param>
     private void ChangeVoipDeviceSensitivity(int value)
     {
-        var num = (float)value / 100f;
-        _voiceBroadcastTrigger.ActivationFader.Volume = num;
+        _voiceBroadcastTrigger.ActivationFader.Volume = (float)value / 100f;
     }
 
+    /// <summary>
+    /// Creates a lightweight physical parameter instance without stamina drain simulation.
+    /// </summary>
+    /// <returns>A new <see cref="PhysicalBase"/> instance.</returns>
     public override PhysicalBase CreatePhysical()
     {
         return new PhysicalBase();
     }
 
+    /// <summary>
+    /// Triggers a spoken voice phrase if the player object is active in the hierarchy.
+    /// </summary>
+    /// <param name="phrase">Phrase trigger type to speak.</param>
+    /// <param name="demand">Whether the voice line is demanded immediately.</param>
+    /// <param name="delay">Playback delay in seconds.</param>
+    /// <param name="mask">Tag mask filters.</param>
+    /// <param name="probability">Probability percentage of speaking (0-100).</param>
+    /// <param name="aggressive">Whether to play aggressive vocalization variant.</param>
     public override void Say(EPhraseTrigger phrase, bool demand = false, float delay = 0, ETagStatus mask = 0, int probability = 100, bool aggressive = false)
     {
         if (gameObject.activeSelf)
@@ -417,6 +570,11 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
+    /// <summary>
+    /// Plays landing and grounded impact sounds based on the calculated surface type beneath the player.
+    /// </summary>
+    /// <param name="fallHeight">Height fallen before landing.</param>
+    /// <param name="jumpHeight">Jump height reached.</param>
     public override void PlayGroundedSound(float fallHeight, float jumpHeight)
     {
         (var hit, var surfaceSound) = CalculateMovementSurface();
@@ -424,46 +582,84 @@ public sealed class ObservedPlayer : FikaPlayer
         base.PlayGroundedSound(fallHeight, jumpHeight);
     }
 
+    /// <summary>
+    /// Overridden to suppress skill level change notifications on observed players.
+    /// </summary>
+    /// <param name="skill">The skill whose level changed.</param>
     public override void OnSkillLevelChanged(BaseSkill skill)
     {
         // Do nothing
     }
 
+    /// <summary>
+    /// Overridden to suppress weapon mastery notifications on observed players.
+    /// </summary>
+    /// <param name="masterSkill">The weapon mastering skill updated.</param>
     public override void OnWeaponMastered(Mastering masterSkill)
     {
         // Do nothing
     }
 
+    /// <summary>
+    /// Overridden to prevent self-damage coroutines from running on observed players.
+    /// </summary>
     public override void StartInflictSelfDamageCoroutine()
     {
         // Do nothing
     }
 
+    /// <summary>
+    /// Overridden to suppress state speed limit additions on observed players.
+    /// </summary>
+    /// <param name="speedDelta">Speed difference delta.</param>
+    /// <param name="cause">The cause of the speed limit.</param>
     public override void AddStateSpeedLimit(float speedDelta, ESpeedLimit cause)
     {
         // Do nothing
     }
 
+    /// <summary>
+    /// Overridden to suppress speed limit updates on observed players.
+    /// </summary>
+    /// <param name="speedDelta">Speed difference delta.</param>
+    /// <param name="cause">The cause of the speed limit.</param>
     public override void UpdateSpeedLimit(float speedDelta, ESpeedLimit cause)
     {
         // Do nothing
     }
 
+    /// <summary>
+    /// Overridden to suppress health-dependent speed limit updates on observed players.
+    /// </summary>
     public override void UpdateSpeedLimitByHealth()
     {
         // Do nothing
     }
 
+    /// <summary>
+    /// Overridden to suppress timed speed limit updates on observed players.
+    /// </summary>
+    /// <param name="speedDelta">Speed difference delta.</param>
+    /// <param name="cause">The cause of the speed limit.</param>
+    /// <param name="duration">Duration of the limit in seconds.</param>
     public override void UpdateSpeedLimit(float speedDelta, ESpeedLimit cause, float duration)
     {
         // Do nothing
     }
 
+    /// <summary>
+    /// Overridden to suppress tactical headset audio filter updates on observed players.
+    /// </summary>
     public override void UpdatePhones()
     {
         // Do nothing
     }
 
+    /// <summary>
+    /// Overridden to suppress face shield mark operations on observed players.
+    /// </summary>
+    /// <param name="armor">The face shield component.</param>
+    /// <param name="hasServerOrigin">Whether the operation originated from the server.</param>
     public override void FaceshieldMarkOperation(FaceShieldComponent armor, bool hasServerOrigin)
     {
         // Do nothing
@@ -475,6 +671,12 @@ public sealed class ObservedPlayer : FikaPlayer
         base.ShotReactions(shot, bodyPart);
     }*/
 
+    /// <summary>
+    /// Updates aggressor statistics, triggers weapon skill progression on the damaging player, and checks death status.
+    /// </summary>
+    /// <param name="DamageInfo">Information detailing the inflicted damage.</param>
+    /// <param name="bodyPart">The affected body part.</param>
+    /// <param name="colliderType">The collider type that was hit.</param>
     public override void ManageAggressor(DamageInfo DamageInfo, EBodyPart bodyPart, EBodyPartColliderType colliderType)
     {
         if (_isDeadAlready)
@@ -510,21 +712,40 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
+    /// <summary>
+    /// Overridden to suppress arm stamina and condition updates on observed players.
+    /// </summary>
     public override void UpdateArmsCondition()
     {
         // Do nothing
     }
 
+    /// <summary>
+    /// Determines whether the player should play death vocalization screams depending on the fatal hit location.
+    /// </summary>
+    /// <param name="bodyPart">The fatal body part hit.</param>
+    /// <returns><see langword="true"/> if the hit was not to the head; otherwise, <see langword="false"/>.</returns>
     public override bool ShouldVocalizeDeath(EBodyPart bodyPart)
     {
         return bodyPart > EBodyPart.Head;
     }
 
+    /// <summary>
+    /// Overridden to suppress headlight toggle network packets from observed players.
+    /// </summary>
+    /// <param name="isSilent">Whether the toggle was silent.</param>
     public override void SendHeadlightsPacket(bool isSilent)
     {
         // Do nothing
     }
 
+    /// <summary>
+    /// Triggers pain vocalizations, increases awareness for AI, and updates hit reaction state.
+    /// </summary>
+    /// <param name="damage">Amount of damage taken.</param>
+    /// <param name="staminaBurnRate">Rate at which stamina was depleted.</param>
+    /// <param name="bodyPartType">The body part that received damage.</param>
+    /// <param name="damageType">The category of damage inflicted.</param>
     public override void ApplyHitDebuff(float damage, float staminaBurnRate, EBodyPart bodyPartType, EDamageType damageType)
     {
         if (damageType.IsEnemyDamage())
@@ -540,6 +761,12 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
+    /// <summary>
+    /// Handles explosive damage by updating damage history and transmitting a damage packet to the network.
+    /// </summary>
+    /// <param name="DamageInfo">Information detailing the explosion damage.</param>
+    /// <param name="bodyPartType">Target body part hit by the explosion.</param>
+    /// <param name="colliderType">Collider type hit.</param>
     public void HandleExplosive(DamageInfo DamageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType)
     {
         if (HealthController.DamageCoeff == 0)
@@ -557,6 +784,13 @@ public sealed class ObservedPlayer : FikaPlayer
         Singleton<IFikaNetworkManager>.Instance.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
     }
 
+    /// <summary>
+    /// Records damage parameters and last aggressor references on this observed player.
+    /// </summary>
+    /// <param name="DamageInfo">Information detailing the damage.</param>
+    /// <param name="bodyPartType">The damaged body part.</param>
+    /// <param name="colliderType">The collider type that was struck.</param>
+    /// <param name="absorbed">Amount of damage absorbed by armor.</param>
     public override void ApplyDamageInfo(DamageInfo DamageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, float absorbed)
     {
         LastAggressor = DamageInfo.Player.iPlayer;
@@ -566,6 +800,15 @@ public sealed class ObservedPlayer : FikaPlayer
         LastDamageType = DamageInfo.DamageType;
     }
 
+    /// <summary>
+    /// Handles out-of-bounds sniper shot damage, applies debuffs, and broadcasts a network damage packet.
+    /// </summary>
+    /// <param name="DamageInfo">Damage information from the sniper shot.</param>
+    /// <param name="bodyPartType">Target body part hit.</param>
+    /// <param name="colliderType">Collider type struck.</param>
+    /// <param name="armorPlateCollider">Armor plate collider hit, if applicable.</param>
+    /// <param name="shotId">Unique shot identifier.</param>
+    /// <returns>A <see cref="PlayerHitInfo"/> describing the impact, or <see langword="null"/> if damage coefficient is 0.</returns>
     public PlayerHitInfo HandleSniperShot(DamageInfo DamageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, ShotId shotId)
     {
         if (HealthController.DamageCoeff == 0)
@@ -591,6 +834,15 @@ public sealed class ObservedPlayer : FikaPlayer
         };
     }
 
+    /// <summary>
+    /// Processes incoming ballistic bullet damage, applies armor penetration and degradation, updates health, and syncs over network.
+    /// </summary>
+    /// <param name="damageInfo">Damage information describing the ballistic hit.</param>
+    /// <param name="bodyPartType">Target body part hit.</param>
+    /// <param name="colliderType">Collider type struck.</param>
+    /// <param name="armorPlateCollider">Specific armor plate collider hit.</param>
+    /// <param name="shotId">Unique shot identifier.</param>
+    /// <returns>A <see cref="PlayerHitInfo"/> summarizing the hit result, or <see langword="null"/> if already dead.</returns>
     public override PlayerHitInfo ApplyShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, ShotId shotId)
     {
         if (HealthController != null && !HealthController.IsAlive)
@@ -629,35 +881,57 @@ public sealed class ObservedPlayer : FikaPlayer
         return hitInfo;
     }
 
+    /// <summary>
+    /// Overridden to suppress local inventory add/remove events on observed players.
+    /// </summary>
+    /// <param name="item">The item added or removed.</param>
+    /// <param name="location">Item inventory location.</param>
+    /// <param name="added"><see langword="true"/> if added; <see langword="false"/> if removed.</param>
     public override void OnItemAddedOrRemoved(Item item, ItemAddress location, bool added)
     {
         // Do nothing
     }
 
+    /// <summary>
+    /// Applies explosion durability damage to equipped armor components on the server.
+    /// </summary>
+    /// <param name="armorDamage">Dictionary mapping explosion hits to durability damage amounts.</param>
+    /// <param name="DamageInfo">Explosion damage information.</param>
     public override void ApplyExplosionDamageToArmor(Dictionary<ExplosionDamageInfo, float> armorDamage, DamageInfo DamageInfo)
     {
-        if (_isServer)
+        if (!_isServer)
         {
-            foreach (var armorComponent in _preAllocatedArmorComponents)
+            return;
+        }
+
+        foreach (var armorComponent in _preAllocatedArmorComponents)
+        {
+            var num = 0f;
+            foreach (var keyValuePair in armorDamage)
             {
-                var num = 0f;
-                foreach (var keyValuePair in armorDamage)
+                if (armorComponent.ShotMatches(keyValuePair.Key.BodyPartColliderType, keyValuePair.Key.ArmorPlateCollider))
                 {
-                    if (armorComponent.ShotMatches(keyValuePair.Key.BodyPartColliderType, keyValuePair.Key.ArmorPlateCollider))
-                    {
-                        num += keyValuePair.Value;
-                    }
+                    num += keyValuePair.Value;
                 }
-                if (num > 0f)
-                {
-                    num = armorComponent.ApplyExplosionDurabilityDamage(num, DamageInfo, _preAllocatedArmorComponents);
-                    OnArmorDamaged(num, armorComponent);
-                    OnArmorPointsChanged(armorComponent);
-                }
+            }
+            if (num > 0f)
+            {
+                num = armorComponent.ApplyExplosionDurabilityDamage(num, DamageInfo, _preAllocatedArmorComponents);
+                OnArmorDamaged(num, armorComponent);
+                OnArmorPointsChanged(armorComponent);
             }
         }
     }
 
+    /// <summary>
+    /// Processes client-side simulated ballistic damage, updating aggressor records, armor durability, and network synchronization.
+    /// </summary>
+    /// <param name="damageInfo">Damage info received from client calculation.</param>
+    /// <param name="bodyPartType">Target body part struck.</param>
+    /// <param name="colliderType">Collider struck.</param>
+    /// <param name="armorPlateCollider">Armor plate collider hit.</param>
+    /// <param name="shotId">Unique shot identifier.</param>
+    /// <returns>A <see cref="PlayerHitInfo"/> summarizing the hit result, or <see langword="null"/> if dead.</returns>
     public PlayerHitInfo ApplyClientShot(DamageInfo damageInfo, EBodyPart bodyPartType, EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider, ShotId shotId)
     {
         ShotReactions(damageInfo, bodyPartType);
@@ -702,11 +976,18 @@ public sealed class ObservedPlayer : FikaPlayer
         return hitInfo;
     }
 
+    /// <summary>
+    /// Overridden to suppress weapon mounting commands on observed players.
+    /// </summary>
+    /// <param name="command">The mounting command.</param>
     public override void OnMounting(EFT.MountingPacket.EMountingCommand command)
     {
         // Do nothing
     }
 
+    /// <summary>
+    /// Applies physics impulse to this player's corpse ragdoll according to synchronized death packet data.
+    /// </summary>
     public override void ApplyCorpseImpulse()
     {
         if (botPlayerCulling.IsVisible || _isServer)
@@ -719,15 +1000,21 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
+    /// <summary>
+    /// Creates the <see cref="ObservedMovementContext"/> used to animate and position this remote observed player.
+    /// </summary>
     public override void CreateMovementContext()
     {
-        var movement_MASK = EFTHardSettings.Instance.MOVEMENT_MASK;
-        MovementContext = ObservedMovementContext.Create(this, GetBodyAnimatorCommon, GetCharacterControllerCommon, movement_MASK);
+        MovementContext = ObservedMovementContext.Create(this, GetBodyAnimatorCommon,
+            GetCharacterControllerCommon, EFTHardSettings.Instance.MOVEMENT_MASK);
     }
 
+    /// <summary>
+    /// Plays environmental sound effects (such as bone fractures) when a health effect is added.
+    /// </summary>
+    /// <param name="effect">The health effect added.</param>
     public override void OnHealthEffectAdded(IHealthEffect effect)
     {
-        // Check for GClass increments
         if (effect is IFracture fracture && !fracture.WasPaused && FractureSound != null && Singleton<BetterAudio>.Instantiated)
         {
             Singleton<BetterAudio>.Instance.PlayAtPoint(Position, FractureSound, CameraManager.Instance.Distance(Position),
@@ -735,17 +1022,30 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
+    /// <summary>
+    /// Overridden to suppress health effect removal handling on observed players.
+    /// </summary>
+    /// <param name="effect">The health effect removed.</param>
     public override void OnHealthEffectRemoved(IHealthEffect effect)
     {
         // Do nothing
     }
 
+    /// <summary>
+    /// Overridden to prevent skill manager event connections on observed players.
+    /// </summary>
     public override void ConnectSkillManager()
     {
         // Do nothing
     }
 
     #region proceed
+    /// <summary>
+    /// Transitions hands to an empty hands controller.
+    /// </summary>
+    /// <param name="withNetwork">Whether to synchronize over network.</param>
+    /// <param name="callback">Callback invoked upon completion.</param>
+    /// <param name="scheduled">Whether the transition is scheduled.</param>
     public override void Proceed(bool withNetwork, Callback<IEmptyHandsController> callback, bool scheduled = true)
     {
         Func<EmptyHandsController> func = new(ProceedEmptyHandsController);
@@ -753,6 +1053,12 @@ public sealed class ObservedPlayer : FikaPlayer
             .Proceed(null, callback, scheduled);
     }
 
+    /// <summary>
+    /// Transitions hands to a knife melee controller.
+    /// </summary>
+    /// <param name="knife">The knife component to equip.</param>
+    /// <param name="callback">Callback invoked upon completion.</param>
+    /// <param name="scheduled">Whether the transition is scheduled.</param>
     public override void Proceed(KnifeComponent knife, Callback<IKnifeController> callback, bool scheduled = true)
     {
         HandsControllerFactory factory = new(this, knifeComponent: knife);
@@ -761,6 +1067,12 @@ public sealed class ObservedPlayer : FikaPlayer
             .Proceed(null, callback, scheduled);
     }
 
+    /// <summary>
+    /// Transitions hands to a throwable grenade controller.
+    /// </summary>
+    /// <param name="throwWeap">The throwable grenade item to equip.</param>
+    /// <param name="callback">Callback invoked upon completion.</param>
+    /// <param name="scheduled">Whether the transition is scheduled.</param>
     public override void Proceed(ThrowWeap throwWeap, Callback<IGrenadeController> callback, bool scheduled = true)
     {
         HandsControllerFactory factory = new(this, throwWeap);
@@ -769,6 +1081,12 @@ public sealed class ObservedPlayer : FikaPlayer
             .Proceed(null, callback, scheduled);
     }
 
+    /// <summary>
+    /// Transitions hands to a quick grenade throw controller.
+    /// </summary>
+    /// <param name="throwWeap">The throwable grenade item to throw quickly.</param>
+    /// <param name="callback">Callback invoked upon completion.</param>
+    /// <param name="scheduled">Whether the transition is scheduled.</param>
     public override void Proceed(ThrowWeap throwWeap, Callback<IQuickGrenadeThrowController> callback, bool scheduled = true)
     {
         HandsControllerFactory factory = new(this, throwWeap);
@@ -777,6 +1095,12 @@ public sealed class ObservedPlayer : FikaPlayer
             .Proceed(null, callback, scheduled);
     }
 
+    /// <summary>
+    /// Transitions hands to a firearm weapon controller.
+    /// </summary>
+    /// <param name="weapon">The weapon item to equip.</param>
+    /// <param name="callback">Callback invoked upon completion.</param>
+    /// <param name="scheduled">Whether the transition is scheduled.</param>
     public override void Proceed(Weapon weapon, Callback<IFirearmHandsController> callback, bool scheduled = true)
     {
         HandsControllerFactory factory = new(this, weapon);
@@ -785,6 +1109,14 @@ public sealed class ObservedPlayer : FikaPlayer
             .Proceed(null, callback, scheduled);
     }
 
+    /// <summary>
+    /// Transitions hands to a medical item controller.
+    /// </summary>
+    /// <param name="meds">The medical item to use.</param>
+    /// <param name="bodyParts">Body parts to treat.</param>
+    /// <param name="callback">Callback invoked upon completion.</param>
+    /// <param name="animationVariant">Animation variant index.</param>
+    /// <param name="scheduled">Whether the transition is scheduled.</param>
     public override void Proceed(Meds meds, OneAndList<EBodyPart> bodyParts, Callback<IMedsController> callback, int animationVariant, bool scheduled = true)
     {
         HandsControllerFactory factory = new(this)
@@ -798,6 +1130,14 @@ public sealed class ObservedPlayer : FikaPlayer
             .Proceed(null, callback, scheduled);
     }
 
+    /// <summary>
+    /// Transitions hands to a consumable food or drink controller.
+    /// </summary>
+    /// <param name="foodDrink">The food or drink item to consume.</param>
+    /// <param name="amount">Amount of the item to consume.</param>
+    /// <param name="callback">Callback invoked upon completion.</param>
+    /// <param name="animationVariant">Animation variant index.</param>
+    /// <param name="scheduled">Whether the transition is scheduled.</param>
     public override void Proceed(FoodDrink foodDrink, float amount, Callback<IMedsController> callback, int animationVariant, bool scheduled = true)
     {
         HandsControllerFactory factory = new(this)
@@ -812,21 +1152,40 @@ public sealed class ObservedPlayer : FikaPlayer
     }
     #endregion
 
+    /// <summary>
+    /// Overridden to suppress camera FOV change adjustments on observed players.
+    /// </summary>
+    /// <param name="fov">New field of view angle.</param>
     public override void OnFovUpdatedEvent(int fov)
     {
         // Do nothing
     }
 
+    /// <summary>
+    /// Overridden to suppress greeting notifications on observed players.
+    /// </summary>
+    /// <param name="sender">Sender nickname.</param>
     public override void ShowHelloNotification(string sender)
     {
         // Do nothing
     }
 
+    /// <summary>
+    /// Overridden to suppress local health controller tick on observed players.
+    /// </summary>
+    /// <param name="deltaTime">Frame delta time.</param>
     public override void HealthControllerUpdate(float deltaTime)
     {
         // Do nothing
     }
 
+    /// <summary>
+    /// Plays the vocal audio clip for a voice phrase unless running in headless mode.
+    /// </summary>
+    /// <param name="event">Phrase trigger type.</param>
+    /// <param name="clip">The audio clip to play.</param>
+    /// <param name="bank">Audio tag bank containing the clip.</param>
+    /// <param name="speaker">The speaker initiating playback.</param>
     public override void OnPhraseTold(EPhraseTrigger @event, TaggedClip clip, TagBank bank, BaseSpeaker speaker)
     {
         if (!FikaBackendUtils.IsHeadless)
@@ -835,11 +1194,20 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
+    /// <summary>
+    /// Invokes the rotation action delegate on the movement context to update body alignment.
+    /// </summary>
+    /// <param name="forceApplyToOriginalRibcage">Whether to force apply rotation directly to ribcage transform.</param>
     public override void MouseLook(bool forceApplyToOriginalRibcage = false)
     {
         MovementContext.RotationAction?.Invoke(this);
     }
 
+    /// <summary>
+    /// Checks the ground surface beneath the player to update movement audio and surface physics data.
+    /// </summary>
+    /// <param name="range">Surface check detection range.</param>
+    /// <returns><see langword="true"/> if within hearing range; otherwise, <see langword="false"/>.</returns>
     public override bool CheckSurface(float range)
     {
         if (_lastDistance > (range * ProtagonistHearing))
@@ -857,8 +1225,9 @@ public sealed class ObservedPlayer : FikaPlayer
     }
 
     /// <summary>
-    /// Updates replicated values
+    /// Samples interpolated and extrapolated snapshot states from the network and applies positions, rotations, animators, and sound cues.
     /// </summary>
+    /// <param name="localTime">Current local network time used for snapshot interpolation.</param>
     public void ManualStateUpdate(double localTime)
     {
         var bufferState = Snapshotter.GetInterpolationIndices(localTime, out var from, out var to, out var t);
@@ -1059,6 +1428,9 @@ public sealed class ObservedPlayer : FikaPlayer
         ObservedCharacterController._velocity = CurrentPlayerState.Velocity;
     }
 
+    /// <summary>
+    /// Casts an interaction ray forward to detect interactable players in front of this observed player.
+    /// </summary>
     public override void InteractionRaycast()
     {
         if (_playerLookRaycastTransform == null || !HealthController.IsAlive)
@@ -1073,7 +1445,6 @@ public sealed class ObservedPlayer : FikaPlayer
         if (gameObject != null)
         {
             if (gameObject.TryGetComponent<Player>(out var otherPlayer) && InteractablePlayer != otherPlayer)
-            if (player != null && player != InteractablePlayer)
             {
                 InteractablePlayer = (otherPlayer != this) ? otherPlayer : null;
             }
@@ -1083,6 +1454,10 @@ public sealed class ObservedPlayer : FikaPlayer
         InteractablePlayer = null;
     }
 
+    /// <summary>
+    /// Spawns and configures an <see cref="ObservedCorpse"/> or standard <see cref="Corpse"/> with replicated inventory upon death.
+    /// </summary>
+    /// <returns>The created corpse instance.</returns>
     public override Corpse CreateCorpse()
     {
         if (CorpseSyncPacket.InventoryDescriptor != null)
@@ -1104,6 +1479,9 @@ public sealed class ObservedPlayer : FikaPlayer
         return corpse;
     }
 
+    /// <summary>
+    /// Creates the nested audio source for environmental sound effects if not in headless mode.
+    /// </summary>
     public override void CreateNestedSource()
     {
         if (!FikaBackendUtils.IsHeadless)
@@ -1112,6 +1490,9 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
+    /// <summary>
+    /// Creates the speech audio source for voice phrases if not in headless mode.
+    /// </summary>
     public override void CreateSpeechSource()
     {
         if (!FikaBackendUtils.IsHeadless)
@@ -1120,6 +1501,10 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
+    /// <summary>
+    /// Handles death events, cleanups, corpse spawning, UI notifications, and network unregistration.
+    /// </summary>
+    /// <param name="damageType">Lethal damage type that killed the player.</param>
     public override void OnDead(EDamageType damageType)
     {
         ClearReviveInteractable();
@@ -1176,11 +1561,22 @@ public sealed class ObservedPlayer : FikaPlayer
         Singleton<IFikaNetworkManager>.Instance.ObservedPlayers.Remove(this);
     }
 
+    /// <summary>
+    /// Overridden to suppress transit interactions on observed players.
+    /// </summary>
+    /// <param name="controller">The transit controller.</param>
+    /// <param name="transitPointId">Transit point ID.</param>
+    /// <param name="keyId">Key ID used for transit.</param>
+    /// <param name="time">In-game transition time.</param>
     public override void TransitInteraction(TransitController controller, int transitPointId, string keyId, EDateTime time)
     {
         // Do nothing
     }
 
+    /// <summary>
+    /// Deserializes and processes incoming damage packet information, updating damage history and inflicting damage.
+    /// </summary>
+    /// <param name="packet">Network damage packet containing hit details.</param>
     public override void HandleDamagePacket(DamagePacket packet)
     {
         DamageInfo damageInfo = new()
@@ -1223,9 +1619,16 @@ public sealed class ObservedPlayer : FikaPlayer
         LastDamagedBodyPart = packet.BodyPartType;
     }
 
+    /// <summary>
+    /// Handles kill notifications, shared quest progression, and experience distribution when killed by a group member.
+    /// </summary>
+    /// <param name="aggressor">The player that inflicted lethal damage.</param>
+    /// <param name="damageInfo">Lethal damage details.</param>
+    /// <param name="bodyPart">Fatal body part.</param>
+    /// <param name="lethalDamageType">Fatal damage type.</param>
     public override void OnBeenKilledByAggressor(IPlayer aggressor, DamageInfo damageInfo, EBodyPart bodyPart, EDamageType lethalDamageType)
     {
-        // Only handle if it was ourselves as otherwise it's irrelevant
+        // only handle if it was ourselves as otherwise it's irrelevant
         if (LastAggressor.IsYourPlayer)
         {
             base.OnBeenKilledByAggressor(aggressor, damageInfo, bodyPart, lethalDamageType);
@@ -1265,11 +1668,18 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
+    /// <summary>
+    /// Overridden to suppress external interactions on observed players.
+    /// </summary>
     public override void ExternalInteraction()
     {
         // Do nothing
     }
 
+    /// <summary>
+    /// Toggles the downed state, spawning or destroying revive interactables, triggering agony phrases, and updating UI.
+    /// </summary>
+    /// <param name="downed"><see langword="true"/> if entering downed state; otherwise, <see langword="false"/>.</param>
     public override void ToggleDowned(bool downed)
     {
 #if DEBUG
@@ -1318,6 +1728,11 @@ public sealed class ObservedPlayer : FikaPlayer
         ClearReviveInteractable();
     }
 
+    /// <summary>
+    /// Updates the reviving status on the revive interactable and health bar when a teammate revives this player.
+    /// </summary>
+    /// <param name="reviving">Whether revival is currently in progress.</param>
+    /// <param name="nickname">Nickname of the player performing the revival.</param>
     public override void ToggleRevive(bool reviving, string nickname)
     {
 #if DEBUG
@@ -1333,6 +1748,9 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
+    /// <summary>
+    /// Destroys and cleans up the active <see cref="ReviveInteractable"/> component.
+    /// </summary>
     internal void ClearReviveInteractable()
     {
         var interactable = _reviveInteractable;
@@ -1343,10 +1761,13 @@ public sealed class ObservedPlayer : FikaPlayer
         _reviveInteractable = null;
     }
 
+    /// <summary>
+    /// Loads and attaches the third-person compass model to the player's ribcage transform.
+    /// </summary>
     internal void CreateObservedCompass()
     {
         const string bundlePath = "assets/content/weapons/additional_hands/item_compass.bundle";
-        if (!_compassLoaded)
+        if (!_compassInstantiated)
         {
             var transform = Singleton<ObjectsFactory>.Instance.CreateFromPool<Transform>(new ResourceKey
             {
@@ -1356,10 +1777,14 @@ public sealed class ObservedPlayer : FikaPlayer
             transform.localRotation = Quaternion.identity;
             transform.localPosition = Vector3.zero;
             UpdateCompassController(transform.gameObject);
-            _compassLoaded = true;
+            _compassInstantiated = true;
         }
     }
 
+    /// <summary>
+    /// Deserializes and equips the given inventory descriptor onto this observed player, refreshing slot views.
+    /// </summary>
+    /// <param name="inventoryDescriptor">Serialized item descriptor containing equipment hierarchy.</param>
     public void SetInventory(ItemDescriptor inventoryDescriptor)
     {
         if (HandsController != null)
@@ -1388,6 +1813,9 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
+    /// <summary>
+    /// Rebuilds visual third-person slot views for all equipped items, holsters, and weapon bones.
+    /// </summary>
     private void RefreshSlotViews()
     {
         foreach (var equipmentSlot in PlayerBody.SlotNames)
@@ -1431,7 +1859,7 @@ public sealed class ObservedPlayer : FikaPlayer
                         }
                     }
                     controller.CCV.RemoveBones(controller.Weapon.AllSlots);
-                    foreach (EFT.InventoryLogic.IContainer container in newSlots)
+                    foreach (IContainer container in newSlots)
                     {
                         if (container is Slot slot)
                         {
@@ -1464,6 +1892,10 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
+    /// <summary>
+    /// Applies replicated vaulting or climbing animation parameters and trajectory offsets.
+    /// </summary>
+    /// <param name="packet">Vaulting packet containing speed, height, and trajectory details.</param>
     public override void DoObservedVault(VaultPacket packet)
     {
         if (packet.VaultingStrategy != EVaultingStrategy.Vault)
@@ -1495,6 +1927,9 @@ public sealed class ObservedPlayer : FikaPlayer
         MovementContext.PlayerAnimator.SetIsGrounded(true);
     }
 
+    /// <summary>
+    /// Configures packet senders, health bar creation, vaulting components, and spawns team notifications.
+    /// </summary>
     public void InitObservedPlayer()
     {
         PacketSender = gameObject.AddComponent<ObservedPacketSender>();
@@ -1562,6 +1997,11 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
+    /// <summary>
+    /// Asynchronously waits for the game to start and instantiates the floating nameplate/health bar.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token to abort waiting.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
     private async Task CreateHealthBarAsync(CancellationToken cancellationToken = default)
     {
         try
@@ -1601,6 +2041,9 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
+    /// <summary>
+    /// Executes late update processing including procedural animations, IK passes, prop updates, and corpse culling.
+    /// </summary>
     public override void LateUpdate()
     {
         DistanceDirty = true;
@@ -1617,16 +2060,27 @@ public sealed class ObservedPlayer : FikaPlayer
         _bodyupdated = false;
     }
 
+    /// <summary>
+    /// Overridden to suppress local muffled state updates.
+    /// </summary>
     public override void UpdateMuffledState()
     {
         // Do nothing
     }
 
+    /// <summary>
+    /// Overridden to suppress voice muffled state packets from observed players.
+    /// </summary>
+    /// <param name="isMuffled">Whether the voice is muffled.</param>
     public override void SendVoiceMuffledState(bool isMuffled)
     {
         // Do nothing
     }
 
+    /// <summary>
+    /// Configures audio mixer groups on speech and VOIP sources according to muffled status.
+    /// </summary>
+    /// <param name="muffled"><see langword="true"/> to route through occluded mixer; otherwise, <see langword="false"/>.</param>
     public void SetMuffledState(bool muffled)
     {
         Muffled = muffled;
@@ -1645,27 +2099,19 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
+    /// <summary>
+    /// Overridden to suppress landing adjustments on observed players.
+    /// </summary>
+    /// <param name="d">Adjustment delta.</param>
     public override void LandingAdjustments(float d)
     {
         // Do nothing
     }
 
-    public new void CreateCompass()
-    {
-        if (!_compassInstantiated)
-        {
-            var transform = Singleton<ObjectsFactory>.Instance.CreateFromPool<Transform>(new ResourceKey
-            {
-                path = "assets/content/weapons/additional_hands/item_compass.bundle"
-            });
-            transform.SetParent(PlayerBones.Ribcage.Original, false);
-            transform.localRotation = Quaternion.identity;
-            transform.localPosition = Vector3.zero;
-            UpdateCompassController(transform.gameObject);
-            _compassInstantiated = true;
-        }
-    }
-
+    /// <summary>
+    /// Handles animated gestures such as friendly wave greetings towards looked-at players.
+    /// </summary>
+    /// <param name="interaction">Interaction gesture type.</param>
     public override void OnAnimatedInteraction(EInteraction interaction)
     {
         if (interaction == EInteraction.FriendlyGesture)
@@ -1678,26 +2124,46 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
+    /// <summary>
+    /// Pauses all active health effects on this observed player.
+    /// </summary>
     public override void PauseAllEffectsOnPlayer()
     {
         NetworkHealthController.PauseAllEffects();
     }
 
+    /// <summary>
+    /// Unpauses all active health effects on this observed player.
+    /// </summary>
     public override void UnpauseAllEffectsOnPlayer()
     {
         NetworkHealthController.UnpauseAllEffects();
     }
 
+    /// <summary>
+    /// Overridden to suppress vaulting triggers on observed players.
+    /// </summary>
     public override void OnVaulting()
     {
         // Do nothing
     }
 
+    /// <summary>
+    /// Immediately succeeds the callback when replacing an active controller.
+    /// </summary>
+    /// <param name="removingItem">Item being removed from hands.</param>
+    /// <param name="callback">Completion callback.</param>
     public override void SetControllerInsteadRemovedOne(Item removingItem, Callback callback)
     {
         callback.Succeed();
     }
 
+    /// <summary>
+    /// Main per-frame update loop for observed players, handling movement updates, culling, and state-specific logic.
+    /// </summary>
+    /// <param name="deltaTime">Frame delta time.</param>
+    /// <param name="platformDeltaTime">Platform-specific delta time, if any.</param>
+    /// <param name="loop">Update loop index.</param>
     public override void ManualUpdate(float deltaTime, float? platformDeltaTime = null, int loop = 1)
     {
         MovementUpdate(deltaTime);
@@ -1729,6 +2195,9 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
+    /// <summary>
+    /// Initializes audio settings and hooks into protagonist hearing sensitivity changes.
+    /// </summary>
     public override void InitAudioController()
     {
         if (!FikaBackendUtils.IsHeadless)
@@ -1738,23 +2207,40 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
+    /// <summary>
+    /// Recalculates movement sound multipliers and voice rolloff distance.
+    /// </summary>
     private void UpdateSoundRolloff()
     {
         CalculateMovementVolumeDefaultMultiplier(CommonAssets.Scripts.Audio.EAudioMovementState.Run);
         UpdateVoiceSoundRolloff();
     }
 
+    /// <summary>
+    /// Updates speech audio rolloff distance scaled by protagonist hearing.
+    /// </summary>
     private void UpdateVoiceSoundRolloff()
     {
         SpeechSource?.SetRolloff(60f * ProtagonistHearing);
     }
 
+    /// <summary>
+    /// Starts interaction with a world interactive object (e.g. opening a door).
+    /// </summary>
+    /// <param name="interactiveObject">The interactive world object.</param>
+    /// <param name="interactionResult">Interaction result parameters.</param>
+    /// <param name="callback">Action callback on start.</param>
     public override void StartInteraction(WorldInteractiveObject interactiveObject, InteractionResult interactionResult, Action callback)
     {
         CurrentManagedState.StartDoorInteraction(interactiveObject, interactionResult, callback);
         UpdateInteractionCast();
     }
 
+    /// <summary>
+    /// Executes interaction on a world interactive door or object.
+    /// </summary>
+    /// <param name="door">The door being operated.</param>
+    /// <param name="interactionResult">Interaction parameters.</param>
     public override void ExecuteInteraction(WorldInteractiveObject door, InteractionResult interactionResult)
     {
         if (door != null)
@@ -1763,16 +2249,26 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
+    /// <summary>
+    /// Gets whether grenade animations should update according to point of view (always <see langword="true"/>).
+    /// </summary>
+    /// <returns>Always <see langword="true"/>.</returns>
     public override bool UpdateGrenadeAnimatorDuePoV()
     {
         return true;
     }
 
+    /// <summary>
+    /// Overridden to suppress physics fixed update ticks on observed players.
+    /// </summary>
     public override void FixedUpdateTick()
     {
         // Do nothing
     }
 
+    /// <summary>
+    /// Cleans up revive interactables, culling objects, hands controllers, health bars, and network listeners when destroyed.
+    /// </summary>
     public override void OnDestroy()
     {
         ClearReviveInteractable();
@@ -1810,6 +2306,11 @@ public sealed class ObservedPlayer : FikaPlayer
         base.OnDestroy();
     }
 
+    /// <summary>
+    /// Resets blind fire settings when hands interaction state transitions.
+    /// </summary>
+    /// <param name="value">New hands interaction state.</param>
+    /// <param name="animationId">Animation identifier.</param>
     public override void SendHandsInteractionStateChanged(bool value, int animationId)
     {
         if (value)
@@ -1818,6 +2319,10 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
+    /// <summary>
+    /// Handles an incoming proceed packet to equip or switch to the appropriate hands controller.
+    /// </summary>
+    /// <param name="packet">Network packet specifying the controller type and item.</param>
     public void HandleProceedPacket(ProceedPacket packet)
     {
         switch (packet.ProceedType)
@@ -1876,12 +2381,32 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
-    private class ObservedSlotViewHandler : IDisposable
+    /// <summary>
+    /// Monitors an equipment slot and rebuilds third-person visual meshes when equipped items change.
+    /// </summary>
+    private sealed class ObservedSlotViewHandler : IDisposable
     {
+        /// <summary>
+        /// Monitored equipment slot.
+        /// </summary>
         private readonly Slot _slot;
+
+        /// <summary>
+        /// Reference to the parent observed player.
+        /// </summary>
         private readonly ObservedPlayer _observedPlayer;
+
+        /// <summary>
+        /// Equipment slot category type.
+        /// </summary>
         private readonly EquipmentSlot _slotType;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ObservedSlotViewHandler"/> class and subscribes to item changes.
+        /// </summary>
+        /// <param name="itemSlot">The inventory slot to monitor.</param>
+        /// <param name="player">The parent observed player.</param>
+        /// <param name="equipmentType">The equipment slot type.</param>
         public ObservedSlotViewHandler(Slot itemSlot, ObservedPlayer player, EquipmentSlot equipmentType)
         {
             _slot = itemSlot;
@@ -1891,11 +2416,18 @@ public sealed class ObservedPlayer : FikaPlayer
             itemSlot.OnAddOrRemoveItem += HandleItemMove;
         }
 
+        /// <summary>
+        /// Unsubscribes from slot item events.
+        /// </summary>
         public void Dispose()
         {
             _slot.OnAddOrRemoveItem -= HandleItemMove;
         }
 
+        /// <summary>
+        /// Reconstructs the slot view when an item is added or removed, notifying global equipment events.
+        /// </summary>
+        /// <param name="item">The item that changed.</param>
         private void HandleItemMove(Item item)
         {
             var slotBone = _observedPlayer.PlayerBody.GetSlotBone(_slotType);
@@ -1913,6 +2445,10 @@ public sealed class ObservedPlayer : FikaPlayer
             Dispose();
         }
 
+        /// <summary>
+        /// Resets force rendering flags on all renderers associated with the previous slot view.
+        /// </summary>
+        /// <param name="oldSlotView">The previous slot view being cleared.</param>
         private void ClearSlotView(PlayerBody.SlotView oldSlotView)
         {
             for (var i = 0; i < oldSlotView.Renderers.Length; i++)
@@ -1934,6 +2470,11 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
+    /// <summary>
+    /// Processes weapon procedural animations, FBBIK solvers, and bone transformations during late update.
+    /// </summary>
+    /// <param name="deltaTime">Frame delta time.</param>
+    /// <param name="ikUpdateInterval">Update interval for full-body inverse kinematics.</param>
     private void ObservedVisualPass(float deltaTime, int ikUpdateInterval)
     {
         if (CustomAnimationsAreProcessing || !botPlayerCulling.IsVisible || !HealthController.IsAlive)
@@ -2021,7 +2562,12 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
-    #region handControllers
+#region handControllers
+    /// <summary>
+    /// Fast-forwards and destroys the existing hands controller and instantiates a new controller from the given factory.
+    /// </summary>
+    /// <param name="controllerFactory">Factory delegate creating the new controller instance.</param>
+    /// <param name="item">Item held in hands, or <see langword="null"/>.</param>
     private void CreateHandsController(Func<AbstractHandsController> controllerFactory, Item item)
     {
         CreateHandsControllerHandler handler = new((item != null) ? BeginSetInHands(item) : null);
@@ -2054,6 +2600,12 @@ public sealed class ObservedPlayer : FikaPlayer
         _shouldCullController = _handsController is EmptyHandsController or KnifeController or UsableItemController;
     }
 
+    /// <summary>
+    /// Spawns the hands controller corresponding to the specified controller type and item ID.
+    /// </summary>
+    /// <param name="controllerType">Hands controller type to spawn.</param>
+    /// <param name="itemId">Item MongoDB identifier.</param>
+    /// <param name="isStationary">Whether the controller is for a stationary weapon.</param>
     public void SpawnHandsController(EHandsControllerType controllerType, MongoID itemId, bool isStationary)
     {
         switch (controllerType)
@@ -2091,21 +2643,38 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
+    /// <summary>
+    /// Spawns and equips an empty hands controller.
+    /// </summary>
     private void CreateEmptyHandsController()
     {
         CreateHandsController(ReturnEmptyHandsController, null);
     }
 
+    /// <summary>
+    /// Factory delegate returning a new <see cref="ObservedEmptyHandsController"/>.
+    /// </summary>
+    /// <returns>A new <see cref="ObservedEmptyHandsController"/> instance.</returns>
     private AbstractHandsController ReturnEmptyHandsController()
     {
         return ObservedEmptyHandsController.Create(this);
     }
 
+    /// <summary>
+    /// Factory delegate returning a new <see cref="ObservedEmptyHandsController"/> for proceed operations.
+    /// </summary>
+    /// <returns>A new <see cref="ObservedEmptyHandsController"/> instance.</returns>
     private ObservedEmptyHandsController ProceedEmptyHandsController()
     {
         return ObservedEmptyHandsController.Create(this);
     }
 
+    /// <summary>
+    /// Spawns and equips a firearm or stationary weapon hands controller.
+    /// </summary>
+    /// <param name="itemId">Item identifier of the firearm.</param>
+    /// <param name="isStationary">Whether the weapon is a stationary mount.</param>
+    /// <param name="initial">Whether this is the initial spawn setup.</param>
     private void CreateFirearmController(MongoID itemId, bool isStationary = false, bool initial = false)
     {
         CreateFirearmControllerHandler handler = new(this);
@@ -2133,6 +2702,10 @@ public sealed class ObservedPlayer : FikaPlayer
         CreateHandsController(handler.ReturnController, handler.item);
     }
 
+    /// <summary>
+    /// Spawns and equips a grenade hands controller.
+    /// </summary>
+    /// <param name="itemId">Item identifier of the grenade.</param>
     private void CreateGrenadeController(MongoID itemId)
     {
         CreateGrenadeControllerHandler handler = new(this);
@@ -2154,6 +2727,13 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
+    /// <summary>
+    /// Spawns and equips a medical item hands controller.
+    /// </summary>
+    /// <param name="itemId">Item identifier of the medical item.</param>
+    /// <param name="bodyParts">Body parts being treated.</param>
+    /// <param name="amount">Amount of medicine applied.</param>
+    /// <param name="animationVariant">Animation variant index.</param>
     private void CreateMedsController(MongoID itemId, OneAndList<EBodyPart> bodyParts, float amount, int animationVariant)
     {
         var result = FindItemById(itemId, false, false);
@@ -2166,6 +2746,10 @@ public sealed class ObservedPlayer : FikaPlayer
         CreateHandsController(handler.ReturnController, handler.Item);
     }
 
+    /// <summary>
+    /// Spawns and equips a melee knife hands controller.
+    /// </summary>
+    /// <param name="itemId">Item identifier of the knife.</param>
     private void CreateKnifeController(MongoID itemId)
     {
         CreateKnifeControllerHandler handler = new(this);
@@ -2186,6 +2770,10 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
+    /// <summary>
+    /// Spawns and equips a quick grenade throw hands controller.
+    /// </summary>
+    /// <param name="itemId">Item identifier of the grenade to throw.</param>
     private void CreateQuickGrenadeController(MongoID itemId)
     {
         CreateQuickGrenadeControllerHandler handler = new(this);
@@ -2206,6 +2794,10 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
+    /// <summary>
+    /// Spawns and equips a quick knife attack hands controller.
+    /// </summary>
+    /// <param name="itemId">Item identifier of the knife.</param>
     private void CreateQuickKnifeController(MongoID itemId)
     {
         CreateQuickKnifeControllerHandler handler = new(this);
@@ -2226,6 +2818,10 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
+    /// <summary>
+    /// Spawns and equips a usable item hands controller.
+    /// </summary>
+    /// <param name="itemId">Item identifier of the usable item.</param>
     private void CreateUsableItemController(MongoID itemId)
     {
         var result = FindItemById(itemId, false, false);
@@ -2238,6 +2834,10 @@ public sealed class ObservedPlayer : FikaPlayer
         CreateHandsController(handler.ReturnController, handler.Item);
     }
 
+    /// <summary>
+    /// Spawns and equips a quick-use item hands controller.
+    /// </summary>
+    /// <param name="itemId">Item identifier of the item.</param>
     private void CreateQuickUseItemController(MongoID itemId)
     {
         var result = FindItemById(itemId, false, false);
@@ -2250,6 +2850,12 @@ public sealed class ObservedPlayer : FikaPlayer
         CreateHandsController(handler.ReturnController, handler.Item);
     }
 
+    /// <summary>
+    /// Sets killer, fatal body part, and weapon metadata when the player is eliminated.
+    /// </summary>
+    /// <param name="killerId">Profile ID of the killer, if known.</param>
+    /// <param name="bodyPart">Fatal body part.</param>
+    /// <param name="weaponId">Template/item ID of the weapon used.</param>
     public void SetAggressorData(MongoID? killerId, EBodyPart bodyPart, MongoID? weaponId)
     {
         var killer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(killerId);
@@ -2266,6 +2872,11 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
+    /// <summary>
+    /// Updates the Full Body Biped IK (FBBIK) solver with iteration count scaled by distance from camera.
+    /// </summary>
+    /// <param name="distance">Distance in meters to camera.</param>
+    /// <param name="ikUpdateInterval">Interval between solver updates when quick mode is active.</param>
     private void ObservedFBBIKUpdate(float distance, int ikUpdateInterval)
     {
         _fbbik.solver.iterations = (int)Mathf.Clamp(15f / distance, 0f, 2f);
@@ -2281,11 +2892,27 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
-    private class RemoveHandsControllerHandler(ObservedPlayer fikaPlayer, Callback callback)
+    /// <summary>
+    /// Handler managing removal callbacks when transitioning hands controllers.
+    /// </summary>
+    /// <param name="fikaPlayer">The target observed player.</param>
+    /// <param name="callback">The callback to invoke.</param>
+    private sealed class RemoveHandsControllerHandler(ObservedPlayer fikaPlayer, Callback callback)
     {
+        /// <summary>
+        /// Reference to the target observed player.
+        /// </summary>
         private readonly ObservedPlayer _fikaPlayer = fikaPlayer;
+
+        /// <summary>
+        /// The callback invoked upon completion.
+        /// </summary>
         private readonly Callback _callback = callback;
 
+        /// <summary>
+        /// Invoked when the hands removal operation completes.
+        /// </summary>
+        /// <param name="result">Result containing the newly equipped empty hands controller.</param>
         public void Handle(Result<IEmptyHandsController> result)
         {
             if (_fikaPlayer._removeFromHandsCallback == _callback)
@@ -2296,10 +2923,20 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
-    private class CreateHandsControllerHandler(Player.InventoryOperation setInHandsOperation)
+    /// <summary>
+    /// Handler managing the inventory operation lifecycle for setting items in hands.
+    /// </summary>
+    /// <param name="setInHandsOperation">The active inventory operation.</param>
+    private sealed class CreateHandsControllerHandler(InventoryOperation setInHandsOperation)
     {
-        public readonly Player.InventoryOperation SetInHandsOperation = setInHandsOperation;
+        /// <summary>
+        /// The underlying inventory operation.
+        /// </summary>
+        public readonly InventoryOperation SetInHandsOperation = setInHandsOperation;
 
+        /// <summary>
+        /// Disposes the underlying inventory operation.
+        /// </summary>
         internal void DisposeHandler()
         {
             var handler = SetInHandsOperation;
@@ -2311,91 +2948,229 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
-    private class CreateFirearmControllerHandler(ObservedPlayer fikaPlayer)
+    /// <summary>
+    /// Factory handler for instantiating an <see cref="ObservedFirearmController"/>.
+    /// </summary>
+    /// <param name="fikaPlayer">The target observed player.</param>
+    private sealed class CreateFirearmControllerHandler(ObservedPlayer fikaPlayer)
     {
+        /// <summary>
+        /// Reference to the target observed player.
+        /// </summary>
         private readonly ObservedPlayer _fikaPlayer = fikaPlayer;
+
+        /// <summary>
+        /// The weapon item to equip.
+        /// </summary>
         public Item item;
 
+        /// <summary>
+        /// Creates and returns the firearm controller instance.
+        /// </summary>
+        /// <returns>A new <see cref="ObservedFirearmController"/>.</returns>
         internal AbstractHandsController ReturnController()
         {
             return ObservedFirearmController.Create(_fikaPlayer, (Weapon)item);
         }
     }
 
-    private class CreateGrenadeControllerHandler(ObservedPlayer fikaPlayer)
+    /// <summary>
+    /// Factory handler for instantiating an <see cref="ObservedGrenadeController"/>.
+    /// </summary>
+    /// <param name="fikaPlayer">The target observed player.</param>
+    private sealed class CreateGrenadeControllerHandler(ObservedPlayer fikaPlayer)
     {
+        /// <summary>
+        /// Reference to the target observed player.
+        /// </summary>
         private readonly ObservedPlayer _fikaPlayer = fikaPlayer;
+
+        /// <summary>
+        /// The grenade item to equip.
+        /// </summary>
         public Item Item;
 
+        /// <summary>
+        /// Creates and returns the grenade controller instance.
+        /// </summary>
+        /// <returns>A new <see cref="ObservedGrenadeController"/>.</returns>
         internal AbstractHandsController ReturnController()
         {
             return ObservedGrenadeController.Create(_fikaPlayer, (ThrowWeap)Item);
         }
     }
 
-    private class CreateMedsControllerHandler(ObservedPlayer fikaPlayer, Item item, OneAndList<EBodyPart> bodyParts, float amount, int animationVariant)
+    /// <summary>
+    /// Factory handler for instantiating an <see cref="ObservedMedsController"/>.
+    /// </summary>
+    /// <param name="fikaPlayer">The target observed player.</param>
+    /// <param name="item">The medical item.</param>
+    /// <param name="bodyParts">Body parts to treat.</param>
+    /// <param name="amount">Amount of medicine used.</param>
+    /// <param name="animationVariant">Animation variant index.</param>
+    private sealed class CreateMedsControllerHandler(ObservedPlayer fikaPlayer, Item item, OneAndList<EBodyPart> bodyParts, float amount, int animationVariant)
     {
+        /// <summary>
+        /// Reference to the target observed player.
+        /// </summary>
         private readonly ObservedPlayer _fikaPlayer = fikaPlayer;
+
+        /// <summary>
+        /// The medical item.
+        /// </summary>
         public readonly Item Item = item;
+
+        /// <summary>
+        /// Target body parts to treat.
+        /// </summary>
         private readonly OneAndList<EBodyPart> _bodyParts = bodyParts;
+
+        /// <summary>
+        /// Dosage amount applied.
+        /// </summary>
         private readonly float _amount = amount;
+
+        /// <summary>
+        /// Animation variant index.
+        /// </summary>
         private readonly int _animationVariant = animationVariant;
 
+        /// <summary>
+        /// Creates and returns the medical controller instance.
+        /// </summary>
+        /// <returns>A new <see cref="ObservedMedsController"/>.</returns>
         internal AbstractHandsController ReturnController()
         {
             return ObservedMedsController.Create(_fikaPlayer, Item, _bodyParts, _amount, _animationVariant);
         }
     }
 
-    private class CreateKnifeControllerHandler(ObservedPlayer fikaPlayer)
+    /// <summary>
+    /// Factory handler for instantiating an <see cref="ObservedKnifeController"/>.
+    /// </summary>
+    /// <param name="fikaPlayer">The target observed player.</param>
+    private sealed class CreateKnifeControllerHandler(ObservedPlayer fikaPlayer)
     {
+        /// <summary>
+        /// Reference to the target observed player.
+        /// </summary>
         private readonly ObservedPlayer _fikaPlayer = fikaPlayer;
+
+        /// <summary>
+        /// The knife component to equip.
+        /// </summary>
         public KnifeComponent Knife;
 
+        /// <summary>
+        /// Creates and returns the knife controller instance.
+        /// </summary>
+        /// <returns>A new <see cref="ObservedKnifeController"/>.</returns>
         internal AbstractHandsController ReturnController()
         {
             return ObservedKnifeController.Create(_fikaPlayer, Knife);
         }
     }
 
-    private class CreateQuickGrenadeControllerHandler(ObservedPlayer fikaPlayer)
+    /// <summary>
+    /// Factory handler for instantiating an <see cref="ObservedQuickGrenadeController"/>.
+    /// </summary>
+    /// <param name="fikaPlayer">The target observed player.</param>
+    private sealed class CreateQuickGrenadeControllerHandler(ObservedPlayer fikaPlayer)
     {
+        /// <summary>
+        /// Reference to the target observed player.
+        /// </summary>
         private readonly ObservedPlayer _fikaPlayer = fikaPlayer;
+
+        /// <summary>
+        /// The grenade item to quickly throw.
+        /// </summary>
         public Item tem;
 
+        /// <summary>
+        /// Creates and returns the quick grenade controller instance.
+        /// </summary>
+        /// <returns>A new <see cref="ObservedQuickGrenadeController"/>.</returns>
         internal AbstractHandsController ReturnController()
         {
             return ObservedQuickGrenadeController.Create(_fikaPlayer, (ThrowWeap)tem);
         }
     }
 
-    private class CreateQuickKnifeControllerHandler(ObservedPlayer fikaPlayer)
+    /// <summary>
+    /// Factory handler for instantiating an <see cref="ObservedQuickKnifeController"/>.
+    /// </summary>
+    /// <param name="fikaPlayer">The target observed player.</param>
+    private sealed class CreateQuickKnifeControllerHandler(ObservedPlayer fikaPlayer)
     {
+        /// <summary>
+        /// Reference to the target observed player.
+        /// </summary>
         private readonly ObservedPlayer _fikaPlayer = fikaPlayer;
+
+        /// <summary>
+        /// The knife component for the quick attack.
+        /// </summary>
         public KnifeComponent Knife;
 
+        /// <summary>
+        /// Creates and returns the quick knife controller instance.
+        /// </summary>
+        /// <returns>A new <see cref="ObservedQuickKnifeController"/>.</returns>
         internal AbstractHandsController ReturnController()
         {
             return ObservedQuickKnifeController.Create(_fikaPlayer, Knife);
         }
     }
 
-    private class CreateUsableItemControllerHandler(ObservedPlayer fikaPlayer, Item item)
+    /// <summary>
+    /// Factory handler for instantiating a usable item controller.
+    /// </summary>
+    /// <param name="fikaPlayer">The target observed player.</param>
+    /// <param name="item">The usable item.</param>
+    private sealed class CreateUsableItemControllerHandler(ObservedPlayer fikaPlayer, Item item)
     {
+        /// <summary>
+        /// Reference to the target observed player.
+        /// </summary>
         private readonly ObservedPlayer _fikaPlayer = fikaPlayer;
+
+        /// <summary>
+        /// The usable item.
+        /// </summary>
         public readonly Item Item = item;
 
+        /// <summary>
+        /// Creates and returns the usable item controller instance.
+        /// </summary>
+        /// <returns>A new <see cref="UsableItemController"/>.</returns>
         internal AbstractHandsController ReturnController()
         {
             return UsableItemController.CreateController<UsableItemController>(_fikaPlayer, Item);
         }
     }
 
-    private class CreateQuickUseItemControllerHandler(ObservedPlayer fikaPlayer, Item item)
+    /// <summary>
+    /// Factory handler for instantiating an <see cref="ObservedQuickUseItemController"/>.
+    /// </summary>
+    /// <param name="fikaPlayer">The target observed player.</param>
+    /// <param name="item">The quick-use item.</param>
+    private sealed class CreateQuickUseItemControllerHandler(ObservedPlayer fikaPlayer, Item item)
     {
+        /// <summary>
+        /// Reference to the target observed player.
+        /// </summary>
         private readonly ObservedPlayer _fikaPlayer = fikaPlayer;
+
+        /// <summary>
+        /// The quick-use item.
+        /// </summary>
         public readonly Item Item = item;
 
+        /// <summary>
+        /// Creates and returns the quick use item controller instance.
+        /// </summary>
+        /// <returns>A new <see cref="ObservedQuickUseItemController"/>.</returns>
         internal AbstractHandsController ReturnController()
         {
             return ObservedQuickUseItemController.Create(_fikaPlayer, Item);
@@ -2403,4 +3178,4 @@ public sealed class ObservedPlayer : FikaPlayer
     }
 }
 
-    #endregion
+#endregion
