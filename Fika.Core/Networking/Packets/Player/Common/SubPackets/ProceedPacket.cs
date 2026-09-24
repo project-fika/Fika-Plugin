@@ -1,77 +1,22 @@
 ﻿using EFT;
 using EFT.NetworkPackets;
 using Fika.Core.Main.Players;
-using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
-public sealed class ProceedPacket : IPoolSubPacket
+public readonly struct ProceedPacket
 {
-    private ProceedPacket()
+    public ProceedPacket(OneAndList<EBodyPart> bodyParts, MongoID itemId, float amount, int animationVariant, EProceedType proceedType, bool scheduled)
     {
-
+        BodyParts = bodyParts;
+        ItemId = itemId;
+        Amount = amount;
+        AnimationVariant = animationVariant;
+        ProceedType = proceedType;
+        Scheduled = scheduled;
     }
 
-    public static ProceedPacket CreateInstance()
-    {
-        return new();
-    }
-
-    public static ProceedPacket FromValue(OneAndList<EBodyPart> bodyParts, MongoID itemId, float amount, int animationVariant, EProceedType proceedType, bool scheduled)
-    {
-        var packet = CommonSubPacketPoolManager.Instance.GetPacket<ProceedPacket>(ECommonSubPacketType.Proceed);
-        packet.BodyParts = bodyParts;
-        packet.ItemId = itemId;
-        packet.Amount = amount;
-        packet.AnimationVariant = animationVariant;
-        packet.ProceedType = proceedType;
-        packet.Scheduled = scheduled;
-        return packet;
-    }
-
-    public OneAndList<EBodyPart> BodyParts;
-    public MongoID ItemId;
-    public float Amount;
-    public int AnimationVariant;
-    public EProceedType ProceedType;
-    public bool Scheduled;
-
-    public void Execute(FikaPlayer player)
-    {
-        if (player is ObservedPlayer observedPlayer)
-        {
-            observedPlayer.HandleProceedPacket(this);
-        }
-    }
-
-    public void Serialize(NetDataWriter writer)
-    {
-        writer.PutEnum(ProceedType);
-        if (ProceedType is not EProceedType.EmptyHands)
-        {
-            writer.PutMongoID(ItemId);
-        }
-        else
-        {
-            writer.Put(Scheduled);
-        }
-        if (ProceedType is EProceedType.FoodClass or EProceedType.MedsClass)
-        {
-            writer.Put(Amount);
-            writer.Put(AnimationVariant);
-            if (ProceedType is EProceedType.MedsClass)
-            {
-                var bodyPartsAmount = BodyParts.Length;
-                writer.Put(bodyPartsAmount);
-                for (var i = 0; i < bodyPartsAmount; i++)
-                {
-                    writer.PutEnum(BodyParts[i]);
-                }
-            }
-        }
-    }
-
-    public void Deserialize(NetDataReader reader)
+    public ProceedPacket(NetDataReader reader)
     {
         ProceedType = reader.GetEnum<EProceedType>();
         if (ProceedType is not EProceedType.EmptyHands)
@@ -97,13 +42,45 @@ public sealed class ProceedPacket : IPoolSubPacket
         }
     }
 
-    public void Dispose()
+    public readonly OneAndList<EBodyPart> BodyParts;
+    public readonly MongoID ItemId;
+    public readonly float Amount;
+    public readonly int AnimationVariant;
+    public readonly EProceedType ProceedType;
+    public readonly bool Scheduled;
+
+    public readonly void Execute(FikaPlayer player)
     {
-        BodyParts = default;
-        ItemId = default;
-        Amount = 0f;
-        AnimationVariant = 0;
-        ProceedType = default;
-        Scheduled = false;
+        if (player is ObservedPlayer observedPlayer)
+        {
+            observedPlayer.HandleProceedPacket(this);
+        }
+    }
+
+    public readonly void Serialize(NetDataWriter writer)
+    {
+        writer.PutEnum(ProceedType);
+        if (ProceedType is not EProceedType.EmptyHands)
+        {
+            writer.PutMongoID(ItemId);
+        }
+        else
+        {
+            writer.Put(Scheduled);
+        }
+        if (ProceedType is EProceedType.FoodClass or EProceedType.MedsClass)
+        {
+            writer.Put(Amount);
+            writer.Put(AnimationVariant);
+            if (ProceedType is EProceedType.MedsClass)
+            {
+                var bodyPartsAmount = BodyParts.Length;
+                writer.Put(bodyPartsAmount);
+                for (var i = 0; i < bodyPartsAmount; i++)
+                {
+                    writer.PutEnum(BodyParts[i]);
+                }
+            }
+        }
     }
 }

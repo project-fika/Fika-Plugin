@@ -2,44 +2,27 @@
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
-public sealed class InteractionPacket : IPoolSubPacket
+public readonly struct InteractionPacket
 {
-    private InteractionPacket()
+    public InteractionPacket(EInteraction interaction)
     {
-
+        Interaction = interaction;
     }
 
-    public static InteractionPacket CreateInstance()
-    {
-        return new();
-    }
-
-    public static InteractionPacket FromValue(EInteraction interaction)
-    {
-        var packet = CreateInstance();
-        packet.Interaction = interaction;
-        return packet;
-    }
-
-    public EInteraction Interaction;
-
-    public void Execute(FikaPlayer player)
-    {
-        player.SetInteractInHands(Interaction);
-    }
-
-    public void Serialize(NetDataWriter writer)
-    {
-        writer.Put((byte)Interaction);
-    }
-
-    public void Deserialize(NetDataReader reader)
+    public InteractionPacket(NetDataReader reader)
     {
         Interaction = reader.GetEnum<EInteraction>();
     }
 
-    public void Dispose()
+    public readonly EInteraction Interaction;
+
+    public readonly void Execute(FikaPlayer player)
     {
-        Interaction = default;
+        player.SetInteractInHands(Interaction);
+    }
+
+    public readonly void Serialize(NetDataWriter writer)
+    {
+        writer.Put((byte)Interaction);
     }
 }

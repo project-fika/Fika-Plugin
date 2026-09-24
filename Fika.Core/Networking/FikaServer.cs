@@ -459,11 +459,11 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
         RegisterPacket<KnifeHitPacket, NetPeer>(OnKnifeHitPacketReceived);
         RegisterPacket<QuestSyncPacket, NetPeer>(OnQuestSyncPacketReceived);
         RegisterPacket<SpawnItemInInventoryPacket, NetPeer>(SpawnItemInInventoryPacketReceived);
+        RegisterPacket<CommonPlayerPacket, NetPeer>(OnCommonPlayerPacketReceived);
 
         RegisterReusable<WorldPacket, NetPeer>(OnWorldPacketReceived);
 
         RegisterNetReusable<WeaponPacket, NetPeer>(OnWeaponPacketReceived);
-        RegisterNetReusable<CommonPlayerPacket, NetPeer>(OnCommonPlayerPacketReceived);
         RegisterNetReusable<GenericPacket, NetPeer>(OnGenericPacketReceived);
 
         return Task.CompletedTask;

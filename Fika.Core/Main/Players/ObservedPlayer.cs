@@ -780,8 +780,8 @@ public sealed class ObservedPlayer : FikaPlayer
         LastDamageType = DamageInfo.DamageType;
 
         CommonPacket.Type = ECommonSubPacketType.Damage;
-        CommonPacket.SubPacket = DamagePacket.FromValue(NetId, DamageInfo, bodyPartType, colliderType);
-        Singleton<IFikaNetworkManager>.Instance.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
+        CommonPacket.SubPacket.Damage = new DamagePacket(NetId, DamageInfo, bodyPartType, colliderType);
+        Singleton<IFikaNetworkManager>.Instance.SendData(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
     }
 
     /// <summary>
@@ -823,8 +823,8 @@ public sealed class ObservedPlayer : FikaPlayer
         LastDamageType = DamageInfo.DamageType;
 
         CommonPacket.Type = ECommonSubPacketType.Damage;
-        CommonPacket.SubPacket = DamagePacket.FromValue(NetId, DamageInfo, bodyPartType, colliderType, armorPlateCollider);
-        Singleton<IFikaNetworkManager>.Instance.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
+        CommonPacket.SubPacket.Damage = new DamagePacket(NetId, DamageInfo, bodyPartType, colliderType, armorPlateCollider);
+        Singleton<IFikaNetworkManager>.Instance.SendData(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
 
         return new()
         {
@@ -872,8 +872,8 @@ public sealed class ObservedPlayer : FikaPlayer
         ReceiveDamage(damageInfo.Damage, bodyPartType, damageInfo.DamageType, num, hitInfo.Material);
 
         CommonPacket.Type = ECommonSubPacketType.Damage;
-        CommonPacket.SubPacket = DamagePacket.FromValue(NetId, damageInfo, bodyPartType, colliderType, armorPlateCollider, absorbed: num);
-        Singleton<IFikaNetworkManager>.Instance.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
+        CommonPacket.SubPacket.Damage = new DamagePacket(NetId, damageInfo, bodyPartType, colliderType, armorPlateCollider, absorbed: num);
+        Singleton<IFikaNetworkManager>.Instance.SendData(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
 
         // Run this to get weapon skill
         ManageAggressor(damageInfo, bodyPartType, colliderType);
@@ -967,8 +967,8 @@ public sealed class ObservedPlayer : FikaPlayer
         ReceiveDamage(damageInfo.Damage, bodyPartType, damageInfo.DamageType, num, hitInfo.Material);
 
         CommonPacket.Type = ECommonSubPacketType.Damage;
-        CommonPacket.SubPacket = DamagePacket.FromValue(NetId, damageInfo, bodyPartType, colliderType, armorPlateCollider, absorbed: num);
-        Singleton<IFikaNetworkManager>.Instance.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
+        CommonPacket.SubPacket.Damage = new DamagePacket(NetId, damageInfo, bodyPartType, colliderType, armorPlateCollider, absorbed: num);
+        Singleton<IFikaNetworkManager>.Instance.SendData(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
 
         // Run this to get weapon skill
         ManageAggressor(damageInfo, bodyPartType, colliderType);

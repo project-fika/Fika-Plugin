@@ -1,66 +1,31 @@
-using EFT.HealthSystem;
 using System.Collections.Generic;
 using EFT;
+using EFT.HealthSystem;
 using EFT.InventoryLogic;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
-using Fika.Core.Networking.Pooling;
 using static EFT.HealthSystem.SyncHealthPacket;
 using static EFT.HealthSystem.SyncHealthPacket.SyncAddEffect;
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
-public sealed class HealthSyncPacket : IPoolSubPacket
+public readonly struct HealthSyncPacket
 {
-    private HealthSyncPacket() { }
-
-    public static HealthSyncPacket CreateInstance()
+    public HealthSyncPacket(SyncHealthPacket value)
     {
-        return new();
+        Packet = value;
     }
 
-    public SyncHealthPacket Packet;
-    public MongoID? KillerId;
-    public MongoID? WeaponId;
-    public EBodyPart BodyPart;
-    public CorpseSyncPackets CorpseSyncPacket;
-    public List<string> TriggerZones = new(4);
-
-    public static HealthSyncPacket FromValue(SyncHealthPacket value)
+    public HealthSyncPacket(SyncHealthPacket value, EBodyPart bodyPart, CorpseSyncPackets corpseSyncPacket, MongoID? killerId, MongoID? weaponId)
     {
-        var packet = CommonSubPacketPoolManager.Instance.GetPacket<HealthSyncPacket>(ECommonSubPacketType.HealthSync);
-        packet.Packet = value;
-        return packet;
+        Packet = value;
+        KillerId = killerId;
+        WeaponId = weaponId;
+        BodyPart = bodyPart;
+        CorpseSyncPacket = corpseSyncPacket;
     }
 
-    public void Execute(FikaPlayer player = null)
-    {
-        if (player is ObservedPlayer observedPlayer)
-        {
-            if (Packet.SyncType == ESyncType.IsAlive && !Packet.Data.IsAlive.IsAlive)
-            {
-                if (KillerId.HasValue)
-                {
-                    observedPlayer.SetAggressorData(KillerId, BodyPart, WeaponId);
-                }
-                observedPlayer.CorpseSyncPacket = CorpseSyncPacket;
-                if (TriggerZones.Count > 0)
-                {
-                    observedPlayer.TriggerZones.AddRange(TriggerZones);
-                }
-                if (!observedPlayer.NetworkHealthController.IsAlive) // prevent downed players from not fully dying
-                {
-                    observedPlayer.NetworkHealthController.IsAlive = true;
-                }
-            }
-            observedPlayer.NetworkHealthController.HandleSyncPacket(Packet);
-            return;
-        }
-
-        FikaGlobals.LogError($"OnHealthSyncPacketReceived::Player with id {player.NetId} was not observed. Name: {player.Profile.GetCorrectedNickname()}");
-    }
-
-    public void Deserialize(NetDataReader reader)
+    public HealthSyncPacket(NetDataReader reader)
     {
         SyncHealthPacket packet = new()
         {
@@ -154,9 +119,13 @@ public sealed class HealthSyncPacket : IPoolSubPacket
                         BodyPart = reader.GetEnum<EBodyPart>();
                         CorpseSyncPacket = reader.GetCorpseSyncPacket();
                         int count = reader.GetByte();
-                        for (var i = 0; i < count; i++)
+                        if (count > 0)
                         {
-                            TriggerZones.Add(reader.GetString());
+                            CorpseSyncPacket.TriggerZones = new(count);
+                            for (var i = 0; i < count; i++)
+                            {
+                                CorpseSyncPacket.TriggerZones.Add(reader.GetString());
+                            } 
                         }
                     }
                     break;
@@ -249,7 +218,40 @@ public sealed class HealthSyncPacket : IPoolSubPacket
         Packet = packet;
     }
 
-    public void Serialize(NetDataWriter writer)
+    public readonly SyncHealthPacket Packet;
+    public readonly MongoID? KillerId;
+    public readonly MongoID? WeaponId;
+    public readonly EBodyPart BodyPart;
+    public readonly CorpseSyncPackets CorpseSyncPacket;
+
+    public readonly void Execute(FikaPlayer player = null)
+    {
+        if (player is ObservedPlayer observedPlayer)
+        {
+            if (Packet.SyncType == ESyncType.IsAlive && !Packet.Data.IsAlive.IsAlive)
+            {
+                if (KillerId.HasValue)
+                {
+                    observedPlayer.SetAggressorData(KillerId, BodyPart, WeaponId);
+                }
+                observedPlayer.CorpseSyncPacket = CorpseSyncPacket;
+                if (CorpseSyncPacket.TriggerZones.Count > 0)
+                {
+                    observedPlayer.TriggerZones.AddRange(CorpseSyncPacket.TriggerZones);
+                }
+                if (!observedPlayer.NetworkHealthController.IsAlive) // prevent downed players from not fully dying
+                {
+                    observedPlayer.NetworkHealthController.IsAlive = true;
+                }
+            }
+            observedPlayer.NetworkHealthController.HandleSyncPacket(Packet);
+            return;
+        }
+
+        FikaGlobals.LogError($"OnHealthSyncPacketReceived::Player with id {player.NetId} was not observed. Name: {player.Profile.GetCorrectedNickname()}");
+    }
+
+    public readonly void Serialize(NetDataWriter writer)
     {
         ref readonly var packet = ref Packet.Data;
         writer.PutEnum(Packet.SyncType);
@@ -344,10 +346,10 @@ public sealed class HealthSyncPacket : IPoolSubPacket
                         writer.PutNullableMongoID(WeaponId);
                         writer.PutEnum(BodyPart);
                         writer.PutCorpseSyncPacket(CorpseSyncPacket);
-                        writer.Put((byte)TriggerZones.Count);
-                        for (var i = 0; i < TriggerZones.Count; i++)
+                        writer.Put((byte)CorpseSyncPacket.TriggerZones.Count);
+                        for (var i = 0; i < CorpseSyncPacket.TriggerZones.Count; i++)
                         {
-                            writer.Put(TriggerZones[i]);
+                            writer.Put(CorpseSyncPacket.TriggerZones[i]);
                         }
                     }
                     break;
@@ -437,22 +439,9 @@ public sealed class HealthSyncPacket : IPoolSubPacket
                 break;
         }
     }
-
-    public void Dispose()
-    {
-        if (Packet.SyncType is ESyncType.IsAlive)
-        {
-            KillerId = null;
-            WeaponId = null;
-            BodyPart = default;
-            CorpseSyncPacket = default;
-            TriggerZones.Clear();
-        }
-        Packet = default;
-    }
 }
 
-public struct CorpseSyncPackets
+public struct CorpseSyncPackets()
 {
     public ItemDescriptor InventoryDescriptor;
     public Item ItemInHands;
@@ -465,4 +454,6 @@ public struct CorpseSyncPackets
     public float Force;
 
     public EquipmentSlot ItemSlot;
+
+    public List<string> TriggerZones = new(4);
 }

@@ -76,7 +76,7 @@ internal class Minefield_Explode_Patch : ModulePatch
             foreach (var bodyPartCollider in enumerable)
             {
                 fikaPlayer.CommonPacket.Type = ECommonSubPacketType.Damage;
-                fikaPlayer.CommonPacket.SubPacket = DamagePacket.FromValue(fikaPlayer.NetId, new()
+                fikaPlayer.CommonPacket.SubPacket.Damage = new DamagePacket(fikaPlayer.NetId, new()
                 {
                     DamageType = EDamageType.Landmine,
                     Damage = num4 * num2,
@@ -85,7 +85,7 @@ internal class Minefield_Explode_Patch : ModulePatch
                     Direction = default,
                     HitNormal = default
                 }, bodyPartCollider.BodyPartType, bodyPartCollider.BodyPartColliderType);
-                Singleton<IFikaNetworkManager>.Instance.SendNetReusable(ref fikaPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
+                Singleton<IFikaNetworkManager>.Instance.SendData(ref fikaPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
                 if (++num5 >= num3)
                 {
                     break;

@@ -103,8 +103,8 @@ public sealed class ClientHealthController(Profile.HealthInfo healthInfo, Player
         }
 
         _fikaPlayer.CommonPacket.Type = ECommonSubPacketType.HealthSync;
-        _fikaPlayer.CommonPacket.SubPacket = HealthSyncPacket.FromValue(packet);
-        _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _fikaPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
+        _fikaPlayer.CommonPacket.SubPacket.HealthSync = new HealthSyncPacket(packet);
+        _fikaPlayer.PacketSender.NetworkManager.SendData(ref _fikaPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
     }
 
     public void Revive()

@@ -287,11 +287,11 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
         RegisterPacket<ClearSnapshotterPacket>(OnClearSnapshotterPacketReceived);
         RegisterPacket<ProceedResponsePacket>(OnProceedResponsePacketReceived);
         RegisterPacket<SpawnItemInInventoryPacket>(SpawnItemInInventoryPacketReceived);
+        RegisterPacket<CommonPlayerPacket>(OnCommonPlayerPacketReceived);
 
         RegisterReusable<WorldPacket>(OnWorldPacketReceived);
 
         RegisterNetReusable<WeaponPacket>(OnWeaponPacketReceived);
-        RegisterNetReusable<CommonPlayerPacket>(OnCommonPlayerPacketReceived);
         RegisterNetReusable<GenericPacket>(OnGenericPacketReceived);
 
         return Task.CompletedTask;

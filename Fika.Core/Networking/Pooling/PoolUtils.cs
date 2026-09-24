@@ -11,7 +11,6 @@ internal static class PoolUtils
     public static void CreateAll()
     {
         FirearmSubPacketPoolManager.Instance.CreatePool();
-        CommonSubPacketPoolManager.Instance.CreatePool();
         GenericSubPacketPoolManager.Instance.CreatePool();
     }
 
@@ -21,7 +20,6 @@ internal static class PoolUtils
     public static void ReleaseAll()
     {
         FirearmSubPacketPoolManager.Release();
-        CommonSubPacketPoolManager.Release();
         GenericSubPacketPoolManager.Release();
     }
 }

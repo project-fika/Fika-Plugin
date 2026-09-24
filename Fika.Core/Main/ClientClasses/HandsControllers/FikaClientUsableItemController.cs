@@ -21,8 +21,8 @@ public class FikaClientUsableItemController : UsableItemController
     {
         base.CompassStateHandler(isActive);
         _fikaPlayer.CommonPacket.Type = ECommonSubPacketType.UsableItem;
-        _fikaPlayer.CommonPacket.SubPacket = UsableItemPacket.FromValue(true, isActive, false, false, false);
-        _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _fikaPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
+        _fikaPlayer.CommonPacket.SubPacket.UsableItem = new UsableItemPacket(true, isActive, false, false, false);
+        _fikaPlayer.PacketSender.NetworkManager.SendData(ref _fikaPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
     }
 
     public override bool ExamineWeapon()
@@ -31,8 +31,8 @@ public class FikaClientUsableItemController : UsableItemController
         if (flag)
         {
             _fikaPlayer.CommonPacket.Type = ECommonSubPacketType.UsableItem;
-            _fikaPlayer.CommonPacket.SubPacket = UsableItemPacket.FromValue(false, false, true, false, false);
-            _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _fikaPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
+            _fikaPlayer.CommonPacket.SubPacket.UsableItem = new UsableItemPacket(false, false, true, false, false);
+            _fikaPlayer.PacketSender.NetworkManager.SendData(ref _fikaPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
         }
         return flag;
     }
@@ -44,8 +44,8 @@ public class FikaClientUsableItemController : UsableItemController
         if (IsAiming != isAiming)
         {
             _fikaPlayer.CommonPacket.Type = ECommonSubPacketType.UsableItem;
-            _fikaPlayer.CommonPacket.SubPacket = UsableItemPacket.FromValue(false, false, false, true, isAiming);
-            _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _fikaPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
+            _fikaPlayer.CommonPacket.SubPacket.UsableItem = new UsableItemPacket(false, false, false, true, isAiming);
+            _fikaPlayer.PacketSender.NetworkManager.SendData(ref _fikaPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
         }
     }
 }

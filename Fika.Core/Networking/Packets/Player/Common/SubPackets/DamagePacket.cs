@@ -1,89 +1,47 @@
 ﻿using EFT;
 using EFT.Ballistics;
 using Fika.Core.Main.Players;
-using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
-public sealed class DamagePacket : IPoolSubPacket
+public readonly struct DamagePacket
 {
-    private DamagePacket() { }
-
-    public static DamagePacket CreateInstance()
-    {
-        return new();
-    }
-
-    public int NetId;
-    public float Damage;
-    public float Absorbed;
-    public float PenetrationPower;
-    public float ArmorDamage;
-
-    public Vector3 Direction;
-    public Vector3 Point;
-    public Vector3 HitNormal;
-
-    public EDamageType DamageType;
-    public EBodyPart BodyPartType;
-    public EBodyPartColliderType ColliderType;
-    public EArmorPlateCollider ArmorPlateCollider;
-    public MaterialType Material;
-
-    public MongoID? BlockedBy;
-    public MongoID? DeflectedBy;
-    public MongoID? ProfileId;
-    public MongoID? WeaponId;
-    public MongoID? SourceId;
-
-    public static DamagePacket FromValue(int netId, DamageInfo damageInfo, EBodyPart bodyPartType,
+    public DamagePacket(int netId, DamageInfo damageInfo, EBodyPart bodyPartType,
         EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider = default, MaterialType materialType = default, float absorbed = default)
     {
-        var packet = CommonSubPacketPoolManager.Instance.GetPacket<DamagePacket>(ECommonSubPacketType.Damage);
+        NetId = netId;
+        Damage = damageInfo.Damage;
+        Absorbed = absorbed;
+        PenetrationPower = damageInfo.PenetrationPower;
+        ArmorDamage = damageInfo.ArmorDamage;
 
-        packet.NetId = netId;
-        packet.Damage = damageInfo.Damage;
-        packet.Absorbed = absorbed;
-        packet.PenetrationPower = damageInfo.PenetrationPower;
-        packet.ArmorDamage = damageInfo.ArmorDamage;
+        Direction = damageInfo.Direction;
+        Point = damageInfo.HitPoint;
+        HitNormal = damageInfo.HitNormal;
 
-        packet.Direction = damageInfo.Direction;
-        packet.Point = damageInfo.HitPoint;
-        packet.HitNormal = damageInfo.HitNormal;
+        DamageType = damageInfo.DamageType;
+        BodyPartType = bodyPartType;
+        ColliderType = colliderType;
+        ArmorPlateCollider = armorPlateCollider;
+        Material = materialType;
 
-        packet.DamageType = damageInfo.DamageType;
-        packet.BodyPartType = bodyPartType;
-        packet.ColliderType = colliderType;
-        packet.ArmorPlateCollider = armorPlateCollider;
-        packet.Material = materialType;
-
-        packet.BlockedBy = damageInfo.BlockedBy;
-        packet.DeflectedBy = damageInfo.DeflectedBy;
+        BlockedBy = damageInfo.BlockedBy;
+        DeflectedBy = damageInfo.DeflectedBy;
         if (damageInfo.Player != null)
         {
-            packet.ProfileId = damageInfo.Player.iPlayer.ProfileId;
+            ProfileId = damageInfo.Player.iPlayer.ProfileId;
         }
         if (damageInfo.Weapon != null)
         {
-            packet.WeaponId = damageInfo.Weapon.Id;
+            WeaponId = damageInfo.Weapon.Id;
         }
-        if (!string.IsNullOrEmpty(damageInfo.SourceId))
+        if (!string.IsNullOrWhiteSpace(damageInfo.SourceId))
         {
-            packet.SourceId = damageInfo.SourceId;
-        }
-
-        return packet;
-    }
-
-    public void Execute(FikaPlayer player = null)
-    {
-        if (player.IsAI || player.IsYourPlayer)
-        {
-            player.HandleDamagePacket(this);
+            SourceId = damageInfo.SourceId;
         }
     }
 
-    public void Deserialize(NetDataReader reader)
+    public DamagePacket(NetDataReader reader)
     {
         NetId = reader.GetInt();
 
@@ -121,6 +79,36 @@ public sealed class DamagePacket : IPoolSubPacket
         if (reader.GetBool())
         {
             SourceId = reader.GetMongoID();
+        }
+    }
+
+    public readonly int NetId;
+    public readonly float Damage;
+    public readonly float Absorbed;
+    public readonly float PenetrationPower;
+    public readonly float ArmorDamage;
+
+    public readonly Vector3 Direction;
+    public readonly Vector3 Point;
+    public readonly Vector3 HitNormal;
+
+    public readonly EDamageType DamageType;
+    public readonly EBodyPart BodyPartType;
+    public readonly EBodyPartColliderType ColliderType;
+    public readonly EArmorPlateCollider ArmorPlateCollider;
+    public readonly MaterialType Material;
+
+    public readonly MongoID? BlockedBy;
+    public readonly MongoID? DeflectedBy;
+    public readonly MongoID? ProfileId;
+    public readonly MongoID? WeaponId;
+    public readonly MongoID? SourceId;
+
+    public readonly void Execute(FikaPlayer player = null)
+    {
+        if (player.IsAI || player.IsYourPlayer)
+        {
+            player.HandleDamagePacket(this);
         }
     }
 
@@ -168,30 +156,5 @@ public sealed class DamagePacket : IPoolSubPacket
         {
             writer.PutMongoID(SourceId.Value);
         }
-    }
-
-    public void Dispose()
-    {
-        NetId = default;
-        Damage = default;
-        Absorbed = default;
-        PenetrationPower = default;
-        ArmorDamage = default;
-
-        Direction = default;
-        Point = default;
-        HitNormal = default;
-
-        DamageType = default;
-        BodyPartType = default;
-        ColliderType = default;
-        ArmorPlateCollider = default;
-        Material = default;
-
-        BlockedBy = null;
-        DeflectedBy = null;
-        ProfileId = null;
-        WeaponId = null;
-        SourceId = null;
     }
 }

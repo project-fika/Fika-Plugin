@@ -161,8 +161,8 @@ public sealed class FikaBot : FikaPlayer
             if (ActiveHealthController.IsAlive)
             {
                 CommonPacket.Type = ECommonSubPacketType.Phrase;
-                CommonPacket.SubPacket = PhrasePacket.FromValue(@event, clip.NetId);
-                PacketSender.NetworkManager.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
+                CommonPacket.SubPacket.Phrase = new PhrasePacket(@event, clip.NetId);
+                PacketSender.NetworkManager.SendData(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
             }
         }
         else
@@ -407,9 +407,9 @@ public sealed class FikaBot : FikaPlayer
         internal void SendPacket()
         {
             _fikaBot.CommonPacket.Type = ECommonSubPacketType.Proceed;
-            _fikaBot.CommonPacket.SubPacket = ProceedPacket.FromValue(default, Weapon.Id, 0f, 0,
+            _fikaBot.CommonPacket.SubPacket.Proceed = new ProceedPacket(default, Weapon.Id, 0f, 0,
                 Weapon.IsStationaryWeapon ? EProceedType.Stationary : EProceedType.Weapon, false);
-            _fikaBot.PacketSender.NetworkManager.SendNetReusable(ref _fikaBot.CommonPacket, DeliveryMethod.ReliableOrdered, true);
+            _fikaBot.PacketSender.NetworkManager.SendData(ref _fikaBot.CommonPacket, DeliveryMethod.ReliableOrdered, true);
         }
 
         internal void HandleResult(IResult result)
