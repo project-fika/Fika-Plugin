@@ -1072,10 +1072,10 @@ public sealed class ObservedPlayer : FikaPlayer
         var gameObject = GameWorld.FindInteractable(interactionRay, out _);
         if (gameObject != null)
         {
-            var player = gameObject.GetComponent<Player>();
+            if (gameObject.TryGetComponent<Player>(out var otherPlayer) && InteractablePlayer != otherPlayer)
             if (player != null && player != InteractablePlayer)
             {
-                InteractablePlayer = (player != this) ? player : null;
+                InteractablePlayer = (otherPlayer != this) ? otherPlayer : null;
             }
             return;
         }
