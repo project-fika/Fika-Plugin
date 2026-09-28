@@ -69,6 +69,26 @@ public static class NetworkUtils
     }
 
     /// <summary>
+    /// Updates the global MongoID process counter if the provided instance matches the current process ID.
+    /// </summary>
+    /// <param name="mongoID">The <see cref="MongoID"/> instance to inspect.</param>
+    public static void InitMongoID(this MongoID mongoID)
+    {
+        var processId = mongoID._counter >> 24;
+        if (MongoID._processId != processId)
+        {
+            return;
+        }
+
+        var counterVal = (uint)(mongoID._counter & 0xFFFFFF);
+
+        if (counterVal > MongoID._newIdCounter)
+        {
+            MongoID._newIdCounter = counterVal;
+        }
+    }
+
+    /// <summary>
     /// Validates whether the given IP string represents a connectable, routable IP address.
     /// </summary>
     /// <param name="ip">The IP address string to validate (IPv4 or IPv6).</param>

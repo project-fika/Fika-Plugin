@@ -420,7 +420,7 @@ public static class FikaSerializationExtensions
         };
 
         id._stringID = NetworkUtils.FormatMongoId(id._timeStamp, id._counter);
-        id.Init();
+        id.InitMongoID();
 
         return id;
     }
