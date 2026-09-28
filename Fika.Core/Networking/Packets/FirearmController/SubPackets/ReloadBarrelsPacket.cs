@@ -7,31 +7,29 @@ using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
-public sealed class ReloadBarrelsPacket : IPoolSubPacket
+public readonly struct ReloadBarrelsPacket : IFirearmPacket
 {
-    private ReloadBarrelsPacket()
+    public ReloadBarrelsPacket(string[] ammoIds, ItemAddress placeToPutContainedAmmoMagazine)
     {
-
+        AmmoIds = ammoIds;
+        PlaceToPutContainedAmmoMagazine = placeToPutContainedAmmoMagazine;
     }
 
-    public static ReloadBarrelsPacket FromValue(string[] ammoIds, ItemAddress placeToPutContainedAmmoMagazine)
+    public ReloadBarrelsPacket(NetDataReader reader)
     {
-        var packet = FirearmSubPacketPoolManager.Instance.GetPacket<ReloadBarrelsPacket>(EFirearmSubPacketType.ReloadBarrels);
-        packet.AmmoIds = ammoIds;
-        packet.PlaceToPutContainedAmmoMagazine = placeToPutContainedAmmoMagazine;
-        return packet;
+        AmmoIds = reader.GetStringArray();
+        var exists = reader.GetBool();
+        if (exists)
+        {
+            Descriptor = reader.GetPolymorph<ItemAddressDescriptor>();
+        }
     }
 
-    public static ReloadBarrelsPacket CreateInstance()
-    {
-        return new();
-    }
+    public readonly string[] AmmoIds;
+    public readonly ItemAddress PlaceToPutContainedAmmoMagazine;
+    public readonly ItemAddressDescriptor Descriptor;
 
-    public string[] AmmoIds;
-    public ItemAddress PlaceToPutContainedAmmoMagazine;
-    public ItemAddressDescriptor Descriptor;
-
-    public void Execute(FikaPlayer player)
+    public readonly void Execute(FikaPlayer player)
     {
         if (player.HandsController is ObservedFirearmController controller)
         {
@@ -63,7 +61,7 @@ public sealed class ReloadBarrelsPacket : IPoolSubPacket
         }
     }
 
-    public void Serialize(NetDataWriter writer)
+    public readonly void Serialize(NetDataWriter writer)
     {
         writer.PutArray(AmmoIds);
         var exists = PlaceToPutContainedAmmoMagazine != null;
@@ -74,20 +72,5 @@ public sealed class ReloadBarrelsPacket : IPoolSubPacket
         }
     }
 
-    public void Deserialize(NetDataReader reader)
-    {
-        AmmoIds = reader.GetStringArray();
-        var exists = reader.GetBool();
-        if (exists)
-        {
-            Descriptor = reader.GetPolymorph<ItemAddressDescriptor>();
-        }
-    }
-
-    public void Dispose()
-    {
-        AmmoIds = null;
-        PlaceToPutContainedAmmoMagazine = null;
-        Descriptor = null;
-    }
+    public EFirearmPacketType Type => EFirearmPacketType.ReloadBarrels;
 }

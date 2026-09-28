@@ -18,10 +18,6 @@ public sealed class BotFirearmController : FikaClientFirearmController
     {
         var controller = CreateController<BotFirearmController>(player, weapon);
         controller._fikaPlayer = player;
-        controller._packet = new()
-        {
-            NetId = player.NetId
-        };
         return controller;
     }
 }

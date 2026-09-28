@@ -1,34 +1,30 @@
 ﻿using EFT.InventoryLogic;
 using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
-using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
-public sealed class ReloadLauncherPacket : IPoolSubPacket
+public readonly struct ReloadLauncherPacket : IFirearmPacket
 {
-    private ReloadLauncherPacket()
+    public ReloadLauncherPacket(bool reload, string[] ammoIds)
     {
-
+        Reload = reload;
+        AmmoIds = ammoIds;
     }
 
-    public static ReloadLauncherPacket FromValue(bool reload, string[] ammoIds)
+    public ReloadLauncherPacket(NetDataReader reader)
     {
-        var packet = FirearmSubPacketPoolManager.Instance.GetPacket<ReloadLauncherPacket>(EFirearmSubPacketType.ReloadLauncher);
-        packet.Reload = reload;
-        packet.AmmoIds = ammoIds;
-        return packet;
+        Reload = reader.GetBool();
+        if (Reload)
+        {
+            AmmoIds = reader.GetStringArray();
+        }
     }
 
-    public static ReloadLauncherPacket CreateInstance()
-    {
-        return new();
-    }
+    public readonly string[] AmmoIds;
+    public readonly bool Reload;
 
-    public string[] AmmoIds;
-    public bool Reload;
-
-    public void Execute(FikaPlayer player)
+    public readonly void Execute(FikaPlayer player)
     {
         if (player.HandsController is ObservedFirearmController controller)
         {
@@ -39,7 +35,7 @@ public sealed class ReloadLauncherPacket : IPoolSubPacket
         }
     }
 
-    public void Serialize(NetDataWriter writer)
+    public readonly void Serialize(NetDataWriter writer)
     {
         writer.Put(Reload);
         if (Reload)
@@ -48,18 +44,5 @@ public sealed class ReloadLauncherPacket : IPoolSubPacket
         }
     }
 
-    public void Deserialize(NetDataReader reader)
-    {
-        Reload = reader.GetBool();
-        if (Reload)
-        {
-            AmmoIds = reader.GetStringArray();
-        }
-    }
-
-    public void Dispose()
-    {
-        Reload = false;
-        AmmoIds = null;
-    }
+    public EFirearmPacketType Type => EFirearmPacketType.ReloadLauncher;
 }

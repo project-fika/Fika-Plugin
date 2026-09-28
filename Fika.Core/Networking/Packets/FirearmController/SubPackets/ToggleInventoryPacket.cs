@@ -1,31 +1,23 @@
 ﻿using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
-using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
-public sealed class ToggleInventoryPacket : IPoolSubPacket
+public readonly struct ToggleInventoryPacket : IFirearmPacket
 {
-    private ToggleInventoryPacket()
+    public ToggleInventoryPacket(bool open)
     {
-
+        Open = open;
     }
 
-    public static ToggleInventoryPacket FromValue(bool open)
+    public ToggleInventoryPacket(NetDataReader reader)
     {
-        var packet = FirearmSubPacketPoolManager.Instance.GetPacket<ToggleInventoryPacket>(EFirearmSubPacketType.ToggleInventory);
-        packet.Open = open;
-        return packet;
+        Open = reader.GetBool();
     }
 
-    public static ToggleInventoryPacket CreateInstance()
-    {
-        return new();
-    }
+    public readonly bool Open;
 
-    public bool Open;
-
-    public void Execute(FikaPlayer player)
+    public readonly void Execute(FikaPlayer player)
     {
         if (player.HandsController is ObservedFirearmController controller)
         {
@@ -33,18 +25,10 @@ public sealed class ToggleInventoryPacket : IPoolSubPacket
         }
     }
 
-    public void Serialize(NetDataWriter writer)
+    public readonly void Serialize(NetDataWriter writer)
     {
         writer.Put(Open);
     }
 
-    public void Deserialize(NetDataReader reader)
-    {
-        Open = reader.GetBool();
-    }
-
-    public void Dispose()
-    {
-        Open = false;
-    }
+    public EFirearmPacketType Type => EFirearmPacketType.ToggleInventory;
 }

@@ -4,35 +4,34 @@ using EFT.InventoryLogic;
 using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
-using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
-public sealed class ReloadMagPacket : IPoolSubPacket
+public readonly struct ReloadMagPacket : IFirearmPacket
 {
-    private ReloadMagPacket()
+    public ReloadMagPacket(MongoID magId, ItemAddress gridItemAddress)
     {
-
+        MagId = magId;
+        if (gridItemAddress != null)
+        {
+            Descriptor = gridItemAddress.ToDescriptor();
+        }
     }
 
-    public static ReloadMagPacket FromValue(MongoID magId, ItemAddress gridItemAddress)
+    public ReloadMagPacket(NetDataReader reader)
     {
-        var packet = FirearmSubPacketPoolManager.Instance.GetPacket<ReloadMagPacket>(EFirearmSubPacketType.ReloadMag);
-        packet.MagId = magId;
-        packet.GridItemAddress = gridItemAddress;
-        return packet;
+        MagId = reader.GetMongoID();
+        var exists = reader.GetBool();
+        if (exists)
+        {
+            Descriptor = reader.GetPolymorph<ItemAddressDescriptor>();
+        }
     }
 
-    public static ReloadMagPacket CreateInstance()
-    {
-        return new();
-    }
+    public readonly MongoID MagId;
+    public readonly ItemAddressDescriptor Descriptor;
 
-    public MongoID MagId;
-    public ItemAddress GridItemAddress;
-    public ItemAddressDescriptor Descriptor;
-
-    public void Execute(FikaPlayer player)
+    public readonly void Execute(FikaPlayer player)
     {
         if (player.HandsController is ObservedFirearmController controller)
         {
@@ -84,31 +83,16 @@ public sealed class ReloadMagPacket : IPoolSubPacket
         }
     }
 
-    public void Serialize(NetDataWriter writer)
+    public readonly void Serialize(NetDataWriter writer)
     {
         writer.PutMongoID(MagId);
-        var exists = GridItemAddress != null;
+        var exists = Descriptor != null;
         writer.Put(exists);
         if (exists)
         {
-            writer.PutPolymorph(GridItemAddress.ToDescriptor());
+            writer.PutPolymorph(Descriptor);
         }
     }
 
-    public void Deserialize(NetDataReader reader)
-    {
-        MagId = reader.GetMongoID();
-        var exists = reader.GetBool();
-        if (exists)
-        {
-            Descriptor = reader.GetPolymorph<ItemAddressDescriptor>();
-        }
-    }
-
-    public void Dispose()
-    {
-        MagId = default;
-        GridItemAddress = null;
-        Descriptor = null;
-    }
+    public EFirearmPacketType Type => EFirearmPacketType.ReloadMag;
 }

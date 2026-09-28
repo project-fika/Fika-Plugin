@@ -60,10 +60,6 @@ public sealed class FikaBot : FikaPlayer
         player._isHeadless = FikaBackendUtils.IsHeadless;
         player.IsYourPlayer = false;
         player.NetId = playerId;
-        player.CommonPacket = new()
-        {
-            NetId = playerId
-        };
 
         BotInventoryController inventoryController = new(player, profile, true, currentId, nextOperationId);
         player._baseInventoryController = inventoryController;
@@ -160,9 +156,8 @@ public sealed class FikaBot : FikaPlayer
         {
             if (ActiveHealthController.IsAlive)
             {
-                CommonPacket.Type = ECommonSubPacketType.Phrase;
-                CommonPacket.SubPacket.Phrase = new PhrasePacket(@event, clip.NetId);
-                PacketSender.NetworkManager.SendData(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
+                var packet = new PhrasePacket(@event, clip.NetId);
+                PacketSender.NetworkManager.SendPlayerPacket(in packet, NetId, DeliveryMethod.ReliableOrdered, true);
             }
         }
         else
@@ -406,10 +401,9 @@ public sealed class FikaBot : FikaPlayer
 
         internal void SendPacket()
         {
-            _fikaBot.CommonPacket.Type = ECommonSubPacketType.Proceed;
-            _fikaBot.CommonPacket.SubPacket.Proceed = new ProceedPacket(default, Weapon.Id, 0f, 0,
+            var packet = new ProceedPacket(default, Weapon.Id, 0f, 0,
                 Weapon.IsStationaryWeapon ? EProceedType.Stationary : EProceedType.Weapon, false);
-            _fikaBot.PacketSender.NetworkManager.SendData(ref _fikaBot.CommonPacket, DeliveryMethod.ReliableOrdered, true);
+            _fikaBot.PacketSender.NetworkManager.SendPlayerPacket(in packet, _fikaBot.NetId, DeliveryMethod.ReliableOrdered, true);
         }
 
         internal void HandleResult(IResult result)

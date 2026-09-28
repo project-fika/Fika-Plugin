@@ -3,7 +3,7 @@
 /// <summary>
 /// Represents common sub-packet types for general player actions.
 /// </summary>
-public enum ECommonSubPacketType : byte
+public enum EPlayerPacketType : byte
 {
     /// <summary>
     /// Player phrase.
@@ -39,6 +39,11 @@ public enum ECommonSubPacketType : byte
     /// Item dropped.
     /// </summary>
     Drop,
+
+    /// <summary>
+    /// Player muffled state changed.
+    /// </summary>
+    MuffledState,
 
     /// <summary>
     /// Stationary interaction.

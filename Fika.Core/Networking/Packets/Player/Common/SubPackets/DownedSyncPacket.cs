@@ -3,16 +3,13 @@ using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
-public readonly struct DownedSyncPacket
+public readonly struct DownedSyncPacket(bool downed) : IPlayerPacket
 {
-    public DownedSyncPacket(bool downed)
-    {
-        Downed = downed;
-    }
+    public EPlayerPacketType Type => EPlayerPacketType.DownedSync;
 
-    public readonly bool Downed;
+    public readonly bool Downed = downed;
 
-    public readonly void Execute(FikaPlayer player = null)
+    public readonly void Execute(FikaPlayer player)
     {
         if (player is ObservedPlayer observedPlayer)
         {
@@ -21,5 +18,10 @@ public readonly struct DownedSyncPacket
         }
 
         FikaGlobals.LogError($"OnHealthSyncPacketReceived::Player with id {player.NetId} was not observed. Name: {player.Profile.GetCorrectedNickname()}");
+    }
+
+    public readonly void Serialize(NetDataWriter writer)
+    {
+        writer.Put(Downed);
     }
 }

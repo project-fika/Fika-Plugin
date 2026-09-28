@@ -1,9 +1,9 @@
-﻿using EFT.Settings;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
 using EFT.InventoryLogic.Operations;
+using EFT.Settings;
 using EFT.UI;
 using Fika.Core.Main.BaseClasses;
 using Fika.Core.Main.ClientClasses;
@@ -166,8 +166,8 @@ public sealed class HostInventoryController : BaseInventoryController
             if (CanExecute(handler.Operation))
             {
                 handler.Operation.Execute(handler.HandleResultDelegate);
-                FikaPlayer.PacketSender.NetworkManager.SendGenericPacket(EGenericSubPacketType.InventoryOperation,
-                    InventoryPacket.FromValue(FikaPlayer.NetId, operation), true);
+                var packet = new InventoryPacket(FikaPlayer.NetId, operation);
+                FikaPlayer.PacketSender.NetworkManager.SendGenericPacket(in packet, deliveryMethod: DeliveryMethod.ReliableOrdered, true);
                 return;
             }
             handler.Operation.Dispose();

@@ -1,42 +1,42 @@
 ﻿using EFT.InventoryLogic;
 using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
-using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
-public sealed class CylinderMagPacket : IPoolSubPacket
+public readonly struct CylinderMagPacket : IFirearmPacket
 {
-    private CylinderMagPacket()
+    public CylinderMagPacket(EReloadWithAmmoStatus status, int camoraIndex, int ammoLoadedToMag, bool changed, bool hammerClosed, string[] ammoIds)
     {
-
+        Status = status;
+        CamoraIndex = camoraIndex;
+        AmmoLoadedToMag = ammoLoadedToMag;
+        Changed = changed;
+        HammerClosed = hammerClosed;
+        AmmoIds = ammoIds;
     }
 
-    public static CylinderMagPacket FromValue(EReloadWithAmmoStatus status, int camoraIndex, int ammoLoadedToMag, bool changed, bool hammerClosed, string[] ammoIds)
+    public CylinderMagPacket(NetDataReader reader)
     {
-        var packet = FirearmSubPacketPoolManager.Instance.GetPacket<CylinderMagPacket>(EFirearmSubPacketType.CylinderMag);
-        packet.Status = status;
-        packet.CamoraIndex = camoraIndex;
-        packet.AmmoLoadedToMag = ammoLoadedToMag;
-        packet.Changed = changed;
-        packet.HammerClosed = hammerClosed;
-        packet.AmmoIds = ammoIds;
-        return packet;
+        Changed = reader.GetBool();
+        if (Changed)
+        {
+            CamoraIndex = reader.GetInt();
+            HammerClosed = reader.GetBool();
+        }
+        Status = reader.GetEnum<EReloadWithAmmoStatus>();
+        AmmoLoadedToMag = reader.GetInt();
+        AmmoIds = reader.GetStringArray();
     }
 
-    public static CylinderMagPacket CreateInstance()
-    {
-        return new();
-    }
+    public readonly EReloadWithAmmoStatus Status;
+    public readonly int CamoraIndex;
+    public readonly int AmmoLoadedToMag;
+    public readonly bool Changed;
+    public readonly bool HammerClosed;
+    public readonly string[] AmmoIds;
 
-    public EReloadWithAmmoStatus Status;
-    public int CamoraIndex;
-    public int AmmoLoadedToMag;
-    public bool Changed;
-    public bool HammerClosed;
-    public string[] AmmoIds;
-
-    public void Execute(FikaPlayer player)
+    public readonly void Execute(FikaPlayer player)
     {
         if (player.HandsController is ObservedFirearmController controller)
         {
@@ -61,7 +61,7 @@ public sealed class CylinderMagPacket : IPoolSubPacket
         }
     }
 
-    public void Serialize(NetDataWriter writer)
+    public readonly void Serialize(NetDataWriter writer)
     {
         writer.Put(Changed);
         if (Changed)
@@ -74,26 +74,5 @@ public sealed class CylinderMagPacket : IPoolSubPacket
         writer.PutArray(AmmoIds);
     }
 
-    public void Deserialize(NetDataReader reader)
-    {
-        Changed = reader.GetBool();
-        if (Changed)
-        {
-            CamoraIndex = reader.GetInt();
-            HammerClosed = reader.GetBool();
-        }
-        Status = reader.GetEnum<EReloadWithAmmoStatus>();
-        AmmoLoadedToMag = reader.GetInt();
-        AmmoIds = reader.GetStringArray();
-    }
-
-    public void Dispose()
-    {
-        Status = default;
-        CamoraIndex = 0;
-        AmmoLoadedToMag = 0;
-        Changed = false;
-        HammerClosed = false;
-        AmmoIds = null;
-    }
+    public EFirearmPacketType Type => EFirearmPacketType.CylinderMag;
 }

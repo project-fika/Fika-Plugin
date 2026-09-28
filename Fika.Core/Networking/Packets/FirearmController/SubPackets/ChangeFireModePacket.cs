@@ -1,32 +1,26 @@
 ﻿using EFT.InventoryLogic;
 using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
-using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
-public sealed class ChangeFireModePacket : IPoolSubPacket
+public readonly struct ChangeFireModePacket : IFirearmPacket
 {
-    private ChangeFireModePacket()
-    {
+    public EFirearmPacketType Type => EFirearmPacketType.ChangeFireMode;
 
+    public readonly Weapon.EFireMode FireMode;
+
+    public ChangeFireModePacket(Weapon.EFireMode fireMode)
+    {
+        FireMode = fireMode;
     }
 
-    public static ChangeFireModePacket FromValue(Weapon.EFireMode fireMode)
+    public ChangeFireModePacket(NetDataReader reader)
     {
-        var packet = FirearmSubPacketPoolManager.Instance.GetPacket<ChangeFireModePacket>(EFirearmSubPacketType.ChangeFireMode);
-        packet.FireMode = fireMode;
-        return packet;
+        FireMode = reader.GetEnum<Weapon.EFireMode>();
     }
 
-    public static ChangeFireModePacket CreateInstance()
-    {
-        return new();
-    }
-
-    public Weapon.EFireMode FireMode;
-
-    public void Execute(FikaPlayer player)
+    public readonly void Execute(FikaPlayer player)
     {
         if (player.HandsController is ObservedFirearmController controller)
         {
@@ -34,18 +28,8 @@ public sealed class ChangeFireModePacket : IPoolSubPacket
         }
     }
 
-    public void Serialize(NetDataWriter writer)
+    public readonly void Serialize(NetDataWriter writer)
     {
         writer.PutEnum(FireMode);
-    }
-
-    public void Deserialize(NetDataReader reader)
-    {
-        FireMode = reader.GetEnum<Weapon.EFireMode>();
-    }
-
-    public void Dispose()
-    {
-        FireMode = Weapon.EFireMode.fullauto;
     }
 }

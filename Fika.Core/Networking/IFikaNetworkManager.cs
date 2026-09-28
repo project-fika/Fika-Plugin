@@ -6,8 +6,10 @@ using EFT.InventoryLogic;
 using Fika.Core.Main.Components;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking.Packets;
+using Fika.Core.Networking.Packets.FirearmController;
 using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Player;
+using Fika.Core.Networking.Packets.Player.Common;
 
 namespace Fika.Core.Networking;
 
@@ -55,7 +57,7 @@ public interface IFikaNetworkManager
     /// <summary>
     /// Temporary stash to spawn items
     /// </summary>
-    public Stash TemporaryStash { get; set; }
+    Stash TemporaryStash { get; set; }
 
     /// <summary>
     /// Gets or sets the total number of players in the session.
@@ -83,13 +85,46 @@ public interface IFikaNetworkManager
     void SendData<T>(ref T packet, DeliveryMethod deliveryMethod, bool broadcast = false) where T : INetSerializable;
 
     /// <summary>
-    /// Sends a generic network packet to one or more peers.
+    /// Sends a packet.
     /// </summary>
-    /// <param name="type">The generic sub-packet type identifier used to determine how the packet will be processed.</param>
-    /// <param name="subpacket">The sub-packet payload to send. Must implement <see cref="IPoolSubPacket"/>.</param>
+    /// <typeparam name="T">The type of packet to send, which must implement <see cref="INetSerializable"/>.</typeparam>
+    /// <param name="packet">The packet instance to send, passed by reference.</param>
+    /// <param name="deliveryMethod">The delivery method (reliable, unreliable, etc.) to use for sending the packet.</param>
+    /// <param name="peerToIgnore">The peer to exclude from receiving the packet</param>
     /// <param name="broadcast">If <see langword="true"/>, the packet will be sent to multiple recipients; otherwise, it will be sent to a single target (server is always broadcast).</param>
-    /// <param name="peerToIgnore">An optional peer to exclude from receiving the packet, typically the sender.</param>
-    void SendGenericPacket(EGenericSubPacketType type, IPoolSubPacket subpacket, bool broadcast = false, NetPeer peerToIgnore = null);
+    void SendData<T>(ref T packet, DeliveryMethod deliveryMethod, NetPeer peerToIgnore, bool broadcast = false) where T : INetSerializable;
+
+    /// <summary>
+    /// Sends a <see cref="IGenericPacket"/>
+    /// </summary>
+    /// <typeparam name="T">The generic packet type</typeparam>
+    /// <param name="genericPacket">The instance of the generic packet</param>
+    /// <param name="deliveryMethod">The delivery method (reliable, unreliable, etc.) to use for sending the packet.</param>
+    /// <param name="broadcast">If <see langword="true"/>, the packet will be sent to multiple recipients; otherwise, it will be sent to a single target (server is always broadcast).</param>
+    /// <param name="peerToIgnore">The peer to exclude from receiving the packet</param>
+    public void SendGenericPacket<T>(in T genericPacket, DeliveryMethod deliveryMethod, bool broadcast = false, NetPeer peerToIgnore = null) where T : struct, IGenericPacket;
+
+    /// <summary>
+    /// Sends a <see cref="IPlayerPacket"/>
+    /// </summary>
+    /// <typeparam name="T">The player packet type</typeparam>
+    /// <param name="playerPacket">The instance of the player packet</param>
+    /// <param name="netId">The player <see cref="FikaPlayer.NetId"/></param>
+    /// <param name="deliveryMethod">The delivery method (reliable, unreliable, etc.) to use for sending the packet.</param>
+    /// <param name="broadcast">If <see langword="true"/>, the packet will be sent to multiple recipients; otherwise, it will be sent to a single target (server is always broadcast).</param>
+    /// <param name="peerToIgnore">The peer to exclude from receiving the packet</param>
+    public void SendPlayerPacket<T>(in T playerPacket, int netId, DeliveryMethod deliveryMethod, bool broadcast = false, NetPeer peerToIgnore = null) where T : struct, IPlayerPacket;
+
+    /// <summary>
+    /// Sends a <see cref="IFirearmPacket"/>
+    /// </summary>
+    /// <typeparam name="T">The firearm packet type</typeparam>
+    /// <param name="firearmPacket">The instance of the firearm packet</param>
+    /// <param name="netId">The player <see cref="FikaPlayer.NetId"/></param>
+    /// <param name="deliveryMethod">The delivery method (reliable, unreliable, etc.) to use for sending the packet.</param>
+    /// <param name="broadcast">If <see langword="true"/>, the packet will be sent to multiple recipients; otherwise, it will be sent to a single target (server is always broadcast).</param>
+    /// <param name="peerToIgnore">The peer to exclude from receiving the packet</param>
+    public void SendFirearmPacket<T>(in T firearmPacket, int netId, DeliveryMethod deliveryMethod, bool broadcast = false, NetPeer peerToIgnore = null) where T : struct, IFirearmPacket;
 
     /// <summary>
     /// Sends a packet implementing <see cref="INetReusable"/> with manual serialization control.

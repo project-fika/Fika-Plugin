@@ -2,53 +2,56 @@
 using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
-using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
-public sealed class GrenadePacket : IPoolSubPacket
+public readonly struct GrenadePacket : IFirearmPacket
 {
-    private GrenadePacket()
-    {
-
-    }
-
-    public static GrenadePacket FromValue(Quaternion grenadeRotation, Vector3 grenadePosition, Vector3 throwForce,
+    public GrenadePacket(Quaternion grenadeRotation, Vector3 grenadePosition, Vector3 throwForce,
         EGrenadePacketType type, bool hasGrenade, bool lowThrow, bool plantTripwire, bool changeToIdle, bool changeToPlant)
     {
-        var packet = FirearmSubPacketPoolManager.Instance.GetPacket<GrenadePacket>(EFirearmSubPacketType.Grenade);
-        packet.GrenadeRotation = grenadeRotation;
-        packet.GrenadePosition = grenadePosition;
-        packet.ThrowForce = throwForce;
-        packet.Type = type;
-        packet.HasGrenade = hasGrenade;
-        packet.LowThrow = lowThrow;
-        packet.PlantTripwire = plantTripwire;
-        packet.ChangeToIdle = changeToIdle;
-        packet.ChangeToPlant = changeToPlant;
-        return packet;
+        GrenadeRotation = grenadeRotation;
+        GrenadePosition = grenadePosition;
+        ThrowForce = throwForce;
+        GrenadeType = type;
+        HasGrenade = hasGrenade;
+        LowThrow = lowThrow;
+        PlantTripwire = plantTripwire;
+        ChangeToIdle = changeToIdle;
+        ChangeToPlant = changeToPlant;
     }
 
-    public static GrenadePacket CreateInstance()
+    public GrenadePacket(NetDataReader reader)
     {
-        return new();
+        GrenadeType = reader.GetEnum<EGrenadePacketType>();
+        HasGrenade = reader.GetBool();
+        if (HasGrenade)
+        {
+            GrenadeRotation = reader.GetUnmanaged<Quaternion>();
+            GrenadePosition = reader.GetUnmanaged<Vector3>();
+            ThrowForce = reader.GetUnmanaged<Vector3>();
+            LowThrow = reader.GetBool();
+        }
+        PlantTripwire = reader.GetBool();
+        ChangeToIdle = reader.GetBool();
+        ChangeToPlant = reader.GetBool();
     }
 
-    public Quaternion GrenadeRotation;
-    public Vector3 GrenadePosition;
-    public Vector3 ThrowForce;
-    public EGrenadePacketType Type;
-    public bool HasGrenade;
-    public bool LowThrow;
-    public bool PlantTripwire;
-    public bool ChangeToIdle;
-    public bool ChangeToPlant;
+    public readonly Quaternion GrenadeRotation;
+    public readonly Vector3 GrenadePosition;
+    public readonly Vector3 ThrowForce;
+    public readonly EGrenadePacketType GrenadeType;
+    public readonly bool HasGrenade;
+    public readonly bool LowThrow;
+    public readonly bool PlantTripwire;
+    public readonly bool ChangeToIdle;
+    public readonly bool ChangeToPlant;
 
-    public void Execute(FikaPlayer player)
+    public readonly void Execute(FikaPlayer player)
     {
         if (player.HandsController is ObservedGrenadeController controller)
         {
-            switch (Type)
+            switch (GrenadeType)
             {
                 case EGrenadePacketType.ExamineWeapon:
                     {
@@ -109,9 +112,9 @@ public sealed class GrenadePacket : IPoolSubPacket
         }
     }
 
-    public void Serialize(NetDataWriter writer)
+    public readonly void Serialize(NetDataWriter writer)
     {
-        writer.PutEnum(Type);
+        writer.PutEnum(GrenadeType);
         writer.Put(HasGrenade);
         if (HasGrenade)
         {
@@ -125,32 +128,5 @@ public sealed class GrenadePacket : IPoolSubPacket
         writer.Put(ChangeToPlant);
     }
 
-    public void Deserialize(NetDataReader reader)
-    {
-        Type = reader.GetEnum<EGrenadePacketType>();
-        HasGrenade = reader.GetBool();
-        if (HasGrenade)
-        {
-            GrenadeRotation = reader.GetUnmanaged<Quaternion>();
-            GrenadePosition = reader.GetUnmanaged<Vector3>();
-            ThrowForce = reader.GetUnmanaged<Vector3>();
-            LowThrow = reader.GetBool();
-        }
-        PlantTripwire = reader.GetBool();
-        ChangeToIdle = reader.GetBool();
-        ChangeToPlant = reader.GetBool();
-    }
-
-    public void Dispose()
-    {
-        GrenadeRotation = default;
-        GrenadePosition = default;
-        ThrowForce = default;
-        Type = default;
-        HasGrenade = false;
-        LowThrow = false;
-        PlantTripwire = false;
-        ChangeToIdle = false;
-        ChangeToPlant = false;
-    }
+    public EFirearmPacketType Type => EFirearmPacketType.Grenade;
 }

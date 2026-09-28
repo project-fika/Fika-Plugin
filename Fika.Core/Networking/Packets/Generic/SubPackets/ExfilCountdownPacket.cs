@@ -2,33 +2,30 @@
 using CommonAssets.Scripts.Game;
 using EFT.Interactive;
 using Fika.Core.Main.GameMode;
-using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
-using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.Generic.SubPackets;
 
-public sealed class ExfilCountdown : IPoolSubPacket
+public readonly struct ExfilCountdownPacket : IGenericPacket
 {
-    public string ExfilName;
-    public float ExfilStartTime;
+    public EGenericPacketType Type => EGenericPacketType.ExfilCountdown;
 
-    private ExfilCountdown() { }
-
-    public static ExfilCountdown CreateInstance()
+    public ExfilCountdownPacket(string exfilName, float exfilStartTime)
     {
-        return new ExfilCountdown();
+        ExfilName = exfilName;
+        ExfilStartTime = exfilStartTime;
     }
 
-    public static ExfilCountdown FromValue(string exfilName, float exfilStartTime)
+    public ExfilCountdownPacket(NetDataReader reader)
     {
-        var packet = GenericSubPacketPoolManager.Instance.GetPacket<ExfilCountdown>(EGenericSubPacketType.ExfilCountdown);
-        packet.ExfilName = exfilName;
-        packet.ExfilStartTime = exfilStartTime;
-        return packet;
+        ExfilName = reader.GetString();
+        ExfilStartTime = reader.GetFloat();
     }
 
-    public void Execute(FikaPlayer player = null)
+    public readonly string ExfilName;
+    public readonly float ExfilStartTime;
+
+    public readonly void Execute()
     {
         var coopHandler = Singleton<IFikaNetworkManager>.Instance.CoopHandler;
         if (coopHandler == null)
@@ -82,21 +79,9 @@ public sealed class ExfilCountdown : IPoolSubPacket
         }
     }
 
-    public void Serialize(NetDataWriter writer)
+    public readonly void Serialize(NetDataWriter writer)
     {
         writer.Put(ExfilName);
         writer.Put(ExfilStartTime);
-    }
-
-    public void Deserialize(NetDataReader reader)
-    {
-        ExfilName = reader.GetString();
-        ExfilStartTime = reader.GetFloat();
-    }
-
-    public void Dispose()
-    {
-        ExfilName = null;
-        ExfilStartTime = 0f;
     }
 }

@@ -1,31 +1,27 @@
 ﻿using Comfort.Common;
 using EFT;
 using EFT.SynchronizableObjects;
-using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
-using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.Generic.SubPackets;
 
-public sealed class DisarmTripwire : IPoolSubPacket
+public readonly struct DisarmTripwirePacket : IGenericPacket
 {
-    public SynchronizableObjectPacket Data;
+    public EGenericPacketType Type => EGenericPacketType.DisarmTripwire;
 
-    private DisarmTripwire() { }
-
-    public static DisarmTripwire CreateInstance()
+    public DisarmTripwirePacket(SynchronizableObjectPacket data)
     {
-        return new DisarmTripwire();
+        Data = data;
     }
 
-    public static DisarmTripwire FromValue(SynchronizableObjectPacket data)
+    public DisarmTripwirePacket(NetDataReader reader)
     {
-        var packet = GenericSubPacketPoolManager.Instance.GetPacket<DisarmTripwire>(EGenericSubPacketType.DisarmTripwire);
-        packet.Data = data;
-        return packet;
+        Data = reader.GetAirplaneDataPacketStruct();
     }
 
-    public void Execute(FikaPlayer player = null)
+    public readonly SynchronizableObjectPacket Data;
+
+    public readonly void Execute()
     {
         if (Data.ObjectType == SynchronizableObjectType.Tripwire)
         {
@@ -44,18 +40,8 @@ public sealed class DisarmTripwire : IPoolSubPacket
         FikaGlobals.LogWarning($"OnSyncObjectPacketReceived: Received a packet we shouldn't receive: {Data.ObjectType}");
     }
 
-    public void Serialize(NetDataWriter writer)
+    public readonly void Serialize(NetDataWriter writer)
     {
         writer.PutAirplaneDataPacketStruct(Data);
-    }
-
-    public void Deserialize(NetDataReader reader)
-    {
-        Data = reader.GetAirplaneDataPacketStruct();
-    }
-
-    public void Dispose()
-    {
-        Data = default;
     }
 }

@@ -268,12 +268,9 @@ public sealed partial class FikaClient
 
     private void OnInraidQuestPacketReceived(InRaidQuestPacket packet)
     {
-        if (_coopHandler.Players.TryGetValue(packet.NetId, out var player))
+        if (_coopHandler.Players.TryGetValue(packet.NetId, out var player) && player.QuestController is ObservedQuestController controller)
         {
-            if (player.QuestController is ObservedQuestController controller)
-            {
-                controller.HandleInraidQuestPacket(packet);
-            }
+            controller.HandleInraidQuestPacket(packet);
         }
     }
 
@@ -528,8 +525,6 @@ public sealed partial class FikaClient
         NetId = packet.NetId;
         AllowVOIP = packet.AllowVOIP;
         StrictInventorySync = packet.StrictSync;
-
-        _genericPacket.NetId = packet.NetId;
 
         LoadingScreenUI.Instance.AddPlayer(NetId, FikaBackendUtils.PMCName);
         var loadingPacket = new LoadingScreenPlayersPacket
@@ -887,21 +882,6 @@ public sealed partial class FikaClient
         }
     }
 
-    private void OnGenericPacketReceived(GenericPacket packet)
-    {
-        if (packet.Type is EGenericSubPacketType.InventoryOperation)
-        {
-            OnInventoryPacketReceived((InventoryPacket)packet.SubPacket);
-            return;
-        }
-        if (packet.Type is EGenericSubPacketType.OperationCallback)
-        {
-            OnOperationCallbackPacketReceived((OperationCallbackPacket)packet.SubPacket);
-            return;
-        }
-        packet.Execute();
-    }
-
     private void OnInformationPacketReceived(InformationPacket packet)
     {
         if (_coopHandler != null)
@@ -923,30 +903,6 @@ public sealed partial class FikaClient
         if (packet.AmountOfPeers > 0)
         {
             Singleton<IFikaNetworkManager>.Instance.PlayerAmount = packet.AmountOfPeers;
-        }
-    }
-
-    private void OnCommonPlayerPacketReceived(CommonPlayerPacket packet)
-    {
-        if (_coopHandler.Players.TryGetValue(packet.NetId, out var playerToApply))
-        {
-            packet.Execute(playerToApply);
-        }
-    }
-
-    private void OnInventoryPacketReceived(InventoryPacket packet)
-    {
-        if (_coopHandler.Players.TryGetValue(packet.NetId, out var playerToApply))
-        {
-            HandleInventoryPacket(packet, playerToApply);
-        }
-    }
-
-    private void OnWeaponPacketReceived(WeaponPacket packet)
-    {
-        if (_coopHandler.Players.TryGetValue(packet.NetId, out var playerToApply))
-        {
-            packet.Execute(playerToApply);
         }
     }
 

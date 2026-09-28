@@ -2,17 +2,19 @@
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
-public readonly struct InventoryChangedPacket
+public readonly struct InventoryChangedPacket(bool inventoryOpen) : IPlayerPacket
 {
-    public InventoryChangedPacket(bool inventoryOpen)
-    {
-        InventoryOpen = inventoryOpen;
-    }
+    public EPlayerPacketType Type => EPlayerPacketType.InventoryChanged;
 
-    public readonly bool InventoryOpen;
+    public readonly bool InventoryOpen = inventoryOpen;
 
     public readonly void Execute(FikaPlayer player)
     {
         player.HandleInventoryOpenedPacket(InventoryOpen);
+    }
+
+    public readonly void Serialize(NetDataWriter writer)
+    {
+        writer.Put(InventoryOpen);
     }
 }

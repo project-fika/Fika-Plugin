@@ -1,12 +1,13 @@
 ﻿using EFT.Vaulting;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
-using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
-public readonly struct VaultPacket
+public readonly struct VaultPacket : IPlayerPacket
 {
+    public EPlayerPacketType Type => EPlayerPacketType.Vault;
+
     public VaultPacket(EVaultingStrategy vaultingStrategy, Vector3 vaultingPoint, float vaultingHeight, float vaultingLength, float vaultingSpeed, float behindObstacleHeight, float absoluteForwardVelocity)
     {
         VaultingStrategy = vaultingStrategy;
@@ -16,6 +17,17 @@ public readonly struct VaultPacket
         VaultingSpeed = vaultingSpeed;
         BehindObstacleHeight = behindObstacleHeight;
         AbsoluteForwardVelocity = absoluteForwardVelocity;
+    }
+
+    public VaultPacket(NetDataReader reader)
+    {
+        VaultingStrategy = reader.GetEnum<EVaultingStrategy>();
+        VaultingPoint = reader.GetUnmanaged<Vector3>();
+        VaultingHeight = reader.GetFloat();
+        VaultingLength = reader.GetFloat();
+        VaultingSpeed = reader.GetFloat();
+        BehindObstacleHeight = reader.GetFloat();
+        AbsoluteForwardVelocity = reader.GetFloat();
     }
 
     public readonly EVaultingStrategy VaultingStrategy;

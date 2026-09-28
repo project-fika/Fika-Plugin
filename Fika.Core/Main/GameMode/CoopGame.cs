@@ -262,27 +262,29 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
 
         if (!GameController.IsServer && !FikaBackendUtils.IsReconnect)
         {
-            var packet = SendCharacterPacket.FromValue(new PlayerInfoPacket()
+            var playerInfoPacket = new PlayerInfoPacket()
             {
                 Profile = fikaPlayer.Profile,
                 ControllerId = fikaPlayer.InventoryController.CurrentId,
                 FirstOperationId = fikaPlayer.InventoryController.NextOperationId
-            }, fikaPlayer.HealthController.IsAlive, false, fikaPlayer.Transform.position, fikaPlayer.NetId);
-            var client = Singleton<FikaClient>.Instance;
+            };
 
             if (fikaPlayer.ActiveHealthController != null)
             {
-                packet.PlayerInfoPacket.HealthByteArray = fikaPlayer.ActiveHealthController.SerializeState();
+                playerInfoPacket.HealthByteArray = fikaPlayer.ActiveHealthController.SerializeState();
             }
 
             if (fikaPlayer.HandsController != null)
             {
-                packet.PlayerInfoPacket.ControllerType = HandsControllerTypeConvert.FromController(fikaPlayer.HandsController);
-                packet.PlayerInfoPacket.ItemId = fikaPlayer.HandsController.Item.Id;
-                packet.PlayerInfoPacket.IsStationary = fikaPlayer.MovementContext.IsStationaryWeaponInHands;
+                playerInfoPacket.ControllerType = HandsControllerTypeConvert.FromController(fikaPlayer.HandsController);
+                playerInfoPacket.ItemId = fikaPlayer.HandsController.Item.Id;
+                playerInfoPacket.IsStationary = fikaPlayer.MovementContext.IsStationaryWeaponInHands;
             }
 
-            client.SendGenericPacket(EGenericSubPacketType.SendCharacter, packet, true);
+            var packet = new SendCharacterPacket(playerInfoPacket, fikaPlayer.HealthController.IsAlive, false, fikaPlayer.Transform.position, fikaPlayer.NetId);
+            var client = Singleton<FikaClient>.Instance;
+
+            client.SendGenericPacket(in packet, DeliveryMethod.ReliableOrdered, true);
         }
 
         _logger.LogInfo("Adding debug component...");

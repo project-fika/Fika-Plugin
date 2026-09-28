@@ -7,7 +7,6 @@ using EFT.Interactive.SecretExfiltrations;
 using Fika.Core.Main.GameMode;
 using Fika.Core.Main.Players;
 using Fika.Core.Networking;
-using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
 
 namespace Fika.Core.Main.Components;
@@ -117,8 +116,8 @@ public class FikaExfilManager : MonoBehaviour
     private void SecretExfiltrationPoint_OnPointFoundEvent(string exitName, bool sharedExit)
     {
         var mainPlayer = (FikaPlayer)Singleton<GameWorld>.Instance.MainPlayer;
-        Singleton<IFikaNetworkManager>.Instance.SendGenericPacket(EGenericSubPacketType.SecretExfilFound,
-            SecretExfilFound.FromValue(mainPlayer.GroupId, exitName), true);
+        var packet = new SecretExfilFoundPacket(mainPlayer.GroupId, exitName);
+        Singleton<IFikaNetworkManager>.Instance.SendGenericPacket(in packet, DeliveryMethod.ReliableOrdered, true);
     }
 
     public void Stop()
@@ -212,8 +211,8 @@ public class FikaExfilManager : MonoBehaviour
             if (point.ExfiltrationStartTime is <= 0 and > -90)
             {
                 point.ExfiltrationStartTime = _game.PastTime;
-                Singleton<IFikaNetworkManager>.Instance.SendGenericPacket(EGenericSubPacketType.ExfilCountdown,
-                        ExfilCountdown.FromValue(point.Settings.Name, point.ExfiltrationStartTime), true);
+                var packet = new ExfilCountdownPacket(point.Settings.Name, point.ExfiltrationStartTime);
+                Singleton<IFikaNetworkManager>.Instance.SendGenericPacket(in packet, DeliveryMethod.ReliableOrdered, true);
             }
             _countdownPoints.Add(point);
         }

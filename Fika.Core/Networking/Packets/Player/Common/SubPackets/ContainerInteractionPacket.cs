@@ -6,8 +6,10 @@ using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
-public readonly struct ContainerInteractionPacket
+public readonly struct ContainerInteractionPacket : IPlayerPacket
 {
+    public EPlayerPacketType Type => EPlayerPacketType.ContainerInteraction;
+
     public ContainerInteractionPacket(string interactiveId, EInteractionType interactionType)
     {
         InteractiveId = interactiveId;
@@ -23,7 +25,7 @@ public readonly struct ContainerInteractionPacket
     public readonly string InteractiveId;
     public readonly EInteractionType InteractionType;
 
-    public readonly void Execute(FikaPlayer player)
+    public readonly void Execute()
     {
         var lootableContainer = Singleton<GameWorld>.Instance.FindDoor(InteractiveId);
         if (lootableContainer != null)

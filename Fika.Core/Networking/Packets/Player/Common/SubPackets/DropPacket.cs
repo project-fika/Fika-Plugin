@@ -2,14 +2,11 @@
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
-public readonly struct DropPacket
+public readonly struct DropPacket(bool fastDrop) : IPlayerPacket
 {
-    public DropPacket(bool fastDrop)
-    {
-        FastDrop = fastDrop;
-    }
+    public EPlayerPacketType Type => EPlayerPacketType.Drop;
 
-    public readonly bool FastDrop;
+    public readonly bool FastDrop = fastDrop;
 
     public readonly void Execute(FikaPlayer player)
     {

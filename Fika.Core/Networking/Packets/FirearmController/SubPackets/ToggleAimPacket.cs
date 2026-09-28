@@ -1,31 +1,23 @@
 ﻿using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
-using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
-public sealed class ToggleAimPacket : IPoolSubPacket
+public readonly struct ToggleAimPacket : IFirearmPacket
 {
-    private ToggleAimPacket()
+    public ToggleAimPacket(int aimingIndex)
     {
-
+        AimingIndex = aimingIndex;
     }
 
-    public static ToggleAimPacket FromValue(int aimingIndex)
+    public ToggleAimPacket(NetDataReader reader)
     {
-        var packet = FirearmSubPacketPoolManager.Instance.GetPacket<ToggleAimPacket>(EFirearmSubPacketType.ToggleAim);
-        packet.AimingIndex = aimingIndex;
-        return packet;
+        AimingIndex = reader.GetInt();
     }
 
-    public static ToggleAimPacket CreateInstance()
-    {
-        return new();
-    }
+    public readonly int AimingIndex;
 
-    public int AimingIndex;
-
-    public void Execute(FikaPlayer player)
+    public readonly void Execute(FikaPlayer player)
     {
         if (player.HandsController is ObservedFirearmController controller)
         {
@@ -33,18 +25,10 @@ public sealed class ToggleAimPacket : IPoolSubPacket
         }
     }
 
-    public void Serialize(NetDataWriter writer)
+    public readonly void Serialize(NetDataWriter writer)
     {
         writer.Put(AimingIndex);
     }
 
-    public void Deserialize(NetDataReader reader)
-    {
-        AimingIndex = reader.GetInt();
-    }
-
-    public void Dispose()
-    {
-        AimingIndex = 0;
-    }
+    public EFirearmPacketType Type => EFirearmPacketType.ToggleAim;
 }

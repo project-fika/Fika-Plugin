@@ -18,23 +18,12 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers;
 public class FikaClientKnifeController : Player.KnifeController
 {
     protected FikaPlayer _fikaPlayer;
-    private WeaponPacket _packet;
 
     public static FikaClientKnifeController Create(FikaPlayer player, KnifeComponent item)
     {
         var controller = CreateController<FikaClientKnifeController>(player, item);
         controller._fikaPlayer = player;
-        controller._packet = new()
-        {
-            NetId = player.NetId
-        };
         return controller;
-    }
-
-    public override void Destroy()
-    {
-        _packet = null;
-        base.Destroy();
     }
 
     public override void CompassStateHandler(bool isActive)
@@ -43,23 +32,20 @@ public class FikaClientKnifeController : Player.KnifeController
         base.CompassStateHandler(isActive);
     }
 
-    public void SendCompassState(CompassChangePacket packet)
+    public void SendCompassState(in CompassChangePacket packet)
     {
 #if DEBUG
         FikaGlobals.LogInfo("Sending CompassPacket");
 #endif
-        _packet.Type = EFirearmSubPacketType.CompassChange;
-        _packet.SubPacket = packet;
-        _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
+        _fikaPlayer.PacketSender.NetworkManager.SendFirearmPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
     }
 
     public override void ExamineWeapon()
     {
         base.ExamineWeapon();
 
-        _packet.Type = EFirearmSubPacketType.Knife;
-        _packet.SubPacket = KnifePacket.FromValue(true, false, false, false);
-        _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
+        var packet = new KnifePacket(true, false, false, false);
+        _fikaPlayer.PacketSender.NetworkManager.SendFirearmPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
     }
 
     public override bool MakeKnifeKick()
@@ -68,9 +54,8 @@ public class FikaClientKnifeController : Player.KnifeController
 
         if (knifeKick)
         {
-            _packet.Type = EFirearmSubPacketType.Knife;
-            _packet.SubPacket = KnifePacket.FromValue(false, true, false, false);
-            _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
+            var packet = new KnifePacket(false, true, false, false);
+            _fikaPlayer.PacketSender.NetworkManager.SendFirearmPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
         }
 
         return knifeKick;
@@ -82,9 +67,8 @@ public class FikaClientKnifeController : Player.KnifeController
 
         if (alternateKnifeKick)
         {
-            _packet.Type = EFirearmSubPacketType.Knife;
-            _packet.SubPacket = KnifePacket.FromValue(false, false, true, false);
-            _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
+            var packet = new KnifePacket(false, false, true, false);
+            _fikaPlayer.PacketSender.NetworkManager.SendFirearmPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
         }
 
         return alternateKnifeKick;
@@ -94,9 +78,8 @@ public class FikaClientKnifeController : Player.KnifeController
     {
         base.BrakeCombo();
 
-        _packet.Type = EFirearmSubPacketType.Knife;
-        _packet.SubPacket = KnifePacket.FromValue(false, false, false, true);
-        _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
+        var packet = new KnifePacket(false, false, false, true);
+        _fikaPlayer.PacketSender.NetworkManager.SendFirearmPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
     }
 
     public override PlayerHitInfo ProcessHit(Player.KnifeRaycastHit hit, BallisticCollider ballisticCollider)

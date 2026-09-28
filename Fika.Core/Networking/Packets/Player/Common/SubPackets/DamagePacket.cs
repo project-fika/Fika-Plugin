@@ -4,12 +4,13 @@ using Fika.Core.Main.Players;
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
-public readonly struct DamagePacket
+public readonly struct DamagePacket : IPlayerPacket
 {
+    public EPlayerPacketType Type => EPlayerPacketType.Damage;
+
     public DamagePacket(int netId, DamageInfo damageInfo, EBodyPart bodyPartType,
         EBodyPartColliderType colliderType, EArmorPlateCollider armorPlateCollider = default, MaterialType materialType = default, float absorbed = default)
     {
-        NetId = netId;
         Damage = damageInfo.Damage;
         Absorbed = absorbed;
         PenetrationPower = damageInfo.PenetrationPower;
@@ -43,8 +44,6 @@ public readonly struct DamagePacket
 
     public DamagePacket(NetDataReader reader)
     {
-        NetId = reader.GetInt();
-
         Damage = reader.GetPackedFloat(0f, 1000f);
         Absorbed = reader.GetPackedFloat(0f, 1000f);
         PenetrationPower = reader.GetPackedFloat(0f, 200f, EFloatCompression.High);
@@ -82,7 +81,6 @@ public readonly struct DamagePacket
         }
     }
 
-    public readonly int NetId;
     public readonly float Damage;
     public readonly float Absorbed;
     public readonly float PenetrationPower;
@@ -104,7 +102,7 @@ public readonly struct DamagePacket
     public readonly MongoID? WeaponId;
     public readonly MongoID? SourceId;
 
-    public readonly void Execute(FikaPlayer player = null)
+    public readonly void Execute(FikaPlayer player)
     {
         if (player.IsAI || player.IsYourPlayer)
         {
@@ -114,8 +112,6 @@ public readonly struct DamagePacket
 
     public void Serialize(NetDataWriter writer)
     {
-        writer.Put(NetId);
-
         writer.PutPackedFloat(Damage, 0f, 1000f);
         writer.PutPackedFloat(Absorbed, 0f, 1000f);
         writer.PutPackedFloat(PenetrationPower, 0f, 200f, EFloatCompression.High);

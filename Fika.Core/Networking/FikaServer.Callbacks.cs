@@ -25,7 +25,6 @@ using Fika.Core.Networking.Packets.Generic.SubPackets;
 using Fika.Core.Networking.Packets.Player;
 using Fika.Core.Networking.Packets.Player.Common;
 using Fika.Core.Networking.Packets.World;
-using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -425,14 +424,13 @@ public sealed partial class FikaServer
         packet.Profiles = _visualProfiles;
         SendData(ref packet, DeliveryMethod.ReliableOrdered);
 
-        var clientConnected = ClientConnected.FromValue(profile.Info.MainProfileNickname);
+        var clientConnected = new ClientConnectedPacket(profile.Info.MainProfileNickname);
         if (!FikaBackendUtils.IsHeadless)
         {
             clientConnected.Execute();
         }
 
-        SendGenericPacket(EGenericSubPacketType.ClientConnected,
-            clientConnected, true);
+        SendGenericPacket(in clientConnected, DeliveryMethod.ReliableOrdered, true);
 
         peer.Tag = profile.Info.MainProfileNickname;
     }
@@ -647,31 +645,33 @@ public sealed partial class FikaServer
                     continue;
                 }
 
-                var characterPacket = SendCharacterPacket.FromValue(new()
+                var playerInfoPacket = new PlayerInfoPacket()
                 {
                     Profile = player.Profile,
                     ControllerId = player.InventoryController.CurrentId,
                     FirstOperationId = player.InventoryController.NextOperationId
-                },
-                player.HealthController.IsAlive, player.IsAI, player.Position, player.NetId);
+                };
 
                 if (player.ActiveHealthController != null)
                 {
-                    characterPacket.PlayerInfoPacket.HealthByteArray = player.ActiveHealthController.SerializeState();
+                    playerInfoPacket.HealthByteArray = player.ActiveHealthController.SerializeState();
                 }
                 else if (player is ObservedPlayer observedPlayer)
                 {
-                    characterPacket.PlayerInfoPacket.HealthByteArray = observedPlayer.NetworkHealthController.Store().SerializeHealthInfo();
+                    playerInfoPacket.HealthByteArray = observedPlayer.NetworkHealthController.Store().SerializeHealthInfo();
                 }
 
                 if (player.HandsController != null)
                 {
-                    characterPacket.PlayerInfoPacket.ControllerType = HandsControllerTypeConvert.FromController(player.HandsController);
-                    characterPacket.PlayerInfoPacket.ItemId = player.HandsController.Item.Id;
-                    characterPacket.PlayerInfoPacket.IsStationary = player.MovementContext.IsStationaryWeaponInHands;
+                    playerInfoPacket.ControllerType = HandsControllerTypeConvert.FromController(player.HandsController);
+                    playerInfoPacket.ItemId = player.HandsController.Item.Id;
+                    playerInfoPacket.IsStationary = player.MovementContext.IsStationaryWeaponInHands;
                 }
 
-                SendGenericPacketToPeer(EGenericSubPacketType.SendCharacter, characterPacket, peer);
+                var characterPacket = new SendCharacterPacket(playerInfoPacket, player.HealthController.IsAlive,
+                    player.IsAI, player.Position, player.NetId);
+
+                SendGenericPacketToPeer(in characterPacket, DeliveryMethod.ReliableOrdered, peer);
             }
 
             StashesPacket stashesPacket = new();
@@ -824,16 +824,6 @@ public sealed partial class FikaServer
         }
     }
 
-    private void OnGenericPacketReceived(GenericPacket packet, NetPeer peer)
-    {
-        if (packet.Type is EGenericSubPacketType.InventoryOperation)
-        {
-            OnInventoryPacketReceived((InventoryPacket)packet.SubPacket, peer);
-            return;
-        }
-        packet.Execute();
-    }
-
     private void OnInformationPacketReceived(InformationPacket packet, NetPeer peer)
     {
         ReadyClients += packet.ReadyPlayers;
@@ -871,15 +861,7 @@ public sealed partial class FikaServer
         SendData(ref respondPackage, DeliveryMethod.ReliableOrdered);
     }
 
-    private void OnCommonPlayerPacketReceived(CommonPlayerPacket packet, NetPeer peer)
-    {
-        if (_coopHandler.Players.TryGetValue(packet.NetId, out var playerToApply))
-        {
-            packet.Execute(playerToApply);
-        }
-    }
-
-    private void OnInventoryPacketReceived(InventoryPacket packet, NetPeer peer)
+    private void OnInventoryPacketReceived(in InventoryPacket packet, NetPeer peer)
     {
         if (_coopHandler.Players.TryGetValue(packet.NetId, out var playerToApply))
         {
@@ -898,8 +880,8 @@ public sealed partial class FikaServer
                     if (result.Failed)
                     {
                         _logger.LogError($"ItemControllerExecutePacket::Operation conversion failed: {result.Error}");
-                        SendGenericPacketToPeer(EGenericSubPacketType.OperationCallback,
-                            OperationCallbackPacket.FromValue(packet.NetId, packet.CallbackId, EOperationStatus.Failed, result.Error.ToString()), peer);
+                        var errorPacket = new OperationCallbackPacket(packet.NetId, packet.CallbackId, EOperationStatus.Failed, result.Error.ToString());
+                        SendGenericPacketToPeer(in errorPacket, DeliveryMethod.ReliableOrdered, peer);
 
                         ResyncInventoryIdPacket resyncPacket = new(playerToApply.NetId);
                         SendDataToPeer(ref resyncPacket, DeliveryMethod.ReliableOrdered, peer);
@@ -908,11 +890,10 @@ public sealed partial class FikaServer
 
                     var handler = _inventoryOperationHandlerPool.Get();
                     handler.Set(result, packet.CallbackId, packet.NetId, peer, this);
-                    SendGenericPacketToPeer(EGenericSubPacketType.OperationCallback,
-                            OperationCallbackPacket.FromValue(packet.NetId, packet.CallbackId, EOperationStatus.Started), peer);
+                    var startCallbackPacket = new OperationCallbackPacket(packet.NetId, packet.CallbackId, EOperationStatus.Started);
+                    SendGenericPacketToPeer(in startCallbackPacket, DeliveryMethod.ReliableOrdered, peer);
 
-                    SendGenericPacket(EGenericSubPacketType.InventoryOperation, packet,
-                        true, peer);
+                    SendGenericPacket(in packet, DeliveryMethod.ReliableOrdered, true, peer);
                     handler.OperationResult.Value.Execute(handler.HandleResultDelegate);
                 }
                 else
@@ -923,20 +904,12 @@ public sealed partial class FikaServer
             catch (Exception exception)
             {
                 _logger.LogError($"ItemControllerExecutePacket::Exception thrown: {exception}");
-                SendGenericPacketToPeer(EGenericSubPacketType.OperationCallback,
-                            OperationCallbackPacket.FromValue(packet.NetId, packet.CallbackId, EOperationStatus.Failed, exception.Message), peer);
+                var errorPacket = new OperationCallbackPacket(packet.NetId, packet.CallbackId, EOperationStatus.Failed, exception.Message);
+                SendGenericPacketToPeer(in errorPacket, DeliveryMethod.ReliableOrdered, peer);
 
                 ResyncInventoryIdPacket resyncPacket = new(playerToApply.NetId);
                 SendDataToPeer(ref resyncPacket, DeliveryMethod.ReliableOrdered, peer);
             }
-        }
-    }
-
-    private void OnWeaponPacketReceived(WeaponPacket packet, NetPeer peer)
-    {
-        if (_coopHandler.Players.TryGetValue(packet.NetId, out var playerToApply))
-        {
-            packet.Execute(playerToApply);
         }
     }
 }

@@ -1,9 +1,12 @@
-﻿using BitPacking;
-using EFT.Vehicle;
-using System;
+﻿using System;
 using System.Net;
 using System.Net.Sockets;
+using BitPacking;
+using EFT.Vehicle;
 using Fika.Core.Networking.LZ4;
+using Fika.Core.Networking.Packets.FirearmController;
+using Fika.Core.Networking.Packets.Generic;
+using Fika.Core.Networking.Packets.Player.Common;
 
 namespace Fika.Core.Networking;
 
@@ -173,6 +176,18 @@ public static class NetworkUtils
         /// A raw <see cref="Packets.Player.PlayerStateData"/>
         /// </summary>
         PlayerState,
+        /// <summary>
+        /// A <see cref="IGenericPacket"/>
+        /// </summary>
+        Generic,
+        /// <summary>
+        /// A <see cref="IPlayerPacket"/>
+        /// </summary>
+        Player,
+        /// <summary>
+        /// A <see cref="IFirearmPacket"/>
+        /// </summary>
+        Firearm,
         /// <summary>
         /// A raw <see cref="ShapshotBTRMessage"/>
         /// </summary>

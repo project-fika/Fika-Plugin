@@ -1,8 +1,3 @@
-using CommonAssets.Scripts.ArtilleryShelling.Client;
-using EFT.InventoryLogic;
-using EFT.Vehicle;
-using EFT.Weather;
-using JsonType;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -12,6 +7,7 @@ using System.Threading.Tasks;
 using Audio.AmbientSubsystem;
 using BepInEx.Logging;
 using Comfort.Common;
+using CommonAssets.Scripts.ArtilleryShelling.Client;
 using CommonAssets.Scripts.Audio.RadioSystem;
 using Dissonance;
 using EFT;
@@ -19,11 +15,13 @@ using EFT.Bots;
 using EFT.Game.Spawning;
 using EFT.GlobalEvents;
 using EFT.Interactive;
+using EFT.InventoryLogic;
 using EFT.UI;
 using EFT.UI.Matchmaker;
 using EFT.UI.Screens;
+using EFT.Vehicle;
+using EFT.Weather;
 using Fika.Core.Bundles;
-using Fika.Core.Main.ClientClasses;
 using Fika.Core.Main.Components;
 using Fika.Core.Main.HostClasses;
 using Fika.Core.Main.Players;
@@ -35,11 +33,11 @@ using Fika.Core.Networking.Packets.Backend;
 using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
 using Fika.Core.Networking.Packets.World;
-using HarmonyLib;
+using JsonType;
 using UnityEngine.Events;
 using static JsonType.LocationSettings;
-using ClientTransitController = Fika.Core.Main.ClientClasses.ClientTransitController;
 using ClientRunddansController = Fika.Core.Main.ClientClasses.ClientRunddansController;
+using ClientTransitController = Fika.Core.Main.ClientClasses.ClientTransitController;
 
 namespace Fika.Core.Main.GameMode;
 
@@ -774,8 +772,8 @@ public abstract class BaseGameController
     private void OnBtrSpawn(BtrSpawnOnThePathEvent spawnEvent)
     {
         Logger.LogInfo("BTR spawned, notifying clients");
-        Singleton<IFikaNetworkManager>.Instance.SendGenericPacket(EGenericSubPacketType.SpawnBTR,
-            BtrSpawn.FromValue(spawnEvent.Position, spawnEvent.Rotation, spawnEvent.PlayerProfileId), true);
+        var packet = new SpawnBTRPacket(spawnEvent.Position, spawnEvent.Rotation, spawnEvent.PlayerProfileId);
+        Singleton<IFikaNetworkManager>.Instance.SendGenericPacket(in packet, DeliveryMethod.ReliableOrdered, true);
     }
 
     /// <summary>

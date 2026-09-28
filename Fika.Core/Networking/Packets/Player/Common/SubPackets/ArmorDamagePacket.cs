@@ -3,8 +3,10 @@ using Fika.Core.Main.Players;
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
-public readonly struct ArmorDamagePacket
+public readonly struct ArmorDamagePacket : IPlayerPacket
 {
+    public EPlayerPacketType Type => EPlayerPacketType.ArmorDamage;
+
     public ArmorDamagePacket(MongoID itemId, float amount)
     {
         ItemId = itemId;
@@ -20,7 +22,7 @@ public readonly struct ArmorDamagePacket
     public readonly MongoID ItemId;
     public readonly float Durability;
 
-    public readonly void Execute(FikaPlayer player = null)
+    public readonly void Execute(FikaPlayer player)
     {
         player.HandleArmorDamagePacket(this);
     }

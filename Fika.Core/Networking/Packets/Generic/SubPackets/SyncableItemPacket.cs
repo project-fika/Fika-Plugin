@@ -3,45 +3,48 @@ using EFT;
 using EFT.Ballistics;
 using EFT.Interactive;
 using Fika.Core.Main.ClientClasses;
-using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
-using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.Generic.SubPackets;
 
-public sealed class SyncableItemPacket : IPoolSubPacket
+public readonly struct SyncableItemPacket : IGenericPacket
 {
-    private SyncableItemPacket() { }
+    public EGenericPacketType Type => EGenericPacketType.SyncableItem;
 
-    public static SyncableItemPacket CreateInstance()
+    public SyncableItemPacket(int netId, Turnable.EState state)
     {
-        return new();
+        NetId = netId;
+        SyncType = ESyncType.LampState;
+        LampStates = state;
     }
 
-    public static SyncableItemPacket FromValue(int netId, Turnable.EState state)
+    public SyncableItemPacket(int netId, Vector3 hitPoint)
     {
-        var packet = GenericSubPacketPoolManager.Instance.GetPacket<SyncableItemPacket>(EGenericSubPacketType.SyncableItem);
-        packet.NetId = netId;
-        packet.SyncType = ESyncType.LampState;
-        packet.LampStates = state;
-        return packet;
+        NetId = netId;
+        SyncType = ESyncType.WindowBreak;
+        HitPoint = hitPoint;
     }
 
-    public static SyncableItemPacket FromValue(int netId, Vector3 hitPoint)
+    public SyncableItemPacket(NetDataReader reader)
     {
-        var packet = GenericSubPacketPoolManager.Instance.GetPacket<SyncableItemPacket>(EGenericSubPacketType.SyncableItem);
-        packet.NetId = netId;
-        packet.SyncType = ESyncType.WindowBreak;
-        packet.HitPoint = hitPoint;
-        return packet;
+        NetId = reader.GetInt();
+        SyncType = reader.GetEnum<ESyncType>();
+        if (SyncType is ESyncType.LampState)
+        {
+            LampStates = reader.GetEnum<Turnable.EState>();
+        }
+        else
+        {
+            HitPoint = reader.GetUnmanaged<Vector3>();
+        }
     }
 
-    public int NetId;
-    public ESyncType SyncType;
-    public Turnable.EState LampStates;
-    public Vector3 HitPoint;
+    public readonly int NetId;
+    public readonly ESyncType SyncType;
+    public readonly Turnable.EState LampStates;
+    public readonly Vector3 HitPoint;
 
-    public void Execute(FikaPlayer player = null)
+    public readonly void Execute()
     {
         if (SyncType is ESyncType.LampState)
         {
@@ -76,21 +79,7 @@ public sealed class SyncableItemPacket : IPoolSubPacket
         }
     }
 
-    public void Deserialize(NetDataReader reader)
-    {
-        NetId = reader.GetInt();
-        SyncType = reader.GetEnum<ESyncType>();
-        if (SyncType is ESyncType.LampState)
-        {
-            LampStates = reader.GetEnum<Turnable.EState>();
-        }
-        else
-        {
-            HitPoint = reader.GetUnmanaged<Vector3>();
-        }
-    }
-
-    public void Serialize(NetDataWriter writer)
+    public readonly void Serialize(NetDataWriter writer)
     {
         writer.Put(NetId);
         writer.PutEnum(SyncType);
@@ -102,19 +91,6 @@ public sealed class SyncableItemPacket : IPoolSubPacket
         {
             writer.PutUnmanaged(HitPoint);
         }
-    }
-
-    public void Dispose()
-    {
-        if (SyncType is ESyncType.LampState)
-        {
-            LampStates = default;
-        }
-        else
-        {
-            HitPoint = default;
-        }
-        SyncType = default;
     }
 
     public enum ESyncType

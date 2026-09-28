@@ -2,8 +2,10 @@
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
-public readonly struct UsableItemPacket
+public readonly struct UsableItemPacket : IPlayerPacket
 {
+    public EPlayerPacketType Type => EPlayerPacketType.UsableItem;
+
     public UsableItemPacket(bool hasCompassState, bool compassState, bool examineWeapon, bool hasAim, bool aimState)
     {
         HasCompassState = hasCompassState;

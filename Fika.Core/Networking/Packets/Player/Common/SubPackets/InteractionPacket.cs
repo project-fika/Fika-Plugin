@@ -2,8 +2,10 @@
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
-public readonly struct InteractionPacket
+public readonly struct InteractionPacket : IPlayerPacket
 {
+    public EPlayerPacketType Type => EPlayerPacketType.Interaction;
+
     public InteractionPacket(EInteraction interaction)
     {
         Interaction = interaction;

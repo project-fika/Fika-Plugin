@@ -219,8 +219,8 @@ public class CoopHandler : MonoBehaviour
 
     private void SyncPlayersWithClients()
     {
-        Singleton<IFikaNetworkManager>.Instance.SendGenericPacket(EGenericSubPacketType.CharacterSync,
-            CharacterSyncPacket.FromValue(Players), true);
+        var packet = new CharacterSyncPacket(Players);
+        Singleton<IFikaNetworkManager>.Instance.SendGenericPacket(in packet, DeliveryMethod.ReliableOrdered);
     }
 
     protected void OnDestroy()
@@ -587,7 +587,7 @@ public class CoopHandler : MonoBehaviour
         }
     }
 
-    public void CheckIds(List<int> playerIds, List<int> missingIds)
+    public void CheckIds(int[] playerIds, List<int> missingIds)
     {
         foreach (var netId in playerIds)
         {

@@ -3,8 +3,10 @@ using Fika.Core.Main.Players;
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
-public readonly struct HeadLightsPacket
+public readonly struct HeadLightsPacket : IPlayerPacket
 {
+    public EPlayerPacketType Type => EPlayerPacketType.HeadLights;
+
     public HeadLightsPacket(int amount, bool isSilent, LightsState[] lightStates)
     {
         Amount = amount;

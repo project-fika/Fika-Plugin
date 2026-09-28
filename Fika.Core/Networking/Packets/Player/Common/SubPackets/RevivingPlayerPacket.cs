@@ -1,10 +1,11 @@
 ﻿using Fika.Core.Main.Players;
-using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
-public readonly struct RevivingPlayerPacket
+public readonly struct RevivingPlayerPacket : IPlayerPacket
 {
+    public EPlayerPacketType Type => EPlayerPacketType.RevivingPlayer;
+
     public RevivingPlayerPacket(bool reviving, string nickname)
     {
         _reviving = reviving;
@@ -20,18 +21,10 @@ public readonly struct RevivingPlayerPacket
     private readonly bool _reviving;
     private readonly string _nickname;
 
-    public readonly void Execute(FikaPlayer player = null)
+    public readonly void Execute(FikaPlayer player)
     {
-        if (player != null)
-        {
-            player.ToggleRevive(_reviving, _nickname);
-            return;
-        }
-
-        FikaGlobals.LogError($"OnHealthSyncPacketReceived::Player with id {player.NetId} was not local. Name: {player.Profile.GetCorrectedNickname()}");
+        player.ToggleRevive(_reviving, _nickname);
     }
-
-
 
     public readonly void Serialize(NetDataWriter writer)
     {

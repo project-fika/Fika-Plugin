@@ -1,37 +1,33 @@
-﻿using EFT.InventoryLogic;
-using System;
+﻿using System;
 using EFT;
+using EFT.InventoryLogic;
 using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
-using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
-public sealed class QuickReloadMagPacket : IPoolSubPacket
+public readonly struct QuickReloadMagPacket : IFirearmPacket
 {
-    private QuickReloadMagPacket()
+    public QuickReloadMagPacket(MongoID magId, bool reload)
     {
-
+        MagId = magId;
+        Reload = reload;
     }
 
-    public static QuickReloadMagPacket FromValue(MongoID magId, bool reload)
+    public QuickReloadMagPacket(NetDataReader reader)
     {
-        var packet = FirearmSubPacketPoolManager.Instance.GetPacket<QuickReloadMagPacket>(EFirearmSubPacketType.QuickReloadMag);
-        packet.MagId = magId;
-        packet.Reload = reload;
-        return packet;
+        Reload = reader.GetBool();
+        if (Reload)
+        {
+            MagId = reader.GetMongoID();
+        }
     }
 
-    public static QuickReloadMagPacket CreateInstance()
-    {
-        return new();
-    }
+    public readonly MongoID MagId;
+    public readonly bool Reload;
 
-    public MongoID MagId;
-    public bool Reload;
-
-    public void Execute(FikaPlayer player)
+    public readonly void Execute(FikaPlayer player)
     {
         if (player.HandsController is ObservedFirearmController controller)
         {
@@ -62,7 +58,7 @@ public sealed class QuickReloadMagPacket : IPoolSubPacket
         }
     }
 
-    public void Serialize(NetDataWriter writer)
+    public readonly void Serialize(NetDataWriter writer)
     {
         writer.Put(Reload);
         if (Reload)
@@ -71,18 +67,5 @@ public sealed class QuickReloadMagPacket : IPoolSubPacket
         }
     }
 
-    public void Deserialize(NetDataReader reader)
-    {
-        Reload = reader.GetBool();
-        if (Reload)
-        {
-            MagId = reader.GetMongoID();
-        }
-    }
-
-    public void Dispose()
-    {
-        MagId = default;
-        Reload = false;
-    }
+    public EFirearmPacketType Type => EFirearmPacketType.QuickReloadMag;
 }

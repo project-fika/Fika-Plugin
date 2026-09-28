@@ -5,8 +5,10 @@ using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
-public readonly struct MountingPacket
+public readonly struct MountingPacket : IPlayerPacket
 {
+    public EPlayerPacketType Type => EPlayerPacketType.Mounting;
+
     public MountingPacket(EFT.MountingPacket.EMountingCommand command, bool isMounted,
         Vector3 mountDirection, Vector3 mountingPoint, float currentMountingPointVerticalOffset, short mountingDirection)
     {

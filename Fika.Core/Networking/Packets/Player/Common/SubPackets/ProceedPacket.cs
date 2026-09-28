@@ -4,8 +4,10 @@ using Fika.Core.Main.Players;
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
-public readonly struct ProceedPacket
+public readonly struct ProceedPacket : IPlayerPacket
 {
+    public EPlayerPacketType Type => EPlayerPacketType.Proceed;
+
     public ProceedPacket(OneAndList<EBodyPart> bodyParts, MongoID itemId, float amount, int animationVariant, EProceedType proceedType, bool scheduled)
     {
         BodyParts = bodyParts;

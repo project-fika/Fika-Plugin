@@ -1,56 +1,18 @@
 ﻿using EFT;
 using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
-using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
-public sealed class ScopeStatesPacket : IPoolSubPacket
+public readonly struct ScopeStatesPacket : IFirearmPacket
 {
-    private ScopeStatesPacket()
+    public ScopeStatesPacket(int amount, ScopeState[] states)
     {
-
-    }
-    public static ScopeStatesPacket FromValue(int amount, ScopeState[] states)
-    {
-        var packet = FirearmSubPacketPoolManager.Instance.GetPacket<ScopeStatesPacket>(EFirearmSubPacketType.ToggleScopeStates);
-        packet.Amount = amount;
-        packet.States = states;
-        return packet;
+        Amount = amount;
+        States = states;
     }
 
-    public static ScopeStatesPacket CreateInstance()
-    {
-        return new();
-    }
-
-    public int Amount;
-    public ScopeState[] States;
-
-    public void Execute(FikaPlayer player)
-    {
-        if (player.HandsController is ObservedFirearmController controller)
-        {
-            controller.SetScopeMode(States);
-        }
-    }
-
-    public void Serialize(NetDataWriter writer)
-    {
-        writer.Put(Amount);
-        if (Amount > 0)
-        {
-            for (var i = 0; i < Amount; i++)
-            {
-                writer.Put(States[i].Id);
-                writer.Put(States[i].ScopeMode);
-                writer.Put(States[i].ScopeIndexInsideSight);
-                writer.Put(States[i].ScopeCalibrationIndex);
-            }
-        }
-    }
-
-    public void Deserialize(NetDataReader reader)
+    public ScopeStatesPacket(NetDataReader reader)
     {
         Amount = reader.GetInt();
         if (Amount > 0)
@@ -69,9 +31,31 @@ public sealed class ScopeStatesPacket : IPoolSubPacket
         }
     }
 
-    public void Dispose()
+    public readonly int Amount;
+    public readonly ScopeState[] States;
+
+    public readonly void Execute(FikaPlayer player)
     {
-        Amount = 0;
-        States = null;
+        if (player.HandsController is ObservedFirearmController controller)
+        {
+            controller.SetScopeMode(States);
+        }
     }
+
+    public readonly void Serialize(NetDataWriter writer)
+    {
+        writer.Put(Amount);
+        if (Amount > 0)
+        {
+            for (var i = 0; i < Amount; i++)
+            {
+                writer.Put(States[i].Id);
+                writer.Put(States[i].ScopeMode);
+                writer.Put(States[i].ScopeIndexInsideSight);
+                writer.Put(States[i].ScopeCalibrationIndex);
+            }
+        }
+    }
+
+    public EFirearmPacketType Type => EFirearmPacketType.ToggleScopeStates;
 }

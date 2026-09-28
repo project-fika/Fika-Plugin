@@ -1,36 +1,33 @@
 ﻿using EFT.InventoryLogic;
 using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
-using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
-public sealed class ReloadWithAmmoPacket : IPoolSubPacket
+public readonly struct ReloadWithAmmoPacket : IFirearmPacket
 {
-    private ReloadWithAmmoPacket()
+    public ReloadWithAmmoPacket(EReloadWithAmmoStatus status, int ammoLoadedToMag = 0, string[] ammoIds = null)
     {
-
+        Status = status;
+        AmmoLoadedToMag = ammoLoadedToMag;
+        AmmoIds = ammoIds;
     }
 
-    public static ReloadWithAmmoPacket FromValue(EReloadWithAmmoStatus status, int ammoLoadedToMag = 0, string[] ammoIds = null)
+    public ReloadWithAmmoPacket(NetDataReader reader)
     {
-        var packet = FirearmSubPacketPoolManager.Instance.GetPacket<ReloadWithAmmoPacket>(EFirearmSubPacketType.ReloadWithAmmo);
-        packet.Status = status;
-        packet.AmmoLoadedToMag = ammoLoadedToMag;
-        packet.AmmoIds = ammoIds;
-        return packet;
+        Status = reader.GetEnum<EReloadWithAmmoStatus>();
+        if (Status == EReloadWithAmmoStatus.StartReload)
+        {
+            AmmoIds = reader.GetStringArray();
+        }
+        AmmoLoadedToMag = reader.GetInt();
     }
 
-    public static ReloadWithAmmoPacket CreateInstance()
-    {
-        return new();
-    }
+    public readonly EReloadWithAmmoStatus Status;
+    public readonly int AmmoLoadedToMag;
+    public readonly string[] AmmoIds;
 
-    public EReloadWithAmmoStatus Status;
-    public int AmmoLoadedToMag;
-    public string[] AmmoIds;
-
-    public void Execute(FikaPlayer player)
+    public readonly void Execute(FikaPlayer player)
     {
         if (player.HandsController is ObservedFirearmController controller)
         {
@@ -49,7 +46,7 @@ public sealed class ReloadWithAmmoPacket : IPoolSubPacket
         }
     }
 
-    public void Serialize(NetDataWriter writer)
+    public readonly void Serialize(NetDataWriter writer)
     {
         writer.PutEnum(Status);
         if (Status == EReloadWithAmmoStatus.StartReload)
@@ -59,20 +56,5 @@ public sealed class ReloadWithAmmoPacket : IPoolSubPacket
         writer.Put(AmmoLoadedToMag);
     }
 
-    public void Deserialize(NetDataReader reader)
-    {
-        Status = reader.GetEnum<EReloadWithAmmoStatus>();
-        if (Status == EReloadWithAmmoStatus.StartReload)
-        {
-            AmmoIds = reader.GetStringArray();
-        }
-        AmmoLoadedToMag = reader.GetInt();
-    }
-
-    public void Dispose()
-    {
-        Status = EReloadWithAmmoStatus.None;
-        AmmoLoadedToMag = 0;
-        AmmoIds = null;
-    }
+    public EFirearmPacketType Type => EFirearmPacketType.ReloadWithAmmo;
 }

@@ -9,8 +9,10 @@ using static Fika.Core.Main.Players.FikaPlayer;
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
-public readonly struct WorldInteractionPacket
+public readonly struct WorldInteractionPacket : IPlayerPacket
 {
+    public EPlayerPacketType Type => EPlayerPacketType.WorldInteraction;
+
     public WorldInteractionPacket(string interactiveId, EInteractionType interactionType, EInteractionStage interactionStage, string itemId = null)
     {
         InteractiveId = interactiveId;

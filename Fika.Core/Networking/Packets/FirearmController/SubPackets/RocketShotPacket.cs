@@ -3,36 +3,30 @@ using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
-using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
-public sealed class RocketShotPacket : IPoolSubPacket
+public readonly struct RocketShotPacket : IFirearmPacket
 {
-    private RocketShotPacket()
+    public RocketShotPacket(Vector3 shotPosition, Vector3 shotForward, MongoID ammoTemplate)
     {
-
+        ShotPosition = shotPosition;
+        ShotForward = shotForward;
+        AmmoTemplateId = ammoTemplate;
     }
 
-    public static RocketShotPacket FromValue(Vector3 shotPosition, Vector3 shotForward, MongoID ammoTemplate)
+    public RocketShotPacket(NetDataReader reader)
     {
-        var packet = FirearmSubPacketPoolManager.Instance.GetPacket<RocketShotPacket>(EFirearmSubPacketType.RocketShot);
-        packet.ShotPosition = shotPosition;
-        packet.ShotForward = shotForward;
-        packet.AmmoTemplateId = ammoTemplate;
-        return packet;
+        ShotPosition = reader.GetUnmanaged<Vector3>();
+        ShotForward = reader.GetUnmanaged<Vector3>();
+        AmmoTemplateId = reader.GetMongoID();
     }
 
-    public static RocketShotPacket CreateInstance()
-    {
-        return new();
-    }
+    public readonly Vector3 ShotPosition;
+    public readonly Vector3 ShotForward;
+    public readonly MongoID AmmoTemplateId;
 
-    public Vector3 ShotPosition;
-    public Vector3 ShotForward;
-    public MongoID AmmoTemplateId;
-
-    public void Execute(FikaPlayer player)
+    public readonly void Execute(FikaPlayer player)
     {
         if (player.HandsController is ObservedFirearmController controller)
         {
@@ -41,24 +35,12 @@ public sealed class RocketShotPacket : IPoolSubPacket
         }
     }
 
-    public void Serialize(NetDataWriter writer)
+    public readonly void Serialize(NetDataWriter writer)
     {
         writer.PutUnmanaged(ShotPosition);
         writer.PutUnmanaged(ShotForward);
         writer.PutMongoID(AmmoTemplateId);
     }
 
-    public void Deserialize(NetDataReader reader)
-    {
-        ShotPosition = reader.GetUnmanaged<Vector3>();
-        ShotForward = reader.GetUnmanaged<Vector3>();
-        AmmoTemplateId = reader.GetMongoID();
-    }
-
-    public void Dispose()
-    {
-        ShotPosition = default;
-        ShotForward = default;
-        AmmoTemplateId = default;
-    }
+    public EFirearmPacketType Type => EFirearmPacketType.RocketShot;
 }

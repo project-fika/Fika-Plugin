@@ -1,27 +1,11 @@
 ﻿using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
-using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
-public sealed class ToggleLauncherPacket : IPoolSubPacket
+public readonly struct ToggleLauncherPacket : IFirearmPacket
 {
-    private ToggleLauncherPacket()
-    {
-
-    }
-
-    public static ToggleLauncherPacket FromValue()
-    {
-        return FirearmSubPacketPoolManager.Instance.GetPacket<ToggleLauncherPacket>(EFirearmSubPacketType.ToggleLauncher);
-    }
-
-    public static ToggleLauncherPacket CreateInstance()
-    {
-        return new();
-    }
-
-    public void Execute(FikaPlayer player)
+    public readonly void Execute(FikaPlayer player)
     {
         if (player.HandsController is ObservedFirearmController controller)
         {
@@ -29,18 +13,10 @@ public sealed class ToggleLauncherPacket : IPoolSubPacket
         }
     }
 
-    public void Serialize(NetDataWriter writer)
+    public readonly void Serialize(NetDataWriter writer)
     {
         // do nothing
     }
 
-    public void Deserialize(NetDataReader reader)
-    {
-        // do nothing
-    }
-
-    public void Dispose()
-    {
-        // do nothing
-    }
+    public EFirearmPacketType Type => EFirearmPacketType.ToggleLauncher;
 }

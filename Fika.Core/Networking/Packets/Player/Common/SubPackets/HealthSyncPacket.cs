@@ -9,8 +9,10 @@ using static EFT.HealthSystem.SyncHealthPacket.SyncAddEffect;
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
-public readonly struct HealthSyncPacket
+public readonly struct HealthSyncPacket : IPlayerPacket
 {
+    public EPlayerPacketType Type => EPlayerPacketType.HealthSync;
+
     public HealthSyncPacket(SyncHealthPacket value)
     {
         Packet = value;
@@ -224,7 +226,7 @@ public readonly struct HealthSyncPacket
     public readonly EBodyPart BodyPart;
     public readonly CorpseSyncPackets CorpseSyncPacket;
 
-    public readonly void Execute(FikaPlayer player = null)
+    public readonly void Execute(FikaPlayer player)
     {
         if (player is ObservedPlayer observedPlayer)
         {

@@ -4,8 +4,10 @@ using Fika.Core.Main.Players;
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
-public readonly struct StationaryPacket
+public readonly struct StationaryPacket : IPlayerPacket
 {
+    public EPlayerPacketType Type => EPlayerPacketType.Stationary;
+
     public StationaryPacket(EStationaryCommand command, string id = null)
     {
         Command = command;
