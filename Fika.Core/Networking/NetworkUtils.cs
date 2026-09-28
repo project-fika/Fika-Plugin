@@ -2,6 +2,7 @@
 using System.Net;
 using System.Net.Sockets;
 using BitPacking;
+using EFT;
 using EFT.Vehicle;
 using Fika.Core.Networking.LZ4;
 using Fika.Core.Networking.Packets.FirearmController;
@@ -52,6 +53,12 @@ public static class NetworkUtils
         return result;
     }
 
+    /// <summary>
+    /// Formats a timestamp and counter into a 24-character hexadecimal <see cref="MongoID"/> string.
+    /// </summary>
+    /// <param name="timeStamp">The Unix timestamp.</param>
+    /// <param name="counter">The incrementing counter value.</param>
+    /// <returns>A 24-character lowercase hexadecimal string.</returns>
     public static string FormatMongoId(uint timeStamp, ulong counter)
     {
         return string.Create(24, (timeStamp, counter), static (span, state) =>
