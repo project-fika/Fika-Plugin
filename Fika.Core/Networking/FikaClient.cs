@@ -575,7 +575,8 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
         var netId = reader.GetInt();
         if (!_coopHandler.Players.TryGetValue(netId, out var player))
         {
-            _logger.LogWarning($"FikaClient::HandleFirearmPacket: Received FirearmPacket, but there was no player with id {netId}");
+            var type = reader.GetEnum<EFirearmPacketType>();
+            _logger.LogWarning($"FikaClient::HandleFirearmPacket: Received FirearmPacket, but there was no player with id {netId} for packet type {type}");
             return;
         }
 
@@ -685,7 +686,8 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
         var netId = reader.GetInt();
         if (!_coopHandler.Players.TryGetValue(netId, out var player))
         {
-            _logger.LogWarning($"FikaClient::HandlePlayerPacket: Received PlayerPacket, but there was no player with id {netId}");
+            var type = reader.GetEnum<EPlayerPacketType>();
+            _logger.LogWarning($"FikaClient::HandlePlayerPacket: Received PlayerPacket, but there was no player with id {netId} for packet type {type}");
             return;
         }
 
