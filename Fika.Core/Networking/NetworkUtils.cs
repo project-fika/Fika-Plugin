@@ -54,7 +54,7 @@ public static class NetworkUtils
 
     public static string FormatMongoId(uint timeStamp, ulong counter)
     {
-        return string.Create(24, (timeStamp, counter), (span, state) =>
+        return string.Create(24, (timeStamp, counter), static (span, state) =>
         {
             state.timeStamp.TryFormat(span[..8], out _, "x8");
             state.counter.TryFormat(span[8..], out _, "x16");
