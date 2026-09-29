@@ -494,7 +494,7 @@ public class FikaClientFirearmController : Player.FirearmController
 
     private void SendAbortReloadPacket(int amount)
     {
-        var packet = new ReloadWithAmmoPacket(EReloadWithAmmoStatus.AbortReload, amount);
+        var packet = new ReloadWithAmmoPacket(EReloadWithAmmoStatus.AbortReload);
         _fikaPlayer.PacketSender.NetworkManager.SendFirearmPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
     }
 
@@ -515,7 +515,7 @@ public class FikaClientFirearmController : Player.FirearmController
     {
         if (_fikaPlayer.HealthController.IsAlive)
         {
-            var packet = new ReloadWithAmmoPacket(EReloadWithAmmoStatus.EndReload, amount);
+            var packet = new ReloadWithAmmoPacket(EReloadWithAmmoStatus.EndReload);
             _fikaPlayer.PacketSender.NetworkManager.SendFirearmPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
         }
     }
@@ -683,7 +683,7 @@ public class FikaClientFirearmController : Player.FirearmController
             if (_fikaPlayer.HealthController.IsAlive)
             {
                 var packet = new CylinderMagPacket(EReloadWithAmmoStatus.StartReload,
-                    _cylinderMagazine.CurrentCamoraIndex, 0, true,
+                    _cylinderMagazine.CurrentCamoraIndex, true,
                     _coopClientFirearmController.Item.CylinderHammerClosed, _ammoIds);
                 _fikaPlayer.PacketSender.NetworkManager.SendFirearmPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
             }

@@ -764,11 +764,12 @@ public sealed class ObservedFirearmController : FirearmController
         _boltActionReload = true;
     }
 
-    public List<Ammo> FindAmmoByIds(string[] ammoIds)
+    public List<Ammo> FindAmmoByIds(string[] ammoIds, int count)
     {
         _preallocatedAmmoList.Clear();
-        foreach (var id in ammoIds)
+        for (var i = 0; i < count; i++)
         {
+            var id = ammoIds[i];
             var gstruct = _player.FindItemById(id);
             if (gstruct.Succeeded && gstruct.Value is Ammo bulletClass)
             {

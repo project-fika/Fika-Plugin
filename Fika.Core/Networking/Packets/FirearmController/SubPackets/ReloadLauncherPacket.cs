@@ -1,4 +1,6 @@
-﻿using EFT.InventoryLogic;
+﻿using System;
+using System.Buffers;
+using EFT.InventoryLogic;
 using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
 
@@ -6,10 +8,17 @@ namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
 public readonly struct ReloadLauncherPacket : IFirearmPacket
 {
-    public ReloadLauncherPacket(bool reload, string[] ammoIds)
+    public readonly ushort AmmoCount;
+    public readonly string[] AmmoIds;
+    public readonly bool Reload;
+
+    public EFirearmPacketType Type => EFirearmPacketType.ReloadLauncher;
+
+    public ReloadLauncherPacket(bool reload, string[] ammoIds = null)
     {
         Reload = reload;
-        AmmoIds = ammoIds;
+        AmmoCount = (ushort)(ammoIds?.Length ?? 0);
+        AmmoIds = ammoIds ?? [];
     }
 
     public ReloadLauncherPacket(NetDataReader reader)
@@ -17,21 +26,45 @@ public readonly struct ReloadLauncherPacket : IFirearmPacket
         Reload = reader.GetBool();
         if (Reload)
         {
-            AmmoIds = reader.GetStringArray();
+            AmmoCount = reader.GetUShort();
+            if (AmmoCount > 0)
+            {
+                AmmoIds = ArrayPool<string>.Shared.Rent(AmmoCount);
+                for (var i = 0; i < AmmoCount; i++)
+                {
+                    AmmoIds[i] = reader.GetString();
+                }
+            }
+            else
+            {
+                AmmoIds = [];
+            }
+        }
+        else
+        {
+            AmmoCount = 0;
+            AmmoIds = [];
         }
     }
 
-    public readonly string[] AmmoIds;
-    public readonly bool Reload;
-
     public readonly void Execute(FikaPlayer player)
     {
-        if (player.HandsController is ObservedFirearmController controller)
+        try
         {
-            var ammo = controller.FindAmmoByIds(AmmoIds);
-            AmmoPack ammoPack = new(ammo);
-            controller.FastForwardCurrentState();
-            controller.ReloadGrenadeLauncher(ammoPack, null);
+            if (player.HandsController is ObservedFirearmController controller)
+            {
+                var ammo = controller.FindAmmoByIds(AmmoIds, AmmoCount);
+                AmmoPack ammoPack = new(ammo);
+                controller.FastForwardCurrentState();
+                controller.ReloadGrenadeLauncher(ammoPack, null);
+            }
+        }
+        finally
+        {
+            if (AmmoCount > 0)
+            {
+                ArrayPool<string>.Shared.Return(AmmoIds, clearArray: true);
+            }
         }
     }
 
@@ -40,9 +73,11 @@ public readonly struct ReloadLauncherPacket : IFirearmPacket
         writer.Put(Reload);
         if (Reload)
         {
-            writer.PutArray(AmmoIds);
+            writer.Put(AmmoCount);
+            for (var i = 0; i < AmmoCount; i++)
+            {
+                writer.Put(AmmoIds[i]);
+            }
         }
     }
-
-    public EFirearmPacketType Type => EFirearmPacketType.ReloadLauncher;
 }
