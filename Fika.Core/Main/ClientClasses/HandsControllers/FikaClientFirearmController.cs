@@ -534,18 +534,18 @@ public class FikaClientFirearmController : Player.FirearmController
             base.SetTriggerPressed(pressed);
             if (ReloadAborted && !bool_)
             {
-                coopClientFirearmController.SendAbortReloadPacket(AmmoToLoadIntoMag);
+                _coopClientFirearmController.SendAbortReloadPacket(AmmoToLoadIntoMag);
             }
         }
 
         public override void SwitchToIdle()
         {
-            coopClientFirearmController.SendEndReloadPacket(AmmoToLoadIntoMag);
+            _coopClientFirearmController.SendEndReloadPacket(AmmoToLoadIntoMag);
             EndReload();
             base.SwitchToIdle();
         }
 
-        private readonly FikaClientFirearmController coopClientFirearmController = (FikaClientFirearmController)controller;
+        private readonly FikaClientFirearmController _coopClientFirearmController = (FikaClientFirearmController)controller;
     }
 
     private class AmmoPackReloadInternalOneChamberOperation(Player.FirearmController controller) : Player.FirearmController.ReloadInternalMagOperation(controller)
