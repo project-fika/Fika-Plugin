@@ -1,4 +1,5 @@
-﻿using EFT;
+﻿using System;
+using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
@@ -58,7 +59,7 @@ public readonly struct ReloadMagPacket : IFirearmPacket
             {
                 gridItemAddress = player.InventoryController.ToItemAddress(Descriptor);
             }
-            catch (HTTPNetworkException exception)
+            catch (Exception exception)
             {
                 FikaGlobals.LogError(exception);
             }
