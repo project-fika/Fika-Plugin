@@ -120,15 +120,15 @@ public class FikaClientFirearmController : Player.FirearmController
     {
         if (Item is RocketLauncher)
         {
-            return new Player.FirearmController.RocketLauncherFire(this);
+            return new RocketLauncherFire(this);
         }
         if (Item.IsFlareGun)
         {
-            return new Player.FirearmController.FlareGunFire(this);
+            return new FlareGunFire(this);
         }
         if (Item.IsOneOff)
         {
-            return new Player.FirearmController.OneOffGunFire(this);
+            return new OneOffGunFire(this);
         }
         if (Item.ReloadMode == Weapon.EReloadMode.OnlyBarrel)
         {
@@ -136,11 +136,11 @@ public class FikaClientFirearmController : Player.FirearmController
         }
         if (Item is Revolver)
         {
-            return new Player.FirearmController.FireCylinderMagOperation(this);
+            return new FireCylinderMagOperation(this);
         }
         if (!Item.BoltAction)
         {
-            return new Player.FirearmController.FireOperation(this);
+            return new FireOperation(this);
         }
         return new DefaultFireOperation(this);
     }
