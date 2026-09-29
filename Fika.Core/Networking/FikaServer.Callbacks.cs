@@ -435,14 +435,6 @@ public sealed partial class FikaServer
         peer.Tag = profile.Info.MainProfileNickname;
     }
 
-    private void OnPingPacketReceived(PingPacket packet, NetPeer peer)
-    {
-        if (FikaPlugin.Instance.Settings.UsePingSystem.Value && !FikaBackendUtils.IsHeadless)
-        {
-            PingFactory.ReceivePing(packet.PingLocation, packet.PingType, packet.PingColor, packet.Nickname, packet.LocaleId);
-        }
-    }
-
     private void OnBotStatePacketReceived(BotStatePacket packet, NetPeer peer)
     {
         switch (packet.Type)

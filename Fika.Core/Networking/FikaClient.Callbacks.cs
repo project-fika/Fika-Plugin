@@ -395,14 +395,6 @@ public sealed partial class FikaClient
         _logger.LogWarning("OnLoadingProfilePacketReceived: Profiles was null!");
     }
 
-    private void OnPingPacketReceived(PingPacket packet)
-    {
-        if (FikaPlugin.Instance.Settings.UsePingSystem.Value)
-        {
-            PingFactory.ReceivePing(packet.PingLocation, packet.PingType, packet.PingColor, packet.Nickname, packet.LocaleId);
-        }
-    }
-
     private void OnBotStatePacketReceived(BotStatePacket packet)
     {
         if (_coopHandler == null)
