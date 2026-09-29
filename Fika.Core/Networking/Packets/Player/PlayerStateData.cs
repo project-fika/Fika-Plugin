@@ -103,7 +103,7 @@ public readonly struct PlayerStateData
     /// <summary>1 byte, offset 39</summary>
     private readonly byte _velocityDirZPacked;
 
-    public PhysicalBase.StaminaStruct Physical
+    public readonly PhysicalBase.StaminaStruct Physical
     {
         get
         {
@@ -116,7 +116,7 @@ public readonly struct PlayerStateData
         }
     }
 
-    public Vector3 Velocity
+    public readonly Vector3 Velocity
     {
         get
         {
@@ -126,7 +126,7 @@ public readonly struct PlayerStateData
         }
     }
 
-    public Vector2 HeadRotation
+    public readonly Vector2 HeadRotation
     {
         get
         {
@@ -135,7 +135,7 @@ public readonly struct PlayerStateData
         }
     }
 
-    public Vector2 Rotation
+    public readonly Vector2 Rotation
     {
         get
         {
@@ -144,7 +144,7 @@ public readonly struct PlayerStateData
         }
     }
 
-    public Vector2 MovementDirection
+    public readonly Vector2 MovementDirection
     {
         get
         {
@@ -153,7 +153,7 @@ public readonly struct PlayerStateData
         }
     }
 
-    public float Tilt
+    public readonly float Tilt
     {
         get
         {
@@ -161,7 +161,7 @@ public readonly struct PlayerStateData
         }
     }
 
-    public float MovementSpeed
+    public readonly float MovementSpeed
     {
         get
         {
@@ -169,7 +169,7 @@ public readonly struct PlayerStateData
         }
     }
 
-    public float SprintSpeed
+    public readonly float SprintSpeed
     {
         get
         {
@@ -177,7 +177,7 @@ public readonly struct PlayerStateData
         }
     }
 
-    public float PoseLevel
+    public readonly float PoseLevel
     {
         get
         {
@@ -185,7 +185,7 @@ public readonly struct PlayerStateData
         }
     }
 
-    public float WeaponOverlap
+    public readonly float WeaponOverlap
     {
         get
         {
@@ -193,7 +193,7 @@ public readonly struct PlayerStateData
         }
     }
 
-    public int Step
+    public readonly int Step
     {
         get
         {
@@ -201,7 +201,7 @@ public readonly struct PlayerStateData
         }
     }
 
-    public int Blindfire
+    public readonly int Blindfire
     {
         get
         {
