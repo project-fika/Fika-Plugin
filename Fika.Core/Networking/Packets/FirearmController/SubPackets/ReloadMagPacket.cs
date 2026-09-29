@@ -1,5 +1,4 @@
-﻿using System;
-using EFT;
+﻿using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
@@ -33,54 +32,40 @@ public readonly struct ReloadMagPacket : IFirearmPacket
 
     public readonly void Execute(FikaPlayer player)
     {
-        if (player.HandsController is ObservedFirearmController controller)
+        if (player.HandsController is not ObservedFirearmController controller)
         {
-            Magazine magazine = null;
+            return;
+        }
+
+        var result = player.FindItemById(MagId);
+        if (!result.Succeeded)
+        {
+            FikaGlobals.LogError(result.Error.ToString());
+            return;
+        }
+
+        if (result.Value is not Magazine magazine)
+        {
+            var itemTypeName = result.Value?.GetType().Name ?? "null";
+            FikaGlobals.LogError($"ReloadMagPacket: Item was not MagazineClass, it was {itemTypeName}");
+            return;
+        }
+
+        ItemAddress gridItemAddress = null;
+        if (Descriptor != null)
+        {
             try
             {
-                var result = player.FindItemById(MagId);
-                if (!result.Succeeded)
-                {
-                    FikaGlobals.LogError(result.Error.ToString());
-                    return;
-                }
-                if (result.Value is Magazine magazineClass)
-                {
-                    magazine = magazineClass;
-                }
-                else
-                {
-                    FikaGlobals.LogError($"ReloadMagPacket: Item was not MagazineClass, it was {result.Value.GetType()}");
-                }
+                gridItemAddress = player.InventoryController.ToItemAddress(Descriptor);
             }
-            catch (Exception ex)
+            catch (HTTPNetworkException exception)
             {
-                FikaGlobals.LogError(ex);
-                FikaGlobals.LogError($"ReloadMagPacket: There is no item {MagId} in profile {player.ProfileId}");
-                throw;
-            }
-            ItemAddress gridItemAddress = null;
-            if (Descriptor != null)
-            {
-                try
-                {
-                    gridItemAddress = player.InventoryController.ToItemAddress(Descriptor);
-                }
-                catch (HTTPNetworkException exception2)
-                {
-                    FikaGlobals.LogError(exception2);
-                }
-            }
-            if (magazine != null)
-            {
-                controller.FastForwardCurrentState();
-                controller.ReloadMag(magazine, gridItemAddress, null);
-            }
-            else
-            {
-                FikaGlobals.LogError($"ReloadMagPacket: final variables were null! Mag: {magazine}, Address: {gridItemAddress}");
+                FikaGlobals.LogError(exception);
             }
         }
+
+        controller.FastForwardCurrentState();
+        controller.ReloadMag(magazine, gridItemAddress, null);
     }
 
     public readonly void Serialize(NetDataWriter writer)
