@@ -555,37 +555,32 @@ public sealed partial class FikaClient
     {
         switch (packet.Status)
         {
-            case EFT.BufferZone.EBufferZoneData.Availability:
-            case EFT.BufferZone.EBufferZoneData.DisableByZryachiyDead:
-            case EFT.BufferZone.EBufferZoneData.DisableByPlayerDead:
+            case EBufferZoneData.Availability:
+            case EBufferZoneData.DisableByZryachiyDead:
+            case EBufferZoneData.DisableByPlayerDead:
                 {
                     BufferZoneController.Instance.SetInnerZoneAvailabilityStatus(packet.Available, packet.Status);
                 }
                 break;
-            case EFT.BufferZone.EBufferZoneData.PlayerAccessStatus:
+            case EBufferZoneData.PlayerAccessStatus:
                 {
                     BufferZoneController.Instance.SetPlayerAccessStatus(packet.ProfileId, packet.Available);
                 }
                 break;
-            case EFT.BufferZone.EBufferZoneData.PlayerInZoneStatusChange:
+            case EBufferZoneData.PlayerInZoneStatusChange:
                 {
                     BufferZoneController.Instance.SetPlayerInZoneStatus(packet.ProfileId, packet.Available);
                 }
-                break;
-            default:
                 break;
         }
     }
 
     private void OnFlareSuccessPacketReceived(FlareSuccessPacket packet)
     {
-        if (Singleton<GameWorld>.Instance.MainPlayer.ProfileId == packet.ProfileId)
+        if (Singleton<GameWorld>.Instance.MainPlayer.ProfileId == packet.ProfileId && !packet.Success)
         {
-            if (!packet.Success)
-            {
-                NotificationManager.DisplayNotification(new CustomNotification("AirplaneDelayMessage".Localized(null),
-                            ENotificationDurationType.Default, ENotificationIconType.Default, null));
-            }
+            NotificationManager.DisplayNotification(new CustomNotification("AirplaneDelayMessage".Localized(null),
+                        ENotificationDurationType.Default, ENotificationIconType.Default, null));
         }
     }
 
@@ -814,12 +809,9 @@ public sealed partial class FikaClient
             return;
         }
 
-        if (MyPlayer.HealthController.IsAlive)
+        if (MyPlayer.HealthController.IsAlive && MyPlayer.QuestController is ClientSharedQuestController sharedQuestController)
         {
-            if (MyPlayer.QuestController is ClientSharedQuestController sharedQuestController)
-            {
-                sharedQuestController.ReceiveQuestDropItemPacket(packet);
-            }
+            sharedQuestController.ReceiveQuestDropItemPacket(packet);
         }
     }
 
@@ -830,12 +822,9 @@ public sealed partial class FikaClient
             return;
         }
 
-        if (MyPlayer.HealthController.IsAlive)
+        if (MyPlayer.HealthController.IsAlive && MyPlayer.QuestController is ClientSharedQuestController sharedQuestController)
         {
-            if (MyPlayer.QuestController is ClientSharedQuestController sharedQuestController)
-            {
-                sharedQuestController.ReceiveQuestItemPacket(packet);
-            }
+            sharedQuestController.ReceiveQuestItemPacket(packet);
         }
     }
 
@@ -846,12 +835,9 @@ public sealed partial class FikaClient
             return;
         }
 
-        if (MyPlayer.HealthController.IsAlive)
+        if (MyPlayer.HealthController.IsAlive && MyPlayer.QuestController is ClientSharedQuestController sharedQuestController)
         {
-            if (MyPlayer.QuestController is ClientSharedQuestController sharedQuestController)
-            {
-                sharedQuestController.ReceiveQuestPacket(packet);
-            }
+            sharedQuestController.ReceiveQuestPacket(packet);
         }
     }
 
