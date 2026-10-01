@@ -420,7 +420,7 @@ public static class FikaSerializationExtensions
         };
 
         id._stringID = NetworkUtils.FormatMongoId(id._timeStamp, id._counter);
-        id.Init();
+        id.InitMongoID();
 
         return id;
     }
@@ -1243,50 +1243,7 @@ public static class FikaSerializationExtensions
         var ticks = reader.GetLong();
         return new TimeSpan(ticks);
     }
-
-    public static void PutFirearmSubPacket(this NetDataWriter writer, ISubPacket packet, EFirearmSubPacketType type)
-    {
-        switch (type)
-        {
-            case EFirearmSubPacketType.ShotInfo:
-            case EFirearmSubPacketType.ChangeFireMode:
-            case EFirearmSubPacketType.ToggleAim:
-            case EFirearmSubPacketType.ToggleLightStates:
-            case EFirearmSubPacketType.ToggleScopeStates:
-            case EFirearmSubPacketType.ToggleInventory:
-            case EFirearmSubPacketType.LeftStanceChange:
-            case EFirearmSubPacketType.ReloadMag:
-            case EFirearmSubPacketType.QuickReloadMag:
-            case EFirearmSubPacketType.ReloadWithAmmo:
-            case EFirearmSubPacketType.CylinderMag:
-            case EFirearmSubPacketType.ReloadLauncher:
-            case EFirearmSubPacketType.ReloadBarrels:
-            case EFirearmSubPacketType.Grenade:
-            case EFirearmSubPacketType.CompassChange:
-            case EFirearmSubPacketType.Knife:
-            case EFirearmSubPacketType.FlareShot:
-            case EFirearmSubPacketType.RocketShot:
-            case EFirearmSubPacketType.RollCylinder:
-                packet.Serialize(writer);
-                break;
-
-            case EFirearmSubPacketType.ToggleLauncher:
-            case EFirearmSubPacketType.CancelGrenade:
-            case EFirearmSubPacketType.ReloadBoltAction:
-            case EFirearmSubPacketType.UnderbarrelSightingRangeUp:
-            case EFirearmSubPacketType.UnderbarrelSightingRangeDown:
-            case EFirearmSubPacketType.ToggleBipod:
-            case EFirearmSubPacketType.ExamineWeapon:
-            case EFirearmSubPacketType.CheckAmmo:
-            case EFirearmSubPacketType.CheckChamber:
-            case EFirearmSubPacketType.CheckFireMode:
-            case EFirearmSubPacketType.Loot:
-                break;
-            default:
-                FikaGlobals.LogError("Type was outside of bounds!");
-                break;
-        }
-    }
+    
     public static IRequestPacket GetRequestSubPacket(this NetDataReader reader, ERequestSubPacketType type)
     {
         switch (type)

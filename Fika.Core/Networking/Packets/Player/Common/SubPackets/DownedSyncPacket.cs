@@ -1,28 +1,15 @@
 ﻿using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
-using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
-public sealed class DownedSyncPacket : IPoolSubPacket
+public readonly struct DownedSyncPacket(bool downed) : IPlayerPacket
 {
-    private DownedSyncPacket() { }
+    public EPlayerPacketType Type => EPlayerPacketType.DownedSync;
 
-    public static DownedSyncPacket CreateInstance()
-    {
-        return new();
-    }
+    public readonly bool Downed = downed;
 
-    public bool Downed;
-
-    public static DownedSyncPacket FromValue(bool downed)
-    {
-        var packet = CommonSubPacketPoolManager.Instance.GetPacket<DownedSyncPacket>(ECommonSubPacketType.DownedSync);
-        packet.Downed = downed;
-        return packet;
-    }
-
-    public void Execute(FikaPlayer player = null)
+    public readonly void Execute(FikaPlayer player)
     {
         if (player is ObservedPlayer observedPlayer)
         {
@@ -33,18 +20,8 @@ public sealed class DownedSyncPacket : IPoolSubPacket
         FikaGlobals.LogError($"OnHealthSyncPacketReceived::Player with id {player.NetId} was not observed. Name: {player.Profile.GetCorrectedNickname()}");
     }
 
-    public void Deserialize(NetDataReader reader)
-    {
-        Downed = reader.GetBool();
-    }
-
-    public void Serialize(NetDataWriter writer)
+    public readonly void Serialize(NetDataWriter writer)
     {
         writer.Put(Downed);
-    }
-
-    public void Dispose()
-    {
-        Downed = default;
     }
 }

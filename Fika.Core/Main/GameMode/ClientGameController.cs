@@ -454,8 +454,8 @@ public class ClientGameController(IFikaGame game, EUpdateQueue updateQueue, Game
         {
             try // This is to allow clients to extract if they lose connection
             {
-                Singleton<IFikaNetworkManager>.Instance.SendGenericPacket(EGenericSubPacketType.ClientExtract,
-                    ClientExtract.FromValue(player.NetId), true);
+                var packet = new ClientExtractPacket(player.NetId);
+                Singleton<IFikaNetworkManager>.Instance.SendGenericPacket(in packet, DeliveryMethod.ReliableOrdered, true);
             }
             catch
             {

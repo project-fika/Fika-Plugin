@@ -3,34 +3,29 @@ using EFT;
 using EFT.Interactive;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
-using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
-public sealed class ContainerInteractionPacket : IPoolSubPacket
+public readonly struct ContainerInteractionPacket : IPlayerPacket
 {
-    private ContainerInteractionPacket()
-    {
+    public EPlayerPacketType Type => EPlayerPacketType.ContainerInteraction;
 
+    public ContainerInteractionPacket(string interactiveId, EInteractionType interactionType)
+    {
+        InteractiveId = interactiveId;
+        InteractionType = interactionType;
     }
 
-    public static ContainerInteractionPacket CreateInstance()
+    public ContainerInteractionPacket(NetDataReader reader)
     {
-        return new();
+        InteractiveId = reader.GetString();
+        InteractionType = reader.GetEnum<EInteractionType>();
     }
 
-    public static ContainerInteractionPacket FromValue(string interactiveId, EInteractionType interactionType)
-    {
-        var packet = CommonSubPacketPoolManager.Instance.GetPacket<ContainerInteractionPacket>(ECommonSubPacketType.ContainerInteraction);
-        packet.InteractiveId = interactiveId;
-        packet.InteractionType = interactionType;
-        return packet;
-    }
+    public readonly string InteractiveId;
+    public readonly EInteractionType InteractionType;
 
-    public string InteractiveId;
-    public EInteractionType InteractionType;
-
-    public void Execute(FikaPlayer player)
+    public readonly void Execute()
     {
         var lootableContainer = Singleton<GameWorld>.Instance.FindDoor(InteractiveId);
         if (lootableContainer != null)
@@ -47,21 +42,9 @@ public sealed class ContainerInteractionPacket : IPoolSubPacket
         }
     }
 
-    public void Serialize(NetDataWriter writer)
+    public readonly void Serialize(NetDataWriter writer)
     {
         writer.Put(InteractiveId);
         writer.PutEnum(InteractionType);
-    }
-
-    public void Deserialize(NetDataReader reader)
-    {
-        InteractiveId = reader.GetString();
-        InteractionType = reader.GetEnum<EInteractionType>();
-    }
-
-    public void Dispose()
-    {
-        InteractiveId = null;
-        InteractionType = default;
     }
 }

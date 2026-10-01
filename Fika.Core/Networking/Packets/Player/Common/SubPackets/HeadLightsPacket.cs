@@ -1,55 +1,20 @@
 ﻿using EFT;
 using Fika.Core.Main.Players;
-using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
-public sealed class HeadLightsPacket : IPoolSubPacket
+public readonly struct HeadLightsPacket : IPlayerPacket
 {
-    private HeadLightsPacket()
-    {
+    public EPlayerPacketType Type => EPlayerPacketType.HeadLights;
 
+    public HeadLightsPacket(int amount, bool isSilent, LightsState[] lightStates)
+    {
+        Amount = amount;
+        IsSilent = isSilent;
+        LightStates = lightStates;
     }
 
-    public static HeadLightsPacket CreateInstance()
-    {
-        return new();
-    }
-
-    public static HeadLightsPacket FromValue(int amount, bool isSilent, LightsState[] lightStates)
-    {
-        var packet = CommonSubPacketPoolManager.Instance.GetPacket<HeadLightsPacket>(ECommonSubPacketType.HeadLights);
-        packet.Amount = amount;
-        packet.IsSilent = isSilent;
-        packet.LightStates = lightStates;
-        return packet;
-    }
-
-    public int Amount;
-    public bool IsSilent;
-    public LightsState[] LightStates;
-
-    public void Execute(FikaPlayer player)
-    {
-        player.HandleHeadLightsPacket(this);
-    }
-
-    public void Serialize(NetDataWriter writer)
-    {
-        writer.Put(Amount);
-        writer.Put(IsSilent);
-        if (Amount > 0)
-        {
-            for (var i = 0; i < Amount; i++)
-            {
-                writer.Put(LightStates[i].Id);
-                writer.Put(LightStates[i].IsActive);
-                writer.Put(LightStates[i].LightMode);
-            }
-        }
-    }
-
-    public void Deserialize(NetDataReader reader)
+    public HeadLightsPacket(NetDataReader reader)
     {
         Amount = reader.GetInt();
         IsSilent = reader.GetBool();
@@ -68,10 +33,27 @@ public sealed class HeadLightsPacket : IPoolSubPacket
         }
     }
 
-    public void Dispose()
+    public readonly int Amount;
+    public readonly bool IsSilent;
+    public readonly LightsState[] LightStates;
+
+    public readonly void Execute(FikaPlayer player)
     {
-        Amount = 0;
-        IsSilent = false;
-        LightStates = null;
+        player.HandleHeadLightsPacket(this);
+    }
+
+    public readonly void Serialize(NetDataWriter writer)
+    {
+        writer.Put(Amount);
+        writer.Put(IsSilent);
+        if (Amount > 0)
+        {
+            for (var i = 0; i < Amount; i++)
+            {
+                writer.Put(LightStates[i].Id);
+                writer.Put(LightStates[i].IsActive);
+                writer.Put(LightStates[i].LightMode);
+            }
+        }
     }
 }

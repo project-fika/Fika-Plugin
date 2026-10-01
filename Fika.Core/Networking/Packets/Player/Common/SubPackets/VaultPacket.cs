@@ -1,64 +1,25 @@
 ﻿using EFT.Vaulting;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
-using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
-public sealed class VaultPacket : IPoolSubPacket
+public readonly struct VaultPacket : IPlayerPacket
 {
-    private VaultPacket()
-    {
+    public EPlayerPacketType Type => EPlayerPacketType.Vault;
 
+    public VaultPacket(EVaultingStrategy vaultingStrategy, Vector3 vaultingPoint, float vaultingHeight, float vaultingLength, float vaultingSpeed, float behindObstacleHeight, float absoluteForwardVelocity)
+    {
+        VaultingStrategy = vaultingStrategy;
+        VaultingPoint = vaultingPoint;
+        VaultingHeight = vaultingHeight;
+        VaultingLength = vaultingLength;
+        VaultingSpeed = vaultingSpeed;
+        BehindObstacleHeight = behindObstacleHeight;
+        AbsoluteForwardVelocity = absoluteForwardVelocity;
     }
 
-    public static VaultPacket CreateInstance()
-    {
-        return new();
-    }
-
-    public static VaultPacket FromValue(EVaultingStrategy vaultingStrategy, Vector3 vaultingPoint, float vaultingHeight, float vaultingLength, float vaultingSpeed, float behindObstacleHeight, float absoluteForwardVelocity)
-    {
-        var packet = CommonSubPacketPoolManager.Instance.GetPacket<VaultPacket>(ECommonSubPacketType.Vault);
-        packet.VaultingStrategy = vaultingStrategy;
-        packet.VaultingPoint = vaultingPoint;
-        packet.VaultingHeight = vaultingHeight;
-        packet.VaultingLength = vaultingLength;
-        packet.VaultingSpeed = vaultingSpeed;
-        packet.BehindObstacleHeight = behindObstacleHeight;
-        packet.AbsoluteForwardVelocity = absoluteForwardVelocity;
-        return packet;
-    }
-
-    public EVaultingStrategy VaultingStrategy;
-    public Vector3 VaultingPoint;
-    public float VaultingHeight;
-    public float VaultingLength;
-    public float VaultingSpeed;
-    public float BehindObstacleHeight;
-    public float AbsoluteForwardVelocity;
-
-    public void Execute(FikaPlayer player)
-    {
-        // A headless client can get stuck in permanent high-velocity states due to vaulting, skip it
-        if (!FikaBackendUtils.IsHeadless)
-        {
-            player.DoObservedVault(this);
-        }
-    }
-
-    public void Serialize(NetDataWriter writer)
-    {
-        writer.PutEnum(VaultingStrategy);
-        writer.PutUnmanaged(VaultingPoint);
-        writer.Put(VaultingHeight);
-        writer.Put(VaultingLength);
-        writer.Put(VaultingSpeed);
-        writer.Put(BehindObstacleHeight);
-        writer.Put(AbsoluteForwardVelocity);
-    }
-
-    public void Deserialize(NetDataReader reader)
+    public VaultPacket(NetDataReader reader)
     {
         VaultingStrategy = reader.GetEnum<EVaultingStrategy>();
         VaultingPoint = reader.GetUnmanaged<Vector3>();
@@ -69,14 +30,31 @@ public sealed class VaultPacket : IPoolSubPacket
         AbsoluteForwardVelocity = reader.GetFloat();
     }
 
-    public void Dispose()
+    public readonly EVaultingStrategy VaultingStrategy;
+    public readonly Vector3 VaultingPoint;
+    public readonly float VaultingHeight;
+    public readonly float VaultingLength;
+    public readonly float VaultingSpeed;
+    public readonly float BehindObstacleHeight;
+    public readonly float AbsoluteForwardVelocity;
+
+    public readonly void Execute(FikaPlayer player)
     {
-        VaultingStrategy = default;
-        VaultingPoint = default;
-        VaultingHeight = 0f;
-        VaultingLength = 0f;
-        VaultingSpeed = 0f;
-        BehindObstacleHeight = 0f;
-        AbsoluteForwardVelocity = 0f;
+        // a headless client can get stuck in permanent high-velocity states due to vaulting, skip it
+        if (!FikaBackendUtils.IsHeadless)
+        {
+            player.DoObservedVault(this);
+        }
+    }
+
+    public readonly void Serialize(NetDataWriter writer)
+    {
+        writer.PutEnum(VaultingStrategy);
+        writer.PutUnmanaged(VaultingPoint);
+        writer.Put(VaultingHeight);
+        writer.Put(VaultingLength);
+        writer.Put(VaultingSpeed);
+        writer.Put(BehindObstacleHeight);
+        writer.Put(AbsoluteForwardVelocity);
     }
 }

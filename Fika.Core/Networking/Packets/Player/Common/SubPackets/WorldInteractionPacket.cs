@@ -5,39 +5,39 @@ using EFT.Interactive;
 using EFT.InventoryLogic;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
-using Fika.Core.Networking.Pooling;
 using static Fika.Core.Main.Players.FikaPlayer;
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
-public sealed class WorldInteractionPacket : IPoolSubPacket
+public readonly struct WorldInteractionPacket : IPlayerPacket
 {
-    private WorldInteractionPacket()
-    {
+    public EPlayerPacketType Type => EPlayerPacketType.WorldInteraction;
 
+    public WorldInteractionPacket(string interactiveId, EInteractionType interactionType, EInteractionStage interactionStage, string itemId = null)
+    {
+        InteractiveId = interactiveId;
+        InteractionType = interactionType;
+        InteractionStage = interactionStage;
+        ItemId = itemId;
     }
 
-    public static WorldInteractionPacket CreateInstance()
+    public WorldInteractionPacket(NetDataReader reader)
     {
-        return new();
+        InteractiveId = reader.GetString();
+        InteractionType = reader.GetEnum<EInteractionType>();
+        InteractionStage = reader.GetEnum<EInteractionStage>();
+        if (InteractionType == EInteractionType.Unlock)
+        {
+            ItemId = reader.GetString();
+        }
     }
 
-    public static WorldInteractionPacket FromValue(string interactiveId, EInteractionType interactionType, EInteractionStage interactionStage, string itemId = null)
-    {
-        var packet = CommonSubPacketPoolManager.Instance.GetPacket<WorldInteractionPacket>(ECommonSubPacketType.WorldInteraction);
-        packet.InteractiveId = interactiveId;
-        packet.InteractionType = interactionType;
-        packet.InteractionStage = interactionStage;
-        packet.ItemId = itemId;
-        return packet;
-    }
+    public readonly string InteractiveId;
+    public readonly EInteractionType InteractionType;
+    public readonly EInteractionStage InteractionStage;
+    public readonly string ItemId;
 
-    public string InteractiveId;
-    public EInteractionType InteractionType;
-    public EInteractionStage InteractionStage;
-    public string ItemId;
-
-    public void Execute(FikaPlayer player)
+    public readonly void Execute(FikaPlayer player)
     {
         var worldInteractiveObject = Singleton<GameWorld>.Instance.FindDoor(InteractiveId);
         if (worldInteractiveObject != null)
@@ -103,10 +103,10 @@ public sealed class WorldInteractionPacket : IPoolSubPacket
         }
     }
 
-    private bool GetKeyHandler(FikaPlayer player, WorldInteractiveObject worldInteractiveObject, out KeyHandler keyHandler)
+    private readonly bool GetKeyHandler(FikaPlayer player, WorldInteractiveObject worldInteractiveObject, out KeyHandler keyHandler)
     {
         keyHandler = new(player);
-        if (string.IsNullOrEmpty(ItemId))
+        if (string.IsNullOrWhiteSpace(ItemId))
         {
             FikaGlobals.LogError("WorldInteractionPacket: ItemID was null!");
             return false;
@@ -140,7 +140,7 @@ public sealed class WorldInteractionPacket : IPoolSubPacket
         return true;
     }
 
-    public void Serialize(NetDataWriter writer)
+    public readonly void Serialize(NetDataWriter writer)
     {
         writer.Put(InteractiveId);
         writer.PutEnum(InteractionType);
@@ -149,24 +149,5 @@ public sealed class WorldInteractionPacket : IPoolSubPacket
         {
             writer.Put(ItemId);
         }
-    }
-
-    public void Deserialize(NetDataReader reader)
-    {
-        InteractiveId = reader.GetString();
-        InteractionType = reader.GetEnum<EInteractionType>();
-        InteractionStage = reader.GetEnum<EInteractionStage>();
-        if (InteractionType == EInteractionType.Unlock)
-        {
-            ItemId = reader.GetString();
-        }
-    }
-
-    public void Dispose()
-    {
-        InteractiveId = null;
-        InteractionType = default;
-        InteractionStage = default;
-        ItemId = null;
     }
 }

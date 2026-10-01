@@ -50,9 +50,8 @@ public sealed class BotHealthController(Profile.HealthInfo healthInfo, Player pl
 
         if (ShouldSend(packet.SyncType))
         {
-            _fikaBot.CommonPacket.Type = ECommonSubPacketType.HealthSync;
-            _fikaBot.CommonPacket.SubPacket = HealthSyncPacket.FromValue(packet);
-            _fikaBot.PacketSender.NetworkManager.SendNetReusable(ref _fikaBot.CommonPacket, DeliveryMethod.ReliableOrdered, true);
+            var syncPacket = new HealthSyncPacket(packet);
+            _fikaBot.PacketSender.NetworkManager.SendPlayerPacket(in syncPacket, _fikaBot.NetId, DeliveryMethod.ReliableOrdered, true);
         }
     }
 }

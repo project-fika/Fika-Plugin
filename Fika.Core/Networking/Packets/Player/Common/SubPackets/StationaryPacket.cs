@@ -1,50 +1,20 @@
 ﻿using Comfort.Common;
 using EFT;
 using Fika.Core.Main.Players;
-using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
-public sealed class StationaryPacket : IPoolSubPacket
+public readonly struct StationaryPacket : IPlayerPacket
 {
-    private StationaryPacket()
-    {
+    public EPlayerPacketType Type => EPlayerPacketType.Stationary;
 
+    public StationaryPacket(EStationaryCommand command, string id = null)
+    {
+        Command = command;
+        Id = id;
     }
 
-    public static StationaryPacket CreateInstance()
-    {
-        return new();
-    }
-
-    public static StationaryPacket FromValue(EStationaryCommand command, string id = null)
-    {
-        var packet = CommonSubPacketPoolManager.Instance.GetPacket<StationaryPacket>(ECommonSubPacketType.Stationary);
-        packet.Command = command;
-        packet.Id = id;
-        return packet;
-    }
-
-    public EStationaryCommand Command;
-    public string Id;
-
-    public void Execute(FikaPlayer player)
-    {
-        var stationaryWeapon = Command == EStationaryCommand.Occupy
-            ? Singleton<GameWorld>.Instance.FindStationaryWeapon(Id) : null;
-        player.ObservedStationaryInteract(stationaryWeapon, (StationaryWeaponPacket.EStationaryCommand)Command);
-    }
-
-    public void Serialize(NetDataWriter writer)
-    {
-        writer.PutEnum(Command);
-        if (Command == EStationaryCommand.Occupy)
-        {
-            writer.Put(Id);
-        }
-    }
-
-    public void Deserialize(NetDataReader reader)
+    public StationaryPacket(NetDataReader reader)
     {
         Command = reader.GetEnum<EStationaryCommand>();
         if (Command == EStationaryCommand.Occupy)
@@ -53,9 +23,22 @@ public sealed class StationaryPacket : IPoolSubPacket
         }
     }
 
-    public void Dispose()
+    public readonly EStationaryCommand Command;
+    public readonly string Id;
+
+    public readonly void Execute(FikaPlayer player)
     {
-        Command = default;
-        Id = null;
+        var stationaryWeapon = Command == EStationaryCommand.Occupy
+            ? Singleton<GameWorld>.Instance.FindStationaryWeapon(Id) : null;
+        player.ObservedStationaryInteract(stationaryWeapon, (StationaryWeaponPacket.EStationaryCommand)Command);
+    }
+
+    public readonly void Serialize(NetDataWriter writer)
+    {
+        writer.PutEnum(Command);
+        if (Command == EStationaryCommand.Occupy)
+        {
+            writer.Put(Id);
+        }
     }
 }

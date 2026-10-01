@@ -1,78 +1,94 @@
-﻿using EFT.InventoryLogic;
+﻿using System.Buffers;
+using EFT.InventoryLogic;
 using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
-using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
-public sealed class ReloadWithAmmoPacket : IPoolSubPacket
+public readonly struct ReloadWithAmmoPacket : IFirearmPacket
 {
-    private ReloadWithAmmoPacket()
-    {
+    public readonly EReloadWithAmmoStatus Status;
+    public readonly ushort AmmoCount;
+    public readonly string[] AmmoIds;
 
+    public EFirearmPacketType Type => EFirearmPacketType.ReloadWithAmmo;
+
+    public ReloadWithAmmoPacket(EReloadWithAmmoStatus status, string[] ammoIds = null)
+    {
+        Status = status;
+        AmmoCount = (ushort)(ammoIds?.Length ?? 0);
+        AmmoIds = ammoIds ?? [];
     }
 
-    public static ReloadWithAmmoPacket FromValue(EReloadWithAmmoStatus status, int ammoLoadedToMag = 0, string[] ammoIds = null)
-    {
-        var packet = FirearmSubPacketPoolManager.Instance.GetPacket<ReloadWithAmmoPacket>(EFirearmSubPacketType.ReloadWithAmmo);
-        packet.Status = status;
-        packet.AmmoLoadedToMag = ammoLoadedToMag;
-        packet.AmmoIds = ammoIds;
-        return packet;
-    }
-
-    public static ReloadWithAmmoPacket CreateInstance()
-    {
-        return new();
-    }
-
-    public EReloadWithAmmoStatus Status;
-    public int AmmoLoadedToMag;
-    public string[] AmmoIds;
-
-    public void Execute(FikaPlayer player)
-    {
-        if (player.HandsController is ObservedFirearmController controller)
-        {
-            if (Status == EReloadWithAmmoStatus.AbortReload)
-            {
-                controller.CurrentOperation.SetTriggerPressed(true);
-            }
-
-            if (Status == EReloadWithAmmoStatus.StartReload)
-            {
-                var bullets = controller.FindAmmoByIds(AmmoIds);
-                AmmoPack ammoPack = new(bullets);
-                controller.FastForwardCurrentState();
-                controller.CurrentOperation.ReloadWithAmmo(ammoPack, null, null);
-            }
-        }
-    }
-
-    public void Serialize(NetDataWriter writer)
-    {
-        writer.PutEnum(Status);
-        if (Status == EReloadWithAmmoStatus.StartReload)
-        {
-            writer.PutArray(AmmoIds);
-        }
-        writer.Put(AmmoLoadedToMag);
-    }
-
-    public void Deserialize(NetDataReader reader)
+    public ReloadWithAmmoPacket(NetDataReader reader)
     {
         Status = reader.GetEnum<EReloadWithAmmoStatus>();
+
         if (Status == EReloadWithAmmoStatus.StartReload)
         {
-            AmmoIds = reader.GetStringArray();
+            AmmoCount = reader.GetUShort();
+
+            if (AmmoCount > 0)
+            {
+                AmmoIds = ArrayPool<string>.Shared.Rent(AmmoCount);
+                for (var i = 0; i < AmmoCount; i++)
+                {
+                    AmmoIds[i] = reader.GetString();
+                }
+            }
+            else
+            {
+                AmmoIds = [];
+            }
         }
-        AmmoLoadedToMag = reader.GetInt();
+        else
+        {
+            AmmoCount = 0;
+            AmmoIds = [];
+        }
     }
 
-    public void Dispose()
+    public readonly void Serialize(NetDataWriter writer)
     {
-        Status = EReloadWithAmmoStatus.None;
-        AmmoLoadedToMag = 0;
-        AmmoIds = null;
+        writer.PutEnum(Status);
+
+        if (Status == EReloadWithAmmoStatus.StartReload)
+        {
+            writer.Put(AmmoCount);
+            for (var i = 0; i < AmmoCount; i++)
+            {
+                writer.Put(AmmoIds[i]);
+            }
+        }
+    }
+
+    public readonly void Execute(FikaPlayer player)
+    {
+        try
+        {
+            if (player.HandsController is ObservedFirearmController controller)
+            {
+                if (Status == EReloadWithAmmoStatus.AbortReload)
+                {
+                    controller.CurrentOperation.SetTriggerPressed(true);
+                }
+
+                if (Status == EReloadWithAmmoStatus.StartReload && AmmoCount > 0)
+                {
+                    var bullets = controller.FindAmmoByIds(AmmoIds, AmmoCount);
+                    AmmoPack ammoPack = new(bullets);
+
+                    controller.FastForwardCurrentState();
+                    controller.CurrentOperation.ReloadWithAmmo(ammoPack, null, null);
+                }
+            }
+        }
+        finally
+        {
+            if (AmmoCount > 0)
+            {
+                ArrayPool<string>.Shared.Return(AmmoIds, true);
+            }
+        }
     }
 }

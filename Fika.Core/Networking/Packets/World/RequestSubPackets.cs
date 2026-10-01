@@ -1,14 +1,13 @@
-﻿using CommonAssets.Scripts.Game;
-using EFT;
-using EFT.Weather;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Comfort.Common;
+using CommonAssets.Scripts.Game;
+using EFT;
 using EFT.Interactive;
+using EFT.Weather;
 using Fika.Core.Main.GameMode;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
-using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
 
 namespace Fika.Core.Networking.Packets.World;
@@ -401,30 +400,33 @@ public static class RequestSubPackets
 #if DEBUG
                         FikaGlobals.LogWarning($"Found {fikaPlayer.Profile.Nickname} that was missing from client, sending...");
 #endif
-                        var packet = SendCharacterPacket.FromValue(new()
+                        var playerInfoPacket = new PlayerInfoPacket()
                         {
                             Profile = fikaPlayer.Profile,
                             ControllerId = fikaPlayer.InventoryController.CurrentId,
                             FirstOperationId = fikaPlayer.InventoryController.NextOperationId
-                        }, fikaPlayer.HealthController.IsAlive, fikaPlayer.IsAI, fikaPlayer.Transform.position, fikaPlayer.NetId);
+                        };
 
                         if (fikaPlayer.ActiveHealthController != null)
                         {
-                            packet.PlayerInfoPacket.HealthByteArray = fikaPlayer.ActiveHealthController.SerializeState();
+                            playerInfoPacket.HealthByteArray = fikaPlayer.ActiveHealthController.SerializeState();
                         }
                         else
                         {
-                            packet.PlayerInfoPacket.HealthByteArray = fikaPlayer.Profile.Health.SerializeHealthInfo();
+                            playerInfoPacket.HealthByteArray = fikaPlayer.Profile.Health.SerializeHealthInfo();
                         }
 
                         if (fikaPlayer.HandsController != null)
                         {
-                            packet.PlayerInfoPacket.ControllerType = HandsControllerTypeConvert.FromController(fikaPlayer.HandsController);
-                            packet.PlayerInfoPacket.ItemId = fikaPlayer.HandsController.Item.Id;
-                            packet.PlayerInfoPacket.IsStationary = fikaPlayer.MovementContext.IsStationaryWeaponInHands;
+                            playerInfoPacket.ControllerType = HandsControllerTypeConvert.FromController(fikaPlayer.HandsController);
+                            playerInfoPacket.ItemId = fikaPlayer.HandsController.Item.Id;
+                            playerInfoPacket.IsStationary = fikaPlayer.MovementContext.IsStationaryWeaponInHands;
                         }
 
-                        server.SendGenericPacketToPeer(EGenericSubPacketType.SendCharacter, packet, peer);
+                        var packet = new SendCharacterPacket(playerInfoPacket, fikaPlayer.HealthController.IsAlive,
+                            fikaPlayer.IsAI, fikaPlayer.Transform.position, fikaPlayer.NetId);
+
+                        server.SendGenericPacketToPeer(in packet, DeliveryMethod.ReliableOrdered, peer);
                     }
                 }
             }

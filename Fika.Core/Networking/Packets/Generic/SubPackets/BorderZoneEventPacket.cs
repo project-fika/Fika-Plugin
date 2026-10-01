@@ -1,31 +1,29 @@
 ﻿using Comfort.Common;
 using EFT;
 using Fika.Core.Main.Players;
-using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.Generic.SubPackets;
 
-public sealed class BorderZoneEvent : IPoolSubPacket
+public readonly struct BorderZoneEventPacket : IGenericPacket
 {
-    public string ProfileId;
-    public int ZoneId;
+    public EGenericPacketType Type => EGenericPacketType.BorderZoneEvent;
 
-    private BorderZoneEvent() { }
-
-    public static BorderZoneEvent CreateInstance()
+    public BorderZoneEventPacket(string profileId, int zoneId)
     {
-        return new BorderZoneEvent();
+        ProfileId = profileId;
+        ZoneId = zoneId;
     }
 
-    public static BorderZoneEvent FromValue(string profileId, int zoneId)
+    public BorderZoneEventPacket(NetDataReader reader)
     {
-        var packet = GenericSubPacketPoolManager.Instance.GetPacket<BorderZoneEvent>(EGenericSubPacketType.BorderZone);
-        packet.ProfileId = profileId;
-        packet.ZoneId = zoneId;
-        return packet;
+        ProfileId = reader.GetString();
+        ZoneId = reader.GetInt();
     }
 
-    public void Execute(FikaPlayer player = null)
+    public readonly string ProfileId;
+    public readonly int ZoneId;
+
+    public readonly void Execute()
     {
         if (!Singleton<GameWorld>.Instantiated)
         {
@@ -42,8 +40,7 @@ public sealed class BorderZoneEvent : IPoolSubPacket
         {
             if (borderZone.Id == ZoneId)
             {
-                var players = Singleton<GameWorld>.Instance.RegisteredPlayers;
-                foreach (var iPlayer in players)
+                foreach (var iPlayer in Singleton<GameWorld>.Instance.RegisteredPlayers)
                 {
                     if (iPlayer.ProfileId == ProfileId)
                     {
@@ -59,21 +56,9 @@ public sealed class BorderZoneEvent : IPoolSubPacket
         }
     }
 
-    public void Serialize(NetDataWriter writer)
+    public readonly void Serialize(NetDataWriter writer)
     {
         writer.Put(ProfileId);
         writer.Put(ZoneId);
-    }
-
-    public void Deserialize(NetDataReader reader)
-    {
-        ProfileId = reader.GetString();
-        ZoneId = reader.GetInt();
-    }
-
-    public void Dispose()
-    {
-        ProfileId = null;
-        ZoneId = 0;
     }
 }

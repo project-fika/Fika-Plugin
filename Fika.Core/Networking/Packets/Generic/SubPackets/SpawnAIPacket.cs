@@ -1,32 +1,17 @@
 ﻿using Comfort.Common;
 using EFT;
-using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
-using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.Generic.SubPackets;
 
-public sealed class SpawnAI : IPoolSubPacket
+public readonly struct SpawnAIPacket(int netId, Vector3 location) : IGenericPacket
 {
-    public int NetId;
-    public Vector3 Location;
+    public EGenericPacketType Type => EGenericPacketType.SpawnAI;
 
-    private SpawnAI() { }
+    public readonly int NetId = netId;
+    public readonly Vector3 Location = location;
 
-    public static SpawnAI CreateInstance()
-    {
-        return new SpawnAI();
-    }
-
-    public static SpawnAI FromValue(int netId, Vector3 location)
-    {
-        var packet = GenericSubPacketPoolManager.Instance.GetPacket<SpawnAI>(EGenericSubPacketType.SpawnAI);
-        packet.NetId = netId;
-        packet.Location = location;
-        return packet;
-    }
-
-    public void Execute(FikaPlayer player = null)
+    public readonly void Execute()
     {
         var coopHandler = Singleton<IFikaNetworkManager>.Instance.CoopHandler;
         if (coopHandler == null)
@@ -55,21 +40,9 @@ public sealed class SpawnAI : IPoolSubPacket
         }
     }
 
-    public void Serialize(NetDataWriter writer)
+    public readonly void Serialize(NetDataWriter writer)
     {
         writer.Put(NetId);
         writer.PutUnmanaged(Location);
-    }
-
-    public void Deserialize(NetDataReader reader)
-    {
-        NetId = reader.GetInt();
-        Location = reader.GetUnmanaged<Vector3>();
-    }
-
-    public void Dispose()
-    {
-        NetId = 0;
-        Location = default;
     }
 }

@@ -1,56 +1,34 @@
 ﻿using EFT;
-using System;
-using Fika.Core.Main.Players;
-using Fika.Core.Networking.Pooling;
+using EFT.InventoryLogic.Operations;
 
 namespace Fika.Core.Networking.Packets.Generic.SubPackets;
 
-public sealed class InventoryPacket : IPoolSubPacket
+public readonly struct InventoryPacket : IGenericPacket
 {
-    private InventoryPacket() { }
+    public EGenericPacketType Type => EGenericPacketType.InventoryOperation;
 
-    public static InventoryPacket CreateInstance()
+    public InventoryPacket(int netId, AbstractOperation operation)
     {
-        return new();
+        NetId = netId;
+        CallbackId = operation.Id;
+        Descriptor = operation.ToDescriptor();
     }
 
-    public static InventoryPacket FromValue(int netId, EFT.InventoryLogic.Operations.AbstractOperation operation)
-    {
-        var packet = GenericSubPacketPoolManager.Instance.GetPacket<InventoryPacket>(EGenericSubPacketType.InventoryOperation);
-        packet.NetId = netId;
-        packet.CallbackId = operation.Id;
-        packet.Descriptor = operation.ToDescriptor();
-        return packet;
-    }
-
-    public int NetId;
-    public ushort CallbackId;
-    public InventoryOperationDescriptor Descriptor;
-
-    [Obsolete("Not used for inventory packets", true)]
-    public void Execute(FikaPlayer player = null)
-    {
-        // unused
-    }
-
-    public void Serialize(NetDataWriter writer)
-    {
-        writer.Put(NetId);
-        writer.Put(CallbackId);
-        writer.PutPolymorph(Descriptor);
-    }
-
-    public void Deserialize(NetDataReader reader)
+    public InventoryPacket(NetDataReader reader)
     {
         NetId = reader.GetInt();
         CallbackId = reader.GetUShort();
         Descriptor = reader.GetPolymorph<InventoryOperationDescriptor>();
     }
 
-    public void Dispose()
+    public readonly int NetId;
+    public readonly ushort CallbackId;
+    public readonly InventoryOperationDescriptor Descriptor;
+
+    public readonly void Serialize(NetDataWriter writer)
     {
-        NetId = 0;
-        CallbackId = 0;
-        Descriptor = null;
+        writer.Put(NetId);
+        writer.Put(CallbackId);
+        writer.PutPolymorph(Descriptor);
     }
 }

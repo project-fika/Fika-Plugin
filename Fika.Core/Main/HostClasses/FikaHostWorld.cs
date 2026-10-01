@@ -1,10 +1,9 @@
-﻿using EFT.Ballistics;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Comfort.Common;
 using EFT;
+using EFT.Ballistics;
 using EFT.Interactive;
 using Fika.Core.Networking;
-using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
 using Fika.Core.Networking.Packets.World;
 
@@ -50,8 +49,8 @@ public class FikaHostWorld : World
 
     private void WindowBreaker_OnWindowHitAction(WindowBreaker windowBreaker, DamageInfo damageInfo, WindowBreakingConfig.Crack crack, float angle)
     {
-        _server.SendGenericPacket(EGenericSubPacketType.SyncableItem,
-            SyncableItemPacket.FromValue(windowBreaker.NetId, damageInfo.HitPoint), true);
+        var packet = new SyncableItemPacket(windowBreaker.NetId, damageInfo.HitPoint);
+        _server.SendGenericPacket(in packet, DeliveryMethod.ReliableOrdered);
     }
 
     protected void Update()
@@ -147,7 +146,7 @@ public class FikaHostWorld : World
     /// <param name="arg4"></param>
     private void OnBorderZoneShot(IObserverToPlayerBridge player, BorderZone zone, float arg3, bool arg4)
     {
-        _server.SendGenericPacket(EGenericSubPacketType.BorderZone,
-            BorderZoneEvent.FromValue(player.iPlayer.ProfileId, zone.Id), true);
+        var packet = new BorderZoneEventPacket(player.iPlayer.ProfileId, zone.Id);
+        _server.SendGenericPacket(in packet, DeliveryMethod.ReliableOrdered);
     }
 }

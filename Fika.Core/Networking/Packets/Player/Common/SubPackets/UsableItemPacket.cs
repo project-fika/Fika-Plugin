@@ -1,40 +1,21 @@
 ﻿using Fika.Core.Main.Players;
-using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
-public sealed class UsableItemPacket : IPoolSubPacket
+public readonly struct UsableItemPacket : IPlayerPacket
 {
-    private UsableItemPacket() { }
+    public EPlayerPacketType Type => EPlayerPacketType.UsableItem;
 
-    public static UsableItemPacket CreateInstance()
+    public UsableItemPacket(bool hasCompassState, bool compassState, bool examineWeapon, bool hasAim, bool aimState)
     {
-        return new();
+        HasCompassState = hasCompassState;
+        CompassState = compassState;
+        ExamineWeapon = examineWeapon;
+        HasAim = hasAim;
+        AimState = aimState;
     }
 
-    public static UsableItemPacket FromValue(bool hasCompassState, bool compassState, bool examineWeapon, bool hasAim, bool aimState)
-    {
-        var packet = CommonSubPacketPoolManager.Instance.GetPacket<UsableItemPacket>(ECommonSubPacketType.UsableItem);
-        packet.HasCompassState = hasCompassState;
-        packet.CompassState = compassState;
-        packet.ExamineWeapon = examineWeapon;
-        packet.HasAim = hasAim;
-        packet.AimState = aimState;
-        return packet;
-    }
-
-    public bool HasCompassState;
-    public bool CompassState;
-    public bool ExamineWeapon;
-    public bool HasAim;
-    public bool AimState;
-
-    public void Execute(FikaPlayer player = null)
-    {
-        player.HandleUsableItemPacket(this);
-    }
-
-    public void Deserialize(NetDataReader reader)
+    public UsableItemPacket(NetDataReader reader)
     {
         HasCompassState = reader.GetBool();
         if (HasCompassState)
@@ -49,7 +30,18 @@ public sealed class UsableItemPacket : IPoolSubPacket
         }
     }
 
-    public void Serialize(NetDataWriter writer)
+    public readonly bool HasCompassState;
+    public readonly bool CompassState;
+    public readonly bool ExamineWeapon;
+    public readonly bool HasAim;
+    public readonly bool AimState;
+
+    public readonly void Execute(FikaPlayer player = null)
+    {
+        player.HandleUsableItemPacket(this);
+    }
+
+    public readonly void Serialize(NetDataWriter writer)
     {
         writer.Put(HasCompassState);
         if (HasCompassState)
@@ -62,14 +54,5 @@ public sealed class UsableItemPacket : IPoolSubPacket
         {
             writer.Put(AimState);
         }
-    }
-
-    public void Dispose()
-    {
-        HasCompassState = false;
-        CompassState = false;
-        ExamineWeapon = false;
-        HasAim = false;
-        AimState = false;
     }
 }

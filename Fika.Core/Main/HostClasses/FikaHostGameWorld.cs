@@ -1,21 +1,19 @@
-﻿using CommonAssets.Scripts.Game;
-using EFT.Airdrop;
-using EFT.BufferZone;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Comfort.Common;
+using CommonAssets.Scripts.Game;
 using EFT;
+using EFT.Airdrop;
+using EFT.BufferZone;
 using EFT.Interactive;
 using EFT.InventoryLogic;
 using EFT.SynchronizableObjects;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
-using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
 using Fika.Core.Networking.Packets.World;
-using HarmonyLib;
 
 namespace Fika.Core.Main.HostClasses;
 
@@ -39,7 +37,7 @@ public class FikaHostGameWorld : ClientLocalGameWorld
     {
         var gameWorld = gameObject.AddComponent<FikaHostGameWorld>();
         gameWorld.ObjectsFactory = objectsFactory;
-        Traverse.Create(gameWorld).Field<EUpdateQueue>("_updateQueue").Value = updateQueue;
+        gameWorld._updateQueue = updateQueue;
         gameWorld.SpeakerManager = gameObject.AddComponent<SpeakerManager>();
         gameWorld.ExfiltrationController = new ExfiltrationController();
         gameWorld.BufferZoneController = new BufferZoneController();
@@ -73,8 +71,8 @@ public class FikaHostGameWorld : ClientLocalGameWorld
     public override void ChangeLampState(Turnable turnable, Turnable.EState state)
     {
         base.ChangeLampState(turnable, state);
-        Server.SendGenericPacket(EGenericSubPacketType.SyncableItem,
-            SyncableItemPacket.FromValue(turnable.NetId, state), true);
+        var packet = new SyncableItemPacket(turnable.NetId, state);
+        Server.SendGenericPacket(in packet, DeliveryMethod.ReliableOrdered, true);
     }
 
     public override void AfterPlayerTick(float dt)
@@ -105,8 +103,8 @@ public class FikaHostGameWorld : ClientLocalGameWorld
             return;
         }
 
-        Server.SendGenericPacket(EGenericSubPacketType.Mine,
-            MineEvent.FromValue(directional.transform.position), true);
+        var packet = new MineEventPacket(directional.transform.position);
+        Server.SendGenericPacket(in packet, DeliveryMethod.ReliableOrdered, true);
     }
 
     public override void Dispose()

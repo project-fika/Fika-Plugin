@@ -3,12 +3,22 @@
 /// <summary>
 /// Describes sub-packet types related to firearms and combat actions.
 /// </summary>
-public enum EFirearmSubPacketType : byte
+public enum EFirearmPacketType : byte
 {
     /// <summary>
     /// Information about a shot fired.
     /// </summary>
     ShotInfo,
+
+    /// <summary>
+    /// Dry shot with no ammo loaded
+    /// </summary>
+    DryShot,
+
+    /// <summary>
+    /// Misfire shot
+    /// </summary>
+    Misfire,
 
     /// <summary>
     /// Change the firearm's fire mode.

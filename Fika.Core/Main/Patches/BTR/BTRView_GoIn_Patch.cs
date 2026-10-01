@@ -80,7 +80,7 @@ public class BTRView_GoIn_Patch : ModulePatch
             observedPlayer.CharacterController.isEnabled = false;
             observedPlayer.BtrState = EPlayerBtrState.GoIn;
             side.AddPassenger(observedPlayer, placeId);
-            var soundController = Traverse.Create(view).Field<BtrSoundController>("_soundController").Value;
+            var soundController = view._soundController;
             if (soundController != null)
             {
                 soundController.UpdateBtrAudioRoom(EnvironmentType.Indoor, observedPlayer);

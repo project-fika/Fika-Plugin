@@ -220,9 +220,8 @@ internal sealed class ReviveInteractable : InteractableObject
             var nickname = _localPlayer.Profile.GetCorrectedNickname();
             _observedPlayer.ToggleRevive(true, nickname);
 
-            _observedPlayer.CommonPacket.Type = ECommonSubPacketType.RevivingPlayer;
-            _observedPlayer.CommonPacket.SubPacket = RevivingPlayerPacket.FromValue(true, nickname);
-            _observedPlayer.PacketSender.NetworkManager.SendNetReusable(ref _observedPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
+            var packet = new RevivingPlayerPacket(true, nickname);
+            _observedPlayer.PacketSender.NetworkManager.SendPlayerPacket(in packet, _observedPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
         }
     }
 
@@ -233,9 +232,8 @@ internal sealed class ReviveInteractable : InteractableObject
 
         if (!success || !_localPlayer.HealthController.IsAlive)
         {
-            _observedPlayer.CommonPacket.Type = ECommonSubPacketType.RevivingPlayer;
-            _observedPlayer.CommonPacket.SubPacket = RevivingPlayerPacket.FromValue(false, string.Empty);
-            _observedPlayer.PacketSender.NetworkManager.SendNetReusable(ref _observedPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
+            var packet = new RevivingPlayerPacket(false, string.Empty);
+            _observedPlayer.PacketSender.NetworkManager.SendPlayerPacket(in packet, _observedPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
             return;
         }
 
@@ -243,9 +241,8 @@ internal sealed class ReviveInteractable : InteractableObject
         {
             if (_observedPlayer != null)
             {
-                _observedPlayer.CommonPacket.Type = ECommonSubPacketType.RevivedPlayer;
-                _observedPlayer.CommonPacket.SubPacket = RevivedPlayerPacket.FromValue();
-                _observedPlayer.PacketSender.NetworkManager.SendNetReusable(ref _observedPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
+                var packet2 = new RevivedPlayerPacket();
+                _observedPlayer.PacketSender.NetworkManager.SendPlayerPacket(in packet2, _observedPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
 
 #if DEBUG
                 FikaGlobals.LogInfo($"Reviving {_observedPlayer.NetId}");

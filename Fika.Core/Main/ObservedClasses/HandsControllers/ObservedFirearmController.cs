@@ -9,7 +9,6 @@ using EFT.InventoryLogic;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Packets.FirearmController.SubPackets;
-using HarmonyLib;
 using static EFT.Player;
 
 namespace Fika.Core.Main.ObservedClasses.HandsControllers;
@@ -40,7 +39,6 @@ public sealed class ObservedFirearmController : FirearmController
     private float _overlapCounter;
     private bool _hasFired;
     private Firearms _weaponManager;
-    private UnderbarrelContainer _underBarrelManager;
     private bool _boltActionReload;
     private bool _isThrowingPatron;
     private bool _stationaryWeapon;
@@ -117,11 +115,6 @@ public sealed class ObservedFirearmController : FirearmController
     {
         _objectInHandsAnimator.SetAiming(false);
         _weaponManager = _weaponPrefab.ObjectInHands as Firearms;
-        if (UnderbarrelWeapon != null)
-        {
-            var weaponTraverse = Traverse.Create(this);
-            _underBarrelManager = weaponTraverse.Field<Player.FirearmController.UnderbarrelContainer>("_underbarrelContainer").Value;
-        }
         IsRevolver = Weapon is Revolver;
         _stationaryWeapon = Weapon.IsStationaryWeapon;
     }
@@ -328,10 +321,9 @@ public sealed class ObservedFirearmController : FirearmController
     private IEnumerator BreakFiringLoop()
     {
         WeaponSoundPlayer.Release();
-        var isFiring = Traverse.Create(WeaponSoundPlayer).Field<bool>("_isFiring");
         var attempts = 0;
         WaitForEndOfFrame waitForEndOfFrame = new();
-        while (isFiring.Value && attempts < 10)
+        while (WeaponSoundPlayer._isFiring && attempts < 10)
         {
             yield return waitForEndOfFrame;
             WeaponSoundPlayer.StopFiringLoop();
@@ -395,79 +387,66 @@ public sealed class ObservedFirearmController : FirearmController
         FirearmsAnimator.SetFire(false);
     }
 
-    public void HandleShotInfoPacket(ShotInfoPacket packet, InventoryController inventoryController)
+    public void HandleShotInfoPacket(in ShotInfoPacket packet, InventoryController inventoryController)
     {
-        if (packet.ShotType == EShotType.DryFire)
+        if (IsRevolver)
         {
-            HandleObservedDryShot();
+            HandleRevolverShot(in packet, inventoryController);
             return;
         }
+        HandleObservedShot(in packet, inventoryController);
+    }
 
-        if (packet.ShotType >= EShotType.Misfire)
+    public void HandleObservedMisfire(in MisfirePacket packet)
+    {
+        switch (packet.ShotType)
         {
-            switch (packet.ShotType)
-            {
-                case EShotType.Misfire:
-                    Weapon.MalfState.State = Weapon.EMalfunctionState.Misfire;
-                    break;
-                case EShotType.Feed:
-                    Weapon.MalfState.State = Weapon.EMalfunctionState.Feed;
-                    break;
-                case EShotType.JamedShot:
-                    Weapon.MalfState.State = Weapon.EMalfunctionState.Jam;
-                    break;
-                case EShotType.SoftSlidedShot:
-                    Weapon.MalfState.State = Weapon.EMalfunctionState.SoftSlide;
-                    break;
-                case EShotType.HardSlidedShot:
-                    Weapon.MalfState.State = Weapon.EMalfunctionState.HardSlide;
-                    break;
-            }
+            case EShotType.Misfire:
+                Weapon.MalfState.State = Weapon.EMalfunctionState.Misfire;
+                break;
+            case EShotType.Feed:
+                Weapon.MalfState.State = Weapon.EMalfunctionState.Feed;
+                break;
+            case EShotType.JamedShot:
+                Weapon.MalfState.State = Weapon.EMalfunctionState.Jam;
+                break;
+            case EShotType.SoftSlidedShot:
+                Weapon.MalfState.State = Weapon.EMalfunctionState.SoftSlide;
+                break;
+            case EShotType.HardSlidedShot:
+                Weapon.MalfState.State = Weapon.EMalfunctionState.HardSlide;
+                break;
+        }
 
-            var ammo = (Ammo)Singleton<ItemFactory>.Instance.CreateItem(MongoID.Generate(), packet.AmmoTemplate, null);
-            Weapon.MalfState.MalfunctionedAmmo = ammo;
-            Weapon.MalfState.AmmoToFire = ammo;
+        var ammo = (Ammo)Singleton<ItemFactory>.Instance.CreateItem(MongoID.Generate(), packet.AmmoTemplate, null);
+        Weapon.MalfState.MalfunctionedAmmo = ammo;
+        Weapon.MalfState.AmmoToFire = ammo;
 
-            FirearmsAnimator.MisfireSlideUnknown(false);
-            _weaponPrefab.InitMalfunctionState(Weapon, false, false, out _);
-            FirearmsAnimator.Malfunction((int)Weapon.MalfState.State);
+        FirearmsAnimator.MisfireSlideUnknown(false);
+        _weaponPrefab.InitMalfunctionState(Weapon, false, false, out _);
+        FirearmsAnimator.Malfunction((int)Weapon.MalfState.State);
 
-            switch (Weapon.MalfState.State)
-            {
-                case Weapon.EMalfunctionState.Misfire:
-                    FirearmsAnimator.Animator.Play("MISFIRE", 1, 0f);
-                    break;
-                case Weapon.EMalfunctionState.Jam:
-                    FirearmsAnimator.Animator.Play("JAM", 1, 0f);
-                    break;
-                case Weapon.EMalfunctionState.HardSlide:
-                    FirearmsAnimator.Animator.Play("HARD_SLIDE", 1, 0f);
-                    break;
-                case Weapon.EMalfunctionState.SoftSlide:
-                    FirearmsAnimator.Animator.Play("SOFT_SLIDE", 1, 0f);
-                    break;
-                case Weapon.EMalfunctionState.Feed:
-                    FirearmsAnimator.Animator.Play("FEED", 1, 0f);
-                    break;
-            }
+        switch (Weapon.MalfState.State)
+        {
+            case Weapon.EMalfunctionState.Misfire:
+                FirearmsAnimator.Animator.Play("MISFIRE", 1, 0f);
+                break;
+            case Weapon.EMalfunctionState.Jam:
+                FirearmsAnimator.Animator.Play("JAM", 1, 0f);
+                break;
+            case Weapon.EMalfunctionState.HardSlide:
+                FirearmsAnimator.Animator.Play("HARD_SLIDE", 1, 0f);
+                break;
+            case Weapon.EMalfunctionState.SoftSlide:
+                FirearmsAnimator.Animator.Play("SOFT_SLIDE", 1, 0f);
+                break;
+            case Weapon.EMalfunctionState.Feed:
+                FirearmsAnimator.Animator.Play("FEED", 1, 0f);
+                break;
+        }
 
-            if (Weapon.MalfState.State == Weapon.EMalfunctionState.Misfire)
-            {
-                if (Weapon.HasChambers)
-                {
-                    var firstChamber = Weapon.Chambers[0];
-                    if (firstChamber.ContainedItem is Ammo)
-                    {
-                        firstChamber.RemoveItemWithoutRestrictions();
-                    }
-                }
-
-                FirearmsAnimator.SetFire(true);
-                _hasFired = true;
-                _lastFireTime = 0f;
-                return;
-            }
-
+        if (Weapon.MalfState.State == Weapon.EMalfunctionState.Misfire)
+        {
             if (Weapon.HasChambers)
             {
                 var firstChamber = Weapon.Chambers[0];
@@ -475,42 +454,49 @@ public sealed class ObservedFirearmController : FirearmController
                 {
                     firstChamber.RemoveItemWithoutRestrictions();
                 }
-
-                if (Weapon.MalfState.State == Weapon.EMalfunctionState.Feed)
-                {
-                    var currentMagazine = Weapon.GetCurrentMagazine();
-                    if (currentMagazine != null)
-                    {
-                        var fedAmmo = (Ammo)currentMagazine.Cartridges.PopToNowhere(_observedPlayer.InventoryController).Value.ResultItem;
-                        if (fedAmmo != null)
-                        {
-                            Weapon.MalfState.MalfunctionedAmmo = fedAmmo;
-                            // Leave here for now - Lacyway
-                            /*weaponManager.SetRoundIntoWeapon(fedAmmo, 0);
-                            weaponManager.MoveAmmoFromChamberToShellPort(false, 0);*/
-                        }
-                        else
-                        {
-                            FikaGlobals.LogError("HandleShotInfoPacket: Could not find ammo when setting up feed malfunction!");
-                        }
-                    }
-                }
-                else
-                {
-                    _weaponManager.MoveAmmoFromChamberToShellPort(true, 0);
-                }
             }
-        }
 
-        if (IsRevolver)
-        {
-            HandleRevolverShot(packet, inventoryController);
+            FirearmsAnimator.SetFire(true);
+            _hasFired = true;
+            _lastFireTime = 0f;
             return;
         }
-        HandleObservedShot(packet, inventoryController);
+
+        if (Weapon.HasChambers)
+        {
+            var firstChamber = Weapon.Chambers[0];
+            if (firstChamber.ContainedItem is Ammo)
+            {
+                firstChamber.RemoveItemWithoutRestrictions();
+            }
+
+            if (Weapon.MalfState.State == Weapon.EMalfunctionState.Feed)
+            {
+                var currentMagazine = Weapon.GetCurrentMagazine();
+                if (currentMagazine != null)
+                {
+                    var fedAmmo = (Ammo)currentMagazine.Cartridges.PopToNowhere(_observedPlayer.InventoryController).Value.ResultItem;
+                    if (fedAmmo != null)
+                    {
+                        Weapon.MalfState.MalfunctionedAmmo = fedAmmo;
+                        // Leave here for now - Lacyway
+                        /*weaponManager.SetRoundIntoWeapon(fedAmmo, 0);
+                        weaponManager.MoveAmmoFromChamberToShellPort(false, 0);*/
+                    }
+                    else
+                    {
+                        FikaGlobals.LogError("HandleShotInfoPacket: Could not find ammo when setting up feed malfunction!");
+                    }
+                }
+            }
+            else
+            {
+                _weaponManager.MoveAmmoFromChamberToShellPort(true, 0);
+            }
+        }
     }
 
-    private void HandleObservedDryShot()
+    public void HandleObservedDryShot()
     {
         if (IsRevolver)
         {
@@ -539,7 +525,7 @@ public sealed class ObservedFirearmController : FirearmController
         _lastFireTime = 0f;
     }
 
-    private void HandleRevolverShot(ShotInfoPacket packet, InventoryController inventoryController)
+    private void HandleRevolverShot(in ShotInfoPacket packet, InventoryController inventoryController)
     {
         var revolver = Weapon;
         var cylinderMagazine = (CylinderMagazine)revolver.GetCurrentMagazine();
@@ -602,7 +588,7 @@ public sealed class ObservedFirearmController : FirearmController
         FirearmsAnimator.SetFire(false);
     }
 
-    private void HandleObservedShot(ShotInfoPacket packet, InventoryController inventoryController)
+    private void HandleObservedShot(in ShotInfoPacket packet, InventoryController inventoryController)
     {
         var ammo = (Ammo)Singleton<ItemFactory>.Instance.CreateItem(MongoID.Generate(), packet.AmmoTemplate, null);
         _observedPlayer.TurnOffFbbikAt = Time.time + 0.6f;
@@ -658,7 +644,7 @@ public sealed class ObservedFirearmController : FirearmController
                 {
                     grenadeBullet.IsUsed = true;
                     UnderbarrelWeapon.Chamber.RemoveItem();
-                    _underBarrelManager?.DestroyPatronInWeapon();
+                    _underbarrelContainer?.DestroyPatronInWeapon();
                 }
                 FirearmsAnimator.SetFire(false);
                 return;
@@ -778,11 +764,12 @@ public sealed class ObservedFirearmController : FirearmController
         _boltActionReload = true;
     }
 
-    public List<Ammo> FindAmmoByIds(string[] ammoIds)
+    public List<Ammo> FindAmmoByIds(string[] ammoIds, int count)
     {
         _preallocatedAmmoList.Clear();
-        foreach (var id in ammoIds)
+        for (var i = 0; i < count; i++)
         {
+            var id = ammoIds[i];
             var gstruct = _player.FindItemById(id);
             if (gstruct.Succeeded && gstruct.Value is Ammo bulletClass)
             {

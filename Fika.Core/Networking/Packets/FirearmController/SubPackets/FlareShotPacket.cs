@@ -3,38 +3,36 @@ using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
-using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
-public sealed class FlareShotPacket : IPoolSubPacket
+public readonly struct FlareShotPacket : IFirearmPacket
 {
-    private FlareShotPacket()
+    public FlareShotPacket(Vector3 shotPosition, Vector3 shotForward, MongoID ammoTemplateId, bool startOneShotFire)
     {
-
+        ShotPosition = shotPosition;
+        ShotForward = shotForward;
+        AmmoTemplateId = ammoTemplateId;
+        StartOneShotFire = startOneShotFire;
     }
 
-    public static FlareShotPacket FromValue(Vector3 shotPosition, Vector3 shotForward, MongoID ammoTemplateId, bool startOneShotFire)
+    public FlareShotPacket(NetDataReader reader)
     {
-        var packet = FirearmSubPacketPoolManager.Instance.GetPacket<FlareShotPacket>(EFirearmSubPacketType.FlareShot);
-        packet.ShotPosition = shotPosition;
-        packet.ShotForward = shotForward;
-        packet.AmmoTemplateId = ammoTemplateId;
-        packet.StartOneShotFire = startOneShotFire;
-        return packet;
+        StartOneShotFire = reader.GetBool();
+        if (!StartOneShotFire)
+        {
+            ShotPosition = reader.GetUnmanaged<Vector3>();
+            ShotForward = reader.GetUnmanaged<Vector3>();
+            AmmoTemplateId = reader.GetMongoID();
+        }
     }
 
-    public static FlareShotPacket CreateInstance()
-    {
-        return new();
-    }
+    public readonly Vector3 ShotPosition;
+    public readonly Vector3 ShotForward;
+    public readonly MongoID AmmoTemplateId;
+    public readonly bool StartOneShotFire;
 
-    public Vector3 ShotPosition;
-    public Vector3 ShotForward;
-    public MongoID AmmoTemplateId;
-    public bool StartOneShotFire;
-
-    public void Execute(FikaPlayer player)
+    public readonly void Execute(FikaPlayer player)
     {
         if (player.HandsController is ObservedFirearmController controller)
         {
@@ -63,7 +61,7 @@ public sealed class FlareShotPacket : IPoolSubPacket
         }
     }
 
-    public void Serialize(NetDataWriter writer)
+    public readonly void Serialize(NetDataWriter writer)
     {
         writer.Put(StartOneShotFire);
         if (!StartOneShotFire)
@@ -74,22 +72,5 @@ public sealed class FlareShotPacket : IPoolSubPacket
         }
     }
 
-    public void Deserialize(NetDataReader reader)
-    {
-        StartOneShotFire = reader.GetBool();
-        if (!StartOneShotFire)
-        {
-            ShotPosition = reader.GetUnmanaged<Vector3>();
-            ShotForward = reader.GetUnmanaged<Vector3>();
-            AmmoTemplateId = reader.GetMongoID();
-        }
-    }
-
-    public void Dispose()
-    {
-        ShotPosition = default;
-        ShotForward = default;
-        AmmoTemplateId = default;
-        StartOneShotFire = false;
-    }
+    public EFirearmPacketType Type => EFirearmPacketType.FlareShot;
 }

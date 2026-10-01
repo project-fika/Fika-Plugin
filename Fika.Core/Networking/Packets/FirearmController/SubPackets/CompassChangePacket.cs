@@ -1,30 +1,24 @@
 ﻿using Fika.Core.Main.Players;
-using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
-public sealed class CompassChangePacket : IPoolSubPacket
+public readonly struct CompassChangePacket : IFirearmPacket
 {
-    private CompassChangePacket()
-    {
+    public EFirearmPacketType Type => EFirearmPacketType.CompassChange;
 
+    public CompassChangePacket(bool enabled)
+    {
+        Enabled = enabled;
     }
 
-    public static CompassChangePacket FromValue(bool enabled)
+    public CompassChangePacket(NetDataReader reader)
     {
-        var packet = FirearmSubPacketPoolManager.Instance.GetPacket<CompassChangePacket>(EFirearmSubPacketType.CompassChange);
-        packet.Enabled = enabled;
-        return packet;
+        Enabled = reader.GetBool();
     }
 
-    public static CompassChangePacket CreateInstance()
-    {
-        return new();
-    }
+    public readonly bool Enabled;
 
-    public bool Enabled;
-
-    public void Execute(FikaPlayer player)
+    public readonly void Execute(FikaPlayer player)
     {
         // temporarily disabled, broken in base game
         /*if (player.HandsController is ItemHandsController handsController)
@@ -33,18 +27,8 @@ public sealed class CompassChangePacket : IPoolSubPacket
         }*/
     }
 
-    public void Serialize(NetDataWriter writer)
+    public readonly void Serialize(NetDataWriter writer)
     {
         writer.Put(Enabled);
-    }
-
-    public void Deserialize(NetDataReader reader)
-    {
-        Enabled = reader.GetBool();
-    }
-
-    public void Dispose()
-    {
-        Enabled = false;
     }
 }

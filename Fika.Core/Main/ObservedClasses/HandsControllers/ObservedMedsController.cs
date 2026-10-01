@@ -18,9 +18,6 @@ internal sealed class ObservedMedsController : Player.MedsController
     private FikaPlayer _fikaPlayer;
     private int _animation;
 
-    private readonly static FieldInfo _onOutUseActionField = typeof(Player.MedsController)
-        .GetField("_onOutUseEvent", BindingFlags.NonPublic | BindingFlags.Instance);
-
     private ObservedMedsOperation ObservedOperation
     {
         get
@@ -32,8 +29,8 @@ internal sealed class ObservedMedsController : Player.MedsController
     public static ObservedMedsController Create(FikaPlayer player, Item item, OneAndList<EBodyPart> bodyParts, float amount, int animationVariant)
     {
         var controller = CreateController<ObservedMedsController>(player, item, bodyParts, amount, animationVariant);
-        var action = (Action)_onOutUseActionField.GetValue(controller);
-        _onOutUseActionField.SetValue(controller, FikaGlobals.ClearDelegates(action));
+        var action = controller._onOutUseEvent;
+        controller._onOutUseEvent = FikaGlobals.ClearDelegates(action);
         controller._fikaPlayer = player;
         controller._animation = animationVariant;
         return controller;

@@ -32,15 +32,9 @@ public sealed class BotDifficulties : Dictionary<string, BotDifficulties.RoleDat
 
     public BotSettingsComponents GetComponent(BotDifficulty botDifficulty, WildSpawnType role)
     {
-#if DEBUG
-        FikaGlobals.LogInfo($"Retrieving data for: {role}, difficulty: {botDifficulty}");
-#endif
-        if (TryGetValue(role.ToString().ToLower(), out var value))
+        if (TryGetValue(role.ToString().ToLower(), out var value) && value.TryGetValue(botDifficulty.ToString().ToLower(), out var botSettingsComponents))
         {
-            if (value.TryGetValue(botDifficulty.ToString().ToLower(), out var botSettingsComponents))
-            {
-                return botSettingsComponents;
-            }
+            return botSettingsComponents;
         }
 
         FikaGlobals.LogError($"Unable to retrieve difficulty settings for: {role}, difficulty: {botDifficulty}");

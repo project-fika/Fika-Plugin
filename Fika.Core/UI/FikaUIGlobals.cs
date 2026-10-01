@@ -81,8 +81,6 @@ public static class FikaUIGlobals
     public static ErrorWindowContext ShowFikaMessage(this PreloaderUI preloaderUI, string header, string message,
         ErrorScreen.EButtonType buttonType, float waitingTime, Action acceptCallback, Action endTimeCallback)
     {
-        var preloaderUiTraverse = Traverse.Create(preloaderUI);
-
         CG_ShowCriticalErrorScreen messageHandler = new()
         {
             preloaderUI_0 = preloaderUI
@@ -94,8 +92,8 @@ public static class FikaUIGlobals
             return new ErrorWindowContext();
         }
 
-        var errorScreenTemplate = preloaderUiTraverse.Field("_criticalErrorScreenTemplate").GetValue<ErrorScreen>();
-        var errorScreenContainer = preloaderUiTraverse.Field("_criticalErrorScreenContainer").GetValue<EmptyInputNode>();
+        var errorScreenTemplate = preloaderUI._criticalErrorScreenTemplate;
+        var errorScreenContainer = preloaderUI._criticalErrorScreenContainer;
 
         messageHandler.errorScreen = UnityEngine.Object.Instantiate(errorScreenTemplate, errorScreenContainer.transform, false);
         errorScreenContainer.AddChildNode(messageHandler.errorScreen);
@@ -148,7 +146,7 @@ public static class FikaUIGlobals
         errorScreenHandler.context.OnDecline += Application.Quit;
         errorScreenHandler.context.OnCloseSilent += errorScreen.CloseSilent;
 
-        var ui = Traverse.Create(errorScreen).Field<CompositeDisposable>("UI").Value;
+        var ui = errorScreen.UI;
 
         ui.AddDisposable(errorScreenHandler.method_0);
         var text = buttonType switch
@@ -169,7 +167,7 @@ public static class FikaUIGlobals
         var description = message.SubstringIfNecessary(500);
         errorScreenTraverse.Field("_description").SetValue(description);
 
-        var errorDescription = Traverse.Create(errorScreen).Field<TextMeshProUGUI>("_errorDescription").Value;
+        var errorDescription = errorScreen._errorDescription;
         errorDescription.SetText(description);
 
         var coroutine_0 = errorScreenTraverse.Field("_waitForReactionCoroutine").GetValue<Coroutine>();

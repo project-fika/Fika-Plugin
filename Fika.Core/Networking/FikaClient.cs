@@ -24,12 +24,13 @@ using Fika.Core.Networking.Packets.Communication;
 using Fika.Core.Networking.Packets.Debug;
 #endif
 using Fika.Core.Networking.Packets.FirearmController;
+using Fika.Core.Networking.Packets.FirearmController.SubPackets;
 using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
 using Fika.Core.Networking.Packets.Player;
 using Fika.Core.Networking.Packets.Player.Common;
+using Fika.Core.Networking.Packets.Player.Common.SubPackets;
 using Fika.Core.Networking.Packets.World;
-using Fika.Core.Networking.Pooling;
 using Fika.Core.Networking.Snapshotting;
 using Fika.Core.Networking.VOIP;
 using Fika.Core.UI.Custom;
@@ -37,9 +38,14 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using static Fika.Core.Networking.NetworkUtils;
+using InteractionPacket = Fika.Core.Networking.Packets.Player.Common.SubPackets.InteractionPacket;
+using MountingPacket = Fika.Core.Networking.Packets.Player.Common.SubPackets.MountingPacket;
+using ReloadMagPacket = Fika.Core.Networking.Packets.FirearmController.SubPackets.ReloadMagPacket;
+using RollCylinderPacket = Fika.Core.Networking.Packets.FirearmController.SubPackets.RollCylinderPacket;
 
 namespace Fika.Core.Networking;
 
@@ -129,7 +135,6 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
     private string _myProfileId;
     private Queue<EFT.InventoryLogic.Operations.AbstractOperation> _inventoryOperations;
     private List<int> _missingIds;
-    private GenericPacket _genericPacket;
     private DateTime _startTime;
     private Callback _handleInventoryOperationCallback;
 
@@ -170,7 +175,6 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
         NetworkGameSession.LossPercent = 0;
 
         _myProfileId = FikaBackendUtils.Profile.ProfileId;
-        _genericPacket = new();
 
         await RegisterPacketsAndTypes();
 
@@ -244,8 +248,6 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
 
     private Task RegisterPacketsAndTypes()
     {
-        PoolUtils.CreateAll();
-
         RegisterCustomType(FikaSerializationExtensions.PutRagdollStruct, FikaSerializationExtensions.GetRagdollStruct);
         RegisterCustomType(FikaSerializationExtensions.PutArtilleryStruct, FikaSerializationExtensions.GetArtilleryStruct);
         RegisterCustomType(FikaSerializationExtensions.PutGrenadeStruct, FikaSerializationExtensions.GetGrenadeStruct);
@@ -288,10 +290,6 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
         RegisterPacket<SpawnItemInInventoryPacket>(SpawnItemInInventoryPacketReceived);
 
         RegisterReusable<WorldPacket>(OnWorldPacketReceived);
-
-        RegisterNetReusable<WeaponPacket>(OnWeaponPacketReceived);
-        RegisterNetReusable<CommonPlayerPacket>(OnCommonPlayerPacketReceived);
-        RegisterNetReusable<GenericPacket>(OnGenericPacketReceived);
 
         return Task.CompletedTask;
     }
@@ -357,9 +355,6 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
     private void OnDestroy()
     {
         _netClient?.Stop();
-        _genericPacket.Clear();
-
-        PoolUtils.ReleaseAll();
 
         if (_fikaChat != null)
         {
@@ -383,6 +378,11 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
         }
     }
 
+    public void SendData<T>(ref T packet, DeliveryMethod deliveryMethod, NetPeer peerToIgnore, bool broadcast = false) where T : INetSerializable
+    {
+        SendData(ref packet, deliveryMethod, broadcast);
+    }
+
     public void SendPlayerState(ref PlayerStateData packet)
     {
         _dataWriter.Reset();
@@ -394,12 +394,39 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
         _netClient.SendToAll(_dataWriter.AsReadOnlySpan(), DeliveryMethod.Unreliable);
     }
 
-    public void SendGenericPacket(EGenericSubPacketType type, IPoolSubPacket subpacket, bool broadcast = false, NetPeer peerToIgnore = null)
+    public void SendGenericPacket<T>(in T genericPacket, DeliveryMethod deliveryMethod, bool broadcast = false, NetPeer peerToIgnore = null) where T : struct, IGenericPacket
     {
-        var packet = _genericPacket;
-        packet.Type = type;
-        packet.SubPacket = subpacket;
-        SendNetReusable(ref packet, DeliveryMethod.ReliableOrdered, broadcast);
+        _dataWriter.Reset();
+        _dataWriter.Put(broadcast);
+        _dataWriter.PutEnum(EPacketType.Generic);
+
+        _dataWriter.PutEnum(genericPacket.Type);
+        genericPacket.Serialize(_dataWriter);
+        _netClient.SendToAll(_dataWriter.AsReadOnlySpan(), deliveryMethod);
+    }
+
+    public void SendPlayerPacket<T>(in T playerPacket, int netId, DeliveryMethod deliveryMethod, bool broadcast = false, NetPeer peerToIgnore = null) where T : struct, IPlayerPacket
+    {
+        _dataWriter.Reset();
+        _dataWriter.Put(broadcast);
+        _dataWriter.PutEnum(EPacketType.Player);
+
+        _dataWriter.Put(netId);
+        _dataWriter.PutEnum(playerPacket.Type);
+        playerPacket.Serialize(_dataWriter);
+        _netClient.SendToAll(_dataWriter.AsReadOnlySpan(), deliveryMethod);
+    }
+
+    public void SendFirearmPacket<T>(in T firearmPacket, int netId, DeliveryMethod deliveryMethod, bool broadcast = false, NetPeer peerToIgnore = null) where T : struct, IFirearmPacket
+    {
+        _dataWriter.Reset();
+        _dataWriter.Put(broadcast);
+        _dataWriter.PutEnum(EPacketType.Firearm);
+
+        _dataWriter.Put(netId);
+        _dataWriter.PutEnum(firearmPacket.Type);
+        firearmPacket.Serialize(_dataWriter);
+        _netClient.SendToAll(_dataWriter.AsReadOnlySpan(), deliveryMethod);
     }
 
     public void SendNetReusable<T>(ref T packet, DeliveryMethod deliveryMethod, bool broadcast = false, NetPeer peerToIgnore = null) where T : INetReusable
@@ -509,10 +536,8 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
                 var remoteTime = reader.GetDouble();
                 var localTime = NetworkTimeSync.NetworkTime;
                 var remaining = reader.GetRemainingBytesSpan();
-                var snapshots = MemoryMarshal.Cast<byte, PlayerStateData>(remaining);
-                for (var i = 0; i < snapshots.Length; i++)
+                foreach (ref readonly var snapshot in MemoryMarshal.Cast<byte, PlayerStateData>(remaining))
                 {
-                    ref readonly var snapshot = ref snapshots[i];
                     if (_coopHandler.Players.TryGetValue(snapshot.NetId, out var player))
                     {
                         var header = new PlayerStateSnapshot(in snapshot, remoteTime, localTime);
@@ -521,7 +546,7 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
                 }
                 break;
             case EPacketType.BTR:
-                var data = reader.GetUnmanaged<ShapshotBTRMessage>();
+                ref var data = ref Unsafe.As<byte, ShapshotBTRMessage>(ref MemoryMarshal.GetReference(reader.GetRemainingBytesSpan()));
                 if (BtrController.Instance.BtrView != null)
                 {
                     BtrController.Instance.BtrView.SyncViewFromServer(ref data);
@@ -532,6 +557,268 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
                 {
                     VOIPClient.NetworkReceivedPacket(reader.GetRemainingBytesSegment());
                 }
+                break;
+            case EPacketType.Generic:
+                HandleGenericPacket(reader);
+                break;
+            case EPacketType.Player:
+                HandlePlayerPacket(reader);
+                break;
+            case EPacketType.Firearm:
+                HandleFirearmPacket(reader);
+                break;
+        }
+    }
+
+    private void HandleFirearmPacket(NetPacketReader reader)
+    {
+        var netId = reader.GetInt();
+        if (!_coopHandler.Players.TryGetValue(netId, out var player))
+        {
+            var type = reader.GetEnum<EFirearmPacketType>();
+            _logger.LogWarning($"FikaClient::HandleFirearmPacket: Received FirearmPacket, but there was no player with id {netId} for packet type {type}");
+            return;
+        }
+
+        switch (reader.GetEnum<EFirearmPacketType>())
+        {
+            case EFirearmPacketType.ShotInfo:
+                new ShotInfoPacket(reader).Execute(player);
+                break;
+            case EFirearmPacketType.DryShot:
+                new DryShotPacket(reader).Execute(player);
+                break;
+            case EFirearmPacketType.Misfire:
+                new MisfirePacket(reader).Execute(player);
+                break;
+            case EFirearmPacketType.ChangeFireMode:
+                new ChangeFireModePacket(reader).Execute(player);
+                break;
+            case EFirearmPacketType.ToggleAim:
+                new ToggleAimPacket(reader).Execute(player);
+                break;
+            case EFirearmPacketType.ExamineWeapon:
+                new ExamineWeaponPacket().Execute(player);
+                break;
+            case EFirearmPacketType.CheckAmmo:
+                new CheckAmmoPacket().Execute(player);
+                break;
+            case EFirearmPacketType.CheckChamber:
+                new CheckChamberPacket().Execute(player);
+                break;
+            case EFirearmPacketType.CheckFireMode:
+                new CheckFireModePacket().Execute(player);
+                break;
+            case EFirearmPacketType.ToggleLightStates:
+                new LightStatesPacket(reader).Execute(player);
+                break;
+            case EFirearmPacketType.ToggleScopeStates:
+                new ScopeStatesPacket(reader).Execute(player);
+                break;
+            case EFirearmPacketType.ToggleLauncher:
+                new ToggleLauncherPacket().Execute(player);
+                break;
+            case EFirearmPacketType.ToggleInventory:
+                new ToggleInventoryPacket(reader).Execute(player);
+                break;
+            case EFirearmPacketType.Loot:
+                new FirearmLootPacket().Execute(player);
+                break;
+            case EFirearmPacketType.ReloadMag:
+                new ReloadMagPacket(reader).Execute(player);
+                break;
+            case EFirearmPacketType.QuickReloadMag:
+                new QuickReloadMagPacket(reader).Execute(player);
+                break;
+            case EFirearmPacketType.ReloadWithAmmo:
+                new ReloadWithAmmoPacket(reader).Execute(player);
+                break;
+            case EFirearmPacketType.CylinderMag:
+                new CylinderMagPacket(reader).Execute(player);
+                break;
+            case EFirearmPacketType.ReloadLauncher:
+                new ReloadLauncherPacket(reader).Execute(player);
+                break;
+            case EFirearmPacketType.ReloadBarrels:
+                new ReloadBarrelsPacket(reader).Execute(player);
+                break;
+            case EFirearmPacketType.Grenade:
+                new GrenadePacket(reader).Execute(player);
+                break;
+            case EFirearmPacketType.CancelGrenade:
+                new CancelGrenadePacket().Execute(player);
+                break;
+            case EFirearmPacketType.CompassChange:
+                new CompassChangePacket(reader).Execute(player);
+                break;
+            case EFirearmPacketType.Knife:
+                new KnifePacket(reader).Execute(player);
+                break;
+            case EFirearmPacketType.FlareShot:
+                new FlareShotPacket(reader).Execute(player);
+                break;
+            case EFirearmPacketType.RocketShot:
+                new RocketShotPacket(reader).Execute(player);
+                break;
+            case EFirearmPacketType.ReloadBoltAction:
+                new ReloadBoltActionPacket().Execute(player);
+                break;
+            case EFirearmPacketType.RollCylinder:
+                new RollCylinderPacket().Execute(player);
+                break;
+            case EFirearmPacketType.UnderbarrelSightingRangeUp:
+                new UnderbarrelSightingRangeUpPacket().Execute(player);
+                break;
+            case EFirearmPacketType.UnderbarrelSightingRangeDown:
+                new UnderbarrelSightingRangeDownPacket().Execute(player);
+                break;
+            case EFirearmPacketType.ToggleBipod:
+                new ToggleBipodPacket().Execute(player);
+                break;
+            case EFirearmPacketType.LeftStanceChange:
+                new LeftStanceChangePacket(reader).Execute(player);
+                break;
+        }
+    }
+
+    private void HandlePlayerPacket(NetPacketReader reader)
+    {
+        var netId = reader.GetInt();
+        if (!_coopHandler.Players.TryGetValue(netId, out var player))
+        {
+            var type = reader.GetEnum<EPlayerPacketType>();
+            _logger.LogWarning($"FikaClient::HandlePlayerPacket: Received PlayerPacket, but there was no player with id {netId} for packet type {type}");
+            return;
+        }
+
+        switch (reader.GetEnum<EPlayerPacketType>())
+        {
+            case EPlayerPacketType.Phrase:
+                new PhrasePacket(reader).Execute(player);
+                break;
+            case EPlayerPacketType.WorldInteraction:
+                new WorldInteractionPacket(reader).Execute(player);
+                break;
+            case EPlayerPacketType.ContainerInteraction:
+                new ContainerInteractionPacket(reader).Execute();
+                break;
+            case EPlayerPacketType.Proceed:
+                new ProceedPacket(reader).Execute(player);
+                break;
+            case EPlayerPacketType.HeadLights:
+                new HeadLightsPacket(reader).Execute(player);
+                break;
+            case EPlayerPacketType.InventoryChanged:
+                reader.GetUnmanaged<InventoryChangedPacket>().Execute(player);
+                break;
+            case EPlayerPacketType.Drop:
+                reader.GetUnmanaged<DropPacket>().Execute(player);
+                break;
+            case EPlayerPacketType.MuffledState:
+                reader.GetUnmanaged<MuffledStatePacket>().Execute(player);
+                break;
+            case EPlayerPacketType.Stationary:
+                new StationaryPacket(reader).Execute(player);
+                break;
+            case EPlayerPacketType.Vault:
+                reader.GetUnmanaged<VaultPacket>().Execute(player);
+                break;
+            case EPlayerPacketType.Interaction:
+                new InteractionPacket(reader).Execute(player);
+                break;
+            case EPlayerPacketType.Mounting:
+                new MountingPacket(reader).Execute(player);
+                break;
+            case EPlayerPacketType.Damage:
+                new DamagePacket(reader).Execute(player);
+                break;
+            case EPlayerPacketType.ArmorDamage:
+                new ArmorDamagePacket(reader).Execute(player);
+                break;
+            case EPlayerPacketType.HealthSync:
+                new HealthSyncPacket(reader).Execute(player);
+                break;
+            case EPlayerPacketType.UsableItem:
+                new UsableItemPacket(reader).Execute(player);
+                break;
+            case EPlayerPacketType.DownedSync:
+                reader.GetUnmanaged<DownedSyncPacket>().Execute(player);
+                break;
+            case EPlayerPacketType.RevivedPlayer:
+                new RevivedPlayerPacket().Execute(player);
+                break;
+            case EPlayerPacketType.RevivingPlayer:
+                new RevivingPlayerPacket(reader).Execute(player);
+                break;
+        }
+    }
+
+    private void HandleGenericPacket(NetPacketReader reader)
+    {
+        switch (reader.GetEnum<EGenericPacketType>())
+        {
+            case EGenericPacketType.ClientExtract:
+                reader.GetUnmanaged<ClientExtractPacket>().Execute();
+                break;
+            case EGenericPacketType.ClientConnected:
+                new ClientConnectedPacket(reader).Execute();
+                break;
+            case EGenericPacketType.ClientDisconnected:
+                new ClientDisconnectedPacket(reader).Execute();
+                break;
+            case EGenericPacketType.ExfilCountdown:
+                new ExfilCountdownPacket(reader).Execute();
+                break;
+            case EGenericPacketType.UpdateBackendData:
+                reader.GetUnmanaged<UpdateBackendDataPacket>().Execute();
+                break;
+            case EGenericPacketType.SecretExfilFound:
+                new SecretExfilFoundPacket(reader).Execute();
+                break;
+            case EGenericPacketType.BorderZoneEvent:
+                new BorderZoneEventPacket(reader).Execute();
+                break;
+            case EGenericPacketType.MineEvent:
+                reader.GetUnmanaged<MineEventPacket>().Execute();
+                break;
+            case EGenericPacketType.DisarmTripwire:
+                new DisarmTripwirePacket(reader).Execute();
+                break;
+            case EGenericPacketType.SpawnBTR:
+                new SpawnBTRPacket(reader).Execute();
+                break;
+            case EGenericPacketType.CharacterSync:
+                new CharacterSyncPacket(reader).Execute();
+                break;
+            case EGenericPacketType.InventoryOperation:
+                {
+                    var inventory = new InventoryPacket(reader);
+                    if (_coopHandler.Players.TryGetValue(inventory.NetId, out var player))
+                    {
+                        HandleInventoryPacket(in inventory, player);
+                    }
+                    break;
+                }
+            case EGenericPacketType.OperationCallback:
+                {
+                    var operationCallback = new OperationCallbackPacket(reader);
+                    if (_coopHandler.Players.TryGetValue(operationCallback.NetId, out var player) && player.IsYourPlayer)
+                    {
+                        player.HandleCallbackFromServer(in operationCallback);
+                    }
+                    break;
+                }
+            case EGenericPacketType.Ping:
+                new PingPacket(reader).Execute();
+                break;
+            case EGenericPacketType.SendCharacter:
+                new SendCharacterPacket(reader).Execute();
+                break;
+            case EGenericPacketType.SyncableItem:
+                new SyncableItemPacket(reader).Execute();
+                break;
+            case EGenericPacketType.SpawnAI:
+                reader.GetUnmanaged<SpawnAIPacket>().Execute();
                 break;
         }
     }
@@ -650,7 +937,7 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
         return (NetPeer)_netClient.GetPeerById(id);
     }
 
-    private void HandleInventoryPacket(InventoryPacket packet, FikaPlayer player)
+    private void HandleInventoryPacket(in InventoryPacket packet, FikaPlayer player)
     {
         if (packet.Descriptor == null)
         {

@@ -3,7 +3,7 @@
 /// <summary>
 /// Represents generic game-level packet events unrelated to specific systems.
 /// </summary>
-public enum EGenericSubPacketType : byte
+public enum EGenericPacketType : byte
 {
     /// <summary>
     /// Client extraction event.
@@ -38,22 +38,17 @@ public enum EGenericSubPacketType : byte
     /// <summary>
     /// Border zone event.
     /// </summary>
-    BorderZone,
+    BorderZoneEvent,
 
     /// <summary>
     /// Mine triggered.
     /// </summary>
-    Mine,
+    MineEvent,
 
     /// <summary>
     /// Disarm a tripwire event.
     /// </summary>
     DisarmTripwire,
-
-    /// <summary>
-    /// Player muffled state changed.
-    /// </summary>
-    MuffledState,
 
     /// <summary>
     /// Spawns the BTR vehicle.

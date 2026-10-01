@@ -1,32 +1,24 @@
 ﻿using EFT.InventoryLogic;
 using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
-using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
-public sealed class RollCylinderPacket : IPoolSubPacket
+public readonly struct RollCylinderPacket : IFirearmPacket
 {
-    private RollCylinderPacket()
+    public RollCylinderPacket(bool rollToZeroCamora)
     {
-
+        RollToZeroCamora = rollToZeroCamora;
     }
 
-    public static RollCylinderPacket FromValue(bool rollToZeroCamora)
+    public RollCylinderPacket(NetDataReader reader)
     {
-        var packet = FirearmSubPacketPoolManager.Instance.GetPacket<RollCylinderPacket>(EFirearmSubPacketType.RollCylinder);
-        packet.RollToZeroCamora = rollToZeroCamora;
-        return packet;
+        RollToZeroCamora = reader.GetBool();
     }
 
-    public static RollCylinderPacket CreateInstance()
-    {
-        return new();
-    }
+    public readonly bool RollToZeroCamora;
 
-    public bool RollToZeroCamora;
-
-    public void Execute(FikaPlayer player)
+    public readonly void Execute(FikaPlayer player)
     {
         if (player.HandsController is ObservedFirearmController controller && controller.Weapon is Revolver)
         {
@@ -34,18 +26,10 @@ public sealed class RollCylinderPacket : IPoolSubPacket
         }
     }
 
-    public void Serialize(NetDataWriter writer)
+    public readonly void Serialize(NetDataWriter writer)
     {
         writer.Put(RollToZeroCamora);
     }
 
-    public void Deserialize(NetDataReader reader)
-    {
-        RollToZeroCamora = reader.GetBool();
-    }
-
-    public void Dispose()
-    {
-        RollToZeroCamora = false;
-    }
+    public EFirearmPacketType Type => EFirearmPacketType.RollCylinder;
 }

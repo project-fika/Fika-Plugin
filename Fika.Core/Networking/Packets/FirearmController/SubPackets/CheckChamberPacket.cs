@@ -1,27 +1,13 @@
 ﻿using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
-using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
-public sealed class CheckChamberPacket : IPoolSubPacket
+public readonly struct CheckChamberPacket : IFirearmPacket
 {
-    private CheckChamberPacket()
-    {
+    public EFirearmPacketType Type => EFirearmPacketType.CheckChamber;
 
-    }
-
-    public static CheckChamberPacket FromValue()
-    {
-        return FirearmSubPacketPoolManager.Instance.GetPacket<CheckChamberPacket>(EFirearmSubPacketType.CheckChamber);
-    }
-
-    public static CheckChamberPacket CreateInstance()
-    {
-        return new();
-    }
-
-    public void Execute(FikaPlayer player)
+    public readonly void Execute(FikaPlayer player)
     {
         if (player.HandsController is ObservedFirearmController controller)
         {
@@ -29,17 +15,7 @@ public sealed class CheckChamberPacket : IPoolSubPacket
         }
     }
 
-    public void Serialize(NetDataWriter writer)
-    {
-        // do nothing
-    }
-
-    public void Deserialize(NetDataReader reader)
-    {
-        // do nothing
-    }
-
-    public void Dispose()
+    public readonly void Serialize(NetDataWriter writer)
     {
         // do nothing
     }

@@ -7,10 +7,8 @@ using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
-using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.FirearmController;
 using Fika.Core.Networking.Packets.FirearmController.SubPackets;
-using Fika.Core.Networking.Pooling;
 using ReloadMagPacket = Fika.Core.Networking.Packets.FirearmController.SubPackets.ReloadMagPacket;
 using RollCylinderPacket = Fika.Core.Networking.Packets.FirearmController.SubPackets.RollCylinderPacket;
 
@@ -19,7 +17,6 @@ namespace Fika.Core.Main.ClientClasses.HandsControllers;
 public class FikaClientFirearmController : Player.FirearmController
 {
     protected FikaPlayer _fikaPlayer;
-    protected WeaponPacket _packet;
     private bool _isClient;
     private bool _isGrenadeLauncher;
 
@@ -29,18 +26,12 @@ public class FikaClientFirearmController : Player.FirearmController
         controller._fikaPlayer = player;
         controller._isClient = FikaBackendUtils.IsClient;
         controller._isGrenadeLauncher = weapon.IsGrenadeLauncher;
-        controller._packet = new()
-        {
-            NetId = player.NetId
-        };
         return controller;
     }
 
-    public void SendLightStates(LightStatesPacket packet)
+    public void SendLightStates(in LightStatesPacket packet)
     {
-        _packet.Type = EFirearmSubPacketType.ToggleLightStates;
-        _packet.SubPacket = packet;
-        _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
+        _fikaPlayer.PacketSender.NetworkManager.SendFirearmPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
     }
 
     public override void CompassStateHandler(bool isActive)
@@ -49,20 +40,12 @@ public class FikaClientFirearmController : Player.FirearmController
         base.CompassStateHandler(isActive);
     }
 
-    public void SendCompassState(CompassChangePacket packet)
+    public void SendCompassState(in CompassChangePacket packet)
     {
 #if DEBUG
         FikaGlobals.LogInfo("Sending CompassPacket");
 #endif
-        _packet.Type = EFirearmSubPacketType.CompassChange;
-        _packet.SubPacket = packet;
-        _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
-    }
-
-    public override void Destroy()
-    {
-        _packet = null;
-        base.Destroy();
+        _fikaPlayer.PacketSender.NetworkManager.SendFirearmPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
     }
 
     public override void SetWeaponOverlapValue(float overlap)
@@ -80,9 +63,9 @@ public class FikaClientFirearmController : Player.FirearmController
     public override Dictionary<Type, OperationFactoryDelegate> GetOperationFactoryDelegates()
     {
         var operationFactoryDelegates = base.GetOperationFactoryDelegates();
-        operationFactoryDelegates[typeof(Player.FirearmController.ReloadInternalMagBase)] = new OperationFactoryDelegate(Weapon1);
-        operationFactoryDelegates[typeof(Player.FirearmController.ReloadCylinderMagOperation)] = new OperationFactoryDelegate(Weapon2);
-        operationFactoryDelegates[typeof(Player.FirearmController.FireOperation)] = new OperationFactoryDelegate(Weapon3);
+        operationFactoryDelegates[typeof(ReloadInternalMagBase)] = new OperationFactoryDelegate(Weapon1);
+        operationFactoryDelegates[typeof(ReloadCylinderMagOperation)] = new OperationFactoryDelegate(Weapon2);
+        operationFactoryDelegates[typeof(FireOperation)] = new OperationFactoryDelegate(Weapon3);
         return operationFactoryDelegates;
     }
 
@@ -137,15 +120,15 @@ public class FikaClientFirearmController : Player.FirearmController
     {
         if (Item is RocketLauncher)
         {
-            return new Player.FirearmController.RocketLauncherFire(this);
+            return new RocketLauncherFire(this);
         }
         if (Item.IsFlareGun)
         {
-            return new Player.FirearmController.FlareGunFire(this);
+            return new FlareGunFire(this);
         }
         if (Item.IsOneOff)
         {
-            return new Player.FirearmController.OneOffGunFire(this);
+            return new OneOffGunFire(this);
         }
         if (Item.ReloadMode == Weapon.EReloadMode.OnlyBarrel)
         {
@@ -153,11 +136,11 @@ public class FikaClientFirearmController : Player.FirearmController
         }
         if (Item is Revolver)
         {
-            return new Player.FirearmController.FireCylinderMagOperation(this);
+            return new FireCylinderMagOperation(this);
         }
         if (!Item.BoltAction)
         {
-            return new Player.FirearmController.FireOperation(this);
+            return new FireOperation(this);
         }
         return new DefaultFireOperation(this);
     }
@@ -167,8 +150,8 @@ public class FikaClientFirearmController : Player.FirearmController
         var success = base.ToggleBipod();
         if (success)
         {
-            _packet.Type = EFirearmSubPacketType.ToggleBipod;
-            _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
+            var packet = new ToggleBipodPacket();
+            _fikaPlayer.PacketSender.NetworkManager.SendFirearmPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
         }
         return success;
     }
@@ -178,8 +161,8 @@ public class FikaClientFirearmController : Player.FirearmController
         var flag = base.CheckChamber();
         if (flag)
         {
-            _packet.Type = EFirearmSubPacketType.CheckChamber;
-            _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
+            var packet = new CheckChamberPacket();
+            _fikaPlayer.PacketSender.NetworkManager.SendFirearmPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
         }
         return flag;
     }
@@ -189,8 +172,8 @@ public class FikaClientFirearmController : Player.FirearmController
         var flag = base.CheckAmmo();
         if (flag)
         {
-            _packet.Type = EFirearmSubPacketType.CheckAmmo;
-            _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
+            var packet = new CheckAmmoPacket();
+            _fikaPlayer.PacketSender.NetworkManager.SendFirearmPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
         }
         return flag;
     }
@@ -200,9 +183,8 @@ public class FikaClientFirearmController : Player.FirearmController
         var flag = base.ChangeFireMode(fireMode);
         if (flag)
         {
-            _packet.Type = EFirearmSubPacketType.ChangeFireMode;
-            _packet.SubPacket = ChangeFireModePacket.FromValue(fireMode);
-            _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
+            var packet = new ChangeFireModePacket(fireMode);
+            _fikaPlayer.PacketSender.NetworkManager.SendFirearmPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
         }
         return flag;
     }
@@ -210,9 +192,8 @@ public class FikaClientFirearmController : Player.FirearmController
     public override void ChangeAimingMode()
     {
         base.ChangeAimingMode();
-        _packet.Type = EFirearmSubPacketType.ToggleAim;
-        _packet.SubPacket = FirearmSubPacketPoolManager.Instance.GetPacket<IPoolSubPacket>(EFirearmSubPacketType.ToggleAim);
-        _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
+        var packet = new ToggleAimPacket();
+        _fikaPlayer.PacketSender.NetworkManager.SendFirearmPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
     }
 
     public override void SetAim(bool value)
@@ -222,9 +203,8 @@ public class FikaClientFirearmController : Player.FirearmController
         base.SetAim(value);
         if (IsAiming != isAiming || (aimingInterruptedByOverlap && _fikaPlayer.HealthController.IsAlive))
         {
-            _packet.Type = EFirearmSubPacketType.ToggleAim;
-            _packet.SubPacket = ToggleAimPacket.FromValue(IsAiming ? Item.AimIndex.Value : -1);
-            _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
+            var packet = new ToggleAimPacket(IsAiming ? Item.AimIndex.Value : -1);
+            _fikaPlayer.PacketSender.NetworkManager.SendFirearmPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
         }
     }
 
@@ -233,9 +213,8 @@ public class FikaClientFirearmController : Player.FirearmController
         base.AimingChanged(newValue);
         if (!IsAiming && _fikaPlayer.HealthController.IsAlive)
         {
-            _packet.Type = EFirearmSubPacketType.ToggleAim;
-            _packet.SubPacket = ToggleAimPacket.FromValue(-1);
-            _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
+            var packet = new ToggleAimPacket(-1);
+            _fikaPlayer.PacketSender.NetworkManager.SendFirearmPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
         }
     }
 
@@ -244,8 +223,8 @@ public class FikaClientFirearmController : Player.FirearmController
         var flag = base.CheckFireMode();
         if (flag && _fikaPlayer.HealthController.IsAlive)
         {
-            _packet.Type = EFirearmSubPacketType.CheckFireMode;
-            _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
+            var packet = new CheckFireModePacket();
+            _fikaPlayer.PacketSender.NetworkManager.SendFirearmPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
 
         }
         return flag;
@@ -254,9 +233,8 @@ public class FikaClientFirearmController : Player.FirearmController
     public override void DryShot(int chamberIndex = 0, bool underbarrelShot = false)
     {
         base.DryShot(chamberIndex, underbarrelShot);
-        _packet.Type = EFirearmSubPacketType.ShotInfo;
-        _packet.SubPacket = ShotInfoPacket.FromDryShot(chamberIndex, underbarrelShot, EShotType.DryFire);
-        _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
+        var packet = new DryShotPacket(chamberIndex, underbarrelShot);
+        _fikaPlayer.PacketSender.NetworkManager.SendFirearmPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
     }
 
     public override bool ExamineWeapon()
@@ -264,45 +242,46 @@ public class FikaClientFirearmController : Player.FirearmController
         var flag = base.ExamineWeapon();
         if (flag && _fikaPlayer.HealthController.IsAlive)
         {
-            _packet.Type = EFirearmSubPacketType.ExamineWeapon;
-            _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
+            var packet = new ExamineWeaponPacket();
+            _fikaPlayer.PacketSender.NetworkManager.SendFirearmPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
         }
         return flag;
     }
 
     public override void InitiateShot(IWeapon weapon, Ammo ammo, Vector3 shotPosition, Vector3 shotDirection, Vector3 fireportPosition, int chamberIndex, float overheat)
     {
-        EShotType shotType = default;
-
-        switch (weapon.MalfState.State)
+        var malfState = weapon.MalfState;
+        var shotType = malfState.State switch
         {
-            case Weapon.EMalfunctionState.None:
-                shotType = EShotType.RegularShot;
-                break;
-            case Weapon.EMalfunctionState.Misfire:
-                shotType = EShotType.Misfire;
-                break;
-            case Weapon.EMalfunctionState.Jam:
-                shotType = EShotType.JamedShot;
-                break;
-            case Weapon.EMalfunctionState.HardSlide:
-                shotType = EShotType.HardSlidedShot;
-                break;
-            case Weapon.EMalfunctionState.SoftSlide:
-                shotType = EShotType.SoftSlidedShot;
-                break;
-            case Weapon.EMalfunctionState.Feed:
-                shotType = EShotType.Feed;
-                break;
+            Weapon.EMalfunctionState.None => EShotType.RegularShot,
+            Weapon.EMalfunctionState.Misfire => EShotType.Misfire,
+            Weapon.EMalfunctionState.Jam => EShotType.JamedShot,
+            Weapon.EMalfunctionState.HardSlide => EShotType.HardSlidedShot,
+            Weapon.EMalfunctionState.SoftSlide => EShotType.SoftSlidedShot,
+            Weapon.EMalfunctionState.Feed => EShotType.Feed,
+            _ => EShotType.RegularShot
+        };
+
+        var player = _fikaPlayer;
+        var netManager = player.PacketSender.NetworkManager;
+        var netId = player.NetId;
+        var ammoTemplateId = ammo.TemplateId;
+
+        if (shotType.IsMisfire())
+        {
+            var packet = new MisfirePacket(ammoTemplateId, overheat, shotType);
+            netManager.SendFirearmPacket(in packet, netId, DeliveryMethod.ReliableOrdered, true);
+        }
+        else
+        {
+            var isLauncherActive = Weapon.IsUnderBarrelDeviceActive || _isGrenadeLauncher;
+            var packet = new ShotInfoPacket(shotPosition, shotDirection, ammoTemplateId, overheat,
+                malfState.LastShotOverheat, malfState.LastShotTime, Weapon.Repairable.Durability, chamberIndex,
+                isLauncherActive, malfState.SlideOnOverheatReached);
+            netManager.SendFirearmPacket(in packet, netId, DeliveryMethod.ReliableOrdered, true);
         }
 
-        _packet.Type = EFirearmSubPacketType.ShotInfo;
-        _packet.SubPacket = ShotInfoPacket.FromShot(shotPosition, shotDirection, ammo.TemplateId, overheat,
-            weapon.MalfState.LastShotOverheat, weapon.MalfState.LastShotTime, Weapon.Repairable.Durability,
-            chamberIndex, Weapon.IsUnderBarrelDeviceActive || _isGrenadeLauncher,
-            weapon.MalfState.SlideOnOverheatReached, shotType);
-        _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
-        _fikaPlayer.StatisticsManager.OnShot(Weapon, ammo);
+        player.StatisticsManager.OnShot(Weapon, ammo);
 
         base.InitiateShot(weapon, ammo, shotPosition, shotDirection, fireportPosition, chamberIndex, overheat);
     }
@@ -312,9 +291,8 @@ public class FikaClientFirearmController : Player.FirearmController
         if (CanStartReload())
         {
             base.QuickReloadMag(magazine, callback);
-            _packet.Type = EFirearmSubPacketType.QuickReloadMag;
-            _packet.SubPacket = QuickReloadMagPacket.FromValue(magazine.Id, true);
-            _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
+            var packet = new QuickReloadMagPacket(magazine.Id, true);
+            _fikaPlayer.PacketSender.NetworkManager.SendFirearmPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
             return;
         }
 
@@ -325,7 +303,7 @@ public class FikaClientFirearmController : Player.FirearmController
     {
         if (CanStartReload() && ammoPack.AmmoCount > 0)
         {
-            ReloadBarrelsHandler handler = new(_fikaPlayer, this, placeToPutContainedAmmoMagazine, ammoPack);
+            ReloadBarrelsHandler handler = new(_fikaPlayer, placeToPutContainedAmmoMagazine, ammoPack);
             CurrentOperation.ReloadBarrels(ammoPack, placeToPutContainedAmmoMagazine, callback, handler.Process);
             return;
         }
@@ -360,9 +338,8 @@ public class FikaClientFirearmController : Player.FirearmController
         if (CanStartReload())
         {
             var reloadingAmmoIds = ammoPack.GetReloadingAmmoIds();
-            _packet.Type = EFirearmSubPacketType.ReloadLauncher;
-            _packet.SubPacket = ReloadLauncherPacket.FromValue(true, reloadingAmmoIds);
-            _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
+            var packet = new ReloadLauncherPacket(true, reloadingAmmoIds);
+            _fikaPlayer.PacketSender.NetworkManager.SendFirearmPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
 
             CurrentOperation.ReloadGrenadeLauncher(ammoPack, callback);
             return;
@@ -381,7 +358,7 @@ public class FikaClientFirearmController : Player.FirearmController
         _player.MovementContext.PlayerAnimator.AnimatedInteractions.ForceStopInteractions();
         if (!_player.MovementContext.PlayerAnimator.AnimatedInteractions.IsInteractionPlaying)
         {
-            ReloadMagHandler handler = new(_fikaPlayer, this, itemAddress, magazine);
+            ReloadMagHandler handler = new(_fikaPlayer, itemAddress, magazine);
             CurrentOperation.ReloadMag(magazine, itemAddress, callback, handler.Process);
             return;
         }
@@ -397,7 +374,7 @@ public class FikaClientFirearmController : Player.FirearmController
         }
         if (CanStartReload())
         {
-            ReloadWithAmmoHandler handler = new(_fikaPlayer, this, ammoPack.GetReloadingAmmoIds());
+            ReloadWithAmmoHandler handler = new(_fikaPlayer, ammoPack.GetReloadingAmmoIds());
             CurrentOperation.ReloadWithAmmo(ammoPack, callback, handler.Process);
             return;
         }
@@ -409,9 +386,8 @@ public class FikaClientFirearmController : Player.FirearmController
     {
         if (force || CurrentOperation.CanChangeLightState(lightsStates))
         {
-            _packet.Type = EFirearmSubPacketType.ToggleLightStates;
-            _packet.SubPacket = LightStatesPacket.FromValue(lightsStates.Length, lightsStates);
-            _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
+            var packet = new LightStatesPacket(lightsStates.Length, lightsStates);
+            _fikaPlayer.PacketSender.NetworkManager.SendFirearmPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
         }
 
         return base.SetLightsState(lightsStates, force, animated);
@@ -441,37 +417,25 @@ public class FikaClientFirearmController : Player.FirearmController
             return;
         }
 
-        _packet.Type = EFirearmSubPacketType.ToggleScopeStates;
-        _packet.SubPacket = ScopeStatesPacket.FromValue(scopeStates.Length, scopeStates);
-        _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
+        var packet = new ScopeStatesPacket(scopeStates.Length, scopeStates);
+        _fikaPlayer.PacketSender.NetworkManager.SendFirearmPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
     }
 
     public override void ShotMisfired(Ammo ammo, Weapon.EMalfunctionState malfunctionState, float overheat)
     {
-        EShotType shotType = new();
-
-        switch (malfunctionState)
+        var shotType = malfunctionState switch
         {
-            case Weapon.EMalfunctionState.Misfire:
-                shotType = EShotType.Misfire;
-                break;
-            case Weapon.EMalfunctionState.Jam:
-                shotType = EShotType.JamedShot;
-                break;
-            case Weapon.EMalfunctionState.HardSlide:
-                shotType = EShotType.HardSlidedShot;
-                break;
-            case Weapon.EMalfunctionState.SoftSlide:
-                shotType = EShotType.SoftSlidedShot;
-                break;
-            case Weapon.EMalfunctionState.Feed:
-                shotType = EShotType.Feed;
-                break;
-        }
+            Weapon.EMalfunctionState.None => EShotType.RegularShot,
+            Weapon.EMalfunctionState.Misfire => EShotType.Misfire,
+            Weapon.EMalfunctionState.Jam => EShotType.JamedShot,
+            Weapon.EMalfunctionState.HardSlide => EShotType.HardSlidedShot,
+            Weapon.EMalfunctionState.SoftSlide => EShotType.SoftSlidedShot,
+            Weapon.EMalfunctionState.Feed => EShotType.Feed,
+            _ => EShotType.RegularShot
+        };
 
-        _packet.Type = EFirearmSubPacketType.ShotInfo;
-        _packet.SubPacket = ShotInfoPacket.FromMisfire(ammo.TemplateId, overheat, shotType);
-        _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
+        var packet = new MisfirePacket(ammo.TemplateId, overheat, shotType);
+        _fikaPlayer.PacketSender.NetworkManager.SendFirearmPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
 
         base.ShotMisfired(ammo, malfunctionState, overheat);
     }
@@ -481,8 +445,8 @@ public class FikaClientFirearmController : Player.FirearmController
         var flag = base.ToggleLauncher(callback);
         if (flag)
         {
-            _packet.Type = EFirearmSubPacketType.ToggleLauncher;
-            _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
+            var packet = new ToggleLauncherPacket();
+            _fikaPlayer.PacketSender.NetworkManager.SendFirearmPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
         }
         return flag;
     }
@@ -490,54 +454,48 @@ public class FikaClientFirearmController : Player.FirearmController
     public override void Loot(bool p)
     {
         base.Loot(p);
-        _packet.Type = EFirearmSubPacketType.Loot;
-        _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
+        var packet = new FirearmLootPacket();
+        _fikaPlayer.PacketSender.NetworkManager.SendFirearmPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
     }
 
     public override void SetInventoryOpened(bool opened)
     {
         base.SetInventoryOpened(opened);
-        _packet.Type = EFirearmSubPacketType.ToggleInventory;
-        _packet.SubPacket = ToggleInventoryPacket.FromValue(opened);
-        _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
+        var packet = new ToggleInventoryPacket(opened);
+        _fikaPlayer.PacketSender.NetworkManager.SendFirearmPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
     }
 
     public override void ChangeLeftStance()
     {
         base.ChangeLeftStance();
-        _packet.Type = EFirearmSubPacketType.LeftStanceChange;
-        _packet.SubPacket = LeftStanceChangePacket.FromValue(_fikaPlayer.MovementContext.LeftStanceEnabled);
-        _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
+        var packet = new LeftStanceChangePacket(_fikaPlayer.MovementContext.LeftStanceEnabled);
+        _fikaPlayer.PacketSender.NetworkManager.SendFirearmPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
     }
 
     public override void SendStartOneShotFire()
     {
-        _packet.Type = EFirearmSubPacketType.FlareShot;
-        _packet.SubPacket = FlareShotPacket.FromValue(default, default, default, true);
-        _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
+        var packet = new FlareShotPacket(default, default, default, true);
+        _fikaPlayer.PacketSender.NetworkManager.SendFirearmPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
     }
 
     public override void CreateFlareShot(Ammo flareItem, Vector3 shotPosition, Vector3 forward)
     {
-        _packet.Type = EFirearmSubPacketType.FlareShot;
-        _packet.SubPacket = FlareShotPacket.FromValue(shotPosition, forward, flareItem.TemplateId, false);
-        _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
+        var packet = new FlareShotPacket(shotPosition, forward, flareItem.TemplateId, false);
+        _fikaPlayer.PacketSender.NetworkManager.SendFirearmPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
         base.CreateFlareShot(flareItem, shotPosition, forward);
     }
 
     public override void CreateRocketShot(Ammo rocketItem, Vector3 shotPosition, Vector3 forward, Transform smokeport = null)
     {
-        _packet.Type = EFirearmSubPacketType.RocketShot;
-        _packet.SubPacket = RocketShotPacket.FromValue(shotPosition, forward, rocketItem.TemplateId);
-        _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
+        var packet = new RocketShotPacket(shotPosition, forward, rocketItem.TemplateId);
+        _fikaPlayer.PacketSender.NetworkManager.SendFirearmPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
         base.CreateRocketShot(rocketItem, shotPosition, forward, smokeport);
     }
 
     private void SendAbortReloadPacket(int amount)
     {
-        _packet.Type = EFirearmSubPacketType.ReloadWithAmmo;
-        _packet.SubPacket = ReloadWithAmmoPacket.FromValue(EReloadWithAmmoStatus.AbortReload, amount);
-        _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
+        var packet = new ReloadWithAmmoPacket(EReloadWithAmmoStatus.AbortReload);
+        _fikaPlayer.PacketSender.NetworkManager.SendFirearmPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
     }
 
     public override void RollCylinder(bool rollToZeroCamora)
@@ -547,9 +505,8 @@ public class FikaClientFirearmController : Player.FirearmController
             return;
         }
 
-        _packet.Type = EFirearmSubPacketType.RollCylinder;
-        _packet.SubPacket = RollCylinderPacket.FromValue(rollToZeroCamora);
-        _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
+        var packet = new RollCylinderPacket(rollToZeroCamora);
+        _fikaPlayer.PacketSender.NetworkManager.SendFirearmPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
 
         CurrentOperation.RollCylinder(null, rollToZeroCamora);
     }
@@ -558,16 +515,15 @@ public class FikaClientFirearmController : Player.FirearmController
     {
         if (_fikaPlayer.HealthController.IsAlive)
         {
-            _packet.Type = EFirearmSubPacketType.ReloadWithAmmo;
-            _packet.SubPacket = ReloadWithAmmoPacket.FromValue(EReloadWithAmmoStatus.EndReload, amount);
-            _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
+            var packet = new ReloadWithAmmoPacket(EReloadWithAmmoStatus.EndReload);
+            _fikaPlayer.PacketSender.NetworkManager.SendFirearmPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
         }
     }
 
     private void SendBoltActionReloadPacket()
     {
-        _packet.Type = EFirearmSubPacketType.ReloadBoltAction;
-        _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _packet, DeliveryMethod.ReliableOrdered, true);
+        var packet = new ReloadBoltActionPacket();
+        _fikaPlayer.PacketSender.NetworkManager.SendFirearmPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
     }
 
     private class CylinderReloadOperation(Player.FirearmController controller) : Player.FirearmController.ReloadCylinderMagOperation(controller)
@@ -578,18 +534,18 @@ public class FikaClientFirearmController : Player.FirearmController
             base.SetTriggerPressed(pressed);
             if (ReloadAborted && !bool_)
             {
-                coopClientFirearmController.SendAbortReloadPacket(AmmoToLoadIntoMag);
+                _coopClientFirearmController.SendAbortReloadPacket(AmmoToLoadIntoMag);
             }
         }
 
         public override void SwitchToIdle()
         {
-            coopClientFirearmController.SendEndReloadPacket(AmmoToLoadIntoMag);
+            _coopClientFirearmController.SendEndReloadPacket(AmmoToLoadIntoMag);
             EndReload();
             base.SwitchToIdle();
         }
 
-        private readonly FikaClientFirearmController coopClientFirearmController = (FikaClientFirearmController)controller;
+        private readonly FikaClientFirearmController _coopClientFirearmController = (FikaClientFirearmController)controller;
     }
 
     private class AmmoPackReloadInternalOneChamberOperation(Player.FirearmController controller) : Player.FirearmController.ReloadInternalMagOperation(controller)
@@ -697,10 +653,9 @@ public class FikaClientFirearmController : Player.FirearmController
         private bool _hasSent;
     }
 
-    private sealed class ReloadMagHandler(FikaPlayer fikaPlayer, FikaClientFirearmController coopClientFirearmController, ItemAddress gridItemAddress, Magazine magazine)
+    private sealed class ReloadMagHandler(FikaPlayer fikaPlayer, ItemAddress gridItemAddress, Magazine magazine)
     {
         private readonly FikaPlayer _fikaPlayer = fikaPlayer;
-        private readonly FikaClientFirearmController _coopClientFirearmController = coopClientFirearmController;
         private readonly ItemAddress _gridItemAddress = gridItemAddress;
         private readonly Magazine _magazine = magazine;
 
@@ -708,9 +663,8 @@ public class FikaClientFirearmController : Player.FirearmController
         {
             if (_fikaPlayer.HealthController.IsAlive)
             {
-                _coopClientFirearmController._packet.Type = EFirearmSubPacketType.ReloadMag;
-                _coopClientFirearmController._packet.SubPacket = ReloadMagPacket.FromValue(_magazine.Id, _gridItemAddress);
-                _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _coopClientFirearmController._packet, DeliveryMethod.ReliableOrdered, true);
+                var packet = new ReloadMagPacket(_magazine.Id, _gridItemAddress);
+                _fikaPlayer.PacketSender.NetworkManager.SendFirearmPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
             }
         }
     }
@@ -728,19 +682,17 @@ public class FikaClientFirearmController : Player.FirearmController
         {
             if (_fikaPlayer.HealthController.IsAlive)
             {
-                _coopClientFirearmController._packet.Type = EFirearmSubPacketType.CylinderMag;
-                _coopClientFirearmController._packet.SubPacket = CylinderMagPacket.FromValue(EReloadWithAmmoStatus.StartReload,
-                    _cylinderMagazine.CurrentCamoraIndex, 0, true,
+                var packet = new CylinderMagPacket(EReloadWithAmmoStatus.StartReload,
+                    _cylinderMagazine.CurrentCamoraIndex, true,
                     _coopClientFirearmController.Item.CylinderHammerClosed, _ammoIds);
-                _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _coopClientFirearmController._packet, DeliveryMethod.ReliableOrdered, true);
+                _fikaPlayer.PacketSender.NetworkManager.SendFirearmPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
             }
         }
     }
 
-    private sealed class ReloadBarrelsHandler(FikaPlayer fikaPlayer, FikaClientFirearmController coopClientFirearmController, ItemAddress placeToPutContainedAmmoMagazine, AmmoPack ammoPack)
+    private sealed class ReloadBarrelsHandler(FikaPlayer fikaPlayer, ItemAddress placeToPutContainedAmmoMagazine, AmmoPack ammoPack)
     {
         private readonly FikaPlayer _fikaPlayer = fikaPlayer;
-        private readonly FikaClientFirearmController _coopClientFirearmController = coopClientFirearmController;
         private readonly ItemAddress _placeToPutContainedAmmoMagazine = placeToPutContainedAmmoMagazine;
         private readonly AmmoPack _ammoPack = ammoPack;
 
@@ -748,26 +700,23 @@ public class FikaClientFirearmController : Player.FirearmController
         {
             if (_fikaPlayer.HealthController.IsAlive)
             {
-                _coopClientFirearmController._packet.Type = EFirearmSubPacketType.ReloadBarrels;
-                _coopClientFirearmController._packet.SubPacket = ReloadBarrelsPacket.FromValue(_ammoPack.GetReloadingAmmoIds(), _placeToPutContainedAmmoMagazine);
-                _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _coopClientFirearmController._packet, DeliveryMethod.ReliableOrdered, true);
+                var packet = new ReloadBarrelsPacket(_ammoPack.GetReloadingAmmoIds(), _placeToPutContainedAmmoMagazine);
+                _fikaPlayer.PacketSender.NetworkManager.SendFirearmPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
             }
         }
     }
 
-    private sealed class ReloadWithAmmoHandler(FikaPlayer fikaPlayer, FikaClientFirearmController coopClientFirearmController, string[] ammoIds)
+    private sealed class ReloadWithAmmoHandler(FikaPlayer fikaPlayer, string[] ammoIds)
     {
         private readonly FikaPlayer _fikaPlayer = fikaPlayer;
-        private readonly FikaClientFirearmController _coopClientFirearmController = coopClientFirearmController;
         private readonly string[] _ammoIds = ammoIds;
 
         public void Process(IResult _)
         {
             if (_fikaPlayer.HealthController.IsAlive)
             {
-                _coopClientFirearmController._packet.Type = EFirearmSubPacketType.ReloadWithAmmo;
-                _coopClientFirearmController._packet.SubPacket = ReloadWithAmmoPacket.FromValue(EReloadWithAmmoStatus.StartReload, ammoIds: _ammoIds);
-                _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _coopClientFirearmController._packet, DeliveryMethod.ReliableOrdered, true);
+                var packet = new ReloadWithAmmoPacket(EReloadWithAmmoStatus.StartReload, ammoIds: _ammoIds);
+                _fikaPlayer.PacketSender.NetworkManager.SendFirearmPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
             }
         }
     }

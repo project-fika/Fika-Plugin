@@ -1,9 +1,13 @@
-﻿using BitPacking;
-using EFT.Vehicle;
-using System;
+﻿using System;
 using System.Net;
 using System.Net.Sockets;
+using BitPacking;
+using EFT;
+using EFT.Vehicle;
 using Fika.Core.Networking.LZ4;
+using Fika.Core.Networking.Packets.FirearmController;
+using Fika.Core.Networking.Packets.Generic;
+using Fika.Core.Networking.Packets.Player.Common;
 
 namespace Fika.Core.Networking;
 
@@ -49,13 +53,39 @@ public static class NetworkUtils
         return result;
     }
 
+    /// <summary>
+    /// Formats a timestamp and counter into a 24-character hexadecimal <see cref="MongoID"/> string.
+    /// </summary>
+    /// <param name="timeStamp">The Unix timestamp.</param>
+    /// <param name="counter">The incrementing counter value.</param>
+    /// <returns>A 24-character lowercase hexadecimal string.</returns>
     public static string FormatMongoId(uint timeStamp, ulong counter)
     {
-        return string.Create(24, (timeStamp, counter), (span, state) =>
+        return string.Create(24, (timeStamp, counter), static (span, state) =>
         {
             state.timeStamp.TryFormat(span[..8], out _, "x8");
             state.counter.TryFormat(span[8..], out _, "x16");
         });
+    }
+
+    /// <summary>
+    /// Updates the global MongoID process counter if the provided instance matches the current process ID.
+    /// </summary>
+    /// <param name="mongoID">The <see cref="MongoID"/> instance to inspect.</param>
+    public static void InitMongoID(this MongoID mongoID)
+    {
+        var processId = mongoID._counter >> 24;
+        if (MongoID._processId != processId)
+        {
+            return;
+        }
+
+        var counterVal = (uint)(mongoID._counter & 0xFFFFFF);
+
+        if (counterVal > MongoID._newIdCounter)
+        {
+            MongoID._newIdCounter = counterVal;
+        }
     }
 
     /// <summary>
@@ -173,6 +203,18 @@ public static class NetworkUtils
         /// A raw <see cref="Packets.Player.PlayerStateData"/>
         /// </summary>
         PlayerState,
+        /// <summary>
+        /// A <see cref="IGenericPacket"/>
+        /// </summary>
+        Generic,
+        /// <summary>
+        /// A <see cref="IPlayerPacket"/>
+        /// </summary>
+        Player,
+        /// <summary>
+        /// A <see cref="IFirearmPacket"/>
+        /// </summary>
+        Firearm,
         /// <summary>
         /// A raw <see cref="ShapshotBTRMessage"/>
         /// </summary>

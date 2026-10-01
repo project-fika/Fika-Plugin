@@ -3,32 +3,18 @@ using EFT;
 using EFT.AssetsManager;
 using EFT.Communications;
 using Fika.Core.Main.GameMode;
-using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
-using Fika.Core.Networking.Pooling;
 using static Fika.Core.UI.FikaUIGlobals;
 
 namespace Fika.Core.Networking.Packets.Generic.SubPackets;
 
-public sealed class ClientExtract : IPoolSubPacket
+public readonly struct ClientExtractPacket(int netId) : IGenericPacket
 {
-    public int NetId;
+    public EGenericPacketType Type => EGenericPacketType.ClientExtract;
 
-    private ClientExtract() { }
+    public readonly int NetId = netId;
 
-    public static ClientExtract CreateInstance()
-    {
-        return new ClientExtract();
-    }
-
-    public static ClientExtract FromValue(int netId)
-    {
-        var packet = GenericSubPacketPoolManager.Instance.GetPacket<ClientExtract>(EGenericSubPacketType.ClientExtract);
-        packet.NetId = netId;
-        return packet;
-    }
-
-    public void Execute(FikaPlayer player = null)
+    public readonly void Execute()
     {
         var coopHandler = Singleton<IFikaNetworkManager>.Instance.CoopHandler;
         if (coopHandler == null)
@@ -58,7 +44,7 @@ public sealed class ClientExtract : IPoolSubPacket
                         var nickname = !string.IsNullOrEmpty(playerToApply.Profile.Info.MainProfileNickname) ? playerToApply.Profile.Info.MainProfileNickname : playerToApply.Profile.Nickname;
                         NotificationManager.DisplayMessageNotification(string.Format(LocaleUtils.GROUP_MEMBER_EXTRACTED.Localized(),
                             ColorizeText(EColor.GREEN, nickname)),
-                        EFT.Communications.ENotificationDurationType.Default, EFT.Communications.ENotificationIconType.EntryPoint);
+                        ENotificationDurationType.Default, ENotificationIconType.EntryPoint);
                     }
                 }
             }
@@ -71,18 +57,8 @@ public sealed class ClientExtract : IPoolSubPacket
         }
     }
 
-    public void Serialize(NetDataWriter writer)
+    public readonly void Serialize(NetDataWriter writer)
     {
         writer.Put(NetId);
-    }
-
-    public void Deserialize(NetDataReader reader)
-    {
-        NetId = reader.GetInt();
-    }
-
-    public void Dispose()
-    {
-        NetId = 0;
     }
 }

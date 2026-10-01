@@ -74,7 +74,7 @@ public sealed class BotStateManager : MonoBehaviour
         if (_updateCount >= _updatesPerTick)
         {
             SendBatchStates();
-            _updateCount -= _updatesPerTick;
+            _updateCount %= _updatesPerTick;
         }
     }
 

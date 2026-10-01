@@ -1,65 +1,83 @@
-﻿using EFT.InventoryLogic;
+﻿using System;
+using System.Buffers;
+using EFT.InventoryLogic;
 using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
-using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
-public sealed class ReloadLauncherPacket : IPoolSubPacket
+public readonly struct ReloadLauncherPacket : IFirearmPacket
 {
-    private ReloadLauncherPacket()
-    {
+    public readonly ushort AmmoCount;
+    public readonly string[] AmmoIds;
+    public readonly bool Reload;
 
+    public EFirearmPacketType Type => EFirearmPacketType.ReloadLauncher;
+
+    public ReloadLauncherPacket(bool reload, string[] ammoIds = null)
+    {
+        Reload = reload;
+        AmmoCount = (ushort)(ammoIds?.Length ?? 0);
+        AmmoIds = ammoIds ?? [];
     }
 
-    public static ReloadLauncherPacket FromValue(bool reload, string[] ammoIds)
-    {
-        var packet = FirearmSubPacketPoolManager.Instance.GetPacket<ReloadLauncherPacket>(EFirearmSubPacketType.ReloadLauncher);
-        packet.Reload = reload;
-        packet.AmmoIds = ammoIds;
-        return packet;
-    }
-
-    public static ReloadLauncherPacket CreateInstance()
-    {
-        return new();
-    }
-
-    public string[] AmmoIds;
-    public bool Reload;
-
-    public void Execute(FikaPlayer player)
-    {
-        if (player.HandsController is ObservedFirearmController controller)
-        {
-            var ammo = controller.FindAmmoByIds(AmmoIds);
-            AmmoPack ammoPack = new(ammo);
-            controller.FastForwardCurrentState();
-            controller.ReloadGrenadeLauncher(ammoPack, null);
-        }
-    }
-
-    public void Serialize(NetDataWriter writer)
-    {
-        writer.Put(Reload);
-        if (Reload)
-        {
-            writer.PutArray(AmmoIds);
-        }
-    }
-
-    public void Deserialize(NetDataReader reader)
+    public ReloadLauncherPacket(NetDataReader reader)
     {
         Reload = reader.GetBool();
         if (Reload)
         {
-            AmmoIds = reader.GetStringArray();
+            AmmoCount = reader.GetUShort();
+            if (AmmoCount > 0)
+            {
+                AmmoIds = ArrayPool<string>.Shared.Rent(AmmoCount);
+                for (var i = 0; i < AmmoCount; i++)
+                {
+                    AmmoIds[i] = reader.GetString();
+                }
+            }
+            else
+            {
+                AmmoIds = [];
+            }
+        }
+        else
+        {
+            AmmoCount = 0;
+            AmmoIds = [];
         }
     }
 
-    public void Dispose()
+    public readonly void Execute(FikaPlayer player)
     {
-        Reload = false;
-        AmmoIds = null;
+        try
+        {
+            if (player.HandsController is ObservedFirearmController controller)
+            {
+                var ammo = controller.FindAmmoByIds(AmmoIds, AmmoCount);
+                AmmoPack ammoPack = new(ammo);
+                controller.FastForwardCurrentState();
+                controller.ReloadGrenadeLauncher(ammoPack, null);
+            }
+        }
+        finally
+        {
+            if (AmmoCount > 0)
+            {
+                ArrayPool<string>.Shared.Return(AmmoIds, clearArray: true);
+            }
+        }
+    }
+
+    public readonly void Serialize(NetDataWriter writer)
+    {
+        writer.Put(Reload);
+        if (Reload)
+        {
+            writer.Put(AmmoCount);
+            for (var i = 0; i < AmmoCount; i++)
+            {
+                writer.Put(AmmoIds[i]);
+            }
+        }
     }
 }

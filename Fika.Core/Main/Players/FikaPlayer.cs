@@ -1,29 +1,28 @@
 ﻿// © 2026 Lacyway All Rights Reserved
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
-using Audio.AudioWeatherSystem;
 using Comfort.Common;
 using CommonAssets.Scripts.Audio;
 using Diz.LanguageExtensions;
 using EFT;
 using EFT.Ballistics;
+using EFT.CameraControl;
 using EFT.Communications;
+using EFT.Counters;
+using EFT.Dialogs;
 using EFT.HealthSystem;
 using EFT.Interactive;
 using EFT.InventoryLogic;
-using EFT.SynchronizableObjects;
-using EFT.Vehicle;
-using EFT.CameraControl;
-using EFT.Counters;
-using EFT.Dialogs;
 using EFT.Prestige;
 using EFT.Quests;
 using EFT.Settings;
 using EFT.Settings.Sound;
+using EFT.SynchronizableObjects;
+using EFT.Vehicle;
 using Fika.Core.Main.BaseClasses;
 using Fika.Core.Main.ClientClasses;
 using Fika.Core.Main.ClientClasses.HandsControllers;
@@ -38,7 +37,6 @@ using Fika.Core.Networking.Models;
 using Fika.Core.Networking.Packets.Communication;
 using Fika.Core.Networking.Packets.FirearmController;
 using Fika.Core.Networking.Packets.FirearmController.SubPackets;
-using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
 using Fika.Core.Networking.Packets.Player;
 using Fika.Core.Networking.Packets.Player.Common;
@@ -46,7 +44,6 @@ using Fika.Core.Networking.Packets.Player.Common.SubPackets;
 using Fika.Core.Networking.Packets.World;
 using Fika.Core.Networking.Snapshotting;
 using Fika.Core.Networking.VOIP;
-using HarmonyLib;
 using JsonType;
 using static Fika.Core.Main.ClientClasses.ClientInventoryController;
 using InteractionPacket = Fika.Core.Networking.Packets.Player.Common.SubPackets.InteractionPacket;
@@ -67,7 +64,6 @@ public class FikaPlayer : LocalPlayer
     public bool IsObservedAI;
     public readonly Dictionary<uint, Action<ServerOperationStatus>> OperationCallbacks = [];
     public PlayerSnapshotter<PlayerStateSnapshot> Snapshotter;
-    public CommonPlayerPacket CommonPacket;
     public virtual bool LeftStanceDisabled { get; internal set; }
     public DateTime TalkDateTime { get; internal set; }
     /// <summary>
@@ -134,22 +130,12 @@ public class FikaPlayer : LocalPlayer
     private Bleedout _bleedout;
 
     protected EPlayerState _currentState;
-    private float _sign;
     private float _turnSoundTimer;
 
     public ushort OperationStationaryCallbackId;
     private uint _proceedCallbackId;
     private readonly Dictionary<uint, Callback> _proceedCallbacks = [];
     protected BaseInventoryController _baseInventoryController;
-
-    private static Func<Player, SurfaceSet> _getCurrentSet;
-    private static Func<Player, float> _getLastStepTime;
-    private static Action<Player, float> _setLastStepTime;
-    private static Action<Player, bool> _setPlayedAtLeastOneStep;
-    private static Func<Player, bool> _getPlayedAtLeastOneStep;
-    private static Func<Player, float> _getSprintSurfaceCheck;
-    private static Func<Player, float> _getRunSurfaceCheck;
-    private static Func<Player, IPlayerStepAudioController> _getSpecificStepAudioController;
     #endregion
 
     /// <summary>
@@ -184,10 +170,6 @@ public class FikaPlayer : LocalPlayer
         player.IsYourPlayer = true;
         player.NetId = netId;
         player._voipHandler = VoipSettings.Default;
-        player.CommonPacket = new()
-        {
-            NetId = netId
-        };
 
         PlayerOwnerInventoryController inventoryController = FikaBackendUtils.IsServer
             ? new HostInventoryController(player, profile, false, strictSync)
@@ -248,7 +230,7 @@ public class FikaPlayer : LocalPlayer
             player.InventoryController.StrictCheckMagazine(magazineClass, true, player.Profile.MagDrillsMastering, false, false);
         }
 
-        var services = Traverse.Create(player).Field<HashSet<ETraderServiceType>>("_notYetPurchasedTraderServiceTypes").Value;
+        var services = player._notYetPurchasedTraderServiceTypes;
         foreach (var etraderServiceType in Singleton<GlobalConfiguration>.Instance.ServicesData.Keys)
         {
             services.Add(etraderServiceType);
@@ -332,23 +314,6 @@ public class FikaPlayer : LocalPlayer
         }
     }
 
-    private void AssignGetCurrentSet()
-    {
-        _getCurrentSet = FikaGlobals.CreateGetter<Player, SurfaceSet>("_currentSet");
-
-        _getLastStepTime = FikaGlobals.CreateGetter<Player, float>("_lastStepTime");
-        _setLastStepTime = FikaGlobals.CreateSetter<Player, float>("_lastStepTime");
-
-        _getPlayedAtLeastOneStep = FikaGlobals.CreateGetter<Player, bool>("_playedAtLeastOneStep");
-        _setPlayedAtLeastOneStep = FikaGlobals.CreateSetter<Player, bool>("_playedAtLeastOneStep");
-
-        _getSprintSurfaceCheck = FikaGlobals.CreateGetter<Player, float>("_sprintSurfaceCheck");
-
-        _getRunSurfaceCheck = FikaGlobals.CreateGetter<Player, float>("_runSurfaceCheck");
-
-        _getSpecificStepAudioController = FikaGlobals.CreateGetter<Player, IPlayerStepAudioController>("_specificStepAudioController");
-    }
-
     public override void InitAudioController()
     {
         base.InitAudioController();
@@ -357,20 +322,13 @@ public class FikaPlayer : LocalPlayer
 
     protected void SetupFikaAudio()
     {
-        if (_getCurrentSet == null)
-        {
-            AssignGetCurrentSet();
-        }
-
         MovementContext.OnStateChanged -= StateChangedHandler;
         MovementContext.OnStateChanged += MovementContext_OnStateChanged;
 
-        var traverse = Traverse.Create(this);
-        var idleField = traverse.Field<Coroutine>("_idleCoroutine");
-        if (idleField.Value != null)
+        if (_idleCoroutine != null)
         {
-            StopCoroutine(idleField.Value);
-            idleField.Value = null;
+            StopCoroutine(_idleCoroutine);
+            _idleCoroutine = null;
         }
     }
 
@@ -381,16 +339,16 @@ public class FikaPlayer : LocalPlayer
         switch (previousState)
         {
             case EPlayerState.Sprint:
-                _setPlayedAtLeastOneStep(this, false);
-                if (!_getPlayedAtLeastOneStep(this) && CheckSurface(_getSprintSurfaceCheck(this)))
+                _playedAtLeastOneStep = false;
+                if (!_playedAtLeastOneStep && CheckSurface(_sprintSurfaceCheck))
                 {
-                    DefaultPlay(_getCurrentSet(this).SprintSoundBank, 1f, EAudioMovementState.Sprint);
+                    DefaultPlay(_currentSet.SprintSoundBank, 1f, EAudioMovementState.Sprint);
                 }
 
                 if (nextState == EPlayerState.Transition || nextState == EPlayerState.Idle)
                 {
-                    var volumeMod = FirstPersonPointOfView ? _getCurrentSet(this).StopSoundBank.BaseVolume : 1f;
-                    DefaultPlay(_getCurrentSet(this).StopSoundBank,
+                    var volumeMod = FirstPersonPointOfView ? _currentSet.StopSoundBank.BaseVolume : 1f;
+                    DefaultPlay(_currentSet.StopSoundBank,
                         volumeMod * MovementContext.CovertMovementVolume, EAudioMovementState.Stop);
                 }
                 break;
@@ -399,21 +357,21 @@ public class FikaPlayer : LocalPlayer
             case EPlayerState.MoveZombieState:
             case EPlayerState.StartMoveZombieState:
             case EPlayerState.EndMoveZombieState:
-                _setPlayedAtLeastOneStep(this, false);
-                if (!_getPlayedAtLeastOneStep(this) && SinceLastStep > 0.66f)
+                _playedAtLeastOneStep = false;
+                if (!_playedAtLeastOneStep && SinceLastStep > 0.66f)
                 {
-                    if (CheckSurface(_getRunSurfaceCheck(this)))
+                    if (CheckSurface(_runSurfaceCheck))
                     {
                         PlayStepSound();
                     }
-                    _setLastStepTime(this, Time.time);
+                    _lastStepTime = Time.time; ;
                 }
                 break;
         }
 
         if (nextState == EPlayerState.Jump)
         {
-            DefaultPlay(_getCurrentSet(this).JumpSoundBank, 1f, EAudioMovementState.Jump);
+            DefaultPlay(_currentSet.JumpSoundBank, 1f, EAudioMovementState.Jump);
             PlayGearSound(MovementContext.CovertEquipmentNoise, true);
         }
         else if (nextState == EPlayerState.Prone2Stand)
@@ -427,7 +385,7 @@ public class FikaPlayer : LocalPlayer
 
             if (previousState == EPlayerState.Sprint)
             {
-                DefaultPlay(_getCurrentSet(this).ProneDropSoundBank, finalVolume, moveState);
+                DefaultPlay(_currentSet.ProneDropSoundBank, finalVolume, moveState);
             }
             else
             {
@@ -439,7 +397,7 @@ public class FikaPlayer : LocalPlayer
 
         if (CurrentState.Name != _currentState)
         {
-            _setPlayedAtLeastOneStep(this, false);
+            _playedAtLeastOneStep = false;
         }
     }
 
@@ -479,18 +437,18 @@ public class FikaPlayer : LocalPlayer
         if (Math.Abs(_sign - currentSignValue) >= 1E-45f)
         {
             _sign = currentSignValue;
-            var elapsed = Time.time - _getLastStepTime(this);
+            var elapsed = Time.time - _lastStepTime;
 
             if (elapsed > 0.2f && MovementContext.FreefallTime < 0.6f)
             {
-                _setPlayedAtLeastOneStep(this, true);
-                _setLastStepTime(this, Time.time);
+                _playedAtLeastOneStep = true;
+                _lastStepTime = Time.time; ;
                 UpdateSourcePriority(NestedStepSoundSource);
 
-                if (CheckSurface(_getSprintSurfaceCheck(this)))
+                if (CheckSurface(_sprintSurfaceCheck))
                 {
                     UpdateMuffledState();
-                    var sprintBank = _getCurrentSet(this).SprintSoundBank;
+                    var sprintBank = _currentSet.SprintSoundBank;
 
                     var volumeBase = FirstPersonPointOfView ? sprintBank.BaseVolume : 1f;
                     var weightMod = 0.5f + (3f * Physical.Overweight);
@@ -500,7 +458,7 @@ public class FikaPlayer : LocalPlayer
 
                     sprintBank.Play(NestedStepSoundSource, EnvironmentType.Outdoor, Distance,
                         finalVolume, Distance, FirstPersonPointOfView, true);
-                    _getSpecificStepAudioController(this).Play(EAudioMovementState.Sprint, Environment,
+                    _specificStepAudioController.Play(EAudioMovementState.Sprint, Environment,
                         Distance, finalVolume, Distance, FirstPersonPointOfView);
 
                     PlayGearSound(1f, false);
@@ -528,10 +486,10 @@ public class FikaPlayer : LocalPlayer
             var sinceLastStep = SinceLastStep;
             if (sinceLastStep > 0.2f && MovementContext.FreefallTime < 1f)
             {
-                _setLastStepTime(this, Time.time);
-                _setPlayedAtLeastOneStep(this, true);
+                _lastStepTime = Time.time; ;
+                _playedAtLeastOneStep = true;
 
-                if (CheckSurface(_getRunSurfaceCheck(this)))
+                if (CheckSurface(_runSurfaceCheck))
                 {
                     if (sinceLastStep < 1.2f && FirstPersonPointOfView)
                     {
@@ -688,9 +646,8 @@ public class FikaPlayer : LocalPlayer
             }
         }
 
-        CommonPacket.Type = ECommonSubPacketType.DownedSync;
-        CommonPacket.SubPacket = DownedSyncPacket.FromValue(downed);
-        PacketSender.NetworkManager.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
+        var packet = new DownedSyncPacket(downed);
+        PacketSender.NetworkManager.SendPlayerPacket(in packet, NetId, DeliveryMethod.ReliableOrdered, true);
     }
 
     public virtual void ToggleRevive(bool reviving, string nickname)
@@ -764,8 +721,8 @@ public class FikaPlayer : LocalPlayer
 
     public override void SendVoiceMuffledState(bool isMuffled)
     {
-        Singleton<IFikaNetworkManager>.Instance.SendGenericPacket(EGenericSubPacketType.MuffledState,
-                MuffledState.FromValue(NetId, isMuffled), true);
+        var packet = new MuffledStatePacket(isMuffled);
+        Singleton<IFikaNetworkManager>.Instance.SendPlayerPacket(in packet, NetId, DeliveryMethod.ReliableOrdered, true);
     }
 
     public override void OnWeaponMastered(Mastering masterSkill)
@@ -1057,9 +1014,8 @@ public class FikaPlayer : LocalPlayer
 
     public override void DropCurrentController(Action callback, bool fastDrop, Item nextControllerItem = null)
     {
-        CommonPacket.Type = ECommonSubPacketType.Drop;
-        CommonPacket.SubPacket = DropPacket.FromValue(fastDrop);
-        PacketSender.NetworkManager.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
+        var packet = new DropPacket(fastDrop);
+        PacketSender.NetworkManager.SendPlayerPacket(in packet, NetId, DeliveryMethod.ReliableOrdered, true);
         base.DropCurrentController(callback, fastDrop, nextControllerItem);
     }
 
@@ -1247,9 +1203,8 @@ public class FikaPlayer : LocalPlayer
 
         base.SetInventoryOpened(opened);
 
-        CommonPacket.Type = ECommonSubPacketType.InventoryChanged;
-        CommonPacket.SubPacket = InventoryChangedPacket.FromValue(opened);
-        PacketSender.NetworkManager.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
+        var packet = new InventoryChangedPacket(opened);
+        PacketSender.NetworkManager.SendPlayerPacket(in packet, NetId, DeliveryMethod.ReliableOrdered, true);
     }
 
     public override void SendHeadlightsPacket(bool isSilent)
@@ -1258,9 +1213,8 @@ public class FikaPlayer : LocalPlayer
         {
             LightsState[] lightStates = [.. _helmetLightControllers.Select(FikaGlobals.GetFirearmLightStates)];
 
-            CommonPacket.Type = ECommonSubPacketType.HeadLights;
-            CommonPacket.SubPacket = HeadLightsPacket.FromValue(lightStates.Length, isSilent, lightStates);
-            PacketSender.NetworkManager.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
+            var packet = new HeadLightsPacket(lightStates.Length, isSilent, lightStates);
+            PacketSender.NetworkManager.SendPlayerPacket(in packet, NetId, DeliveryMethod.ReliableOrdered, true);
         }
     }
 
@@ -1283,7 +1237,8 @@ public class FikaPlayer : LocalPlayer
                 return;
             }
 
-            controller.SendLightStates(LightStatesPacket.FromValue(array.Length, array));
+            var packet = new LightStatesPacket(array.Length, array);
+            controller.SendLightStates(in packet);
         }
     }
 
@@ -1293,9 +1248,8 @@ public class FikaPlayer : LocalPlayer
 
         if (ActiveHealthController.IsAlive)
         {
-            CommonPacket.Type = ECommonSubPacketType.Phrase;
-            CommonPacket.SubPacket = PhrasePacket.FromValue(@event, clip.NetId);
-            PacketSender.NetworkManager.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
+            var packet = new PhrasePacket(@event, clip.NetId);
+            PacketSender.NetworkManager.SendPlayerPacket(in packet, NetId, DeliveryMethod.ReliableOrdered, true);
         }
     }
 
@@ -1332,9 +1286,8 @@ public class FikaPlayer : LocalPlayer
 
         base.OperateStationaryWeapon(stationaryWeapon, command);
 
-        CommonPacket.Type = ECommonSubPacketType.Stationary;
-        CommonPacket.SubPacket = StationaryPacket.FromValue((EStationaryCommand)command, stationaryWeapon != null ? stationaryWeapon.Id : string.Empty);
-        PacketSender.NetworkManager.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
+        var packet = new StationaryPacket((EStationaryCommand)command, stationaryWeapon != null ? stationaryWeapon.Id : string.Empty);
+        PacketSender.NetworkManager.SendPlayerPacket(in packet, NetId, DeliveryMethod.ReliableOrdered, true);
     }
 
     private void CheckIfStationarySucceeded(IResult result)
@@ -1355,10 +1308,9 @@ public class FikaPlayer : LocalPlayer
     // Start
     public override void StartInteraction(WorldInteractiveObject interactiveObject, InteractionResult interactionResult, Action callback)
     {
-        CommonPacket.Type = ECommonSubPacketType.WorldInteraction;
-        CommonPacket.SubPacket = WorldInteractionPacket.FromValue(interactiveObject.Id, interactionResult.InteractionType,
+        var packet = new WorldInteractionPacket(interactiveObject.Id, interactionResult.InteractionType,
             EInteractionStage.Start, (interactionResult is UnlockResult keyInteractionResult) ? keyInteractionResult.Key.Item.Id : null);
-        PacketSender.NetworkManager.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
+        PacketSender.NetworkManager.SendPlayerPacket(in packet, NetId, DeliveryMethod.ReliableOrdered, true);
         CurrentManagedState.StartDoorInteraction(interactiveObject, interactionResult, callback);
         UpdateInteractionCast();
     }
@@ -1369,10 +1321,9 @@ public class FikaPlayer : LocalPlayer
         base.ExecuteInteraction(door, interactionResult);
         if (!door.ForceLocalInteraction)
         {
-            CommonPacket.Type = ECommonSubPacketType.WorldInteraction;
-            CommonPacket.SubPacket = WorldInteractionPacket.FromValue(door.Id, interactionResult.InteractionType,
+            var packet = new WorldInteractionPacket(door.Id, interactionResult.InteractionType,
                 EInteractionStage.Execute, (interactionResult is UnlockResult keyInteractionResult) ? keyInteractionResult.Key.Item.Id : null);
-            PacketSender.NetworkManager.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
+            PacketSender.NetworkManager.SendPlayerPacket(in packet, NetId, DeliveryMethod.ReliableOrdered, true);
         }
         UpdateInteractionCast();
     }
@@ -1387,9 +1338,8 @@ public class FikaPlayer : LocalPlayer
     {
         if (!FikaGlobals.BlockedInteractions.Contains(interaction))
         {
-            CommonPacket.Type = ECommonSubPacketType.Interaction;
-            CommonPacket.SubPacket = InteractionPacket.FromValue(interaction);
-            PacketSender.NetworkManager.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
+            var packet = new InteractionPacket(interaction);
+            PacketSender.NetworkManager.SendPlayerPacket(in packet, NetId, DeliveryMethod.ReliableOrdered, true);
         }
     }
 
@@ -1405,26 +1355,25 @@ public class FikaPlayer : LocalPlayer
 
     public override void OnMounting(EFT.MountingPacket.EMountingCommand command)
     {
-        var packet = MountingPacket.FromValue(command, MovementContext.IsInMountedState, MovementContext.IsInMountedState ? MovementContext.PlayerMountingPointData.MountPointData.MountDirection : default,
-            MovementContext.IsInMountedState ? MovementContext.PlayerMountingPointData.MountPointData.MountPoint : default,
-            MovementContext.IsInMountedState ? MovementContext.PlayerMountingPointData.CurrentMountingPointVerticalOffset : 0f,
-           MovementContext.IsInMountedState ? (short)MovementContext.PlayerMountingPointData.MountPointData.MountSideDirection : (short)0);
-
-        if (command == EFT.MountingPacket.EMountingCommand.Enter)
+        var mountData = MovementContext.PlayerMountingPointData;
+        MountingPacket packet;
+        if (command != EFT.MountingPacket.EMountingCommand.Enter)
         {
-            packet.TransitionTime = MovementContext.PlayerMountingPointData.CurrentApproachTime;
-            packet.TargetPos = MovementContext.PlayerMountingPointData.PlayerTargetPos;
-            packet.TargetPoseLevel = MovementContext.PlayerMountingPointData.TargetPoseLevel;
-            packet.TargetHandsRotation = MovementContext.PlayerMountingPointData.TargetHandsRotation;
-            packet.TargetBodyRotation = MovementContext.PlayerMountingPointData.TargetBodyRotation;
-            packet.PoseLimit = MovementContext.PlayerMountingPointData.PoseLimit;
-            packet.PitchLimit = MovementContext.PlayerMountingPointData.PitchLimit;
-            packet.YawLimit = MovementContext.PlayerMountingPointData.YawLimit;
+            packet = new MountingPacket(command, MovementContext.IsInMountedState, MovementContext.IsInMountedState ? mountData.MountPointData.MountDirection : default,
+                MovementContext.IsInMountedState ? mountData.MountPointData.MountPoint : default,
+                MovementContext.IsInMountedState ? mountData.CurrentMountingPointVerticalOffset : 0f,
+               MovementContext.IsInMountedState ? (short)mountData.MountPointData.MountSideDirection : (short)0);
+        }
+        else
+        {
+            packet = new MountingPacket(command, MovementContext.IsInMountedState, MovementContext.IsInMountedState ? mountData.MountPointData.MountDirection : default,
+                MovementContext.IsInMountedState ? mountData.MountPointData.MountPoint : default,
+                mountData.PlayerTargetPos, mountData.TargetPoseLevel, mountData.TargetHandsRotation, mountData.PoseLimit, mountData.PitchLimit,
+                mountData.YawLimit, mountData.TargetBodyRotation, MovementContext.IsInMountedState ? mountData.CurrentMountingPointVerticalOffset : 0f,
+                MovementContext.IsInMountedState ? (short)mountData.MountPointData.MountSideDirection : (short)0, mountData.CurrentApproachTime);
         }
 
-        CommonPacket.Type = ECommonSubPacketType.Mounting;
-        CommonPacket.SubPacket = packet;
-        PacketSender.NetworkManager.SendNetReusable(ref CommonPacket,
+        PacketSender.NetworkManager.SendPlayerPacket(in packet, NetId,
             command is EFT.MountingPacket.EMountingCommand.Update ? DeliveryMethod.Unreliable : DeliveryMethod.ReliableOrdered,
             true);
     }
@@ -1472,8 +1421,8 @@ public class FikaPlayer : LocalPlayer
         };
         UpdateInteractionCast();
 
-        Singleton<IFikaNetworkManager>.Instance.SendGenericPacket(EGenericSubPacketType.DisarmTripwire,
-                DisarmTripwire.FromValue(data), true);
+        var packet = new DisarmTripwirePacket(data);
+        Singleton<IFikaNetworkManager>.Instance.SendGenericPacket(in packet, DeliveryMethod.ReliableOrdered, true);
     }
 
     public override void EventObjectInteraction(EventObjectController controller, int objectId, EventObject.EInteraction interaction)
@@ -1515,10 +1464,7 @@ public class FikaPlayer : LocalPlayer
         }
 
         var inventoryDescriptor = ItemBinarySerializer.SerializeItem(Inventory.Equipment, FikaGlobals.SearchControllerSerializer);
-
-        var packets = HealthSyncPacket.FromValue(packet);
-        packets.BodyPart = LastBodyPart;
-        packets.CorpseSyncPacket = new()
+        var corpseSyncPacket = new CorpseSyncPackets()
         {
             BodyPartColliderType = LastDamageInfo.BodyPartColliderType,
             Direction = LastDamageInfo.Direction,
@@ -1530,17 +1476,7 @@ public class FikaPlayer : LocalPlayer
 
         if (TriggerZones.Count > 0)
         {
-            packets.TriggerZones.AddRange(TriggerZones);
-        }
-
-        if (LastAggressor != null)
-        {
-            packets.KillerId = LastAggressor.ProfileId;
-        }
-
-        if (_lastWeaponId != null)
-        {
-            packets.WeaponId = _lastWeaponId;
+            corpseSyncPacket.TriggerZones.AddRange(TriggerZones);
         }
 
         if (HandsController.Item != null)
@@ -1551,15 +1487,16 @@ public class FikaPlayer : LocalPlayer
                 var weaponSlot = FikaGlobals.WeaponSlots[i];
                 if (heldItem == Equipment.GetSlot(weaponSlot).ContainedItem)
                 {
-                    packets.CorpseSyncPacket.ItemSlot = weaponSlot;
+                    corpseSyncPacket.ItemSlot = weaponSlot;
                     break;
                 }
             }
         }
 
-        CommonPacket.Type = ECommonSubPacketType.HealthSync;
-        CommonPacket.SubPacket = packets;
-        PacketSender.NetworkManager.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
+        var packets = new HealthSyncPacket(packet, LastBodyPart, corpseSyncPacket,
+            LastAggressor != null ? LastAggressor.ProfileId : null, _lastWeaponId != null ? _lastWeaponId : null);
+
+        PacketSender.NetworkManager.SendPlayerPacket(in packets, NetId, DeliveryMethod.ReliableOrdered, true);
     }
 
     public override void OnDead(EDamageType damageType)
@@ -1585,17 +1522,13 @@ public class FikaPlayer : LocalPlayer
         PacketSender.SendState = false;
         if (IsYourPlayer)
         {
-            StartCoroutine(LocalPlayerDied());
+            LocalPlayerDiedAsync(destroyCancellationToken)
+                .Forget();
         }
     }
 
     public override void OnDestroy()
     {
-        if (IsAI || IsYourPlayer)
-        {
-            CommonPacket?.Clear();
-            CommonPacket = null;
-        }
         OnPlayerDestroyed?.Invoke(this);
         base.OnDestroy();
     }
@@ -1652,14 +1585,21 @@ public class FikaPlayer : LocalPlayer
         FikaGlobals.LogError($"GenerateAndSendDogTagPacket: Item or Dogtagcomponent was null on player {Profile.Nickname}, id {NetId}");
     }
 
-    private IEnumerator LocalPlayerDied()
+    private async Task LocalPlayerDiedAsync(CancellationToken token = default)
     {
-        AddPlayerRequest request = new(FikaBackendUtils.GroupId, ProfileId, FikaBackendUtils.IsSpectator);
-        var diedTask = FikaRequestHandler.PlayerDied(request);
-        WaitForEndOfFrame waitForEndOfFrame = new();
-        while (!diedTask.IsCompleted)
+        try
         {
-            yield return waitForEndOfFrame;
+            token.ThrowIfCancellationRequested();
+            AddPlayerRequest request = new(FikaBackendUtils.GroupId, ProfileId, FikaBackendUtils.IsSpectator);
+            await FikaRequestHandler.PlayerDied(request);
+        }
+        catch (OperationCanceledException)
+        {
+
+        }
+        catch (Exception ex)
+        {
+            FikaGlobals.LogError($"Failed to send PlayerDied request: {ex}");
         }
     }
 
@@ -1788,7 +1728,7 @@ public class FikaPlayer : LocalPlayer
         ActiveHealthController.UnpauseAllEffects();
     }
 
-    public void HandleCallbackFromServer(OperationCallbackPacket operationCallbackPacket)
+    public void HandleCallbackFromServer(in OperationCallbackPacket operationCallbackPacket)
     {
         if (OperationCallbacks.TryGetValue(operationCallbackPacket.CallbackId, out var callback))
         {
@@ -1835,9 +1775,8 @@ public class FikaPlayer : LocalPlayer
     {
         if (!children)
         {
-            CommonPacket.Type = ECommonSubPacketType.ArmorDamage;
-            CommonPacket.SubPacket = ArmorDamagePacket.FromValue(armor.Item.Id, armor.Repairable.Durability);
-            Singleton<IFikaNetworkManager>.Instance.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
+            var packet = new ArmorDamagePacket(armor.Item.Id, armor.Repairable.Durability);
+            PacketSender.NetworkManager.SendPlayerPacket(in packet, NetId, DeliveryMethod.ReliableOrdered, true);
         }
     }
 
@@ -2029,11 +1968,10 @@ public class FikaPlayer : LocalPlayer
 
     public override void OnVaulting()
     {
-        CommonPacket.Type = ECommonSubPacketType.Vault;
-        CommonPacket.SubPacket = VaultPacket.FromValue(VaultingParameters.GetVaultingStrategy(), VaultingParameters.MaxWeightPointPosition,
+        var packet = new VaultPacket(VaultingParameters.GetVaultingStrategy(), VaultingParameters.MaxWeightPointPosition,
             VaultingParameters.VaultingHeight, VaultingParameters.VaultingLength, MovementContext.VaultingSpeed,
             VaultingParameters.BehindObstacleRatio, VaultingParameters.AbsoluteForwardVelocity);
-        PacketSender.NetworkManager.SendNetReusable(ref CommonPacket, DeliveryMethod.ReliableOrdered, true);
+        PacketSender.NetworkManager.SendPlayerPacket(in packet, NetId, DeliveryMethod.ReliableOrdered, true);
     }
 
     public void ReceiveTraderServicesData(List<TraderServiceAvailabilityData> services)
@@ -2103,9 +2041,8 @@ public class FikaPlayer : LocalPlayer
 
         public void Handle()
         {
-            _player.CommonPacket.Type = ECommonSubPacketType.ContainerInteraction;
-            _player.CommonPacket.SubPacket = ContainerInteractionPacket.FromValue(Container.Id, EInteractionType.Close);
-            _player.PacketSender.NetworkManager.SendNetReusable(ref _player.CommonPacket, DeliveryMethod.ReliableOrdered, true);
+            var packet = new ContainerInteractionPacket(Container.Id, EInteractionType.Close);
+            _player.PacketSender.NetworkManager.SendPlayerPacket(in packet, _player.NetId, DeliveryMethod.ReliableOrdered, true);
 
             Container.Interact(new InteractionResult(EInteractionType.Close));
             if (_player.MovementContext.LevelOnApproachStart > 0f)
@@ -2152,9 +2089,8 @@ public class FikaPlayer : LocalPlayer
 
         internal void SendPacket()
         {
-            _fikaPlayer.CommonPacket.Type = ECommonSubPacketType.Proceed;
-            _fikaPlayer.CommonPacket.SubPacket = ProceedPacket.FromValue(default, default, 0f, 0, EProceedType.EmptyHands, _scheduled);
-            _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _fikaPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
+            var packet = new ProceedPacket(default, default, 0f, 0, EProceedType.EmptyHands, _scheduled);
+            _fikaPlayer.PacketSender.NetworkManager.SendPlayerPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
         }
 
         internal void HandleResult(IResult result)
@@ -2203,10 +2139,9 @@ public class FikaPlayer : LocalPlayer
 
         internal void SendPacket()
         {
-            _fikaPlayer.CommonPacket.Type = ECommonSubPacketType.Proceed;
-            _fikaPlayer.CommonPacket.SubPacket = ProceedPacket.FromValue(default, Weapon.Id, 0f, 0,
+            var packet = new ProceedPacket(default, Weapon.Id, 0f, 0,
                 Weapon.IsStationaryWeapon ? EProceedType.Stationary : EProceedType.Weapon, false);
-            _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _fikaPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
+            _fikaPlayer.PacketSender.NetworkManager.SendPlayerPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
         }
 
         internal void HandleResult(IResult result)
@@ -2255,9 +2190,8 @@ public class FikaPlayer : LocalPlayer
 
         internal void SendPacket()
         {
-            _fikaPlayer.CommonPacket.Type = ECommonSubPacketType.Proceed;
-            _fikaPlayer.CommonPacket.SubPacket = ProceedPacket.FromValue(default, _item.Id, 0f, 0, EProceedType.UsableItem, false);
-            _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _fikaPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
+            var packet = new ProceedPacket(default, _item.Id, 0f, 0, EProceedType.UsableItem, false);
+            _fikaPlayer.PacketSender.NetworkManager.SendPlayerPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
         }
 
         internal void HandleResult(IResult result)
@@ -2306,9 +2240,8 @@ public class FikaPlayer : LocalPlayer
 
         internal void SendPacket()
         {
-            _fikaPlayer.CommonPacket.Type = ECommonSubPacketType.Proceed;
-            _fikaPlayer.CommonPacket.SubPacket = ProceedPacket.FromValue(default, _item.Id, 0f, 0, EProceedType.UsableItem, false);
-            _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _fikaPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
+            var packet = new ProceedPacket(default, _item.Id, 0f, 0, EProceedType.UsableItem, false);
+            _fikaPlayer.PacketSender.NetworkManager.SendPlayerPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
         }
 
         internal void HandleResult(IResult result)
@@ -2357,9 +2290,8 @@ public class FikaPlayer : LocalPlayer
 
         internal void SendPacket()
         {
-            _fikaPlayer.CommonPacket.Type = ECommonSubPacketType.Proceed;
-            _fikaPlayer.CommonPacket.SubPacket = ProceedPacket.FromValue(default, _item.Id, 0f, 0, EProceedType.QuickUse, false);
-            _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _fikaPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
+            var packet = new ProceedPacket(default, _item.Id, 0f, 0, EProceedType.QuickUse, false);
+            _fikaPlayer.PacketSender.NetworkManager.SendPlayerPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
         }
 
         internal void HandleResult(IResult result)
@@ -2410,10 +2342,9 @@ public class FikaPlayer : LocalPlayer
 
         internal void SendPacket()
         {
-            _fikaPlayer.CommonPacket.Type = ECommonSubPacketType.Proceed;
-            _fikaPlayer.CommonPacket.SubPacket = ProceedPacket.FromValue(_bodyParts, _meds.Id, 1f, _animationVariant,
+            var packet = new ProceedPacket(_bodyParts, _meds.Id, 1f, _animationVariant,
                 EProceedType.MedsClass, false);
-            _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _fikaPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
+            _fikaPlayer.PacketSender.NetworkManager.SendPlayerPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
         }
 
         internal void HandleResult(IResult result)
@@ -2465,10 +2396,9 @@ public class FikaPlayer : LocalPlayer
 
         internal void SendPacket()
         {
-            _fikaPlayer.CommonPacket.Type = ECommonSubPacketType.Proceed;
-            _fikaPlayer.CommonPacket.SubPacket = ProceedPacket.FromValue(_bodyParts, _foodDrink.Id, _amount, _animationVariant,
+            var packet = new ProceedPacket(_bodyParts, _foodDrink.Id, _amount, _animationVariant,
                 EProceedType.MedsClass, false);
-            _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _fikaPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
+            _fikaPlayer.PacketSender.NetworkManager.SendPlayerPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
         }
 
         internal void HandleResult(IResult result)
@@ -2517,9 +2447,8 @@ public class FikaPlayer : LocalPlayer
 
         internal void SendPacket()
         {
-            _fikaPlayer.CommonPacket.Type = ECommonSubPacketType.Proceed;
-            _fikaPlayer.CommonPacket.SubPacket = ProceedPacket.FromValue(default, Knife.Item.Id, 0f, 0, EProceedType.Knife, false);
-            _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _fikaPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
+            var packet = new ProceedPacket(default, Knife.Item.Id, 0f, 0, EProceedType.Knife, false);
+            _fikaPlayer.PacketSender.NetworkManager.SendPlayerPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
         }
 
         internal void HandleResult(IResult result)
@@ -2568,9 +2497,8 @@ public class FikaPlayer : LocalPlayer
 
         internal void SendPacket()
         {
-            _fikaPlayer.CommonPacket.Type = ECommonSubPacketType.Proceed;
-            _fikaPlayer.CommonPacket.SubPacket = ProceedPacket.FromValue(default, Knife.Item.Id, 0f, 0, EProceedType.QuickKnifeKick, false);
-            _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _fikaPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
+            var packet = new ProceedPacket(default, Knife.Item.Id, 0f, 0, EProceedType.QuickKnifeKick, false);
+            _fikaPlayer.PacketSender.NetworkManager.SendPlayerPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
         }
 
         internal void HandleResult(IResult result)
@@ -2619,9 +2547,8 @@ public class FikaPlayer : LocalPlayer
 
         internal void SendPacket()
         {
-            _fikaPlayer.CommonPacket.Type = ECommonSubPacketType.Proceed;
-            _fikaPlayer.CommonPacket.SubPacket = ProceedPacket.FromValue(default, _throwWeap.Id, 0f, 0, EProceedType.GrenadeClass, false);
-            _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _fikaPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
+            var packet = new ProceedPacket(default, _throwWeap.Id, 0f, 0, EProceedType.GrenadeClass, false);
+            _fikaPlayer.PacketSender.NetworkManager.SendPlayerPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
         }
 
         internal void HandleResult(IResult result)
@@ -2670,9 +2597,8 @@ public class FikaPlayer : LocalPlayer
 
         internal void SendPacket()
         {
-            _fikaPlayer.CommonPacket.Type = ECommonSubPacketType.Proceed;
-            _fikaPlayer.CommonPacket.SubPacket = ProceedPacket.FromValue(default, _throwWeap.Id, 0f, 0, EProceedType.QuickGrenadeThrow, false);
-            _fikaPlayer.PacketSender.NetworkManager.SendNetReusable(ref _fikaPlayer.CommonPacket, DeliveryMethod.ReliableOrdered, true);
+            var packet = new ProceedPacket(default, _throwWeap.Id, 0f, 0, EProceedType.QuickGrenadeThrow, false);
+            _fikaPlayer.PacketSender.NetworkManager.SendPlayerPacket(in packet, _fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
         }
 
         internal void HandleResult(IResult result)

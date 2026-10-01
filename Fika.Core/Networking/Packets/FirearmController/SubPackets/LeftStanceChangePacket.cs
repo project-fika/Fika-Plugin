@@ -1,31 +1,23 @@
 ﻿using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
-using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
-public sealed class LeftStanceChangePacket : IPoolSubPacket
+public readonly struct LeftStanceChangePacket : IFirearmPacket
 {
-    private LeftStanceChangePacket()
+    public LeftStanceChangePacket(bool leftStance)
     {
-
+        LeftStance = leftStance;
     }
 
-    public static LeftStanceChangePacket FromValue(bool leftStance)
+    public LeftStanceChangePacket(NetDataReader reader)
     {
-        var packet = FirearmSubPacketPoolManager.Instance.GetPacket<LeftStanceChangePacket>(EFirearmSubPacketType.LeftStanceChange);
-        packet.LeftStance = leftStance;
-        return packet;
+        LeftStance = reader.GetBool();
     }
 
-    public static LeftStanceChangePacket CreateInstance()
-    {
-        return new();
-    }
+    public readonly bool LeftStance;
 
-    public bool LeftStance;
-
-    public void Execute(FikaPlayer player)
+    public readonly void Execute(FikaPlayer player)
     {
         if (player.HandsController is ObservedFirearmController controller)
         {
@@ -36,18 +28,10 @@ public sealed class LeftStanceChangePacket : IPoolSubPacket
         }
     }
 
-    public void Serialize(NetDataWriter writer)
+    public readonly void Serialize(NetDataWriter writer)
     {
         writer.Put(LeftStance);
     }
 
-    public void Deserialize(NetDataReader reader)
-    {
-        LeftStance = reader.GetBool();
-    }
-
-    public void Dispose()
-    {
-        LeftStance = false;
-    }
+    public EFirearmPacketType Type => EFirearmPacketType.LeftStanceChange;
 }

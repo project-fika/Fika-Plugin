@@ -1,48 +1,22 @@
-﻿using Comfort.Common;
-using EFT;
-using Fika.Core.Main.Players;
-using Fika.Core.Networking.Pooling;
+﻿using EFT;
+using Fika.Core.Main.Components;
 
 namespace Fika.Core.Networking.Packets.Generic.SubPackets;
 
-public sealed class SendCharacterPacket : IPoolSubPacket
+public readonly struct SendCharacterPacket : IGenericPacket
 {
-    private SendCharacterPacket() { }
+    public EGenericPacketType Type => EGenericPacketType.SendCharacter;
 
-    public static SendCharacterPacket CreateInstance()
+    public SendCharacterPacket(PlayerInfoPacket playerInfoPacket, bool isAlive, bool isAi, Vector3 position, int netId)
     {
-        return new();
+        PlayerInfoPacket = playerInfoPacket;
+        IsAlive = isAlive;
+        IsAI = isAi;
+        Position = position;
+        NetId = netId;
     }
 
-    public static SendCharacterPacket FromValue(PlayerInfoPacket playerInfoPacket, bool isAlive, bool isAi, Vector3 position, int netId)
-    {
-        var packet = GenericSubPacketPoolManager.Instance.GetPacket<SendCharacterPacket>(EGenericSubPacketType.SendCharacter);
-        packet.PlayerInfoPacket = playerInfoPacket;
-        packet.IsAlive = isAlive;
-        packet.IsAI = isAi;
-        packet.Position = position;
-        packet.NetId = netId;
-        return packet;
-    }
-
-    public PlayerInfoPacket PlayerInfoPacket;
-    public bool IsAlive;
-    public bool IsAI;
-    public Vector3 Position;
-    public int NetId;
-
-    public void Execute(FikaPlayer player = null)
-    {
-        var handler = Singleton<IFikaNetworkManager>.Instance.CoopHandler;
-        if (handler != null)
-        {
-            handler.QueueProfile(PlayerInfoPacket.Profile, PlayerInfoPacket.HealthByteArray, Position, NetId, IsAlive, IsAI,
-                PlayerInfoPacket.ControllerId, PlayerInfoPacket.FirstOperationId, PlayerInfoPacket.IsZombie,
-                PlayerInfoPacket.ItemId, PlayerInfoPacket.ControllerType);
-        }
-    }
-
-    public void Deserialize(NetDataReader reader)
+    public SendCharacterPacket(NetDataReader reader)
     {
         PlayerInfoPacket = reader.GetPlayerInfoPacket();
         IsAlive = reader.GetBool();
@@ -51,22 +25,31 @@ public sealed class SendCharacterPacket : IPoolSubPacket
         NetId = reader.GetInt();
     }
 
-    public void Serialize(NetDataWriter writer)
+    public readonly PlayerInfoPacket PlayerInfoPacket;
+    public readonly bool IsAlive;
+    public readonly bool IsAI;
+    public readonly Vector3 Position;
+    public readonly int NetId;
+
+    public readonly void Execute()
+    {
+        if (CoopHandler.TryGetCoopHandler(out var handler))
+        {
+            handler.QueueProfile(PlayerInfoPacket.Profile, PlayerInfoPacket.HealthByteArray, Position, NetId, IsAlive, IsAI,
+                PlayerInfoPacket.ControllerId, PlayerInfoPacket.FirstOperationId, PlayerInfoPacket.IsZombie,
+                PlayerInfoPacket.ItemId, PlayerInfoPacket.ControllerType);
+        }
+    }
+
+
+
+    public readonly void Serialize(NetDataWriter writer)
     {
         writer.PutPlayerInfoPacket(PlayerInfoPacket);
         writer.Put(IsAlive);
         writer.Put(IsAI);
         writer.PutUnmanaged(Position);
         writer.Put(NetId);
-    }
-
-    public void Dispose()
-    {
-        PlayerInfoPacket = default;
-        IsAlive = false;
-        IsAI = false;
-        Position = default;
-        NetId = 0;
     }
 }
 

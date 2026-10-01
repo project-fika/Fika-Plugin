@@ -294,10 +294,10 @@ public static class FikaBackendUtils
             var controller = app.Matchmaker;
             if (controller != null)
             {
-                var menuUi = Singleton<MenuUI>.Instance;
-                if (menuUi != null)
+                var menuUI = Singleton<MenuUI>.Instance;
+                if (menuUI != null)
                 {
-                    var panel = Traverse.Create(menuUi.MatchmakerTimeHasCome).Field<PartyInfoPanel>("_partyInfoPanel").Value;
+                    var panel = menuUI.MatchmakerTimeHasCome._partyInfoPanel;
                     panel.Close();
                     panel.Show(GroupPlayers, Profile, false);
                     return;

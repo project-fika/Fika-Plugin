@@ -322,8 +322,7 @@ public class FikaCommands
             {
                 if (gameWorld.BtrController != null)
                 {
-                    var btrTransform = Traverse.Create(gameWorld.BtrController.BtrView)
-                        .Field<Transform>("_cachedTransform").Value;
+                    var btrTransform = gameWorld.BtrController.BtrView._cachedTransform;
                     if (btrTransform != null)
                     {
                         var myPlayer = gameWorld.MainPlayer;
@@ -677,7 +676,7 @@ public class FikaCommands
     private static void LogWarning(string message)
     {
         ConsoleScreen.LogWarning(message);
-        FikaGlobals.LogInfo(message);
+        FikaGlobals.LogWarning(message);
     }
 
     private static void LogError(string message)

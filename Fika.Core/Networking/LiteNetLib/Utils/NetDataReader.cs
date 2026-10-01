@@ -699,15 +699,8 @@ public class NetDataReader
         var size = sizeof(T);
         EnsureAvailable(size);
 
-#if NET8_0_OR_GREATER
-        var value = Unsafe.ReadUnaligned<T>(ref _data[_position]);
-#else
-        T value;
-        fixed (byte* ptr = &_data[_position])
-        {
-            value = *(T*)ptr;
-        }
-#endif
+        ref var dataRef = ref Unsafe.AsRef(in _data[0]);
+        var value = Unsafe.ReadUnaligned<T>(ref Unsafe.Add(ref dataRef, _position));
 
         _position += size;
         return value;
@@ -743,7 +736,7 @@ public class NetDataReader
     /// </summary>
     /// <typeparam name="T">An unmanaged enum type to read.</typeparam>
     /// <returns>The enum value read from the buffer.</returns>
-    public unsafe T GetEnum<T>() where T : unmanaged, Enum => GetUnmanaged<T>();
+    public T GetEnum<T>() where T : unmanaged, Enum => GetUnmanaged<T>();
 
     /// <summary>
     /// Deserializes a <see cref="DateTime"/> from the <paramref name="reader"/>

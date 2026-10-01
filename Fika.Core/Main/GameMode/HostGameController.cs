@@ -248,15 +248,15 @@ public class HostGameController : BaseGameController, IBotGame
 
         var mongoId = MongoID.Generate(true);
         const ushort nextOperationId = 0;
-        var packet = SendCharacterPacket.FromValue(new()
+        var packet = new SendCharacterPacket(new()
         {
             Profile = profile,
             ControllerId = mongoId,
             FirstOperationId = nextOperationId,
-            IsZombie = profile.Info.Settings.UseSimpleAnimator
+            IsZombie = profile.Info.Settings.UseSimpleAnimator,
+            HealthByteArray = profile.Health.SerializeHealthInfo()
         }, true, true, position, netId);
-        packet.PlayerInfoPacket.HealthByteArray = profile.Health.SerializeHealthInfo();
-        _server.SendGenericPacket(EGenericSubPacketType.SendCharacter, packet, true);
+        _server.SendGenericPacket(in packet, DeliveryMethod.ReliableOrdered, true);
 
         if (_server.NetServer.ConnectedPeersCount > 0)
         {
@@ -283,8 +283,8 @@ public class HostGameController : BaseGameController, IBotGame
             _botStateManager.AddBot(fikaBot);
         }
 
-        var spawnPacket = SpawnAI.FromValue(netId, position);
-        _server.SendGenericPacket(EGenericSubPacketType.SpawnAI, spawnPacket);
+        var spawnPacket = new SpawnAIPacket(netId, position);
+        _server.SendGenericPacket(in spawnPacket, DeliveryMethod.ReliableOrdered, true);
 
         return fikaBot;
     }
@@ -833,8 +833,8 @@ public class HostGameController : BaseGameController, IBotGame
             }
             if (transitController is FikaHostTransitController hostController)
             {
-                _server.SendGenericPacket(EGenericSubPacketType.UpdateBackendData,
-                    UpdateBackendData.FromValue(hostController.AliveTransitPlayers), true);
+                var packet = new UpdateBackendDataPacket(hostController.AliveTransitPlayers);
+                _server.SendGenericPacket(in packet, DeliveryMethod.ReliableOrdered, true);
             }
         }
 
@@ -842,8 +842,8 @@ public class HostGameController : BaseGameController, IBotGame
         {
             try // This is to allow clients to extract if they lose connection
             {
-                _server.SendGenericPacket(EGenericSubPacketType.ClientExtract,
-                    ClientExtract.FromValue(player.NetId), true);
+                var packet = new ClientExtractPacket(player.NetId);
+                _server.SendGenericPacket(in packet, DeliveryMethod.ReliableOrdered, true);
                 ClearHostAI(player);
             }
             catch

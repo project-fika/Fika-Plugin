@@ -68,8 +68,8 @@ public sealed class BotInventoryController : BaseInventoryController
 #if DEBUG
         FikaGlobals.LogInfo($"Sending bot operation {operation.GetType()} from {_fikaBot.Profile.Nickname}");
 #endif
-        _fikaBot.PacketSender.NetworkManager.SendGenericPacket(EGenericSubPacketType.InventoryOperation,
-            InventoryPacket.FromValue(_fikaBot.NetId, operation), true);
+        var packet = new InventoryPacket(_fikaBot.NetId, operation);
+        _fikaBot.PacketSender.NetworkManager.SendGenericPacket(in packet, DeliveryMethod.ReliableOrdered, true);
         HandleOperation(operation, callback).HandleExceptions();
     }
 

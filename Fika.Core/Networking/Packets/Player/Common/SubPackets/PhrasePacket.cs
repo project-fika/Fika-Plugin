@@ -1,32 +1,27 @@
 ﻿using Fika.Core.Main.Players;
-using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
-public sealed class PhrasePacket : IPoolSubPacket
+public readonly struct PhrasePacket : IPlayerPacket
 {
-    private PhrasePacket()
-    {
+    public EPlayerPacketType Type => EPlayerPacketType.Phrase;
 
+    public PhrasePacket(EPhraseTrigger trigger, int index)
+    {
+        PhraseTrigger = trigger;
+        PhraseIndex = index;
     }
 
-    public static PhrasePacket CreateInstance()
+    public PhrasePacket(NetDataReader reader)
     {
-        return new();
+        PhraseTrigger = reader.GetEnum<EPhraseTrigger>();
+        PhraseIndex = reader.GetInt();
     }
 
-    public static PhrasePacket FromValue(EPhraseTrigger trigger, int index)
-    {
-        var packet = CommonSubPacketPoolManager.Instance.GetPacket<PhrasePacket>(ECommonSubPacketType.Phrase);
-        packet.PhraseTrigger = trigger;
-        packet.PhraseIndex = index;
-        return packet;
-    }
+    public readonly EPhraseTrigger PhraseTrigger;
+    public readonly int PhraseIndex;
 
-    public EPhraseTrigger PhraseTrigger;
-    public int PhraseIndex;
-
-    public void Execute(FikaPlayer player)
+    public readonly void Execute(FikaPlayer player)
     {
         if (player.gameObject.activeSelf && player.HealthController.IsAlive)
         {
@@ -34,21 +29,9 @@ public sealed class PhrasePacket : IPoolSubPacket
         }
     }
 
-    public void Serialize(NetDataWriter writer)
+    public readonly void Serialize(NetDataWriter writer)
     {
         writer.PutEnum(PhraseTrigger);
         writer.Put(PhraseIndex);
-    }
-
-    public void Deserialize(NetDataReader reader)
-    {
-        PhraseTrigger = reader.GetEnum<EPhraseTrigger>();
-        PhraseIndex = reader.GetInt();
-    }
-
-    public void Dispose()
-    {
-        PhraseTrigger = EPhraseTrigger.None;
-        PhraseIndex = 0;
     }
 }

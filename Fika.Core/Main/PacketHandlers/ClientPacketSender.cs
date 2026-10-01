@@ -15,6 +15,7 @@ using Fika.Core.Main.GameMode;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
+using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
 using Fika.Core.Networking.Packets.Player;
 using Fika.Core.UI.Custom;
@@ -195,8 +196,8 @@ public class ClientPacketSender : MonoBehaviour, IPacketSender
             // ref so that we can mutate it if we want to, ex: if I ping a switch I want it at the switch.gameObject.position + Vector3.up
             abstractPing.Initialize(ref hitPoint, userData, pingColor);
 
-            NetworkManager.SendGenericPacket(Networking.Packets.Generic.EGenericSubPacketType.Ping,
-                PingPacket.FromValue(hitPoint, pingType, pingColor, _player.Profile.Info.MainProfileNickname, localeId), true);
+            var packet = new PingPacket(hitPoint, pingType, pingColor, _player.Profile.Info.MainProfileNickname, localeId);
+            NetworkManager.SendGenericPacket(in packet, DeliveryMethod.ReliableOrdered, true);
 
             if (FikaPlugin.Instance.Settings.PlayPingAnimation.Value && _player.HealthController.IsAlive)
             {

@@ -86,7 +86,7 @@ public sealed class OfflineRaidSettingsMenuPatch_Override : ModulePatch
         }
 
         // Remove redundant settings and add our own "Random" to make the setting clear, while also renaming index 0 to "Together"
-        var labelList = Traverse.Create(____playersSpawnPlaceDropdown).Field<List<BaseDropDownBox.DropDownItem>>("_values").Value;
+        var labelList = ____playersSpawnPlaceDropdown._values;
         labelList.Clear();
         labelList.Add(new()
         {

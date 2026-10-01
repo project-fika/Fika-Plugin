@@ -1,49 +1,35 @@
 ﻿using EFT;
 using Fika.Core.Main.Players;
-using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.Player.Common.SubPackets;
 
-public sealed class ArmorDamagePacket : IPoolSubPacket
+public readonly struct ArmorDamagePacket : IPlayerPacket
 {
-    private ArmorDamagePacket() { }
+    public EPlayerPacketType Type => EPlayerPacketType.ArmorDamage;
 
-    public static ArmorDamagePacket CreateInstance()
+    public ArmorDamagePacket(MongoID itemId, float amount)
     {
-        return new();
+        ItemId = itemId;
+        Durability = amount;
     }
 
-    public static ArmorDamagePacket FromValue(MongoID itemId, float amount)
-    {
-        var packet = CommonSubPacketPoolManager.Instance.GetPacket<ArmorDamagePacket>(ECommonSubPacketType.ArmorDamage);
-        packet.ItemId = itemId;
-        packet.Durability = amount;
-        return packet;
-    }
-
-    public MongoID ItemId;
-    public float Durability;
-
-    public void Execute(FikaPlayer player = null)
-    {
-        player.HandleArmorDamagePacket(this);
-    }
-
-    public void Deserialize(NetDataReader reader)
+    public ArmorDamagePacket(NetDataReader reader)
     {
         ItemId = reader.GetMongoID();
         Durability = reader.GetFloat();
     }
 
-    public void Serialize(NetDataWriter writer)
+    public readonly MongoID ItemId;
+    public readonly float Durability;
+
+    public readonly void Execute(FikaPlayer player)
+    {
+        player.HandleArmorDamagePacket(this);
+    }
+
+    public readonly void Serialize(NetDataWriter writer)
     {
         writer.PutMongoID(ItemId);
         writer.Put(Durability);
-    }
-
-    public void Dispose()
-    {
-        ItemId = default;
-        Durability = 0f;
     }
 }

@@ -1,82 +1,47 @@
-﻿using EFT;
+﻿using System;
+using System.Buffers;
+using EFT;
 using EFT.InventoryLogic;
 using Fika.Core.Main.ObservedClasses.HandsControllers;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
-using Fika.Core.Networking.Pooling;
 
 namespace Fika.Core.Networking.Packets.FirearmController.SubPackets;
 
-public sealed class ReloadBarrelsPacket : IPoolSubPacket
+public readonly struct ReloadBarrelsPacket : IFirearmPacket
 {
-    private ReloadBarrelsPacket()
+    public readonly ushort AmmoCount;
+    public readonly string[] AmmoIds;
+    public readonly ItemAddressDescriptor Descriptor;
+
+    public EFirearmPacketType Type => EFirearmPacketType.ReloadBarrels;
+
+    public ReloadBarrelsPacket(string[] ammoIds, ItemAddress placeToPutContainedAmmoMagazine)
     {
-
-    }
-
-    public static ReloadBarrelsPacket FromValue(string[] ammoIds, ItemAddress placeToPutContainedAmmoMagazine)
-    {
-        var packet = FirearmSubPacketPoolManager.Instance.GetPacket<ReloadBarrelsPacket>(EFirearmSubPacketType.ReloadBarrels);
-        packet.AmmoIds = ammoIds;
-        packet.PlaceToPutContainedAmmoMagazine = placeToPutContainedAmmoMagazine;
-        return packet;
-    }
-
-    public static ReloadBarrelsPacket CreateInstance()
-    {
-        return new();
-    }
-
-    public string[] AmmoIds;
-    public ItemAddress PlaceToPutContainedAmmoMagazine;
-    public ItemAddressDescriptor Descriptor;
-
-    public void Execute(FikaPlayer player)
-    {
-        if (player.HandsController is ObservedFirearmController controller)
+        AmmoCount = (ushort)(ammoIds?.Length ?? 0);
+        AmmoIds = ammoIds ?? [];
+        if (placeToPutContainedAmmoMagazine != null)
         {
-            var ammo = controller.FindAmmoByIds(AmmoIds);
-            AmmoPack ammoPack = new(ammo);
-            ItemAddress gridItemAddress = null;
-
-            if (Descriptor != null)
-            {
-                try
-                {
-                    gridItemAddress = player.InventoryController.ToItemAddress(Descriptor);
-                }
-                catch (HTTPNetworkException exception2)
-                {
-                    FikaGlobals.LogError(exception2);
-                }
-            }
-
-            if (ammoPack != null)
-            {
-                controller.FastForwardCurrentState();
-                controller.ReloadBarrels(ammoPack, gridItemAddress, null);
-            }
-            else
-            {
-                FikaGlobals.LogError($"ReloadBarrelsPacket: final variables were null! Ammo: {ammoPack}, Address: {gridItemAddress}");
-            }
+            Descriptor = placeToPutContainedAmmoMagazine.ToDescriptor();
         }
     }
 
-    public void Serialize(NetDataWriter writer)
+    public ReloadBarrelsPacket(NetDataReader reader)
     {
-        writer.PutArray(AmmoIds);
-        var exists = PlaceToPutContainedAmmoMagazine != null;
-        writer.Put(exists);
-        if (exists)
+        AmmoCount = reader.GetUShort();
+        if (AmmoCount > 0)
         {
-            writer.PutPolymorph(PlaceToPutContainedAmmoMagazine.ToDescriptor());
+            AmmoIds = ArrayPool<string>.Shared.Rent(AmmoCount);
+            for (var i = 0; i < AmmoCount; i++)
+            {
+                AmmoIds[i] = reader.GetString();
+            }
         }
-    }
+        else
+        {
+            AmmoIds = [];
+        }
 
-    public void Deserialize(NetDataReader reader)
-    {
-        AmmoIds = reader.GetStringArray();
         var exists = reader.GetBool();
         if (exists)
         {
@@ -84,10 +49,62 @@ public sealed class ReloadBarrelsPacket : IPoolSubPacket
         }
     }
 
-    public void Dispose()
+    public readonly void Execute(FikaPlayer player)
     {
-        AmmoIds = null;
-        PlaceToPutContainedAmmoMagazine = null;
-        Descriptor = null;
+        try
+        {
+            if (player.HandsController is not ObservedFirearmController controller)
+            {
+                return;
+            }
+
+            var ammo = controller.FindAmmoByIds(AmmoIds, AmmoCount);
+            if (ammo == null)
+            {
+                FikaGlobals.LogError($"ReloadBarrelsPacket: Failed retrieving ammo items for player {player.ProfileId}.");
+                return;
+            }
+
+            AmmoPack ammoPack = new(ammo);
+
+            ItemAddress gridItemAddress = null;
+            if (Descriptor != null)
+            {
+                try
+                {
+                    gridItemAddress = player.InventoryController.ToItemAddress(Descriptor);
+                }
+                catch (Exception exception)
+                {
+                    FikaGlobals.LogError(exception);
+                }
+            }
+
+            controller.FastForwardCurrentState();
+            controller.ReloadBarrels(ammoPack, gridItemAddress, null);
+        }
+        finally
+        {
+            if (AmmoCount > 0 && AmmoIds != null)
+            {
+                ArrayPool<string>.Shared.Return(AmmoIds, true);
+            }
+        }
+    }
+
+    public readonly void Serialize(NetDataWriter writer)
+    {
+        writer.Put(AmmoCount);
+        for (var i = 0; i < AmmoCount; i++)
+        {
+            writer.Put(AmmoIds[i]);
+        }
+
+        var exists = Descriptor != null;
+        writer.Put(exists);
+        if (exists)
+        {
+            writer.PutPolymorph(Descriptor);
+        }
     }
 }

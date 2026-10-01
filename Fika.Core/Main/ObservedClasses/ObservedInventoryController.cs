@@ -15,9 +15,6 @@ namespace Fika.Core.Main.ObservedClasses;
 
 public sealed class ObservedInventoryController : Player.PlayerInventoryController, IOperationHandler
 {
-    private readonly static FieldInfo _setInHandsCallbackField = typeof(Player)
-        .GetField("_setInHandsCallback", BindingFlags.NonPublic | BindingFlags.Instance);
-
     private readonly FikaPlayer _fikaPlayer;
 
     public override bool HasDiscardLimits
@@ -280,7 +277,7 @@ public sealed class ObservedInventoryController : Player.PlayerInventoryControll
 
         if ((item.Parent != to || operation is FoldOperation) && handler.player_0.HandsController.CanExecute(operation))
         {
-            _setInHandsCallbackField.SetValue(handler.player_0, handler.callback);
+            handler.player_0._setInHandsCallback = handler.callback;
             RaiseInOutProcessEvents(new InOutHandsProcessEventArgs(handler.player_0.HandsController.Item, CommandStatus.Begin, this));
             handler.player_0.HandsController.Execute(operation, handler.method_1);
             return;

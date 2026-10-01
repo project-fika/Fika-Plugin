@@ -91,7 +91,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
     private static ManualLogSource _logger;
 
     private Func<LocalPlayer, EftGamePlayerOwner> _func_1;
-    private FikaPlayer _localPlayer;
+    private FikaPlayer _localFikaPlayer;
     private bool _hasSaved;
     private float _voipDistance;
 
@@ -262,27 +262,29 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
 
         if (!GameController.IsServer && !FikaBackendUtils.IsReconnect)
         {
-            var packet = SendCharacterPacket.FromValue(new PlayerInfoPacket()
+            var playerInfoPacket = new PlayerInfoPacket()
             {
                 Profile = fikaPlayer.Profile,
                 ControllerId = fikaPlayer.InventoryController.CurrentId,
                 FirstOperationId = fikaPlayer.InventoryController.NextOperationId
-            }, fikaPlayer.HealthController.IsAlive, false, fikaPlayer.Transform.position, fikaPlayer.NetId);
-            var client = Singleton<FikaClient>.Instance;
+            };
 
             if (fikaPlayer.ActiveHealthController != null)
             {
-                packet.PlayerInfoPacket.HealthByteArray = fikaPlayer.ActiveHealthController.SerializeState();
+                playerInfoPacket.HealthByteArray = fikaPlayer.ActiveHealthController.SerializeState();
             }
 
             if (fikaPlayer.HandsController != null)
             {
-                packet.PlayerInfoPacket.ControllerType = HandsControllerTypeConvert.FromController(fikaPlayer.HandsController);
-                packet.PlayerInfoPacket.ItemId = fikaPlayer.HandsController.Item.Id;
-                packet.PlayerInfoPacket.IsStationary = fikaPlayer.MovementContext.IsStationaryWeaponInHands;
+                playerInfoPacket.ControllerType = HandsControllerTypeConvert.FromController(fikaPlayer.HandsController);
+                playerInfoPacket.ItemId = fikaPlayer.HandsController.Item.Id;
+                playerInfoPacket.IsStationary = fikaPlayer.MovementContext.IsStationaryWeaponInHands;
             }
 
-            client.SendGenericPacket(EGenericSubPacketType.SendCharacter, packet, true);
+            var packet = new SendCharacterPacket(playerInfoPacket, fikaPlayer.HealthController.IsAlive, false, fikaPlayer.Transform.position, fikaPlayer.NetId);
+            var client = Singleton<FikaClient>.Instance;
+
+            client.SendGenericPacket(in packet, DeliveryMethod.ReliableOrdered, true);
         }
 
         _logger.LogInfo("Adding debug component...");
@@ -562,8 +564,8 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
 
         myPlayer.OnEpInteraction += OnEpInteraction;
 
-        _localPlayer = myPlayer as FikaPlayer;
-        GameController.SetLocalPlayer(_localPlayer);
+        _localFikaPlayer = myPlayer as FikaPlayer;
+        GameController.SetLocalPlayer(_localFikaPlayer);
 
         _logger.LogInfo("Local player created");
         return myPlayer;
@@ -693,6 +695,10 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
     /// <returns></returns>
     public void Extract(FikaPlayer player, ExfiltrationPoint exfiltrationPoint, TransitPoint transitPoint = null)
     {
+        if (player.StatisticsManager is HealthStatisticsManager healthStatisticsManager)
+        {
+            healthStatisticsManager.ConsumeExperience();
+        }
         GameController.Extract(player, exfiltrationPoint, transitPoint);
         MainPlayerExtracted?.Invoke(player);
     }
@@ -1179,12 +1185,12 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         {
             return false;
         }
-        if (_localPlayer == null)
+        if (_localFikaPlayer == null)
         {
             return true;
         }
         var flag = VoiceClient.IsTalkDetected();
-        _localPlayer.TalkDateTime = flag ? DateTimeExtensions.UtcNow : default;
+        _localFikaPlayer.TalkDateTime = flag ? DateTimeExtensions.UtcNow : default;
         bool flag2;
         bool flag3;
         if (_players.Count == 1)
@@ -1196,7 +1202,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         {
             flag2 = false;
             flag3 = false;
-            var position = _localPlayer.Position;
+            var position = _localFikaPlayer.Position;
             foreach (var humanPlayer in GameController.CoopHandler.HumanPlayers)
             {
                 if (humanPlayer.IsYourPlayer)

@@ -1,41 +1,20 @@
-﻿using System;
-using EFT;
-using Fika.Core.Main.Players;
-using Fika.Core.Networking.Pooling;
+﻿using EFT;
 
 namespace Fika.Core.Networking.Packets.Generic.SubPackets;
 
-public sealed class OperationCallbackPacket : IPoolSubPacket
+public readonly struct OperationCallbackPacket : IGenericPacket
 {
-    private OperationCallbackPacket() { }
+    public EGenericPacketType Type => EGenericPacketType.OperationCallback;
 
-    public static OperationCallbackPacket CreateInstance()
+    public OperationCallbackPacket(int netId, ushort callbackId, EOperationStatus status, string error = null)
     {
-        return new();
+        NetId = netId;
+        CallbackId = callbackId;
+        Status = status;
+        Error = error;
     }
 
-    public static OperationCallbackPacket FromValue(int netId, ushort callbackId, EOperationStatus status, string error = null)
-    {
-        var packet = GenericSubPacketPoolManager.Instance.GetPacket<OperationCallbackPacket>(EGenericSubPacketType.OperationCallback);
-        packet.NetId = netId;
-        packet.CallbackId = callbackId;
-        packet.Status = status;
-        packet.Error = error;
-        return packet;
-    }
-
-    public int NetId;
-    public ushort CallbackId;
-    public EOperationStatus Status;
-    public string Error;
-
-    [Obsolete("Not used for inventory packets", true)]
-    public void Execute(FikaPlayer player = null)
-    {
-        // unused
-    }
-
-    public void Deserialize(NetDataReader reader)
+    public OperationCallbackPacket(NetDataReader reader)
     {
         NetId = reader.GetInt();
         CallbackId = reader.GetUShort();
@@ -46,7 +25,12 @@ public sealed class OperationCallbackPacket : IPoolSubPacket
         }
     }
 
-    public void Serialize(NetDataWriter writer)
+    public readonly int NetId;
+    public readonly ushort CallbackId;
+    public readonly EOperationStatus Status;
+    public readonly string Error;
+
+    public readonly void Serialize(NetDataWriter writer)
     {
         writer.Put(NetId);
         writer.Put(CallbackId);
@@ -55,13 +39,5 @@ public sealed class OperationCallbackPacket : IPoolSubPacket
         {
             writer.Put(Error);
         }
-    }
-
-    public void Dispose()
-    {
-        NetId = 0;
-        CallbackId = 0;
-        Status = default;
-        Error = null;
     }
 }

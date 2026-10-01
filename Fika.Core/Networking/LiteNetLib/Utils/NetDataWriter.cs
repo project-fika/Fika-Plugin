@@ -660,7 +660,8 @@ public class NetDataWriter
             ResizeIfNeed(_position + size);
         }
 
-        FastBitConverter.GetBytes(_data, _position, value);
+        ref var dataRef = ref Unsafe.AsRef(in _data[0]);
+        Unsafe.WriteUnaligned(ref Unsafe.Add(ref dataRef, _position), value);
         _position += size;
     }
 
