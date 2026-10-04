@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Diz.Utils;
 using Fika.Core.Main.Utils;
@@ -19,40 +20,84 @@ internal class InternalBundleLoader
     public static InternalBundleLoader Instance { get; private set; }
 
     private AssetBundle _masterBundle;
+    private readonly SynchronizationContext _mainThreadContext;
 
     public InternalBundleLoader()
     {
-        Task.Run(LoadBundles);
         Instance = this;
+        // Capture the main thread's SynchronizationContext now (this ctor runs on
+        // the main thread from FikaPlugin.Awake). Do NOT route the engine call
+        // through Diz AsyncWorker: its TaskWorker captures MainThreadId from
+        // whichever thread triggers its static init, and our Task.Run worker
+        // below frequently wins that race. When it does, MainThreadId is a worker
+        // id, RunInMainTread executes the action inline on the worker, and the
+        // bundle load throws "can only be called from the main thread" while
+        // CheckIsMainThread() lies about it. The SynchronizationContext captured
+        // here is always the real main thread.
+        _mainThreadContext = SynchronizationContext.Current;
+        Task.Run(LoadBundles);
     }
 
     public async Task LoadBundles()
     {
-        var assembly = Assembly.GetExecutingAssembly();
-        foreach (var name in assembly.GetManifestResourceNames())
+        try
         {
-            await using var stream = assembly.GetManifestResourceStream(name);
-            await using MemoryStream memoryStream = new();
-
-            var bundleName = name.Replace("Fika.Core.Bundles.Files.", "")
-                .Replace(".bundle", "");
-
-            if (bundleName == "masterbundle")
+            var assembly = Assembly.GetExecutingAssembly();
+            foreach (var name in assembly.GetManifestResourceNames())
             {
-                await stream.CopyToAsync(memoryStream);
-                var assetBundle = AssetBundle.LoadFromMemoryAsync(memoryStream.ToArray());
-                while (!assetBundle.isDone)
+                await using var stream = assembly.GetManifestResourceStream(name);
+                await using MemoryStream memoryStream = new();
+
+                var bundleName = name.Replace("Fika.Core.Bundles.Files.", "")
+                    .Replace(".bundle", "");
+
+                if (bundleName == "masterbundle")
                 {
-                    await Task.Yield();
-                }
+                    // Pure managed I/O: stays on the worker thread.
+                    await stream.CopyToAsync(memoryStream);
+                    var bytes = memoryStream.ToArray();
 
-                _masterBundle = assetBundle.assetBundle;
+                    // Unity engine calls are main-thread-only, but the async
+                    // load + poll loop can't run here on the worker. Marshal
+                    // just the load across via the main thread's sync context
+                    // captured in the ctor: the bundle is ~680KB so the
+                    // synchronous load is milliseconds on the main thread,
+                    // and the worker stays free while waiting for it.
+                    var tcs = new TaskCompletionSource<AssetBundle>();
+                    if (_mainThreadContext != null)
+                    {
+                        _mainThreadContext.Post(_ =>
+                        {
+                            try
+                            {
+                                tcs.SetResult(AssetBundle.LoadFromMemory(bytes));
+                            }
+                            catch (Exception ex)
+                            {
+                                tcs.SetException(ex);
+                            }
+                        }, null);
+                    }
+                    else
+                    {
+                        tcs.SetException(new InvalidOperationException(
+                            "InternalBundleLoader: no main-thread SynchronizationContext was captured"));
+                    }
+                    _masterBundle = await tcs.Task;
+                    FikaGlobals.LogInfo("InternalBundleLoader: master bundle loaded");
+                }
+                else
+                {
+                    FikaGlobals.LogFatal("Unknown bundle loaded! Terminating...");
+                    AsyncWorker.RunInMainTread(Application.Quit);
+                }
             }
-            else
-            {
-                FikaGlobals.LogFatal("Unknown bundle loaded! Terminating...");
-                AsyncWorker.RunInMainTread(Application.Quit);
-            }
+        }
+        catch (Exception ex)
+        {
+            // Previously this fire-and-forget task failed silently, leaving
+            // _masterBundle null and every consumer NREing downstream.
+            FikaGlobals.LogError($"InternalBundleLoader::LoadBundles failed: {ex}");
         }
     }
 
