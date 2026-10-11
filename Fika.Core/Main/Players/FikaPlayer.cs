@@ -339,7 +339,6 @@ public class FikaPlayer : LocalPlayer
         switch (previousState)
         {
             case EPlayerState.Sprint:
-                _playedAtLeastOneStep = false;
                 if (!_playedAtLeastOneStep && CheckSurface(_sprintSurfaceCheck))
                 {
                     DefaultPlay(_currentSet.SprintSoundBank, 1f, EAudioMovementState.Sprint);
@@ -348,8 +347,8 @@ public class FikaPlayer : LocalPlayer
                 if (nextState == EPlayerState.Transition || nextState == EPlayerState.Idle)
                 {
                     var volumeMod = FirstPersonPointOfView ? _currentSet.StopSoundBank.BaseVolume : 1f;
-                    DefaultPlay(_currentSet.StopSoundBank,
-                        volumeMod * MovementContext.CovertMovementVolume, EAudioMovementState.Stop);
+                    var finalStopVolume = volumeMod * MovementContext.CovertMovementVolume;
+                    DefaultPlay(_currentSet.StopSoundBank, finalStopVolume, EAudioMovementState.Stop);
                 }
                 break;
 
@@ -357,14 +356,13 @@ public class FikaPlayer : LocalPlayer
             case EPlayerState.MoveZombieState:
             case EPlayerState.StartMoveZombieState:
             case EPlayerState.EndMoveZombieState:
-                _playedAtLeastOneStep = false;
                 if (!_playedAtLeastOneStep && SinceLastStep > 0.66f)
                 {
                     if (CheckSurface(_runSurfaceCheck))
                     {
                         PlayStepSound();
                     }
-                    _lastStepTime = Time.time; ;
+                    _lastStepTime = Time.time;
                 }
                 break;
         }
@@ -393,12 +391,8 @@ public class FikaPlayer : LocalPlayer
             }
         }
 
+        _playedAtLeastOneStep = false;
         _currentState = nextState;
-
-        if (CurrentState.Name != _currentState)
-        {
-            _playedAtLeastOneStep = false;
-        }
     }
 
     public override void ManualUpdate(float deltaTime, float? platformDeltaTime = null, int loop = 1)
