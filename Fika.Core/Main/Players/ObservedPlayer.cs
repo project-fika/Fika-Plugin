@@ -3,7 +3,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Audio.SpatialSystem;
@@ -290,6 +289,10 @@ public sealed class ObservedPlayer : FikaPlayer
     private bool _isZombie;
 
     /// <summary>
+    /// The frame interval used to modulo <see cref="Time.frameCount"/> for staggered updates.
+    /// </summary>
+    private const int _frameSkipInterval = 3;
+    /// <summary>
     /// Squared threshold below which movement direction is treated as stationary.
     /// </summary>
     private const float _movementDeadZoneSqr = 0.05f * 0.05f;
@@ -403,7 +406,7 @@ public sealed class ObservedPlayer : FikaPlayer
         player._isZombie = player.UsedSimplifiedSkeleton;
 
         player._frameSkip = ObservedPlayerController._evenOrNotEvenUpdateLastValue;
-        ObservedPlayerController._evenOrNotEvenUpdateLastValue = (ObservedPlayerController._evenOrNotEvenUpdateLastValue + 1) % 3;
+        ObservedPlayerController._evenOrNotEvenUpdateLastValue = (ObservedPlayerController._evenOrNotEvenUpdateLastValue + 1) % _frameSkipInterval;
 
         CameraManager.Instance.FoVUpdateAction -= player.OnFovUpdatedEvent;
 
@@ -960,7 +963,7 @@ public sealed class ObservedPlayer : FikaPlayer
         damageInfo.DidBodyDamage = damageInfo.Damage;
         ReceiveDamage(damageInfo.Damage, bodyPartType, damageInfo.DamageType, num, hitInfo.Material);
 
-        var packet  = new DamagePacket(NetId, damageInfo, bodyPartType, colliderType, armorPlateCollider, absorbed: num);
+        var packet = new DamagePacket(NetId, damageInfo, bodyPartType, colliderType, armorPlateCollider, absorbed: num);
         Singleton<IFikaNetworkManager>.Instance.SendPlayerPacket(in packet, NetId, DeliveryMethod.ReliableOrdered, true);
 
         // Run this to get weapon skill
@@ -2046,7 +2049,7 @@ public sealed class ObservedPlayer : FikaPlayer
             return;
         }
         Physical.LateUpdate();
-        ObservedVisualPass(Time.deltaTime, 3);
+        ObservedVisualPass(Time.deltaTime, _frameSkipInterval);
         PropUpdate();
         _observedCorpseCulling?.ManualUpdate();
         _armsupdated = false;
@@ -2163,7 +2166,7 @@ public sealed class ObservedPlayer : FikaPlayer
 
         if (HealthController.IsAlive)
         {
-            if (Time.frameCount % 2 == _frameSkip)
+            if (Time.frameCount % _frameSkipInterval == _frameSkip)
             {
                 UpdateTriggerColliderSearcher(deltaTime, botPlayerCulling.IsCloseToMyPlayerCamera);
             }
@@ -2555,7 +2558,7 @@ public sealed class ObservedPlayer : FikaPlayer
         }
     }
 
-#region handControllers
+    #region handControllers
     /// <summary>
     /// Fast-forwards and destroys the existing hands controller and instantiates a new controller from the given factory.
     /// </summary>
@@ -3171,4 +3174,4 @@ public sealed class ObservedPlayer : FikaPlayer
     }
 }
 
-#endregion
+    #endregion
