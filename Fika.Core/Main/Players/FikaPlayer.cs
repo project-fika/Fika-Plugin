@@ -480,7 +480,7 @@ public class FikaPlayer : LocalPlayer
             var sinceLastStep = SinceLastStep;
             if (sinceLastStep > 0.2f && MovementContext.FreefallTime < 1f)
             {
-                _lastStepTime = Time.time; ;
+                _lastStepTime = Time.time;
                 _playedAtLeastOneStep = true;
 
                 if (CheckSurface(_runSurfaceCheck))
