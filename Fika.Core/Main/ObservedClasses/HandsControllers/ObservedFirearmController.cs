@@ -77,36 +77,36 @@ public sealed class ObservedFirearmController : FirearmController
     {
         // Check for GClass increments..
         var operationFactoryDelegates = base.GetOperationFactoryDelegates();
-        operationFactoryDelegates[typeof(Player.FirearmController.Idling)] = new OperationFactoryDelegate(Idle1);
+        operationFactoryDelegates[typeof(Idling)] = new OperationFactoryDelegate(Idle1);
         // Look for operations that implement OnShellEjectEvent and ThrowPatronAsLoot
-        operationFactoryDelegates[typeof(Player.FirearmController.ReloadMultiBarrelOperation)] = new OperationFactoryDelegate(ThrowPatron1);
-        operationFactoryDelegates[typeof(Player.FirearmController.ReloadSingleBarrelOperation)] = new OperationFactoryDelegate(ThrowPatron2);
-        operationFactoryDelegates[typeof(Player.FirearmController.RepairMalfunction)] = new OperationFactoryDelegate(ThrowPatron3);
-        operationFactoryDelegates[typeof(Player.FirearmController.RechamberOperation)] = new OperationFactoryDelegate(ThrowPatron4);
+        operationFactoryDelegates[typeof(ReloadMultiBarrelOperation)] = new OperationFactoryDelegate(ThrowPatron1);
+        operationFactoryDelegates[typeof(ReloadSingleBarrelOperation)] = new OperationFactoryDelegate(ThrowPatron2);
+        operationFactoryDelegates[typeof(RepairMalfunction)] = new OperationFactoryDelegate(ThrowPatron3);
+        operationFactoryDelegates[typeof(RechamberOperation)] = new OperationFactoryDelegate(ThrowPatron4);
         return operationFactoryDelegates;
     }
 
-    private Player.ObjectInHandsOperation ThrowPatron1()
+    private ObjectInHandsOperation ThrowPatron1()
     {
         return new ObservedThrowPatronOperation1(this);
     }
 
-    private Player.ObjectInHandsOperation ThrowPatron2()
+    private ObjectInHandsOperation ThrowPatron2()
     {
         return new ObservedThrowPatronOperation2(this);
     }
 
-    private Player.ObjectInHandsOperation ThrowPatron3()
+    private ObjectInHandsOperation ThrowPatron3()
     {
         return new ObservedThrowPatronOperation3(this);
     }
 
-    private Player.ObjectInHandsOperation ThrowPatron4()
+    private ObjectInHandsOperation ThrowPatron4()
     {
         return new ObservedThrowPatronOperation4(this);
     }
 
-    private Player.ObjectInHandsOperation Idle1()
+    private ObjectInHandsOperation Idle1()
     {
         return new ObservedIdleOperation(this);
     }
@@ -270,8 +270,9 @@ public sealed class ObservedFirearmController : FirearmController
             _needsReset = false;
             WeaponSoundPlayer.OnBreakLoop();
 
-            _observedPlayer.HandsAnimator.Animator.Update(Time.fixedDeltaTime);
-            ManualUpdate(Time.fixedDeltaTime);
+            var fdt = Time.fixedDeltaTime;
+            _observedPlayer.HandsAnimator.Animator.Update(fdt);
+            ManualUpdate(fdt);
             if (CurrentOperation.State != EOperationState.Finished)
             {
                 CurrentOperation.FastForward();
@@ -807,7 +808,7 @@ public sealed class ObservedFirearmController : FirearmController
         }
     }
 
-    private class ObservedIdleOperation(FirearmController controller) : Player.FirearmController.Idling(controller)
+    private class ObservedIdleOperation(FirearmController controller) : Idling(controller)
     {
         public override void ProcessRemoveOneOffWeapon()
         {
@@ -815,29 +816,29 @@ public sealed class ObservedFirearmController : FirearmController
         }
     }
 
-    private class ObservedThrowPatronOperation1(FirearmController controller) : Player.FirearmController.ReloadMultiBarrelOperation(controller)
+    private class ObservedThrowPatronOperation1(FirearmController controller) : ReloadMultiBarrelOperation(controller)
     {
         private readonly ObservedFirearmController _observedController = (ObservedFirearmController)controller;
 
-        public override void Start(Player.FirearmController.ReloadMultiBarrelResult reloadMultiBarrelResult, Callback callback)
+        public override void Start(ReloadMultiBarrelResult reloadMultiBarrelResult, Callback callback)
         {
             _observedController._isThrowingPatron = true;
             base.Start(reloadMultiBarrelResult, callback);
         }
     }
 
-    private class ObservedThrowPatronOperation2(FirearmController controller) : Player.FirearmController.ReloadSingleBarrelOperation(controller)
+    private class ObservedThrowPatronOperation2(FirearmController controller) : ReloadSingleBarrelOperation(controller)
     {
         private readonly ObservedFirearmController _observedController = (ObservedFirearmController)controller;
 
-        public override void Start(Player.FirearmController.ReloadSingleBarrelResult reloadSingleBarrelResult, Callback callback)
+        public override void Start(ReloadSingleBarrelResult reloadSingleBarrelResult, Callback callback)
         {
             _observedController._isThrowingPatron = true;
             base.Start(reloadSingleBarrelResult, callback);
         }
     }
 
-    private class ObservedThrowPatronOperation3(FirearmController controller) : Player.FirearmController.RepairMalfunction(controller)
+    private class ObservedThrowPatronOperation3(FirearmController controller) : RepairMalfunction(controller)
     {
         private readonly ObservedFirearmController _observedController = (ObservedFirearmController)controller;
 
@@ -848,7 +849,7 @@ public sealed class ObservedFirearmController : FirearmController
         }
     }
 
-    private class ObservedThrowPatronOperation4(FirearmController controller) : Player.FirearmController.RechamberOperation(controller)
+    private class ObservedThrowPatronOperation4(FirearmController controller) : RechamberOperation(controller)
     {
         private readonly ObservedFirearmController _observedController = (ObservedFirearmController)controller;
 
