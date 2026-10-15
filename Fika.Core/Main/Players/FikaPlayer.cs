@@ -1487,8 +1487,15 @@ public class FikaPlayer : LocalPlayer
             }
         }
 
-        var packets = new HealthSyncPacket(packet, LastBodyPart, corpseSyncPacket,
-            LastAggressor != null ? LastAggressor.ProfileId : null, _lastWeaponId != null ? _lastWeaponId : null);
+        var killerId = !string.IsNullOrWhiteSpace(LastAggressor?.ProfileId)
+            ? (MongoID?)LastAggressor.ProfileId
+            : null;
+
+        var weaponId = !string.IsNullOrWhiteSpace(_lastWeaponId)
+            ? (MongoID?)_lastWeaponId
+            : null;
+
+        var packets = new HealthSyncPacket(packet, LastBodyPart, corpseSyncPacket, killerId, weaponId);
 
         PacketSender.NetworkManager.SendPlayerPacket(in packets, NetId, DeliveryMethod.ReliableOrdered, true);
     }
