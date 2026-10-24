@@ -1261,6 +1261,9 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
             case EGenericPacketType.SpawnAI:
                 reader.GetUnmanaged<SpawnAIPacket>().Execute();
                 break;
+            case EGenericPacketType.LighthouseAggression:
+                new LighthouseAggressionPacket(reader).Execute();
+                break;
         }
     }
 

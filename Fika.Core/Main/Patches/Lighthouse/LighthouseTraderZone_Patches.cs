@@ -12,6 +12,8 @@ namespace Fika.Core.Main.Patches.Lighthouse;
 
 public static class LighthouseTraderZone_Patches
 {
+    public static LighthouseTraderZone Zone;
+
     public class LighthouseTraderZone_AddPlayer_Patch : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
@@ -23,7 +25,7 @@ public static class LighthouseTraderZone_Patches
         public static bool Prefix(Player player, LighthouseTraderZone __instance, ref List<Player> ___allPlayersInZone,
             ref List<Player> ___allowedPlayers, ref List<Player> ___unallowedPlayers, ref Action<string, bool> ____onPlayerAllowStatusChanged)
         {
-            if (!CoopHandler.TryGetCoopHandler(out var coopHandler))
+            if (!CoopHandler.TryGetCoopHandler(out _))
             {
                 return false;
             }
@@ -35,13 +37,7 @@ public static class LighthouseTraderZone_Patches
             {
                 ___allowedPlayers.Add(player);
                 ___allPlayersInZone.Add(player);
-
-                if (coopHandler.MyPlayer == player)
-                {
-                    //Todo: Might have to patch SetAgressor as the host and other clients might need to know IsAgressorInLighthouseTraderZone
-                    player.ActiveHealthController.OnApplyDamageByPlayer += __instance.SetAgressor;
-                }
-
+                SubscribeAggression(player, __instance);
                 return false;
             }
             if (!flag)
@@ -59,13 +55,7 @@ public static class LighthouseTraderZone_Patches
             {
                 ___allowedPlayers.Add(player);
                 radioTransmitterRecodableComponent.OnRadioTransmitterStatusChanged += __instance.OnPlayerChangeRadioTransmitterStatus;
-
-                if (coopHandler.MyPlayer == player)
-                {
-                    //Todo: Might have to patch SetAgressor as the host and other clients might need to know IsAgressorInLighthouseTraderZone
-                    player.ActiveHealthController.OnApplyDamageByPlayer += __instance.SetAgressor;
-                }
-
+                SubscribeAggression(player, __instance);
                 ____onPlayerAllowStatusChanged?.Invoke(player.ProfileId, true);
             }
 
@@ -73,6 +63,15 @@ public static class LighthouseTraderZone_Patches
 
             // Skip original method
             return false;
+        }
+        
+        private static void SubscribeAggression(Player player, LighthouseTraderZone zone)
+        {
+            var healthController = player.ActiveHealthController;
+            if (healthController != null)
+            {
+                healthController.OnApplyDamageByPlayer += zone.SetAgressor;
+            }
         }
     }
 
@@ -87,7 +86,7 @@ public static class LighthouseTraderZone_Patches
         public static bool Prefix(Player player, LighthouseTraderZone __instance, ref List<Player> ___allPlayersInZone,
             ref List<Player> ___allowedPlayers, ref List<Player> ___unallowedPlayers, ref Action<string, bool> ____onPlayerAllowStatusChanged)
         {
-            if (!CoopHandler.TryGetCoopHandler(out var coopHandler))
+            if (!CoopHandler.TryGetCoopHandler(out _))
             {
                 return false;
             }
@@ -104,9 +103,10 @@ public static class LighthouseTraderZone_Patches
                     radioTransmitterRecodableComponent.OnRadioTransmitterStatusChanged -= __instance.OnPlayerChangeRadioTransmitterStatus;
                 }
 
-                if (coopHandler.MyPlayer == player)
+                var healthController = player.ActiveHealthController;
+                if (healthController != null)
                 {
-                    player.ActiveHealthController.OnApplyDamageByPlayer += __instance.SetAgressor;
+                    healthController.OnApplyDamageByPlayer -= __instance.SetAgressor;
                 }
             }
             else
@@ -135,6 +135,8 @@ public static class LighthouseTraderZone_Patches
                 UnityEngine.Object.Destroy(__instance);
                 return false;
             }
+
+            Zone = __instance;
             return true;
         }
     }

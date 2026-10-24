@@ -88,7 +88,17 @@ public enum EGenericPacketType : byte
     /// <summary>
     /// AI loaded by all clients
     /// </summary>
-    SpawnAI
+    SpawnAI,
+
+    /// <summary>
+    /// A client was hit by another player, the host decides whether the attacker angers Lightkeeper
+    /// </summary>
+    LighthouseAggression,
+
+    /// <summary>
+    /// The host changed a client's radio transmitter encoding
+    /// </summary>
+    TransmitterEncoded
 
     /// <summary>
     /// Train synchronization event (commented out).

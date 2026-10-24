@@ -820,6 +820,9 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
             case EGenericPacketType.SpawnAI:
                 reader.GetUnmanaged<SpawnAIPacket>().Execute();
                 break;
+            case EGenericPacketType.TransmitterEncoded:
+                new TransmitterEncodedPacket(reader).Execute();
+                break;
         }
     }
 

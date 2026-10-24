@@ -254,6 +254,11 @@ public class FikaPlayer : LocalPlayer
             }
         }
 
+        if (FikaBackendUtils.IsClient && gameWorld.LocationId == "Lighthouse")
+        {
+            player.ActiveHealthController.OnApplyDamageByPlayer += player.RelayLighthouseAggression;
+        }
+
         player.SubscribeToArmorChangeEvent();
         player.RecalculateEquippedArmorComponents(null);
 
@@ -262,6 +267,22 @@ public class FikaPlayer : LocalPlayer
         OnPlayerSpawned?.Invoke(player);
 
         return player;
+    }
+
+    /// <summary>
+    /// Damage to a client lands on the client, so the host's Lighthouse zone learns about hits on it from here
+    /// </summary>
+    /// <param name="victim">This player</param>
+    /// <param name="aggressor">The player who did the damage</param>
+    private void RelayLighthouseAggression(Player victim, IPlayer aggressor)
+    {
+        if (aggressor == null || aggressor.ProfileId == ProfileId)
+        {
+            return;
+        }
+
+        var packet = new LighthouseAggressionPacket(NetId, aggressor.ProfileId);
+        Singleton<IFikaNetworkManager>.Instance.SendGenericPacket(in packet, DeliveryMethod.ReliableOrdered);
     }
 
     private uint GetNextAvailableId()
