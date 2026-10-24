@@ -10,7 +10,7 @@ public class ShutdownClientNotification : Notification
     {
     }
 
-    public ShutdownClientNotification() : base(Il2CppInjection.Allocate<ShutdownClientNotification>())
+    public ShutdownClientNotification() : base(ClassInjector.DerivedConstructorPointer<ShutdownClientNotification>())
     {
         ClassInjector.DerivedConstructorBody(this);
         ClassInjector.InvokeBaseConstructor<Notification>(this);

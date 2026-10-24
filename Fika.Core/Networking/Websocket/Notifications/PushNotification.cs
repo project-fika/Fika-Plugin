@@ -12,7 +12,7 @@ public class PushNotification : Notification
     {
     }
 
-    public PushNotification() : base(Il2CppInjection.Allocate<PushNotification>())
+    public PushNotification() : base(ClassInjector.DerivedConstructorPointer<PushNotification>())
     {
         ClassInjector.DerivedConstructorBody(this);
         ClassInjector.InvokeBaseConstructor<Notification>(this);

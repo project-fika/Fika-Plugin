@@ -24,6 +24,7 @@ using Fika.Core.Modding.Events;
 using Fika.Core.Networking.Http;
 using Fika.Core.Networking.Packets;
 using Fika.Core.Networking.Packets.Backend;
+using static Fika.Core.Networking.Packets.World.RequestSubPackets;
 using Fika.Core.Networking.VOIP;
 using Fika.Core.UI.Custom;
 using System;
@@ -134,6 +135,12 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
     public bool AllowVOIP { get; set; }
     public List<ObservedPlayer> ObservedPlayers { get; set; }
     public int PlayerAmount { get; set; }
+
+    /// <summary>
+    /// The battle pass documents spawned for each player, keyed by netId. A player only gets one allowance per
+    /// raid, so a reconnecting client is sent what it already had instead of a fresh roll
+    /// </summary>
+    public Dictionary<int, BattlePassDocumentsRequest> BattlePassDocuments { get; } = [];
 
     private int _sendRate;
     private NetPacketProcessor _packetProcessor;
@@ -444,6 +451,7 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
         RegisterPacket<QuestItemPacket, NetPeer>(OnQuestItemPacketReceived);
         RegisterPacket<QuestDropItemPacket, NetPeer>(OnQuestDropItemPacketReceived);
         RegisterPacket<InteractableInitPacket, NetPeer>(OnInteractableInitPacketReceived);
+        RegisterPacket<QuestTemplatesPacket, NetPeer>(OnQuestTemplatesPacketReceived);
         RegisterPacket<PasscodeInitPacket, NetPeer>(OnPasscodeInitPacketReceived);
         RegisterPacket<FinalMissionPacket, NetPeer>(OnFinalMissionPacketReceived);
         RegisterPacket<PasscodeAttemptPacket, NetPeer>(OnPasscodeAttemptPacketReceived);

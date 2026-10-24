@@ -8,6 +8,7 @@ using EFT.Notes;
 using EFT.Prestige;
 using EFT.Quests;
 using Fika.Core.Main.Utils;
+using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using JsonType;
 
 namespace Fika.Core.Networking;
@@ -145,6 +146,10 @@ public static class EFTSerializationExtensions
         RegisterSerializer<QuestHandoverDescriptor>((w, t) => w.PutEFTQuestHandoverDescriptor(t));
         RegisterSerializer<EFT.Quests.QuestStatusData>((w, t) => w.PutEFTQuestsQuestStatusData(t));
         RegisterSerializer<RecodableComponentDescriptor>((w, t) => w.PutEFTRecodableComponentDescriptor(t));
+        RegisterSerializer<ReadChapterConditionsOperationDescriptor>((w, t) => w.PutEFTInventoryLogicOperationsReadChapterConditionsOperationDescriptor(t));
+        RegisterSerializer<ReadQuestConditionOperationDescriptor>((w, t) => w.PutEFTInventoryLogicOperationsReadQuestConditionOperationDescriptor(t));
+        RegisterSerializer<ReadQuestLinkOperationDescriptor>((w, t) => w.PutEFTInventoryLogicOperationsReadQuestLinkOperationDescriptor(t));
+        RegisterSerializer<ReadQuestNoteOperationDescriptor>((w, t) => w.PutEFTInventoryLogicOperationsReadQuestNoteOperationDescriptor(t));
         RegisterSerializer<RemoveOperationDescriptor>((w, t) => w.PutEFTRemoveOperationDescriptor(t));
         RegisterSerializer<RepairableComponentDescriptor>((w, t) => w.PutEFTRepairableComponentDescriptor(t));
         RegisterSerializer<RepairEnhancementComponentDescriptor>((w, t) => w.PutEFTRepairEnhancementComponentDescriptor(t));
@@ -164,6 +169,8 @@ public static class EFTSerializationExtensions
         RegisterSerializer<SplitOperationDescriptor>((w, t) => w.PutEFTSplitOperationDescriptor(t));
         RegisterSerializer<StackSlotDescriptor>((w, t) => w.PutEFTStackSlotDescriptor(t));
         RegisterSerializer<StackSlotItemAddressDescriptor>((w, t) => w.PutEFTStackSlotItemAddressDescriptor(t));
+        RegisterSerializer<StudyItemOperationDescriptor>((w, t) => w.PutEFTStudyItemOperationDescriptor(t));
+        RegisterSerializer<StudyItemPlayerOperationDescriptor>((w, t) => w.PutEFTStudyItemPlayerOperationDescriptor(t));
         RegisterSerializer<SwapOperationDescriptor>((w, t) => w.PutEFTSwapOperationDescriptor(t));
         RegisterSerializer<TagComponentDescriptor>((w, t) => w.PutEFTTagComponentDescriptor(t));
         RegisterSerializer<TagOperationDescriptor>((w, t) => w.PutEFTTagOperationDescriptor(t));
@@ -173,6 +180,7 @@ public static class EFTSerializationExtensions
         RegisterSerializer<ToggleOperationDescriptor>((w, t) => w.PutEFTToggleOperationDescriptor(t));
         RegisterSerializer<TraderInfoDescriptor>((w, t) => w.PutEFTTraderInfoDescriptor(t));
         RegisterSerializer<TraderServiceAvailabilityData>((w, t) => w.PutEFTTraderServiceAvailabilityData(t));
+        RegisterSerializer<TransferExfiltrationPaymentOperationDescriptor>((w, t) => w.PutEFTInventoryLogicOperationsTransferExfiltrationPaymentOperationDescriptor(t));
         RegisterSerializer<TransferOperationDescriptor>((w, t) => w.PutEFTTransferOperationDescriptor(t));
         RegisterSerializer<UnbindItemOperationDescriptor>((w, t) => w.PutEFTUnbindItemOperationDescriptor(t));
         RegisterSerializer<UnloadMagOperationDescriptor>((w, t) => w.PutEFTUnloadMagOperationDescriptor(t));
@@ -272,6 +280,10 @@ public static class EFTSerializationExtensions
         RegisterDeserializer<QuestHandoverDescriptor>(r => r.GetEFTQuestHandoverDescriptor());
         RegisterDeserializer<EFT.Quests.QuestStatusData>(r => r.GetEFTQuestsQuestStatusData());
         RegisterDeserializer<RecodableComponentDescriptor>(r => r.GetEFTRecodableComponentDescriptor());
+        RegisterDeserializer<ReadChapterConditionsOperationDescriptor>(r => r.GetEFTInventoryLogicOperationsReadChapterConditionsOperationDescriptor());
+        RegisterDeserializer<ReadQuestConditionOperationDescriptor>(r => r.GetEFTInventoryLogicOperationsReadQuestConditionOperationDescriptor());
+        RegisterDeserializer<ReadQuestLinkOperationDescriptor>(r => r.GetEFTInventoryLogicOperationsReadQuestLinkOperationDescriptor());
+        RegisterDeserializer<ReadQuestNoteOperationDescriptor>(r => r.GetEFTInventoryLogicOperationsReadQuestNoteOperationDescriptor());
         RegisterDeserializer<RemoveOperationDescriptor>(r => r.GetEFTRemoveOperationDescriptor());
         RegisterDeserializer<RepairableComponentDescriptor>(r => r.GetEFTRepairableComponentDescriptor());
         RegisterDeserializer<RepairEnhancementComponentDescriptor>(r => r.GetEFTRepairEnhancementComponentDescriptor());
@@ -291,6 +303,8 @@ public static class EFTSerializationExtensions
         RegisterDeserializer<SplitOperationDescriptor>(r => r.GetEFTSplitOperationDescriptor());
         RegisterDeserializer<StackSlotDescriptor>(r => r.GetEFTStackSlotDescriptor());
         RegisterDeserializer<StackSlotItemAddressDescriptor>(r => r.GetEFTStackSlotItemAddressDescriptor());
+        RegisterDeserializer<StudyItemOperationDescriptor>(r => r.GetEFTStudyItemOperationDescriptor());
+        RegisterDeserializer<StudyItemPlayerOperationDescriptor>(r => r.GetEFTStudyItemPlayerOperationDescriptor());
         RegisterDeserializer<SwapOperationDescriptor>(r => r.GetEFTSwapOperationDescriptor());
         RegisterDeserializer<TagComponentDescriptor>(r => r.GetEFTTagComponentDescriptor());
         RegisterDeserializer<TagOperationDescriptor>(r => r.GetEFTTagOperationDescriptor());
@@ -300,6 +314,7 @@ public static class EFTSerializationExtensions
         RegisterDeserializer<ToggleOperationDescriptor>(r => r.GetEFTToggleOperationDescriptor());
         RegisterDeserializer<TraderInfoDescriptor>(r => r.GetEFTTraderInfoDescriptor());
         RegisterDeserializer<TraderServiceAvailabilityData>(r => r.GetEFTTraderServiceAvailabilityData());
+        RegisterDeserializer<TransferExfiltrationPaymentOperationDescriptor>(r => r.GetEFTInventoryLogicOperationsTransferExfiltrationPaymentOperationDescriptor());
         RegisterDeserializer<TransferOperationDescriptor>(r => r.GetEFTTransferOperationDescriptor());
         RegisterDeserializer<UnbindItemOperationDescriptor>(r => r.GetEFTUnbindItemOperationDescriptor());
         RegisterDeserializer<UnloadMagOperationDescriptor>(r => r.GetEFTUnloadMagOperationDescriptor());
@@ -3272,14 +3287,22 @@ public static class EFTSerializationExtensions
         writer.Put(target.Ending != null);
         if (target.Ending != null)
         {
-            writer.Put(target.Ending.Current);
-            writer.Put(target.Ending.Achieved?.Length ?? -1);
-            if (target.Ending.Achieved != null)
+            writer.Put(target.Ending.Current.HasValue);
+            if (target.Ending.Current.HasValue)
             {
-                foreach (var achieved in target.Ending.Achieved)
-                {
-                    writer.Put(achieved);
-                }
+                writer.PutMongoID(target.Ending.Current.Value);
+            }
+            writer.PutMongoIDArray(target.Ending.Achieved);
+            writer.Put(target.Ending.Available != null);
+            if (target.Ending.Available != null)
+            {
+                writer.PutMongoIDArray(target.Ending.Available.Regular);
+                writer.PutMongoIDArray(target.Ending.Available.Pve);
+            }
+            writer.Put(target.Ending.Display.HasValue);
+            if (target.Ending.Display.HasValue)
+            {
+                writer.PutMongoID(target.Ending.Display.Value);
             }
         }
         writer.Put(target.UnlockedLocations?.Count ?? -1);
@@ -3307,6 +3330,68 @@ public static class EFTSerializationExtensions
                 }
             }
         }
+        writer.Put(target.Pdt != null);
+        if (target.Pdt != null)
+        {
+            writer.Put(target.Pdt.OperatorAccountId);
+            writer.PutTextArray(target.Pdt.CandidateAccountIds);
+        }
+    }
+
+    // Null is written as -1 so the reader can restore it
+    private static void PutMongoIDArray(this NetDataWriter writer, Il2CppReferenceArray<MongoID> array)
+    {
+        writer.Put(array?.Length ?? -1);
+        if (array != null)
+        {
+            foreach (var id in array)
+            {
+                writer.PutMongoID(id);
+            }
+        }
+    }
+
+    private static Il2CppReferenceArray<MongoID> GetMongoIDArray(this NetDataReader reader)
+    {
+        var count = reader.GetInt();
+        if (count < 0)
+        {
+            return null;
+        }
+        var array = new Il2CppReferenceArray<MongoID>(count);
+        for (var i = 0; i < count; i++)
+        {
+            array[i] = reader.GetMongoID();
+        }
+        return array;
+    }
+
+    // Null is written as -1 so the reader can restore it
+    private static void PutTextArray(this NetDataWriter writer, Il2CppStringArray array)
+    {
+        writer.Put(array?.Length ?? -1);
+        if (array != null)
+        {
+            foreach (var text in array)
+            {
+                writer.Put(text);
+            }
+        }
+    }
+
+    private static Il2CppStringArray GetTextArray(this NetDataReader reader)
+    {
+        var count = reader.GetInt();
+        if (count < 0)
+        {
+            return null;
+        }
+        var array = new Il2CppStringArray(count);
+        for (var i = 0; i < count; i++)
+        {
+            array[i] = reader.GetString();
+        }
+        return array;
     }
 
     // Null is written as -1 so the reader can restore it
@@ -3523,17 +3608,20 @@ public static class EFTSerializationExtensions
         completeProfileDescriptorClass.ReadQuestData = reader.GetMongoIDSet();
         if (reader.GetBool())
         {
-            var ending = new EndingInfo { Current = reader.GetString() };
-            var achievedCount = reader.GetInt();
-            if (achievedCount >= 0)
+            var ending = new EndingInfo
             {
-                var achieved = new string[achievedCount];
-                for (var i = 0; i < achievedCount; i++)
+                Current = reader.GetBool() ? reader.GetMongoID().ToIl2CppNullable() : new Il2CppSystem.Nullable<MongoID>(),
+                Achieved = reader.GetMongoIDArray()
+            };
+            if (reader.GetBool())
+            {
+                ending.Available = new EndingInfo.AvailableEndings
                 {
-                    achieved[i] = reader.GetString();
-                }
-                ending.Achieved = achieved;
+                    Regular = reader.GetMongoIDArray(),
+                    Pve = reader.GetMongoIDArray()
+                };
             }
+            ending.Display = reader.GetBool() ? reader.GetMongoID().ToIl2CppNullable() : new Il2CppSystem.Nullable<MongoID>();
             completeProfileDescriptorClass.Ending = ending;
         }
         var unlockedCount = reader.GetInt();
@@ -3565,6 +3653,14 @@ public static class EFTSerializationExtensions
                 completeProfileDescriptorClass.BattlePassProgress.Add(progress);
             }
         }
+        if (reader.GetBool())
+        {
+            completeProfileDescriptorClass.Pdt = new PdtProfileRelationsDescriptor
+            {
+                OperatorAccountId = reader.GetString(),
+                CandidateAccountIds = reader.GetTextArray()
+            };
+        }
         return completeProfileDescriptorClass;
     }
 
@@ -3576,7 +3672,16 @@ public static class EFTSerializationExtensions
         writer.Put(target.Nickname);
         writer.Put(target.MainProfileNickname);
         writer.PutEnum(target.Side);
-        writer.Put(target.PrestigeLevel);
+        writer.PutEnum(target.SelectedPrestigeGameMode);
+        writer.Put(target.PrestigeLevels?.Count ?? -1);
+        if (target.PrestigeLevels != null)
+        {
+            foreach (var prestige in target.PrestigeLevels)
+            {
+                writer.PutEnum(prestige.Key);
+                writer.Put(prestige.Value);
+            }
+        }
         writer.Put(target.RegistrationDate);
         writer.Put(target.SavageLockTime);
         writer.Put(target.GroupId);
@@ -3600,6 +3705,8 @@ public static class EFTSerializationExtensions
         writer.Put(target.Experience);
         writer.Put(target.Level);
         writer.Put(target.LockedMoveCommands);
+        writer.Put(target.OperatorAccountId);
+        writer.PutTextArray(target.CandidateAccountIds);
     }
 
     /// <summary>
@@ -3612,20 +3719,29 @@ public static class EFTSerializationExtensions
             Nickname = reader.GetString(),
             MainProfileNickname = reader.GetString(),
             Side = reader.GetEnum<EPlayerSide>(),
-            PrestigeLevel = reader.GetInt(),
-            RegistrationDate = reader.GetInt(),
-            SavageLockTime = reader.GetDouble(),
-            GroupId = reader.GetString(),
-            TeamId = reader.GetString(),
-            EntryPoint = reader.GetString(),
-            NicknameChangeDate = reader.GetLong(),
-            GameVersion = reader.GetString(),
-            Type = reader.GetEnum<EProfileType>(),
-            HasCoopExtension = reader.GetBool(),
-            HasPveGame = reader.GetBool(),
-            IsStreamerModeAvailable = reader.GetBool(),
-            GroupInviteRestriction = reader.GetBool()
+            SelectedPrestigeGameMode = reader.GetEnum<EGameMode>()
         };
+        var prestigeCount = reader.GetInt();
+        if (prestigeCount >= 0)
+        {
+            profileInfoClass.PrestigeLevels = new Il2CppSystem.Collections.Generic.Dictionary<EGameMode, int>();
+            for (var i = 0; i < prestigeCount; i++)
+            {
+                profileInfoClass.PrestigeLevels[reader.GetEnum<EGameMode>()] = reader.GetInt();
+            }
+        }
+        profileInfoClass.RegistrationDate = reader.GetInt();
+        profileInfoClass.SavageLockTime = reader.GetDouble();
+        profileInfoClass.GroupId = reader.GetString();
+        profileInfoClass.TeamId = reader.GetString();
+        profileInfoClass.EntryPoint = reader.GetString();
+        profileInfoClass.NicknameChangeDate = reader.GetLong();
+        profileInfoClass.GameVersion = reader.GetString();
+        profileInfoClass.Type = reader.GetEnum<EProfileType>();
+        profileInfoClass.HasCoopExtension = reader.GetBool();
+        profileInfoClass.HasPveGame = reader.GetBool();
+        profileInfoClass.IsStreamerModeAvailable = reader.GetBool();
+        profileInfoClass.GroupInviteRestriction = reader.GetBool();
         var num = reader.GetInt();
         profileInfoClass.Bans = new Il2CppSystem.Collections.Generic.List<ProfileBanDescriptor>(num);
         for (var i = 0; i < num; i++)
@@ -3638,6 +3754,8 @@ public static class EFTSerializationExtensions
         profileInfoClass.Experience = reader.GetInt();
         profileInfoClass.Level = reader.GetInt();
         profileInfoClass.LockedMoveCommands = reader.GetBool();
+        profileInfoClass.OperatorAccountId = reader.GetString();
+        profileInfoClass.CandidateAccountIds = reader.GetTextArray();
         return profileInfoClass;
     }
 
@@ -5018,6 +5136,7 @@ public static class EFTSerializationExtensions
         writer.PutEnum(target.Side);
         writer.Put(target.Level);
         writer.Put(target.PrestigeLevel);
+        writer.PutEnum(target.PrestigeGameMode);
         writer.PutEnum(target.MemberCategory);
         writer.PutEnum(target.SelectedMemberCategory);
         writer.Put(target.SavageLockTime);
@@ -5047,6 +5166,7 @@ public static class EFTSerializationExtensions
             Side = reader.GetEnum<EPlayerSide>(),
             Level = reader.GetInt(),
             PrestigeLevel = reader.GetInt(),
+            PrestigeGameMode = reader.GetEnum<EGameMode>(),
             MemberCategory = reader.GetEnum<EMemberCategory>(),
             SelectedMemberCategory = reader.GetEnum<EMemberCategory>(),
             SavageLockTime = reader.GetDouble(),
@@ -5160,5 +5280,188 @@ public static class EFTSerializationExtensions
             y = reader.GetFloat(),
             z = reader.GetFloat()
         };
+    }
+
+    /// <summary>
+    /// Serializes a read quest chapter conditions operation descriptor into the writer stream.
+    /// </summary>
+    public static void PutEFTInventoryLogicOperationsReadChapterConditionsOperationDescriptor(this NetDataWriter writer, ReadChapterConditionsOperationDescriptor target)
+    {
+        writer.Put(target.OperationId);
+        writer.PutMongoID(target.OwnerId);
+        writer.PutMongoID(target.ChapterId);
+        writer.PutEnum(target.Type);
+    }
+
+    /// <summary>
+    /// Deserializes and reconstructs a ReadChapterConditionsOperationDescriptor object from the reader stream.
+    /// </summary>
+    public static ReadChapterConditionsOperationDescriptor GetEFTInventoryLogicOperationsReadChapterConditionsOperationDescriptor(this NetDataReader reader)
+    {
+        return new ReadChapterConditionsOperationDescriptor
+        {
+            OperationId = reader.GetUShort(),
+            OwnerId = reader.GetMongoID(),
+            ChapterId = reader.GetMongoID(),
+            Type = reader.GetEnum<ReadChapterConditionsOperation.EChapterConditionType>()
+        };
+    }
+
+    /// <summary>
+    /// Serializes a read quest condition operation descriptor into the writer stream.
+    /// </summary>
+    public static void PutEFTInventoryLogicOperationsReadQuestConditionOperationDescriptor(this NetDataWriter writer, ReadQuestConditionOperationDescriptor target)
+    {
+        writer.Put(target.OperationId);
+        writer.PutMongoID(target.OwnerId);
+        writer.PutMongoID(target.ConditionId);
+    }
+
+    /// <summary>
+    /// Deserializes and reconstructs a ReadQuestConditionOperationDescriptor object from the reader stream.
+    /// </summary>
+    public static ReadQuestConditionOperationDescriptor GetEFTInventoryLogicOperationsReadQuestConditionOperationDescriptor(this NetDataReader reader)
+    {
+        return new ReadQuestConditionOperationDescriptor
+        {
+            OperationId = reader.GetUShort(),
+            OwnerId = reader.GetMongoID(),
+            ConditionId = reader.GetMongoID()
+        };
+    }
+
+    /// <summary>
+    /// Serializes a read quest link operation descriptor into the writer stream.
+    /// </summary>
+    public static void PutEFTInventoryLogicOperationsReadQuestLinkOperationDescriptor(this NetDataWriter writer, ReadQuestLinkOperationDescriptor target)
+    {
+        writer.Put(target.OperationId);
+        writer.PutMongoID(target.OwnerId);
+        writer.PutMongoID(target.LinkId);
+    }
+
+    /// <summary>
+    /// Deserializes and reconstructs a ReadQuestLinkOperationDescriptor object from the reader stream.
+    /// </summary>
+    public static ReadQuestLinkOperationDescriptor GetEFTInventoryLogicOperationsReadQuestLinkOperationDescriptor(this NetDataReader reader)
+    {
+        return new ReadQuestLinkOperationDescriptor
+        {
+            OperationId = reader.GetUShort(),
+            OwnerId = reader.GetMongoID(),
+            LinkId = reader.GetMongoID()
+        };
+    }
+
+    /// <summary>
+    /// Serializes a read quest note operation descriptor into the writer stream.
+    /// </summary>
+    public static void PutEFTInventoryLogicOperationsReadQuestNoteOperationDescriptor(this NetDataWriter writer, ReadQuestNoteOperationDescriptor target)
+    {
+        writer.Put(target.OperationId);
+        writer.PutMongoID(target.OwnerId);
+        writer.PutMongoID(target.NoteId);
+    }
+
+    /// <summary>
+    /// Deserializes and reconstructs a ReadQuestNoteOperationDescriptor object from the reader stream.
+    /// </summary>
+    public static ReadQuestNoteOperationDescriptor GetEFTInventoryLogicOperationsReadQuestNoteOperationDescriptor(this NetDataReader reader)
+    {
+        return new ReadQuestNoteOperationDescriptor
+        {
+            OperationId = reader.GetUShort(),
+            OwnerId = reader.GetMongoID(),
+            NoteId = reader.GetMongoID()
+        };
+    }
+
+    /// <summary>
+    /// Serializes an exfiltration payment transfer operation descriptor into the writer stream.
+    /// </summary>
+    public static void PutEFTInventoryLogicOperationsTransferExfiltrationPaymentOperationDescriptor(this NetDataWriter writer, TransferExfiltrationPaymentOperationDescriptor target)
+    {
+        writer.Put(target.OperationId);
+        writer.PutMongoID(target.OwnerId);
+        writer.Put(target.PointName);
+        writer.Put(target.Items.Length);
+        for (var i = 0; i < target.Items.Length; i++)
+        {
+            writer.PutEFTDestroyedItem(target.Items[i]);
+        }
+    }
+
+    /// <summary>
+    /// Deserializes and reconstructs a TransferExfiltrationPaymentOperationDescriptor object from the reader stream.
+    /// </summary>
+    public static TransferExfiltrationPaymentOperationDescriptor GetEFTInventoryLogicOperationsTransferExfiltrationPaymentOperationDescriptor(this NetDataReader reader)
+    {
+        var gclass = new TransferExfiltrationPaymentOperationDescriptor
+        {
+            OperationId = reader.GetUShort(),
+            OwnerId = reader.GetMongoID(),
+            PointName = reader.GetString()
+        };
+        var num = reader.GetInt();
+        var items = new DestroyedItem[num];
+        for (var i = 0; i < num; i++)
+        {
+            items[i] = reader.GetEFTDestroyedItem();
+        }
+        gclass.Items = items;
+        return gclass;
+    }
+
+    /// <summary>
+    /// Serializes a study item operation descriptor into the writer stream.
+    /// </summary>
+    public static void PutEFTStudyItemOperationDescriptor(this NetDataWriter writer, StudyItemOperationDescriptor target)
+    {
+        writer.Put(target.OperationId);
+        writer.PutMongoID(target.OwnerId);
+        writer.PutMongoID(target.ItemId);
+    }
+
+    /// <summary>
+    /// Deserializes and reconstructs a StudyItemOperationDescriptor object from the reader stream.
+    /// </summary>
+    public static StudyItemOperationDescriptor GetEFTStudyItemOperationDescriptor(this NetDataReader reader)
+    {
+        return new StudyItemOperationDescriptor
+        {
+            OperationId = reader.GetUShort(),
+            OwnerId = reader.GetMongoID(),
+            ItemId = reader.GetMongoID()
+        };
+    }
+
+    /// <summary>
+    /// Serializes a study item player operation descriptor into the writer stream.
+    /// </summary>
+    public static void PutEFTStudyItemPlayerOperationDescriptor(this NetDataWriter writer, StudyItemPlayerOperationDescriptor target)
+    {
+        writer.Put(target.OperationId);
+        writer.PutMongoID(target.OwnerId);
+        writer.PutMongoID(target.ItemId);
+        writer.Put(target.RecorderId.HasValue);
+        if (target.RecorderId.HasValue)
+        {
+            writer.PutMongoID(target.RecorderId.Value);
+        }
+    }
+
+    /// <summary>
+    /// Deserializes and reconstructs a StudyItemPlayerOperationDescriptor object from the reader stream.
+    /// </summary>
+    public static StudyItemPlayerOperationDescriptor GetEFTStudyItemPlayerOperationDescriptor(this NetDataReader reader)
+    {
+        var descriptor = new StudyItemPlayerOperationDescriptor
+        {
+            OperationId = reader.GetUShort(),
+            OwnerId = reader.GetMongoID(),
+            ItemId = reader.GetMongoID()
+        };
+        descriptor.RecorderId = reader.GetBool() ? reader.GetMongoID().ToIl2CppNullable() : new Il2CppSystem.Nullable<MongoID>();
+        return descriptor;
     }
 }

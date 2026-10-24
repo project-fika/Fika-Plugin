@@ -14,7 +14,7 @@ public sealed class ReceivedSentItemNotification : Notification
     {
     }
 
-    public ReceivedSentItemNotification() : base(Il2CppInjection.Allocate<ReceivedSentItemNotification>())
+    public ReceivedSentItemNotification() : base(ClassInjector.DerivedConstructorPointer<ReceivedSentItemNotification>())
     {
         ClassInjector.DerivedConstructorBody(this);
         ClassInjector.InvokeBaseConstructor<Notification>(this);

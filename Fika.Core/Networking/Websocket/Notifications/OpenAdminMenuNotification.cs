@@ -12,7 +12,7 @@ internal class OpenAdminMenuNotification : Notification
     {
     }
 
-    public OpenAdminMenuNotification() : base(Il2CppInjection.Allocate<OpenAdminMenuNotification>())
+    public OpenAdminMenuNotification() : base(ClassInjector.DerivedConstructorPointer<OpenAdminMenuNotification>())
     {
         ClassInjector.DerivedConstructorBody(this);
         ClassInjector.InvokeBaseConstructor<Notification>(this);

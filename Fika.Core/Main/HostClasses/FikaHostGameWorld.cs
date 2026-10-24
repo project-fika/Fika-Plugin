@@ -114,7 +114,7 @@ public class FikaHostGameWorld : ClientLocalGameWorld
     /// <param name="directional"></param>
     private void OnMineExplode(MineDirectional directional)
     {
-        if (!directional.gameObject.active)
+        if (!directional.gameObject.activeSelf)
         {
             return;
         }

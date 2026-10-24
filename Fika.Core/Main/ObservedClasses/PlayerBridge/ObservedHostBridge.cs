@@ -17,7 +17,7 @@ public sealed class ObservedHostBridge : Il2CppSystem.Object, BodyPartCollider.I
     {
     }
 
-    public ObservedHostBridge(ObservedPlayer observedPlayer) : base(Il2CppInjection.Allocate<ObservedHostBridge>())
+    public ObservedHostBridge(ObservedPlayer observedPlayer) : base(ClassInjector.DerivedConstructorPointer<ObservedHostBridge>())
     {
         ClassInjector.DerivedConstructorBody(this);
         _observedPlayer = observedPlayer;

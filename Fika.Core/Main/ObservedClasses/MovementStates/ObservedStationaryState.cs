@@ -11,7 +11,7 @@ public class ObservedStationaryState : StationaryPlayerState
     {
     }
 
-    public ObservedStationaryState(MovementContext movementContext) : base(Il2CppInjection.Allocate<ObservedStationaryState>())
+    public ObservedStationaryState(MovementContext movementContext) : base(ClassInjector.DerivedConstructorPointer<ObservedStationaryState>())
     {
         ClassInjector.DerivedConstructorBody(this);
         ClassInjector.InvokeBaseConstructor<StationaryPlayerState>(this, movementContext);

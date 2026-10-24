@@ -3,9 +3,15 @@ using TMPro;
 using EFT;
 using UnityEngine.UI;
 using static Fika.Core.UI.FikaUIGlobals;
+using System;
+using Il2CppInterop.Runtime.Injection;
 
 public class MainMenuUIPlayer : MonoBehaviour
 {
+    public MainMenuUIPlayer(IntPtr pointer) : base(pointer)
+    {
+    }
+
     public TextMeshProUGUI PlayerName;
     public TextMeshProUGUI PlayerLevel;
     public TextMeshProUGUI PlayerStatus;

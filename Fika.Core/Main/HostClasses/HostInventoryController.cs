@@ -39,7 +39,7 @@ public sealed class HostInventoryController : BaseInventoryController
     private readonly Player _player;
     private readonly HostInventoryOperationHandlerPool _hostInventoryOperationHandlerPool;
 
-    public HostInventoryController(Player player, Profile profile, bool examined, bool strictSync) : base(Il2CppInjection.Allocate<HostInventoryController>(), player, profile, examined, strictSync)
+    public HostInventoryController(Player player, Profile profile, bool examined, bool strictSync) : base(ClassInjector.DerivedConstructorPointer<HostInventoryController>(), player, profile, examined, strictSync)
     {
         _player = player;
         FikaPlayer = (FikaPlayer)player;
@@ -118,7 +118,7 @@ public sealed class HostInventoryController : BaseInventoryController
             var lootedItem = moveOperation.Item;
             if (lootedItem.QuestItem)
             {
-                if (FikaPlayer.QuestController is ClientSharedQuestController sharedQuestController && sharedQuestController.ContainsAcceptedType("PlaceBeacon"))
+                if (FikaPlayer.QuestController is ClientSharedQuestController sharedQuestController && sharedQuestController.ContainsAcceptedType("FindItem"))
                 {
                     if (!sharedQuestController.CheckForTemplateId(lootedItem.TemplateId))
                     {
@@ -150,6 +150,13 @@ public sealed class HostInventoryController : BaseInventoryController
 
         // Do not replicate search operations or studying tapes
         if (operation is SinglePlayerSearchContentOperation or StudyItemPlayerOperation)
+        {
+            base.Execute(operation, callback);
+            return;
+        }
+
+        // Do not replicate various client side quest operations
+        if (operation is SetDialogProgressOperation or BaseQuestOperation or ReadQuestNoteOperation or ReadQuestLinkOperation or ReadQuestConditionOperation or ReadChapterConditionsOperation)
         {
             base.Execute(operation, callback);
             return;

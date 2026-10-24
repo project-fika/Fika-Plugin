@@ -58,9 +58,9 @@ public struct InRaidQuestPacket : INetSerializable
                 }
                 break;
             case InraidQuestType.Handover:
+                writer.Put(ItemIdsToRemove != null);
                 if (ItemIdsToRemove != null)
                 {
-                    writer.Put(true);
                     writer.Put((ushort)ItemIdsToRemove.Count);
                     for (var i = 0; i < ItemIdsToRemove.Count; i++)
                     {

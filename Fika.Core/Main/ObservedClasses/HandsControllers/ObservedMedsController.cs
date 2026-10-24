@@ -136,7 +136,7 @@ internal sealed class ObservedMedsController : Player.MedsController
         {
         }
 
-        public ObservedMedsOperation(Player.MedsController controller) : base(Il2CppInjection.Allocate<ObservedMedsOperation>())
+        public ObservedMedsOperation(Player.MedsController controller) : base(ClassInjector.DerivedConstructorPointer<ObservedMedsOperation>())
         {
             ClassInjector.DerivedConstructorBody(this);
             ClassInjector.InvokeBaseConstructor<Player.MedsController.MedsInHandsOperation>(this, controller);

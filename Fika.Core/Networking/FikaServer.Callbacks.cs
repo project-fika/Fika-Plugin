@@ -31,6 +31,7 @@ using System.Linq;
 using static Fika.Core.Networking.Packets.World.ReconnectPacket;
 using EFT.NetworkPackets;
 using Diz.Jobs;
+using Fika.Core.Main.Components;
 
 namespace Fika.Core.Networking;
 
@@ -77,18 +78,49 @@ public sealed partial class FikaServer
         }
 
         Singleton<ObjectsFactory>.Instance.LoadBundlesAndCreatePools(ObjectsFactory.PoolsCategory.Raid, ObjectsFactory.AssemblyType.Online,
-            item.Template.AllResources.ToHashSet(), JobYieldPriority.Immediate)
+            item.Template.AllResources.ToIl2CppList(), JobYieldPriority.Immediate, null, new Il2CppSystem.Threading.CancellationToken())
             .HandleExceptions();
     }
+
+    private readonly Dictionary<int, List<QuestSyncPacket>> _pendingQuestSyncs = [];
 
     private void OnQuestSyncPacketReceived(QuestSyncPacket packet, NetPeer peer)
     {
         if (!CoopHandler.Players.TryGetValue(packet.NetId, out var player))
         {
-            _logger.LogError($"Could not find player with id [{packet.NetId}] when trying to sync quest packet");
+            if (!_pendingQuestSyncs.TryGetValue(packet.NetId, out var pending))
+            {
+                pending = [];
+                _pendingQuestSyncs.Add(packet.NetId, pending);
+            }
+
+            pending.Add(packet);
             return;
         }
 
+        ApplyQuestSync(player, packet);
+    }
+
+    public void FlushQuestSyncs(FikaPlayer player)
+    {
+        if (!_pendingQuestSyncs.Remove(player.NetId, out var pending))
+        {
+            return;
+        }
+
+        foreach (var packet in pending)
+        {
+            ApplyQuestSync(player, packet);
+        }
+    }
+
+    public void ClearQuestSyncs()
+    {
+        _pendingQuestSyncs.Clear();
+    }
+
+    private void ApplyQuestSync(FikaPlayer player, QuestSyncPacket packet)
+    {
         if (player.QuestController is ObservedQuestController observedQuestController)
         {
             observedQuestController.UpdateQuestStatusForClient(packet);
@@ -127,7 +159,7 @@ public sealed partial class FikaServer
                     {
                         HitPoint = packet.HitPoint
                     };
-                    window.MakeHit(in damageInfo);
+                    window.MakeHit(ref damageInfo);
                 }
                 break;
             case EHitType.Btr:
@@ -219,7 +251,7 @@ public sealed partial class FikaServer
         var search = gameWorld.FindItemWithWorldData(itemId);
         if (search.Succeeded)
         {
-            item = search.Value.item;
+            item = search.Value.Item1;
             return true;
         }
 
@@ -316,6 +348,16 @@ public sealed partial class FikaServer
 
             _logger.LogError("Could not find the RunddansController when player interacted");
         }
+    }
+
+    private void OnCutsceneSkipIntentionPacketReceived(CutsceneSkipIntentionPacket packet, NetPeer peer)
+    {
+        FikaCutsceneManager.Instance?.ReceiveSkipIntention(packet);
+    }
+
+    private void OnCutsceneViewCompletePacketReceived(CutsceneViewCompletePacket packet, NetPeer peer)
+    {
+        FikaCutsceneManager.Instance?.ReceiveViewComplete(packet);
     }
 
     private void OnInraidQuestPacketReceived(InRaidQuestPacket packet, NetPeer peer)
@@ -441,7 +483,7 @@ public sealed partial class FikaServer
         {
             case BotStatePacket.EStateType.LoadBot:
                 {
-                    var fikaGame = Singleton<IFikaGame>.Instance;
+                    var fikaGame = FikaGlobals.FikaGame;
                     if (fikaGame != null)
                     {
                         (fikaGame.GameController as HostGameController).IncreaseLoadedPlayers(packet.NetId);
@@ -520,7 +562,7 @@ public sealed partial class FikaServer
         {
             if (packet.InitialRequest)
             {
-                NotificationManager.DisplayMessageNotification(LocaleUtils.RECONNECT_REQUESTED.Localized(),
+                FikaGlobals.DisplayMessage(LocaleUtils.RECONNECT_REQUESTED.Localized(),
                     iconType: EFT.Communications.ENotificationIconType.Alert);
                 foreach (var player in _coopHandler.HumanPlayers)
                 {
@@ -595,7 +637,10 @@ public sealed partial class FikaServer
             Dictionary<int, byte> lampStates = [];
             foreach (var controller in lampControllers)
             {
-                lampStates.Add(controller.NetId, (byte)controller.LampState);
+                if (controller.NetId != 0)
+                {
+                    lampStates[controller.NetId] = (byte)controller.LampState;
+                }
             }
 
             if (lampStates.Count > 0)
@@ -725,16 +770,21 @@ public sealed partial class FikaServer
 
     private void OnWorldLootPacketReceived(WorldLootPacket packet, NetPeer peer)
     {
-        var fikaGame = Singleton<IFikaGame>.Instance;
-        if (fikaGame != null)
+        var fikaGame = FikaGlobals.FikaGame;
+        var location = fikaGame?.GameController.Location;
+        if (location == null || !string.Equals(location.Id, packet.LocationId, StringComparison.OrdinalIgnoreCase)
+            || !Singleton<GameWorld>.Instantiated || Singleton<GameWorld>.Instance.LootList.Count == 0)
         {
-            WorldLootPacket response = new()
-            {
-                Data = (fikaGame.GameController as HostGameController).GetHostLootItems()
-            };
-
-            SendDataToPeer(ref response, DeliveryMethod.ReliableOrdered, peer);
+            return;
         }
+
+        WorldLootPacket response = new()
+        {
+            LocationId = location.Id,
+            Data = (fikaGame.GameController as HostGameController).GetHostLootItems()
+        };
+
+        SendDataToPeer(ref response, DeliveryMethod.ReliableOrdered, peer);
     }
 
     private void OnInteractableInitPacketReceived(InteractableInitPacket packet, NetPeer peer)
@@ -746,15 +796,79 @@ public sealed partial class FikaServer
                 var world = Singleton<GameWorld>.Instance.World;
                 if (world.Interactables != null)
                 {
+                    Dictionary<string, int> interactables = [];
+                    foreach (var interactable in world.Interactables)
+                    {
+                        interactables[interactable.Key] = interactable.Value;
+                    }
+
                     InteractableInitPacket response = new(false)
                     {
-                        Interactables = (Dictionary<string, int>)world.Interactables
+                        Interactables = interactables
                     };
 
                     SendDataToPeer(ref response, DeliveryMethod.ReliableOrdered, peer);
                 }
             }
         }
+    }
+
+    private void OnQuestTemplatesPacketReceived(QuestTemplatesPacket packet, NetPeer peer)
+    {
+        QuestTemplateSync.Receive(packet);
+        SendData(ref packet, DeliveryMethod.ReliableOrdered, peer);
+
+        foreach ((var netId, var data) in QuestTemplateSync.Templates)
+        {
+            if (netId == packet.NetId)
+            {
+                continue;
+            }
+
+            QuestTemplatesPacket existing = new()
+            {
+                NetId = netId,
+                Data = data
+            };
+            SendDataToPeer(ref existing, DeliveryMethod.ReliableOrdered, peer);
+        }
+    }
+
+    private void OnFinalMissionPacketReceived(FinalMissionPacket packet, NetPeer peer)
+    {
+        FikaFinalMissionDirector.Instance?.OnPacketReceived(packet);
+    }
+
+    private void OnPasscodeInitPacketReceived(PasscodeInitPacket packet, NetPeer peer)
+    {
+        if (!packet.IsRequest)
+        {
+            return;
+        }
+
+        if (Singleton<GameWorld>.Instance.PasscodeController is not FikaHostPasscodeController controller)
+        {
+            _logger.LogError("Received a passcode init request but there was no PasscodeController");
+            return;
+        }
+
+        PasscodeInitPacket response = new(false)
+        {
+            Hints = controller.GetHints()
+        };
+
+        SendDataToPeer(ref response, DeliveryMethod.ReliableOrdered, peer);
+    }
+
+    private void OnPasscodeAttemptPacketReceived(PasscodeAttemptPacket packet, NetPeer peer)
+    {
+        if (Singleton<GameWorld>.Instance.PasscodeController is FikaHostPasscodeController controller)
+        {
+            controller.HandleAttempt(packet);
+            return;
+        }
+
+        _logger.LogError("Received a passcode attempt but there was no PasscodeController");
     }
 
     private void OnQuestDropItemPacketReceived(QuestDropItemPacket packet, NetPeer peer)
@@ -805,6 +919,19 @@ public sealed partial class FikaServer
         }
     }
 
+    private void OnQuestRelayPacketReceived(QuestRelayPacket packet, NetPeer peer)
+    {
+        if (_hostPlayer == null)
+        {
+            return;
+        }
+
+        if (_hostPlayer.HealthController.IsAlive && _hostPlayer.QuestController is ClientSharedQuestController sharedQuestController)
+        {
+            sharedQuestController.ReceiveQuestRelayPacket(packet);
+        }
+    }
+
     private void OnTextMessagePacketReceived(TextMessagePacket packet, NetPeer peer)
     {
         _logger.LogInfo($"Received message from: {packet.Nickname}, Message: {packet.Message}");
@@ -824,7 +951,7 @@ public sealed partial class FikaServer
 
         InformationPacket respondPackage = new()
         {
-            RaidStarted = gameExists && Singleton<IFikaGame>.Instance.GameController.RaidStarted,
+            RaidStarted = gameExists && FikaGlobals.FikaGame.GameController.RaidStarted,
             ReadyPlayers = ReadyClients,
             HostReady = HostReady,
             HostLoaded = RaidInitialized,
@@ -834,15 +961,15 @@ public sealed partial class FikaServer
 
         if (gameExists && packet.RequestStart)
         {
-            Singleton<IFikaGame>.Instance.GameController.RaidStarted = true;
+            FikaGlobals.FikaGame.GameController.RaidStarted = true;
         }
 
         if (gameExists && HostReady)
         {
             respondPackage.GameTime = _gameStartTime.Value;
             var gameTimer = _coopHandler.LocalGameInstance.GameController.GameInstance.GameTimer;
-            respondPackage.SessionTime = gameTimer.SessionTime.Value;
-            respondPackage.GameDateTime = (Singleton<IFikaGame>.Instance.GameController as HostGameController).GameDateTime;
+            respondPackage.SessionTime = (gameTimer.SessionTime.Value).ToManaged();
+            respondPackage.GameDateTime = (FikaGlobals.FikaGame.GameController as HostGameController).GameDateTime;
         }
 
         if (packet.RemoteNetId != 0 && _coopHandler.Players.TryGetValue(packet.RemoteNetId, out var player))

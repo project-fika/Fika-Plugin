@@ -2,15 +2,21 @@
 using TMPro;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using System;
+using Il2CppInterop.Runtime.Injection;
+using Fika.Core.Main.Utils;
 
 public class ButtonHandler : MonoBehaviour, IPointerExitHandler, IPointerEnterHandler
 {
+    public ButtonHandler(IntPtr pointer) : base(pointer)
+    {
+    }
+
     private Image _handleImage;
     private TextMeshProUGUI _handleText;
     private WaitForFixedUpdate _fixedUpdateAwaiter;
     private float _alphaModifier;
 
-    [SerializeField]
 #pragma warning disable CS0169 // Remove unused private members
     Sprite buttonSprite;
 #pragma warning restore CS0169 // Remove unused private members
@@ -60,12 +66,12 @@ public class ButtonHandler : MonoBehaviour, IPointerExitHandler, IPointerEnterHa
     public void OnPointerEnter(PointerEventData eventData)
     {
         StopAllCoroutines();
-        StartCoroutine(ShowButton());
+        StartCoroutine((ShowButton()).ToIl2Cpp());
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
         StopAllCoroutines();
-        StartCoroutine(FadeButton());
+        StartCoroutine((FadeButton()).ToIl2Cpp());
     }
 }

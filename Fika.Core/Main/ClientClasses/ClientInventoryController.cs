@@ -39,7 +39,7 @@ public sealed class ClientInventoryController : BaseInventoryController
     private readonly Player _player;
     private readonly ClientInventoryOperationHandlerPool _clientInventoryOperationHandlerPool;
 
-    public ClientInventoryController(Player player, Profile profile, bool examined, bool strictSync) : base(Il2CppInjection.Allocate<ClientInventoryController>(), player, profile, examined, strictSync)
+    public ClientInventoryController(Player player, Profile profile, bool examined, bool strictSync) : base(ClassInjector.DerivedConstructorPointer<ClientInventoryController>(), player, profile, examined, strictSync)
     {
         _player = player;
         FikaPlayer = (FikaPlayer)player;
@@ -160,6 +160,13 @@ public sealed class ClientInventoryController : BaseInventoryController
 
         // Do not replicate search operations or studying tapess
         if (operation is SinglePlayerSearchContentOperation or SetDialogProgressOperation or StudyItemPlayerOperation) // search for "DialogController not available"
+        {
+            base.Execute(operation, callback);
+            return;
+        }
+
+        // Do not replicate various client side quest operations
+        if (operation is BaseQuestOperation or ReadQuestNoteOperation or ReadQuestLinkOperation or ReadQuestConditionOperation or ReadChapterConditionsOperation)
         {
             base.Execute(operation, callback);
             return;

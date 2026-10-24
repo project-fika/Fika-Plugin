@@ -40,7 +40,7 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
         StrictSync = strictSync;
     }
 
-    public BaseInventoryController(Player player, Profile profile, bool examined, bool strictSync) : this(Il2CppInjection.Allocate<BaseInventoryController>(), player, profile, examined, strictSync)
+    public BaseInventoryController(Player player, Profile profile, bool examined, bool strictSync) : this(ClassInjector.DerivedConstructorPointer<BaseInventoryController>(), player, profile, examined, strictSync)
     {
     }
 
@@ -205,7 +205,7 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
         }
 
         public CustomAmmoLoader(InventoryController inventoryController, Magazine magazine, Ammo sourceAmmo,
-            int count, bool elite, float loadOneAmmoSpeed, int loadPerTick) : base(Il2CppInjection.Allocate<CustomAmmoLoader>())
+            int count, bool elite, float loadOneAmmoSpeed, int loadPerTick) : base(ClassInjector.DerivedConstructorPointer<CustomAmmoLoader>())
         {
             ClassInjector.DerivedConstructorBody(this);
             _inventoryController = inventoryController;
@@ -381,7 +381,7 @@ public class BaseInventoryController : Player.PlayerOwnerInventoryController
         }
 
         public CustomAmmoUnloader(BaseInventoryController baseInventoryController, Magazine magazine, int unloadPerTick, float unloadOneAmmoSpeed, bool isElite)
-            : base(Il2CppInjection.Allocate<CustomAmmoUnloader>())
+            : base(ClassInjector.DerivedConstructorPointer<CustomAmmoUnloader>())
         {
             ClassInjector.DerivedConstructorBody(this);
             _inventoryController = baseInventoryController;

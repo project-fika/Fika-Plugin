@@ -11,6 +11,7 @@ using Dissonance.Integrations.MirrorIgnorance;
 using Dissonance.Networking.Client;
 using Diz.Jobs;
 using EFT;
+using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using EFT.Airdrop;
 using EFT.AssetsManager;
 using EFT.Bots;
@@ -31,6 +32,7 @@ using Fika.Core.Main.ClientClasses;
 using Fika.Core.Main.Components;
 using Fika.Core.Main.Patches.BTR;
 using Fika.Core.Main.Players;
+using Fika.Core.Main.Patches.LocalGame;
 using Fika.Core.Main.Utils;
 using Fika.Core.Modding;
 using Fika.Core.Modding.Events;
@@ -44,6 +46,8 @@ using Fika.Core.Networking.Packets.World;
 using Fika.Core.UI.Models;
 using HarmonyLib;
 using JsonType;
+using EFT.UI.Matchmaker;
+using Il2CppInterop.Runtime.Injection;
 
 namespace Fika.Core.Main.GameMode;
 
@@ -52,6 +56,10 @@ namespace Fika.Core.Main.GameMode;
 /// </summary>
 public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, IClientHearingTable
 {
+    public CoopGame(IntPtr pointer) : base(pointer)
+    {
+    }
+
     /// <summary>
     /// Invoked when the main player extracts
     /// </summary>
@@ -101,13 +109,13 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
     internal static CoopGame Create(IInputTree inputTree, Profile profile, GameWorld gameWorld, GameDateTime backendDateTime,
         InsuranceCompany insurance, GameUI gameUI, LocationSettings.Location location,
         TimeAndWeatherSettings timeAndWeather, WavesSettings wavesSettings, EDateTime dateTime,
-        Callback<ExitStatus, TimeSpan, ClientMetrics> callback, float fixedDeltaTime, EUpdateQueue updateQueue,
+        Callback<ExitStatus, Il2CppSystem.TimeSpan, ClientMetrics> callback, float fixedDeltaTime, EUpdateQueue updateQueue,
         IEftSession backEndSession, TimeSpan sessionTime, ClientMetricsEvents metricsEvents,
         ClientMetricsCollector metricsCollector, LocalRaidSettings localRaidSettings, RaidSettings raidSettings)
     {
         _logger = Logger.CreateLogSource("CoopGame");
 
-        Singleton<IFikaNetworkManager>.Instance.RaidSide = localRaidSettings.playerSide;
+        FikaGlobals.NetworkManager.RaidSide = localRaidSettings.playerSide;
 
         var gameTime = backendDateTime;
         if (timeAndWeather.HourOfDay != -1)
@@ -116,14 +124,14 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
             var currentTime = backendDateTime.StatedGameDateTime;
             DateTime newTime = new(currentTime.Year, currentTime.Month, currentTime.Day, timeAndWeather.HourOfDay,
                 currentTime.Minute, currentTime.Second, currentTime.Millisecond);
-            gameTime = new(backendDateTime.StatedRealDateTime, newTime, backendDateTime.TimeFactor);
-            gameTime.Reset(newTime);
+            gameTime = new(backendDateTime.StatedRealDateTime, (newTime).ToIl2Cpp(), backendDateTime.TimeFactor);
+            gameTime.Reset((newTime).ToIl2Cpp());
             dateTime = EDateTime.CURR;
         }
 
         var coopGame = Create<CoopGame>(inputTree, profile, gameWorld, gameTime, insurance, gameUI,
             location, timeAndWeather, wavesSettings, dateTime, callback, fixedDeltaTime, updateQueue, backEndSession,
-            new TimeSpan?(sessionTime), metricsEvents, metricsCollector, localRaidSettings);
+            new Il2CppSystem.Nullable<Il2CppSystem.TimeSpan>(sessionTime.ToIl2Cpp()), metricsEvents, metricsCollector, localRaidSettings);
         coopGame.GameController = FikaBackendUtils.IsServer ? new HostGameController(coopGame, updateQueue, gameWorld, backEndSession, location, wavesSettings, coopGame.GameDateTime)
             : new ClientGameController(coopGame, updateQueue, gameWorld, backEndSession);
         coopGame.GameController.Location = location;
@@ -154,7 +162,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         SetupGamePlayerOwnerHandler setupGamePlayerOwnerHandler = new(inputTree, insurance, backEndSession, gameUI, coopGame, location);
         coopGame._func_1 = setupGamePlayerOwnerHandler.HandleSetup;
 
-        Singleton<IFikaGame>.Create(coopGame);
+        FikaGlobals.FikaGame = coopGame;
         FikaEventDispatcher.DispatchEvent(new FikaGameCreatedEvent(coopGame));
 
         var endByExitTrigger = coopGame.GetComponent<EndByExitTrigerScenario>();
@@ -199,30 +207,49 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
             _game.LocalPlayer = player;
             var gamePlayerOwner = EftGamePlayerOwner.Create(player, _inputTree, _insurance, _backEndSession,
                 _gameUI, _game.GameDateTime, _location);
-            gamePlayerOwner.OnLeave += _game.vmethod_4;
+            gamePlayerOwner.OnLeave += new Action(_game.LocalLeaveGame);
             return gamePlayerOwner;
         }
     }
 
-    public override void SetMatchmakerStatus(string status, float? progress = null)
+    internal ScreenUpdater ScreenUpdater { get; set; }
+
+    public override void SetMatchmakerStatus(EMatchingStage stage, Il2CppSystem.Nullable<float> progress)
     {
-        InvokeMatchingStatusChanged(status, progress);
+        if (ScreenUpdater != null)
+        {
+            ScreenUpdater.UpdateStatus(stage, progress);
+            return;
+        }
+        base.SetMatchmakerStatus(stage, progress);
+    }
+
+    public void SetMatchmakerStatus(string status, float? progress = null)
+    {
+        Main.Patches.LocalGame.ScreenUpdater.SetStatusText(status);
+        SetMatchmakerStatus(EMatchingStage.None,
+            progress.HasValue ? new Il2CppSystem.Nullable<float>(progress.Value) : new Il2CppSystem.Nullable<float>());
     }
 
     /// <summary>
     /// The countdown deploy screen
     /// </summary>
-    public override IEnumerator vmethod_2()
+    public override Il2CppSystem.Collections.IEnumerator InitSessionUI()
+    {
+        return InitSessionUIRoutine().ToIl2Cpp();
+    }
+
+    private IEnumerator InitSessionUIRoutine()
     {
         yield return GameController.CountdownScreen(Profile, ProfileId);
     }
 
-    public override async Task<LocalPlayer> vmethod_3(GameWorld gameWorld, int playerId, Vector3 position, Quaternion rotation,
-        string layerName, string prefix, EPointOfView pointOfView, Profile profile, bool aiControl,
-        EUpdateQueue updateQueue, Player.EUpdateMode armsUpdateMode, Player.EUpdateMode bodyUpdateMode,
-        CharacterControllerSpawner.Mode characterControllerMode, Func<float> getSensitivity,
-        Func<float> getAimingSensitivity, IStatisticsManager statisticsManager, IEftSession session,
-        ELocalMode localMode)
+    public override Il2CppSystem.Threading.Tasks.Task<LocalPlayer> PlayerFactory(GameWorld gameWorld, int playerId, Vector3 position, Quaternion rotation, string layerName, string prefix, EPointOfView pointOfView, Profile profile, bool aiControl, EUpdateQueue updateQueue, Player.EUpdateMode armsUpdateMode, Player.EUpdateMode bodyUpdateMode, CharacterControllerSpawner.Mode characterControllerMode, Il2CppSystem.Func<float> getSensitivity, Il2CppSystem.Func<float> getAimingSensitivity, IStatisticsManager statisticsManager, IEftSession session, ELocalMode localMode)
+    {
+        return PlayerFactoryAsync(gameWorld, playerId, position, rotation, layerName, prefix, pointOfView, profile, aiControl, updateQueue, armsUpdateMode, bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, statisticsManager, session, localMode).ToIl2Cpp();
+    }
+
+    private async Task<LocalPlayer> PlayerFactoryAsync(GameWorld gameWorld, int playerId, Vector3 position, Quaternion rotation, string layerName, string prefix, EPointOfView pointOfView, Profile profile, bool aiControl, EUpdateQueue updateQueue, Player.EUpdateMode armsUpdateMode, Player.EUpdateMode bodyUpdateMode, CharacterControllerSpawner.Mode characterControllerMode, Il2CppSystem.Func<float> getSensitivity, Il2CppSystem.Func<float> getAimingSensitivity, IStatisticsManager statisticsManager, IEftSession session, ELocalMode localMode)
     {
         if (!TransitController.IsTransit(profile.Id, out int _) && !FikaBackendUtils.IsReconnect)
         {
@@ -232,7 +259,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         var fikaPlayer = await FikaPlayer.Create(gameWorld, playerId, position, rotation, "Player", "Main_", EPointOfView.FirstPerson,
             profile, false, UpdateQueue, armsUpdateMode, Player.EUpdateMode.Auto,
             AppEnvironment.Config.CharacterController.ClientPlayerMode, getSensitivity, getAimingSensitivity,
-            statisticsManager, new ClientViewFilter(), session, playerId, Singleton<IFikaNetworkManager>.Instance.StrictInventorySync);
+            statisticsManager, new ClientViewFilter(), session, playerId, FikaGlobals.NetworkManager.StrictInventorySync);
 
         fikaPlayer.Location = Location.Id;
         var coopHandler = GameController.CoopHandler;
@@ -240,13 +267,13 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         if (coopHandler == null)
         {
             _logger.LogError("vmethod_3: CoopHandler was null!");
-            throw new MissingComponentException("CoopHandler was missing during CoopGame init");
+            throw new InvalidOperationException("CoopHandler was missing during CoopGame init");
         }
 
         if (GameController.RaidSettings.MetabolismDisabled)
         {
             fikaPlayer.HealthController.DisableMetabolism();
-            NotificationManager.DisplayMessageNotification(LocaleUtils.METABOLISM_DISABLED.Localized(), iconType: EFT.Communications.ENotificationIconType.Alert);
+            FikaGlobals.DisplayMessage(LocaleUtils.METABOLISM_DISABLED.Localized(), iconType: EFT.Communications.ENotificationIconType.Alert);
         }
 
         coopHandler.Players.Add(fikaPlayer.NetId, fikaPlayer);
@@ -335,6 +362,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         _logger.LogInfo($"Location: {Location.Name}");
         var instance = Singleton<GlobalConfiguration>.Instance;
 
+        GameController.InitWorldControllers(gameWorld);
         GameController.InitShellingController(instance, gameWorld, Location);
         GameController.InitHalloweenEvent(instance, gameWorld, Location);
         GameController.InitBTRController(instance, gameWorld, Location);
@@ -345,6 +373,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         }
 
         GameController.InitializeRunddans(instance, gameWorld, Location);
+        GameController.InitializePasscodes(gameWorld, Location);
 
         if (GameController.IsServer)
         {
@@ -374,7 +403,11 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
             CameraManager.Instance.SetOcclusionCullingEnabled(Location.OcculsionCullingEnabled);
             CameraManager.Instance.IsActive = false;
 
-            Singleton<IFikaNetworkManager>.Instance.CreateFikaChat();
+            FikaGlobals.NetworkManager.CreateFikaChat();
+            if (player is FikaPlayer fikaPlayer)
+            {
+                QuestTemplateSync.SendLocal(fikaPlayer);
+            }
         }
         catch (Exception ex)
         {
@@ -402,7 +435,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
             }
         }
 
-        await vmethod_1(botsSettings, null);
+        await LocalBotsControllerInitialization(botsSettings, null).AsManaged();
 
         if (GameController.IsServer)
         {
@@ -415,6 +448,11 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
             (Singleton<GameWorld>.Instance as ClientGameWorld).ClientSynchronizableObjectLogicProcessor.ServerAirdropManager = airdropEventClass;
             GameWorld.SynchronizableObjectLogicProcessor.AirdropDataSender = Singleton<FikaServer>.Instance;
         }
+        if (Location.FixedWeatherLocationConfig != null)
+        {
+            SetFixedWeather(Location.FixedWeatherLocationConfig);
+        }
+
         await PrepareSession();
         FikaEventDispatcher.DispatchEvent(new GameWorldStartedEvent(GameWorld));
     }
@@ -438,7 +476,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         } while (Profile == null);
 
         await Singleton<ObjectsFactory>.Instance.LoadBundlesAndCreatePools(ObjectsFactory.PoolsCategory.Raid, ObjectsFactory.AssemblyType.Local,
-            [.. Profile.GetAllPrefabPaths(true)], JobYieldPriority.General);
+            Profile.GetAllPrefabPaths(true).ToIl2CppList(), JobYieldPriority.General, null, new Il2CppSystem.Threading.CancellationToken());
     }
 
     private async Task Reconnect()
@@ -465,7 +503,32 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         client.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
     }
 
+    private void ConsumeLocationAccessRequirement()
+    {
+        if (_raidSettings == null || _raidSettings.mode != ELocalMode.PVE_OFFLINE || Location.access == null)
+        {
+            return;
+        }
 
+        var transition = _raidSettings.transition;
+        var transitEntry = transition == null || transition.transitionCount <= 0
+            ? transition != null && transition.transitionType.HasFlagNoBox(ELocationTransition.Common)
+            : true;
+        var accessKeyCount = transitEntry ? Location.access.transit_PVE : Location.access.menu_PVE;
+        if (accessKeyCount == null || accessKeyCount.Count == 0)
+        {
+            return;
+        }
+
+        var items = Profile.Inventory.GetPlayerItems(EPlayerItems.Equipment);
+        if (!LocationAccessRequirementsUtility.TryConsumeAccessRequirement(items, accessKeyCount, null))
+        {
+            foreach (var entry in accessKeyCount)
+            {
+                LocationAccessRequirementsUtility.RemoveAllNonKeyItemsByTemplate(items, entry.Key);
+            }
+        }
+    }
 
     /// <summary>
     /// Creates the local player
@@ -475,7 +538,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
     {
         Status = GameStatus.Running;
 
-        var num = Singleton<IFikaNetworkManager>.Instance.NetId;
+        var num = FikaGlobals.NetworkManager.NetId;
 
         var eupdateMode = Player.EUpdateMode.Auto;
         if (AppEnvironment.Config.UseHandsFastAnimator)
@@ -503,29 +566,14 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
 
         GameController.ExfilManager = gameObject.AddComponent<FikaExfilManager>();
 
-        if (Location.AccessKeys?.Length > 0)
-        {
-            var items = Profile.Inventory.GetPlayerItems(EPlayerItems.Equipment);
-            if (items != null)
-            {
-                CG_MoveNext keyFinder = new()
-                {
-                    accessKeys = Location.AccessKeys
-                };
-                var accessKey = items.FirstOrDefault(keyFinder.method_0);
-                if (accessKey != null)
-                {
-                    RemoveUsedLocationKeycard(Profile, accessKey.Id);
-                }
-            }
-        }
+        ConsumeLocationAccessRequirement();
 
-        if (Singleton<IFikaNetworkManager>.Instance.AllowVOIP)
+        if (FikaGlobals.NetworkManager.AllowVOIP)
         {
             _logger.LogInfo("VOIP enabled, initializing...");
             try
             {
-                await Singleton<IFikaNetworkManager>.Instance.InitializeVOIP();
+                await FikaGlobals.NetworkManager.InitializeVOIP();
             }
             catch (Exception ex)
             {
@@ -550,10 +598,15 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
                 Profile.Info.Nickname = Profile.Info.Nickname.Insert(0, "headless_");
             }
 
-            myPlayer = await vmethod_3(GameWorld, num, spawnPos, spawnRot, "Player", "", EPointOfView.FirstPerson,
+            if (!FikaBackendUtils.IsReconnect)
+            {
+                FikaFinalMissionDirector.StripProfile(Profile, num);
+            }
+
+            myPlayer = await PlayerFactoryAsync(GameWorld, num, spawnPos, spawnRot, "Player", "", EPointOfView.FirstPerson,
                     Profile, false, UpdateQueue, eupdateMode, Player.EUpdateMode.Auto,
                     AppEnvironment.Config.CharacterController.ClientPlayerMode,
-                    FikaGlobals.GetLocalPlayerSensitivity, FikaGlobals.GetLocalPlayerAimingSensitivity, statisticsManager,
+                    new System.Func<float>(FikaGlobals.GetLocalPlayerSensitivity), new System.Func<float>(FikaGlobals.GetLocalPlayerAimingSensitivity), statisticsManager,
                     _backEnd, (_raidSettings?.mode) ?? ELocalMode.TRAINING);
         }
         catch (Exception ex)
@@ -579,7 +632,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         var dogTag = Profile.Inventory.Equipment.GetSlot(EquipmentSlot.Dogtag).ContainedItem;
         if (dogTag != null)
         {
-            Traverse.Create(dogTag).Field<string>("<Id>k__BackingField").Value = MongoID.Generate(true);
+            dogTag._Id_k__BackingField = MongoID.Generate(true);
 #if DEBUG
             _logger.LogWarning("Generated new ID for DogTag");
 #endif
@@ -609,15 +662,25 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
     /// <param name="controllerSettings"></param>
     /// <param name="spawnSystem"></param>
     /// <returns></returns>
-    public override async Task vmethod_1(BotControllerSettings controllerSettings, ISpawnSystem spawnSystem)
+    public override Il2CppSystem.Threading.Tasks.Task LocalBotsControllerInitialization(BotControllerSettings controllerSettings, ISpawnSystem spawnSystem)
+    {
+        return LocalBotsControllerInitializationAsync(controllerSettings, spawnSystem).ToIl2Cpp();
+    }
+
+    private async Task LocalBotsControllerInitializationAsync(BotControllerSettings controllerSettings, ISpawnSystem spawnSystem)
     {
         await GameController.StartBotSystemsAndCountdown(controllerSettings, GameWorld);
     }
 
-    public override IEnumerator vmethod_5(Action runCallback)
+    public override Il2CppSystem.Collections.IEnumerator SessionRun(Il2CppSystem.Action runCallback)
+    {
+        return SessionRunRoutine(runCallback).ToIl2Cpp();
+    }
+
+    private IEnumerator SessionRunRoutine(Il2CppSystem.Action runCallback)
     {
         yield return GameController.FinishRaidSetup();
-        yield return base.vmethod_5(runCallback);
+        yield return base.SessionRun(runCallback);
     }
 
     public override void Spawn()
@@ -627,7 +690,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
             coopClientHealthController.Start();
         }
         _playerOwner.Player.HealthController.DiedEvent += HealthController_DiedEvent;
-        _playerOwner.vmethod_0();
+        _playerOwner.Run();
 #if DEBUG
         FikaGlobals.LogWarning("Forcing god mode on DEBUG build, use 'god f' console command to disable");
         _playerOwner.Player.ActiveHealthController.SetDamageCoeff(0f);
@@ -637,7 +700,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
     /// <summary>
     /// Sets up <see cref="OfflineHealthController"/> events and all <see cref="ExfiltrationPoint"/>s
     /// </summary>
-    public override void vmethod_6()
+    public override void SessionRun()
     {
         GameController.SetupEventsAndExfils(_playerOwner.Player);
         SessionStartTime = DateTimeExtensions.Now;
@@ -709,6 +772,18 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
     /// <param name="damageType"></param>
     private async void HealthController_DiedEvent(EDamageType damageType)
     {
+        try
+        {
+            await HandleDeath();
+        }
+        catch (Exception ex)
+        {
+            FikaGlobals.LogError($"HealthController_DiedEvent: {ex}");
+        }
+    }
+
+    private async Task HandleDeath()
+    {
         var player = _playerOwner.Player;
         if (player.QuestController is ClientSharedQuestController sharedQuestController)
         {
@@ -723,10 +798,9 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
             GameUi.TimerPanel.Close();
         }
 
-        player.HealthController.DiedEvent -= CG_Spawn;
         player.HealthController.DiedEvent -= HealthController_DiedEvent;
 
-        PlayerOwner.vmethod_1();
+        PlayerOwner.Stop();
         ExitStatus = ExitStatus.Killed;
         ExitLocation = string.Empty;
 
@@ -753,7 +827,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
             var data = FikaBackendUtils.TransitData;
             data.transitionType = ELocationTransition.Common;
             data.transitionCount++;
-            data.visitedLocations = [.. data.visitedLocations, Location.Id];
+            data.visitedLocations = new Il2CppStringArray([.. data.visitedLocations ?? (IEnumerable<string>)[], Location.Id]);
             FikaBackendUtils.TransitData = data;
         }
         else
@@ -787,7 +861,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
             exitStatus = ExitStatus.Killed;
         }
 
-        if (!ExtractedPlayers.Contains(myPlayer.NetId) && GameTimer.SessionTime != null && GameTimer.PastTime >= GameTimer.SessionTime)
+        if (!ExtractedPlayers.Contains(myPlayer.NetId) && GameTimer.SessionTime.HasValue && GameTimer.PastTime >= GameTimer.SessionTime.Value)
         {
             exitStatus = ExitStatus.MissingInAction;
         }
@@ -809,6 +883,9 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
                     continue;
                 }
 
+                // A transit keeps the handler alive and packets for these players still arrive until it is cleaned up
+                GameController.CoopHandler.Players.Remove(player.NetId);
+                GameController.CoopHandler.HumanPlayers.Remove(player);
                 try
                 {
                     player.Dispose();
@@ -860,7 +937,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         {
             EnvironmentManager.Instance.Stop();
         }
-        MonoBehaviourSingleton<PreloaderUI>.Instance.StartBlackScreenShow(1f, 1f, stopManager.ExitOverride);
+        MonoBehaviourSingleton<PreloaderUI>.Instance.StartBlackScreenShow(1f, 1f, new System.Action(stopManager.ExitOverride));
         AppEnvironment.Config.UseSpiritPlayer = false;
     }
 
@@ -893,7 +970,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
             exitName = exitName,
             inSession = true,
             favorite = Profile.Info.Side == EPlayerSide.Savage,
-            playTime = (int)playTimeDuration.Duration().TotalSeconds,
+            playTime = (int)playTimeDuration.ToManaged().Duration().TotalSeconds,
             ProfileId = Profile.Id
         };
 
@@ -916,10 +993,10 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
     /// <param name="profileId">The profile id to get the items from.</param>
     /// <returns>A dictionary mapping stash names to arrays of flat item data for each matching sent item container. The
     /// dictionary is empty if no matching containers are found.</returns>
-    public Dictionary<string, FlatItem[]> GetOwnSentItems(string profileId)
+    public Il2CppSystem.Collections.Generic.Dictionary<string, Il2CppReferenceArray<FlatItem>> GetOwnSentItems(string profileId)
     {
         var instance = Singleton<GameWorld>.Instance;
-        Dictionary<string, FlatItem[]> dictionary = [];
+        Il2CppSystem.Collections.Generic.Dictionary<string, Il2CppReferenceArray<FlatItem>> dictionary = new();
         var btrController = instance.BtrController;
         if ((btrController?.TransferItemsController.Stash) != null)
         {
@@ -1056,7 +1133,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         {
             EnvironmentManager.Instance.Stop();
         }
-        MonoBehaviourSingleton<PreloaderUI>.Instance.StartBlackScreenShow(1f, 1f, stopManager.ExitOverride);
+        MonoBehaviourSingleton<PreloaderUI>.Instance.StartBlackScreenShow(1f, 1f, new System.Action(stopManager.ExitOverride));
         AppEnvironment.Config.UseSpiritPlayer = false;
     }
 
@@ -1071,7 +1148,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
     /// <summary>
     /// Tells the server that we have left the raid
     /// </summary>
-    public override ClientMetrics vmethod_7()
+    public override ClientMetrics CollectMetrics()
     {
         if (!FikaBackendUtils.IsTransit)
         {
@@ -1115,9 +1192,13 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
         BTRSide_Patches.Passengers.Clear();
     }
 
-    private class ExitManager : CG_Stop
+    private class ExitManager
     {
-        public new CoopGame baseLocalGame_0;
+        public CoopGame baseLocalGame_0;
+        public string profileId;
+        public ExitStatus exitStatus;
+        public string exitName;
+        public float delay;
 
         public void ExitOverride()
         {
@@ -1125,7 +1206,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
 
             if (baseLocalGame_0._playerOwner != null)
             {
-                baseLocalGame_0._playerOwner.vmethod_1();
+                baseLocalGame_0._playerOwner.Stop();
             }
 
             EftScreenManager.Instance.CloseAllScreensForced();
@@ -1134,31 +1215,50 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
             if (!baseLocalGame_0._hasSaved)
             {
                 baseLocalGame_0._playerOwner.Player.TriggerZones.Clear();
-                baseLocalGame_0._playerOwner.Player.TriggerZones.AddRange(baseLocalGame_0.GameController.LocalTriggerZones);
+                baseLocalGame_0._playerOwner.Player.TriggerZones.AddRange((baseLocalGame_0.GameController.LocalTriggerZones).ToIl2CppList());
                 baseLocalGame_0.GameEnd(profileId, exitStatus, exitName, delay).HandleExceptions();
                 return;
             }
 
-            //Most of this is from method_14, minus the saving player part.
-            baseLocalGame_0._playerOwner.Player.OnGameSessionEnd(exitStatus, baseLocalGame_0.PastTime, baseLocalGame_0.Location.Id, exitName);
+            //Most of this is from GameEnd, minus the saving player part.
+            _ = EndSession();
+        }
+
+        private async Task EndSession()
+        {
+            await baseLocalGame_0._playerOwner.Player.OnGameSessionEnd(exitStatus, baseLocalGame_0.PastTime,
+                baseLocalGame_0.Location.Id, exitName).AsManaged();
             baseLocalGame_0.CleanUp();
 
-            CG_Class1637 exitCallback = new()
+            // The post raid screens wait on this flag, GameEnd sets it after saving and we bypassed GameEnd
+            if (TarkovApplication.Exist(out var tarkovApplication))
             {
-                baseLocalGame_0 = baseLocalGame_0,
-                duration = DateTimeExtensions.Now - baseLocalGame_0.SessionStartTime,
-                exitStatus = exitStatus,
-            };
+                tarkovApplication.GameOverSaveStatusReceived = true;
+            }
 
-            StaticManager.Instance.WaitSeconds(delay, exitCallback.method_0);
+            var game = baseLocalGame_0;
+            var status = exitStatus;
+            var duration = DateTimeExtensions.Now - game.SessionStartTime;
+            StaticManager.Instance.WaitSeconds(delay, new Action(() =>
+            {
+                game._callback.Invoke(new Result<ExitStatus, Il2CppSystem.TimeSpan, ClientMetrics>(status, duration, game.CollectMetrics()));
+                UIEventSystem.Instance.Enable();
+                game._releaseProfilerSpikeAnalyser = null;
+            }));
         }
     }
 
     /// <summary>
     /// Used to manage the stopping of the <see cref="CoopGame"/> gracefully when cancelling
     /// </summary>
-    private class CancelExitManager : CG_Stop
+    private class CancelExitManager
     {
+        public CoopGame baseLocalGame_0;
+        public string profileId;
+        public ExitStatus exitStatus;
+        public string exitName;
+        public float delay;
+
         public void ExitOverride()
         {
             var instance = EftScreenManager.Instance;
@@ -1190,7 +1290,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
             return true;
         }
         var flag = VoiceClient.IsTalkDetected();
-        _localFikaPlayer.TalkDateTime = flag ? DateTimeExtensions.UtcNow : default;
+        _localFikaPlayer.TalkDateTime = (flag ? DateTimeExtensions.UtcNow : default).ToManaged();
         bool flag2;
         bool flag3;
         if (_players.Count == 1)
@@ -1210,7 +1310,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
                     continue;
                 }
 
-                var valueTuple = humanPlayer.IsHeard(in position, _voipDistance);
+                var valueTuple = humanPlayer.IsHeard(ref position, _voipDistance);
                 var item = valueTuple.Item1;
                 var item2 = valueTuple.Item2;
                 flag2 = flag2 || item;

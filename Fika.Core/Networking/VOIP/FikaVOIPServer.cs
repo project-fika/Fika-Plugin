@@ -22,7 +22,7 @@ public class FikaVOIPServer : MirrorIgnoranceServer
     {
     }
 
-    public FikaVOIPServer(FikaCommsNetwork commsNetwork) : base(Il2CppInjection.Allocate<FikaVOIPServer>())
+    public FikaVOIPServer(FikaCommsNetwork commsNetwork) : base(ClassInjector.DerivedConstructorPointer<FikaVOIPServer>())
     {
         ClassInjector.DerivedConstructorBody(this);
         ClassInjector.InvokeBaseConstructor<MirrorIgnoranceServer>(this, commsNetwork);

@@ -17,7 +17,7 @@ public class ClientRunddansController : NetworkRunddansController
     {
     }
 
-    public ClientRunddansController(RunddansGlobalSettings settings, LocationSettings.Location location) : base(Il2CppInjection.Allocate<ClientRunddansController>())
+    public ClientRunddansController(RunddansGlobalSettings settings, LocationSettings.Location location) : base(ClassInjector.DerivedConstructorPointer<ClientRunddansController>())
     {
         ClassInjector.DerivedConstructorBody(this);
         ClassInjector.InvokeBaseConstructor<NetworkRunddansController>(this, settings, location);

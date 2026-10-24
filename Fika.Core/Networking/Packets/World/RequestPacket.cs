@@ -41,6 +41,9 @@ public class RequestPacket : INetSerializable
             case ERequestSubPacketType.CharacterSync:
                 FikaGlobals.LogError("Type was CharacterSync which should never be null!");
                 break;
+            case ERequestSubPacketType.BattlePassDocuments:
+                FikaGlobals.LogError("Type was BattlePassDocuments which should never be null!");
+                break;
             default:
                 FikaGlobals.LogError("Type was out of bounds!");
                 break;

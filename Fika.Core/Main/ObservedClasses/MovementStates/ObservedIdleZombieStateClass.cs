@@ -12,7 +12,7 @@ public class ObservedIdleZombieStateClass : IdleZombieState
     {
     }
 
-    public ObservedIdleZombieStateClass(MovementContext movementContext) : base(Il2CppInjection.Allocate<ObservedIdleZombieStateClass>())
+    public ObservedIdleZombieStateClass(MovementContext movementContext) : base(ClassInjector.DerivedConstructorPointer<ObservedIdleZombieStateClass>())
     {
         ClassInjector.DerivedConstructorBody(this);
         ClassInjector.InvokeBaseConstructor<IdleZombieState>(this, movementContext);

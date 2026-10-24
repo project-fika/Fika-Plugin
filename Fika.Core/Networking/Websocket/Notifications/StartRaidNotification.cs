@@ -15,7 +15,7 @@ public class StartRaidNotification : Notification
     {
     }
 
-    public StartRaidNotification() : base(Il2CppInjection.Allocate<StartRaidNotification>())
+    public StartRaidNotification() : base(ClassInjector.DerivedConstructorPointer<StartRaidNotification>())
     {
         ClassInjector.DerivedConstructorBody(this);
         ClassInjector.InvokeBaseConstructor<Notification>(this);

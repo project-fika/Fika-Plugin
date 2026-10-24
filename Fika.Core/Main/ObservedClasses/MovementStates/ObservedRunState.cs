@@ -20,7 +20,7 @@ public class ObservedRunState : MovePlayerState
         MovementContext = movementContext;
     }
 
-    public ObservedRunState(MovementContext movementContext) : this(Il2CppInjection.Allocate<ObservedRunState>(), movementContext)
+    public ObservedRunState(MovementContext movementContext) : this(ClassInjector.DerivedConstructorPointer<ObservedRunState>(), movementContext)
     {
     }
 

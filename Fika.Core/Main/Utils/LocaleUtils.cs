@@ -25,7 +25,8 @@ public static class LocaleUtils
         { WildSpawnType.bossKolontay, "Kollontay" },
         { WildSpawnType.bossPartisan, "Partisan" },
         { WildSpawnType.bossTagillaAgro, "Shadow of Tagilla" },
-        { WildSpawnType.bossKillaAgro, "Vengeful Killa" }
+        { WildSpawnType.bossKillaAgro, "Vengeful Killa" },
+        { WildSpawnType.bossScourgeEventLab, "Scourge" }
     };
 
     /// <summary>

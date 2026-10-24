@@ -8,7 +8,7 @@ using EFT.Communications;
 using EFT.UI;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Http;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 using UnityEngine.UI;
 using static Fika.Core.UI.FikaUIGlobals;
 
@@ -23,14 +23,26 @@ public class MenuTaskBar_Patch : ModulePatch
         return typeof(MenuTaskBar).GetMethod(nameof(MenuTaskBar.Awake));
     }
 
+    private static Sprite FindSprite(string name)
+    {
+        foreach (var sprite in Resources.FindObjectsOfTypeAll<Sprite>())
+        {
+            if (sprite.name == name)
+            {
+                return sprite;
+            }
+        }
+
+        return null;
+    }
+
     [PatchPostfix]
-    public static void Postfix(Dictionary<EMenuType, AnimatedToggle> ____toggleButtons, Dictionary<EMenuType,
-        HoverTooltipArea> ____hoverTooltipAreas, ref GameObject[] ____newInformation)
+    public static void Postfix(EFT.UI.MenuTaskBar __instance)
     {
         var watchlistGameobject = GameObject.Find("Preloader UI/Preloader UI/BottomPanel/Content/TaskBar/Tabs/Watchlist");
         if (watchlistGameobject != null)
         {
-            GameObject.Destroy(watchlistGameobject);
+            watchlistGameobject.SetActive(false);
             var fleaMarketGameObject = GameObject.Find("Preloader UI/Preloader UI/BottomPanel/Content/TaskBar/Tabs/FleaMarket");
             if (fleaMarketGameObject != null)
             {
@@ -48,27 +60,27 @@ public class MenuTaskBar_Patch : ModulePatch
                     text.SetLabelText(LocaleUtils.UI_DOWNLOAD_PROFILE.Localized());
                     text.LocalizationKey = "";
                 }
-
-                var buildListObject = GameObject.Find("/Menu UI/UI/EquipmentBuildsScreen/Panels/BuildsListPanel/Header/SizeSample/Selected/Icon");
-                if (buildListObject != null)
+                
+                var downloadSprite = FindSprite("tab_icon_overall");
+                var downloadProfileImage = downloadProfileButton.transform.GetChild(0).gameObject.GetComponent<Image>();
+                if (downloadProfileImage != null && downloadSprite != null)
                 {
-                    var downloadImage = buildListObject.GetComponent<Image>();
-                    var downloadProfileImage = downloadProfileButton.transform.GetChild(0).gameObject.GetComponent<Image>();
-                    if (downloadProfileImage != null && downloadImage != null)
-                    {
-                        downloadProfileImage.sprite = downloadImage.sprite;
-                    }
+                    downloadProfileImage.sprite = downloadSprite;
+                }
+                else
+                {
+                    FikaGlobals.LogWarning("MenuTaskBar_Patch: could not find the tab_icon_overall sprite for the download profile tab");
                 }
 
                 var animatedToggle = downloadProfileGameObject.GetComponentInChildren<AnimatedToggle>();
                 if (animatedToggle != null)
                 {
-                    animatedToggle.onValueChanged.AddListener(async (_) =>
+                    animatedToggle.onValueChanged.AddListener(new System.Action<bool>(async (_) =>
                     {
                         var elapsed = DateTime.Now - _lastDownload;
                         if (elapsed.TotalMinutes <= 1)
                         {
-                            NotificationManager.DisplayMessageNotification(
+                            FikaGlobals.DisplayMessage(
                                 $"Please wait {(int)Math.Ceiling(60 - elapsed.TotalSeconds)} seconds before attempting to download your profile again!",
                                 iconType: ENotificationIconType.Alert, textColor: Color.red);
                             return;
@@ -115,12 +127,12 @@ public class MenuTaskBar_Patch : ModulePatch
                                         }
                                     }
 
-                                    File.WriteAllText(Path.Combine(profileDir, $"{profileId}.json"), profileResponse.Profile.ToString());
-                                    NotificationManager.DisplayMessageNotification(string.Format(LocaleUtils.SAVED_PROFILE.Localized(),
+                                    File.WriteAllText(Path.Combine(profileDir, $"{profileId}.json"), profileResponse.Profile.GetRawText());
+                                    FikaGlobals.DisplayMessage(string.Format(LocaleUtils.SAVED_PROFILE.Localized(),
                                         [ColorizeText(EColor.BLUE, profileId), fikaDir]));
 
-                                    /* ____toggleButtons.Remove(EMenuType.NewsHub);
-                                     ____hoverTooltipAreas.Remove(EMenuType.NewsHub);
+                                    /* __instance._toggleButtons.Remove(EMenuType.NewsHub);
+                                     __instance._hoverTooltipAreas.Remove(EMenuType.NewsHub);
                                      GameObject.Destroy(downloadProfileGameObject);*/
                                 }
                             }
@@ -136,19 +148,8 @@ public class MenuTaskBar_Patch : ModulePatch
                         }
 
                         _lastDownload = DateTime.Now;
-                    });
+                    }));
 
-                    var surveyButton = ____hoverTooltipAreas[EMenuType.NewsHub];
-
-                    ____toggleButtons.Remove(EMenuType.NewsHub);
-                    ____hoverTooltipAreas.Remove(EMenuType.NewsHub);
-                    GameObject.Destroy(surveyButton.gameObject);
-                    List<GameObject> newList = [.. ____newInformation];
-                    newList.Remove(newList[^1]);
-                    ____newInformation = [.. newList];
-
-                    ____toggleButtons.Add(EMenuType.NewsHub, animatedToggle);
-                    ____hoverTooltipAreas.Add(EMenuType.NewsHub, downloadProfileGameObject.GetComponent<HoverTooltipArea>());
                 }
             }
         }

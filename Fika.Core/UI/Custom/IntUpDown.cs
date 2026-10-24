@@ -2,16 +2,19 @@
 #pragma warning disable CS0649
 using TMPro;
 using UnityEngine.UI;
+using System;
+using Il2CppInterop.Runtime.Injection;
+using Fika.Core.Main.Utils;
 
 public class IntUpDown : MonoBehaviour
 {
-    [SerializeField]
+    public IntUpDown(IntPtr pointer) : base(pointer)
+    {
+    }
+
     Button _increaseButton;
-    [SerializeField]
     Button _decreaseButton;
-    [SerializeField]
     int _amountOfPlayers = 1;
-    [SerializeField]
     TextMeshProUGUI _amountText;
 
     public void IncreaseAmount()

@@ -13,7 +13,7 @@ public sealed class ObservedViewFilter : ViewFilter
     {
     }
 
-    public ObservedViewFilter() : base(Il2CppInjection.Allocate<ObservedViewFilter>())
+    public ObservedViewFilter() : base(ClassInjector.DerivedConstructorPointer<ObservedViewFilter>())
     {
         ClassInjector.DerivedConstructorBody(this);
     }

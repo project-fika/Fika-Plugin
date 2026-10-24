@@ -1,11 +1,24 @@
 using DG.Tweening;
 using TMPro;
 using UnityEngine.UI;
+using System;
+using Il2CppInterop.Runtime.Injection;
+using Fika.Core.Main.Utils;
+using Fika.Core.UI.Custom;
 
 public class LoadingScreenPlayer : MonoBehaviour
 {
+    public LoadingScreenPlayer(IntPtr pointer) : base(pointer)
+    {
+    }
+
+    [PrefabPath("NameText")]
     public TMP_Text Nickname;
+
+    [PrefabPath("ProgressText")]
     public TMP_Text Percentage;
+
+    [PrefabPath("LoadingBarBorder/LoadingBarBG/LoadingBar")]
     public Image ProgressBar;
 
     public float Progress

@@ -221,11 +221,11 @@ public static class FikaSerializationExtensions
         LootData enumerable = [new JsonLootItem()];
         enumerable[0].Item = item;
         Item[] array = [.. enumerable.Select(FikaGlobals.GetLootItemPositionItem)];
-        ResourceKey[] resourceKeys = [.. array.OfType<ContainerCollection>().GetAllItemsFromCollections()
-            .Concat(array.Where(AirdropSynchronizableObject.CG_ParseItemData.CG_ParseItemData.method_1))
-            .SelectMany(AirdropSynchronizableObject.CG_ParseItemData.CG_ParseItemData.method_2)];
+        ResourceKey[] resourceKeys = [.. array.OfType<ContainerCollection>().ToIl2CppList().GetAllItemsFromCollections()
+            .Concat(array.Where(x => x is not ContainerCollection))
+            .SelectMany(x => x.Template.AllResources)];
         Singleton<ObjectsFactory>.Instance.LoadBundlesAndCreatePools(ObjectsFactory.PoolsCategory.Raid, ObjectsFactory.AssemblyType.Online,
-            resourceKeys, JobYieldPriority.Immediate).HandleExceptions();
+            resourceKeys.ToIl2CppList(), JobYieldPriority.Immediate, null, new Il2CppSystem.Threading.CancellationToken()).HandleExceptions();
 
         return item;
     }
@@ -403,8 +403,8 @@ public static class FikaSerializationExtensions
     /// <param name="mongoId">The <see cref="MongoID"/> to serialize</param>
     public static void PutMongoID(this NetDataWriter writer, MongoID mongoId)
     {
-        writer.Put(mongoId._timeStamp);
-        writer.Put(mongoId._counter);
+        writer.Put(mongoId?._timeStamp ?? 0u);
+        writer.Put(mongoId?._counter ?? 0ul);
     }
 
     /// <summary>
@@ -431,11 +431,14 @@ public static class FikaSerializationExtensions
     /// <param name="mongoId">The nullable <see cref="MongoID"/> to serialize</param>
     public static void PutNullableMongoID(this NetDataWriter writer, MongoID? mongoId)
     {
-        writer.Put(mongoId.HasValue);
-        if (mongoId.HasValue)
+        if (mongoId is not MongoID id)
         {
-            writer.PutMongoID(mongoId.Value);
+            writer.Put(false);
+            return;
         }
+
+        writer.Put(true);
+        writer.PutMongoID(id);
     }
 
     /// <summary>
@@ -595,9 +598,10 @@ public static class FikaSerializationExtensions
     /// <param name="valueInfo"></param>
     public static void WriteValueInfo(this BinaryWriter writer, Profile.HealthInfo.ValueInfo valueInfo)
     {
+        // The client reads these back as HealthValue(current, maximum, minimum)
         writer.Write(valueInfo.Current);
-        writer.Write(valueInfo.Minimum);
         writer.Write(valueInfo.Maximum);
+        writer.Write(valueInfo.Minimum);
     }
 
     /// <summary>
@@ -680,7 +684,7 @@ public static class FikaSerializationExtensions
     public static void PutAirplaneDataPacketStruct(this NetDataWriter writer, SynchronizableObjectPacket airplaneDataPacketStruct)
     {
         writer.PutEnum(airplaneDataPacketStruct.ObjectType);
-        writer.Put((byte)airplaneDataPacketStruct.ObjectId);
+        writer.Put(airplaneDataPacketStruct.ObjectId);
 
         switch (airplaneDataPacketStruct.ObjectType)
         {
@@ -720,7 +724,7 @@ public static class FikaSerializationExtensions
         SynchronizableObjectPacket packet = new()
         {
             ObjectType = reader.GetEnum<SynchronizableObjectType>(),
-            ObjectId = reader.GetByte(),
+            ObjectId = reader.GetInt(),
             PacketData = new()
         };
 
@@ -731,29 +735,35 @@ public static class FikaSerializationExtensions
                 packet.Rotation = reader.GetUnmanaged<Vector3>();
                 packet.Outdated = reader.GetBool();
                 packet.IsStatic = reader.GetBool();
-                packet.PacketData.AirdropDataPacket = new()
+                var airdropData = packet.PacketData;
+                airdropData.AirdropDataPacket = new()
                 {
                     AirdropType = reader.GetEnum<EAirdropType>(),
                     FallingStage = reader.GetEnum<EAirdropFallingStage>(),
                     SignalFire = reader.GetBool(),
                     UniqueId = reader.GetInt()
                 };
+                packet.PacketData = airdropData;
                 break;
             case SynchronizableObjectType.AirPlane:
                 packet.Position = reader.GetUnmanaged<Vector3>();
                 packet.Rotation = reader.GetUnmanaged<Vector3>();
-                packet.PacketData.AirplaneDataPacket = new()
+                var airplaneData = packet.PacketData;
+                airplaneData.AirplaneDataPacket = new()
                 {
                     AirplanePercent = reader.GetInt()
                 };
+                packet.PacketData = airplaneData;
                 packet.Outdated = reader.GetBool();
                 packet.IsStatic = reader.GetBool();
                 break;
             case SynchronizableObjectType.Tripwire:
-                packet.PacketData.TripwireDataPacket = new()
+                var tripwireData = packet.PacketData;
+                tripwireData.TripwireDataPacket = new()
                 {
                     State = reader.GetEnum<ETripwireState>()
                 };
+                packet.PacketData = tripwireData;
                 packet.Position = reader.GetUnmanaged<Vector3>();
                 packet.Rotation = reader.GetUnmanaged<Vector3>();
                 packet.IsActive = reader.GetBool();
@@ -1201,7 +1211,7 @@ public static class FikaSerializationExtensions
     /// <returns>A new <see cref="GameDateTime"/> with data</returns>
     public static GameDateTime GetGameDateTime(this NetDataReader reader)
     {
-        return new GameDateTime(DateTime.FromBinary(reader.GetLong()), DateTime.FromBinary(reader.GetLong()), reader.GetFloat())
+        return new GameDateTime((DateTime.FromBinary(reader.GetLong())).ToIl2Cpp(), (DateTime.FromBinary(reader.GetLong())).ToIl2Cpp(), reader.GetFloat())
         {
             TimeFactorMod = reader.GetFloat()
         };
@@ -1258,6 +1268,8 @@ public static class FikaSerializationExtensions
                 return new TraderServicesRequest(reader);
             case ERequestSubPacketType.CharacterSync:
                 return new RequestCharactersPacket(reader);
+            case ERequestSubPacketType.BattlePassDocuments:
+                return new BattlePassDocumentsRequest(reader);
             default:
                 FikaGlobals.LogError("Type was outside of bounds!");
                 return null;

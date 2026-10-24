@@ -4,7 +4,6 @@ using Comfort.Common;
 using Diz.Jobs;
 using Diz.Utils;
 using EFT;
-using EFT.Console.Core;
 using EFT.HealthSystem;
 using EFT.InventoryLogic;
 using EFT.UI;
@@ -17,6 +16,7 @@ using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Debug;
 using Fika.Core.Networking.Packets.Player;
 using HarmonyLib;
+using SPTushonka.Reflection.Commands;
 using static Fika.Core.Networking.Packets.Debug.CommandPacket;
 
 namespace Fika.Core.ConsoleCommands;
@@ -38,7 +38,7 @@ public class FikaCommands
         {
             if (!FikaBackendUtils.IsServer)
             {
-                var myId = Singleton<IFikaNetworkManager>.Instance.NetId;
+                var myId = FikaGlobals.NetworkManager.NetId;
                 CommandPacket commandPacket = new(ECommandType.Bring)
                 {
                     NetId = myId
@@ -121,7 +121,7 @@ public class FikaCommands
             return;
         }
 
-        if (!Singleton<IFikaNetworkManager>.Instantiated)
+        if (FikaGlobals.NetworkManager == null)
         {
             return;
         }
@@ -222,7 +222,7 @@ public class FikaCommands
     [ConsoleCommand("extract", description: "Extract from raid")]
     public static void Extract()
     {
-        var game = Singleton<IFikaGame>.Instance;
+        var game = FikaGlobals.FikaGame;
         if (game == null)
         {
             LogWarning("You are not in a game.");
@@ -249,7 +249,7 @@ public class FikaCommands
     [ConsoleCommand("despawnAllAi", description: "Despawns all AI bots")]
     public static void DespawnAllAI()
     {
-        var fikaGame = Singleton<IFikaGame>.Instance;
+        var fikaGame = FikaGlobals.FikaGame;
         if (fikaGame != null)
         {
             if (!FikaBackendUtils.IsServer)
@@ -283,7 +283,7 @@ public class FikaCommands
     [ConsoleCommand("stoptimer", description: "Stops the game timer")]
     public static void StopTimer()
     {
-        var fikaGame = Singleton<IFikaGame>.Instance;
+        var fikaGame = FikaGlobals.FikaGame;
         if (fikaGame == null || fikaGame is not CoopGame coopGame)
         {
             LogError("Game was null or not a CoopGame");
@@ -308,7 +308,7 @@ public class FikaCommands
     [ConsoleCommand("goToBTR", description: "Teleports you to the BTR if active")]
     public static void GoToBTR()
     {
-        var fikaGame = Singleton<IFikaGame>.Instance;
+        var fikaGame = FikaGlobals.FikaGame;
         if (fikaGame == null || fikaGame is not CoopGame coopGame)
         {
             LogError("Game was null or not a CoopGame");
@@ -381,7 +381,7 @@ public class FikaCommands
             Item = item
         };
 
-        Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+        FikaGlobals.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered);
     }
 
     [ConsoleCommand("spawnItemInInventory", description: "Spawns an item from a templateId in your inventory")]
@@ -419,9 +419,9 @@ public class FikaCommands
             item.StackObjectsCount = 1;
         }
 
-        var stash = Singleton<IFikaNetworkManager>.Instance.TemporaryStash;
+        var stash = FikaGlobals.NetworkManager.TemporaryStash;
         var grid = stash.Grid;
-        var tempMove = Singleton<IFikaNetworkManager>.Instance.TemporaryStash.Grid.AddItemWithoutRestrictions(item, grid.FindFreeSpace(item));
+        var tempMove = FikaGlobals.NetworkManager.TemporaryStash.Grid.AddItemWithoutRestrictions(item, grid.FindFreeSpace(item));
         if (tempMove.Failed)
         {
             LogError($"Failed to move item to temporary stash: {tempMove.Error}");
@@ -446,7 +446,7 @@ public class FikaCommands
 
             LogInfo($"Moved to: {moveResult.Value.ResultItem.Parent.ContainerName}");
 
-            player.InventoryController.ConvertOperationResultToOperation(moveResult.Value).Execute(result =>
+            player.InventoryController.ConvertOperationResultToOperation(moveResult.Value).Execute(new System.Action<Comfort.Common.IResult>(result =>
             {
                 if (result.Failed)
                 {
@@ -456,10 +456,10 @@ public class FikaCommands
                 {
                     LogInfo($"Moved item to: {item.Parent.ContainerName}");
                 }
-            });
+            }));
 
             Singleton<ObjectsFactory>.Instance.LoadBundlesAndCreatePools(ObjectsFactory.PoolsCategory.Raid, ObjectsFactory.AssemblyType.Online,
-                item.Template.AllResources.ToHashSet(), JobYieldPriority.Immediate)
+                item.Template.AllResources.ToIl2CppList(), JobYieldPriority.Immediate, null, null)
                 .HandleExceptions();
 
             var packet = new SpawnItemInInventoryPacket
@@ -471,7 +471,7 @@ public class FikaCommands
                 ItemAddress = item.Parent
             };
 
-            Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+            FikaGlobals.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered);
         }
         catch (Exception ex)
         {
@@ -541,7 +541,7 @@ public class FikaCommands
             WithCheckMinMax = false
         };
 
-        var botController = (Singleton<IFikaGame>.Instance.GameController as HostGameController).BotsController;
+        var botController = (FikaGlobals.FikaGame.GameController as HostGameController).BotsController;
         if (botController == null)
         {
             LogError("BotsController was null!");
@@ -609,7 +609,7 @@ public class FikaCommands
     [ConsoleCommand("debug", description: "Toggle debug window")]
     public static void Debug(bool state)
     {
-        var fikaGame = Singleton<IFikaGame>.Instance;
+        var fikaGame = FikaGlobals.FikaGame;
         if (fikaGame == null || fikaGame is not CoopGame coopGame)
         {
             LogError("Game was null or not a CoopGame");
@@ -651,7 +651,7 @@ public class FikaCommands
 
     private static bool CheckForGame()
     {
-        var fikaGame = Singleton<IFikaGame>.Instance;
+        var fikaGame = FikaGlobals.FikaGame;
         if (fikaGame == null)
         {
             LogError("Game was null");

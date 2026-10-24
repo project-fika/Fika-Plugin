@@ -66,7 +66,7 @@ internal sealed class ObservedQuickKnifeController : Player.QuickKnifeKickContro
         {
         }
 
-        public ObservedQuickKnifeOperation(ObservedQuickKnifeController controller) : base(Il2CppInjection.Allocate<ObservedQuickKnifeOperation>())
+        public ObservedQuickKnifeOperation(ObservedQuickKnifeController controller) : base(ClassInjector.DerivedConstructorPointer<ObservedQuickKnifeOperation>())
         {
             ClassInjector.DerivedConstructorBody(this);
             ClassInjector.InvokeBaseConstructor<Player.QuickKnifeKickController.QuickKnifeKickOperation>(this, controller);

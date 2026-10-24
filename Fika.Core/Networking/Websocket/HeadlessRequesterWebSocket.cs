@@ -8,9 +8,9 @@ using EFT.UI;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Websocket.Headless;
 using Fika.Core.UI.Custom;
-using Newtonsoft.Json.Linq;
-using SPT.Common.Http;
-using WebSocketSharp;
+using SPTushonka.Common.Http;
+using System.Text.Json;
+using Fika.Core.Networking.Http;
 
 namespace Fika.Core.Networking.Websocket;
 
@@ -25,11 +25,11 @@ public class HeadlessRequesterWebSocket
     {
         get
         {
-            return _webSocket.ReadyState == WebSocketState.Open;
+            return _webSocket.IsOpen;
         }
     }
 
-    private readonly WebSocket _webSocket;
+    private readonly FikaWebSocket _webSocket;
 
     public HeadlessRequesterWebSocket()
     {
@@ -37,31 +37,16 @@ public class HeadlessRequesterWebSocket
         SessionId = RequestHandler.SessionId;
         Url = $"{Host}/fika/headless/requester";
 
-        _webSocket = new WebSocket(Url)
-        {
-            WaitTime = TimeSpan.FromMinutes(1),
-            EmitOnPing = true
-        };
-
-        _webSocket.SetCredentials(SessionId, "", true);
-
-        _webSocket.OnOpen += WebSocket_OnOpen;
-        _webSocket.OnError += WebSocket_OnError;
-        _webSocket.OnMessage += (sender, args) =>
-        {
-            if (args.IsPing)
-            {
-                return;
-            }
-
-            // Run the OnMessage event on main thread
-            AsyncWorker.RunInMainTread(() => WebSocket_OnMessage(sender, args));
-        };
+        _webSocket = new FikaWebSocket(Url, SessionId, TimeSpan.FromMinutes(1));
+        _webSocket.Opened += WebSocket_OnOpen;
+        _webSocket.Errored += WebSocket_OnError;
+        // Run the OnMessage event on main thread
+        _webSocket.MessageReceived += data => MainThread.Post(() => WebSocket_OnMessage(data));
     }
 
-    private void WebSocket_OnError(object sender, ErrorEventArgs e)
+    private void WebSocket_OnError(string message)
     {
-        _logger.LogInfo($"WS error: {e.Message}");
+        _logger.LogInfo($"WS error: {message}");
     }
 
     public void Connect()
@@ -74,32 +59,33 @@ public class HeadlessRequesterWebSocket
         _webSocket.Close();
     }
 
-    private void WebSocket_OnOpen(object sender, EventArgs e)
+    private void WebSocket_OnOpen()
     {
         _logger.LogInfo("Connected to HeadlessRequesterWebSocket");
     }
 
-    private void WebSocket_OnMessage(object sender, MessageEventArgs e)
+    private void WebSocket_OnMessage(string data)
     {
-        if (string.IsNullOrEmpty(e?.Data))
+        if (string.IsNullOrEmpty(data))
         {
             return;
         }
 
-        var jsonObject = JObject.Parse(e.Data);
-
-        if (!jsonObject.ContainsKey("Type"))
+        using var document = JsonDocument.Parse(data);
+        if (!document.RootElement.TryGetProperty("Type", out var typeElement))
         {
             return;
         }
 
-        var type = Enum.Parse<EFikaHeadlessWSMessageType>(jsonObject.Value<string>("Type"));
+        var type = typeElement.ValueKind == JsonValueKind.Number
+            ? (EFikaHeadlessWSMessageType)typeElement.GetInt32()
+            : Enum.Parse<EFikaHeadlessWSMessageType>(typeElement.GetString());
 
         switch (type)
         {
             case EFikaHeadlessWSMessageType.RequesterJoinRaid:
                 {
-                    HandleRequesterJoinRaidAsync(e.Data)
+                    HandleRequesterJoinRaidAsync(data)
                         .Forget();
                     break;
                 }
@@ -108,7 +94,7 @@ public class HeadlessRequesterWebSocket
 
     private async Task HandleRequesterJoinRaidAsync(string json)
     {
-        var data = json.ParseJsonTo<RequesterJoinRaid>();
+        var data = FikaJson.Deserialize<RequesterJoinRaid>(json);
 
         if (string.IsNullOrEmpty(data.MatchId))
         {

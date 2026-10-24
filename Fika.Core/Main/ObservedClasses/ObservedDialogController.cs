@@ -14,7 +14,7 @@ public class ObservedDialogController : BaseTraderDialogController
     {
     }
 
-    public ObservedDialogController(Profile profile, QuestController questController, InventoryController inventoryController) : base(Il2CppInjection.Allocate<ObservedDialogController>())
+    public ObservedDialogController(Profile profile, QuestController questController, InventoryController inventoryController) : base(ClassInjector.DerivedConstructorPointer<ObservedDialogController>())
     {
         ClassInjector.DerivedConstructorBody(this);
         ClassInjector.InvokeBaseConstructor<BaseTraderDialogController>(this, profile, questController, inventoryController);

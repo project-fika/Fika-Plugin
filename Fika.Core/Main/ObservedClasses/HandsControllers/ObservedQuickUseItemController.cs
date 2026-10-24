@@ -38,7 +38,7 @@ public sealed class ObservedQuickUseItemController : Player.QuickUseItemControll
         {
         }
 
-        public ObservedQuickUseItemControllerOperation(ObservedQuickUseItemController controller) : base(Il2CppInjection.Allocate<ObservedQuickUseItemControllerOperation>())
+        public ObservedQuickUseItemControllerOperation(ObservedQuickUseItemController controller) : base(ClassInjector.DerivedConstructorPointer<ObservedQuickUseItemControllerOperation>())
         {
             ClassInjector.DerivedConstructorBody(this);
             ClassInjector.InvokeBaseConstructor<Player.QuickUseItemController.QuickUseOperation>(this, controller);

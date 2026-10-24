@@ -31,7 +31,7 @@ public class ClientQuestController : QuestControllerClientLocalGame
         ClassInjector.InvokeBaseConstructor<QuestControllerClientLocalGame>(this, profile, inventoryController, searchController, session);
     }
 
-    public ClientQuestController(Profile profile, InventoryController inventoryController, IPlayerSearchController searchController, IQuestSession session, FikaPlayer player) : this(Il2CppInjection.Allocate<ClientQuestController>(), profile, inventoryController, searchController, session, player)
+    public ClientQuestController(Profile profile, InventoryController inventoryController, IPlayerSearchController searchController, IQuestSession session, FikaPlayer player) : this(ClassInjector.DerivedConstructorPointer<ClientQuestController>(), profile, inventoryController, searchController, session, player)
     {
     }
 

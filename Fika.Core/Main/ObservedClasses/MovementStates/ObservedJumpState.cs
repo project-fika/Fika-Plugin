@@ -11,7 +11,7 @@ public class ObservedJumpState : JumpPlayerState
     {
     }
 
-    public ObservedJumpState(MovementContext movementContext) : base(Il2CppInjection.Allocate<ObservedJumpState>())
+    public ObservedJumpState(MovementContext movementContext) : base(ClassInjector.DerivedConstructorPointer<ObservedJumpState>())
     {
         ClassInjector.DerivedConstructorBody(this);
         ClassInjector.InvokeBaseConstructor<JumpPlayerState>(this, movementContext);

@@ -11,7 +11,7 @@ public class ObservedProneMoveStateClass : ObservedRunState
     {
     }
 
-    public ObservedProneMoveStateClass(MovementContext movementContext) : base(Il2CppInjection.Allocate<ObservedProneMoveStateClass>(), movementContext)
+    public ObservedProneMoveStateClass(MovementContext movementContext) : base(ClassInjector.DerivedConstructorPointer<ObservedProneMoveStateClass>(), movementContext)
     {
     }
 

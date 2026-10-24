@@ -81,23 +81,26 @@ public static class FikaUIGlobals
     public static ErrorWindowContext ShowFikaMessage(this PreloaderUI preloaderUI, string header, string message,
         ErrorScreen.EButtonType buttonType, float waitingTime, Action acceptCallback, Action endTimeCallback)
     {
-        CG_ShowCriticalErrorScreen messageHandler = new()
-        {
-            preloaderUI_0 = preloaderUI
-        };
-
         if (!AsyncWorker.CheckIsMainThread())
         {
             FikaGlobals.LogError("You are trying to show error screen from non-main thread!");
             return new ErrorWindowContext();
         }
 
-        var errorScreenTemplate = preloaderUI._criticalErrorScreenTemplate;
         var errorScreenContainer = preloaderUI._criticalErrorScreenContainer;
+        var errorScreen = UnityEngine.Object.Instantiate(preloaderUI._criticalErrorScreenTemplate, errorScreenContainer.transform, false);
+        errorScreenContainer.AddChildNode(errorScreen);
+        var context = errorScreen.ShowFikaMessage(header, message, acceptCallback, waitingTime, endTimeCallback, buttonType, true);
 
-        messageHandler.errorScreen = UnityEngine.Object.Instantiate(errorScreenTemplate, errorScreenContainer.transform, false);
-        errorScreenContainer.AddChildNode(messageHandler.errorScreen);
-        return messageHandler.errorScreen.ShowFikaMessage(header, message, acceptCallback, waitingTime, endTimeCallback, buttonType, true);
+        Action onClose = null;
+        onClose = () =>
+        {
+            UnityEngine.Object.Destroy(errorScreen.gameObject);
+            errorScreenContainer.RemoveChildNode(errorScreen);
+            context.OnClose -= onClose;
+        };
+        context.OnClose += onClose;
+        return context;
     }
 
     /// <summary>
@@ -116,39 +119,14 @@ public static class FikaUIGlobals
         Action closeManuallyCallback = null, float waitingTime = 0f, Action timeOutCallback = null,
         ErrorScreen.EButtonType buttonType = ErrorScreen.EButtonType.OkButton, bool removeHtml = true)
     {
-        var errorScreenTraverse = Traverse.Create(errorScreen);
-
-        ErrorScreen.CG_Show errorScreenHandler = new()
-        {
-            errorScreen_0 = errorScreen
-        };
-        if (!MonoBehaviourSingleton<PreloaderUI>.Instance.CanShowErrorScreen)
-        {
-            return new ErrorWindowContext();
-        }
-        if (removeHtml)
-        {
-            message = ErrorScreen.RemoveHtml(message);
-        }
-        ItemUiContext.Instance.CloseAllWindows();
-
+        var context = errorScreen.Show(title, message, waitingTime, buttonType, removeHtml);
         var onClose = timeOutCallback ?? closeManuallyCallback;
-        errorScreenTraverse.Field("_onClose").SetValue(onClose);
-        MethodBase baseShow = typeof(ErrorScreen).BaseType.GetMethod("Show");
-
-        errorScreenHandler.context = (ErrorWindowContext)baseShow.Invoke(errorScreen, []);
-        errorScreenHandler.context.OnAccept += errorScreen.TimeOut;
-        if (timeOutCallback != null)
+        if (onClose != null)
         {
-            errorScreenHandler.context.OnAccept += timeOutCallback;
+            context.OnAccept += onClose;
         }
-        errorScreenHandler.context.OnDecline += errorScreen.CloseSilent;
-        errorScreenHandler.context.OnDecline += Application.Quit;
-        errorScreenHandler.context.OnCloseSilent += errorScreen.CloseSilent;
+        context.OnDecline += Application.Quit;
 
-        var ui = errorScreen.UI;
-
-        ui.AddDisposable(errorScreenHandler.method_0);
         var text = buttonType switch
         {
             ErrorScreen.EButtonType.OkButton => "I UNDERSTAND",
@@ -156,30 +134,8 @@ public static class FikaUIGlobals
             ErrorScreen.EButtonType.QuitButton => "I DECLINE",
             _ => throw new ArgumentOutOfRangeException()
         };
-
-        var exitButton = errorScreenTraverse.Field("_exitButton").GetValue<DefaultUIButton>();
-
-        exitButton.SetHeaderText(text, exitButton.HeaderSize);
-        errorScreen.RectTransform.anchoredPosition = Vector2.zero;
-
-        errorScreen.Caption.SetText(string.IsNullOrEmpty(title) ? "ERROR" : title);
-
-        var description = message.SubstringIfNecessary(500);
-        errorScreenTraverse.Field("_description").SetValue(description);
-
-        var errorDescription = errorScreen._errorDescription;
-        errorDescription.SetText(description);
-
-        var coroutine_0 = errorScreenTraverse.Field("_waitForReactionCoroutine").GetValue<Coroutine>();
-        if (coroutine_0 != null)
-        {
-            errorScreen.StopCoroutine(coroutine_0);
-        }
-        if (waitingTime > 0f)
-        {
-            errorScreenTraverse.Field("_waitForReactionCoroutine").SetValue(errorScreen.StartCoroutine(errorScreen.Co_WaitForReaction(DateTimeExtensions.Now.AddSeconds((double)waitingTime))));
-        }
-        return errorScreenHandler.context;
+        errorScreen._exitButton.SetHeaderText(text, errorScreen._exitButton.HeaderSize);
+        return context;
     }
 
     /// <summary>
@@ -245,7 +201,7 @@ public static class FikaUIGlobals
                 }
 
                 var backendTime = session.GetCurrentLocationTime;
-                if (backendTime == DateTime.MinValue)
+                if (backendTime.ToManaged() == DateTime.MinValue)
                 {
                     return "";
                 }

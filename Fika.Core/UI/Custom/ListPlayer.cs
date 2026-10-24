@@ -3,34 +3,37 @@ using EFT;
 using Fika.Core;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
+using Fika.Core.UI.Custom;
 using TMPro;
 using UnityEngine.UI;
+using System;
+using Il2CppInterop.Runtime.Injection;
 
 public class ListPlayer : MonoBehaviour
 {
+    public ListPlayer(IntPtr pointer) : base(pointer)
+    {
+    }
+
 #pragma warning disable CS0649
-    [SerializeField]
+    [PrefabPath("BGBorder")]
     private Image BackgroundBorder;
 
-    [SerializeField]
+    [PrefabPath("BGBorder/BG")]
     private Image Background;
 
-    [SerializeField]
+    [PrefabPath("BGBorder/BG/HealthBarBorder/HealthBar/HealthText")]
     private TMP_Text HPText;
 
-    [SerializeField]
     private TMP_Text NameText;
 
-    [SerializeField]
     private TMP_Text FactionText;
 
-    [SerializeField]
+    [PrefabPath("BGBorder/BG/HealthBarBorder/HealthBar")]
     private Image HPBackground;
 
-    [SerializeField]
     private Image NameBackground;
 
-    [SerializeField]
     private Image FactionBackground;
 #pragma warning restore CS0649
 
@@ -113,7 +116,7 @@ public class ListPlayer : MonoBehaviour
 
     private static Color GetRoleColor(FikaPlayer player)
     {
-        if ((!FikaBackendUtils.IsServer && !player.IsObservedAI) || !player.IsAI)
+        if ((!FikaBackendUtils.IsServer && !player.IsObservedAI) || (FikaBackendUtils.IsServer && !player.IsAI))
         {
             switch (player.Profile.Info.Side)
             {

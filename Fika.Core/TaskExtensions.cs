@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Fika.Core;
@@ -24,5 +25,17 @@ public static class TaskExtensions
         {
             Main.Utils.FikaGlobals.LogError(e.ToString());
         }
+    }
+
+    /// <summary>
+    ///     Get a managed token that is cancelled together with an il2cpp token
+    /// </summary>
+    /// <param name="token">Il2cpp token, such as a component's destroyCancellationToken</param>
+    /// <returns>Managed token that follows the il2cpp token</returns>
+    public static CancellationToken ToManaged(this Il2CppSystem.Threading.CancellationToken token)
+    {
+        CancellationTokenSource source = new();
+        token.Register(new Action(source.Cancel));
+        return source.Token;
     }
 }

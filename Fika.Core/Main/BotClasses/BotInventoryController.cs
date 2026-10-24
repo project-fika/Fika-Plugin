@@ -35,7 +35,7 @@ public sealed class BotInventoryController : BaseInventoryController
     private readonly FikaBot _fikaBot;
     private readonly BotInventoryOperationHandlerPool _botInventoryOperationHandlerPool;
 
-    public BotInventoryController(Player player, Profile profile, bool examined, MongoID currentId, ushort nextOperationId) : base(Il2CppInjection.Allocate<BotInventoryController>(), player, profile, examined, false)
+    public BotInventoryController(Player player, Profile profile, bool examined, MongoID currentId, ushort nextOperationId) : base(ClassInjector.DerivedConstructorPointer<BotInventoryController>(), player, profile, examined, false)
     {
         _fikaBot = (FikaBot)player;
         IdSource = currentId;

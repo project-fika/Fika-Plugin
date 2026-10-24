@@ -9,6 +9,8 @@ using BepInEx.Logging;
 using Comfort.Common;
 using CommonAssets.Scripts.ArtilleryShelling.Client;
 using CommonAssets.Scripts.Audio.RadioSystem;
+using CommonAssets.Scripts.Cutscenes;
+using CommonAssets.Scripts.Game;
 using Dissonance;
 using EFT;
 using EFT.Bots;
@@ -20,8 +22,10 @@ using EFT.UI;
 using EFT.UI.Matchmaker;
 using EFT.UI.Screens;
 using EFT.Vehicle;
+using EFT.VolumePropagation;
 using EFT.Weather;
 using Fika.Core.Bundles;
+using Fika.Core.Main.ClientClasses;
 using Fika.Core.Main.Components;
 using Fika.Core.Main.HostClasses;
 using Fika.Core.Main.Players;
@@ -38,6 +42,7 @@ using UnityEngine.Events;
 using static JsonType.LocationSettings;
 using ClientRunddansController = Fika.Core.Main.ClientClasses.ClientRunddansController;
 using ClientTransitController = Fika.Core.Main.ClientClasses.ClientTransitController;
+using Il2CppInterop.Runtime.Injection;
 
 namespace Fika.Core.Main.GameMode;
 
@@ -45,17 +50,23 @@ namespace Fika.Core.Main.GameMode;
 /// Abstract base controller managing core raid lifecycle, networking synchronization,
 /// environment/weather configuration, and game world systems for Fika co-op sessions.
 /// </summary>
-public abstract class BaseGameController
+public abstract class BaseGameController : Il2CppSystem.Object
 {
+    protected BaseGameController(IntPtr pointer) : base(pointer)
+    {
+    }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="BaseGameController"/> class.
     /// </summary>
+    /// <param name="pointer">The injected il2cpp object pointer.</param>
     /// <param name="game">The Fika game instance.</param>
     /// <param name="updateQueue">The update queue used for tick processing.</param>
     /// <param name="gameWorld">The EFT game world instance.</param>
     /// <param name="session">The backend EFT session.</param>
-    public BaseGameController(IFikaGame game, EUpdateQueue updateQueue, GameWorld gameWorld, IEftSession session)
+    protected BaseGameController(IntPtr pointer, IFikaGame game, EUpdateQueue updateQueue, GameWorld gameWorld, IEftSession session) : base(pointer)
     {
+        ClassInjector.DerivedConstructorBody(this);
         _fikaGame = game;
         _abstractGame = (AbstractGame)game;
         _updateQueue = updateQueue;
@@ -260,7 +271,7 @@ public abstract class BaseGameController
     /// <summary>
     /// Unsubscription delegate for BTR spawn events.
     /// </summary>
-    protected Action _btrSpawn;
+    protected Il2CppSystem.Action _btrSpawn;
 
     /// <summary>
     /// The co-op handler component.
@@ -336,7 +347,7 @@ public abstract class BaseGameController
             backButtonComponent.SetHeaderText(LocaleUtils.UI_START_RAID.Localized(), 32);
             backButtonComponent.SetEnabledTooltip(LocaleUtils.UI_START_RAID_DESCRIPTION.Localized());
             UnityEvent newEvent = new();
-            newEvent.AddListener(() =>
+            newEvent.AddListener(new System.Action(() =>
             {
                 if (IsServer)
                 {
@@ -350,7 +361,7 @@ public abstract class BaseGameController
                     RequestStart = true
                 };
                 fikaClient.SendData(ref packet, DeliveryMethod.ReliableOrdered);
-            });
+            }));
             backButtonComponent.OnClick = newEvent;
 
             Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.QuestStarted);
@@ -393,8 +404,12 @@ public abstract class BaseGameController
     {
         var asset = InternalBundleLoader.Instance.GetFikaAsset(InternalBundleLoader.EFikaAsset.DebugUI);
         var debugObject = GameObject.Instantiate(asset);
-        _debugUi = debugObject.GetComponent<DebugUI>();
         debugObject.SetActive(false);
+        _debugUi = DebugUI.Create(debugObject);
+        if (_debugUi == null)
+        {
+            GameObject.Destroy(debugObject);
+        }
     }
 
     /// <summary>
@@ -503,7 +518,7 @@ public abstract class BaseGameController
         _abstractGame.SetMatchmakerStatus(LocaleUtils.UI_FINISHING_RAID_INIT.Localized());
 
         WaitForEndOfFrame endOfFrame = new();
-        var musicTask = Singleton<GUISounds>.Instance.FadeBackgroundMusicAsync(false, CancellationToken.None);
+        var musicTask = Singleton<GUISounds>.Instance.FadeBackgroundMusicAsync(false, Il2CppSystem.Threading.CancellationToken.None);
         while (!musicTask.IsCompleted)
         {
             yield return endOfFrame;
@@ -511,11 +526,21 @@ public abstract class BaseGameController
 
         AudioUtils.ResetAudioBuffer();
 
+        if (MonoBehaviourSingleton<BetterAudio>.Instantiated)
+        {
+            MonoBehaviourSingleton<BetterAudio>.Instance.ResetMasterValues();
+        }
+
         _gameWorld.TriggersModule = _abstractGame.gameObject.AddComponent<LocalFikaTriggersModule>();
         _gameWorld.FillLampControllers();
-        if (Location.Id == "laboratory")
+        var locationId = Location.Id.ToLowerInvariant();
+        if (locationId is "laboratory" or "laboratory_dark" or "sandbox_start" or "labyrinth")
         {
             Season = ESeason.Summer;
+        }
+        else if (locationId == "icebreaker")
+        {
+            Season = ESeason.Winter;
         }
         WeatherReady = true;
         FikaBackendUtils.CustomRaidSettings.UseCustomWeather = false;
@@ -528,7 +553,7 @@ public abstract class BaseGameController
 #if DEBUG
         Logger.LogWarning($"Running season handler for season: {Season}");
 #endif
-        var runSeason = seasonController.Run(Season, SeasonsSettings);
+        var runSeason = seasonController.Run(Season, SeasonsSettings, locationId == "icebreaker");
         while (!runSeason.IsCompleted)
         {
             yield return endOfFrame;
@@ -556,6 +581,12 @@ public abstract class BaseGameController
     {
         FikaBackendUtils.GroupPlayers.Clear();
 
+        Il2CppSystem.Collections.Generic.Dictionary<EEftStatusVariable, string> statusData = new();
+        statusData.Add(EEftStatusVariable.Map, Location.Id);
+        statusData.Add(EEftStatusVariable.PlayerSide, profile.Info.Side.ToString());
+        statusData.Add(EEftStatusVariable.PlayerLevel, profile.Info.Level.ToString());
+        GlobalEventsController.Instance.CreateCommonEvent<UpdateEftStatusEvent>().Invoke(EEftStatus.Raid, statusData);
+
         var timeBeforeDeployLocal = FikaBackendUtils.IsReconnect ? 3 : Singleton<GlobalConfiguration>.Instance.TimeBeforeDeployLocal;
 #if DEBUG
         timeBeforeDeployLocal = 3;
@@ -571,17 +602,18 @@ public abstract class BaseGameController
             MonoBehaviourSingleton<AmbientAudioSystem>.Instance.Initialize();
         }
         MonoBehaviourSingleton<BetterAudio>.Instance.FadeInVolumeBeforeRaid(timeBeforeDeployLocal);
-        Singleton<GUISounds>.Instance.method_9(false);
+        Singleton<GUISounds>.Instance.FadeBackgroundMusic(false, null);
         Singleton<GUISounds>.Instance.StopMenuBackgroundMusicWithDelay(timeBeforeDeployLocal);
         _abstractGame.GameUi.gameObject.SetActive(true);
         _abstractGame.GameUi.TimerPanel.ProfileId = profileId;
+        _abstractGame.GameUi.TimerPanel.RaidID = _localPlayer.RaidId;
         yield return new WaitForSeconds(timeBeforeDeployLocal);
         SyncTransitControllers(profileId);
         FikaEventDispatcher.DispatchEvent(new FikaRaidStartedEvent(FikaBackendUtils.IsServer));
 
-        if (Singleton<IFikaNetworkManager>.Instance.AllowVOIP && !FikaBackendUtils.IsHeadless)
+        if (FikaGlobals.NetworkManager.AllowVOIP && !FikaBackendUtils.IsHeadless)
         {
-            _abstractGame.StartCoroutine(FixVOIPAudioDevice());
+            _abstractGame.StartCoroutine((FixVOIPAudioDevice()).ToIl2Cpp());
         }
     }
 
@@ -656,7 +688,7 @@ public abstract class BaseGameController
                 Events = transitData.events
             };
 
-            Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered);
+            FikaGlobals.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered);
             return;
         }
 
@@ -675,6 +707,21 @@ public abstract class BaseGameController
     /// </summary>
     /// <param name="profile">The player profile.</param>
     public abstract void CreateSpawnSystem(Profile profile);
+
+    public void InitWorldControllers(GameWorld gameWorld)
+    {
+        gameWorld.CutscenesClientController = new CutscenesClientController();
+        gameWorld.CutscenesServerController = new CutscenesServerController();
+        FikaCutsceneManager.Create(gameWorld);
+        FikaFinalMissionDirector.Create(gameWorld);
+        gameWorld.VolumetricPropagationSystem = new VolumePropagationSystem((IVolumeNetSink)null);
+        SeasonsEnvironmentController.Initialize();
+        if (gameWorld.RaidDialogEntryController == null)
+        {
+            gameWorld.RaidDialogEntryController = new RaidDialogEntryController();
+        }
+        gameWorld.RaidDialogEntryController.InitAllEntryPointsOnLocation(_backendSession.Traders);
+    }
 
     /// <summary>
     /// Initializes the server and client artillery shelling controllers if configured for the current location.
@@ -754,7 +801,7 @@ public abstract class BaseGameController
                     gameWorld.BtrController = new BtrController(gameWorld);
                     if (IsServer)
                     {
-                        _btrSpawn = GlobalEventsController.Instance.SubscribeOnEvent<BtrSpawnOnThePathEvent>(OnBtrSpawn);
+                        _btrSpawn = GlobalEventsController.Instance.SubscribeOnEvent<BtrSpawnOnThePathEvent>(new System.Action<EFT.GlobalEvents.BtrSpawnOnThePathEvent>(OnBtrSpawn));
                     }
                 }
             }
@@ -772,8 +819,8 @@ public abstract class BaseGameController
     private void OnBtrSpawn(BtrSpawnOnThePathEvent spawnEvent)
     {
         Logger.LogInfo("BTR spawned, notifying clients");
-        var packet = new SpawnBTRPacket(spawnEvent.Position, spawnEvent.Rotation, spawnEvent.PlayerProfileId);
-        Singleton<IFikaNetworkManager>.Instance.SendGenericPacket(in packet, DeliveryMethod.ReliableOrdered, true);
+        var packet = new SpawnBTRPacket(spawnEvent.Position, spawnEvent.Rotation, spawnEvent.PlayerRaidId);
+        FikaGlobals.NetworkManager.SendGenericPacket(in packet, DeliveryMethod.ReliableOrdered, true);
     }
 
     /// <summary>
@@ -845,6 +892,19 @@ public abstract class BaseGameController
             RunddansController.ToggleEventEnvironment(false);
         }
     }
+    
+    public void InitializePasscodes(GameWorld gameWorld, LocationSettings.Location location)
+    {
+        var settings = location.PasscodeLocationSettings;
+        if (settings == null || settings.Entries == null || settings.Entries.Length < 1)
+        {
+            return;
+        }
+
+        gameWorld.PasscodeController = IsServer ? new FikaHostPasscodeController(settings)
+            : new FikaClientPasscodeController(settings);
+        Logger.LogInfo("Created PasscodeController");
+    }
 
     /// <summary>
     /// Asynchronously initializes or synchronizes loot items within the current raid location.
@@ -862,11 +922,7 @@ public abstract class BaseGameController
         var raidCode = FikaBackendUtils.RaidCode;
         if (!string.IsNullOrEmpty(raidCode))
         {
-            var preloaderUI = MonoBehaviourSingleton<PreloaderUI>.Instance;
-            // Raid code
-            preloaderUI.string_3 = $"{raidCode}";
-            // Update version label
-            preloaderUI.RefreshCornerLabel();
+            MonoBehaviourSingleton<PreloaderUI>.Instance.SetSessionId(raidCode);
 
             Logger.LogInfo($"MatchingType: {FikaBackendUtils.ClientType}, Raid Code: {raidCode}");
         }
@@ -982,7 +1038,7 @@ public abstract class BaseGameController
         SessionTime = sessionTime;
         if (_abstractGame is CoopGame coopGame)
         {
-            Logger.LogInfo($"Received date from server, was [{coopGame.GameDateTime.Calculate():G}] - new [{gameDateTime.Calculate():G}]");
+            Logger.LogInfo($"Received date from server, was [{coopGame.GameDateTime.Calculate().ToManaged():G}] - new [{gameDateTime.Calculate().ToManaged():G}]");
             coopGame.GameDateTime = gameDateTime;
             coopGame.GameWorld.GameDateTime = gameDateTime;
             _timeSet = true;

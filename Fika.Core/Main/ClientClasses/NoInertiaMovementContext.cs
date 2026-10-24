@@ -15,7 +15,7 @@ public class NoInertiaMovementContext : ClientMovementContext
     {
     }
 
-    public NoInertiaMovementContext() : base(Il2CppInjection.Allocate<NoInertiaMovementContext>())
+    public NoInertiaMovementContext() : base(ClassInjector.DerivedConstructorPointer<NoInertiaMovementContext>())
     {
         ClassInjector.DerivedConstructorBody(this);
         ClassInjector.InvokeBaseConstructor<MovementContext>(this);

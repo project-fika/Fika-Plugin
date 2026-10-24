@@ -11,7 +11,7 @@ internal class ObservedTransit2ProneStateClass : ObservedIdleStateClass
     {
     }
 
-    public ObservedTransit2ProneStateClass(MovementContext movementContext) : base(Il2CppInjection.Allocate<ObservedTransit2ProneStateClass>(), movementContext)
+    public ObservedTransit2ProneStateClass(MovementContext movementContext) : base(ClassInjector.DerivedConstructorPointer<ObservedTransit2ProneStateClass>(), movementContext)
     {
     }
 

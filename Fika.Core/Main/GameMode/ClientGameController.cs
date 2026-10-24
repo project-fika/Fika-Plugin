@@ -25,6 +25,7 @@ using Fika.Core.Networking.Packets.Backend;
 using Fika.Core.Networking.Packets.Generic;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
 using Fika.Core.Networking.Packets.World;
+using Il2CppInterop.Runtime.Injection;
 using JsonType;
 using static JsonType.LocationSettings;
 
@@ -37,7 +38,7 @@ public class ClientGameController : BaseGameController
     }
 
     public ClientGameController(IFikaGame game, EUpdateQueue updateQueue, GameWorld gameWorld, IEftSession session)
-        : base(Il2CppInjection.Allocate<ClientGameController>(), game, updateQueue, gameWorld, session)
+        : base(ClassInjector.DerivedConstructorPointer<ClientGameController>(), game, updateQueue, gameWorld, session)
     {
     }
 

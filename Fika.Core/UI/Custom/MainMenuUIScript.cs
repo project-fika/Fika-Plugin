@@ -16,11 +16,16 @@ using Fika.Core.Networking.Models.Presence;
 using HarmonyLib;
 using JsonType;
 using static Fika.Core.UI.FikaUIGlobals;
+using Il2CppInterop.Runtime.Injection;
 
 namespace Fika.Core.UI.Custom;
 
 public class MainMenuUIScript : MonoBehaviour
 {
+    public MainMenuUIScript(IntPtr pointer) : base(pointer)
+    {
+    }
+
     public static bool Exist
     {
         get
@@ -74,7 +79,7 @@ public class MainMenuUIScript : MonoBehaviour
             {
                 return DateTime.MinValue;
             }
-            return _backendSession.GetCurrentLocationTime;
+            return (_backendSession.GetCurrentLocationTime).ToManaged();
         }
     }
 
@@ -101,6 +106,11 @@ public class MainMenuUIScript : MonoBehaviour
 
     protected void OnEnable()
     {
+        if (_mainMenuUI == null)
+        {
+            return;
+        }
+
         if (!FikaPlugin.Instance.Settings.EnableOnlinePlayers.Value)
         {
             if (_userInterface != null)
@@ -120,7 +130,7 @@ public class MainMenuUIScript : MonoBehaviour
             var scale = FikaPlugin.Instance.Settings.OnlinePlayersScale.Value;
             _transformToScale.localScale = new(scale, scale, scale);
         }
-        _queryRoutine = StartCoroutine(QueryPlayers());
+        _queryRoutine = StartCoroutine((QueryPlayers()).ToIl2Cpp());
     }
 
     protected void OnDisable()
@@ -135,7 +145,13 @@ public class MainMenuUIScript : MonoBehaviour
     {
         var mainMenuUIPrefab = InternalBundleLoader.Instance.GetFikaAsset(InternalBundleLoader.EFikaAsset.MainMenuUI);
         var mainMenuUI = Instantiate(mainMenuUIPrefab);
-        _mainMenuUI = mainMenuUI.GetComponent<MainMenuUI>();
+        _mainMenuUI = PrefabWiring.Attach<MainMenuUI>(mainMenuUI);
+        if (_mainMenuUI == null)
+        {
+            Destroy(mainMenuUI);
+            return;
+        }
+
         _playerTemplate = _mainMenuUI.PlayerTemplate;
         var newParent = Singleton<CommonUI>.Instance.MenuScreen.gameObject.transform;
         mainMenuUI.transform.SetParent(newParent);
@@ -148,11 +164,8 @@ public class MainMenuUIScript : MonoBehaviour
         var scale = FikaPlugin.Instance.Settings.OnlinePlayersScale.Value;
         _transformToScale.localScale = new(scale, scale, scale);
         objectToAttach.AddComponent<UIDragComponent>().Init(_transformToScale, true);
-        _mainMenuUI.RefreshButton.onClick.AddListener(ManualRefresh);
-
-        gameObject.SetActive(false);
-        this.WaitFrames(3, null);
-        gameObject.SetActive(true);
+        _mainMenuUI.RefreshButton.onClick.AddListener(new System.Action(ManualRefresh));
+        OnEnable();
     }
 
     private void ManualRefresh()
@@ -189,6 +202,38 @@ public class MainMenuUIScript : MonoBehaviour
         SetupPlayers(ref response);
     }
 
+    private static bool HasLocationAccess(RaidInformation information)
+    {
+        if (!TarkovApplication.Exist(out var tarkovApplication) || tarkovApplication.Session == null)
+        {
+            return false;
+        }
+
+        var session = tarkovApplication.Session;
+        var locationSettings = session.LocationSettings;
+        var location = locationSettings.locations.Values.FirstOrDefault(l => l.Id == information.Location);
+        if (location == null)
+        {
+            return false;
+        }
+
+        var profile = session.Profile;
+        var level = profile.Info.Level;
+        if (information.Side is ESideType.Pmc && !location.IsAvailableByPmcLevel(locationSettings, level, level))
+        {
+            return false;
+        }
+
+        var questLockSource = location.GetQuestLockSource(locationSettings);
+        if (questLockSource != null && questLockSource.LockedByQuest)
+        {
+            var unlockedLocations = (Il2CppSystem.Collections.Generic.IEnumerable<string>)(object)profile.UnlockedLocations;
+            return location.IsUnlockedForPlayer(locationSettings, unlockedLocations);
+        }
+
+        return true;
+    }
+
     private string ConvertToTime(EDateTime dateTime, bool staticTime)
     {
         if (staticTime)
@@ -215,7 +260,7 @@ public class MainMenuUIScript : MonoBehaviour
         foreach (var presence in responses)
         {
             var newPlayer = Instantiate(_playerTemplate, _playerTemplate.transform.parent);
-            var mainMenuUIPlayer = newPlayer.GetComponent<MainMenuUIPlayer>();
+            var mainMenuUIPlayer = PrefabWiring.Attach<MainMenuUIPlayer>(newPlayer);
             mainMenuUIPlayer.SetActivity(presence.Nickname, presence.Level, presence.Activity);
             if (presence.Activity is EFikaPlayerPresence.IN_RAID && presence.RaidInformation.HasValue)
             {
@@ -231,14 +276,14 @@ public class MainMenuUIScript : MonoBehaviour
                     ColorizeText(EColor.BLUE, information.Location.Localized()),
                     BoldText(time)));
 
-                if (!information.Started)
+                if (!information.Started && HasLocationAccess(information))
                 {
                     var buttonGo = mainMenuUIPlayer.JoinButton.transform.parent.gameObject;
                     buttonGo.SetActive(true);
                     var tooltip2 = buttonGo.AddComponent<HoverTooltipArea>();
                     tooltip2.enabled = true;
                     tooltip2.SetMessageText(LocaleUtils.UI_JOIN_RAID.Localized());
-                    mainMenuUIPlayer.JoinButton.onClick.AddListener(async () =>
+                    mainMenuUIPlayer.JoinButton.onClick.AddListener(new Action(async () =>
                     {
                         if (JoinInProgress)
                         {
@@ -281,17 +326,26 @@ public class MainMenuUIScript : MonoBehaviour
                         var mmc = tarkovApplication._menuOperation;
 
 #if !DEBUG
-                        if (location.AccessKeys.Length > 0 && information.Side is ESideType.Pmc)
+                        // Same rules as MatchmakerOperation.TryGetAccessToLocation for a menu entry
+                        var accessKeys = location.access?.menu_PVE;
+                        if (accessKeys != null && accessKeys.Count > 0 && information.Side is ESideType.Pmc)
                         {
                             var playerLevel = session.Profile.Info.Level;
                             if (playerLevel >= location.MinPlayerLvlAccessKeys)
                             {
-                                var playerItems = mmc.InventoryController.Inventory.GetPlayerItems(EPlayerItems.Equipment);
-                                var item = playerItems.FirstOrDefault(i => mmc.InventoryController.Examined(i) && location.AccessKeys.Contains(i.StringTemplateId));
-                                if (item == null)
+                                var inventoryController = mmc.InventoryController;
+                                var playerItems = inventoryController.Inventory.GetPlayerItems(EPlayerItems.Equipment);
+                                if (!LocationAccessRequirementsUtility.HasAnyValidAccessRequirement(playerItems, accessKeys,
+                                    new Func<Item, bool>(inventoryController.Examined)))
                                 {
-                                    NotificationManager.DisplayMessageNotification(string.Format(LocaleUtils.MISSING_KEY_FOR_LOCATION.Localized(),
-                                        $"{location.AccessKeys[0]} Name".Localized()),
+                                    string firstKey = null;
+                                    foreach (var entry in accessKeys)
+                                    {
+                                        firstKey = entry.Key;
+                                        break;
+                                    }
+                                    FikaGlobals.DisplayMessage(string.Format(LocaleUtils.MISSING_KEY_FOR_LOCATION.Localized(),
+                                        $"{firstKey} Name".Localized()),
                                         iconType: ENotificationIconType.Alert);
                                     JoinInProgress = false;
                                     return;
@@ -300,7 +354,7 @@ public class MainMenuUIScript : MonoBehaviour
                         }
 #endif
 
-                        NotificationManager.DisplayMessageNotification(LocaleUtils.CONNECTING_TO_SESSION.Localized(),
+                        FikaGlobals.DisplayMessage(LocaleUtils.CONNECTING_TO_SESSION.Localized(),
                             iconType: ENotificationIconType.EntryPoint);
                         using var pingingClient = await NetManagerUtils.CreatePingingClient();
 
@@ -343,8 +397,8 @@ public class MainMenuUIScript : MonoBehaviour
                                 Side = information.Side,
                                 PlayersSpawnPlace = default,
                                 MetabolismDisabled = default,
-                                BotSettings = default,
-                                WavesSettings = default,
+                                BotSettings = new(),
+                                WavesSettings = new(),
                                 TimeAndWeatherSettings = default,
                                 SelectedDateTime = information.Time,
                                 SelectedLocation = location,
@@ -356,7 +410,7 @@ public class MainMenuUIScript : MonoBehaviour
 
                             FikaBackendUtils.IsScav = raidSettings.IsScav;
 
-                            var controller = mmc.MatchmakerPlayersController;
+                            var controller = mmc.Matchmaker.MatchmakerPlayersController;
 
                             if (raidSettings.Side is ESideType.Savage && ScavBlocked(session, out var minutesLeft))
                             {
@@ -367,16 +421,21 @@ public class MainMenuUIScript : MonoBehaviour
                             }
 
                             tarkovApplication._raidSettings = raidSettings;
-                            controller.MatchingStartTime = DateTimeExtensions.Now;
+                            controller.MatchingProgress.SetStartTime(DateTimeExtensions.Now);
 
+                            var matching = tarkovApplication.LocalGameMatching(raidSettings.TimeAndWeatherSettings);
                             try
                             {
-                                await tarkovApplication.LocalGameMatching(raidSettings.TimeAndWeatherSettings);
+                                await matching;
                             }
                             catch (Exception ex)
                             {
-                                Singleton<PreloaderUI>.Instance.ShowErrorScreen("ERROR JOINING",
-                                    $"Exception caught during raid init: {ex.Message}", Application.Quit);
+                                // Backing out of the loading screen cancels the matching and the menu takes it from there
+                                if (!matching.IsCanceled)
+                                {
+                                    Singleton<PreloaderUI>.Instance.ShowErrorScreen("ERROR JOINING",
+                                        $"Exception caught during raid init: {ex.Message}", new System.Action(Application.Quit));
+                                }
                                 JoinInProgress = false;
                             }
                         }
@@ -386,7 +445,7 @@ public class MainMenuUIScript : MonoBehaviour
                         }
 
                         JoinInProgress = false;
-                    });
+                    }));
                 }
             }
             newPlayer.SetActive(true);

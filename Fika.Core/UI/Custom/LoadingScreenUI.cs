@@ -3,12 +3,21 @@ using Comfort.Common;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Backend;
+using Fika.Core.UI.Custom;
+using System;
+using Il2CppInterop.Runtime.Injection;
 
 public class LoadingScreenUI : MonoBehaviour
 {
+    public LoadingScreenUI(IntPtr pointer) : base(pointer)
+    {
+    }
+
     public static LoadingScreenUI Instance { get; internal set; }
 
+    [PrefabPath("Canvas/Stack/LoadingPlayer")]
     public GameObject LoadingPlayerPrefab;
+
     public Transform Stack;
 
     private Dictionary<int, LoadingScreenPlayer> _loadingPlayers;
@@ -18,10 +27,26 @@ public class LoadingScreenUI : MonoBehaviour
         _loadingPlayers = [];
     }
 
+    /// <summary>
+    /// Attaches and wires the component on an instantiated prefab
+    /// </summary>
+    /// <param name="root">The instantiated prefab</param>
+    public static LoadingScreenUI Create(GameObject root)
+    {
+        var ui = PrefabWiring.Attach<LoadingScreenUI>(root);
+        if (ui == null)
+        {
+            FikaGlobals.LogError("Could not wire up the LoadingScreenUI!");
+            GameObject.Destroy(root);
+        }
+
+        return ui;
+    }
+
     public void ReInitAfterTransit()
     {
         FikaGlobals.LogInfo("Restarting LoadingScreenUI");
-        var netId = Singleton<IFikaNetworkManager>.Instance.NetId;
+        var netId = FikaGlobals.NetworkManager.NetId;
         var pmcName = FikaBackendUtils.IsHeadless ? "Headless" : FikaBackendUtils.PMCName;
 
         AddPlayer(netId, pmcName);
@@ -32,7 +57,7 @@ public class LoadingScreenUI : MonoBehaviour
             Nicknames = [pmcName]
         };
 
-        Singleton<IFikaNetworkManager>.Instance.SendData(ref loadingPacket, DeliveryMethod.ReliableUnordered, true);
+        FikaGlobals.NetworkManager.SendData(ref loadingPacket, DeliveryMethod.ReliableUnordered, true);
     }
 
     public LoadingScreenPlayersPacket GetPlayersPacket()
@@ -76,13 +101,13 @@ public class LoadingScreenUI : MonoBehaviour
 
     public void UpdateAndBroadcast(float progress)
     {
-        var netId = Singleton<IFikaNetworkManager>.Instance.NetId;
+        var netId = FikaGlobals.NetworkManager.NetId;
         var loadingPacket = new LoadingScreenPacket
         {
             NetId = netId,
             Progress = progress
         };
-        Singleton<IFikaNetworkManager>.Instance.SendData(ref loadingPacket, DeliveryMethod.Unreliable, true);
+        FikaGlobals.NetworkManager.SendData(ref loadingPacket, DeliveryMethod.Unreliable, true);
         SetProgress(netId, progress);
     }
 
@@ -102,7 +127,14 @@ public class LoadingScreenUI : MonoBehaviour
         }
 
         var go = GameObject.Instantiate(LoadingPlayerPrefab, Stack);
-        var lsp = go.GetComponent<LoadingScreenPlayer>();
+        var lsp = PrefabWiring.Attach<LoadingScreenPlayer>(go);
+        if (lsp == null)
+        {
+            FikaGlobals.LogError("Could not wire up the LoadingScreenPlayer!");
+            GameObject.Destroy(go);
+            return;
+        }
+
         lsp.SetNickname(nickname);
         _loadingPlayers.Add(netId, lsp);
         go.SetActive(true);

@@ -13,7 +13,7 @@ public sealed class ClientViewFilter : ViewFilter
     {
     }
 
-    public ClientViewFilter() : base(Il2CppInjection.Allocate<ClientViewFilter>())
+    public ClientViewFilter() : base(ClassInjector.DerivedConstructorPointer<ClientViewFilter>())
     {
         ClassInjector.DerivedConstructorBody(this);
     }

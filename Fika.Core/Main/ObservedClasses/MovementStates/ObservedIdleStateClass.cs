@@ -17,7 +17,7 @@ public class ObservedIdleStateClass : IdlePlayerState
         ClassInjector.InvokeBaseConstructor<IdlePlayerState>(this, movementContext);
     }
 
-    public ObservedIdleStateClass(MovementContext movementContext) : this(Il2CppInjection.Allocate<ObservedIdleStateClass>(), movementContext)
+    public ObservedIdleStateClass(MovementContext movementContext) : this(ClassInjector.DerivedConstructorPointer<ObservedIdleStateClass>(), movementContext)
     {
     }
 

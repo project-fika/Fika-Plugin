@@ -1,4 +1,4 @@
-using EFT.Ballistics;
+﻿using EFT.Ballistics;
 using System.Collections.Generic;
 using Comfort.Common;
 using EFT.UI;
@@ -6,23 +6,44 @@ using Fika.Core.Main.Components;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
+using Fika.Core.UI.Custom;
 using TMPro;
+using System;
+using Il2CppInterop.Runtime.Injection;
 
 public class DebugUI : MonoBehaviour
 {
+    public DebugUI(IntPtr pointer) : base(pointer)
+    {
+    }
+
+    [PrefabPath("Canvas/Border/Frame/Content/AlivePlayers")]
     public TMP_Text AlivePlayersText;
+
+    [PrefabPath("Canvas/Border/Frame/Content/AliveBots")]
     public TMP_Text AliveBotsText;
+
+    [PrefabPath("Canvas/Border/Frame/Content/Clients")]
     public TMP_Text ClientsText;
+
+    [PrefabPath("Canvas/Border/Frame/Content/Ping")]
     public TMP_Text PingText;
+
+    [PrefabPath("Canvas/Border/Frame/Content/RTT")]
     public TMP_Text RTTText;
+
+    [PrefabPath("Canvas/Border/Frame/Content/ServerFPS")]
     public TMP_Text ServerFPSText;
+
     public RectTransform Border;
     public RectTransform Frame;
 
     private const float _serverHeight = 90f;
     private const float _clientHeight = 130f;
 
+    [NonSerialized]
     private FikaServer _server;
+    [NonSerialized]
     private CoopHandler _coopHandler;
     private float _frameCounter;
     private bool _isServer;
@@ -55,7 +76,18 @@ public class DebugUI : MonoBehaviour
 
     private Color DefaultColor;
 
-    protected void Awake()
+    /// <summary>
+    /// Attaches and wires the component on an instantiated prefab
+    /// </summary>
+    /// <param name="root">The instantiated prefab, deactivated so that no event runs before the fields are set</param>
+    public static DebugUI Create(GameObject root)
+    {
+        var ui = PrefabWiring.Attach<DebugUI>(root);
+        ui?.Init();
+        return ui;
+    }
+
+    private void Init()
     {
         _isServer = FikaBackendUtils.IsServer;
         if (_isServer)

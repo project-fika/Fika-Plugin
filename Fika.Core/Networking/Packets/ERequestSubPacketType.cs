@@ -28,5 +28,10 @@ public enum ERequestSubPacketType : byte
     /// <summary>
     /// Request character synchronization.
     /// </summary>
-    CharacterSync
+    CharacterSync,
+
+    /// <summary>
+    /// Request the battle pass documents the host has spawned for a player.
+    /// </summary>
+    BattlePassDocuments
 }

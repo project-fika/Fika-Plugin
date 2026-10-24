@@ -19,13 +19,20 @@ using HarmonyLib;
 using TMPro;
 using UnityEngine.UI;
 using static Fika.Core.UI.FikaUIGlobals;
+using Il2CppInterop.Runtime.Injection;
 
 namespace Fika.Core.UI.Custom;
 
 public class MatchMakerUIScript : MonoBehaviour
 {
+    public MatchMakerUIScript(IntPtr pointer) : base(pointer)
+    {
+    }
+
     private MatchMakerUI _fikaMatchMakerUi;
     private LobbyEntry[] _matches;
+
+    private static readonly Dictionary<string, bool> EmptyPlayers = [];
     private readonly List<GameObject> _matchesListObjects = [];
     private bool _stopQuery;
     private GameObject _newBackButton;
@@ -50,7 +57,7 @@ public class MatchMakerUIScript : MonoBehaviour
             _stopQuery = false;
             if (_serverQueryRoutine == null)
             {
-                _serverQueryRoutine = StartCoroutine(ServerQuery());
+                _serverQueryRoutine = StartCoroutine((ServerQuery()).ToIl2Cpp());
             }
         }
     }
@@ -70,7 +77,12 @@ public class MatchMakerUIScript : MonoBehaviour
     {
         _profileId = FikaBackendUtils.Profile.ProfileId;
         CreateMatchMakerUI();
-        _serverQueryRoutine = StartCoroutine(ServerQuery());
+        if (_fikaMatchMakerUi == null)
+        {
+            return;
+        }
+
+        _serverQueryRoutine = StartCoroutine((ServerQuery()).ToIl2Cpp());
         _started = true;
     }
 
@@ -82,7 +94,7 @@ public class MatchMakerUIScript : MonoBehaviour
             _serverQueryRoutine = null;
         }
 
-        if (!_fikaMatchMakerUi.LoadingScreen.activeSelf)
+        if (_fikaMatchMakerUi == null || !_fikaMatchMakerUi.LoadingScreen.activeSelf)
         {
             return;
         }
@@ -131,36 +143,35 @@ public class MatchMakerUIScript : MonoBehaviour
         var matchMakerUiPrefab = InternalBundleLoader.Instance.GetFikaAsset(InternalBundleLoader.EFikaAsset.MatchmakerUI);
         var uiGameObj = Instantiate(matchMakerUiPrefab);
         _mmGameObject = uiGameObj;
-        _fikaMatchMakerUi = uiGameObj.GetComponent<MatchMakerUI>();
+        _fikaMatchMakerUi = MatchMakerUI.Create(uiGameObj);
+        if (_fikaMatchMakerUi == null)
+        {
+            Destroy(uiGameObj);
+            return;
+        }
+
         _fikaMatchMakerUi.transform.parent = transform;
 
         var rectTransform = _fikaMatchMakerUi.transform.GetChild(0).RectTransform();
         rectTransform.gameObject.AddComponent<UIDragComponent>().Init(rectTransform, true);
 
-        if (_fikaMatchMakerUi.RaidGroupDefaultToClone.active)
-        {
-            _fikaMatchMakerUi.RaidGroupDefaultToClone.SetActive(false);
-        }
-
-        if (_fikaMatchMakerUi.DediSelection.active)
-        {
-            _fikaMatchMakerUi.DediSelection.SetActive(false);
-        }
+        _fikaMatchMakerUi.RaidGroupDefaultToClone.SetActive(false);
+        _fikaMatchMakerUi.DediSelection.SetActive(false);
 
         // Ensure the IsSpectator field is reset every time the matchmaker UI is created
         FikaBackendUtils.IsSpectator = false;
 
         _fikaMatchMakerUi.SpectatorToggle.isOn = false;
-        _fikaMatchMakerUi.SpectatorToggle.onValueChanged.AddListener((arg) =>
+        _fikaMatchMakerUi.SpectatorToggle.onValueChanged.AddListener(new System.Action<bool>((arg) =>
         {
             FikaBackendUtils.IsSpectator = !FikaBackendUtils.IsSpectator;
             Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuCheckBox);
-        });
+        }));
 
         _fikaMatchMakerUi.LoadingAnimationText.SetText(string.Empty);
 
         _fikaMatchMakerUi.DedicatedToggle.isOn = false;
-        _fikaMatchMakerUi.DedicatedToggle.onValueChanged.AddListener((_) => Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuCheckBox));
+        _fikaMatchMakerUi.DedicatedToggle.onValueChanged.AddListener(new System.Action<bool>((_) => Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuCheckBox)));
 
         if (availableHeadlesses.Length == 0)
         {
@@ -184,7 +195,7 @@ public class MatchMakerUIScript : MonoBehaviour
             }
 
             _fikaMatchMakerUi.HeadlessSelection.gameObject.SetActive(true);
-            _fikaMatchMakerUi.HeadlessSelection.onValueChanged.AddListener((_) => Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuDropdownSelect));
+            _fikaMatchMakerUi.HeadlessSelection.onValueChanged.AddListener(new System.Action<int>((_) => Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuDropdownSelect)));
 
             _fikaMatchMakerUi.HeadlessSelection.ClearOptions();
 
@@ -202,14 +213,14 @@ public class MatchMakerUIScript : MonoBehaviour
                 });
             }
 
-            _fikaMatchMakerUi.HeadlessSelection.AddOptions(optionDatas);
+            _fikaMatchMakerUi.HeadlessSelection.AddOptions((optionDatas).ToIl2CppList());
         }
 
         var hostTooltipArea = _fikaMatchMakerUi.RaidGroupHostButton.GetOrAddComponent<HoverTooltipArea>();
         hostTooltipArea.enabled = true;
         hostTooltipArea.SetMessageText(LocaleUtils.UI_HOST_RAID_TOOLTIP.Localized());
 
-        _fikaMatchMakerUi.RaidGroupHostButton.onClick.AddListener(() =>
+        _fikaMatchMakerUi.RaidGroupHostButton.onClick.AddListener(new System.Action(() =>
         {
             Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
             if (!_fikaMatchMakerUi.DediSelection.activeSelf)
@@ -220,20 +231,20 @@ public class MatchMakerUIScript : MonoBehaviour
             {
                 _fikaMatchMakerUi.DediSelection.SetActive(false);
             }
-        });
+        }));
 
-        _fikaMatchMakerUi.CloseButton.onClick.AddListener(() =>
+        _fikaMatchMakerUi.CloseButton.onClick.AddListener(new System.Action(() =>
         {
             Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.ButtonClick);
-            if (_fikaMatchMakerUi.DediSelection.active)
+            if (_fikaMatchMakerUi.DediSelection.activeSelf)
             {
                 _fikaMatchMakerUi.DediSelection.SetActive(false);
             }
-        });
+        }));
 
-        _fikaMatchMakerUi.DedicatedToggle.onValueChanged.AddListener((_) => Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuCheckBox));
+        _fikaMatchMakerUi.DedicatedToggle.onValueChanged.AddListener(new System.Action<bool>((_) => Singleton<GUISounds>.Instance.PlayUISound(EUISoundType.MenuCheckBox)));
 
-        _fikaMatchMakerUi.StartButton.onClick.AddListener(async () =>
+        _fikaMatchMakerUi.StartButton.onClick.AddListener(new System.Action(async () =>
         {
             ToggleLoading(true);
 
@@ -336,9 +347,9 @@ public class MatchMakerUIScript : MonoBehaviour
                     NotificationManager.DisplaySingletonWarningNotification(LocaleUtils.STARTING_RAID_ON_DEDICATED.Localized());
                 }
             }
-        });
+        }));
 
-        _fikaMatchMakerUi.RefreshButton.onClick.AddListener(ManualRefresh);
+        _fikaMatchMakerUi.RefreshButton.onClick.AddListener(new System.Action(ManualRefresh));
 
         var tooltipArea = _fikaMatchMakerUi.RefreshButton.GetOrAddComponent<HoverTooltipArea>();
         tooltipArea.enabled = true;
@@ -350,11 +361,11 @@ public class MatchMakerUIScript : MonoBehaviour
 
         _newBackButton = Instantiate(BackButton.gameObject, BackButton.transform.parent);
         UnityEngine.Events.UnityEvent newEvent = new();
-        newEvent.AddListener(BackButton.OnClick.Invoke);
+        newEvent.AddListener(new System.Action(BackButton.OnClick.Invoke));
         var newButtonComponent = _newBackButton.GetComponent<DefaultUIButton>();
         newButtonComponent.OnClick = newEvent;
 
-        if (!_newBackButton.active)
+        if (!_newBackButton.activeSelf)
         {
             _newBackButton.SetActive(true);
         }
@@ -381,7 +392,7 @@ public class MatchMakerUIScript : MonoBehaviour
             return;
         }
 
-        _serverQueryRoutine = StartCoroutine(ServerQuery());
+        _serverQueryRoutine = StartCoroutine((ServerQuery()).ToIl2Cpp());
     }
 
     private void AutoRefresh()
@@ -411,7 +422,7 @@ public class MatchMakerUIScript : MonoBehaviour
         }
 
         FikaBackendUtils.IsReconnect = reconnect;
-        NotificationManager.DisplayMessageNotification(LocaleUtils.CONNECTING_TO_SESSION.Localized(),
+        FikaGlobals.DisplayMessage(LocaleUtils.CONNECTING_TO_SESSION.Localized(),
             iconType: EFT.Communications.ENotificationIconType.EntryPoint);
         using var pingingClient = await NetManagerUtils.CreatePingingClient();
 
@@ -460,6 +471,19 @@ public class MatchMakerUIScript : MonoBehaviour
             return false;
         }
     }
+    
+    private static GameObject FindInRow(GameObject row, string name)
+    {
+        foreach (var child in row.GetComponentsInChildren<Transform>(true))
+        {
+            if (child.name == name)
+            {
+                return child.gameObject;
+            }
+        }
+
+        return null;
+    }
 
     private void RefreshUI()
     {
@@ -476,6 +500,8 @@ public class MatchMakerUIScript : MonoBehaviour
             {
                 Destroy(match);
             }
+
+            _matchesListObjects.Clear();
         }
 
         // create lobby listings
@@ -497,7 +523,8 @@ public class MatchMakerUIScript : MonoBehaviour
 
             var localPlayerInRaid = false;
             var localPlayerDead = false;
-            foreach ((MongoID profileId, var player) in entry.Players)
+
+            foreach ((MongoID profileId, var player) in entry.Players ?? EmptyPlayers)
             {
                 if (profileId == _profileId)
                 {
@@ -507,22 +534,22 @@ public class MatchMakerUIScript : MonoBehaviour
             }
 
             // player label
-            var playerLabel = GameObject.Find("PlayerLabel");
-            playerLabel.name = "PlayerLabel" + i;
+            var playerLabel = FindInRow(server, "PlayerLabel");
             var sessionName = entry.HostUsername;
             playerLabel.GetComponentInChildren<TextMeshProUGUI>().SetText(sessionName);
 
             // players count label
-            var playerCountLabel = GameObject.Find("PlayerCountLabel");
-            playerCountLabel.name = "PlayerCountLabel" + i;
+            var playerCountLabel = FindInRow(server, "PlayerCountLabel");
             var playerCount = entry.IsHeadless ? entry.PlayerCount - 1 : entry.PlayerCount;
             playerCountLabel.GetComponentInChildren<TextMeshProUGUI>().SetText("{0}", playerCount);
 
             // player join button
-            var joinButton = GameObject.Find("JoinButton");
-            joinButton.name = "JoinButton" + i;
+            var joinButton = FindInRow(server, "JoinButton");
+
+            PrefabWiring.Attach<ButtonHandler>(joinButton);
+
             var button = joinButton.GetComponent<Button>();
-            button.onClick.AddListener(async () =>
+            button.onClick.AddListener(new System.Action(async () =>
             {
                 if (_fikaMatchMakerUi.DediSelection.activeSelf)
                 {
@@ -539,7 +566,7 @@ public class MatchMakerUIScript : MonoBehaviour
                     return;
                 }
                 ToggleLoading(false);
-            });
+            }));
 
             HoverTooltipArea tooltipArea;
             var image = server.GetComponent<Image>();

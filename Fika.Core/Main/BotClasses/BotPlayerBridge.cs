@@ -16,7 +16,7 @@ public sealed class BotPlayerBridge : Il2CppSystem.Object, BodyPartCollider.IObs
     {
     }
 
-    public BotPlayerBridge(FikaBot bot) : base(Il2CppInjection.Allocate<BotPlayerBridge>())
+    public BotPlayerBridge(FikaBot bot) : base(ClassInjector.DerivedConstructorPointer<BotPlayerBridge>())
     {
         ClassInjector.DerivedConstructorBody(this);
         _bot = bot;

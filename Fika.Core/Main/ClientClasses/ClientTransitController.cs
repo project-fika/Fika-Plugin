@@ -20,7 +20,7 @@ public class ClientTransitController : NetworkTransitController
     {
     }
 
-    public ClientTransitController(TransitGlobalSettings settings, Il2CppReferenceArray<LocationSettings.Location.TransitParameters> parameters, Profile profile, LocalRaidSettings localRaidSettings) : base(Il2CppInjection.Allocate<ClientTransitController>())
+    public ClientTransitController(TransitGlobalSettings settings, Il2CppReferenceArray<LocationSettings.Location.TransitParameters> parameters, Profile profile, LocalRaidSettings localRaidSettings) : base(ClassInjector.DerivedConstructorPointer<ClientTransitController>())
     {
         ClassInjector.DerivedConstructorBody(this);
         _onClientPlayerEnter = new Action<TransitPoint, Player>(OnClientPlayerEnter);

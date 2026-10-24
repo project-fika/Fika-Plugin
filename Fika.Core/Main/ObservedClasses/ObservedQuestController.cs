@@ -19,7 +19,7 @@ public class ObservedQuestController : QuestControllerClientLocalGame
     {
     }
 
-    public ObservedQuestController(Profile profile, InventoryController inventoryController, IPlayerSearchController searchController, IQuestSession session) : base(Il2CppInjection.Allocate<ObservedQuestController>())
+    public ObservedQuestController(Profile profile, InventoryController inventoryController, IPlayerSearchController searchController, IQuestSession session) : base(ClassInjector.DerivedConstructorPointer<ObservedQuestController>())
     {
         ClassInjector.DerivedConstructorBody(this);
         ClassInjector.InvokeBaseConstructor<QuestControllerClientLocalGame>(this, profile, inventoryController, searchController, session);
@@ -213,6 +213,11 @@ public class ObservedQuestController : QuestControllerClientLocalGame
         {
             case InRaidQuestPacket.InraidQuestType.Finish:
                 {
+                    if (packet.Items == null || packet.Items.Count == 0)
+                    {
+                        return;
+                    }
+
                     FikaGlobals.LogInfo($"Processing {packet.Items.Count} items from quest reward for {Profile.Info.MainProfileNickname}");
                     List<QuestReward> readList = [];
                     foreach (var item in packet.Items)
@@ -252,6 +257,11 @@ public class ObservedQuestController : QuestControllerClientLocalGame
                 break;
             case InRaidQuestPacket.InraidQuestType.Handover:
                 {
+                    if (packet.ItemIdsToRemove == null)
+                    {
+                        return;
+                    }
+
                     FikaGlobals.LogInfo($"Discarding {packet.ItemIdsToRemove.Count} items from {Profile.Info.MainProfileNickname}");
                     List<Item> itemsToRemove = [];
                     var gameWorld = Singleton<GameWorld>.Instance;
@@ -278,7 +288,7 @@ public class ObservedQuestController : QuestControllerClientLocalGame
                         list.Add(discardResult);
                     }
 
-                    if (discardResult.Failed)
+                    if (discardResult != null && discardResult.Failed)
                     {
                         RollBackAll(list);
                         FikaGlobals.LogError($"Could not discard items: {discardResult.Error.Localized()}");

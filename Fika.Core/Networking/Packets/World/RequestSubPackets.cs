@@ -1,9 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using Comfort.Common;
 using CommonAssets.Scripts.Game;
 using EFT;
 using EFT.Interactive;
+using EFT.InventoryLogic;
 using EFT.Weather;
 using Fika.Core.Main.GameMode;
 using Fika.Core.Main.Players;
@@ -449,6 +452,161 @@ public static class RequestSubPackets
                 {
                     writer.Put(netId);
                 }
+            }
+        }
+    }
+
+    public class BattlePassDocumentsRequest : IRequestPacket
+    {
+        public int NetId;
+        public int Remaining;
+        public List<int> Indices;
+        public List<Item> Items;
+
+        public BattlePassDocumentsRequest()
+        {
+
+        }
+
+        public BattlePassDocumentsRequest(NetDataReader reader)
+        {
+            NetId = reader.GetInt();
+            Remaining = reader.GetInt();
+            var amount = reader.GetInt();
+            if (amount < 0)
+            {
+                return;
+            }
+
+            Indices = new(amount);
+            Items = new(amount);
+            for (var i = 0; i < amount; i++)
+            {
+                Indices.Add(reader.GetInt());
+                Items.Add(reader.GetItem());
+            }
+        }
+
+        public void HandleRequest(NetPeer peer, FikaServer server)
+        {
+            StaticManager.BeginCoroutine(SpawnDocuments(NetId, Remaining, peer, server).ToIl2Cpp());
+        }
+
+        private static IEnumerator SpawnDocuments(int netId, int remaining, NetPeer peer, FikaServer server)
+        {
+            // The client asks for these at the end of its own loot spawn, which can beat the observed player onto the host
+            WaitForSeconds wait = new(0.25f);
+            FikaPlayer player = null;
+            for (var i = 0; i < 120; i++)
+            {
+                if (server.CoopHandler.Players.TryGetValue(netId, out player))
+                {
+                    break;
+                }
+                yield return wait;
+            }
+
+            if (player == null)
+            {
+                FikaGlobals.LogError($"BattlePassDocumentsRequest: no player with netId {netId} appeared, skipping documents");
+                yield break;
+            }
+
+            if (!server.BattlePassDocuments.TryGetValue(netId, out var response))
+            {
+                var gameWorld = Singleton<GameWorld>.Instance;
+                response = new()
+                {
+                    NetId = netId,
+                    Indices = [],
+                    Items = []
+                };
+
+                var allowed = Math.Min(remaining, player.Profile.GetBattlePassDocumentLimitRemainingForRaid());
+                foreach (var index in SelectDocuments(gameWorld, allowed))
+                {
+                    var lootItem = gameWorld._battlePassDocumentLootItems[index];
+                    var item = lootItem.Item.CloneItem(null);
+                    gameWorld.SpawnBattlePassDocument(lootItem, item, player.ProfileId);
+                    response.Indices.Add(index);
+                    response.Items.Add(item);
+                }
+
+                server.BattlePassDocuments.Add(netId, response);
+            }
+
+            RequestPacket packet = new()
+            {
+                Type = ERequestSubPacketType.BattlePassDocuments,
+                RequestSubPacket = response
+            };
+
+            server.SendDataToPeer(ref packet, DeliveryMethod.ReliableOrdered, peer);
+        }
+        
+        private static List<int> SelectDocuments(GameWorld gameWorld, int count)
+        {
+            var documents = gameWorld._battlePassDocumentLootItems;
+            var total = documents != null ? documents.Count : 0;
+            if (count <= 0 || total == 0)
+            {
+                return [];
+            }
+
+            List<int> pool = new(total);
+            for (var i = 0; i < total; i++)
+            {
+                pool.Add(i);
+            }
+
+            if (count >= total)
+            {
+                return pool;
+            }
+
+            List<int> selected = new(count);
+            for (var i = 0; i < count; i++)
+            {
+                var swap = UnityEngine.Random.Range(i, pool.Count);
+                (pool[i], pool[swap]) = (pool[swap], pool[i]);
+                selected.Add(pool[i]);
+            }
+
+            return selected;
+        }
+
+        public void HandleResponse()
+        {
+            if (Items == null || Items.Count == 0)
+            {
+                return;
+            }
+
+            var gameWorld = Singleton<GameWorld>.Instance;
+            var documents = gameWorld._battlePassDocumentLootItems;
+            var profileId = gameWorld.MainPlayer.ProfileId;
+            for (var i = 0; i < Items.Count; i++)
+            {
+                gameWorld.SpawnBattlePassDocument(documents[Indices[i]], Items[i], profileId);
+            }
+
+            FikaGlobals.LogInfo($"Spawned {Items.Count} battle pass documents from the host");
+        }
+
+        public void Serialize(NetDataWriter writer)
+        {
+            writer.Put(NetId);
+            writer.Put(Remaining);
+            writer.Put(Items != null ? Items.Count : -1);
+            if (Items == null)
+            {
+                return;
+            }
+
+            for (var i = 0; i < Items.Count; i++)
+            {
+                writer.Put(Indices[i]);
+                writer.PutItem(Items[i]);
             }
         }
     }

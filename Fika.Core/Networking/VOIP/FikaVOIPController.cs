@@ -20,7 +20,7 @@ class FikaVOIPController : Il2CppSystem.Object, IPlayerVoipController, IDisposab
 
     private static readonly TimeSpan _hearingDetectionTime = TimeSpan.FromSeconds(2.0);
 
-    public FikaVOIPController(FikaPlayer localPlayer, SoundSettingsGroup soundSettings) : base(Il2CppInjection.Allocate<FikaVOIPController>())
+    public FikaVOIPController(FikaPlayer localPlayer, SoundSettingsGroup soundSettings) : base(ClassInjector.DerivedConstructorPointer<FikaVOIPController>())
     {
         ClassInjector.DerivedConstructorBody(this);
         var voipState = localPlayer.VoipState;

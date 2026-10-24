@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Fika.Core.Networking.Packets;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Fika.Core.Networking.LiteNetLib.Utils;
 

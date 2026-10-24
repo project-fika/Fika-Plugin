@@ -14,7 +14,7 @@ public class HeadlessConnectedNotification : Notification
     {
     }
 
-    public HeadlessConnectedNotification() : base(Il2CppInjection.Allocate<HeadlessConnectedNotification>())
+    public HeadlessConnectedNotification() : base(ClassInjector.DerivedConstructorPointer<HeadlessConnectedNotification>())
     {
         ClassInjector.DerivedConstructorBody(this);
         ClassInjector.InvokeBaseConstructor<Notification>(this);

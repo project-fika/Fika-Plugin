@@ -5,14 +5,14 @@ using EFT.Communications;
 using EFT.UI;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking.Websocket.Notifications;
-using Newtonsoft.Json.Linq;
-using SPT.Common.Http;
+using SPTushonka.Common.Http;
 using System;
 #if DEBUG
 using System.Linq;
 #endif
 using System.Threading.Tasks;
-using WebSocketSharp;
+using System.Text.Json;
+using Fika.Core.Networking.Http;
 
 namespace Fika.Core.Networking.Websocket;
 
@@ -34,13 +34,13 @@ internal class FikaNotificationManager
     {
         get
         {
-            return _webSocket.ReadyState == WebSocketState.Open;
+            return _webSocket.IsOpen;
         }
     }
 
     public bool reconnecting;
 
-    private WebSocket _webSocket;
+    private readonly FikaWebSocket _webSocket;
 
     public FikaNotificationManager()
     {
@@ -49,17 +49,10 @@ internal class FikaNotificationManager
         SessionId = RequestHandler.SessionId;
         Url = $"{Host}/fika/notification/";
 
-        _webSocket = new WebSocket(Url)
-        {
-            WaitTime = TimeSpan.FromMinutes(1),
-            EmitOnPing = true
-        };
-
-        _webSocket.SetCredentials(SessionId, "", true);
-
-        _webSocket.OnError += WebSocket_OnError;
-        _webSocket.OnMessage += WebSocket_OnMessage;
-        _webSocket.OnClose += (sender, e) =>
+        _webSocket = new FikaWebSocket(Url, SessionId, TimeSpan.FromMinutes(1));
+        _webSocket.Errored += WebSocket_OnError;
+        _webSocket.MessageReceived += data => MainThread.Post(() => WebSocket_OnMessage(data));
+        _webSocket.Closed += () =>
         {
             if (reconnecting)
             {
@@ -72,9 +65,9 @@ internal class FikaNotificationManager
         Connect();
     }
 
-    private void WebSocket_OnError(object sender, ErrorEventArgs e)
+    private void WebSocket_OnError(string message)
     {
-        _logger.LogInfo($"WS error: {e.Message}");
+        _logger.LogInfo($"WS error: {message}");
     }
 
     public void Connect()
@@ -87,26 +80,22 @@ internal class FikaNotificationManager
         _webSocket.Close();
     }
 
-    private void WebSocket_OnMessage(object sender, MessageEventArgs e)
+    private void WebSocket_OnMessage(string data)
     {
-        if (e == null || e.IsPing)
+        if (string.IsNullOrEmpty(data))
         {
             return;
         }
 
-        if (string.IsNullOrEmpty(e.Data))
+        using var document = JsonDocument.Parse(data);
+        if (!document.RootElement.TryGetProperty("type", out var typeElement))
         {
             return;
         }
 
-        var jsonObject = JObject.Parse(e.Data);
-
-        if (!jsonObject.ContainsKey("type"))
-        {
-            return;
-        }
-
-        var type = (EFikaNotification)Enum.Parse(typeof(EFikaNotification), jsonObject.Value<string>("type"));
+        var type = typeElement.ValueKind == JsonValueKind.Number
+            ? (EFikaNotification)typeElement.GetInt32()
+            : Enum.Parse<EFikaNotification>(typeElement.GetString());
 
 #if DEBUG
         _logger.LogDebug($"Received type: {type}");
@@ -115,7 +104,7 @@ internal class FikaNotificationManager
         switch (type)
         {
             case EFikaNotification.StartedRaid:
-                notification = e.Data.ParseJsonTo<StartRaidNotification>([]);
+                notification = FikaJson.Deserialize<StartRaidNotification>(data);
 
                 if (FikaGlobals.IsInRaid)
                 {
@@ -124,25 +113,25 @@ internal class FikaNotificationManager
                 HandleNotification(notification);
                 break;
             case EFikaNotification.SentItem:
-                notification = e.Data.ParseJsonTo<ReceivedSentItemNotification>([]);
+                notification = FikaJson.Deserialize<ReceivedSentItemNotification>(data);
                 HandleNotification(notification);
                 break;
             case EFikaNotification.PushNotification:
-                notification = e.Data.ParseJsonTo<PushNotification>([]);
+                notification = FikaJson.Deserialize<PushNotification>(data);
                 HandleNotification(notification);
                 break;
             case EFikaNotification.KeepAlive:
                 break;
             case EFikaNotification.OpenAdminSettings:
-                notification = e.Data.ParseJsonTo<OpenAdminMenuNotification>([]);
+                notification = FikaJson.Deserialize<OpenAdminMenuNotification>(data);
                 HandleAdminMenu(notification);
                 break;
             case EFikaNotification.ShutdownClient:
-                notification = e.Data.ParseJsonTo<ShutdownClientNotification>([]);
+                notification = FikaJson.Deserialize<ShutdownClientNotification>(data);
                 HandleShutdown(notification);
                 break;
             case EFikaNotification.HeadlessConnected:
-                notification = e.Data.ParseJsonTo<HeadlessConnectedNotification>([]);
+                notification = FikaJson.Deserialize<HeadlessConnectedNotification>(data);
                 HandleNotification(notification);
                 break;
         }
@@ -152,7 +141,7 @@ internal class FikaNotificationManager
     {
         if (FikaBackendUtils.IsHeadless)
         {
-            AsyncWorker.RunInMainTread(Application.Quit);
+            MainThread.Post(Application.Quit);
         }
     }
 
@@ -160,13 +149,13 @@ internal class FikaNotificationManager
     {
         if (notification is OpenAdminMenuNotification openAdminNotif && openAdminNotif.Success)
         {
-            AsyncWorker.RunInMainTread(AdminSettingsUIScript.Create);
+            MainThread.Post(AdminSettingsUIScript.Create);
         }
     }
 
     private void HandleNotification(Notification notification)
     {
-        AsyncWorker.RunInMainTread(() => Singleton<PreloaderUI>.Instance.NotifierView.NotificationReceivedHandler(notification));
+        MainThread.Post(() => Singleton<PreloaderUI>.Instance.NotifierView.NotificationReceivedHandler(notification));
     }
 
     private async Task ReconnectWebSocket()
@@ -175,20 +164,20 @@ internal class FikaNotificationManager
 
         while (reconnecting)
         {
-            if (_webSocket.ReadyState == WebSocketState.Open)
+            if (_webSocket.IsOpen)
             {
                 break;
             }
 
             // Don't attempt to reconnect if we're still attempting to connect.
-            if (_webSocket.ReadyState != WebSocketState.Connecting)
+            if (!_webSocket.IsConnecting)
             {
                 _webSocket.Connect();
             }
 
             await Task.Delay(10 * 1000);
 
-            if (_webSocket.ReadyState == WebSocketState.Open)
+            if (_webSocket.IsOpen)
             {
                 break;
             }

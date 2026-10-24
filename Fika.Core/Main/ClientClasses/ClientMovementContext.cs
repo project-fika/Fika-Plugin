@@ -11,7 +11,7 @@ public class ClientMovementContext : MovementContext
     {
     }
 
-    public ClientMovementContext() : base(Il2CppInjection.Allocate<ClientMovementContext>())
+    public ClientMovementContext() : base(ClassInjector.DerivedConstructorPointer<ClientMovementContext>())
     {
         ClassInjector.DerivedConstructorBody(this);
         ClassInjector.InvokeBaseConstructor<MovementContext>(this);

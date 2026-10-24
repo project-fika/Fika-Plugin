@@ -14,9 +14,20 @@ public static class FikaJson
         Converters = { new MongoIdConverter(), new EnumConverterFactory(), new GameObjectConverterFactory() }
     };
 
+    public static readonly JsonSerializerOptions CamelCaseOptions = new(Options)
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        PropertyNameCaseInsensitive = true
+    };
+
     public static string Serialize<T>(T value)
     {
         return JsonSerializer.Serialize(value, Options);
+    }
+
+    public static string Serialize<T>(T value, JsonSerializerOptions options)
+    {
+        return JsonSerializer.Serialize(value, options);
     }
 
     public static T Deserialize<T>(string json)
@@ -87,13 +98,13 @@ public static class FikaJson
         public override T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             using var document = JsonDocument.ParseValue(ref reader);
-            MainThread.AttachToIl2Cpp();
+            using var il2cppThread = MainThread.AttachToIl2Cpp();
             return JsonExtensions.ParseJsonTo<T>(document.RootElement.GetRawText());
         }
 
         public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
         {
-            MainThread.AttachToIl2Cpp();
+            using var il2cppThread = MainThread.AttachToIl2Cpp();
             writer.WriteRawValue(JsonExtensions.ToJson(value));
         }
     }

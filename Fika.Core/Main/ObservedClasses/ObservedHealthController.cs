@@ -19,7 +19,7 @@ public sealed class ObservedHealthController : NetworkHealthController
     {
     }
 
-    public ObservedHealthController(Il2CppStructArray<byte> serializedState, ObservedPlayer player, InventoryController inventory, SkillManager skills) : base(Il2CppInjection.Allocate<ObservedHealthController>())
+    public ObservedHealthController(Il2CppStructArray<byte> serializedState, ObservedPlayer player, InventoryController inventory, SkillManager skills) : base(ClassInjector.DerivedConstructorPointer<ObservedHealthController>())
     {
         ClassInjector.DerivedConstructorBody(this);
         _player = player;

@@ -99,7 +99,7 @@ public sealed class ObservedTripwireState : Player.GrenadeHandsController.PlantT
     {
     }
 
-    public ObservedTripwireState(Player.GrenadeHandsController controller, FikaPlayer player) : base(Il2CppInjection.Allocate<ObservedTripwireState>())
+    public ObservedTripwireState(Player.GrenadeHandsController controller, FikaPlayer player) : base(ClassInjector.DerivedConstructorPointer<ObservedTripwireState>())
     {
         ClassInjector.DerivedConstructorBody(this);
         ClassInjector.InvokeBaseConstructor<Player.GrenadeHandsController.PlantTripwireOperation>(this, controller);

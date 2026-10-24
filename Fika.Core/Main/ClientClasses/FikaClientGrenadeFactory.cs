@@ -11,7 +11,7 @@ public class FikaClientGrenadeFactory : GrenadeFactory
     {
     }
 
-    public FikaClientGrenadeFactory() : base(Il2CppInjection.Allocate<FikaClientGrenadeFactory>())
+    public FikaClientGrenadeFactory() : base(ClassInjector.DerivedConstructorPointer<FikaClientGrenadeFactory>())
     {
         ClassInjector.DerivedConstructorBody(this);
         ClassInjector.InvokeBaseConstructor<GrenadeFactory>(this);

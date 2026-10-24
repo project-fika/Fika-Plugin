@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using EFT;
@@ -69,15 +70,15 @@ public static class FikaRequestHandler
         throw new Exception("Could not retrieve or parse the external IP address from any provider.");
     }
 
-    private static byte[] EncodeBody<T>(T o)
+    private static byte[] EncodeBody<T>(T o, JsonSerializerOptions options = null)
     {
-        var serialized = FikaJson.Serialize(o);
+        var serialized = options == null ? FikaJson.Serialize(o) : FikaJson.Serialize(o, options);
         return Encoding.UTF8.GetBytes(serialized);
     }
 
     private static T DecodeBody<T>(byte[] data)
     {
-        MainThread.AttachToIl2Cpp();
+        using var il2cppThread = MainThread.AttachToIl2Cpp();
         var json = Encoding.UTF8.GetString(data);
         return FikaJson.Deserialize<T>(json);
     }
@@ -95,9 +96,9 @@ public static class FikaRequestHandler
             .GetResult();
     }
 
-    private static async Task<T2> PostJsonAsync<T1, T2>(string path, T1 o)
+    private static async Task<T2> PostJsonAsync<T1, T2>(string path, T1 o, JsonSerializerOptions options = null)
     {
-        var data = EncodeBody(o);
+        var data = EncodeBody(o, options);
         var response = await _httpClient.PostAsync(path, data);
         return DecodeBody<T2>(response);
     }
@@ -209,7 +210,7 @@ public static class FikaRequestHandler
 
     public static async Task<StartHeadlessResponse> StartHeadless(StartHeadlessRequest request)
     {
-        return await PostJsonAsync<StartHeadlessRequest, StartHeadlessResponse>("/fika/raid/headless/start", request);
+        return await PostJsonAsync<StartHeadlessRequest, StartHeadlessResponse>("/fika/raid/headless/start", request, FikaJson.CamelCaseOptions);
     }
 
     public static AvailableHeadlessClientsRequest[] GetAvailableHeadlesses()

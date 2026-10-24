@@ -13,7 +13,7 @@ public class ObservedSprintState : SprintPlayerState
     {
     }
 
-    public ObservedSprintState(MovementContext movementContext) : base(Il2CppInjection.Allocate<ObservedSprintState>())
+    public ObservedSprintState(MovementContext movementContext) : base(ClassInjector.DerivedConstructorPointer<ObservedSprintState>())
     {
         ClassInjector.DerivedConstructorBody(this);
         ClassInjector.InvokeBaseConstructor<SprintPlayerState>(this, movementContext);

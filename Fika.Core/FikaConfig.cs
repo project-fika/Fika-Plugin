@@ -16,6 +16,7 @@ using Fika.Core.UI;
 using Fika.Core.UI.Patches;
 using static Fika.Core.FikaPlugin;
 using static Fika.Core.Networking.IFikaNetworkManager;
+using UnityEngine;
 
 namespace Fika.Core;
 
@@ -153,8 +154,24 @@ public sealed class FikaConfig(ConfigFile config)
         }
     }
 
+    // Thi shit is needed because BepInEx knows nothing about the il2cpp Color
+    private static void RegisterColorConverter()
+    {
+        if (TomlTypeConverter.CanConvert(typeof(Color)))
+        {
+            return;
+        }
+
+        TomlTypeConverter.AddConverter(typeof(Color), new TypeConverter
+        {
+            ConvertToString = (value, type) => ColorUtility.ToHtmlStringRGBA((Color)value),
+            ConvertToObject = (value, type) => ColorUtility.TryParseHtmlString("#" + value, out var color) ? color : Color.white
+        });
+    }
+
     public void SetupConfig()
     {
+        RegisterColorConverter();
         var failed = false;
         List<string> headers = [];
         var disabledMessage = LocaleUtils.UI_DISABLED_BY_HOST.Localized();

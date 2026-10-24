@@ -11,7 +11,7 @@ public class HostGrenadeFactory : GrenadeFactory
     {
     }
 
-    public HostGrenadeFactory() : base(Il2CppInjection.Allocate<HostGrenadeFactory>())
+    public HostGrenadeFactory() : base(ClassInjector.DerivedConstructorPointer<HostGrenadeFactory>())
     {
         ClassInjector.DerivedConstructorBody(this);
         ClassInjector.InvokeBaseConstructor<GrenadeFactory>(this);

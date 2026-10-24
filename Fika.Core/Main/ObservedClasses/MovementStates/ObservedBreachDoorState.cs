@@ -12,7 +12,7 @@ public class ObservedBreachDoorState : BreachDoorState
     {
     }
 
-    public ObservedBreachDoorState(MovementContext movementContext) : base(Il2CppInjection.Allocate<ObservedBreachDoorState>())
+    public ObservedBreachDoorState(MovementContext movementContext) : base(ClassInjector.DerivedConstructorPointer<ObservedBreachDoorState>())
     {
         ClassInjector.DerivedConstructorBody(this);
         ClassInjector.InvokeBaseConstructor<BreachDoorState>(this, movementContext);

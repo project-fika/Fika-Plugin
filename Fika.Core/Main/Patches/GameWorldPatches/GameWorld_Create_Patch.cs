@@ -1,11 +1,9 @@
 ﻿using CommonAssets.Scripts.Game;
-using EFT.BufferZone;
 using System.Reflection;
 using EFT;
 using Fika.Core.Main.ClientClasses;
 using Fika.Core.Main.HostClasses;
 using Fika.Core.Main.Utils;
-using HarmonyLib;
 using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.GameWorldPatches;
@@ -27,11 +25,10 @@ public class GameWorld_Create_Patch : ModulePatch
             FikaBackendUtils.RequestTutorialWorld = false;
             return true;
         }
-
+        
         if (!FikaBackendUtils.RequestFikaWorld)
         {
-            __result = CreateHideoutWorld(gameObject, objectsFactory, updateQueue, currentProfileId);
-            return false;
+            return true;
         }
 
         if (FikaBackendUtils.IsServer)
@@ -44,19 +41,5 @@ public class GameWorld_Create_Patch : ModulePatch
         }
         FikaBackendUtils.RequestFikaWorld = false;
         return false;
-    }
-
-    private static GameWorld CreateHideoutWorld(GameObject gameObject, ObjectsFactory objectsFactory, EUpdateQueue updateQueue, Il2CppSystem.Nullable<MongoID> currentProfileId)
-    {
-        var gameWorld = gameObject.AddComponent<HideoutGameWorld>();
-        gameWorld.ObjectsFactory = objectsFactory;
-        gameWorld._updateQueue = updateQueue;
-        gameWorld.SpeakerManager = gameObject.AddComponent<SpeakerManager>();
-        gameWorld.ExfiltrationController = new ExfiltrationController();
-        gameWorld.BufferZoneController = new BufferZoneController();
-        gameWorld.CurrentProfileId = currentProfileId;
-        gameWorld.UnityTickListener = GameWorldUnityTickListener.Create(gameObject, gameWorld);
-        gameWorld.AudioSourceCulling = gameObject.GetOrAddComponent<AudioSourceCulling>();
-        return gameWorld;
     }
 }

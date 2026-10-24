@@ -13,7 +13,7 @@ public class ObservedMountedState : MovementState
     {
     }
 
-    public ObservedMountedState(MovementContext movementContext, Player observedPlayer) : base(Il2CppInjection.Allocate<ObservedMountedState>())
+    public ObservedMountedState(MovementContext movementContext, Player observedPlayer) : base(ClassInjector.DerivedConstructorPointer<ObservedMountedState>())
     {
         ClassInjector.DerivedConstructorBody(this);
         _mountingMovementSettings = Singleton<GlobalConfiguration>.Instance.MountingSettings.MovementSettings;

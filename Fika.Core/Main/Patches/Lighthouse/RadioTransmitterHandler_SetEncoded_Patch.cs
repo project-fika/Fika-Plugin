@@ -1,12 +1,10 @@
 using System.Reflection;
-using Comfort.Common;
 using EFT;
 using Fika.Core.Main.Players;
 using Fika.Core.Main.Utils;
-using Fika.Core.Networking;
 using Fika.Core.Networking.LiteNetLib;
 using Fika.Core.Networking.Packets.Generic.SubPackets;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.Lighthouse;
 
@@ -31,6 +29,6 @@ public class RadioTransmitterHandler_SetEncoded_Patch : ModulePatch
         }
 
         var packet = new TransmitterEncodedPacket(observedPlayer.NetId, isEncoded);
-        Singleton<IFikaNetworkManager>.Instance.SendGenericPacket(in packet, DeliveryMethod.ReliableOrdered, true);
+        FikaGlobals.NetworkManager.SendGenericPacket(in packet, DeliveryMethod.ReliableOrdered, true);
     }
 }

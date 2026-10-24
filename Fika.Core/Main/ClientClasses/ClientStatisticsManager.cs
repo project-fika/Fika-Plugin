@@ -12,7 +12,7 @@ public sealed class ClientStatisticsManager : BaseStatisticsManager
     {
     }
 
-    public ClientStatisticsManager() : base(Il2CppInjection.Allocate<ClientStatisticsManager>())
+    public ClientStatisticsManager() : base(ClassInjector.DerivedConstructorPointer<ClientStatisticsManager>())
     {
         ClassInjector.DerivedConstructorBody(this);
         ClassInjector.InvokeBaseConstructor<BaseStatisticsManager>(this);

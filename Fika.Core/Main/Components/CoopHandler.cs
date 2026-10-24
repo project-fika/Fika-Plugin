@@ -219,6 +219,7 @@ public class CoopHandler : MonoBehaviour
             }
         }
 
+        FikaCutsceneManager.Instance?.Tick();
         FikaFinalMissionDirector.Instance?.Tick();
         ProcessQuitting();
     }
@@ -356,7 +357,7 @@ public class CoopHandler : MonoBehaviour
                 var botController = (FikaGlobals.FikaGame.GameController as HostGameController).BotsController;
                 if (botController != null)
                 {
-                    AddClientToBotEnemiesAsync(botController, otherPlayer, destroyCancellationToken)
+                    AddClientToBotEnemiesAsync(botController, otherPlayer, destroyCancellationToken.ToManaged())
                         .Forget();
                 }
                 else
@@ -516,6 +517,11 @@ public class CoopHandler : MonoBehaviour
         }
 
         otherPlayer.InitObservedPlayer();
+        QuestTemplateSync.Apply(otherPlayer);
+        if (FikaBackendUtils.IsServer)
+        {
+            Singleton<FikaServer>.Instance.FlushQuestSyncs(otherPlayer);
+        }
 
         var controllerType = spawnObject.ControllerType;
         var itemId = spawnObject.ItemId;

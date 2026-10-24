@@ -1,11 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Reflection.Emit;
+﻿using System.Reflection;
 using EFT.Vehicle;
 using Fika.Core.Main.Utils;
-using HarmonyLib;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.BTR;
 
@@ -20,18 +16,18 @@ public class BTRTurretView_AttachBot_Postfix : ModulePatch
             .GetMethod(nameof(BTRTurretView.AttachBot));
     }
 
-    [PatchTranspiler]
-    public static IEnumerable<CodeInstruction> Transpile(IEnumerable<CodeInstruction> instructions)
+    [PatchPostfix]
+    public static void Postfix(BTRTurretView __instance)
     {
-        var il = instructions.ToList();
-        il[92].operand = typeof(FikaBackendUtils)
-            .GetProperty(nameof(FikaBackendUtils.IsClient))
-            .GetGetMethod();
+        if (!FikaBackendUtils.IsClient)
+        {
+            return;
+        }
 
-        var nopIntr = il[93];
-        nopIntr.opcode = OpCodes.Nop;
-        nopIntr.operand = null;
-
-        return il;
+        var offlineBot = __instance._offlineBot;
+        if (offlineBot != null && offlineBot.Item2 && offlineBot.Item1 != null)
+        {
+            offlineBot.Item1.Transform.Original.position = __instance.BotRoot.position;
+        }
     }
 }

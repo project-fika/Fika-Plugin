@@ -267,6 +267,7 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
         RegisterPacket<QuestDropItemPacket>(OnQuestDropItemPacketReceived);
         RegisterPacket<HalloweenEventPacket>(OnHalloweenEventPacketReceived);
         RegisterPacket<InteractableInitPacket>(OnInteractableInitPacketReceived);
+        RegisterPacket<QuestTemplatesPacket>(OnQuestTemplatesPacketReceived);
         RegisterPacket<PasscodeInitPacket>(OnPasscodeInitPacketReceived);
         RegisterPacket<PasscodeResultPacket>(OnPasscodeResultPacketReceived);
         RegisterPacket<StatisticsPacket>(OnStatisticsPacketReceived);

@@ -1,6 +1,7 @@
 ﻿// © 2026 Lacyway All Rights Reserved
 
 using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
@@ -37,6 +38,7 @@ using Fika.Core.Networking.Packets.Player.Common.SubPackets;
 using Fika.Core.Networking.Snapshotting;
 using JsonType;
 using static Fika.Core.UI.FikaUIGlobals;
+using Il2CppInterop.Runtime.Injection;
 
 namespace Fika.Core.Main.Players;
 
@@ -47,6 +49,10 @@ namespace Fika.Core.Main.Players;
 /// </summary>
 public sealed class ObservedPlayer : FikaPlayer
 {
+    public ObservedPlayer(IntPtr pointer) : base(pointer)
+    {
+    }
+
     #region Fields and Properties
     /// <summary>
     /// Gets the health bar UI component attached to this observed player.
@@ -343,6 +349,7 @@ public sealed class ObservedPlayer : FikaPlayer
         var player = Create<ObservedPlayer>(gameWorld, resourceKey, playerId, position, updateQueue,
             armsUpdateMode, bodyUpdateMode, characterControllerMode, getSensitivity, getAimingSensitivity, prefix, aiControl, useSimpleAnimator);
 
+        player.enabled = false;
         player.IsYourPlayer = false;
         player.IsObservedAI = aiControl;
 
@@ -351,7 +358,7 @@ public sealed class ObservedPlayer : FikaPlayer
 
         ObservedStatisticsManager statisticsManager = new();
         ObservedQuestController observedQuestController = null;
-        NetworkDialogueController dialogueController = null;
+        ObservedDialogController dialogueController = null;
         if (!aiControl)
         {
             observedQuestController = new(profile, inventoryController, inventoryController.PlayerSearchController, null);
@@ -361,18 +368,18 @@ public sealed class ObservedPlayer : FikaPlayer
             dialogueController = new(profile, observedQuestController, inventoryController);
         }
 
-        player.VoipState = (!FikaBackendUtils.IsHeadless && !aiControl && Singleton<IFikaNetworkManager>.Instance.AllowVOIP)
+        player.VoipState = (!FikaBackendUtils.IsHeadless && !aiControl && FikaGlobals.NetworkManager.AllowVOIP)
             ? EVoipState.Available : EVoipState.NotAvailable;
 
-        await player.Init(rotation, layerName, pointOfView, profile, inventoryController, healthController,
-            statisticsManager, observedQuestController, null,
-            null, dialogueController, filter, player.VoipState, aiControl, false);
+        await player.Init(rotation, layerName, pointOfView, playerId, profile, inventoryController, healthController,
+            statisticsManager, observedQuestController, null, null,
+            null, dialogueController, filter, player.VoipState, aiControl, false, null).AsManaged();
 
         player.DisposeObservers();
 
         player.Pedometer.Stop();
         player._handsController = EmptyHandsController.CreateController<EmptyHandsController>(player);
-        player._handsController.Spawn(1f, FikaGlobals.EmptyAction);
+        player._handsController.Spawn(1f, new System.Action(FikaGlobals.EmptyAction));
 
         player.AIData = new AIData(null, player);
 
@@ -415,7 +422,7 @@ public sealed class ObservedPlayer : FikaPlayer
             player._followerCullingObject = player.gameObject.AddComponent<FollowerCullingObject>();
             player._followerCullingObject.enabled = true;
             player._followerCullingObject.CullByDistanceOnly = false;
-            player._followerCullingObject.Init(player.GetCullingTransform);
+            player._followerCullingObject.Init(new System.Func<UnityEngine.Transform>(player.GetCullingTransform));
             player._followerCullingObject.SetParams(EFTHardSettings.Instance.CULLING_PLAYER_SPHERE_RADIUS,
                 EFTHardSettings.Instance.CULLING_PLAYER_SPHERE_SHIFT, EFTHardSettings.Instance.CULLING_PLAYER_DISTANCE);
         }
@@ -423,6 +430,7 @@ public sealed class ObservedPlayer : FikaPlayer
         player.SubscribeToArmorChangeEvent();
         player.RecalculateEquippedArmorComponents(null);
         player.NetId = playerId;
+        player.enabled = true;
 
         OnPlayerSpawned?.Invoke(player);
 
@@ -445,8 +453,9 @@ public sealed class ObservedPlayer : FikaPlayer
     {
         NightVisionObserver.Dispose();
         ThermalVisionObserver.Dispose();
-        FaceCoverObserver.Dispose();
-        FaceCoverObserver.Dispose();
+        FaceCoverShieldObserver.Dispose();
+        FaceCoverMaskObserver.Dispose();
+        FaceShieldObserver.Dispose();
     }
 
     /// <summary>
@@ -463,7 +472,7 @@ public sealed class ObservedPlayer : FikaPlayer
             if (DissonanceComms != null)
             {
                 DissonanceComms.TrackPlayerPosition(this);
-                StartCoroutine(SourceBindingCreated());
+                StartCoroutine((SourceBindingCreated()).ToIl2Cpp());
                 if (VoipAudioSource != null)
                 {
 
@@ -532,7 +541,7 @@ public sealed class ObservedPlayer : FikaPlayer
         _voiceBroadcastTrigger = gameObject.AddComponent<VoiceBroadcastTrigger>();
         _voiceBroadcastTrigger.ChannelType = CommTriggerTarget.Self;
         _soundSettings = Singleton<SettingsManager>.Instance.Sound.Settings;
-        CompositeDisposable.BindState(_soundSettings.VoiceChatVolume, ChangeVoipDeviceSensitivity);
+        CompositeDisposable.BindState(_soundSettings.VoiceChatVolume, new System.Action<int>(ChangeVoipDeviceSensitivity));
     }
 
     /// <summary>
@@ -562,11 +571,12 @@ public sealed class ObservedPlayer : FikaPlayer
     /// <param name="mask">Tag mask filters.</param>
     /// <param name="probability">Probability percentage of speaking (0-100).</param>
     /// <param name="aggressive">Whether to play aggressive vocalization variant.</param>
-    public override void Say(EPhraseTrigger phrase, bool demand = false, float delay = 0, ETagStatus mask = 0, int probability = 100, bool aggressive = false)
+    /// <param name="tagFilter">Tag filter applied to the phrase.</param>
+    public override void Say(EPhraseTrigger phrase, bool demand = false, float delay = 0, ETagStatus mask = 0, int probability = 100, bool aggressive = false, ETagFilter tagFilter = 0)
     {
         if (gameObject.activeSelf)
         {
-            base.Say(phrase, demand, delay, mask, probability, aggressive);
+            base.Say(phrase, demand, delay, mask, probability, aggressive, tagFilter);
         }
     }
 
@@ -575,11 +585,11 @@ public sealed class ObservedPlayer : FikaPlayer
     /// </summary>
     /// <param name="fallHeight">Height fallen before landing.</param>
     /// <param name="jumpHeight">Jump height reached.</param>
-    public override void PlayGroundedSound(float fallHeight, float jumpHeight)
+    public override void GroundedStateHandler(float fallHeight, float jumpHeight)
     {
-        (var hit, var surfaceSound) = CalculateMovementSurface();
-        UpdateSurfaceData(hit, surfaceSound);
-        base.PlayGroundedSound(fallHeight, jumpHeight);
+        var surface = CalculateMovementSurface();
+        UpdateSurfaceData(surface.Item1, surface.Item2);
+        base.GroundedStateHandler(fallHeight, jumpHeight);
     }
 
     /// <summary>
@@ -692,7 +702,7 @@ public sealed class ObservedPlayer : FikaPlayer
             return;
         }
         var player = Singleton<GameWorld>.Instance.GetAlivePlayerByProfileID(DamageInfo.Player.iPlayer.ProfileId);
-        if (player == this)
+        if (player == null || player == this)
         {
             return;
         }
@@ -756,7 +766,7 @@ public sealed class ObservedPlayer : FikaPlayer
         {
             if (gameObject.activeSelf && Speaker != null)
             {
-                Speaker.Play(EPhraseTrigger.OnBeingHurt, HealthStatus, true, null);
+                Speaker.Play(EPhraseTrigger.OnBeingHurt, HealthStatus, true, new Il2CppSystem.Nullable<int>());
             }
         }
     }
@@ -780,7 +790,7 @@ public sealed class ObservedPlayer : FikaPlayer
         LastDamageType = DamageInfo.DamageType;
 
         var packet = new DamagePacket(NetId, DamageInfo, bodyPartType, colliderType);
-        Singleton<IFikaNetworkManager>.Instance.SendPlayerPacket(in packet, NetId, DeliveryMethod.ReliableOrdered, true);
+        FikaGlobals.NetworkManager.SendPlayerPacket(in packet, NetId, DeliveryMethod.ReliableOrdered, true);
     }
 
     /// <summary>
@@ -822,7 +832,7 @@ public sealed class ObservedPlayer : FikaPlayer
         LastDamageType = DamageInfo.DamageType;
 
         var packet = new DamagePacket(NetId, DamageInfo, bodyPartType, colliderType, armorPlateCollider);
-        Singleton<IFikaNetworkManager>.Instance.SendPlayerPacket(in packet, NetId, DeliveryMethod.ReliableOrdered, true);
+        FikaGlobals.NetworkManager.SendPlayerPacket(in packet, NetId, DeliveryMethod.ReliableOrdered, true);
 
         return new()
         {
@@ -850,7 +860,7 @@ public sealed class ObservedPlayer : FikaPlayer
 
         ShotReactions(damageInfo, bodyPartType);
         ApplyHitDebuff(damageInfo.Damage, 0f, bodyPartType, damageInfo.DamageType);
-        var flag = damageInfo.DeflectedBy != null;
+        var flag = damageInfo.DeflectedBy.HasValue;
         var damage = damageInfo.Damage;
         var list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
         var materialType = flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1)
@@ -870,7 +880,7 @@ public sealed class ObservedPlayer : FikaPlayer
         ReceiveDamage(damageInfo.Damage, bodyPartType, damageInfo.DamageType, num, hitInfo.Material);
 
         var packet = new DamagePacket(NetId, damageInfo, bodyPartType, colliderType, armorPlateCollider, absorbed: num);
-        Singleton<IFikaNetworkManager>.Instance.SendPlayerPacket(in packet, NetId, DeliveryMethod.ReliableOrdered, true);
+        FikaGlobals.NetworkManager.SendPlayerPacket(in packet, NetId, DeliveryMethod.ReliableOrdered, true);
 
         // Run this to get weapon skill
         ManageAggressor(damageInfo, bodyPartType, colliderType);
@@ -894,7 +904,7 @@ public sealed class ObservedPlayer : FikaPlayer
     /// </summary>
     /// <param name="armorDamage">Dictionary mapping explosion hits to durability damage amounts.</param>
     /// <param name="DamageInfo">Explosion damage information.</param>
-    public override void ApplyExplosionDamageToArmor(Dictionary<ExplosionDamageInfo, float> armorDamage, DamageInfo DamageInfo)
+    public override void ApplyExplosionDamageToArmor(Il2CppSystem.Collections.Generic.Dictionary<ExplosionDamageInfo, float> armorDamage, DamageInfo DamageInfo)
     {
         if (!_isServer)
         {
@@ -944,7 +954,7 @@ public sealed class ObservedPlayer : FikaPlayer
             return null;
         }
 
-        var flag = damageInfo.DeflectedBy != null;
+        var flag = damageInfo.DeflectedBy.HasValue;
         var damage = damageInfo.Damage;
         var list = ProceedDamageThroughArmor(ref damageInfo, colliderType, armorPlateCollider, true);
         var materialType = flag ? MaterialType.HelmetRicochet : ((list == null || list.Count < 1)
@@ -964,7 +974,7 @@ public sealed class ObservedPlayer : FikaPlayer
         ReceiveDamage(damageInfo.Damage, bodyPartType, damageInfo.DamageType, num, hitInfo.Material);
 
         var packet = new DamagePacket(NetId, damageInfo, bodyPartType, colliderType, armorPlateCollider, absorbed: num);
-        Singleton<IFikaNetworkManager>.Instance.SendPlayerPacket(in packet, NetId, DeliveryMethod.ReliableOrdered, true);
+        FikaGlobals.NetworkManager.SendPlayerPacket(in packet, NetId, DeliveryMethod.ReliableOrdered, true);
 
         // Run this to get weapon skill
         ManageAggressor(damageInfo, bodyPartType, colliderType);
@@ -1001,8 +1011,8 @@ public sealed class ObservedPlayer : FikaPlayer
     /// </summary>
     public override void CreateMovementContext()
     {
-        MovementContext = ObservedMovementContext.Create(this, GetBodyAnimatorCommon,
-            GetCharacterControllerCommon, EFTHardSettings.Instance.MOVEMENT_MASK);
+        MovementContext = ObservedMovementContext.Create(this, new System.Func<ICharacterController>(GetCharacterControllerCommon),
+            EFTHardSettings.Instance.MOVEMENT_MASK);
     }
 
     /// <summary>
@@ -1013,8 +1023,7 @@ public sealed class ObservedPlayer : FikaPlayer
     {
         if (effect is IFracture fracture && !fracture.WasPaused && FractureSound != null && Singleton<BetterAudio>.Instantiated)
         {
-            Singleton<BetterAudio>.Instance.PlayAtPoint(Position, FractureSound, CameraManager.Instance.Distance(Position),
-                BetterAudio.AudioSourceGroupType.Impacts, 15, 0.7f, EOcclusionTest.Fast, null, false);
+            PlayAtPoint(Position, FractureSound, 15);
         }
     }
 
@@ -1146,6 +1155,28 @@ public sealed class ObservedPlayer : FikaPlayer
         new Process<MedsController, IMedsController>(this, func, foodDrink, false)
             .Proceed(null, callback, scheduled);
     }
+
+    public override void Proceed(Item item, Callback<IQuickUseItem> callback, bool scheduled = true)
+    {
+        Func<QuickUseItemController> func = new(() => ObservedQuickUseItemController.Create(this, item));
+        new Process<QuickUseItemController, IQuickUseItem>(this, func, item, false)
+            .Proceed(null, callback, scheduled);
+    }
+
+    public override void Proceed(KnifeComponent knife, Callback<IQuickKnifeKickController> callback, bool scheduled = true)
+    {
+        Func<QuickKnifeKickController> func = new(() => ObservedQuickKnifeController.Create(this, knife));
+        new Process<QuickKnifeKickController, IQuickKnifeKickController>(this, func, knife.Item, false)
+            .Proceed(null, callback, scheduled);
+    }
+
+    public override void Proceed(RecorderItem recorder, Callback<IRecorderController> callback, bool scheduled = true)
+    {
+        Func<RecorderHandsController> func = new(() => RecorderHandsController.CreateController<RecorderHandsController>(this, recorder,
+            RecorderController.CreateRecorderHandler(recorder)));
+        new Process<RecorderHandsController, IRecorderController>(this, func, recorder, false)
+            .Proceed(null, callback, scheduled);
+    }
     #endregion
 
     /// <summary>
@@ -1211,11 +1242,11 @@ public sealed class ObservedPlayer : FikaPlayer
             return false;
         }
 
-        (var hit, var surfaceSound) = CalculateMovementSurface();
-        UpdateSurfaceData(hit, surfaceSound);
+        var surface = CalculateMovementSurface();
+        UpdateSurfaceData(surface.Item1, surface.Item2);
         if (Environment == EnvironmentType.Outdoor)
         {
-            method_35();
+            ApplyUnderRoofStatus();
         }
         return true;
     }
@@ -1463,14 +1494,12 @@ public sealed class ObservedPlayer : FikaPlayer
         if (FikaBackendUtils.IsClient)
         {
             var observedCorpse = CreateCorpse<ObservedCorpse>(Velocity);
-            observedCorpse.IsZombieCorpse = UsedSimplifiedSkeleton;
             observedCorpse.SetSpecificSettings(PlayerBones.RightPalm);
             Singleton<GameWorld>.Instance.ObservedPlayersCorpses.Add(NetId, observedCorpse);
             return observedCorpse;
         }
 
         var corpse = CreateCorpse<Corpse>(Velocity);
-        corpse.IsZombieCorpse = UsedSimplifiedSkeleton;
         //CorpsePositionSyncer.Create(corpse.gameObject, corpse, NetId);
         return corpse;
     }
@@ -1531,7 +1560,7 @@ public sealed class ObservedPlayer : FikaPlayer
                 var aggressorNickname = !string.IsNullOrEmpty(LastAggressor.Profile.Info.MainProfileNickname) ? LastAggressor.Profile.Info.MainProfileNickname : LastAggressor.Profile.Nickname;
                 if (aggressor.gameObject.name.StartsWith("Player_") || aggressor.IsYourPlayer)
                 {
-                    NotificationManager.DisplayMessageNotification(string.Format(LocaleUtils.KILLED_BOSS.Localized(),
+                    FikaGlobals.DisplayMessage(string.Format(LocaleUtils.KILLED_BOSS.Localized(),
                     [ColorizeText(EColor.GREEN, LastAggressor.Profile.Info.MainProfileNickname), ColorizeText(EColor.BROWN, name)]),
                     iconType: EFT.Communications.ENotificationIconType.Friend);
                 }
@@ -1551,10 +1580,10 @@ public sealed class ObservedPlayer : FikaPlayer
         {
             Corpse.SetItemInHandsLootedCallback(null);
             Corpse.ItemInHands.Value = CorpseSyncPacket.ItemInHands;
-            Corpse.SetItemInHandsLootedCallback(ReleaseHand);
+            Corpse.SetItemInHandsLootedCallback(new System.Action(ReleaseHand));
         }
         CorpseSyncPacket = default;
-        Singleton<IFikaNetworkManager>.Instance.ObservedPlayers.Remove(this);
+        FikaGlobals.NetworkManager.ObservedPlayers.Remove(this);
     }
 
     /// <summary>
@@ -1584,19 +1613,19 @@ public sealed class ObservedPlayer : FikaPlayer
             HitNormal = packet.HitNormal,
             Direction = packet.Direction,
             PenetrationPower = packet.PenetrationPower,
-            BlockedBy = packet.BlockedBy,
-            DeflectedBy = packet.DeflectedBy,
+            BlockedBy = packet.BlockedBy.ToIl2CppNullable(),
+            DeflectedBy = packet.DeflectedBy.ToIl2CppNullable(),
             ArmorDamage = packet.ArmorDamage
         };
 
-        if (packet.SourceId.HasValue)
+        if (packet.SourceId is not null)
         {
-            damageInfo.SourceId = packet.SourceId.Value;
+            damageInfo.SourceId = packet.SourceId;
         }
 
-        if (packet.ProfileId.HasValue)
+        if (packet.ProfileId is not null)
         {
-            var player = Singleton<GameWorld>.Instance.GetAlivePlayerBridgeByProfileID(packet.ProfileId.Value);
+            var player = Singleton<GameWorld>.Instance.GetAlivePlayerBridgeByProfileID(packet.ProfileId);
 
             if (player != null)
             {
@@ -1615,6 +1644,19 @@ public sealed class ObservedPlayer : FikaPlayer
         LastDamagedBodyPart = packet.BodyPartType;
     }
 
+    private void ClearVictimAccountId(Profile killerProfile)
+    {
+        var victims = killerProfile.EftStats.Victims;
+        for (var i = victims.Count - 1; i >= 0; i--)
+        {
+            if (victims[i].ProfileId == ProfileId)
+            {
+                victims[i].AccountId = string.Empty;
+                return;
+            }
+        }
+    }
+
     /// <summary>
     /// Handles kill notifications, shared quest progression, and experience distribution when killed by a group member.
     /// </summary>
@@ -1628,6 +1670,10 @@ public sealed class ObservedPlayer : FikaPlayer
         if (LastAggressor.IsYourPlayer)
         {
             base.OnBeenKilledByAggressor(aggressor, damageInfo, bodyPart, lethalDamageType);
+            if (IsObservedAI)
+            {
+                ClearVictimAccountId(aggressor.Profile);
+            }
             return;
         }
 
@@ -1658,7 +1704,7 @@ public sealed class ObservedPlayer : FikaPlayer
 
                 var distance = Vector3.Distance(aggressor.Position, Position);
                 mainPlayer.HandleTeammateKill(damageInfo, bodyPart, Side, role, ProfileId,
-                    distance, Inventory.EquippedInSlotsTemplateIds, HealthController.BodyPartEffects, TriggerZones,
+                    distance, (Inventory.EquippedInSlotsTemplateIds).ToManagedList(), HealthController.BodyPartEffects, (TriggerZones).ToManagedList(),
                     (FikaPlayer)aggressor);
             }
         }
@@ -1695,7 +1741,7 @@ public sealed class ObservedPlayer : FikaPlayer
                 NotificationManager.DisplayWarningNotification(string.Format(LocaleUtils.UI_REVIVING_BEEN_DOWNED.Localized(),
                                 ColorizeText(EColor.GREEN, Profile.GetCorrectedNickname())));
             }
-            Speaker.Play(EPhraseTrigger.OnAgony, HealthStatus, true);
+            Speaker.Play(EPhraseTrigger.OnAgony, HealthStatus, true, new Il2CppSystem.Nullable<int>());
             if (_reviveInteractable != null)
             {
                 FikaGlobals.LogWarning($"ReviveInteractable was not null on {Profile.GetCorrectedNickname()}");
@@ -1832,7 +1878,8 @@ public sealed class ObservedPlayer : FikaPlayer
         {
             if (Inventory.Equipment.TryFindItem(controller.Weapon.Id, out var item))
             {
-                if (item is not Weapon newWeapon)
+                var newWeapon = item.TryCast<Weapon>();
+                if (newWeapon == null)
                 {
                     FikaGlobals.LogError("HandsController item was not Weapon");
                     return;
@@ -1844,7 +1891,8 @@ public sealed class ObservedPlayer : FikaPlayer
                     Dictionary<string, ContainerCollectionView.SlotView> currentViews = [];
                     foreach (var kvp in controller.CCV.ContainerBones)
                     {
-                        if (kvp.Key is Slot slot && slot.ContainedItem != null)
+                        var slot = kvp.Key.TryCast<Slot>();
+                        if (slot != null && slot.ContainedItem != null)
                         {
                             if (currentViews.ContainsKey(slot.FullId))
                             {
@@ -1854,8 +1902,8 @@ public sealed class ObservedPlayer : FikaPlayer
                             currentViews.Add(slot.FullId, kvp.Value);
                         }
                     }
-                    controller.CCV.RemoveBones(controller.Weapon.AllSlots);
-                    foreach (IContainer container in newSlots)
+                    controller.CCV.RemoveBones(controller.Weapon.AllSlots.Select(slot => (EFT.InventoryLogic.IContainer)slot).ToIl2CppList());
+                    foreach (EFT.InventoryLogic.IContainer container in newSlots)
                     {
                         if (container is Slot slot)
                         {
@@ -1960,7 +2008,7 @@ public sealed class ObservedPlayer : FikaPlayer
             Profile.Info.TeamId = "Fika";
             if (!FikaBackendUtils.IsHeadless)
             {
-                CreateHealthBarAsync(destroyCancellationToken)
+                CreateHealthBarAsync(destroyCancellationToken.ToManaged())
                     .Forget();
             }
 
@@ -1977,7 +2025,7 @@ public sealed class ObservedPlayer : FikaPlayer
 
             if (FikaPlugin.Instance.Settings.ShowNotifications.Value)
             {
-                NotificationManager.DisplayMessageNotification(string.Format(LocaleUtils.GROUP_MEMBER_SPAWNED.Localized(),
+                FikaGlobals.DisplayMessage(string.Format(LocaleUtils.GROUP_MEMBER_SPAWNED.Localized(),
                     ColorizeText(EColor.GREEN, Profile.Info.MainProfileNickname)),
                 ENotificationDurationType.Default, ENotificationIconType.Friend);
             }
@@ -2002,7 +2050,7 @@ public sealed class ObservedPlayer : FikaPlayer
     {
         try
         {
-            var fikaGame = Singleton<IFikaGame>.Instance;
+            var fikaGame = FikaGlobals.FikaGame;
             if (fikaGame == null)
             {
                 return;
@@ -2048,12 +2096,14 @@ public sealed class ObservedPlayer : FikaPlayer
         {
             return;
         }
+        BeginLocalSceneIkLateUpdate(this);
         Physical.LateUpdate();
         ObservedVisualPass(Time.deltaTime, _frameSkipInterval);
         PropUpdate();
         _observedCorpseCulling?.ManualUpdate();
         _armsupdated = false;
         _bodyupdated = false;
+        EndLocalSceneIkLateUpdate(this);
     }
 
     /// <summary>
@@ -2160,7 +2210,7 @@ public sealed class ObservedPlayer : FikaPlayer
     /// <param name="deltaTime">Frame delta time.</param>
     /// <param name="platformDeltaTime">Platform-specific delta time, if any.</param>
     /// <param name="loop">Update loop index.</param>
-    public override void ManualUpdate(float deltaTime, float? platformDeltaTime = null, int loop = 1)
+    public override void ManualUpdate(float deltaTime, Il2CppSystem.Nullable<float> platformDeltaTime = null, int loop = 1)
     {
         MovementUpdate(deltaTime);
 
@@ -2226,10 +2276,31 @@ public sealed class ObservedPlayer : FikaPlayer
     /// <param name="interactiveObject">The interactive world object.</param>
     /// <param name="interactionResult">Interaction result parameters.</param>
     /// <param name="callback">Action callback on start.</param>
-    public override void StartInteraction(WorldInteractiveObject interactiveObject, InteractionResult interactionResult, Action callback)
+    /// <param name="enterDoorState">Whether the player enters the door interaction state.</param>
+    public override void StartInteraction(WorldInteractiveObject interactiveObject, InteractionResult interactionResult, Il2CppSystem.Action callback, bool enterDoorState = true)
     {
+        if (interactiveObject is Door door)
+        {
+            if (interactionResult.InteractionType == EInteractionType.Seal)
+            {
+                door.StartSealing();
+            }
+            else if (interactionResult.InteractionType == EInteractionType.Unseal)
+            {
+                door.StartUnsealing();
+            }
+        }
         CurrentManagedState.StartDoorInteraction(interactiveObject, interactionResult, callback);
         UpdateInteractionCast();
+    }
+
+    public override void CancelDoorInteraction(WorldInteractiveObject door, InteractionResult interactionResult)
+    {
+        if (door is Door sealedDoor
+            && (interactionResult.InteractionType == EInteractionType.Seal || interactionResult.InteractionType == EInteractionType.Unseal))
+        {
+            sealedDoor.DropSealing();
+        }
     }
 
     /// <summary>
@@ -2295,7 +2366,7 @@ public sealed class ObservedPlayer : FikaPlayer
         }
         _observedSlotViewHandlers.Clear();
         _observedCorpseCulling?.Dispose();
-        if (HealthController.IsAlive && !Singleton<IFikaNetworkManager>.Instance.ObservedPlayers.Remove(this) && !Profile.Nickname.StartsWith("headless_"))
+        if (HealthController.IsAlive && !FikaGlobals.NetworkManager.ObservedPlayers.Remove(this) && !Profile.Nickname.StartsWith("headless_"))
         {
             FikaGlobals.LogWarning($"Failed to remove {ProfileId}, {Profile.Nickname} from observed list");
         }
@@ -2372,6 +2443,11 @@ public sealed class ObservedPlayer : FikaPlayer
             case EProceedType.Stationary:
                 {
                     CreateFirearmController(packet.ItemId, true);
+                    break;
+                }
+            case EProceedType.Recorder:
+                {
+                    CreateRecorderController(packet.ItemId);
                     break;
                 }
         }
@@ -2496,7 +2572,6 @@ public sealed class ObservedPlayer : FikaPlayer
             MouseLook(false);
             const float num2 = 1f;
             var num4 = GetCurveValue(PlayerAnimator.LEFT_STANCE_CURVE);
-            ProceduralWeaponAnimation.GetLeftStanceCurrentCurveValue(num4);
             _rightHand = 1f - (GetCurveValue(PlayerAnimator.RIGHT_HAND_WEIGHT) * num2);
             _leftHand = 1f - (GetCurveValue(PlayerAnimator.LEFT_HAND_WEIGHT) * num2);
             ThirdPersonWeaponRootAuthority = MovementContext.IsInMountedState ? 0f : (GetCurveValue(PlayerAnimator.WEAPON_ROOT_3RD) * num2);
@@ -2515,14 +2590,11 @@ public sealed class ObservedPlayer : FikaPlayer
                 ProceduralWeaponAnimation.IsAiming);
             HandPosers[0].weight = _leftHand;
             _limbs[0].solver.IKRotationWeight = _limbs[0].solver.IKPositionWeight = _leftHand;
-            _limbs[1].solver.IKRotationWeight = _limbs[1].solver.IKPositionWeight = _rightHand;
-            IkProcess(_lastDistance);
-            AdjustElbows(num2);
-            IkApply(_lastDistance);
-            if (_rightHand < 1f)
-            {
-                PlayerBones.Kinematics(_markers[1], _rightHand);
-            }
+            var rightHandDetach = 1f - (GetCurveValue(PlayerAnimator.RIGHT_HAND_DETACH_WEIGHT) * num2);
+            var rightLimbWeight = rightHandDetach < 1f ? rightHandDetach : _rightHand;
+            _limbs[1].solver.IKRotationWeight = _limbs[1].solver.IKPositionWeight = rightLimbWeight;
+            EnqueueLocalSceneIkPlayer(this, _lastDistance);
+            AdjustElbows(num2, GetCurveValue(PlayerAnimator.ELBOW_LEFT_WEIGHT), GetCurveValue(PlayerAnimator.ELBOW_RIGHT_WEIGHT));
             var num6 = GetCurveValue(PlayerAnimator.AIMING_LAYER_CURVE);
             MovementContext.PlayerAnimator.Animator.SetLayerWeight(6, 1f - num6);
             _prevHeight = Transform.position.y;
@@ -2591,7 +2663,7 @@ public sealed class ObservedPlayer : FikaPlayer
             HandsController = null;
         }
 
-        SpawnController(controllerFactory(), handler.DisposeHandler);
+        SpawnController(controllerFactory(), new System.Action(handler.DisposeHandler));
         ((ISetInHandsHandler)this).OnSetInHands(new(item, CommandStatus.Succeed, InventoryController));
         _shouldCullController = _handsController is EmptyHandsController or KnifeController or UsableItemController;
     }
@@ -2632,6 +2704,9 @@ public sealed class ObservedPlayer : FikaPlayer
                 break;
             case EHandsControllerType.UsableItem:
                 CreateUsableItemController(itemId);
+                break;
+            case EHandsControllerType.RecorderItem:
+                CreateRecorderController(itemId);
                 break;
             default:
                 FikaGlobals.LogWarning($"ObservedPlayer::SpawnHandsController: Unhandled ControllerType, was {controllerType}");
@@ -2830,6 +2905,27 @@ public sealed class ObservedPlayer : FikaPlayer
         CreateHandsController(handler.ReturnController, handler.Item);
     }
 
+    private void CreateRecorderController(MongoID itemId)
+    {
+        var result = FindItemById(itemId, false, false);
+        if (!result.Succeeded)
+        {
+            FikaGlobals.LogError(result.Error);
+            return;
+        }
+
+        var recorder = result.Value.TryCast<RecorderItem>();
+        if (recorder == null)
+        {
+            FikaGlobals.LogError($"CreateRecorderController: Item was not a RecorderItem, was {result.Value.GetType()}!");
+            return;
+        }
+
+        // Observed hands only show the recorder, tape playback stays with the owner
+        CreateHandsController(() => RecorderHandsController.CreateController<RecorderHandsController>(this, recorder,
+            RecorderController.CreateRecorderHandler(recorder)), recorder);
+    }
+
     /// <summary>
     /// Spawns and equips a quick-use item hands controller.
     /// </summary>
@@ -2854,7 +2950,7 @@ public sealed class ObservedPlayer : FikaPlayer
     /// <param name="weaponId">Template/item ID of the weapon used.</param>
     public void SetAggressorData(MongoID? killerId, EBodyPart bodyPart, MongoID? weaponId)
     {
-        var killer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByID(killerId);
+        var killer = Singleton<GameWorld>.Instance.GetEverExistedPlayerByProfileId(killerId?.ToString());
         if (killer != null)
         {
             LastAggressor = killer;
@@ -2862,7 +2958,7 @@ public sealed class ObservedPlayer : FikaPlayer
         LastBodyPart = bodyPart;
         _lastWeaponId = weaponId;
 
-        if (LastDamageInfo.Weapon == null && _lastWeaponId != null)
+        if (LastDamageInfo.Weapon is null && _lastWeaponId is not null)
         {
             FindKillerWeapon();
         }

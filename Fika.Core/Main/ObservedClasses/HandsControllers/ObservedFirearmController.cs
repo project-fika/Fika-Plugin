@@ -130,10 +130,6 @@ public sealed class ObservedFirearmController : FirearmController
         _weaponManager = _weaponPrefab.ObjectInHands as Firearms;
         // ScopeZoomHandler.Update drives the zoom from the local mouse wheel, an observed scope only follows packets.
         _weaponManager.ValidateScopeSmoothZoomUpdate(false);
-        if (UnderbarrelWeapon != null)
-        {
-            _underBarrelManager = _underbarrelContainer;
-        }
         IsRevolver = Weapon is Revolver;
         _stationaryWeapon = Weapon.IsStationaryWeapon;
     }
@@ -862,7 +858,7 @@ public sealed class ObservedFirearmController : FirearmController
         {
         }
 
-        public ObservedIdleOperation(FirearmController controller) : base(Il2CppInjection.Allocate<ObservedIdleOperation>())
+        public ObservedIdleOperation(FirearmController controller) : base(ClassInjector.DerivedConstructorPointer<ObservedIdleOperation>())
         {
             ClassInjector.DerivedConstructorBody(this);
             ClassInjector.InvokeBaseConstructor<Player.FirearmController.Idling>(this, controller);
@@ -880,7 +876,7 @@ public sealed class ObservedFirearmController : FirearmController
         {
         }
 
-        public ObservedThrowPatronOperation1(FirearmController controller) : base(Il2CppInjection.Allocate<ObservedThrowPatronOperation1>())
+        public ObservedThrowPatronOperation1(FirearmController controller) : base(ClassInjector.DerivedConstructorPointer<ObservedThrowPatronOperation1>())
         {
             ClassInjector.DerivedConstructorBody(this);
             _observedController = (ObservedFirearmController)controller;
@@ -902,7 +898,7 @@ public sealed class ObservedFirearmController : FirearmController
         {
         }
 
-        public ObservedThrowPatronOperation2(FirearmController controller) : base(Il2CppInjection.Allocate<ObservedThrowPatronOperation2>())
+        public ObservedThrowPatronOperation2(FirearmController controller) : base(ClassInjector.DerivedConstructorPointer<ObservedThrowPatronOperation2>())
         {
             ClassInjector.DerivedConstructorBody(this);
             _observedController = (ObservedFirearmController)controller;
@@ -924,7 +920,7 @@ public sealed class ObservedFirearmController : FirearmController
         {
         }
 
-        public ObservedThrowPatronOperation3(FirearmController controller) : base(Il2CppInjection.Allocate<ObservedThrowPatronOperation3>())
+        public ObservedThrowPatronOperation3(FirearmController controller) : base(ClassInjector.DerivedConstructorPointer<ObservedThrowPatronOperation3>())
         {
             ClassInjector.DerivedConstructorBody(this);
             _observedController = (ObservedFirearmController)controller;
@@ -946,7 +942,7 @@ public sealed class ObservedFirearmController : FirearmController
         {
         }
 
-        public ObservedThrowPatronOperation4(FirearmController controller) : base(Il2CppInjection.Allocate<ObservedThrowPatronOperation4>())
+        public ObservedThrowPatronOperation4(FirearmController controller) : base(ClassInjector.DerivedConstructorPointer<ObservedThrowPatronOperation4>())
         {
             ClassInjector.DerivedConstructorBody(this);
             _observedController = (ObservedFirearmController)controller;

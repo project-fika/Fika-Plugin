@@ -21,7 +21,7 @@ public sealed class ClientHealthController : PlayerHealthController
     {
     }
 
-    public ClientHealthController(Profile.HealthInfo healthInfo, Player player, InventoryController inventoryController, SkillManager skillManager, bool aiHealth) : base(Il2CppInjection.Allocate<ClientHealthController>())
+    public ClientHealthController(Profile.HealthInfo healthInfo, Player player, InventoryController inventoryController, SkillManager skillManager, bool aiHealth) : base(ClassInjector.DerivedConstructorPointer<ClientHealthController>())
     {
         ClassInjector.DerivedConstructorBody(this);
         _fikaPlayer = (FikaPlayer)player;

@@ -230,6 +230,11 @@ public class FikaClientFirearmController : Player.FirearmController
         var isAiming = IsAiming;
         var aimingInterruptedByOverlap = AimingInterruptedByOverlap;
         base.SetAim(value);
+        if (_fikaPlayer.PacketSender?.NetworkManager == null)
+        {
+            return;
+        }
+
         if (IsAiming != isAiming || (aimingInterruptedByOverlap && _fikaPlayer.HealthController.IsAlive))
         {
             var packet = new ToggleAimPacket(IsAiming ? Item.AimIndex.Value : -1);
@@ -593,7 +598,7 @@ public class FikaClientFirearmController : Player.FirearmController
         {
         }
 
-        public CylinderReloadOperation(Player.FirearmController controller) : base(Il2CppInjection.Allocate<CylinderReloadOperation>())
+        public CylinderReloadOperation(Player.FirearmController controller) : base(ClassInjector.DerivedConstructorPointer<CylinderReloadOperation>())
         {
             ClassInjector.DerivedConstructorBody(this);
             _coopClientFirearmController = (FikaClientFirearmController)controller;
@@ -626,7 +631,7 @@ public class FikaClientFirearmController : Player.FirearmController
         {
         }
 
-        public AmmoPackReloadInternalOneChamberOperation(Player.FirearmController controller) : base(Il2CppInjection.Allocate<AmmoPackReloadInternalOneChamberOperation>())
+        public AmmoPackReloadInternalOneChamberOperation(Player.FirearmController controller) : base(ClassInjector.DerivedConstructorPointer<AmmoPackReloadInternalOneChamberOperation>())
         {
             ClassInjector.DerivedConstructorBody(this);
             _coopClientFirearmController = (FikaClientFirearmController)controller;
@@ -658,7 +663,7 @@ public class FikaClientFirearmController : Player.FirearmController
         {
         }
 
-        public AmmoPackReloadInternalBoltOpenOperation(Player.FirearmController controller) : base(Il2CppInjection.Allocate<AmmoPackReloadInternalBoltOpenOperation>())
+        public AmmoPackReloadInternalBoltOpenOperation(Player.FirearmController controller) : base(ClassInjector.DerivedConstructorPointer<AmmoPackReloadInternalBoltOpenOperation>())
         {
             ClassInjector.DerivedConstructorBody(this);
             _coopClientFirearmController = (FikaClientFirearmController)controller;
@@ -690,7 +695,7 @@ public class FikaClientFirearmController : Player.FirearmController
         {
         }
 
-        public DefaultFireOperation(Player.FirearmController controller) : base(Il2CppInjection.Allocate<DefaultFireOperation>())
+        public DefaultFireOperation(Player.FirearmController controller) : base(ClassInjector.DerivedConstructorPointer<DefaultFireOperation>())
         {
             ClassInjector.DerivedConstructorBody(this);
             _coopClientFirearmController = (FikaClientFirearmController)controller;

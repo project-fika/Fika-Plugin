@@ -15,7 +15,7 @@ public class HostRunddansController : LocalRunddansController
     {
     }
 
-    public HostRunddansController(RunddansGlobalSettings settings, LocationSettings.Location location) : base(Il2CppInjection.Allocate<HostRunddansController>())
+    public HostRunddansController(RunddansGlobalSettings settings, LocationSettings.Location location) : base(ClassInjector.DerivedConstructorPointer<HostRunddansController>())
     {
         ClassInjector.DerivedConstructorBody(this);
         ClassInjector.InvokeBaseConstructor<LocalRunddansController>(this, settings, location);

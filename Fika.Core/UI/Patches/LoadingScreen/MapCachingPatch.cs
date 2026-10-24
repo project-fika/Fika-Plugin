@@ -10,8 +10,21 @@ public class MapCachingPatch : ModulePatch
 {
     protected override MethodBase GetTargetMethod()
     {
-        return AccessTools.Method(typeof(EFT.TarkovApplication.__c__DisplayClass222_0),
-            nameof(EFT.TarkovApplication.__c__DisplayClass222_0._LoadMapAndData_b__0));
+        return FindLoadMapAndDataLambda("_LoadMapAndData_b__0");
+    }
+    
+    internal static MethodInfo FindLoadMapAndDataLambda(string name)
+    {
+        foreach (var type in typeof(EFT.TarkovApplication).GetNestedTypes())
+        {
+            var method = AccessTools.DeclaredMethod(type, name);
+            if (method != null)
+            {
+                return method;
+            }
+        }
+
+        return null;
     }
 
     [PatchPrefix]

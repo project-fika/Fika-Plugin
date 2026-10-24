@@ -4,7 +4,6 @@ using EFT;
 using Fika.Core.Main.GameMode;
 using Fika.Core.Main.Utils;
 using HarmonyLib;
-using SPTushonka.Common.Http;
 using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.Overrides;
@@ -62,9 +61,5 @@ public class FixSavageInventoryScreenPatch_Override : ModulePatch
             profile
         ]);
         session.ProfileOfPet.LearnAll();
-
-        // make a request to the server, so it knows of the items we might transfer
-        RequestHandler.PutJson("/raid/profile/scavsave",
-            GetProfileAtEndOfRaidPatch_Override.ProfileDescriptor.ToJson());
     }
 }

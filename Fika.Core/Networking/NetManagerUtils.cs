@@ -110,6 +110,7 @@ public static class NetManagerUtils
     public static void DestroyNetManager(bool isServer)
     {
         NetworkUtils.ResetReaderAndWriter();
+        QuestTemplateSync.Clear();
 
         if (FikaBackendUtils.IsTransit)
         {
@@ -124,6 +125,8 @@ public static class NetManagerUtils
                 server.RaidInitialized = false;
                 server.ReadyClients = 0;
                 server.LocationReceived = false;
+                server.BattlePassDocuments.Clear();
+                server.ClearQuestSyncs();
                 return;
             }
 

@@ -9,11 +9,16 @@ using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Communication;
 using UnityEngine.EventSystems;
+using Il2CppInterop.Runtime.Injection;
 
 namespace Fika.Core.UI.Custom;
 
 public class FikaChatUIScript : InputNode
 {
+    public FikaChatUIScript(IntPtr pointer) : base(pointer)
+    {
+    }
+
     public static bool IsActive { get; internal set; }
 
     public List<ChatMessage> ChatMessages
@@ -64,9 +69,9 @@ public class FikaChatUIScript : InputNode
         _closeThreshold = 3f;
         _mainScreen = gameObject.transform.GetChild(0).gameObject;
 
-        _fikaChatUI.InputField.onSubmit.AddListener(OnSubmit);
-        _fikaChatUI.SendButton.onClick.AddListener(SendMessage);
-        _fikaChatUI.CloseButton.onClick.AddListener(CloseChat);
+        _fikaChatUI.InputField.onSubmit.AddListener(new System.Action<string>(OnSubmit));
+        _fikaChatUI.SendButton.onClick.AddListener(new System.Action(SendMessage));
+        _fikaChatUI.CloseButton.onClick.AddListener(new System.Action(CloseChat));
     }
 
     protected void Start()
@@ -107,7 +112,7 @@ public class FikaChatUIScript : InputNode
         AddMessage(chatMessage);
 
         TextMessagePacket packet = new(_nickname, message);
-        Singleton<IFikaNetworkManager>.Instance.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
+        FikaGlobals.NetworkManager.SendData(ref packet, DeliveryMethod.ReliableOrdered, true);
         Singleton<GUISounds>.Instance.PlayChatSound(ESocialNetworkSoundType.OutgoingMessage);
         _fikaChatUI.InputField.DeactivateInputField();
         _fikaChatUI.InputField.SetTextWithoutNotify(string.Empty);
@@ -131,7 +136,7 @@ public class FikaChatUIScript : InputNode
     {
         if (_isActive)
         {
-            UIEventSystem.Instance.SetTemporaryStatus(false);
+            UIEventSystem.Instance.SetTemporaryStatus(UIEventSystem.EInputEnabler.Console, false);
         }
         _isActive = false;
         IsActive = false;
@@ -174,7 +179,7 @@ public class FikaChatUIScript : InputNode
     private void SelectInput()
     {
         _fikaChatUI.InputField.ActivateInputField();
-        UIEventSystem.Instance.SetTemporaryStatus(true);
+        UIEventSystem.Instance.SetTemporaryStatus(UIEventSystem.EInputEnabler.Console, true);
         EventSystem.current.SetSelectedGameObject(_mainScreen);
     }
 
@@ -189,6 +194,13 @@ public class FikaChatUIScript : InputNode
     {
         var gameObject = InternalBundleLoader.Instance.GetFikaAsset(InternalBundleLoader.EFikaAsset.FikaChatUI);
         var obj = Instantiate(gameObject);
+        if (FikaChatUI.Create(obj) == null)
+        {
+            FikaGlobals.LogError("Could not wire up the FikaChatUI!");
+            Destroy(obj);
+            return null;
+        }
+
         var uiScript = obj.AddComponent<FikaChatUIScript>();
         var rectTransform = obj.transform.GetChild(0).GetChild(0).RectTransform();
         if (rectTransform == null)
@@ -225,7 +237,7 @@ public class FikaChatUIScript : InputNode
         return ETranslateResult.Block;
     }
 
-    public override void TranslateAxes(ref float[] axes)
+    public override void TranslateAxes(ref Il2CppInterop.Runtime.InteropTypes.Arrays.Il2CppStructArray<float> axes)
     {
         if (_isActive)
         {

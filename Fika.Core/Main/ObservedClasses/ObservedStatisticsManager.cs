@@ -19,7 +19,7 @@ public sealed class ObservedStatisticsManager : Il2CppSystem.Object, IStatistics
     {
     }
 
-    public ObservedStatisticsManager() : base(Il2CppInjection.Allocate<ObservedStatisticsManager>())
+    public ObservedStatisticsManager() : base(ClassInjector.DerivedConstructorPointer<ObservedStatisticsManager>())
     {
         ClassInjector.DerivedConstructorBody(this);
     }

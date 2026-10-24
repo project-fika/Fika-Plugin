@@ -9,6 +9,8 @@ using CommonAssets.Scripts.Game;
 using CommonAssets.Scripts.Game.LabyrinthEvent;
 using EFT;
 using EFT.AssetsManager;
+using Il2CppInterop.Runtime.Injection;
+using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using EFT.Bots;
 using EFT.Communications;
 using EFT.Counters;
@@ -49,7 +51,13 @@ public class HostGameController : BaseGameController, IBotGame
 
     public HostGameController(IFikaGame game, EUpdateQueue updateQueue, GameWorld gameWorld, IEftSession session,
         LocationSettings.Location location, WavesSettings wavesSettings, GameDateTime gameDateTime)
-        : base(Il2CppInjection.Allocate<HostGameController>(), game, updateQueue, gameWorld, session)
+        : this(ClassInjector.DerivedConstructorPointer<HostGameController>(), game, updateQueue, gameWorld, session, location, wavesSettings, gameDateTime)
+    {
+    }
+
+    protected HostGameController(IntPtr pointer, IFikaGame game, EUpdateQueue updateQueue, GameWorld gameWorld, IEftSession session,
+        LocationSettings.Location location, WavesSettings wavesSettings, GameDateTime gameDateTime)
+        : base(pointer, game, updateQueue, gameWorld, session)
     {
         _botsController = new();
         _botStateManager = BotStateManager.Create(_abstractGame, Singleton<FikaServer>.Instance, this);
@@ -69,7 +77,9 @@ public class HostGameController : BaseGameController, IBotGame
         _wavesSpawnScenario = WavesSpawnScenario.Create(abstractGame.gameObject, waves, new System.Func<EFT.SpawnWave, Il2CppSystem.Threading.Tasks.Task>(_botsController.ActivateBotsByWave), location);
 
         // Boss Scenario setup
-        var bossSpawns = LocalGame.ModifyBossWaveSettings(ELocalMode.PVE_OFFLINE, wavesSettings, location.BossLocationSpawn);
+        var bossSpawns = wavesSettings.IsBosses
+            ? LocalGame.ModifyBossWaveSettings(ELocalMode.PVE_OFFLINE, wavesSettings, location.BossLocationSpawn)
+            : new Il2CppReferenceArray<BossLocationSpawn>(0L);
         _bossSpawnScenario = BossSpawnScenario.Create(bossSpawns, new System.Action<BossLocationSpawn>(_botsController.ActivateBotsByWave));
 
         _server = Singleton<FikaServer>.Instance;
@@ -754,7 +764,7 @@ public class HostGameController : BaseGameController, IBotGame
                 var initEvent = new TransitInitEvent
                 {
                     PlayerRaidId = activePlayer.RaidId,
-                    Points = ActiveTransitPoints(),
+                    Points = ActiveTransitPoints(transitController),
                     CompletedQuestRequirementMetByPointId = CompletedQuestRequirements(activePlayer),
                     TransitionCount = (ushort)transitController._localRaidSettings.transition.transitionCount,
                     EventPlayer = transitController.IsEvent
@@ -777,7 +787,7 @@ public class HostGameController : BaseGameController, IBotGame
                 {
                     PlayerRaidId = activePlayer.RaidId,
                     EventOnly = transitController.IsEvent,
-                    Points = ActiveTransitPoints()
+                    Points = ActiveTransitPoints(transitController)
                 };
 
                 writer.Reset();
@@ -809,9 +819,9 @@ public class HostGameController : BaseGameController, IBotGame
         return Location.transitParameters ?? new(0);
     }
 
-    private Il2CppSystem.Collections.Generic.Dictionary<int, LocationSettings.Location.TransitParameters> ActiveTransitPoints()
+    private Il2CppSystem.Collections.Generic.Dictionary<int, LocationSettings.Location.TransitParameters> ActiveTransitPoints(EFT.TransitController transitController)
     {
-        return TransitParameters().Where(x => x.active).ToDictionary(k => k.id).ToIl2CppDictionary();
+        return TransitParameters().Where(x => x.active && transitController.pointsById.ContainsKey(x.id)).ToDictionary(k => k.id).ToIl2CppDictionary();
     }
     
     private Il2CppSystem.Collections.Generic.Dictionary<int, bool> CompletedQuestRequirements(Player player)

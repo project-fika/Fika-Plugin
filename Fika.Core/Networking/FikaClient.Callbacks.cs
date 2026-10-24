@@ -33,6 +33,7 @@ using HarmonyLib;
 using ClientRunddansController = Fika.Core.Main.ClientClasses.ClientRunddansController;
 using ClientTransitController = Fika.Core.Main.ClientClasses.ClientTransitController;
 using Grid = EFT.InventoryLogic.Grid;
+using Fika.Core.Main.Components;
 
 namespace Fika.Core.Networking;
 
@@ -79,7 +80,7 @@ public sealed partial class FikaClient
         }
 
         Singleton<ObjectsFactory>.Instance.LoadBundlesAndCreatePools(ObjectsFactory.PoolsCategory.Raid, ObjectsFactory.AssemblyType.Online,
-            item.Template.AllResources.ToHashSet(), JobYieldPriority.Immediate)
+            item.Template.AllResources.ToIl2CppList(), JobYieldPriority.Immediate, null, new Il2CppSystem.Threading.CancellationToken())
             .HandleExceptions();
     }
 
@@ -100,12 +101,17 @@ public sealed partial class FikaClient
         _logger.LogError($"Could not find player {packet.NetId} to reset snapshotter");
     }
 
+    private void OnFinalMissionPacketReceived(FinalMissionPacket packet)
+    {
+        FikaFinalMissionDirector.Instance?.OnPacketReceived(packet);
+    }
+
     private void OnSyncEventPacketReceived(SyncEventPacket packet)
     {
         _logger.LogInfo($"Received sync event: {packet.Type}");
         var reader = NetworkUtils.EventDataReader;
         reader.Reset();
-        Array.Copy(packet.Data, reader.Buffer, packet.Data.Length);
+        packet.Data.CopyTo(reader.Buffer.AsSpan());
         switch (packet.Type)
         {
             case 0:
@@ -159,7 +165,7 @@ public sealed partial class FikaClient
                         var array = new Grid[gameWorld.BtrController.TransferItemsController.Stash.Grids.Length + 1];
                         gameWorld.BtrController.TransferItemsController.Stash.Grids.CopyTo(array, 0);
                         array[^1] = new Grid(packet.BTRStashes[i].Id,
-                            10, 10, true, false, [],
+                            10, 10, true, false, new Il2CppInterop.Runtime.InteropTypes.Arrays.Il2CppReferenceArray<ItemFilter>(0),
                             gameWorld.BtrController.TransferItemsController.Stash, -1);
                         gameWorld.BtrController.TransferItemsController.Stash.Grids = array;
                     }
@@ -180,7 +186,7 @@ public sealed partial class FikaClient
                         var array = new Grid[gameWorld.TransitController.TransferItemsController.Stash.Grids.Length + 1];
                         gameWorld.TransitController.TransferItemsController.Stash.Grids.CopyTo(array, 0);
                         array[^1] = new Grid(packet.TransitStashes[i].Id,
-                            10, 10, true, false, [],
+                            10, 10, true, false, new Il2CppInterop.Runtime.InteropTypes.Arrays.Il2CppReferenceArray<ItemFilter>(0),
                             gameWorld.TransitController.TransferItemsController.Stash, -1);
                         gameWorld.TransitController.TransferItemsController.Stash.Grids = array;
                     }
@@ -256,14 +262,60 @@ public sealed partial class FikaClient
         }
 
         var gameWorld = Singleton<GameWorld>.Instance;
-        if (gameWorld != null && gameWorld.RunddansController is ClientRunddansController)
+        if (gameWorld != null && packet.Event != null && gameWorld.RunddansController is ClientRunddansController)
         {
 #if DEBUG
             _logger.LogInfo($"Received event: {packet.Event}");
 #endif
-            (packet.Event as RunddansStateEvent).PlayerId = MyPlayer.NetId;
+            if (packet.Event is RunddansStateEvent stateEvent)
+            {
+                stateEvent.PlayerRaidId = MyPlayer.NetId;
+            }
+
             packet.Event.Invoke();
         }
+    }
+
+    private void OnPasscodeInitPacketReceived(PasscodeInitPacket packet)
+    {
+        if (packet.IsRequest)
+        {
+            return;
+        }
+
+        if (Singleton<GameWorld>.Instance.PasscodeController is FikaClientPasscodeController controller)
+        {
+            controller.ApplyHints(packet.Hints);
+            return;
+        }
+
+        _logger.LogError("Received passcode hints but there was no PasscodeController");
+    }
+
+    private void OnPasscodeResultPacketReceived(PasscodeResultPacket packet)
+    {
+        if (Singleton<GameWorld>.Instance.PasscodeController is FikaClientPasscodeController controller)
+        {
+            controller.HandleResult(packet, MyPlayer.NetId);
+            return;
+        }
+
+        _logger.LogError("Received a passcode result but there was no PasscodeController");
+    }
+
+    private void OnCutsceneStartPacketReceived(CutsceneStartPacket packet)
+    {
+        FikaCutsceneManager.Instance?.ApplyStartPacket(packet);
+    }
+
+    private void OnCutsceneSkipPacketReceived(CutsceneSkipPacket packet)
+    {
+        FikaCutsceneManager.Instance?.ReceiveSkipPacket(packet);
+    }
+
+    private void OnCutsceneEndPacketReceived(CutsceneEndPacket packet)
+    {
+        FikaCutsceneManager.Instance?.ReceiveEndPacket(packet);
     }
 
     private void OnInraidQuestPacketReceived(InRaidQuestPacket packet)
@@ -333,7 +385,7 @@ public sealed partial class FikaClient
 
         if (packet.ArtilleryPackets.Count > 0)
         {
-            var packets = packet.ArtilleryPackets;
+            var packets = packet.ArtilleryPackets.ToIl2CppList();
             gameWorld.ClientShellingController.SyncProjectilesStates(ref packets);
         }
 
@@ -343,7 +395,7 @@ public sealed partial class FikaClient
             var grenades = gameWorld.Grenades;
             if (grenades.TryGetByKey(throwablePacket.Id, out var throwable))
             {
-                throwable.ApplyNetPacket(throwablePacket);
+                throwable.ApplyNetPacket(throwablePacket, 0f);
             }
         }
 
@@ -564,12 +616,12 @@ public sealed partial class FikaClient
                 break;
             case EBufferZoneData.PlayerAccessStatus:
                 {
-                    BufferZoneController.Instance.SetPlayerAccessStatus(packet.ProfileId, packet.Available);
+                    BufferZoneController.Instance.SetPlayerAccessStatus(packet.PlayerRaidId, packet.Available);
                 }
                 break;
             case EBufferZoneData.PlayerInZoneStatusChange:
                 {
-                    BufferZoneController.Instance.SetPlayerInZoneStatus(packet.ProfileId, packet.Available);
+                    BufferZoneController.Instance.SetPlayerInZoneStatus(packet.PlayerRaidId, packet.Available);
                 }
                 break;
         }
@@ -595,7 +647,7 @@ public sealed partial class FikaClient
                 {
                     if (packet.Status - EBtrInteractionStatus.Blacklisted <= 2 && playerToApply.IsYourPlayer)
                     {
-                        GlobalEventsController.CreateEvent<BtrNotificationInteractionMessageEvent>().Invoke(playerToApply.PlayerId, packet.Status);
+                        GlobalEventsController.CreateEvent<BtrNotificationInteractionMessageEvent>().Invoke(playerToApply.RaidId, packet.Status);
                         return;
                     }
 
@@ -616,7 +668,7 @@ public sealed partial class FikaClient
     {
         if (!packet.IsRequest)
         {
-            var fikaGame = Singleton<IFikaGame>.Instance;
+            var fikaGame = FikaGlobals.FikaGame;
             if (fikaGame == null)
             {
                 return;
@@ -632,7 +684,7 @@ public sealed partial class FikaClient
 #endif
                         var localizedString = LocaleUtils.UI_SYNC_THROWABLES.Localized();
                         fikaGame.GameController.GameInstance.SetMatchmakerStatus(localizedString);
-                        Singleton<GameWorld>.Instance.OnSmokeGrenadesDeserialized(packet.ThrowableData);
+                        Singleton<GameWorld>.Instance.OnSmokeGrenadesDeserialized((packet.ThrowableData).ToIl2CppList());
                     }
                     break;
                 case ReconnectPacket.EReconnectDataType.Interactives:
@@ -717,9 +769,9 @@ public sealed partial class FikaClient
                                     fikaGame.GameController.GameInstance.SetMatchmakerStatus(localizedString, progress / total);
                                     try
                                     {
-                                        DamageInfo damageInfo = default;
+                                        var damageInfo = new DamageInfo();
                                         damageInfo.HitPoint = hitPosition;
-                                        windowBreaker.MakeHit(in damageInfo, true);
+                                        windowBreaker.MakeHit(ref damageInfo, true);
                                     }
                                     catch (Exception ex)
                                     {
@@ -763,18 +815,19 @@ public sealed partial class FikaClient
 
     private void OnWorldLootPacketReceived(WorldLootPacket packet)
     {
-        var fikaGame = Singleton<IFikaGame>.Instance;
-        if (fikaGame != null)
+        var fikaGame = FikaGlobals.FikaGame;
+        var location = fikaGame?.GameController.Location;
+        if (location != null && string.Equals(location.Id, packet.LocationId, StringComparison.OrdinalIgnoreCase))
         {
             var reader = new NetDataReader(packet.Data);
             var lootData = reader.GetEFTLootDataDescriptor();
             var lootItems = ItemBinarySerializer.DeserializeLootData(lootData);
-#if RELEASE
             if (lootItems.Count < 1)
             {
-                throw new NullReferenceException("LootItems length was less than 1! Something probably went very wrong");
+                _logger.LogWarning("Received no world loot from the host, asking again");
+                return;
             }
-#endif
+
             fikaGame.GameController.LootItems = lootItems;
             (fikaGame.GameController as ClientGameController).HasReceivedLoot = true;
         }
@@ -785,6 +838,11 @@ public sealed partial class FikaClient
         ServerFPS = packet.ServerFPS;
     }
 
+    private void OnQuestTemplatesPacketReceived(QuestTemplatesPacket packet)
+    {
+        QuestTemplateSync.Receive(packet);
+    }
+
     private void OnInteractableInitPacketReceived(InteractableInitPacket packet)
     {
         if (!packet.IsRequest)
@@ -792,8 +850,8 @@ public sealed partial class FikaClient
             var world = Singleton<GameWorld>.Instance.World;
             if (world.Interactables == null)
             {
-                world.RegisterNetworkInteractionObjects(packet.Interactables);
-                var fikaGame = Singleton<IFikaGame>.Instance;
+                world.RegisterNetworkInteractionObjects(packet.Interactables.ToIl2CppDictionary());
+                var fikaGame = FikaGlobals.FikaGame;
                 if (fikaGame != null)
                 {
                     (fikaGame.GameController as ClientGameController).InteractablesInitialized = true;
@@ -841,6 +899,19 @@ public sealed partial class FikaClient
         }
     }
 
+    private void OnQuestRelayPacketReceived(QuestRelayPacket packet)
+    {
+        if (MyPlayer == null)
+        {
+            return;
+        }
+
+        if (MyPlayer.HealthController.IsAlive && MyPlayer.QuestController is ClientSharedQuestController sharedQuestController)
+        {
+            sharedQuestController.ReceiveQuestRelayPacket(packet);
+        }
+    }
+
     private void OnTextMessagePacketReceived(TextMessagePacket packet)
     {
         _logger.LogInfo($"Received message from: {packet.Nickname}, Message: {packet.Message}");
@@ -864,7 +935,7 @@ public sealed partial class FikaClient
     {
         if (_coopHandler != null)
         {
-            var fikaGame = Singleton<IFikaGame>.Instance;
+            var fikaGame = FikaGlobals.FikaGame;
             if (fikaGame != null)
             {
                 fikaGame.GameController.RaidStarted = packet.RaidStarted;
@@ -880,7 +951,7 @@ public sealed partial class FikaClient
         HostReceivedLocation = packet.HostReceivedLocation;
         if (packet.AmountOfPeers > 0)
         {
-            Singleton<IFikaNetworkManager>.Instance.PlayerAmount = packet.AmountOfPeers;
+            FikaGlobals.NetworkManager.PlayerAmount = packet.AmountOfPeers;
         }
     }
 
@@ -909,7 +980,7 @@ public sealed partial class FikaClient
     /// <param name="packet">The packet containing the data</param>
     private void OnMessagePacketReceived(MessagePacket packet)
     {
-        NotificationManager.DisplayMessageNotification(packet.Message.Localized(), packet.NotificationDurationType,
+        FikaGlobals.DisplayMessage(packet.Message.Localized(), packet.NotificationDurationType,
             packet.NotificationIconType, packet.Color);
     }
 }

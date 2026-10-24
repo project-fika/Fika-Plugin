@@ -19,6 +19,7 @@ using SPTushonka.SinglePlayer.Patches.Cutscenes;
 #if RELEASE || GOLDMASTER
 using SPTushonka.Custom.Utils;
 #endif
+using SPTushonka.Reflection.Commands;
 using SPTushonka.Reflection.Patching;
 using BepInEx.Unity.IL2CPP;
 using System;
@@ -129,6 +130,7 @@ public sealed class FikaPlugin : BasePlugin
         GetNatPunchServerConfig();
         EnableModulePatches();
         DisableSPTPatches();
+        ConsoleCommandRegistry.RegisterCommandGroup<FikaCommands>();
 
         GetClientConfig();
 

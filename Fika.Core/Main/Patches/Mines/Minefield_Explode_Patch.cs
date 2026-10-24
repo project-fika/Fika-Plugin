@@ -9,7 +9,7 @@ using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using Fika.Core.Networking.Packets.Player.Common;
 using Fika.Core.Networking.Packets.Player.Common.SubPackets;
-using SPT.Reflection.Patching;
+using SPTushonka.Reflection.Patching;
 
 namespace Fika.Core.Main.Patches.Mines;
 
@@ -24,20 +24,18 @@ internal class Minefield_Explode_Patch : ModulePatch
     }
 
     [PatchPrefix]
-    public static bool Prefix(IPlayer player, bool first, List<IPlayer> ___TargetedPlayers,
-        List<IPlayer> ___NotTargetedPlayers, float ____collateralContusionRange, float ____collateralDamageRange,
-        float ____firstExplosionDamage, float ____secondExplosionDamage, Minefield __instance)
+    public static bool Prefix(IPlayer player, bool first, Minefield __instance)
     {
         if (player is ObservedPlayer)
         {
             if (FikaBackendUtils.IsServer)
             {
                 var position = player.Position;
-                foreach (var player2 in ___TargetedPlayers.Concat(___NotTargetedPlayers).ToList())
+                foreach (var player2 in __instance.TargetedPlayers.Concat(__instance.NotTargetedPlayers).ToList())
                 {
                     DoReplicatedMineDamage(player2, Vector3.Distance(position, player2.Position), first,
-                        player != player2, ____collateralContusionRange, ____collateralDamageRange,
-                        ____firstExplosionDamage, ____secondExplosionDamage, __instance);
+                        player != player2, __instance._collateralContusionRange, __instance._collateralDamageRange,
+                        __instance._firstExplosionDamage, __instance._secondExplosionDamage, __instance);
                 }
             }
             return false;
@@ -63,11 +61,11 @@ internal class Minefield_Explode_Patch : ModulePatch
         if (fikaPlayer != null)
         {
             var num2 = 1f - distance / collateralDamageRange;
-            var enumerable = isCollateral ? player.PlayerBones.BodyPartColliders.Where(minefield.CG_DealExplosionDamage)
-                : player.PlayerBones.BodyPartColliders.Where(minefield.CG_DealExplosionDamage1);
+            var enumerable = isCollateral ? player.PlayerBones.BodyPartColliders.Where(x => minefield._collateralDamageTarget.Contains(x.BodyPartType))
+                : player.PlayerBones.BodyPartColliders.Where(x => minefield._explosionTarget.Contains(x.BodyPartType));
 
             enumerable = enumerable.DistinctBy(FikaGlobals.GetBodyPartFromCollider).ToArray();
-            enumerable = enumerable.Randomize();
+            enumerable = enumerable.OrderBy(_ => Random.value).ToArray();
 
             var num3 = isCollateral || first ? Random.Range(2, enumerable.Count()) : int.MaxValue;
             var num4 = isCollateral || first ? firstExplosionDamage : secondExplosionDamage;
@@ -84,7 +82,7 @@ internal class Minefield_Explode_Patch : ModulePatch
                     Direction = default,
                     HitNormal = default
                 }, bodyPartCollider.BodyPartType, bodyPartCollider.BodyPartColliderType);
-                Singleton<IFikaNetworkManager>.Instance.SendPlayerPacket(in packet, fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
+                FikaGlobals.NetworkManager.SendPlayerPacket(in packet, fikaPlayer.NetId, DeliveryMethod.ReliableOrdered, true);
                 if (++num5 >= num3)
                 {
                     break;

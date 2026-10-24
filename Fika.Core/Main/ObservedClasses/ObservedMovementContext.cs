@@ -16,7 +16,7 @@ public class ObservedMovementContext : MovementContext
     {
     }
 
-    public ObservedMovementContext() : base(Il2CppInjection.Allocate<ObservedMovementContext>())
+    public ObservedMovementContext() : base(ClassInjector.DerivedConstructorPointer<ObservedMovementContext>())
     {
         ClassInjector.DerivedConstructorBody(this);
         ClassInjector.InvokeBaseConstructor<MovementContext>(this);

@@ -11,7 +11,7 @@ public class FikaClientPhysical : Physical
     {
     }
 
-    public FikaClientPhysical() : base(Il2CppInjection.Allocate<FikaClientPhysical>())
+    public FikaClientPhysical() : base(ClassInjector.DerivedConstructorPointer<FikaClientPhysical>())
     {
         ClassInjector.DerivedConstructorBody(this);
         ClassInjector.InvokeBaseConstructor<Physical>(this);

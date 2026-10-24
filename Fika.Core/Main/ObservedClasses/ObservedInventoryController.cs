@@ -33,7 +33,7 @@ public sealed class ObservedInventoryController : Player.PlayerInventoryControll
 
     public override IPlayerSearchController PlayerSearchController { get; }
 
-    public ObservedInventoryController(Player player, Profile profile, bool examined, MongoID firstId, ushort firstOperationId, bool aiControl) : base(Il2CppInjection.Allocate<ObservedInventoryController>())
+    public ObservedInventoryController(Player player, Profile profile, bool examined, MongoID firstId, ushort firstOperationId, bool aiControl) : base(ClassInjector.DerivedConstructorPointer<ObservedInventoryController>())
     {
         ClassInjector.DerivedConstructorBody(this);
         PlayerSearchController = new ObservedPlayerSearchController();

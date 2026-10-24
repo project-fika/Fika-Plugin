@@ -19,7 +19,7 @@ public class FikaVOIPClient : MirrorIgnoranceClient
     {
     }
 
-    public FikaVOIPClient(FikaCommsNetwork network) : base(Il2CppInjection.Allocate<FikaVOIPClient>())
+    public FikaVOIPClient(FikaCommsNetwork network) : base(ClassInjector.DerivedConstructorPointer<FikaVOIPClient>())
     {
         ClassInjector.DerivedConstructorBody(this);
         _commsNet = network;

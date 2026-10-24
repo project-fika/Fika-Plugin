@@ -6,11 +6,17 @@ using Fika.Core.Bundles;
 using Fika.Core.Main.Utils;
 using Fika.Core.Networking;
 using TMPro;
+using System;
+using Il2CppInterop.Runtime.Injection;
 
 namespace Fika.Core.UI.Custom;
 
 public class RaidAdminUIScript : InputNode
 {
+    public RaidAdminUIScript(IntPtr pointer) : base(pointer)
+    {
+    }
+
     private RaidAdminUI _raidAdminUI;
     private FikaServer _server;
     private NetManager _netManager;
@@ -27,9 +33,9 @@ public class RaidAdminUIScript : InputNode
         _counterThreshold = 1f;
         _peers = [];
 
-        _raidAdminUI.ClientSelection.onValueChanged.AddListener(OnClientSelection);
-        _raidAdminUI.KickButton.onClick.AddListener(OnKickButton);
-        _raidAdminUI.CloseButton.onClick.AddListener(Close);
+        _raidAdminUI.ClientSelection.onValueChanged.AddListener(new System.Action<int>(OnClientSelection));
+        _raidAdminUI.KickButton.onClick.AddListener(new System.Action(OnKickButton));
+        _raidAdminUI.CloseButton.onClick.AddListener(new System.Action(Close));
 
         FikaGlobals.InputTree.Add(this);
 
@@ -131,7 +137,7 @@ public class RaidAdminUIScript : InputNode
     {
         gameObject.SetActive(true);
         StopAllCoroutines();
-        StartCoroutine(ShowRoutine());
+        StartCoroutine((ShowRoutine()).ToIl2Cpp());
     }
 
     private IEnumerator ShowRoutine()
@@ -143,7 +149,7 @@ public class RaidAdminUIScript : InputNode
 
         RefreshOptions();
 
-        UIEventSystem.Instance.SetTemporaryStatus(true);
+        UIEventSystem.Instance.SetTemporaryStatus(UIEventSystem.EInputEnabler.Console, true);
     }
 
     private void RefreshOptions()
@@ -171,12 +177,12 @@ public class RaidAdminUIScript : InputNode
             clientSelection.onValueChanged.Invoke(0);
         }
 
-        clientSelection.AddOptions(options);
+        clientSelection.AddOptions((options).ToIl2CppList());
     }
 
     public void Close()
     {
-        UIEventSystem.Instance.SetTemporaryStatus(false);
+        UIEventSystem.Instance.SetTemporaryStatus(UIEventSystem.EInputEnabler.Console, false);
         _currentPeer = null;
         gameObject.SetActive(false);
     }
@@ -185,6 +191,15 @@ public class RaidAdminUIScript : InputNode
     {
         var gameObject = InternalBundleLoader.Instance.GetFikaAsset(InternalBundleLoader.EFikaAsset.RaidAdminUI);
         var obj = Instantiate(gameObject);
+        var ui = PrefabWiring.Attach<RaidAdminUI>(obj);
+        if (ui == null)
+        {
+            Destroy(obj);
+            return null;
+        }
+        ui.KickButton.gameObject.AddComponent<ButtonHandler>();
+
+        // The script's Awake reads the wired fields, so it is added after RaidAdminUI is in place.
         var uiScript = obj.AddComponent<RaidAdminUIScript>();
 
         var rectTransform = obj.transform.GetChild(0).GetChild(0).RectTransform();
@@ -209,7 +224,7 @@ public class RaidAdminUIScript : InputNode
         return ECursorResult.ShowCursor;
     }
 
-    public override void TranslateAxes(ref float[] axes)
+    public override void TranslateAxes(ref Il2CppInterop.Runtime.InteropTypes.Arrays.Il2CppStructArray<float> axes)
     {
         axes = null;
     }

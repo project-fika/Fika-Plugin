@@ -12,7 +12,7 @@ public class ObservedDoorInteractionState : DoorInteractState
     {
     }
 
-    public ObservedDoorInteractionState(MovementContext movementContext) : base(Il2CppInjection.Allocate<ObservedDoorInteractionState>())
+    public ObservedDoorInteractionState(MovementContext movementContext) : base(ClassInjector.DerivedConstructorPointer<ObservedDoorInteractionState>())
     {
         ClassInjector.DerivedConstructorBody(this);
         ClassInjector.InvokeBaseConstructor<DoorInteractState>(this, movementContext);
