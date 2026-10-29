@@ -17,7 +17,7 @@ namespace Fika.Core.Networking;
 /// <summary>
 /// Client used to verify that a connection can be established before initializing the <see cref="FikaClient"/> and <see cref="CoopGame"/>
 /// </summary>
-public class FikaPingingClient : INetEventListener, INatPunchListener, IDisposable
+public sealed class FikaPingingClient : INetEventListener, INatPunchListener, IDisposable
 {
     /// <summary>
     /// The network client manager instance.

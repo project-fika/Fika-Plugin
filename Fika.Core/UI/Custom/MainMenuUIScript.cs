@@ -302,32 +302,33 @@ public class MainMenuUIScript : MonoBehaviour
 
                         NotificationManager.DisplayMessageNotification(LocaleUtils.CONNECTING_TO_SESSION.Localized(),
                             iconType: ENotificationIconType.EntryPoint);
-                        using var pingingClient = await NetManagerUtils.CreatePingingClient();
-
-                        if (pingingClient.Init(information.MatchId))
+                        using (var pingingClient = await NetManagerUtils.CreatePingingClient())
                         {
-                            FikaGlobals.LogInfo("Attempting to connect to host session...");
-                            var knockMessage = FikaBackendUtils.ServerGuid.ToString();
-                            var success = await pingingClient.AttemptToPingHost(knockMessage, false);
+                            if (pingingClient.Init(information.MatchId))
+                            {
+                                FikaGlobals.LogInfo("Attempting to connect to host session...");
+                                var knockMessage = FikaBackendUtils.ServerGuid.ToString();
+                                var success = await pingingClient.AttemptToPingHost(knockMessage, false);
 
-                            if (!success)
+                                if (!success)
+                                {
+                                    Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen(
+                                    LocaleUtils.UI_ERROR_CONNECTING.Localized(),
+                                    LocaleUtils.UI_UNABLE_TO_CONNECT.Localized(),
+                                    ErrorScreen.EButtonType.OkButton, 10f);
+                                    JoinInProgress = false;
+                                    return;
+                                }
+                            }
+                            else
                             {
                                 Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen(
-                                LocaleUtils.UI_ERROR_CONNECTING.Localized(),
-                                LocaleUtils.UI_UNABLE_TO_CONNECT.Localized(),
-                                ErrorScreen.EButtonType.OkButton, 10f);
+                                    LocaleUtils.UI_ERROR_CONNECTING.Localized(),
+                                    LocaleUtils.UI_PINGER_START_FAIL.Localized(),
+                                    ErrorScreen.EButtonType.OkButton, 10f);
                                 JoinInProgress = false;
                                 return;
                             }
-                        }
-                        else
-                        {
-                            Singleton<PreloaderUI>.Instance.ShowCriticalErrorScreen(
-                                LocaleUtils.UI_ERROR_CONNECTING.Localized(),
-                                LocaleUtils.UI_PINGER_START_FAIL.Localized(),
-                                ErrorScreen.EButtonType.OkButton, 10f);
-                            JoinInProgress = false;
-                            return;
                         }
 
                         if (FikaBackendUtils.JoinMatch(FikaBackendUtils.Profile.Id, information.MatchId, out var result, out var errorMessage))
