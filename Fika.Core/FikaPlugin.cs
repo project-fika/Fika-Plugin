@@ -378,6 +378,9 @@ public sealed class FikaPlugin : BasePlugin
         new VersionLabelPatch().Disable();
         new FinalMissionDirectorPatches.StartPatch().Disable();
         new FinalMissionDirectorPatches.TickPatch().Disable();
+        new TriggerCutscenePatches().Disable();
+        new RallyZonePatches.StartPatch().Disable();
+        new RallyZonePatches.TickPatch().Disable();
     }
 
     public enum EPingSound
