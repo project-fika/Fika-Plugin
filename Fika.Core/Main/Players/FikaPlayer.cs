@@ -1216,7 +1216,7 @@ public class FikaPlayer : LocalPlayer
     public void HandleTeammateKill(DamageInfo damage, EBodyPart bodyPart,
         EPlayerSide playerSide, WildSpawnType role, string playerProfileId,
         float distance, List<string> targetEquipment,
-        HealthEffects enemyEffects, List<string> zoneIds, FikaPlayer killer)
+        HealthEffects enemyEffects, List<string> zoneIds, Il2CppInterop.Runtime.InteropTypes.Arrays.Il2CppStringArray enemyBuffs, FikaPlayer killer)
     {
 #if DEBUG
         FikaGlobals.LogWarning($"HandleTeammateKill: Weapon {(damage.Weapon != null ? damage.Weapon.Name.Localized() : "None")}");
@@ -1258,7 +1258,7 @@ public class FikaPlayer : LocalPlayer
             var value = list[i];
             QuestController.CheckKillConditionCounter(value, playerProfileId, (targetEquipment).ToIl2CppList(), damage.Weapon,
                             bodyPart, Location, distance, role.ToStringNoBox(), CurrentHour, enemyEffects,
-                            killer.HealthController.BodyPartEffects, (zoneIds).ToIl2CppList(), killer.HealthController.ActiveBuffsNames());
+                            killer.HealthController.BodyPartEffects, (zoneIds).ToIl2CppList(), killer.HealthController.ActiveBuffsNames(), enemyBuffs);
         }
     }
 
@@ -1372,7 +1372,7 @@ public class FikaPlayer : LocalPlayer
         if (FikaBackendUtils.IsServer)
         {
             var corpse = base.CreateCorpse();
-            //CorpsePositionSyncer.Create(corpse.gameObject, corpse, NetId);
+            CorpsePositionSyncer.Create(corpse.gameObject, corpse, NetId);
             return corpse;
         }
 

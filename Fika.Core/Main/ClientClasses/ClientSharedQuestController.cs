@@ -185,13 +185,13 @@ public sealed class ClientSharedQuestController : ClientQuestController
 
     public override void CheckKillConditionCounter(string target, string enemyProfileId, Il2CppSystem.Collections.Generic.List<string> targetEquipment,
         Item weapon, EBodyPart bodyPart, string locationId, float distance, string role, int hour, HealthEffects enemyEffects,
-        HealthEffects effects, Il2CppSystem.Collections.Generic.List<string> zoneIds, Il2CppStringArray buffs)
+        HealthEffects effects, Il2CppSystem.Collections.Generic.List<string> zoneIds, Il2CppStringArray buffs, Il2CppStringArray enemyBuffs)
     {
         _relayCoversChange = IsGroupQuestCounterEventEnabledForPartyRelay(EGroupQuestCounterEvent.Kill);
         try
         {
             base.CheckKillConditionCounter(target, enemyProfileId, targetEquipment, weapon, bodyPart, locationId,
-                distance, role, hour, enemyEffects, effects, zoneIds, buffs);
+                distance, role, hour, enemyEffects, effects, zoneIds, buffs, enemyBuffs);
         }
         finally
         {
@@ -201,13 +201,13 @@ public sealed class ClientSharedQuestController : ClientQuestController
 
     public override void CheckShotConditionCounter(string target, string enemyProfileId, Il2CppSystem.Collections.Generic.List<string> targetEquipment,
         Item weapon, EBodyPart bodyPart, string locationId, float distance, string role, int hour, HealthEffects enemyEffects,
-        HealthEffects effects, Il2CppSystem.Collections.Generic.List<string> zoneIds, Il2CppStringArray buffs)
+        HealthEffects effects, Il2CppSystem.Collections.Generic.List<string> zoneIds, Il2CppStringArray buffs, Il2CppStringArray enemyBuffs)
     {
         _relayCoversChange = IsGroupQuestCounterEventEnabledForPartyRelay(EGroupQuestCounterEvent.Shot);
         try
         {
             base.CheckShotConditionCounter(target, enemyProfileId, targetEquipment, weapon, bodyPart, locationId,
-                distance, role, hour, enemyEffects, effects, zoneIds, buffs);
+                distance, role, hour, enemyEffects, effects, zoneIds, buffs, enemyBuffs);
         }
         finally
         {

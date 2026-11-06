@@ -5,6 +5,7 @@ using EFT;
 using EFT.HealthSystem;
 using EFT.InventoryLogic;
 using Il2CppInterop.Runtime.Injection;
+using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.ObservedClasses;
@@ -60,12 +61,12 @@ public sealed class ObservedStatisticsManager : Il2CppSystem.Object, IStatistics
 
     }
 
-    public void OnEnemyDamage(DamageInfo damage, EBodyPart bodyPart, string playerProfileId, EPlayerSide playerSide, WildSpawnType role, string groupId, float fullHealth, bool isHeavyDamage, float distance, int hour, Il2CppSystem.Collections.Generic.List<string> targetEquipment, HealthEffects enemyEffects, Il2CppSystem.Collections.Generic.List<string> zoneIds)
+    public void OnEnemyDamage(DamageInfo damage, EBodyPart bodyPart, string playerProfileId, EPlayerSide playerSide, WildSpawnType role, string groupId, float fullHealth, bool isHeavyDamage, float distance, int hour, Il2CppSystem.Collections.Generic.List<string> targetEquipment, HealthEffects enemyEffects, Il2CppSystem.Collections.Generic.List<string> zoneIds, Il2CppStringArray enemyBuffs)
     {
         // Do nothing
     }
 
-    public void OnEnemyKill(DamageInfo damage, EDamageType lethalDamageType, EBodyPart bodyPart, EPlayerSide playerSide, WildSpawnType role, string playerAccountId, string playerProfileId, string playerName, string groupId, int level, int killExp, float distance, int hour, Il2CppSystem.Collections.Generic.List<string> targetEquipment, HealthEffects enemyEffects, Il2CppSystem.Collections.Generic.List<string> zoneIds, bool isFriendly, bool isAI)
+    public void OnEnemyKill(DamageInfo damage, EDamageType lethalDamageType, EBodyPart bodyPart, EPlayerSide playerSide, WildSpawnType role, string playerAccountId, string playerProfileId, string playerName, string groupId, int level, int killExp, float distance, int hour, Il2CppSystem.Collections.Generic.List<string> targetEquipment, HealthEffects enemyEffects, Il2CppSystem.Collections.Generic.List<string> zoneIds, bool isFriendly, bool isAI, Il2CppStringArray enemyBuffs)
     {
         // Do nothing
     }

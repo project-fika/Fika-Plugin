@@ -4,7 +4,11 @@ namespace Fika.Core.Networking.Packets.World;
 
 public struct CorpsePositionPacket : INetSerializable
 {
+    private const float PositionScale = 8192f;
+    private const float RotationScale = short.MaxValue;
+
     public CorpseSyncPacket Data;
+    public float RemoteTime;
 
     public void Deserialize(NetDataReader reader)
     {
@@ -14,19 +18,22 @@ public struct CorpsePositionPacket : INetSerializable
             Position = reader.GetUnmanaged<Vector3>(),
             Done = reader.GetBool()
         };
+        RemoteTime = reader.GetFloat();
 
-        if (Data.Done)
+        CorpseTransformSyncs transforms = new();
+        for (var i = 0; i < CorpseTransformSyncs.Count; i++)
         {
-            Data.TransformSyncs = new TransformSync[12];
-            for (var i = 0; i < 12; i++)
+            var position = new Vector3(reader.GetShort(), reader.GetShort(), reader.GetShort()) / PositionScale;
+            var rotation = new Quaternion(reader.GetShort() / RotationScale, reader.GetShort() / RotationScale,
+                reader.GetShort() / RotationScale, reader.GetShort() / RotationScale);
+            transforms.Set(i, new()
             {
-                Data.TransformSyncs[i] = new()
-                {
-                    Position = reader.GetUnmanaged<Vector3>(),
-                    Rotation = reader.GetUnmanaged<Quaternion>()
-                };
-            }
+                Position = Data.Position + position,
+                Rotation = rotation
+            });
         }
+
+        Data.TransformSyncs = transforms;
     }
 
     public readonly void Serialize(NetDataWriter writer)
@@ -34,15 +41,25 @@ public struct CorpsePositionPacket : INetSerializable
         writer.Put(Data.Id);
         writer.PutUnmanaged(Data.Position);
         writer.Put(Data.Done);
+        writer.Put(RemoteTime);
 
-        if (Data.Done && Data.TransformSyncs != null)
+        var transforms = Data.TransformSyncs;
+        for (var i = 0; i < CorpseTransformSyncs.Count; i++)
         {
-            var transforms = Data.TransformSyncs;
-            for (var i = 0; i < 12; i++)
-            {
-                writer.PutUnmanaged(transforms[i].Position);
-                writer.PutUnmanaged(transforms[i].Rotation);
-            }
+            var transform = transforms.Get(i);
+            var position = transform.Position - Data.Position;
+            writer.Put(Pack(position.x * PositionScale));
+            writer.Put(Pack(position.y * PositionScale));
+            writer.Put(Pack(position.z * PositionScale));
+            writer.Put(Pack(transform.Rotation.x * RotationScale));
+            writer.Put(Pack(transform.Rotation.y * RotationScale));
+            writer.Put(Pack(transform.Rotation.z * RotationScale));
+            writer.Put(Pack(transform.Rotation.w * RotationScale));
         }
+    }
+
+    private static short Pack(float value)
+    {
+        return (short)Mathf.Clamp(Mathf.Round(value), short.MinValue, short.MaxValue);
     }
 }

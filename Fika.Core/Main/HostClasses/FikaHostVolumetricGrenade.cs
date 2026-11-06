@@ -2,9 +2,9 @@
 
 namespace Fika.Core.Main.HostClasses;
 
-public class FikaHostTearGasGrenade : TearGasGrenade
+public class FikaHostVolumetricGrenade : VolumetricGrenade
 {
-    public FikaHostTearGasGrenade(IntPtr pointer) : base(pointer)
+    public FikaHostVolumetricGrenade(IntPtr pointer) : base(pointer)
     {
     }
 

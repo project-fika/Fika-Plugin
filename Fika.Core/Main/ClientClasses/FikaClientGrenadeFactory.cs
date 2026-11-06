@@ -32,8 +32,8 @@ public class FikaClientGrenadeFactory : GrenadeFactory
         return gameObject.AddComponent<FikaClientStunGrenade>();
     }
 
-    public override TearGasGrenade AddTearGasGrenade(GameObject gameObject)
+    public override VolumetricGrenade AddVolumetricGrenade(GameObject gameObject)
     {
-        return gameObject.AddComponent<FikaClientTearGasGrenade>();
+        return gameObject.AddComponent<FikaClientVolumetricGrenade>();
     }
 }

@@ -176,12 +176,13 @@ public class HostGameController : BaseGameController, IBotGame
         throw new NotImplementedException("Should not be called as a host");
     }
 
-    public void BotDespawn(BotOwner bot)
+    public Il2CppSystem.Threading.Tasks.Task BotDespawn(BotOwner bot)
     {
         var getPlayer = bot.GetPlayer;
         _botsController.BotDied(bot);
         _botsController.DestroyInfo(getPlayer);
         AssetPoolObject.ReturnToPool(bot.gameObject, true);
+        return Il2CppSystem.Threading.Tasks.Task.CompletedTask;
     }
 
     public override IEnumerator WaitForHostInit(int timeBeforeDeployLocal)

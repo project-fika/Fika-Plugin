@@ -603,7 +603,7 @@ public abstract class BaseGameController : Il2CppSystem.Object
         }
         MonoBehaviourSingleton<BetterAudio>.Instance.FadeInVolumeBeforeRaid(timeBeforeDeployLocal);
         Singleton<GUISounds>.Instance.FadeBackgroundMusic(false, null);
-        Singleton<GUISounds>.Instance.StopMenuBackgroundMusicWithDelay(timeBeforeDeployLocal);
+        Singleton<GUISounds>.Instance.StopMenuAudio(timeBeforeDeployLocal);
         _abstractGame.GameUi.gameObject.SetActive(true);
         _abstractGame.GameUi.TimerPanel.ProfileId = profileId;
         _abstractGame.GameUi.TimerPanel.RaidID = _localPlayer.RaidId;

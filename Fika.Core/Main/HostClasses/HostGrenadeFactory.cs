@@ -32,8 +32,8 @@ public class HostGrenadeFactory : GrenadeFactory
         return gameObject.AddComponent<FikaHostStunGrenade>();
     }
 
-    public override TearGasGrenade AddTearGasGrenade(GameObject gameObject)
+    public override VolumetricGrenade AddVolumetricGrenade(GameObject gameObject)
     {
-        return gameObject.AddComponent<FikaHostTearGasGrenade>();
+        return gameObject.AddComponent<FikaHostVolumetricGrenade>();
     }
 }

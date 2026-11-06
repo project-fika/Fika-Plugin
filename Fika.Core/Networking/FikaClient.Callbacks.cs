@@ -367,22 +367,6 @@ public sealed partial class FikaClient
             return;
         }
 
-        /*if (packet.RagdollPackets != null)
-		{
-			for (int i = 0; i < packet.RagdollPackets.Count; i++)
-			{
-				CorpseSyncPacket ragdollPacket = packet.RagdollPackets[i];
-				if (gameWorld.ObservedPlayersCorpses.TryGetValue(ragdollPacket.Id, out ObservedCorpse corpse) && corpse.HasRagdoll)
-				{
-					corpse.ApplyNetPacket(ragdollPacket);
-					if (ragdollPacket.Done && !corpse.IsVisible())
-					{
-						corpse.ForceApplyTransformSync(ragdollPacket.TransformSyncs);
-					}
-				}
-			}
-		}*/
-
         if (packet.ArtilleryPackets.Count > 0)
         {
             var packets = packet.ArtilleryPackets.ToIl2CppList();
@@ -830,6 +814,16 @@ public sealed partial class FikaClient
 
             fikaGame.GameController.LootItems = lootItems;
             (fikaGame.GameController as ClientGameController).HasReceivedLoot = true;
+        }
+    }
+
+    private void OnCorpsePositionPacketReceived(CorpsePositionPacket packet)
+    {
+        var gameWorld = Singleton<GameWorld>.Instance;
+        if (gameWorld != null && gameWorld.ObservedPlayersCorpses.TryGetValue(packet.Data.Id, out var corpse)
+            && corpse != null && corpse.HasRagdoll)
+        {
+            corpse.ApplyNetPacket(packet.Data, packet.RemoteTime);
         }
     }
 

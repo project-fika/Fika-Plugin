@@ -271,6 +271,7 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
         RegisterPacket<PasscodeInitPacket>(OnPasscodeInitPacketReceived);
         RegisterPacket<PasscodeResultPacket>(OnPasscodeResultPacketReceived);
         RegisterPacket<StatisticsPacket>(OnStatisticsPacketReceived);
+        RegisterPacket<CorpsePositionPacket>(OnCorpsePositionPacketReceived);
         RegisterPacket<WorldLootPacket>(OnWorldLootPacketReceived);
         RegisterPacket<ReconnectPacket>(OnReconnectPacketReceived);
         RegisterPacket<SpawnSyncObjectPacket>(OnSpawnSyncObjectPacketReceived);

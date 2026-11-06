@@ -938,13 +938,14 @@ public static class FikaSerializationExtensions
         writer.PutUnmanaged(packet.Position);
         writer.Put(packet.Done);
 
-        if (packet.Done && packet.TransformSyncs != null)
+        if (packet.Done)
         {
             var transforms = packet.TransformSyncs;
             for (var i = 0; i < 12; i++)
             {
-                writer.PutUnmanaged(transforms[i].Position);
-                writer.PutUnmanaged(transforms[i].Rotation);
+                var transform = transforms.Get(i);
+                writer.PutUnmanaged(transform.Position);
+                writer.PutUnmanaged(transform.Rotation);
             }
         }
     }
@@ -965,15 +966,17 @@ public static class FikaSerializationExtensions
 
         if (packet.Done)
         {
-            packet.TransformSyncs = new TransformSync[12];
+            CorpseTransformSyncs transforms = new();
             for (var i = 0; i < 12; i++)
             {
-                packet.TransformSyncs[i] = new()
+                transforms.Set(i, new()
                 {
                     Position = reader.GetUnmanaged<Vector3>(),
                     Rotation = reader.GetUnmanaged<Quaternion>()
-                };
+                });
             }
+
+            packet.TransformSyncs = transforms;
         }
 
         return packet;

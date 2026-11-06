@@ -202,7 +202,7 @@ public sealed class FikaBot : FikaPlayer
 
                 var distance = Vector3.Distance(aggressor.Position, Position);
                 mainPlayer.HandleTeammateKill(damageInfo, bodyPart, Side, role, ProfileId,
-                    distance, (Inventory.EquippedInSlotsTemplateIds).ToManagedList(), HealthController.BodyPartEffects, (TriggerZones).ToManagedList(),
+                    distance, (Inventory.EquippedInSlotsTemplateIds).ToManagedList(), HealthController.BodyPartEffects, (TriggerZones).ToManagedList(), HealthController.ActiveBuffsNames(),
                     (FikaPlayer)aggressor);
             }
         }

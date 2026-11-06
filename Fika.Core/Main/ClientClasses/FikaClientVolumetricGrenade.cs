@@ -4,9 +4,9 @@ using Fika.Core.Main.Utils;
 
 namespace Fika.Core.Main.ClientClasses;
 
-public class FikaClientTearGasGrenade : ObservedTearGasGrenade
+public class FikaClientVolumetricGrenade : ObservedVolumetricGrenade
 {
-    public FikaClientTearGasGrenade(IntPtr pointer) : base(pointer)
+    public FikaClientVolumetricGrenade(IntPtr pointer) : base(pointer)
     {
     }
 

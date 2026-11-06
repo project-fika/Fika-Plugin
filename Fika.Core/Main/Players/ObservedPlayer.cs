@@ -718,7 +718,7 @@ public sealed class ObservedPlayer : FikaPlayer
             player.StatisticsManager.OnEnemyDamage(DamageInfo, bodyPart, ProfileId, Side, Profile.Info.Settings.Role,
                 GroupId, HealthController.GetBodyPartHealth(EBodyPart.Common, false).Maximum, flag,
                 Vector3.Distance(player.Transform.position, Transform.position), CurrentHour,
-                Inventory.EquippedInSlotsTemplateIds, HealthController.BodyPartEffects, TriggerZones);
+                Inventory.EquippedInSlotsTemplateIds, HealthController.BodyPartEffects, TriggerZones, HealthController.ActiveBuffsNames());
         }
     }
 
@@ -1292,7 +1292,7 @@ public sealed class ObservedPlayer : FikaPlayer
             currentState.Position = Vector3.LerpUnclamped(snapFrom.Data.Position, snapTo.Data.Position, t);
 
             var newDir = currentState.MovementDirection = Vector2.LerpUnclamped(snapFrom.Data.MovementDirection, snapTo.Data.MovementDirection, t);
-            if (!_isZombie && (snapTo.Data.State is EPlayerState.Idle or EPlayerState.Transition || newDir.sqrMagnitude < _movementDeadZoneSqr))
+            if (_isZombie ? !IsZombieMoving(snapTo.Data.State) : snapTo.Data.State is EPlayerState.Idle or EPlayerState.Transition || newDir.sqrMagnitude < _movementDeadZoneSqr)
             {
                 currentState.MovementDirection = Vector2.zero;
                 currentState.IsMoving = false;
@@ -1332,7 +1332,7 @@ public sealed class ObservedPlayer : FikaPlayer
             currentState.Rotation = snapFrom.Data.Rotation;
             currentState.HeadRotation = snapFrom.Data.HeadRotation;
             currentState.MovementDirection = snapFrom.Data.MovementDirection;
-            currentState.IsMoving = snapFrom.Data.MovementDirection.sqrMagnitude > _movementDeadZoneSqr;
+            currentState.IsMoving = _isZombie ? IsZombieMoving(snapFrom.Data.State) : snapFrom.Data.MovementDirection.sqrMagnitude > _movementDeadZoneSqr;
 
             currentState.State = snapFrom.Data.State;
             currentState.Tilt = snapFrom.Data.Tilt;
@@ -1453,6 +1453,21 @@ public sealed class ObservedPlayer : FikaPlayer
         LeftStanceDisabled = CurrentPlayerState.LeftStanceDisabled;
 
         ObservedCharacterController._velocity = CurrentPlayerState.Velocity;
+        
+        if (_isZombie && !CurrentPlayerState.IsMoving)
+        {
+            MovementContext.ApplyRotation(Quaternion.AngleAxis(CurrentPlayerState.Rotation.x, Vector3.up));
+        }
+    }
+
+    /// <summary>
+    /// Checks whether a zombie state keeps the animator in its movement loop.
+    /// </summary>
+    /// <param name="state">The state synced from the host</param>
+    /// <returns><see langword="true"/> if the zombie should play its movement animation</returns>
+    private static bool IsZombieMoving(EPlayerState state)
+    {
+        return state is EPlayerState.StartMoveZombieState or EPlayerState.MoveZombieState;
     }
 
     /// <summary>
@@ -1500,7 +1515,7 @@ public sealed class ObservedPlayer : FikaPlayer
         }
 
         var corpse = CreateCorpse<Corpse>(Velocity);
-        //CorpsePositionSyncer.Create(corpse.gameObject, corpse, NetId);
+        CorpsePositionSyncer.Create(corpse.gameObject, corpse, NetId);
         return corpse;
     }
 
@@ -1704,7 +1719,7 @@ public sealed class ObservedPlayer : FikaPlayer
 
                 var distance = Vector3.Distance(aggressor.Position, Position);
                 mainPlayer.HandleTeammateKill(damageInfo, bodyPart, Side, role, ProfileId,
-                    distance, (Inventory.EquippedInSlotsTemplateIds).ToManagedList(), HealthController.BodyPartEffects, (TriggerZones).ToManagedList(),
+                    distance, (Inventory.EquippedInSlotsTemplateIds).ToManagedList(), HealthController.BodyPartEffects, (TriggerZones).ToManagedList(), HealthController.ActiveBuffsNames(),
                     (FikaPlayer)aggressor);
             }
         }
