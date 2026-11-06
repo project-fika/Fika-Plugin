@@ -448,6 +448,7 @@ public sealed class CoopGame : BaseLocalGame<EftGamePlayerOwner>, IFikaGame, ICl
             (Singleton<GameWorld>.Instance as ClientGameWorld).ClientSynchronizableObjectLogicProcessor.ServerAirdropManager = airdropEventClass;
             GameWorld.SynchronizableObjectLogicProcessor.AirdropDataSender = Singleton<FikaServer>.Instance;
         }
+
         if (Location.FixedWeatherLocationConfig != null)
         {
             SetFixedWeather(Location.FixedWeatherLocationConfig);

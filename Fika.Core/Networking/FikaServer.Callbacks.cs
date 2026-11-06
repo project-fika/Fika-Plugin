@@ -360,6 +360,11 @@ public sealed partial class FikaServer
         FikaCutsceneManager.Instance?.ReceiveViewComplete(packet);
     }
 
+    private void OnRallyZonePresencePacketReceived(RallyZonePresencePacket packet, NetPeer peer)
+    {
+        FikaStoryTriggers.ReceivePresence(packet);
+    }
+
     private void OnInraidQuestPacketReceived(InRaidQuestPacket packet, NetPeer peer)
     {
         if (_coopHandler.Players.TryGetValue(packet.NetId, out var player))

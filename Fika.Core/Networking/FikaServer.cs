@@ -477,6 +477,7 @@ public sealed partial class FikaServer : MonoBehaviour, INetEventListener, INatP
         RegisterPacket<SpawnItemInInventoryPacket, NetPeer>(SpawnItemInInventoryPacketReceived);
         RegisterPacket<CutsceneSkipIntentionPacket, NetPeer>(OnCutsceneSkipIntentionPacketReceived);
         RegisterPacket<CutsceneViewCompletePacket, NetPeer>(OnCutsceneViewCompletePacketReceived);
+        RegisterPacket<RallyZonePresencePacket, NetPeer>(OnRallyZonePresencePacketReceived);
 
         RegisterReusable<WorldPacket, NetPeer>(OnWorldPacketReceived);
 

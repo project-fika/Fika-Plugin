@@ -318,6 +318,16 @@ public sealed partial class FikaClient
         FikaCutsceneManager.Instance?.ReceiveEndPacket(packet);
     }
 
+    private void OnRallyZoneTriggerPacketReceived(RallyZoneTriggerPacket packet)
+    {
+        FikaStoryTriggers.ReceiveRallyZoneTrigger(packet);
+    }
+
+    private void OnRallyZoneUpdatePacketReceived(RallyZoneUpdatePacket packet)
+    {
+        FikaStoryTriggers.ReceiveUpdate(packet);
+    }
+
     private void OnInraidQuestPacketReceived(InRaidQuestPacket packet)
     {
         if (_coopHandler.Players.TryGetValue(packet.NetId, out var player) && player.QuestController is ObservedQuestController controller)

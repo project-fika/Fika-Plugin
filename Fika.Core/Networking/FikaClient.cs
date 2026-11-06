@@ -302,6 +302,8 @@ public sealed partial class FikaClient : MonoBehaviour, INetEventListener, IFika
         RegisterPacket<CutsceneStartPacket>(OnCutsceneStartPacketReceived);
         RegisterPacket<CutsceneSkipPacket>(OnCutsceneSkipPacketReceived);
         RegisterPacket<CutsceneEndPacket>(OnCutsceneEndPacketReceived);
+        RegisterPacket<RallyZoneTriggerPacket>(OnRallyZoneTriggerPacketReceived);
+        RegisterPacket<RallyZoneUpdatePacket>(OnRallyZoneUpdatePacketReceived);
 
         RegisterReusable<WorldPacket>(OnWorldPacketReceived);
 
